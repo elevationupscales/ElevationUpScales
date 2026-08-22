@@ -1,0 +1,37 @@
+Elevation UpScales Solar Image Sources — 2.0.10
+
+Files: assets/solar/solar-hero-desktop.webp, solar-hero-mobile.webp, solar-social-card.webp
+Type: Original AI-generated imagery created for Elevation UpScales
+Subject: Roof-level view across an RV solar array toward a mountain landscape
+Use: Solar Services hero, responsive mobile hero, and social-sharing preview
+Production treatment: Cropped to remove all interface/text, color-graded, darkened for readable HTML copy, and optimized as WebP
+Attribution: None required
+Important: The hero contains no manufacturer logos and does not claim a specific installation or customer project.
+
+Files: assets/solar/packages/standard-system.svg, gold-system.svg, platinum-system.svg
+Type: Original interface illustrations created for Elevation UpScales
+Use: Standard, Gold, and Platinum package-card visuals
+Attribution: None required
+Important: Illustrations communicate package ecosystems and are not exact product photographs.
+
+Files: assets/solar/builder/panel.svg, battery.svg, inverter.svg, controller.svg, wiring.svg
+Type: Original interface illustrations created for Elevation UpScales
+Use: Solar builder component-category visuals
+Attribution: None required
+
+File: assets/hero-galaxy-rv.webp
+Type: Existing Elevation UpScales project asset
+Use: Retained elsewhere in the website where already approved
+Source status: Retained from prior deployment package
+
+Manufacturer-image policy:
+- Official Renogy or Victron Energy product photography may be added later only when the image accurately matches the listed component.
+- Do not hotlink manufacturer images.
+- Download, optimize, document the source, and verify usage rights before production use.
+
+
+Patch 2.0.11 Option B Hero Refresh
+Files: assets/solar/solar-hero-desktop.webp, solar-hero-mobile.webp, solar-social-card.webp
+Source: /mnt/data/crop1.png (user-approved Option B cinematic RV roof solar hero crop)
+Usage: Solar Services hero background, responsive mobile hero, and solar social sharing card
+Notes: Replaced prior hero variants with the approved Option B framing.

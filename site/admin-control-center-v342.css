@@ -1,0 +1,130 @@
+
+/* Elevation UpScales v3.4.2 — Control Center recovery facelift
+   Presentation-only layer on the known-working v3.4.0 DOM/JS contract.
+   No existing element IDs or initialization hooks are removed. */
+
+.admin-shell__header{padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.admin-subhead{max-width:780px}
+
+.admin-priority-bar{
+  margin:14px 0 10px;
+  border-color:rgba(212,175,55,.28);
+  background:linear-gradient(135deg,rgba(212,175,55,.055),rgba(10,10,10,.92))
+}
+.admin-priority-bar>div{min-width:130px}
+.admin-priority-bar strong{font-variant-numeric:tabular-nums}
+
+.admin-summary-grid,
+.admin-command-actions{
+  position:relative;
+  padding-top:28px;
+  margin-top:14px
+}
+.admin-summary-grid::before,
+.admin-command-actions::before{
+  position:absolute;top:0;left:0;
+  color:#d4af37;font-size:.69rem;font-weight:900;
+  letter-spacing:.09em;text-transform:uppercase
+}
+.admin-summary-grid::before{content:"Marketplace Snapshot"}
+.admin-command-actions::before{content:"Solar · Needs Attention"}
+
+.admin-summary-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.admin-summary-grid article:nth-child(6){display:none}
+.admin-summary-grid article,.admin-command-actions article{
+  padding:10px 11px;
+  background:#0c0c0c;
+  border-color:rgba(255,255,255,.11)
+}
+.admin-summary-grid strong,.admin-command-actions strong{font-variant-numeric:tabular-nums}
+.admin-command-actions article:nth-child(n+5){display:none}
+.admin-command-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+
+.admin-owner-signals{
+  margin-top:20px;
+  padding:17px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:#080808
+}
+.admin-owner-signals .admin-section-head{margin-bottom:11px}
+.admin-signal-groups{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:11px!important
+}
+.admin-signal-group{
+  min-width:0;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:11px;
+  padding:11px;
+  background:#0b0b0b
+}
+.admin-signal-group>header{
+  min-height:73px;
+  margin-bottom:9px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.07)
+}
+.admin-signal-group>header h3{margin:.12rem 0 .2rem;font-size:1rem}
+.admin-signal-group>header small{color:#7f7f7f;font-size:.69rem;line-height:1.35}
+.admin-signal-group__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.admin-signal-group:first-child .admin-signal-group__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-signal-group article{
+  min-width:0;
+  padding:9px 10px!important;
+  border:1px solid rgba(255,255,255,.1)!important;
+  border-radius:9px!important;
+  background:#101010!important
+}
+.admin-signal-group article span{font-size:.65rem!important}
+.admin-signal-group article strong{font-size:1.25rem!important;font-variant-numeric:tabular-nums}
+.admin-signal-group article small{font-size:.66rem;line-height:1.3}
+.admin-signal-group article.is-primary{border-color:rgba(212,175,55,.3)!important;background:rgba(212,175,55,.045)!important}
+.admin-signal-group article.is-primary strong{color:#d4af37}
+.admin-signal-group--owner{border-color:rgba(212,175,55,.18)}
+
+.admin-opportunity-workspace,
+.admin-leads-workspace,
+.admin-followup-workspace,
+.admin-workspace,
+.admin-two-column{
+  margin-top:22px!important
+}
+.admin-opportunity-workspace,
+.admin-leads-workspace,
+.admin-followup-workspace,
+.admin-workspace{
+  border-radius:14px
+}
+.admin-opportunity-workspace .admin-section-head,
+.admin-leads-workspace .admin-section-head,
+.admin-followup-workspace .admin-section-head,
+.admin-workspace .admin-section-head{
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,.075)
+}
+
+/* The workflow still records these truthful intermediate Gmail states,
+   but the owner dashboard only needs the actionable endpoints. */
+.followup-metrics article:nth-child(3),
+.followup-metrics article:nth-child(4){display:none}
+.followup-metrics{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+
+.admin-table-scroll{border-radius:9px}
+.admin-muted{line-height:1.42}
+
+@media(max-width:1250px){
+  .admin-signal-groups{grid-template-columns:1fr!important}
+  .admin-signal-group:first-child .admin-signal-group__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .admin-summary-grid,.admin-command-actions{padding-top:25px}
+  .admin-signal-group__grid,
+  .admin-signal-group:first-child .admin-signal-group__grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .admin-signal-group__grid,
+  .admin-signal-group:first-child .admin-signal-group__grid,
+  .followup-metrics{grid-template-columns:1fr!important}
+}

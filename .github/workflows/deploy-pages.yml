@@ -1,0 +1,134 @@
+name: Deploy Elevation UpScales
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Choose preview first; use production only after approval
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - production
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-pages-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate deployment source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Verify required production files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f site/index.html
+          test -f site/_worker.js
+          test -f site/_routes.json
+          test -f site/_headers
+          grep -q '3.11.23-solar-intake-polish' site/_worker.js
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find site -type f -name '*.js' -print0)
+
+      - name: Enforce Cloudflare Pages file limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          file_count=$(find site -type f | wc -l)
+          if [ "$file_count" -gt 20000 ]; then
+            echo "Deployment contains $file_count files; the configured Pages limit is 20,000."
+            exit 1
+          fi
+          oversized=$(find site -type f -size +25M -print -quit)
+          if [ -n "$oversized" ]; then
+            echo "File exceeds the 25 MiB Pages asset limit: $oversized"
+            exit 1
+          fi
+
+      - name: Block local secrets and release archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          blocked=$(find site -type f \( \
+            -name '.env' -o \
+            -name '.env.*' -o \
+            -name '.dev.vars' -o \
+            -name '.dev.vars.*' -o \
+            -name '*.pem' -o \
+            -name '*.key' -o \
+            -name '*.zip' \
+          \) -print -quit)
+          if [ -n "$blocked" ]; then
+            echo "Blocked file found in deployment source: $blocked"
+            exit 1
+          fi
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
+            echo "A credential-like value was found in the website source."
+            exit 1
+          fi
+
+  deploy-preview:
+    name: Deploy preview
+    needs: validate
+    if: ${{ inputs.target == 'preview' }}
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Deploy isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=github-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Record preview URL
+        shell: bash
+        run: |
+          echo "### Cloudflare preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-production:
+    name: Deploy production
+    needs: validate
+    if: ${{ inputs.target == 'production' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Deploy approved production source
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Record production deployment URL
+        shell: bash
+        run: |
+          echo "### Cloudflare production deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"

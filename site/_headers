@@ -1,0 +1,134 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com https://elevationupscales-shop.fourthwall.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; upgrade-insecure-requests
+
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/home-services
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/rv-services
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/store
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-EUS-Store-Build: 3.0.3
+
+/marketplace
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/list-an-rv
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/collector
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/home-project
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/rv-project
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/*.css
+  Cache-Control: public, max-age=3600, must-revalidate
+  CDN-Cache-Control: public, max-age=3600, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=3600, must-revalidate
+  CDN-Cache-Control: public, max-age=3600, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  CDN-Cache-Control: public, max-age=2592000
+
+/store.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-EUS-Store-Build: 3.0.3
+
+/list-a-vehicle
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/list-a-motorcycle
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/list-a-boat
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/solar-services
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/solar-project
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/privacy
+  Cache-Control: public, max-age=0, must-revalidate
+
+/admin-listings
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/api/admin/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/make-a-listing
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/list-a-bicycle
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/list-used-gear
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/api/health
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/api/marketplace/event
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/technician
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/technician.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/technician/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/api/technician/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/assets/technician/forms/*
+  Cache-Control: private, no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/assets/technician/training/*
+  Cache-Control: private, no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/assets/technician/intake/*
+  Cache-Control: private, no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/start-a-project
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/other-ways-we-can-help
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/work-with-us
+  Cache-Control: no-cache, no-store, must-revalidate

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, follow" name="robots"/>
+<title>Opening Project Intake | Elevation UpScales</title>
+<script>
+    const type = (new URLSearchParams(window.location.search).get("type") || "home").toLowerCase();
+    const destinations = { home: "/start-a-project?type=home", rv: "/start-a-project?type=rv", solar: "/start-a-project?type=solar" };
+    window.location.replace(destinations[type] || destinations.home);
+  </script>
+<noscript><meta content="0;url=/start-a-project?type=home" http-equiv="refresh"/></noscript>
+<link href="mobile-audit.css?v=3.0.3" rel="stylesheet"/>
+</head>
+<body>
+<p>Opening the project intake… <a href="/start-a-project?type=home">Home / Property</a> · <a href="/start-a-project?type=rv">RV / Camper</a> · <a href="/start-a-project?type=solar">Solar / Off-Grid</a></p>
+</body>
+</html>

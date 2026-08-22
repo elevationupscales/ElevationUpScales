@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="t d">
+<title id="t">Standard Renogy system illustration</title><desc id="d">Two solar panels, a lithium battery, and inverter in a compact off-grid system.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111719"/><stop offset="1" stop-color="#050708"/></linearGradient><linearGradient id="panel" x1="0" x2="1"><stop stop-color="#17333b"/><stop offset="1" stop-color="#09171b"/></linearGradient></defs>
+<rect width="640" height="360" rx="30" fill="url(#bg)"/><circle cx="525" cy="78" r="74" fill="#d4af37" opacity=".08"/>
+<g transform="translate(48 54) skewX(-8)"><rect width="238" height="146" rx="10" fill="url(#panel)" stroke="#67c8d5" stroke-width="4"/><g stroke="#67c8d5" stroke-opacity=".5" stroke-width="2"><path d="M48 0v146M96 0v146M144 0v146M192 0v146"/><path d="M0 36h238M0 73h238M0 110h238"/></g></g>
+<g transform="translate(135 105) skewX(-8)"><rect width="238" height="146" rx="10" fill="url(#panel)" stroke="#67c8d5" stroke-width="4"/><g stroke="#67c8d5" stroke-opacity=".5" stroke-width="2"><path d="M48 0v146M96 0v146M144 0v146M192 0v146"/><path d="M0 36h238M0 73h238M0 110h238"/></g></g>
+<g transform="translate(390 150)"><rect width="160" height="104" rx="16" fill="#11191d" stroke="#d4af37" stroke-width="4"/><rect x="22" y="-13" width="30" height="17" rx="4" fill="#d4af37"/><rect x="108" y="-13" width="30" height="17" rx="4" fill="#d4af37"/><path d="M77 24h24L88 47h18L70 87l10-31H61z" fill="#d4af37"/></g>
+<g transform="translate(430 58)"><rect width="120" height="70" rx="12" fill="#101518" stroke="#67c8d5" stroke-width="3"/><rect x="15" y="16" width="90" height="17" rx="5" fill="#17272d"/><circle cx="91" cy="51" r="7" fill="#d4af37"/><path d="M18 51h52" stroke="#67c8d5" stroke-width="5" stroke-linecap="round"/></g>
+<text x="46" y="314" fill="#d4af37" font-family="Arial,sans-serif" font-size="24" font-weight="700">RENOGY FOUNDATION</text><text x="46" y="338" fill="#b8c2c7" font-family="Arial,sans-serif" font-size="15">Weekend-ready power • expandable design</text>
+</svg>

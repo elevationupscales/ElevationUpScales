@@ -1,0 +1,833 @@
+.collector-page {
+  background: #040404;
+  overflow-x: hidden;
+}
+
+.collector-page h1,
+.collector-page h2,
+.collector-page h3 {
+  text-wrap: balance;
+}
+
+.collector-kicker,
+.card-number,
+.rarity-badge,
+.progress-label {
+  color: var(--gold-bright);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.collector-hero {
+  position: relative;
+  min-height: calc(100svh - 82px);
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid var(--line);
+}
+
+.collector-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: url("assets/collector/signature-scene.webp") center / cover no-repeat;
+  transform: scale(1.02);
+}
+
+.collector-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.84) 65%, #050505);
+}
+
+.collector-hero-inner {
+  padding-block: clamp(3.5rem, 8vw, 7rem) 3.2rem;
+  text-align: center;
+}
+
+.collector-hero h1 {
+  max-width: 940px;
+  margin-inline: auto;
+}
+
+.collector-lede {
+  max-width: 820px;
+  margin: 0 auto 1.75rem;
+  color: #e0ded7;
+  font-size: clamp(1rem, 2vw, 1.22rem);
+}
+
+.collector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+}
+
+.hero-card-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(235px, 1fr));
+  gap: .9rem;
+  margin-top: 3.2rem;
+  padding: .75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: var(--gold) #111;
+}
+
+.hero-card-strip a {
+  scroll-snap-align: center;
+  border: 1px solid rgba(245, 187, 49, .48);
+  border-radius: 8px;
+  background: rgba(0,0,0,.78);
+  box-shadow: 0 14px 32px rgba(0,0,0,.45);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.hero-card-strip a:hover,
+.hero-card-strip a:focus-visible {
+  border-color: var(--gold-bright);
+  box-shadow: 0 12px 34px rgba(228,169,27,.22);
+}
+
+.hero-card-strip img,
+.official-card {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 7px;
+}
+
+.swipe-note {
+  margin: .8rem 0 0;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.collection-progress {
+  position: sticky;
+  top: 82px;
+  z-index: 70;
+  border-block: 1px solid rgba(228,169,27,.36);
+  background: rgba(4,4,4,.94);
+  backdrop-filter: blur(14px);
+}
+
+.progress-inner {
+  display: grid;
+  grid-template-columns: auto repeat(4, 1fr);
+  align-items: stretch;
+  gap: .35rem;
+  padding-block: .45rem;
+}
+
+.progress-label {
+  align-self: center;
+  padding-right: .65rem;
+  font-size: .78rem;
+}
+
+.progress-slot {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: .45rem;
+  min-height: 42px;
+  padding: .4rem .55rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 5px;
+  color: #8e8c85;
+  text-decoration: none;
+}
+
+.progress-slot b {
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 1.05rem;
+}
+
+.progress-slot span {
+  font-size: .72rem;
+}
+
+.progress-slot.is-active,
+.progress-slot.is-complete {
+  color: #090909;
+  border-color: var(--gold);
+  background: var(--gold-metal);
+}
+
+.release {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  display: grid;
+  align-items: center;
+  border-bottom: 1px solid rgba(228,169,27,.48);
+  background: #050505;
+}
+
+.release-scene,
+.release-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.release-scene {
+  opacity: 0;
+  background-image: var(--scene-image);
+  background-position: center;
+  background-size: cover;
+  transition: opacity .7s ease;
+}
+
+.release.is-scene-loaded .release-scene {
+  opacity: 1;
+}
+
+.release-shade {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.38), rgba(0,0,0,.73) 68%, rgba(0,0,0,.9)),
+    linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.78));
+}
+
+.release:nth-child(even) .release-shade {
+  background:
+    linear-gradient(270deg, rgba(0,0,0,.35), rgba(0,0,0,.72) 68%, rgba(0,0,0,.9)),
+    linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.78));
+}
+
+.release-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(290px, .82fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  padding-block: clamp(5rem, 9vw, 8rem);
+}
+
+.release:nth-child(even) .official-card-wrap {
+  order: 2;
+}
+
+.official-card-wrap {
+  position: relative;
+  padding: clamp(.45rem, 1vw, .75rem);
+  border: 1px solid rgba(255,200,61,.75);
+  border-radius: 10px;
+  background: rgba(0,0,0,.75);
+  box-shadow: 0 26px 70px rgba(0,0,0,.7), 0 0 36px rgba(228,169,27,.18);
+}
+
+.rarity-badge {
+  position: absolute;
+  z-index: 2;
+  top: -1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  padding: .35rem .8rem;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: #050505;
+  background: var(--gold-metal);
+  font-size: .7rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,.55);
+}
+
+.official-card {
+  display: block;
+  filter: none;
+  transform: none;
+  transition: none;
+}
+
+.release-copy {
+  max-width: 520px;
+  padding: 1.35rem;
+  border-left: 3px solid var(--gold);
+  background: linear-gradient(90deg, rgba(0,0,0,.84), rgba(0,0,0,.55));
+  box-shadow: 0 18px 48px rgba(0,0,0,.35);
+}
+
+.release-copy h2 {
+  margin-bottom: .9rem;
+}
+
+.digital-edition-button {
+  width: 100%;
+  margin: .35rem 0 1rem;
+  text-align: center;
+}
+
+.release-copy > p:not(.card-number):not(.set-reminder) {
+  color: #dedbd2;
+  font-size: 1.06rem;
+}
+
+.card-number {
+  margin-bottom: .5rem;
+}
+
+.mini-tracker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .45rem;
+  margin-block: 1.25rem .75rem;
+}
+
+.mini-tracker span {
+  padding: .48rem .25rem;
+  border: 1px solid rgba(228,169,27,.42);
+  color: #96938a;
+  background: #090909;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  text-align: center;
+}
+
+.mini-tracker .filled {
+  color: #050505;
+  background: var(--gold-metal);
+}
+
+.set-reminder {
+  margin-bottom: 1rem;
+  color: var(--gold-bright);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.next-release {
+  display: inline-flex;
+  gap: .45rem;
+  color: #fff;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.collector-section {
+  padding-block: clamp(5rem, 9vw, 8rem);
+  border-bottom: 1px solid rgba(228,169,27,.34);
+}
+
+.compact-container {
+  max-width: 900px;
+}
+
+.reward-section {
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255,198,46,.2), transparent 30rem),
+    linear-gradient(#090909, #020202);
+}
+
+.reward-section > .container > p:not(.collector-kicker) {
+  max-width: 760px;
+  margin-inline: auto;
+  color: #d4d1c9;
+}
+
+.reward-value {
+  display: inline-flex;
+  flex-direction: column;
+  margin-block: 1.5rem 2rem;
+  padding: 1rem 2.5rem;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  color: #050505;
+  background: var(--gold-metal);
+  box-shadow: 0 0 45px rgba(228,169,27,.18);
+}
+
+.reward-value small {
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.reward-value strong {
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: clamp(4rem, 13vw, 7rem);
+  line-height: .95;
+}
+
+.reward-slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+}
+
+.reward-slots div {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem .5rem;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: #101010;
+}
+
+.reward-slots b {
+  color: var(--gold-bright);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 1.8rem;
+}
+
+.reward-slots span {
+  font-size: .78rem;
+}
+
+.coupon-promo {
+  background: linear-gradient(135deg, #070707, #161006);
+}
+
+.coupon-promo-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 430px);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 6rem);
+}
+
+.coupon-promo-grid > div > p:not(.collector-kicker) {
+  color: #d0cdc5;
+}
+
+.coupon-promo img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.why-section {
+  background: #080808;
+}
+
+.why-section p:not(.collector-kicker) {
+  color: #cfccc4;
+}
+
+.future-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+  margin-top: 1.6rem;
+}
+
+.future-labels span {
+  padding: .45rem .72rem;
+  border: 1px solid rgba(228,169,27,.5);
+  border-radius: 999px;
+  color: #d8d5cc;
+  font-size: .76rem;
+}
+
+.future-note {
+  display: block;
+  margin-top: .8rem;
+  color: #858178;
+}
+
+.steps-section {
+  background: linear-gradient(#0c0c0c, #050505);
+}
+
+.collector-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.collector-steps li {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid rgba(228,169,27,.44);
+  background: #101010;
+}
+
+.collector-steps li > span {
+  color: var(--gold-bright);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 2.5rem;
+}
+
+.collector-steps p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.rules-section {
+  background: #060606;
+}
+
+.rules-section details {
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  background: #101010;
+}
+
+.rules-section summary {
+  cursor: pointer;
+  padding: 1.2rem;
+  color: var(--gold-bright);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.rules-copy {
+  padding: 0 1.2rem 1.4rem;
+  color: #d2cfc6;
+}
+
+.rules-copy li + li {
+  margin-top: .45rem;
+}
+
+.collector-contact {
+  position: relative;
+  padding-block: clamp(5rem, 9vw, 8rem);
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.88), rgba(0,0,0,.55)),
+    url("assets/collector/signature-scene.webp") center / cover no-repeat;
+}
+
+.collector-contact-inner {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  gap: 2rem;
+}
+
+.collector-contact-inner > img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+}
+
+.collector-contact .collector-actions {
+  justify-content: flex-start;
+}
+
+.contact-line {
+  margin: 1.25rem 0 0;
+  font-weight: 800;
+}
+
+.reveal-copy {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .65s ease, transform .65s ease;
+}
+
+.release.is-visible .reveal-copy {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+  .collection-progress {
+    top: 72px;
+  }
+
+  .progress-label,
+  .progress-slot span {
+    display: none;
+  }
+
+  .progress-inner {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .progress-slot {
+    display: flex;
+    justify-content: center;
+  }
+
+  .release {
+    min-height: auto;
+  }
+
+  .release-inner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding-block: 5rem;
+  }
+
+  .release:nth-child(even) .official-card-wrap {
+    order: 0;
+  }
+
+  .official-card-wrap {
+    width: min(100%, 760px);
+    margin-inline: auto;
+  }
+
+  .release-copy {
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .release-shade,
+  .release:nth-child(even) .release-shade {
+    background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.9) 62%, #050505);
+  }
+
+  .collector-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .collector-hero {
+    min-height: auto;
+  }
+
+  .collector-hero-inner {
+    padding-top: 3rem;
+  }
+
+  .collector-hero h1 {
+    font-size: clamp(2.7rem, 13vw, 4.3rem);
+  }
+
+  .collector-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collector-actions .button {
+    width: 100%;
+  }
+
+  .hero-card-strip {
+    width: calc(100vw - 1rem);
+    margin-left: calc(50% - 50vw + .5rem);
+    grid-template-columns: repeat(4, 84vw);
+    gap: .65rem;
+    padding-inline: 8vw;
+  }
+
+  .hero-card-strip a:not(:first-child) {
+    opacity: .93;
+  }
+
+  .collection-progress {
+    top: 72px;
+  }
+
+  .release-inner {
+    width: min(calc(100% - 1rem), var(--max));
+    padding-block: 4.25rem 3.75rem;
+  }
+
+  .official-card-wrap {
+    padding: .28rem;
+    border-radius: 7px;
+  }
+
+  .official-card {
+    border-radius: 5px;
+  }
+
+  .release-copy {
+    padding: 1rem;
+  }
+
+  .release-copy h2 {
+    font-size: clamp(2.25rem, 12vw, 3.4rem);
+  }
+
+  .release-copy > p:not(.card-number):not(.set-reminder) {
+    font-size: .98rem;
+  }
+
+  .reward-slots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .coupon-promo-grid,
+  .collector-contact-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .coupon-promo-grid > div,
+  .collector-contact-inner {
+    text-align: center;
+  }
+
+  .coupon-promo-grid img {
+    max-width: 390px;
+    margin-inline: auto;
+  }
+
+  .collector-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .collector-steps li {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: .75rem;
+  }
+
+  .collector-steps li > span {
+    font-size: 2.2rem;
+  }
+
+  .collector-contact-inner > img {
+    margin-inline: auto;
+  }
+
+  .collector-contact .collector-actions {
+    justify-content: center;
+  }
+
+  .contact-line {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collector-page *,
+  .collector-page *::before,
+  .collector-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  .reveal-copy {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Keep the desktop Collector Series experience as focused as the phone view. */
+@media (min-width: 901px) {
+  .collector-page main .container,
+  .collector-page .site-footer .container {
+    width: min(calc(100% - 3rem), 760px);
+  }
+
+  .collector-page .collector-hero {
+    min-height: auto;
+  }
+
+  .collector-page .collector-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .collector-page .collector-actions .button {
+    width: 100%;
+  }
+
+  .collector-page .hero-card-strip {
+    grid-template-columns: repeat(4, minmax(0, 640px));
+    padding-inline: 3.5rem;
+  }
+
+  .collector-page .progress-label,
+  .collector-page .progress-slot span {
+    display: none;
+  }
+
+  .collector-page .progress-inner {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .collector-page .progress-slot {
+    display: flex;
+    justify-content: center;
+  }
+
+  .collector-page .release {
+    min-height: auto;
+  }
+
+  .collector-page .release-inner,
+  .collector-page .coupon-promo-grid,
+  .collector-page .collector-contact-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .collector-page .release-inner {
+    gap: 1.5rem;
+    padding-block: 5rem;
+  }
+
+  .collector-page .release:nth-child(even) .official-card-wrap {
+    order: 0;
+  }
+
+  .collector-page .official-card-wrap,
+  .collector-page .release-copy {
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .collector-page .release-shade,
+  .collector-page .release:nth-child(even) .release-shade {
+    background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.9) 62%, #050505);
+  }
+
+  .collector-page .reward-slots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .collector-page .collector-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .collector-page .collector-steps li {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: .75rem;
+  }
+
+  .collector-page .coupon-promo-grid > div,
+  .collector-page .collector-contact-inner {
+    text-align: center;
+  }
+
+  .collector-page .coupon-promo-grid img {
+    max-width: 390px;
+    margin-inline: auto;
+  }
+
+  .collector-page .collector-contact-inner > img {
+    margin-inline: auto;
+  }
+
+  .collector-page .collector-contact .collector-actions {
+    justify-content: center;
+  }
+}
+
+/* v1.0.8 desktop density pass */
+@media (min-width: 1051px) {
+  .collector-hero { min-height: auto; }
+  .collector-hero-inner { padding-block: 3.2rem 2.2rem; }
+  .collector-lede { margin-bottom: 1.25rem; }
+  .hero-card-strip { max-width: 1040px; margin-top: 1.6rem; }
+  .release { min-height: auto; }
+  .release-inner { min-height: 720px; padding-block: 3.5rem; }
+  .collector-section { padding-block: 3.8rem; }
+  .collector-contact { padding-block: 3.8rem; }
+}

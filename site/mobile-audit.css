@@ -1,0 +1,438 @@
+/* Elevation UpScales 2.0.3 — mobile-only launch refinement.
+   Desktop layout, artwork, product data, and marketplace content remain unchanged. */
+
+@media (max-width: 820px) {
+  html {
+    scroll-padding-top: 86px;
+  }
+
+  body {
+    overflow-x: clip;
+    padding-bottom: calc(66px + env(safe-area-inset-bottom));
+  }
+
+  [id] {
+    scroll-margin-top: 88px;
+  }
+
+  /* Keep the collapsed navigation completely out of layout on mobile. */
+  .eus-nav:not(.is-open) {
+    display: none !important;
+  }
+
+  .eus-nav.is-open {
+    display: grid !important;
+  }
+
+  .eus-menu-toggle {
+    width: 46px;
+    height: 46px;
+  }
+
+  .eus-nav {
+    top: calc(100% + 1px);
+    right: .75rem;
+    left: .75rem;
+    max-height: calc(100dvh - 90px - env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+
+  .mobile-call-bar {
+    grid-template-columns: minmax(0, .42fr) minmax(0, .58fr);
+    min-height: 58px;
+    padding: .3rem .35rem calc(.3rem + env(safe-area-inset-bottom));
+    gap: .35rem;
+  }
+
+  .mobile-call-bar a {
+    min-width: 0;
+    min-height: 48px;
+    padding: .4rem .55rem;
+    font-size: clamp(.78rem, 3.35vw, .94rem);
+    line-height: 1.05;
+    letter-spacing: .035em;
+    text-align: center;
+  }
+
+  .mobile-call-bar .mobile-call {
+    white-space: nowrap;
+  }
+
+  .category-chip,
+  .marketplace-category-controls button {
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 650px) {
+  /* Home Services: keep the hero and service headings inside narrow screens. */
+  .service-page-hero-home-v2 {
+    padding: 2.8rem 0 3rem;
+  }
+
+  .service-page-hero-home-v2 .container {
+    width: calc(100% - 1.5rem);
+  }
+
+  .service-page-hero-layout,
+  .service-page-hero-copy {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .service-page-hero-copy {
+    padding: 0;
+  }
+
+  .service-page-hero-home-v2 .eyebrow {
+    max-width: 100%;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    overflow-wrap: anywhere;
+  }
+
+  .home-services-phase1 .service-page-hero-home-v2 h1 {
+    max-width: 100%;
+    margin-inline: auto;
+    font-size: clamp(2.35rem, 12vw, 3.15rem);
+    line-height: .95;
+  }
+
+  .home-services-phase1 .service-page-hero-copy > p:not(.eyebrow) {
+    max-width: 100%;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .service-page-hero-home-v2 .service-page-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .service-page-hero-home-v2 .service-page-actions .button {
+    width: 100%;
+    min-width: 0;
+    min-height: 50px;
+    padding-inline: .75rem;
+    font-size: .92rem;
+  }
+
+  .home-service-section {
+    padding: 2.8rem 0;
+  }
+
+  .service-page-heading-narrow {
+    margin-bottom: 1.8rem;
+    padding-inline: .15rem;
+  }
+
+  .service-page-heading-narrow h2 {
+    margin-bottom: .85rem;
+    font-size: clamp(2.05rem, 10vw, 2.7rem);
+    line-height: .98;
+  }
+
+  .service-page-heading-narrow p:not(.eyebrow) {
+    font-size: 1rem;
+    line-height: 1.58;
+  }
+
+  .home-service-card {
+    padding: 1.25rem;
+  }
+
+  .home-service-card-badge {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Marketplace hero and feed. */
+  .rvs-page .marketplace-home-hero {
+    min-height: 660px;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-stage {
+    padding: 2.45rem .45rem 1.75rem;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-card {
+    max-width: 100%;
+    padding: 4rem .75rem 1.1rem;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-emblem {
+    top: -28px;
+    width: 98px;
+    height: 67px;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-card h1 {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(2rem, 10.2vw, 2.8rem);
+    line-height: .97;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-card h1 span {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-divider {
+    margin: 1.35rem auto 1.1rem;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-card > p {
+    font-size: .96rem;
+    line-height: 1.5;
+  }
+
+  .marketplace-catalog {
+    padding: 3rem 0;
+  }
+
+  .marketplace-catalog__heading {
+    margin-bottom: 1.35rem;
+  }
+
+  .marketplace-catalog__heading h2 {
+    margin-bottom: .8rem;
+    font-size: clamp(2.05rem, 9.6vw, 2.65rem);
+    line-height: .98;
+  }
+
+  .marketplace-catalog__heading p:not(.eyebrow) {
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .marketplace-category-controls {
+    gap: .55rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .marketplace-category-controls button {
+    min-height: 48px;
+    padding: .72rem .45rem;
+    font-size: .78rem;
+    letter-spacing: .05em;
+  }
+
+  .marketplace-listing-card__copy {
+    padding: 1.05rem;
+  }
+
+  .rvs-listings-inner,
+  .rv-detail-grid,
+  .rv-detail-panel {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .rv-detail-panel {
+    width: 100%;
+  }
+
+  /* Marketplace forms. */
+  .listing-builder-hero {
+    padding: 3rem 0 2.5rem;
+  }
+
+  .listing-builder-hero__inner {
+    gap: 1.35rem;
+  }
+
+  .listing-builder-hero h1 {
+    margin-bottom: .9rem;
+    font-size: clamp(2.55rem, 12.5vw, 3.45rem);
+    line-height: .94;
+  }
+
+  .listing-builder-hero p:not(.eyebrow) {
+    font-size: 1rem;
+    line-height: 1.58;
+  }
+
+  .listing-builder-status {
+    display: block;
+    width: 100%;
+    padding: .75rem .85rem;
+    font-size: .88rem;
+    line-height: 1.5;
+  }
+
+  .listing-builder-hero__actions .button,
+  .listing-form-actions .button {
+    min-height: 48px;
+  }
+
+  .listing-builder {
+    padding: 2.5rem 0 3.5rem;
+  }
+
+  .listing-builder-form {
+    padding: 1rem;
+  }
+
+  .listing-builder-heading h2,
+  .listing-preview-panel__heading h2,
+  .listing-type-section .section-heading h2 {
+    font-size: clamp(2rem, 9.5vw, 2.55rem);
+    line-height: 1;
+  }
+
+  .listing-builder-form fieldset {
+    padding: .9rem;
+  }
+
+  .listing-builder-form input:not([type="file"]),
+  .listing-builder-form select {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .listing-builder-form textarea {
+    min-height: 130px;
+    font-size: 16px;
+  }
+
+  .listing-builder-form input[type="file"] {
+    min-height: 44px;
+    font-size: .82rem;
+  }
+
+  .photo-upload {
+    min-height: 138px;
+  }
+
+  .listing-type-section {
+    padding: 3rem 0;
+  }
+
+  .listing-type-section .section-heading {
+    margin-bottom: 1.8rem;
+  }
+
+  .listing-type-card {
+    min-height: 205px;
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .eus-brand {
+    gap: .45rem;
+  }
+
+  .eus-brand > img {
+    width: 50px;
+    height: 40px;
+  }
+
+  .eus-wordmark strong {
+    font-size: .78rem;
+  }
+
+  .eus-wordmark__sub {
+    font-size: .61rem;
+  }
+
+  .home-services-phase1 .service-page-hero-home-v2 h1 {
+    font-size: 2.3rem;
+  }
+
+  .rvs-page .marketplace-home-hero .hero-card h1 {
+    font-size: 1.95rem;
+  }
+
+  .mobile-call-bar {
+    grid-template-columns: minmax(0, .44fr) minmax(0, .56fr);
+  }
+
+  .mobile-call-bar a {
+    padding-inline: .35rem;
+    font-size: .76rem;
+  }
+}
+
+/* Final Safari and hero-orientation safeguards. */
+@media (max-width: 820px) {
+  html,
+  body,
+  main {
+    max-width: 100%;
+  }
+
+  .eus-nav:not(.is-open) {
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .eus-header details:not([open]) > .eus-dropdown {
+    display: none !important;
+  }
+
+  .rvs-page .marketplace-home-hero {
+    background-position: 56% center;
+  }
+
+  .marketplace-listing-card,
+  .rv-listing-card,
+  .generated-listing,
+  .listing-builder-form,
+  .listing-preview-panel {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* Narrow-screen overflow and touch-target corrections found in the launch audit. */
+@media (max-width: 650px) {
+  .rv-detail-panel h2 {
+    max-width: 100%;
+    font-size: clamp(1.75rem, 8vw, 2.2rem);
+    line-height: 1;
+  }
+
+  .service-page:not(.home-services-phase1) .service-page-hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.4rem, 12vw, 3.2rem);
+    line-height: .96;
+  }
+
+  .price-card-top h3 {
+    min-width: 0;
+    max-width: 100%;
+    font-size: clamp(1.05rem, 5.3vw, 1.35rem);
+    line-height: 1.05;
+    overflow-wrap: break-word;
+  }
+
+  .market-product-link,
+  .progress-slot,
+  .eus-brand {
+    min-height: 44px;
+  }
+
+  .footer-contact a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .service-page:not(.home-services-phase1) .service-page-hero h1 {
+    font-size: 2.35rem;
+  }
+
+  .price-card-top h3 {
+    font-size: 1rem;
+  }
+}
