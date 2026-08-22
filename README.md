@@ -4,12 +4,18 @@ Controlled source repository for the Elevation UpScales Cloudflare Pages website
 
 ## Current baseline
 
-- Release: `v3.11.23`
-- Runtime marker: `3.11.23-solar-intake-polish`
-- Original deployment ZIP SHA256: `9c3a08bc85c566c9e2d5c9e323afa4db7096954b7fc6b8f11dae3c42adfb5f7a`
+- Release: `v3.11.25`
+- Backend runtime marker: `3.11.24-guided-solar-builder`
+- Front-end release marker: `v3.11.25 — interactive Builder navigation + visual live summary`
+- Corrective parent commit: `36fef1e50ade89065cd61b83d11670cd7bf9ee69`
+- Original v3.11.25 update ZIP SHA256: `5b92373bcdd80261987c7f7731b343981b7a9ab3b2f5842625f6c3e3b0dd78ec`
+- Recovery deployment ZIP SHA256: `6163c59f0b83c942e0cd1cf37d39a722dc4ae87cab98cf87b1b3a6d32986b4e3`
 - Website source directory: `site/`
+- Website files: `236`
 
-Cloudflare bindings such as `LEADS_DB`, Marketplace storage, analytics storage, and runtime secrets remain configured in the Cloudflare Pages project. They are not stored in this repository.
+The corrective release restores the intended v3.11.24 Solar Builder files to the authoritative root `site/` tree, applies the v3.11.25 navigation and live-summary update, and removes the misplaced nested copy created by the prior GitHub upload.
+
+Cloudflare bindings such as `LEADS_DB`, Marketplace storage, analytics storage, and runtime secrets remain configured in the existing Cloudflare Pages project. They are not stored in this repository. This release adds no database migration and no binding change.
 
 ## Deploy safely
 
@@ -22,7 +28,7 @@ The repository does not deploy merely because files are uploaded or changed. Dep
 5. Inspect the preview URL shown in the completed workflow summary.
 6. Run the workflow again with **production** only after the preview is approved.
 
-The production job deploys the `main` Pages branch. Confirm the existing Cloudflare Pages project's production branch is `main` before the first production run.
+The production job deploys the `main` Pages branch to the existing `elevationupscales` Cloudflare Pages project.
 
 ## Required GitHub configuration
 
@@ -39,4 +45,4 @@ Never commit Cloudflare tokens, `.env`, `.dev.vars`, private keys, database expo
 
 ## Editing rule
 
-Make website changes inside `site/`. The workflow validates required files, JavaScript syntax, deployment limits, and blocked secret/archive files before Cloudflare receives an upload.
+Make website changes inside `site/`. The workflow validates required files, JavaScript syntax, deployment limits, v3.11.25 Solar Builder markers, and blocked secret/archive files before Cloudflare receives an upload.

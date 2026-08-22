@@ -3,7 +3,7 @@ const PUBLIC_ORIGIN = "https://elevationupscales.com";
 const MAX_PAGES = 10;
 const MAX_PAGE_BYTES = 2_000_000;
 const STORE_BUILD = "3.0.3";
-const OPERATIONS_BUILD = "3.11.23-solar-intake-polish";
+const OPERATIONS_BUILD = "3.11.24-guided-solar-builder";
 
 const SOLAR_NOTIFY_PATH = "/api/solar-build-notify";
 const SOLAR_NOTIFY_MAX_BYTES = 56_000;

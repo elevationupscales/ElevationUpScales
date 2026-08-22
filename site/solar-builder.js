@@ -37,13 +37,11 @@
   ];
   const intentTrack = (type, value="", details={}) => window.EUSIntent?.track?.(type, value, details);
   const BUILDER_STAGES = Object.freeze([
-    { id:"needs", title:"Power Need" },
-    { id:"packages", title:"Starting System" },
-    { id:"panels", title:"Solar Array" },
-    { id:"batteries", title:"Battery Reserve" },
-    { id:"power", title:"Power Center" },
-    { id:"integration", title:"Charging & Protection" },
-    { id:"services", title:"Final Fit" },
+    { id:"needs", title:"Your Power", sections:["needs"] },
+    { id:"packages", title:"System Match", sections:["packages"] },
+    { id:"hardware", title:"Solar & Storage", sections:["panels", "batteries"] },
+    { id:"integration", title:"Charging & Install", sections:["power", "integration"] },
+    { id:"services", title:"Review & Services", sections:["services"] },
   ]);
 
   const catalog = {
@@ -134,6 +132,7 @@
   let userHasInteracted = false;
   let currentBuilderStep = "needs";
   let currentBuilderProgress = Math.round(100 / BUILDER_STAGES.length);
+  let furthestBuilderStage = 0;
 
   function builderEntrySource() {
     try { return (new URLSearchParams(location.search).get("source") || "direct").trim().slice(0, 80); }
@@ -141,39 +140,49 @@
   }
 
   function showBuilderScene(stageId, { focus = false, updateHash = true } = {}) {
-    const index = BUILDER_STAGES.findIndex((stage) => stage.id === stageId);
+    const index = BUILDER_STAGES.findIndex((stage) => stage.id === stageId || stage.sections.includes(stageId));
     if (index < 0) return;
+    const stage = BUILDER_STAGES[index];
+    const activeSections = new Set(stage.sections);
     document.body.classList.add("solar-scene-mode");
     all("[data-builder-section]").forEach((section) => {
-      const active = section.id === stageId;
+      const active = activeSections.has(section.id);
       section.hidden = !active;
       section.setAttribute("aria-hidden", String(!active));
       section.classList.toggle("is-active-scene", active);
     });
-    currentBuilderStep = stageId;
+    const mainPanel = document.querySelector(".builder-main");
+    if (mainPanel) mainPanel.scrollTop = 0;
+    currentBuilderStep = stage.id;
     currentBuilderProgress = Math.round(((index + 1) / BUILDER_STAGES.length) * 100);
-    const stage = BUILDER_STAGES[index];
+    furthestBuilderStage = Math.max(furthestBuilderStage, index);
     if ($("solar-stage-count")) $("solar-stage-count").textContent = `Stage ${index + 1} of ${BUILDER_STAGES.length}`;
     if ($("solar-stage-title")) $("solar-stage-title").textContent = stage.title;
     if ($("solar-stage-meter")) $("solar-stage-meter").style.width = `${currentBuilderProgress}%`;
+    if ($("builder-mobile-stage-count")) $("builder-mobile-stage-count").textContent = `Stage ${index + 1} of ${BUILDER_STAGES.length}`;
+    if ($("builder-mobile-stage-title")) $("builder-mobile-stage-title").textContent = stage.title;
+    if ($("builder-mobile-meter")) $("builder-mobile-meter").style.width = `${currentBuilderProgress}%`;
     if ($("builder-scene-status")) $("builder-scene-status").textContent = stage.title;
     const back = $("builder-scene-back"), next = $("builder-scene-next");
     if (back) back.disabled = index === 0;
     if (next) next.textContent = index === BUILDER_STAGES.length - 1 ? "Review My System →" : "Continue →";
     all("[data-jump]").forEach((button) => {
-      const active = button.dataset.jump === stageId;
+      const buttonIndex = BUILDER_STAGES.findIndex((item) => item.id === button.dataset.jump);
+      const active = button.dataset.jump === stage.id;
       button.classList.toggle("is-active", active);
+      button.classList.toggle("is-complete", buttonIndex >= 0 && buttonIndex < furthestBuilderStage);
       if (active) button.setAttribute("aria-current", "step"); else button.removeAttribute("aria-current");
     });
+    closeBuilderStageNav();
     if (updateHash) {
       try {
         const url = new URL(location.href);
-        url.hash = `builder-${stageId}`;
+        url.hash = `builder-${stage.id}`;
         history.replaceState(history.state, "", `${url.pathname}${url.search}${url.hash}`);
       } catch (_) {}
     }
     if (focus) {
-      const heading = $(`${stageId}`)?.querySelector("h3");
+      const heading = $(stage.sections[0])?.querySelector("h3");
       if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll:true }); }
     }
   }
@@ -227,7 +236,7 @@
     });
     syncInputs();
     update(true);
-    if (scroll) showBuilderScene("panels", { focus:true });
+    if (scroll) showBuilderScene("hardware", { focus:true });
   }
 
   function syncInputs() {
@@ -546,6 +555,25 @@
     if (tag) tag.textContent = brand || "Custom";
   }
 
+  function closeBuilderStageNav() {
+    const nav = $("builder-stage-nav");
+    const toggle = $("builder-stage-toggle");
+    nav?.classList.remove("is-mobile-open");
+    toggle?.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("builder-stage-menu-open");
+  }
+
+  function toggleBuilderStageNav() {
+    const nav = $("builder-stage-nav");
+    const toggle = $("builder-stage-toggle");
+    if (!nav || !toggle) return;
+    const open = !nav.classList.contains("is-mobile-open");
+    nav.classList.toggle("is-mobile-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("builder-stage-menu-open", open);
+    if (open) nav.querySelector('[aria-current="step"]')?.focus({ preventScroll:true });
+  }
+
   function closeMobileSummary() {
     const panel = $("builder-summary-panel");
     const toggle = $("mobile-summary-toggle");
@@ -599,6 +627,12 @@
     if ($("mobile-summary-package")) $("mobile-summary-package").textContent = packageLabel;
     if ($("mobile-summary-solar")) $("mobile-summary-solar").textContent = `${m.arrayWatts.toLocaleString()}W`;
     if ($("mobile-summary-battery")) $("mobile-summary-battery").textContent = `${m.batteryAh.toLocaleString()}Ah`;
+    if ($("summary-visual-solar")) $("summary-visual-solar").textContent = `${m.arrayWatts.toLocaleString()}W`;
+    if ($("summary-visual-battery")) $("summary-visual-battery").textContent = `${m.batteryAh.toLocaleString()}Ah`;
+    if ($("summary-visual-inverter")) $("summary-visual-inverter").textContent = snapshot.inverterWatts ? `${snapshot.inverterWatts.toLocaleString()}W` : "None";
+    if ($("summary-visual-use")) $("summary-visual-use").textContent = snapshot.hasUsage ? `${snapshot.estimatedUsageKwh.toFixed(1)} kWh/day` : "Choose loads";
+    const summaryPanel = $("builder-summary-panel");
+    if (summaryPanel) summaryPanel.dataset.packageTier = state.package;
     if ($("final-action-package")) $("final-action-package").textContent = packageLabel;
     if ($("final-action-solar")) $("final-action-solar").textContent = `${m.arrayWatts.toLocaleString()}W`;
     if ($("final-action-battery")) $("final-action-battery").textContent = `${m.batteryAh.toLocaleString()}Ah • ${m.batteryKwh.toFixed(2)}kWh`;
@@ -889,10 +923,10 @@
       indicator.classList.toggle("is-active", name === target);
       indicator.classList.toggle("is-complete", target === "details" && name === "region");
     });
-    if ($("builder-start-title")) $("builder-start-title").textContent = target === "details" ? "Save your Solar build." : "Start with your service area.";
+    if ($("builder-start-title")) $("builder-start-title").textContent = target === "details" ? "Save this Solar plan." : "Where will this system be used?";
     if ($("builder-start-copy")) $("builder-start-copy").textContent = target === "details"
-      ? "Add the location and one way to reach you. Then the interactive Builder opens with one saved Lead reference."
-      : "Two quick steps save your build and connect it to the right Elevation market.";
+      ? "Add the location and one way to reach you. The guided Builder then opens with one saved Lead reference."
+      : "Choose the project area first. We use it to route the same saved Solar plan to the right market.";
     if (!focus) return;
     setTimeout(() => {
       const targetElement = target === "details" ? $("start-city") : document.querySelector('input[name="start-region"]:checked') || document.querySelector('input[name="start-region"]');
@@ -1016,7 +1050,7 @@
       console.error(error);
     } finally {
       submit.disabled = false;
-      submit.textContent = "Start Building";
+      submit.textContent = "Save Plan & Open Builder";
     }
   }
 
@@ -1032,13 +1066,17 @@
   function contactData() {
     const raw = (id) => $(id).value.trim();
     const fallback = (value) => value || "Not specified";
+    const projectType = fallback(raw("lead-project-type"));
+    const projectDetails = fallback(raw("lead-project-details"));
     return {
       name: fallback(raw("lead-name") || leadContact?.name || ""),
       firstName: fallback(raw("lead-name") || leadContact?.name || "").split(/\s+/)[0],
       phone: raw("lead-phone") || leadContact?.phone || "",
       email: raw("lead-email") || leadContact?.email || "",
       location: fallback(raw("lead-location")),
-      rv: `${fallback(raw("lead-year"))} ${fallback(raw("lead-make"))} ${fallback(raw("lead-model"))} — ${fallback(raw("lead-length"))}`,
+      rv: `${projectType} — ${projectDetails}`,
+      projectType,
+      projectDetails,
       preferred: fallback(raw("lead-contact")),
       timing: fallback(raw("lead-timing")),
       installLocation: fallback(raw("lead-install-location")),
@@ -1069,7 +1107,7 @@
       `Phone: ${contact.phone || "Not specified"}`,
       `Email: ${contact.email || "Not specified"}`,
       `Location: ${contact.location}`,
-      `RV: ${contact.rv}`,
+      `Project: ${contact.rv}`,
       `Preferred contact: ${contact.preferred}`,
       `Project timing: ${contact.timing}`,
       `Installation location: ${contact.installLocation}`,
@@ -1263,6 +1301,7 @@
       update(true);
     }));
     all("[data-jump]").forEach((button) => button.addEventListener("click", () => showBuilderScene(button.dataset.jump, { focus:true })));
+    $("builder-stage-toggle")?.addEventListener("click", toggleBuilderStageNav);
     $("builder-scene-back")?.addEventListener("click", () => moveBuilderScene(-1));
     $("builder-scene-next")?.addEventListener("click", () => moveBuilderScene(1));
     all('input[name="start-region"]').forEach((input) => input.addEventListener("change", syncStarterRegion));
@@ -1284,7 +1323,7 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !$("contact-wall").hidden) closeWall();
       if (event.key === "Escape" && !$("builder-start-wall").hidden) closeStartWall();
-      if (event.key === "Escape") closeMobileSummary();
+      if (event.key === "Escape") { closeMobileSummary(); closeBuilderStageNav(); }
       if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && document.body.classList.contains("is-builder-active") && $("contact-wall").hidden && $("builder-start-wall").hidden && !event.target.closest("input, select, textarea, button, a")) {
         event.preventDefault();
         moveBuilderScene(event.key === "ArrowRight" ? 1 : -1);
@@ -1337,7 +1376,7 @@
     bind();
     update(false);
     const hashStage = location.hash.startsWith("#builder-") ? location.hash.slice(9) : "needs";
-    showBuilderScene(BUILDER_STAGES.some((stage) => stage.id === hashStage) ? hashStage : "needs", { updateHash:false });
+    showBuilderScene(BUILDER_STAGES.some((stage) => stage.id === hashStage || stage.sections.includes(hashStage)) ? hashStage : "needs", { updateHash:false });
     if (params.get("start") === "1" && !builderUnlocked()) showStartWall();
     const year = $("year"); if (year) year.textContent = new Date().getFullYear();
   });

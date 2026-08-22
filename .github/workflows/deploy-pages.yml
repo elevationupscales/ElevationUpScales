@@ -36,7 +36,17 @@ jobs:
           test -f site/_worker.js
           test -f site/_routes.json
           test -f site/_headers
-          grep -q '3.11.23-solar-intake-polish' site/_worker.js
+          test -f site/assets/solar/builder-v2/rv-solar-install-field-desktop.webp
+          test -f site/assets/solar/builder-v2/rv-solar-install-field-mobile.webp
+          test -f site/assets/solar/builder-v2/rv-solar-install-field-social.webp
+          grep -q '3.11.24-guided-solar-builder' site/_worker.js
+          grep -q 'v3.11.25 — interactive Builder navigation + visual live summary' site/solar-builder.css
+          grep -q 'id="builder-mobile-stage"' site/solar-project.html
+          grep -q 'data-jump="hardware"' site/solar-project.html
+          grep -q 'class="summary-system-map"' site/solar-project.html
+          grep -q 'builder-scene-next' site/solar-builder.js
+          grep -q 'Stage 1 of 5' site/solar-project.html
+          cmp -s site/solar-project.html site/solar-project/index.html
 
       - name: Check JavaScript syntax
         shell: bash
