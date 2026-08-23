@@ -60,7 +60,7 @@ jobs:
             'rv navigation': 'RV & Outdoor Store' in store,
             'apparel categories': all(x in store for x in ['All Products','Apparel','Hats','Wall Art','Stickers','Digital']),
             'apparel fallback cards': store.count('class="market-product-card"') >= 10,
-            'rv hero': 'hero-galaxy-rv.webp' in rv,
+            'rv hero': 'mountain-bull-bear-header.webp' in rv,
             'rv shopping list': 'Shopping List' in rv,
             'rv buy now': 'Buy Now' in rvjs,
             'mission control store metric': 'RV Shop Views' in admin,
@@ -96,7 +96,7 @@ jobs:
           grep -q 'All Products' /tmp/store.html
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store" > /tmp/rv-store.html
           grep -q 'RV & Outdoor Store' /tmp/rv-store.html
-          grep -q 'hero-galaxy-rv.webp' /tmp/rv-store.html
+          grep -q 'mountain-bull-bear-header.webp' /tmp/rv-store.html
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/home-top.js" > /tmp/home-top.js
           grep -q "href = '/rv-store'" /tmp/home-top.js
           grep -q 'Shop RV & Outdoor' /tmp/home-top.js
