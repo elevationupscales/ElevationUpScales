@@ -35,7 +35,12 @@ jobs:
           grep -q 'Stage 1 of 7' site/solar-project.html
           ! grep -q 'setInterval.*5000' site/rv-store.js
           grep -q 'onerror' site/rv-store.js
-          grep -q 'imageUrl:' site/rv-manual-catalog.js
+          grep -q 'sellerValidated: true' site/rv-manual-catalog.js
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('site/rv-manual-catalog.js').read_text()
+          assert text.count('["ebay-') == 49, f"Expected 49 validated listings, got {text.count('[\"ebay-')}"
+          PY
       - name: Deploy production
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -56,14 +61,15 @@ jobs:
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store.js" > /tmp/rv-store.js
           ! grep -q 'setInterval.*5000' /tmp/rv-store.js
           grep -q 'onerror' /tmp/rv-store.js
-          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=stability" > /tmp/inventory.json
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=validated-49" > /tmp/inventory.json
           python - <<'PY'
           import json, os
           data=json.load(open('/tmp/inventory.json',encoding='utf-8'))
           items=data.get('items') or []
           count=int(data.get('count') or 0)
-          assert count >= 10, f'Expected >=10 products, got {count}'
-          assert any((i.get('imageUrl') or '').strip() for i in items), 'No product images returned'
+          assert count == 49, f'Expected exactly 49 validated products, got {count}'
+          assert all((i.get('imageUrl') or '').strip() for i in items), 'One or more product images missing'
+          assert all((i.get('priceCents') or 0) > 0 for i in items), 'One or more prices missing'
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
               f.write(f'count={count}\n')
           PY
@@ -79,6 +85,7 @@ jobs:
           workflow_run=${{ github.run_id }}
           deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           rv_inventory_count=${{ steps.smoke.outputs.count }}
+          seller_hub_validated=49
           image_fallback=verified
           scroll_refresh=removed
           status=success
