@@ -3,7 +3,7 @@ const PUBLIC_ORIGIN = "https://elevationupscales.com";
 const MAX_PAGES = 10;
 const MAX_PAGE_BYTES = 2_000_000;
 const STORE_BUILD = "3.0.3";
-const OPERATIONS_BUILD = "3.11.24-guided-solar-builder";
+const OPERATIONS_BUILD = "3.11.29-inventory-foundation";
 
 const SOLAR_NOTIFY_PATH = "/api/solar-build-notify";
 const SOLAR_NOTIFY_MAX_BYTES = 56_000;
@@ -885,6 +885,7 @@ const WORK_WITH_US_SUBMIT_PATH = "/api/work-with-us/submit";
 const ADMIN_OPPORTUNITIES_PATH = "/api/admin/opportunities";
 const ADMIN_MARKET_ANALYTICS_PATH = "/api/admin/market-analytics";
 const ADMIN_SOLAR_QA_TOKEN_PATH = "/api/admin/solar-qa-token";
+const ADMIN_INVENTORY_PATH = "/api/admin/inventory";
 const SOLAR_QA_VALIDATE_PATH = "/api/solar/qa-validate";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const DEFAULT_MARKETPLACE_EMAIL_TO = "casey@elevationupscales.com";
@@ -3131,6 +3132,332 @@ async function handleAdminLogin(request, env) {
   });
 }
 
+
+const INVENTORY_STATUSES = new Set(["active", "paused", "archived"]);
+const INVENTORY_FULFILLMENT_MODES = new Set(["tracked", "supplier_managed", "dropship", "pod"]);
+const INVENTORY_MAX_BODY_BYTES = 24 * 1024;
+
+function inventoryInteger(value, fallback = 0, max = 1_000_000_000) {
+  if (value === undefined || value === null || value === "") return fallback;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(0, Math.min(max, Math.round(number)));
+}
+
+function inventoryMoneyCents(value, fallback = 0) {
+  return inventoryInteger(value, fallback, 100_000_000_000);
+}
+
+function inventoryString(value, max = 180) {
+  return cleanString(value, max);
+}
+
+function inventoryUrl(value) {
+  const raw = inventoryString(value, 700);
+  if (!raw) return "";
+  try {
+    const parsed = new URL(raw);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function inventoryChannels(value) {
+  const raw = Array.isArray(value) ? value : String(value || "").split(",");
+  const channels = [...new Set(raw.map((item) => inventoryString(item, 50).toLowerCase()).filter(Boolean))].slice(0, 12);
+  return JSON.stringify(channels);
+}
+
+function inventoryChannelsFromRow(value) {
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed.map((item) => inventoryString(item, 50)).filter(Boolean) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+async function ensureInventorySchema(db) {
+  if (!db || typeof db.prepare !== "function") throw new Error("Inventory database is not configured");
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_inventory_items (
+    id TEXT PRIMARY KEY,
+    sku TEXT NOT NULL COLLATE NOCASE UNIQUE,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT '',
+    supplier TEXT NOT NULL DEFAULT 'other',
+    fulfillment_mode TEXT NOT NULL DEFAULT 'tracked',
+    supplier_product_id TEXT NOT NULL DEFAULT '',
+    source_url TEXT NOT NULL DEFAULT '',
+    sales_channels_json TEXT NOT NULL DEFAULT '[]',
+    cost_cents INTEGER NOT NULL DEFAULT 0,
+    price_cents INTEGER NOT NULL DEFAULT 0,
+    quantity_on_hand INTEGER NOT NULL DEFAULT 0,
+    quantity_reserved INTEGER NOT NULL DEFAULT 0,
+    reorder_point INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    notes TEXT NOT NULL DEFAULT '',
+    version INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    updated_by TEXT NOT NULL DEFAULT ''
+  )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_inventory_events (
+    id TEXT PRIMARY KEY,
+    item_id TEXT NOT NULL,
+    sku TEXT NOT NULL DEFAULT '',
+    action TEXT NOT NULL,
+    quantity_before INTEGER NOT NULL DEFAULT 0,
+    quantity_after INTEGER NOT NULL DEFAULT 0,
+    reserved_before INTEGER NOT NULL DEFAULT 0,
+    reserved_after INTEGER NOT NULL DEFAULT 0,
+    details_json TEXT NOT NULL DEFAULT '{}',
+    admin_email TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+  )`).run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_inventory_items_updated ON eus_inventory_items(updated_at DESC)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_inventory_events_item ON eus_inventory_events(item_id, created_at DESC)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_inventory_events_created ON eus_inventory_events(created_at DESC)").run();
+}
+
+function inventoryRow(row) {
+  if (!row) return null;
+  const onHand = inventoryInteger(row.quantity_on_hand, 0);
+  const reserved = inventoryInteger(row.quantity_reserved, 0);
+  const available = Math.max(0, onHand - reserved);
+  const mode = INVENTORY_FULFILLMENT_MODES.has(String(row.fulfillment_mode || "")) ? row.fulfillment_mode : "tracked";
+  const reorderPoint = inventoryInteger(row.reorder_point, 0);
+  return {
+    id: inventoryString(row.id, 100),
+    sku: inventoryString(row.sku, 80),
+    name: inventoryString(row.name, 180),
+    category: inventoryString(row.category, 100),
+    supplier: inventoryString(row.supplier, 100),
+    fulfillmentMode: mode,
+    supplierProductId: inventoryString(row.supplier_product_id, 180),
+    sourceUrl: inventoryString(row.source_url, 700),
+    salesChannels: inventoryChannelsFromRow(row.sales_channels_json),
+    costCents: inventoryMoneyCents(row.cost_cents, 0),
+    priceCents: inventoryMoneyCents(row.price_cents, 0),
+    quantityOnHand: onHand,
+    quantityReserved: reserved,
+    quantityAvailable: available,
+    reorderPoint,
+    lowStock: mode === "tracked" && String(row.status) === "active" && available <= reorderPoint,
+    status: INVENTORY_STATUSES.has(String(row.status || "")) ? row.status : "active",
+    notes: inventoryString(row.notes, 4000),
+    version: inventoryInteger(row.version, 1, 2_000_000_000),
+    createdAt: inventoryString(row.created_at, 80),
+    updatedAt: inventoryString(row.updated_at, 80),
+    updatedBy: inventoryString(row.updated_by, 180),
+  };
+}
+
+function inventoryEventRow(row) {
+  let details = {};
+  try { details = JSON.parse(row?.details_json || "{}"); } catch (_) {}
+  return {
+    id: inventoryString(row?.id, 100),
+    itemId: inventoryString(row?.item_id, 100),
+    sku: inventoryString(row?.sku, 80),
+    action: inventoryString(row?.action, 80),
+    quantityBefore: inventoryInteger(row?.quantity_before, 0),
+    quantityAfter: inventoryInteger(row?.quantity_after, 0),
+    reservedBefore: inventoryInteger(row?.reserved_before, 0),
+    reservedAfter: inventoryInteger(row?.reserved_after, 0),
+    details,
+    adminEmail: inventoryString(row?.admin_email, 180),
+    createdAt: inventoryString(row?.created_at, 80),
+  };
+}
+
+async function inventoryLog(db, { itemId, sku, action, quantityBefore = 0, quantityAfter = 0, reservedBefore = 0, reservedAfter = 0, details = {}, adminEmail = "" }) {
+  const id = `inv_evt_${crypto.randomUUID()}`;
+  const createdAt = new Date().toISOString();
+  await db.prepare(`INSERT INTO eus_inventory_events
+    (id,item_id,sku,action,quantity_before,quantity_after,reserved_before,reserved_after,details_json,admin_email,created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`).bind(
+      id, inventoryString(itemId, 100), inventoryString(sku, 80), inventoryString(action, 80),
+      inventoryInteger(quantityBefore), inventoryInteger(quantityAfter), inventoryInteger(reservedBefore), inventoryInteger(reservedAfter),
+      JSON.stringify(details || {}), inventoryString(adminEmail, 180), createdAt,
+    ).run();
+  return createdAt;
+}
+
+async function inventorySnapshot(db) {
+  const [itemsResult, eventsResult, revisionRow] = await Promise.all([
+    db.prepare("SELECT * FROM eus_inventory_items ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END, updated_at DESC, name COLLATE NOCASE ASC LIMIT 2000").all(),
+    db.prepare("SELECT * FROM eus_inventory_events ORDER BY created_at DESC LIMIT 60").all(),
+    db.prepare("SELECT COUNT(*) AS count, MAX(updated_at) AS updated_at, COALESCE(SUM(version),0) AS version_sum FROM eus_inventory_items").first(),
+  ]);
+  const items = (itemsResult?.results || []).map(inventoryRow);
+  const active = items.filter((item) => item.status === "active");
+  const tracked = active.filter((item) => item.fulfillmentMode === "tracked");
+  const stats = {
+    activeSkus: active.length,
+    trackedSkus: tracked.length,
+    onHand: tracked.reduce((sum, item) => sum + item.quantityOnHand, 0),
+    reserved: tracked.reduce((sum, item) => sum + item.quantityReserved, 0),
+    available: tracked.reduce((sum, item) => sum + item.quantityAvailable, 0),
+    lowStock: tracked.filter((item) => item.lowStock).length,
+    inventoryValueCents: tracked.reduce((sum, item) => sum + (item.quantityAvailable * item.costCents), 0),
+  };
+  return {
+    items,
+    stats,
+    recentEvents: (eventsResult?.results || []).map(inventoryEventRow),
+    revision: `${inventoryString(revisionRow?.updated_at, 80) || "empty"}:${Number(revisionRow?.count || 0)}:${Number(revisionRow?.version_sum || 0)}`,
+    syncedAt: new Date().toISOString(),
+    build: OPERATIONS_BUILD,
+  };
+}
+
+async function inventoryReadBody(request) {
+  const parsed = await readLimitedJson(request, INVENTORY_MAX_BODY_BYTES);
+  if (parsed.error === "too_large") return { response: jsonResponse({ error: "Inventory request is too large" }, 413) };
+  if (parsed.error) return { response: jsonResponse({ error: "Invalid inventory request" }, 400) };
+  return { body: parsed.value || {} };
+}
+
+async function handleAdminInventory(request, env, pathname) {
+  const auth = await requireAdmin(request, env);
+  if (auth.response) return auth.response;
+  if (!env.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return jsonResponse({ error: "Inventory storage is not configured" }, 503);
+  const db = env.MARKETPLACE_DB;
+  try { await ensureInventorySchema(db); }
+  catch (error) {
+    console.error(JSON.stringify({ event: "inventory_schema_error", message: error instanceof Error ? error.message : String(error) }));
+    return jsonResponse({ error: "Inventory storage is unavailable" }, 503);
+  }
+
+  const suffix = pathname.slice(ADMIN_INVENTORY_PATH.length).replace(/^\/+/, "");
+  const itemId = inventoryString(decodeURIComponent(suffix.split("/")[0] || ""), 100);
+
+  if (request.method === "GET") return jsonResponse(await inventorySnapshot(db));
+  if (!sameOriginRequest(request)) return jsonResponse({ error: "Cross-origin request denied" }, 403);
+
+  if (request.method === "POST" && !itemId) {
+    const parsed = await inventoryReadBody(request);
+    if (parsed.response) return parsed.response;
+    const body = parsed.body;
+    const sku = inventoryString(body.sku, 80).toUpperCase();
+    const name = inventoryString(body.name, 180);
+    if (!sku || !name) return jsonResponse({ error: "SKU and product name are required" }, 400);
+    const fulfillmentMode = INVENTORY_FULFILLMENT_MODES.has(body.fulfillmentMode) ? body.fulfillmentMode : "tracked";
+    const status = INVENTORY_STATUSES.has(body.status) ? body.status : "active";
+    const now = new Date().toISOString();
+    const id = `inv_${crypto.randomUUID()}`;
+    const item = {
+      id, sku, name,
+      category: inventoryString(body.category, 100),
+      supplier: inventoryString(body.supplier, 100) || "other",
+      fulfillmentMode,
+      supplierProductId: inventoryString(body.supplierProductId, 180),
+      sourceUrl: inventoryUrl(body.sourceUrl),
+      salesChannelsJson: inventoryChannels(body.salesChannels),
+      costCents: inventoryMoneyCents(body.costCents, 0),
+      priceCents: inventoryMoneyCents(body.priceCents, 0),
+      quantityOnHand: fulfillmentMode === "tracked" ? inventoryInteger(body.quantityOnHand, 0) : 0,
+      quantityReserved: fulfillmentMode === "tracked" ? inventoryInteger(body.quantityReserved, 0) : 0,
+      reorderPoint: fulfillmentMode === "tracked" ? inventoryInteger(body.reorderPoint, 0) : 0,
+      status,
+      notes: inventoryString(body.notes, 4000),
+    };
+    try {
+      await db.prepare(`INSERT INTO eus_inventory_items
+        (id,sku,name,category,supplier,fulfillment_mode,supplier_product_id,source_url,sales_channels_json,cost_cents,price_cents,quantity_on_hand,quantity_reserved,reorder_point,status,notes,version,created_at,updated_at,updated_by)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?,?,?)`).bind(
+          item.id,item.sku,item.name,item.category,item.supplier,item.fulfillmentMode,item.supplierProductId,item.sourceUrl,item.salesChannelsJson,item.costCents,item.priceCents,item.quantityOnHand,item.quantityReserved,item.reorderPoint,item.status,item.notes,now,now,auth.session.email,
+        ).run();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (/unique|constraint/i.test(message)) return jsonResponse({ error: `SKU ${sku} already exists` }, 409);
+      console.error(JSON.stringify({ event: "inventory_create_error", message }));
+      return jsonResponse({ error: "Inventory item could not be created" }, 500);
+    }
+    await inventoryLog(db, { itemId: id, sku, action: "created", quantityAfter: item.quantityOnHand, reservedAfter: item.quantityReserved, details: { name: item.name, supplier: item.supplier, fulfillmentMode: item.fulfillmentMode }, adminEmail: auth.session.email }).catch(() => {});
+    const row = await db.prepare("SELECT * FROM eus_inventory_items WHERE id=? LIMIT 1").bind(id).first();
+    return jsonResponse({ ok: true, item: inventoryRow(row), ...(await inventorySnapshot(db)) }, 201);
+  }
+
+  if (!itemId) return jsonResponse({ error: "Inventory item id is required" }, 400);
+  const existingRow = await db.prepare("SELECT * FROM eus_inventory_items WHERE id=? LIMIT 1").bind(itemId).first();
+  if (!existingRow) return jsonResponse({ error: "Inventory item not found" }, 404);
+  const existing = inventoryRow(existingRow);
+
+  if (request.method === "DELETE") {
+    if (existing.status === "archived") return jsonResponse({ ok: true, item: existing, ...(await inventorySnapshot(db)) });
+    const now = new Date().toISOString();
+    const result = await db.prepare("UPDATE eus_inventory_items SET status='archived', version=version+1, updated_at=?, updated_by=? WHERE id=? AND version=?")
+      .bind(now, auth.session.email, itemId, existing.version).run();
+    if (!result?.meta?.changes) return jsonResponse({ error: "Inventory item changed elsewhere. Refresh and try again." }, 409);
+    await inventoryLog(db, { itemId, sku: existing.sku, action: "archived", quantityBefore: existing.quantityOnHand, quantityAfter: existing.quantityOnHand, reservedBefore: existing.quantityReserved, reservedAfter: existing.quantityReserved, adminEmail: auth.session.email }).catch(() => {});
+    const row = await db.prepare("SELECT * FROM eus_inventory_items WHERE id=? LIMIT 1").bind(itemId).first();
+    return jsonResponse({ ok: true, item: inventoryRow(row), ...(await inventorySnapshot(db)) });
+  }
+
+  if (request.method === "PATCH") {
+    const parsed = await inventoryReadBody(request);
+    if (parsed.response) return parsed.response;
+    const body = parsed.body;
+    const requestedVersion = inventoryInteger(body.version, existing.version, 2_000_000_000);
+    if (requestedVersion !== existing.version) return jsonResponse({ error: "Inventory item changed elsewhere. Refresh and try again." }, 409);
+    const nextMode = body.fulfillmentMode === undefined ? existing.fulfillmentMode : (INVENTORY_FULFILLMENT_MODES.has(body.fulfillmentMode) ? body.fulfillmentMode : existing.fulfillmentMode);
+    const nextStatus = body.status === undefined ? existing.status : (INVENTORY_STATUSES.has(body.status) ? body.status : existing.status);
+    const next = {
+      sku: body.sku === undefined ? existing.sku : inventoryString(body.sku, 80).toUpperCase(),
+      name: body.name === undefined ? existing.name : inventoryString(body.name, 180),
+      category: body.category === undefined ? existing.category : inventoryString(body.category, 100),
+      supplier: body.supplier === undefined ? existing.supplier : (inventoryString(body.supplier, 100) || "other"),
+      fulfillmentMode: nextMode,
+      supplierProductId: body.supplierProductId === undefined ? existing.supplierProductId : inventoryString(body.supplierProductId, 180),
+      sourceUrl: body.sourceUrl === undefined ? existing.sourceUrl : inventoryUrl(body.sourceUrl),
+      salesChannelsJson: body.salesChannels === undefined ? JSON.stringify(existing.salesChannels) : inventoryChannels(body.salesChannels),
+      costCents: body.costCents === undefined ? existing.costCents : inventoryMoneyCents(body.costCents, existing.costCents),
+      priceCents: body.priceCents === undefined ? existing.priceCents : inventoryMoneyCents(body.priceCents, existing.priceCents),
+      quantityOnHand: nextMode === "tracked" ? (body.quantityOnHand === undefined ? existing.quantityOnHand : inventoryInteger(body.quantityOnHand, existing.quantityOnHand)) : 0,
+      quantityReserved: nextMode === "tracked" ? (body.quantityReserved === undefined ? existing.quantityReserved : inventoryInteger(body.quantityReserved, existing.quantityReserved)) : 0,
+      reorderPoint: nextMode === "tracked" ? (body.reorderPoint === undefined ? existing.reorderPoint : inventoryInteger(body.reorderPoint, existing.reorderPoint)) : 0,
+      status: nextStatus,
+      notes: body.notes === undefined ? existing.notes : inventoryString(body.notes, 4000),
+    };
+    if (!next.sku || !next.name) return jsonResponse({ error: "SKU and product name are required" }, 400);
+    const changed = [];
+    const compare = {
+      sku: existing.sku, name: existing.name, category: existing.category, supplier: existing.supplier,
+      fulfillmentMode: existing.fulfillmentMode, supplierProductId: existing.supplierProductId, sourceUrl: existing.sourceUrl,
+      salesChannelsJson: JSON.stringify(existing.salesChannels), costCents: existing.costCents, priceCents: existing.priceCents,
+      quantityOnHand: existing.quantityOnHand, quantityReserved: existing.quantityReserved, reorderPoint: existing.reorderPoint,
+      status: existing.status, notes: existing.notes,
+    };
+    for (const key of Object.keys(next)) if (String(next[key] ?? "") !== String(compare[key] ?? "")) changed.push(key);
+    if (!changed.length) return jsonResponse({ ok: true, item: existing, ...(await inventorySnapshot(db)) });
+    const now = new Date().toISOString();
+    try {
+      const result = await db.prepare(`UPDATE eus_inventory_items SET
+        sku=?,name=?,category=?,supplier=?,fulfillment_mode=?,supplier_product_id=?,source_url=?,sales_channels_json=?,cost_cents=?,price_cents=?,quantity_on_hand=?,quantity_reserved=?,reorder_point=?,status=?,notes=?,version=version+1,updated_at=?,updated_by=?
+        WHERE id=? AND version=?`).bind(
+          next.sku,next.name,next.category,next.supplier,next.fulfillmentMode,next.supplierProductId,next.sourceUrl,next.salesChannelsJson,next.costCents,next.priceCents,next.quantityOnHand,next.quantityReserved,next.reorderPoint,next.status,next.notes,now,auth.session.email,itemId,existing.version,
+        ).run();
+      if (!result?.meta?.changes) return jsonResponse({ error: "Inventory item changed elsewhere. Refresh and try again." }, 409);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (/unique|constraint/i.test(message)) return jsonResponse({ error: `SKU ${next.sku} already exists` }, 409);
+      console.error(JSON.stringify({ event: "inventory_update_error", itemId, message }));
+      return jsonResponse({ error: "Inventory item could not be updated" }, 500);
+    }
+    await inventoryLog(db, {
+      itemId, sku: next.sku, action: changed.some((key) => ["quantityOnHand", "quantityReserved"].includes(key)) ? "stock_updated" : "updated",
+      quantityBefore: existing.quantityOnHand, quantityAfter: next.quantityOnHand, reservedBefore: existing.quantityReserved, reservedAfter: next.quantityReserved,
+      details: { changed }, adminEmail: auth.session.email,
+    }).catch(() => {});
+    const row = await db.prepare("SELECT * FROM eus_inventory_items WHERE id=? LIMIT 1").bind(itemId).first();
+    return jsonResponse({ ok: true, item: inventoryRow(row), ...(await inventorySnapshot(db)) });
+  }
+
+  return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, POST, PATCH, DELETE" });
+}
+
 async function handleAdminLogout(request) {
   if (request.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "POST" });
   if (!sameOriginRequest(request)) return jsonResponse({ error: "Cross-origin request denied" }, 403);
@@ -4190,6 +4517,7 @@ export default {
     if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
     if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
+    if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
     if (url.pathname === SOLAR_QA_VALIDATE_PATH) return handleSolarQaValidate(request, env);
     if (url.pathname === ADMIN_LEADS_PATH || url.pathname.startsWith(`${ADMIN_LEADS_PATH}/`)) return handleAdminLeads(request, env, url.pathname);
     if (url.pathname === ADMIN_MARKETPLACE_FOLLOWUPS_PATH || url.pathname.startsWith(`${ADMIN_MARKETPLACE_FOLLOWUPS_PATH}/`)) return handleAdminMarketplaceFollowups(request, env, url.pathname);
