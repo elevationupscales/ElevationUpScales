@@ -5,19 +5,12 @@ on:
     branches:
       - main
     paths:
+      - site/_worker.js
+      - site/_worker_core.js
+      - site/ebay-inventory-sync.js
       - site/rv-store.html
       - site/rv-store.css
       - site/rv-store.js
-      - .github/patches/v3.11.31-ebay-sync-worker.patch
-      - .github/workflows/sync-ebay-inventory.yml
-      - .github/workflows/deploy-pages.yml
-      - .github/workflows/deploy-ebay-sync-v3.11.31-once.yml
-  pull_request:
-    branches:
-      - main
-    types: [opened, synchronize, reopened]
-    paths:
-      - site/rv-store.html
       - .github/workflows/deploy-ebay-sync-v3.11.31-once.yml
 
 permissions:
@@ -40,27 +33,35 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Apply v3.11.31 Worker patch safely
-        shell: bash
-        run: |
-          set -euo pipefail
-          patch=.github/patches/v3.11.31-ebay-sync-worker.patch
-          if grep -q '3.11.31-ebay-inventory-sync' site/_worker.js; then
-            echo 'v3.11.31 Worker patch already present.'
-          else
-            git apply --check "$patch"
-            git apply "$patch"
-          fi
-
-      - name: Validate protected release source
+      - name: Validate v3.11.31 split Worker source
         shell: bash
         run: |
           set -euo pipefail
           test -f site/index.html
           test -f site/_worker.js
+          test -f site/_worker_core.js
+          test -f site/ebay-inventory-sync.js
           test -f site/_routes.json
           test -f site/_headers
-          grep -q '3.11.31-ebay-inventory-sync' site/_worker.js
+
+          # Wrapper owns only the public RV inventory route and delegates everything else.
+          grep -q 'import core from "./_worker_core.js"' site/_worker.js
+          grep -q 'handleStoreInventory' site/_worker.js
+          grep -q 'url.pathname === "/api/store-inventory"' site/_worker.js
+          grep -q 'return core.fetch(request, env, ctx)' site/_worker.js
+
+          # Automatic eBay -> Elevation Inventory mirror.
+          grep -q '3.11.31-ebay-inventory-sync' site/ebay-inventory-sync.js
+          grep -q 'const SELLER = "elevationupscalesshop"' site/ebay-inventory-sync.js
+          grep -q 'ebay-auto-sync-v1' site/ebay-inventory-sync.js
+          grep -q 'eus_inventory_sync_state' site/ebay-inventory-sync.js
+          grep -q 'async function syncEbay' site/ebay-inventory-sync.js
+          grep -q 'sellers:{' site/ebay-inventory-sync.js
+          grep -q 'EBAY_CLIENT_ID' site/ebay-inventory-sync.js
+          grep -q 'EBAY_CLIENT_SECRET' site/ebay-inventory-sync.js
+          grep -q 'fromPublic' site/ebay-inventory-sync.js
+          grep -q 'protectedManual' site/ebay-inventory-sync.js
+          grep -q 'export async function handleStoreInventory' site/ebay-inventory-sync.js
 
           # Preserve accepted Solar lineage.
           test -f site/solar-visual-guide.css
@@ -69,33 +70,27 @@ jobs:
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
 
-          # Preserve split-store navigation and apparel fallback catalog.
+          # Preserve split Store + corrected RV hero.
           test -f site/store.html
+          test -f site/rv-store.html
+          test -f site/rv-store.css
+          test -f site/rv-store.js
           grep -q 'Apparel Store' site/store.html
           grep -q 'RV & Outdoor Store' site/store.html
           grep -q 'href="/rv-store"' site/store.html
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
-
-          # New RV/eBay synchronization behavior.
-          test -f site/rv-store.html
-          test -f site/rv-store.css
-          test -f site/rv-store.js
           grep -q 'hero-galaxy-rv.webp' site/rv-store.html
           grep -q 'Automatic eBay sync' site/rv-store.html
           grep -q 'item.imageUrl' site/rv-store.js
-          grep -q 'EBAY_SYNC_SELLER' site/_worker.js
-          grep -q 'ebay-auto-sync-v1' site/_worker.js
-          grep -q 'eus_inventory_sync_state' site/_worker.js
-          grep -q 'supplierSync' site/_worker.js
-          test -f .github/workflows/sync-ebay-inventory.yml
+          grep -q 'shopping_list' site/rv-store.js
 
-          # Preserve Inventory/Admin/analytics foundations.
+          # Preserve Inventory/Admin/analytics foundations in delegated core.
           test -f site/admin-inventory.html
           test -f site/admin-inventory.css
           test -f site/admin-inventory.js
-          grep -q '/api/admin/inventory' site/_worker.js
-          grep -q 'eus_inventory_items' site/_worker.js
-          grep -q 'shopping_list' site/_worker.js
+          grep -q '/api/admin/inventory' site/_worker_core.js
+          grep -q 'eus_inventory_items' site/_worker_core.js
+          grep -q 'shopping_list' site/_worker_core.js
           grep -q 'admin-inventory.html' site/admin-listings.html
           test -f site/store-channel-analytics.js
           grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
@@ -114,20 +109,6 @@ jobs:
             exit 1
           fi
 
-      - name: Synchronize patched Worker to main
-        id: source
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! git diff --quiet -- site/_worker.js; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add site/_worker.js
-            git commit -m 'Apply v3.11.31 eBay inventory synchronization Worker'
-            git push origin HEAD:main
-          fi
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
       - name: Deploy production to Cloudflare Pages
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -144,11 +125,13 @@ jobs:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 6 --retry-delay 3 --max-time 60 "$DEPLOYMENT_URL/rv-store" > /tmp/rv-store.html
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store" > /tmp/rv-store.html
           grep -q 'hero-galaxy-rv.webp' /tmp/rv-store.html
           grep -q 'Automatic eBay sync' /tmp/rv-store.html
-          curl --fail --silent --show-error --retry 6 --retry-delay 3 --max-time 90 \
+
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 120 \
             -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=3.11.31" > /tmp/inventory.json
+
           python - <<'PY'
           import json, os
           with open('/tmp/inventory.json', encoding='utf-8') as f:
@@ -161,6 +144,7 @@ jobs:
           print('sync_status=', status)
           print('sync_source=', source)
           print('last_success=', sync.get('lastSuccessAt'))
+          print('last_error=', sync.get('lastError'))
           if status == 'error':
               raise SystemExit('eBay supplier synchronization returned an error')
           if count < 1:
@@ -177,9 +161,10 @@ jobs:
           set -euo pipefail
           mkdir -p .github/deployments
           deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          source_commit=$(git rev-parse HEAD)
           cat > .github/deployments/v3.11.31-ebay-inventory-sync.txt <<EOF
           build=3.11.31-ebay-inventory-sync
-          source_commit=${{ steps.source.outputs.sha }}
+          source_commit=$source_commit
           deployment_url=${{ steps.deploy.outputs.deployment-url }}
           workflow_run=${{ github.run_id }}
           deployed_at=$deployed_at
