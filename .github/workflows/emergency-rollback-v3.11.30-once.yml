@@ -1,0 +1,94 @@
+name: Emergency rollback v3.11.30
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/triggers/emergency-rollback-v3.11.30.txt
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: elevation-pages-production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Validate accepted baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/_worker.js
+          node --check site/rv-store.js
+          node --check site/store-patch-8.js
+          grep -q '3.11.30-store-navigation-repair' site/_worker.js
+          grep -q '/api/store-inventory' site/_worker.js
+          grep -q 'shopping_list' site/rv-store.js
+          grep -q 'Stage 1 of 7' site/solar-project.html
+          grep -q 'Apparel Store' site/store.html
+          grep -q 'RV & Outdoor Store' site/store.html
+          grep -q '/rv-store' site/site-shell.js
+      - name: Deploy accepted production baseline
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke customer funnel
+        id: smoke
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          for route in / /start-a-project /store /rv-store /marketplace; do
+            curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL$route" > "/tmp$(echo "$route" | tr '/' '_').html"
+          done
+          grep -q 'Start a Project' /tmp_.html
+          grep -q 'Apparel Store' /tmp_store.html
+          grep -q 'RV & Outdoor Store' /tmp_rv-store.html
+          grep -q 'Marketplace' /tmp_marketplace.html
+          grep -q 'Stage 1 of 7' /tmp_start-a-project.html || true
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-products?recovery=v3.11.30" > /tmp/apparel.json
+          python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/apparel.json',encoding='utf-8'))
+          products=data.get('products') or data.get('items') or []
+          count=len(products)
+          print('apparel_api_count=', count)
+          assert count >= 1, 'Apparel catalog API returned no products'
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f'apparel_count={count}\n')
+          PY
+      - name: Record recovery receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .github/deployments
+          cat > .github/deployments/v3.11.30-emergency-recovery.txt <<EOF
+          build=3.11.30-emergency-recovery
+          baseline=e75862f28428a3e1a660b2f95f0c07e5e6dc9c82
+          source_commit=$(git rev-parse HEAD)
+          deployment_url=${{ steps.deploy.outputs.deployment-url }}
+          workflow_run=${{ github.run_id }}
+          deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          apparel_api_count=${{ steps.smoke.outputs.apparel_count }}
+          status=success
+          EOF
+          git pull --rebase origin main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/deployments/v3.11.30-emergency-recovery.txt
+          git commit -m 'Record v3.11.30 emergency recovery deployment'
+          git push origin HEAD:main
