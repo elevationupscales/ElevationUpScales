@@ -15,6 +15,7 @@
   const money = (cents) => cents ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100) : "View price";
   const loadList = () => { try { return new Set(JSON.parse(localStorage.getItem(LIST_KEY) || "[]")); } catch (_) { return new Set(); } };
   let shopping = loadList();
+  let lastLoadAt = 0;
   const saveList = () => { try { localStorage.setItem(LIST_KEY, JSON.stringify([...shopping])); } catch (_) {} };
   const productImage = (item) => /solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : "/assets/logo-mark.webp";
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
@@ -54,6 +55,7 @@
     syncList();
   }
   async function load() {
+    lastLoadAt = Date.now();
     status.textContent = "Loading live RV & outdoor inventory…";
     try {
       const response = await fetch(`${API}?t=${Date.now()}`, { headers: { Accept: "application/json" }, cache: "no-store" });
@@ -68,6 +70,9 @@
       render();
     }
   }
+  const refreshIfStale = () => {
+    if (document.visibilityState === "visible" && Date.now() - lastLoadAt >= 15000) load();
+  };
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-list-item]");
     if (!button) return;
@@ -85,7 +90,8 @@
   });
   search?.addEventListener("input", () => { state.query = search.value; render(); });
   sort?.addEventListener("change", () => { state.sort = sort.value; render(); });
+  document.addEventListener("visibilitychange", refreshIfStale);
+  window.addEventListener("focus", refreshIfStale);
   track("store_open", "rv_store", { section: "rv_shop" });
   load();
-  setInterval(() => { if (document.visibilityState === "visible") load(); }, 5000);
 })();
