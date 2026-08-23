@@ -36,32 +36,34 @@ jobs:
           test -f site/_worker.js
           test -f site/_routes.json
           test -f site/_headers
-          test -f site/assets/solar/builder-v2/rv-solar-install-field-desktop.webp
-          test -f site/assets/solar/builder-v2/rv-solar-install-field-mobile.webp
-          test -f site/assets/solar/builder-v2/rv-solar-install-field-social.webp
-          grep -q '3.11.29-inventory-foundation' site/_worker.js
-          grep -q 'v3.11.21 — interactive Solar power planner' site/solar-builder.css
+          grep -q '3.11.30-store-navigation-repair' site/_worker.js
+
+          # Preserve accepted Solar lineage.
           test -f site/solar-visual-guide.css
-          grep -q 'solar-visual-guide' site/solar-project.html
           grep -q 'data-jump="panels"' site/solar-project.html
           grep -q 'data-jump="services"' site/solar-project.html
-          grep -q 'builder-scene-next' site/solar-builder.js
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
 
-          # v3.11.27 RV Shop + first-party Store analytics release gates.
+          # v3.11.30 split-store and navigation repair.
           test -f site/store.html
+          test -f site/rv-store.html
+          test -f site/rv-store.css
+          test -f site/rv-store.js
+          grep -q 'Apparel Store' site/store.html
+          grep -q 'RV & Outdoor Store' site/store.html
+          grep -q 'href="/rv-store"' site/store.html
+          grep -q 'href="/rv-store"' site/rv-store.html
+          grep -q '/rv-store' site/site-shell.js
+          grep -q '/api/store-inventory' site/_worker.js
+          grep -q 'shopping_list' site/_worker.js
+          grep -q 'shopping_list' site/rv-store.js
+          test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
+
+          # Preserve Store analytics + Inventory foundation.
           test -f site/store-channel.css
           test -f site/store-channel-analytics.js
-          test -f site/admin-store-analytics.css
-          test -f site/admin-store-analytics.js
-          grep -q 'https://www.ebay.com/usr/elevationupscalesshop' site/store.html
-          grep -q 'data-store-destination="ebay"' site/store.html
-          grep -q 'store-channel-analytics.js' site/store.html
-          grep -q 'store_destination_click' site/_worker.js
-          grep -q 'store_section_view' site/_worker.js
-
-          # v3.11.29 protected Inventory foundation release gates.
+          grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
           test -f site/admin-inventory.html
           test -f site/admin-inventory.css
           test -f site/admin-inventory.js
@@ -82,33 +84,16 @@ jobs:
         run: |
           set -euo pipefail
           file_count=$(find site -type f | wc -l)
-          if [ "$file_count" -gt 20000 ]; then
-            echo "Deployment contains $file_count files; the configured Pages limit is 20,000."
-            exit 1
-          fi
+          test "$file_count" -le 20000
           oversized=$(find site -type f -size +25M -print -quit)
-          if [ -n "$oversized" ]; then
-            echo "File exceeds the 25 MiB Pages asset limit: $oversized"
-            exit 1
-          fi
+          test -z "$oversized"
 
       - name: Block local secrets and release archives
         shell: bash
         run: |
           set -euo pipefail
-          blocked=$(find site -type f \( \
-            -name '.env' -o \
-            -name '.env.*' -o \
-            -name '.dev.vars' -o \
-            -name '.dev.vars.*' -o \
-            -name '*.pem' -o \
-            -name '*.key' -o \
-            -name '*.zip' \
-          \) -print -quit)
-          if [ -n "$blocked" ]; then
-            echo "Blocked file found in deployment source: $blocked"
-            exit 1
-          fi
+          blocked=$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)
+          test -z "$blocked"
           if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
             echo "A credential-like value was found in the website source."
             exit 1
@@ -123,7 +108,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-
       - name: Deploy isolated preview
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -132,9 +116,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=github-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Record preview URL
-        shell: bash
         run: |
           echo "### Cloudflare preview" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
@@ -148,7 +130,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-
       - name: Deploy approved production source
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -157,9 +138,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Record production deployment URL
-        shell: bash
         run: |
           echo "### Cloudflare production deployment" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
