@@ -1,0 +1,8 @@
+build=3.11.30-emergency-recovery
+baseline=e75862f28428a3e1a660b2f95f0c07e5e6dc9c82
+source_commit=4b24fa3a2517b8a626a0e496f63830d185a99301
+deployment_url=https://aab79f09.elevationupscales.pages.dev
+workflow_run=32624819485
+deployed_at=2026-08-23T07:09:51Z
+apparel_catalog_count=28
+status=success
