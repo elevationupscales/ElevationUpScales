@@ -1,0 +1,9 @@
+build=3.11.32-store-funnel
+source_commit=f87d7e6bddf245c2f17529cab16ba44c1793eb07
+deployment_url=https://51ca324f.elevationupscales.pages.dev
+workflow_run=32621342361
+deployed_at=2026-08-23T05:50:32Z
+apparel_server_rendered_products=12
+rv_inventory_count=0
+rv_sync_status=error
+status=success
