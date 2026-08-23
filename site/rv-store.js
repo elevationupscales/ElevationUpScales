@@ -65,14 +65,14 @@
       if (state.items.length) {
         const source = sync.source === "ebay-api" ? "eBay API" : sync.source === "ebay-public" ? "eBay" : "Elevation Inventory";
         status.textContent = `${state.items.length} live items · ${source} sync active`;
-      } else if (sync.status === "error") {
-        status.textContent = "eBay inventory sync needs attention. Use the eBay Store link while the catalog reconnects.";
+      } else if (sync.status === "error" || sync.status === "stale") {
+        status.textContent = "RV inventory sync is reconnecting. You can still open the live eBay Store below.";
       } else {
         status.textContent = "Inventory is syncing now. New eBay and Elevation Inventory items will appear automatically.";
       }
       render();
     } catch (error) {
-      status.textContent = "Live inventory could not be loaded. Use the eBay store link below while we reconnect the catalog.";
+      status.textContent = "Live inventory could not be loaded. Use the eBay Store link below while we reconnect the catalog.";
       state.items = [];
       render();
     }
@@ -94,7 +94,8 @@
   });
   search?.addEventListener("input", () => { state.query = search.value; render(); });
   sort?.addEventListener("change", () => { state.sort = sort.value; render(); });
-  track("store_open", "rv_store", { section: "rv_shop" });
+  track("store_open", "rv_store", { surface: "rv_store" });
+  track("store_section_view", "rv_shop", { surface: "rv_store" });
   load();
   setInterval(() => { if (document.visibilityState === "visible") load(); }, 5000);
 })();
