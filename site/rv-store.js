@@ -55,7 +55,7 @@
     syncList();
   }
   async function load() {
-    status.textContent = "Syncing eBay and Elevation Inventory…";
+    status.textContent = "Loading Elevation Inventory…";
     try {
       const response = await fetch(`${API}?t=${Date.now()}`, { headers: { Accept: "application/json" }, cache: "no-store" });
       const data = await response.json();
@@ -64,15 +64,15 @@
       const sync = data.supplierSync || {};
       if (state.items.length) {
         const source = sync.source === "ebay-api" ? "eBay API" : sync.source === "ebay-public" ? "eBay" : "Elevation Inventory";
-        status.textContent = `${state.items.length} live items · ${source} sync active`;
+        status.textContent = `${state.items.length} live items · ${source}`;
       } else if (sync.status === "error" || sync.status === "stale") {
-        status.textContent = "RV inventory sync is reconnecting. You can still open the live eBay Store below.";
+        status.textContent = "RV inventory is temporarily unavailable.";
       } else {
-        status.textContent = "Inventory is syncing now. New eBay and Elevation Inventory items will appear automatically.";
+        status.textContent = "Inventory is loading.";
       }
       render();
     } catch (error) {
-      status.textContent = "Live inventory could not be loaded. Use the eBay Store link below while we reconnect the catalog.";
+      status.textContent = "Live inventory could not be loaded.";
       state.items = [];
       render();
     }
@@ -97,5 +97,4 @@
   track("store_open", "rv_store", { surface: "rv_store" });
   track("store_section_view", "rv_shop", { surface: "rv_store" });
   load();
-  setInterval(() => { if (document.visibilityState === "visible") load(); }, 5000);
 })();
