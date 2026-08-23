@@ -1,0 +1,80 @@
+name: One-time deploy RV mobile shop-first
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/triggers/rv-mobile-shop-first.txt
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: elevation-pages-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Validate storefront source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/rv-store.js
+          grep -q 'rv-store-trust,.rv-store-hero__media{display:none}' site/rv-store.css
+          grep -q 'rv-store-market{padding:18px 0 44px}' site/rv-store.css
+          grep -q 'manualRvCatalog' site/_worker.js
+          grep -q 'Stage 1 of 7' site/solar-project.html
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke storefront
+        id: smoke
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store.css" > /tmp/rv-store.css
+          grep -q 'rv-store-trust,.rv-store-hero__media{display:none}' /tmp/rv-store.css
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=mobile-shop-first" > /tmp/inventory.json
+          python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/inventory.json',encoding='utf-8'))
+          count=int(data.get('count') or 0)
+          assert count >= 10, f'Expected >=10 products, got {count}'
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f'count={count}\n')
+          PY
+      - name: Record receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .github/deployments
+          cat > .github/deployments/v3.11.34-rv-mobile-shop-first.txt <<EOF
+          build=3.11.34-rv-mobile-shop-first
+          source_commit=$(git rev-parse HEAD)
+          deployment_url=${{ steps.deploy.outputs.deployment-url }}
+          workflow_run=${{ github.run_id }}
+          deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          rv_inventory_count=${{ steps.smoke.outputs.count }}
+          status=success
+          EOF
+          git pull --rebase origin main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/deployments/v3.11.34-rv-mobile-shop-first.txt
+          git commit -m 'Record v3.11.34 RV mobile shop-first deployment'
+          git push origin HEAD:main
