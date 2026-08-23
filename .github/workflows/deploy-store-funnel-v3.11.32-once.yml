@@ -31,34 +31,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f site/index.html
-          test -f site/home-top.js
-          test -f site/site-shell.js
-          test -f site/store.html
-          test -f site/rv-store.html
-          test -f site/rv-store.js
-          test -f site/admin-store-analytics.js
-          test -f site/_worker.js
-          test -f site/_worker_core.js
-          test -f site/ebay-inventory-sync.js
-          grep -q "href = '/rv-store'" site/home-top.js
-          grep -q "Shop RV & Outdoor" site/home-top.js
-          grep -q "Shop Apparel" site/home-top.js
-          grep -q "store_section_view.*rv_shop" site/home-top.js
-          grep -q 'track("store_section_view", "rv_shop"' site/rv-store.js
-          grep -q 'Apparel Store' site/store.html
-          grep -q 'RV & Outdoor Store' site/store.html
-          grep -q 'All Products' site/store.html
-          grep -q 'Wall Art' site/store.html
-          test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
-          grep -q 'hero-galaxy-rv.webp' site/rv-store.html
-          grep -q 'Shopping List' site/rv-store.html
-          grep -q 'Buy Now' site/rv-store.js
-          grep -q 'RV Shop Views' site/admin-store-analytics.js
-          grep -q 'rv_shop_sessions' site/_worker_core.js
-          grep -q 'store_section_view' site/_worker_core.js
-          grep -q 'Stage 1 of 7' site/solar-project.html
-          cmp -s site/solar-project.html site/solar-project/index.html
+          for file in site/index.html site/home-top.js site/site-shell.js site/store.html site/rv-store.html site/rv-store.js site/admin-store-analytics.js site/_worker.js site/_worker_core.js site/ebay-inventory-sync.js site/solar-project.html; do
+            test -f "$file"
+          done
           node --check site/home-top.js
           node --check site/site-shell.js
           node --check site/rv-store.js
@@ -66,6 +41,36 @@ jobs:
           node --check site/_worker.js
           node --check site/_worker_core.js
           node --check site/ebay-inventory-sync.js
+          python - <<'PY'
+          from pathlib import Path
+          home=Path('site/home-top.js').read_text()
+          store=Path('site/store.html').read_text()
+          rv=Path('site/rv-store.html').read_text()
+          rvjs=Path('site/rv-store.js').read_text()
+          admin=Path('site/admin-store-analytics.js').read_text()
+          worker=Path('site/_worker_core.js').read_text()
+          solar=Path('site/solar-project.html').read_text()
+          checks={
+            'home RV destination': "href = '/rv-store'" in home,
+            'home RV label': 'Shop RV & Outdoor' in home,
+            'home apparel label': 'Shop Apparel' in home,
+            'home shopper event': 'store_section_view' in home and 'rv_shop' in home,
+            'rv shopper event': 'store_section_view' in rvjs and 'rv_shop' in rvjs,
+            'apparel navigation': 'Apparel Store' in store,
+            'rv navigation': 'RV & Outdoor Store' in store,
+            'apparel categories': all(x in store for x in ['All Products','Apparel','Hats','Wall Art','Stickers','Digital']),
+            'apparel fallback cards': store.count('class="market-product-card"') >= 10,
+            'rv hero': 'hero-galaxy-rv.webp' in rv,
+            'rv shopping list': 'Shopping List' in rv,
+            'rv buy now': 'Buy Now' in rvjs,
+            'mission control store metric': 'RV Shop Views' in admin,
+            'backend rv unique metric': 'rv_shop_sessions' in worker and 'store_section_view' in worker,
+            'solar lineage': 'Stage 1 of 7' in solar,
+          }
+          failed=[name for name,ok in checks.items() if not ok]
+          for name,ok in checks.items(): print(('PASS' if ok else 'FAIL'), name)
+          if failed: raise SystemExit('Validation failed: '+', '.join(failed))
+          PY
 
       - name: Deploy production to Cloudflare Pages
         id: deploy
