@@ -1,2 +1,3 @@
 trigger=v3.11.32-store-funnel
 purpose=deploy-and-smoke-current-main
+attempt=2
