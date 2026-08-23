@@ -25,9 +25,11 @@
 <title>Store Front | Elevation UpScales</title>
 <link href="styles.css?v=3.0.3" rel="stylesheet"/><link href="site-shell.css?v=3.4.0" rel="stylesheet"/>
 <link href="store-patch-8.css?v=3.0.3" rel="stylesheet"/>
+<link href="store-channel.css?v=3.11.27-rv-shop" rel="stylesheet"/>
 <script defer="True" src="site-shell.js?v=3.4.1"></script><script defer="" src="script.js?v=3.0.3"></script>
 <script defer="" src="store-config.js?v=3.0.3"></script>
 <script defer="" src="store-patch-8.js?v=3.0.3"></script>
+<script defer="" src="store-channel-analytics.js?v=3.11.27-rv-shop"></script>
 <link href="mobile-audit.css?v=3.0.3" rel="stylesheet"/>
 </head>
 <body class="store-page" data-store-build="3.0.3">
@@ -74,6 +76,7 @@
 <summary class="eus-nav-trigger is-current">Shop <span aria-hidden="true" class="eus-caret"></span></summary>
 <div class="eus-dropdown">
 <a href="/store"><span><strong>Shop the Brand</strong><small>Hats, apparel, artwork, stickers, and Elevation releases</small></span></a>
+<a href="/store#rv-shop"><span><strong>RV Shop</strong><small>RV parts, accessories, travel gear, and outdoor essentials on eBay</small></span></a>
 <a href="/collector"><span><strong>Collector Series</strong><small>Explore the four-card collection and Golden Ticket</small></span></a>
 </div>
 </details>
@@ -119,8 +122,25 @@
 </div>
 </div>
 </section>
+<section aria-labelledby="rv-shop-title" class="rv-shop-intro" id="rv-shop">
+<div class="container featured-shell">
+<div class="rv-shop-heading"><p class="eyebrow">RV SHOP · NOW LIVE</p><h2 id="rv-shop-title">RV &amp; Outdoor Gear</h2><p>A dedicated Elevation UpScales shopping lane for RV parts, useful accessories, travel gear, and off-grid essentials. The catalog is fulfilled through our live eBay store while the Elevation website remains your starting point.</p></div>
+<article class="hero-product rv-shop-product">
+<div aria-label="Elevation UpScales RV project image" class="hero-product-media"><img alt="Elevation UpScales RV interior project" height="1200" loading="lazy" src="assets/rv-interior-before-after.webp" width="1200"/></div>
+<div class="hero-product-copy">
+<p class="hero-product-kicker">Elevation UpScales RV Shop</p>
+<h2>Shop RV Parts, Gear &amp; Essentials</h2>
+<p>Browse the live Elevation UpScales eBay shop for RV-focused products and useful outdoor gear. Inventory can change as supplier stock and listings are updated.</p>
+<div class="rv-shop-lanes"><span>RV Essentials</span><span>Parts &amp; Accessories</span><span>Outdoor / Off-Grid</span></div>
+<div class="hero-product-meta"><span class="hero-product-price">eBay Store</span><a class="button button-primary" data-store-destination="ebay" href="https://www.ebay.com/usr/elevationupscalesshop" rel="noopener" target="_blank">Shop the RV Store</a></div>
+<div class="rv-shop-trust"><article><strong>Live inventory</strong><span>Listings stay current in the eBay storefront.</span></article><article><strong>Elevation curated</strong><span>A separate shopping lane from Elevation apparel and collector releases.</span></article><article><strong>Tracked handoff</strong><span>Mission Control records the anonymous website journey up to the eBay click.</span></article></div>
+</div>
+</article>
+</div>
+</section>
 <nav aria-label="Shop categories" class="shop-category-nav">
 <div class="container shop-category-scroll" id="category-filters">
+<a class="category-chip category-chip-link" href="#rv-shop" data-store-section-link="rv_shop">RV Shop</a>
 <button class="category-chip is-active" data-category="all" type="button">All Products</button>
 <button class="category-chip" data-category="apparel" type="button"><span class="category-label-desktop">Apparel</span><span class="category-label-mobile">Shop the Brand</span></button>
 <button class="category-chip" data-category="headwear" type="button">Hats</button>
