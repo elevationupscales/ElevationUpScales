@@ -8,18 +8,24 @@ function sellerSearch(query) {
   return url.toString();
 }
 
-const definitions = [
-  ["manual-rv-parts", "RV Parts & Accessories", "RV Parts & Accessories", "rv camper parts accessories"],
-  ["manual-camping", "Camping & Outdoor Gear", "Camping & Outdoor", "camping outdoor gear"],
-  ["manual-offgrid", "Solar & Off-Grid Gear", "Solar & Off-Grid", "solar battery inverter off grid"],
-  ["manual-road", "Towing & Road Gear", "Towing & Road", "rv towing hitch road gear"],
-  ["manual-electrical", "RV Electrical & Power", "RV Electrical & Power", "rv 12v electrical power converter"],
-  ["manual-water", "RV Water & Plumbing", "RV Water & Plumbing", "rv water pump plumbing sewer"],
+const catalog = [
+  ["manual-runbox-wallet", "RUNBOX Wallet for Men · RFID Bifold", "Elevation Picks", "RUNBOX wallet men RFID bifold"],
+  ["manual-carbon-wallet", "Slim RFID Carbon Fiber Wallet · Men’s Card & ID Holder", "Elevation Picks", "carbon fiber wallet RFID slim"],
+  ["manual-renogy-wonderer", "Renogy Wonderer Solar Charge Controller", "Solar & Off-Grid", "Renogy Wonderer solar charge controller"],
+  ["manual-rv-storage", "RV Storage Organizers", "RV Organization", "RV storage organizers"],
+  ["manual-seat-storage", "Camper Back-of-Seat Storage", "RV Organization", "camper back seat storage organizer"],
+  ["manual-hanging-storage", "Hanging Camper Organizers", "RV Organization", "hanging camper organizer"],
+  ["manual-camp-organization", "Campsite Organization Gear", "Camping & Outdoor", "campsite organization gear"],
+  ["manual-12v", "12V RV Accessories", "RV Electrical & Power", "12V RV accessories"],
+  ["manual-rv-chargers", "RV Chargers & Electrical Equipment", "RV Electrical & Power", "RV charger electrical equipment"],
+  ["manual-water", "RV Water System Components", "RV Water & Plumbing", "RV water system components"],
+  ["manual-motorhome", "Motorhome Components & Accessories", "RV Parts & Accessories", "motorhome components accessories"],
+  ["manual-universal", "Universal Camper Accessories", "RV Parts & Accessories", "universal camper accessories"],
 ];
 
 export function manualRvCatalog() {
-  const updatedAt = "2026-08-23T06:00:00.000Z";
-  return definitions.map(([id, name, category, query]) => ({
+  const updatedAt = "2026-08-23T06:05:00.000Z";
+  return catalog.map(([id, name, category, query]) => ({
     id,
     sku: id.toUpperCase(),
     name,
@@ -27,7 +33,7 @@ export function manualRvCatalog() {
     priceCents: 0,
     fulfillmentMode: "supplier_managed",
     quantityAvailable: null,
-    availability: "Browse current eBay inventory",
+    availability: "Available through Elevation eBay inventory",
     salesChannels: ["ebay", "website"],
     imageUrl: "",
     buyUrl: sellerSearch(query),
