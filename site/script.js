@@ -16,17 +16,5 @@ document.querySelectorAll("[data-text-location]").forEach((link) => {
   });
 });
 
-if (location.pathname === "/rv-store" || location.pathname === "/rv-store.html") {
-  const rvHeroShop = document.querySelector(".rv-store-actions .button-primary");
-  if (rvHeroShop) {
-    rvHeroShop.href = "https://www.ebay.com/usr/elevationupscalesshop";
-    rvHeroShop.target = "_blank";
-    rvHeroShop.rel = "noopener";
-    rvHeroShop.textContent = "Shop Our eBay Store";
-    rvHeroShop.setAttribute("aria-label", "Shop the Elevation UpScales eBay store");
-    rvHeroShop.dataset.storeDestination = "ebay";
-  }
-}
-
 const year = document.querySelector("#year");
 if (year) year.textContent = String(new Date().getFullYear());
