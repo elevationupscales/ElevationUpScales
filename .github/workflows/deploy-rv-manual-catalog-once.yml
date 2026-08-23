@@ -1,9 +1,8 @@
 name: One-time deploy RV manual catalog
 
 on:
-  pull_request:
+  push:
     branches: [main]
-    types: [opened, synchronize, reopened]
     paths:
       - .github/triggers/rv-manual-catalog.txt
 
