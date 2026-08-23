@@ -1,0 +1,40 @@
+name: Sync eBay inventory
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ebay-inventory-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Refresh Elevation Inventory from eBay
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh production inventory mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          response=$(curl --fail --silent --show-error --retry 3 --retry-delay 3 --max-time 60 \
+            -H 'Accept: application/json' \
+            'https://elevationupscales.com/api/store-inventory?source=scheduled')
+          printf '%s' "$response" > /tmp/inventory.json
+          python - <<'PY'
+          import json
+          with open('/tmp/inventory.json', encoding='utf-8') as f:
+              data=json.load(f)
+          sync=data.get('supplierSync') or {}
+          status=sync.get('status')
+          print('inventory_count=', data.get('count'))
+          print('sync_status=', status)
+          print('sync_source=', sync.get('source'))
+          print('last_success=', sync.get('lastSuccessAt'))
+          if status == 'error':
+              raise SystemExit('eBay inventory synchronization returned an error')
+          PY
