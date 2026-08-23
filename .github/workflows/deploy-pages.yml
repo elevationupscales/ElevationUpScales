@@ -71,8 +71,8 @@ jobs:
           grep -q 'href="/rv-store"' site/rv-store.html
           grep -q '/rv-store' site/site-shell.js
           grep -q 'imageUrl' site/rv-store.js
-          grep -q 'hero-galaxy-rv.webp' site/rv-store.html
-          grep -q 'Automatic eBay sync' site/rv-store.html
+          grep -q 'mountain-bull-bear-header.webp' site/rv-store.html
+          grep -q 'eBay inventory sync' site/rv-store.html
           grep -q 'shopping_list' site/rv-store.js
           test -f .github/workflows/sync-ebay-inventory.yml
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
