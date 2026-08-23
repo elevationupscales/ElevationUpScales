@@ -1,2 +1,0 @@
-release=v3.11.35-storefront-complete
-trigger=main
