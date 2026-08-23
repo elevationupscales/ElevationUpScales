@@ -36,7 +36,7 @@ jobs:
           test -f site/_worker.js
           test -f site/_routes.json
           test -f site/_headers
-          grep -q '3.11.30-store-navigation-repair' site/_worker.js
+          grep -q '3.11.31-ebay-inventory-sync' site/_worker.js
 
           # Preserve accepted Solar lineage.
           test -f site/solar-visual-guide.css
@@ -45,7 +45,7 @@ jobs:
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
 
-          # v3.11.30 split-store and navigation repair.
+          # Split-store navigation + v3.11.31 automatic inventory synchronization.
           test -f site/store.html
           test -f site/rv-store.html
           test -f site/rv-store.css
@@ -56,8 +56,14 @@ jobs:
           grep -q 'href="/rv-store"' site/rv-store.html
           grep -q '/rv-store' site/site-shell.js
           grep -q '/api/store-inventory' site/_worker.js
+          grep -q 'EBAY_SYNC_SELLER' site/_worker.js
+          grep -q 'ebay-auto-sync-v1' site/_worker.js
+          grep -q 'eus_inventory_sync_state' site/_worker.js
+          grep -q 'imageUrl' site/rv-store.js
+          grep -q 'hero-galaxy-rv.webp' site/rv-store.html
           grep -q 'shopping_list' site/_worker.js
           grep -q 'shopping_list' site/rv-store.js
+          test -f .github/workflows/sync-ebay-inventory.yml
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
 
           # Preserve Store analytics + Inventory foundation.
