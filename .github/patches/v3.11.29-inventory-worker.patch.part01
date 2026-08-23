@@ -1,0 +1,107 @@
++  let details = {};
++  try { details = JSON.parse(row?.details_json || "{}"); } catch (_) {}
++  return {
++    id: inventoryString(row?.id, 100),
++    itemId: inventoryString(row?.item_id, 100),
++    sku: inventoryString(row?.sku, 80),
++    action: inventoryString(row?.action, 80),
++    quantityBefore: inventoryInteger(row?.quantity_before, 0),
++    quantityAfter: inventoryInteger(row?.quantity_after, 0),
++    reservedBefore: inventoryInteger(row?.reserved_before, 0),
++    reservedAfter: inventoryInteger(row?.reserved_after, 0),
++    details,
++    adminEmail: inventoryString(row?.admin_email, 180),
++    createdAt: inventoryString(row?.created_at, 80),
++  };
++}
++
++async function inventoryLog(db, { itemId, sku, action, quantityBefore = 0, quantityAfter = 0, reservedBefore = 0, reservedAfter = 0, details = {}, adminEmail = "" }) {
++  const id = `inv_evt_${crypto.randomUUID()}`;
++  const createdAt = new Date().toISOString();
++  await db.prepare(`INSERT INTO eus_inventory_events
++    (id,item_id,sku,action,quantity_before,quantity_after,reserved_before,reserved_after,details_json,admin_email,created_at)
++    VALUES (?,?,?,?,?,?,?,?,?,?,?)`).bind(
++      id, inventoryString(itemId, 100), inventoryString(sku, 80), inventoryString(action, 80),
++      inventoryInteger(quantityBefore), inventoryInteger(quantityAfter), inventoryInteger(reservedBefore), inventoryInteger(reservedAfter),
++      JSON.stringify(details || {}), inventoryString(adminEmail, 180), createdAt,
++    ).run();
++  return createdAt;
++}
++
++async function inventorySnapshot(db) {
++  const [itemsResult, eventsResult, revisionRow] = await Promise.all([
++    db.prepare("SELECT * FROM eus_inventory_items ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END, updated_at DESC, name COLLATE NOCASE ASC LIMIT 2000").all(),
++    db.prepare("SELECT * FROM eus_inventory_events ORDER BY created_at DESC LIMIT 60").all(),
++    db.prepare("SELECT COUNT(*) AS count, MAX(updated_at) AS updated_at, COALESCE(SUM(version),0) AS version_sum FROM eus_inventory_items").first(),
++  ]);
++  const items = (itemsResult?.results || []).map(inventoryRow);
++  const active = items.filter((item) => item.status === "active");
++  const tracked = active.filter((item) => item.fulfillmentMode === "tracked");
++  const stats = {
++    activeSkus: active.length,
++    trackedSkus: tracked.length,
++    onHand: tracked.reduce((sum, item) => sum + item.quantityOnHand, 0),
++    reserved: tracked.reduce((sum, item) => sum + item.quantityReserved, 0),
++    available: tracked.reduce((sum, item) => sum + item.quantityAvailable, 0),
++    lowStock: tracked.filter((item) => item.lowStock).length,
++    inventoryValueCents: tracked.reduce((sum, item) => sum + (item.quantityAvailable * item.costCents), 0),
++  };
++  return {
++    items,
++    stats,
++    recentEvents: (eventsResult?.results || []).map(inventoryEventRow),
++    revision: `${inventoryString(revisionRow?.updated_at, 80) || "empty"}:${Number(revisionRow?.count || 0)}:${Number(revisionRow?.version_sum || 0)}`,
++    syncedAt: new Date().toISOString(),
++    build: OPERATIONS_BUILD,
++  };
++}
++
++async function inventoryReadBody(request) {
++  const parsed = await readLimitedJson(request, INVENTORY_MAX_BODY_BYTES);
++  if (parsed.error === "too_large") return { response: jsonResponse({ error: "Inventory request is too large" }, 413) };
++  if (parsed.error) return { response: jsonResponse({ error: "Invalid inventory request" }, 400) };
++  return { body: parsed.value || {} };
++}
++
++async function handleAdminInventory(request, env, pathname) {
++  const auth = await requireAdmin(request, env);
++  if (auth.response) return auth.response;
++  if (!env.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return jsonResponse({ error: "Inventory storage is not configured" }, 503);
++  const db = env.MARKETPLACE_DB;
++  try { await ensureInventorySchema(db); }
++  catch (error) {
++    console.error(JSON.stringify({ event: "inventory_schema_error", message: error instanceof Error ? error.message : String(error) }));
++    return jsonResponse({ error: "Inventory storage is unavailable" }, 503);
++  }
++
++  const suffix = pathname.slice(ADMIN_INVENTORY_PATH.length).replace(/^\/+/, "");
++  const itemId = inventoryString(decodeURIComponent(suffix.split("/")[0] || ""), 100);
++
++  if (request.method === "GET") return jsonResponse(await inventorySnapshot(db));
++  if (!sameOriginRequest(request)) return jsonResponse({ error: "Cross-origin request denied" }, 403);
++
++  if (request.method === "POST" && !itemId) {
++    const parsed = await inventoryReadBody(request);
++    if (parsed.response) return parsed.response;
++    const body = parsed.body;
++    const sku = inventoryString(body.sku, 80).toUpperCase();
++    const name = inventoryString(body.name, 180);
++    if (!sku || !name) return jsonResponse({ error: "SKU and product name are required" }, 400);
++    const fulfillmentMode = INVENTORY_FULFILLMENT_MODES.has(body.fulfillmentMode) ? body.fulfillmentMode : "tracked";
++    const status = INVENTORY_STATUSES.has(body.status) ? body.status : "active";
++    const now = new Date().toISOString();
++    const id = `inv_${crypto.randomUUID()}`;
++    const item = {
++      id, sku, name,
++      category: inventoryString(body.category, 100),
++      supplier: inventoryString(body.supplier, 100) || "other",
++      fulfillmentMode,
++      supplierProductId: inventoryString(body.supplierProductId, 180),
++      sourceUrl: inventoryUrl(body.sourceUrl),
++      salesChannelsJson: inventoryChannels(body.salesChannels),
++      costCents: inventoryMoneyCents(body.costCents, 0),
++      priceCents: inventoryMoneyCents(body.priceCents, 0),
++      quantityOnHand: fulfillmentMode === "tracked" ? inventoryInteger(body.quantityOnHand, 0) : 0,
++      quantityReserved: fulfillmentMode === "tracked" ? inventoryInteger(body.quantityReserved, 0) : 0,
++      reorderPoint: fulfillmentMode === "tracked" ? inventoryInteger(body.reorderPoint, 0) : 0,
++      status,
