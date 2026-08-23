@@ -1,4 +1,4 @@
-/* Elevation UpScales shared navigation 3.4.1 contact CTA integrity */
+/* Elevation UpScales shared navigation 3.11.30 store navigation repair */
 (() => {
   "use strict";
 
@@ -132,6 +132,30 @@
 
   const header = document.querySelector(".eus-header");
   if (!header) return;
+
+  // v3.11.30 — keep the Shop navigation complete on every legacy and current page.
+  const shopMenu = header.querySelector(".eus-menu--shop");
+  const shopDropdown = shopMenu?.querySelector(".eus-dropdown");
+  if (shopDropdown) {
+    shopDropdown.replaceChildren();
+    const shopLinks = [
+      ["/store", "Apparel Store", "Hats, apparel, artwork, stickers, and official Elevation releases"],
+      ["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],
+      ["/collector", "Collector Series", "Explore the four-card collection and Golden Ticket"],
+    ];
+    for (const [href, title, description] of shopLinks) {
+      const link = document.createElement("a");
+      link.href = href;
+      const span = document.createElement("span");
+      const strong = document.createElement("strong");
+      const small = document.createElement("small");
+      strong.textContent = title;
+      small.textContent = description;
+      span.append(strong, small);
+      link.append(span);
+      shopDropdown.append(link);
+    }
+  }
 
   const toggle = header.querySelector(".eus-menu-toggle");
   const nav = header.querySelector(".eus-nav");
