@@ -3,6 +3,7 @@
   const LIST_KEY = "eus-rv-shopping-list:v1";
   const SPRITE_DATA_PATH = "/rv-ebay-sprite-v2.txt?v=3.11.35";
   const SPRITE_COLUMNS = 7;
+  const EBAY_SELLER = "elevationupscalesshop";
   const grid = document.querySelector("#rv-product-grid");
   const status = document.querySelector("#rv-catalog-status");
   const search = document.querySelector("#rv-search");
@@ -103,7 +104,7 @@
     buy.rel = "noopener";
     buy.textContent = "Buy Now";
     buy.setAttribute("aria-label", `Buy ${item.name} on eBay`);
-    buy.addEventListener("click", () => track("store_destination_click", "ebay", { product: item.name, itemNumber: item.itemNumber, destination: "ebay" }));
+    buy.addEventListener("click", () => track("store_destination_click", "ebay", { product: item.name, itemNumber: item.itemNumber, destination: "ebay", seller: EBAY_SELLER }));
     actions.append(listButton, buy);
     copy.append(category, title, meta, actions);
     article.append(media, copy);
@@ -161,7 +162,7 @@
 
   async function init() {
     await loadSprite();
-    track("store_open", "rv_store", { section: "rv_shop", catalogCount: state.items.length });
+    track("store_open", "rv_store", { section: "rv_shop", catalogCount: state.items.length, seller: EBAY_SELLER });
     render();
   }
   init();
