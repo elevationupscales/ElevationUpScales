@@ -1,0 +1,6 @@
+build=3.11.29-inventory-foundation
+source_commit=fc6b1491028806f89ddae4fd7afce658e6410b44
+deployment_url=https://f1ce37a3.elevationupscales.pages.dev
+workflow_run=32617290971
+deployed_at=2026-08-23T04:12:58Z
+status=success
