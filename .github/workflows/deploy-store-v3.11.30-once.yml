@@ -47,6 +47,18 @@ jobs:
             git apply --check "$patch"
             git apply "$patch"
           fi
+          python - <<'PY'
+          from pathlib import Path
+          needle = '<link rel="stylesheet" href="store-patch-8.css?v=3.0.3">'
+          addition = needle + '<link rel="stylesheet" href="mobile-audit.css?v=3.0.3">'
+          for name in ('site/store.html', 'site/rv-store.html'):
+              path = Path(name)
+              text = path.read_text()
+              if 'mobile-audit.css?v=3.0.3' not in text:
+                  if needle not in text:
+                      raise SystemExit(f'Cannot safely add mobile stylesheet to {name}')
+                  path.write_text(text.replace(needle, addition, 1))
+          PY
 
       - name: Validate Store repair and protected systems
         shell: bash
@@ -61,6 +73,7 @@ jobs:
           grep -q '<title>Apparel Store | Elevation UpScales</title>' site/store.html
           grep -q 'RV & Outdoor Store' site/store.html
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
+          grep -q 'mobile-audit.css?v=3.0.3' site/store.html
 
           # Dedicated RV storefront and simple shopping path.
           test -f site/rv-store.html
@@ -70,6 +83,7 @@ jobs:
           grep -q '+ Shopping List' site/rv-store.js
           grep -q '>Buy Now<' site/rv-store.js
           grep -q '/api/store-inventory' site/rv-store.js
+          grep -q 'mobile-audit.css?v=3.0.3' site/rv-store.html
           grep -q '/rv-store' site/site-shell.js
           grep -q 'https://elevationupscales.com/rv-store' site/sitemap.xml
           grep -q '^/outdoor-store /rv-store 301$' site/_redirects
@@ -116,16 +130,16 @@ jobs:
             exit 1
           fi
 
-      - name: Synchronize patched Worker to main
+      - name: Synchronize final Store source to main
         id: source
         shell: bash
         run: |
           set -euo pipefail
-          if ! git diff --quiet -- site/_worker.js; then
+          if ! git diff --quiet -- site/_worker.js site/store.html site/rv-store.html; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add site/_worker.js
-            git commit -m "Apply v3.11.30 public Store inventory API"
+            git add site/_worker.js site/store.html site/rv-store.html
+            git commit -m "Apply v3.11.30 Store runtime repair"
             git push origin HEAD:main
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
