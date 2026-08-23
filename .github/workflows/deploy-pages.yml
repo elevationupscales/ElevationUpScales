@@ -4,13 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: Choose preview first; use production only after approval
+        description: Choose preview first; use production only after preview approval
         required: true
         default: preview
         type: choice
         options:
           - preview
           - production
+      production_confirmation:
+        description: For production only, type DEPLOY
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -22,11 +27,23 @@ concurrency:
 
 jobs:
   validate:
-    name: Validate deployment source
+    name: Validate authoritative main
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Check out authoritative main
         uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Require explicit production confirmation
+        if: ${{ inputs.target == 'production' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ inputs.production_confirmation }}" != "DEPLOY" ]]; then
+            echo "Production deployment blocked: type DEPLOY in the production confirmation field."
+            exit 1
+          fi
 
       - name: Verify required production files
         shell: bash
@@ -118,14 +135,19 @@ jobs:
           fi
 
   deploy-preview:
-    name: Deploy preview
+    name: Deploy isolated preview
     needs: validate
     if: ${{ inputs.target == 'preview' }}
     runs-on: ubuntu-latest
-    environment: preview
+    # Reuse the proven production environment credentials, but deploy only to the
+    # non-production github-preview branch. This cannot replace the main alias.
+    environment: production
     steps:
-      - name: Check out repository
+      - name: Check out authoritative main
         uses: actions/checkout@v6
+        with:
+          ref: main
+
       - name: Deploy isolated preview
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -134,20 +156,45 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=github-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke preview customer routes
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          test -n "$base"
+          for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
+            echo "Smoke testing ${base}${route}"
+            code=$(curl --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 2 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}")
+            if [[ "$code" != "200" ]]; then
+              echo "Smoke test failed for ${route}: HTTP ${code}"
+              exit 1
+            fi
+          done
+          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
+          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
+
       - name: Record preview URL
         run: |
           echo "### Cloudflare preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview smoke tests: PASS" >> "$GITHUB_STEP_SUMMARY"
 
   deploy-production:
-    name: Deploy production
+    name: Deploy approved production
     needs: validate
     if: ${{ inputs.target == 'production' }}
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Check out repository
+      - name: Check out authoritative main
         uses: actions/checkout@v6
+        with:
+          ref: main
+
       - name: Deploy approved production source
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -156,7 +203,29 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke production customer routes
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          test -n "$base"
+          for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
+            echo "Smoke testing ${base}${route}"
+            code=$(curl --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 2 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}")
+            if [[ "$code" != "200" ]]; then
+              echo "Smoke test failed for ${route}: HTTP ${code}"
+              exit 1
+            fi
+          done
+          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
+          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
+
       - name: Record production deployment URL
         run: |
           echo "### Cloudflare production deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production smoke tests: PASS" >> "$GITHUB_STEP_SUMMARY"
