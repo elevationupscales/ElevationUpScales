@@ -1,0 +1,7 @@
+build=3.11.34-rv-mobile-shop-first
+source_commit=b9af81655ae5780aa0f089362da2005c897068a6
+deployment_url=https://25bc9dbe.elevationupscales.pages.dev
+workflow_run=32622384012
+deployed_at=2026-08-23T06:14:21Z
+rv_inventory_count=12
+status=success
