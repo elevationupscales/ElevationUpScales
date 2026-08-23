@@ -1,0 +1,43 @@
++      salesChannelsJson: JSON.stringify(existing.salesChannels), costCents: existing.costCents, priceCents: existing.priceCents,
++      quantityOnHand: existing.quantityOnHand, quantityReserved: existing.quantityReserved, reorderPoint: existing.reorderPoint,
++      status: existing.status, notes: existing.notes,
++    };
++    for (const key of Object.keys(next)) if (String(next[key] ?? "") !== String(compare[key] ?? "")) changed.push(key);
++    if (!changed.length) return jsonResponse({ ok: true, item: existing, ...(await inventorySnapshot(db)) });
++    const now = new Date().toISOString();
++    try {
++      const result = await db.prepare(`UPDATE eus_inventory_items SET
++        sku=?,name=?,category=?,supplier=?,fulfillment_mode=?,supplier_product_id=?,source_url=?,sales_channels_json=?,cost_cents=?,price_cents=?,quantity_on_hand=?,quantity_reserved=?,reorder_point=?,status=?,notes=?,version=version+1,updated_at=?,updated_by=?
++        WHERE id=? AND version=?`).bind(
++          next.sku,next.name,next.category,next.supplier,next.fulfillmentMode,next.supplierProductId,next.sourceUrl,next.salesChannelsJson,next.costCents,next.priceCents,next.quantityOnHand,next.quantityReserved,next.reorderPoint,next.status,next.notes,now,auth.session.email,itemId,existing.version,
++        ).run();
++      if (!result?.meta?.changes) return jsonResponse({ error: "Inventory item changed elsewhere. Refresh and try again." }, 409);
++    } catch (error) {
++      const message = error instanceof Error ? error.message : String(error);
++      if (/unique|constraint/i.test(message)) return jsonResponse({ error: `SKU ${next.sku} already exists` }, 409);
++      console.error(JSON.stringify({ event: "inventory_update_error", itemId, message }));
++      return jsonResponse({ error: "Inventory item could not be updated" }, 500);
++    }
++    await inventoryLog(db, {
++      itemId, sku: next.sku, action: changed.some((key) => ["quantityOnHand", "quantityReserved"].includes(key)) ? "stock_updated" : "updated",
++      quantityBefore: existing.quantityOnHand, quantityAfter: next.quantityOnHand, reservedBefore: existing.quantityReserved, reservedAfter: next.quantityReserved,
++      details: { changed }, adminEmail: auth.session.email,
++    }).catch(() => {});
++    const row = await db.prepare("SELECT * FROM eus_inventory_items WHERE id=? LIMIT 1").bind(itemId).first();
++    return jsonResponse({ ok: true, item: inventoryRow(row), ...(await inventorySnapshot(db)) });
++  }
++
++  return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, POST, PATCH, DELETE" });
++}
++
+ async function handleAdminLogout(request) {
+   if (request.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "POST" });
+   if (!sameOriginRequest(request)) return jsonResponse({ error: "Cross-origin request denied" }, 403);
+@@ -4116,6 +4443,7 @@
+     if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
+     if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
+     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
++    if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
+     if (url.pathname === SOLAR_QA_VALIDATE_PATH) return handleSolarQaValidate(request, env);
+     if (url.pathname === ADMIN_LEADS_PATH || url.pathname.startsWith(`${ADMIN_LEADS_PATH}/`)) return handleAdminLeads(request, env, url.pathname);
+     if (url.pathname === ADMIN_MARKETPLACE_FOLLOWUPS_PATH || url.pathname.startsWith(`${ADMIN_MARKETPLACE_FOLLOWUPS_PATH}/`)) return handleAdminMarketplaceFollowups(request, env, url.pathname);
