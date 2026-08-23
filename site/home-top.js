@@ -3,40 +3,44 @@
 
   const topLinks = [...document.querySelectorAll('a[href="#top"]')];
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, details);
 
   topLinks.forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
-
-      // The site header is sticky, so targeting the header itself can make
-      // the browser think #top is already visible. Scroll the document instead.
       window.scrollTo({
         top: 0,
         left: 0,
         behavior: prefersReducedMotion?.matches ? 'auto' : 'smooth'
       });
-
-      // Keep the homepage URL clean after a same-page "Home" action.
       if (window.location.hash === '#top') {
         history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
       }
     });
   });
 
-  // Keep the main project CTA intact while giving the RV retail store a
-  // prominent, direct homepage entry point.
+  // Keep project intake primary while making both retail lanes unmistakable.
   const heroActions = document.querySelector('.hero-actions');
-  if (heroActions && !heroActions.querySelector('a[data-online-rv-store]')) {
-    const rvStoreButton = document.createElement('a');
+  let rvStoreButton = heroActions?.querySelector('a[data-online-rv-store]');
+  if (heroActions && !rvStoreButton) {
+    rvStoreButton = document.createElement('a');
     rvStoreButton.className = 'button button-outline';
-    rvStoreButton.href = '/store';
     rvStoreButton.dataset.onlineRvStore = '';
-    rvStoreButton.textContent = 'Online RV Store';
     heroActions.appendChild(rvStoreButton);
   }
+  if (rvStoreButton) {
+    rvStoreButton.href = '/rv-store';
+    rvStoreButton.textContent = 'Shop RV & Outdoor';
+    rvStoreButton.addEventListener('click', () => {
+      track('store_section_view', 'rv_shop', { source: 'homepage', cta: 'hero_rv_store' });
+    });
+  }
 
-  const storeUtilityLink = document.querySelector('.hero-utility-links a[href="/store"]');
-  if (storeUtilityLink) {
-    storeUtilityLink.textContent = 'Online RV Store';
+  const apparelLink = document.querySelector('.hero-utility-links a[href="/store"]');
+  if (apparelLink) {
+    apparelLink.textContent = 'Shop Apparel';
+    apparelLink.addEventListener('click', () => {
+      track('store_open', 'apparel', { source: 'homepage', cta: 'hero_apparel_link' });
+    });
   }
 })();
