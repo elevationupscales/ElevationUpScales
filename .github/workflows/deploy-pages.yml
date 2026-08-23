@@ -45,22 +45,40 @@ jobs:
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
 
-          # v3.11.30 split-store and navigation repair.
+          # Preserve split-store navigation from the last known-good deployment.
           test -f site/store.html
           test -f site/rv-store.html
           test -f site/rv-store.css
           test -f site/rv-store.js
+          test -f site/rv-ebay-catalog.js
           grep -q 'Apparel Store' site/store.html
           grep -q 'RV & Outdoor Store' site/store.html
           grep -q 'href="/rv-store"' site/store.html
           grep -q 'href="/rv-store"' site/rv-store.html
           grep -q '/rv-store' site/site-shell.js
-          grep -q '/api/store-inventory' site/_worker.js
-          grep -q 'shopping_list' site/_worker.js
-          grep -q 'shopping_list' site/rv-store.js
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
 
-          # Preserve Store analytics + Inventory foundation.
+          # Validate the current static, Seller Hub-verified eBay catalog architecture.
+          grep -q 'rv-ebay-catalog.js?v=3.11.35' site/rv-store.html
+          grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-ebay-catalog.js
+          grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-store.js
+          grep -q 'elevationupscalesshop' site/rv-store.js
+          ! grep -q '/api/store-inventory' site/rv-store.js
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          catalog = Path('site/rv-ebay-catalog.js').read_text(encoding='utf-8')
+          ids = re.findall(r'\["(\d{12})",', catalog)
+          assert len(ids) >= 10, f'expected a populated eBay catalog, got {len(ids)} items'
+          assert len(ids) == len(set(ids)), 'duplicate eBay item numbers found'
+
+          html = Path('site/rv-store.html').read_text(encoding='utf-8')
+          assert html.index('rv-ebay-catalog.js') < html.index('rv-store.js'), 'catalog must load before renderer'
+          print('verified_ebay_items=', len(ids))
+          PY
+
+          # Preserve Store analytics + Inventory administration foundation.
           test -f site/store-channel.css
           test -f site/store-channel-analytics.js
           grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
