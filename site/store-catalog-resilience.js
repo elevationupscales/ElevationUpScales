@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const CACHE_KEY = "eus-fourthwall-full-catalog:v1";
+  const CACHE_KEY = "eus-fourthwall-full-catalog:v2";
   const MIN_FULL_COUNT = 13;
   const MAX_PAGES = 10;
   const storefront = window.EUS_STORE?.storefront || "https://elevationupscales-shop.fourthwall.com/";
@@ -59,24 +59,25 @@
     data?.data?.results
   ].find(Array.isArray) || [];
 
-  const imageUrl = (value) => typeof value === "string"
-    ? value
-    : String(value?.transformedUrl || value?.url || value?.src || value?.imageUrl || "");
+  const imageUrl = (value) => {
+    if (typeof value === "string") return value.trim();
+    return String(value?.url || value?.src || value?.imageUrl || value?.transformedUrl || "").trim();
+  };
 
   const productImages = (product) => {
     const variants = Array.isArray(product?.variants) ? product.variants : [];
     const candidates = [
       ...(Array.isArray(product?.images) ? product.images : []),
       ...(Array.isArray(product?.media) ? product.media : []),
-      ...variants.flatMap((variant) => [
-        ...(Array.isArray(variant?.images) ? variant.images : []),
-        ...(Array.isArray(variant?.media) ? variant.media : []),
-        variant?.thumbnailImage
-      ]),
       product?.image,
       product?.featuredImage,
       product?.primaryImage,
-      product?.thumbnailImage
+      ...variants.flatMap((variant) => [
+        ...(Array.isArray(variant?.images) ? variant.images : []),
+        ...(Array.isArray(variant?.media) ? variant.media : [])
+      ]),
+      product?.thumbnailImage,
+      ...variants.map((variant) => variant?.thumbnailImage)
     ];
     return [...new Set(candidates.map(imageUrl).filter(Boolean))];
   };
