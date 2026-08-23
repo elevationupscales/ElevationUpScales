@@ -1,0 +1,37 @@
+name: Apply RV Shop integration
+
+on:
+  push:
+    branches:
+      - store-rv-ebay-analytics-v3.11.27
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply controlled Store patch
+        run: python tools/apply-rv-shop-integration.py
+      - name: Validate changed frontend files
+        run: |
+          node --check site/store-channel-analytics.js
+          node --check site/admin-store-analytics.js
+          grep -q 'RV SHOP · NOW LIVE' site/store.html
+          grep -q 'store_destination_click' site/_worker.js
+          grep -q 'store: storeAnalytics' site/_worker.js
+      - name: Commit patched release and remove one-shot tooling
+        run: |
+          rm -f tools/apply-rv-shop-integration.py .github/workflows/apply-rv-shop-integration.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m 'v3.11.27 Integrate eBay RV Shop and Store analytics'
+          git push origin HEAD:store-rv-ebay-analytics-v3.11.27
