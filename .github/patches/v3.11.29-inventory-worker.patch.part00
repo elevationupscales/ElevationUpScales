@@ -1,0 +1,145 @@
+--- a/site/_worker.js
++++ b/site/_worker.js
+@@ -3,7 +3,7 @@
+ const MAX_PAGES = 10;
+ const MAX_PAGE_BYTES = 2_000_000;
+ const STORE_BUILD = "3.0.3";
+-const OPERATIONS_BUILD = "3.11.24-guided-solar-builder";
++const OPERATIONS_BUILD = "3.11.29-inventory-foundation";
+ 
+ const SOLAR_NOTIFY_PATH = "/api/solar-build-notify";
+ const SOLAR_NOTIFY_MAX_BYTES = 56_000;
+@@ -885,6 +885,7 @@
+ const ADMIN_OPPORTUNITIES_PATH = "/api/admin/opportunities";
+ const ADMIN_MARKET_ANALYTICS_PATH = "/api/admin/market-analytics";
+ const ADMIN_SOLAR_QA_TOKEN_PATH = "/api/admin/solar-qa-token";
++const ADMIN_INVENTORY_PATH = "/api/admin/inventory";
+ const SOLAR_QA_VALIDATE_PATH = "/api/solar/qa-validate";
+ const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
+ const DEFAULT_MARKETPLACE_EMAIL_TO = "casey@elevationupscales.com";
+@@ -3126,6 +3127,332 @@
+   });
+ }
+ 
++
++const INVENTORY_STATUSES = new Set(["active", "paused", "archived"]);
++const INVENTORY_FULFILLMENT_MODES = new Set(["tracked", "supplier_managed", "dropship", "pod"]);
++const INVENTORY_MAX_BODY_BYTES = 24 * 1024;
++
++function inventoryInteger(value, fallback = 0, max = 1_000_000_000) {
++  if (value === undefined || value === null || value === "") return fallback;
++  const number = Number(value);
++  if (!Number.isFinite(number)) return fallback;
++  return Math.max(0, Math.min(max, Math.round(number)));
++}
++
++function inventoryMoneyCents(value, fallback = 0) {
++  return inventoryInteger(value, fallback, 100_000_000_000);
++}
++
++function inventoryString(value, max = 180) {
++  return cleanString(value, max);
++}
++
++function inventoryUrl(value) {
++  const raw = inventoryString(value, 700);
++  if (!raw) return "";
++  try {
++    const parsed = new URL(raw);
++    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : "";
++  } catch (_) {
++    return "";
++  }
++}
++
++function inventoryChannels(value) {
++  const raw = Array.isArray(value) ? value : String(value || "").split(",");
++  const channels = [...new Set(raw.map((item) => inventoryString(item, 50).toLowerCase()).filter(Boolean))].slice(0, 12);
++  return JSON.stringify(channels);
++}
++
++function inventoryChannelsFromRow(value) {
++  try {
++    const parsed = JSON.parse(value || "[]");
++    return Array.isArray(parsed) ? parsed.map((item) => inventoryString(item, 50)).filter(Boolean) : [];
++  } catch (_) {
++    return [];
++  }
++}
++
++async function ensureInventorySchema(db) {
++  if (!db || typeof db.prepare !== "function") throw new Error("Inventory database is not configured");
++  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_inventory_items (
++    id TEXT PRIMARY KEY,
++    sku TEXT NOT NULL COLLATE NOCASE UNIQUE,
++    name TEXT NOT NULL,
++    category TEXT NOT NULL DEFAULT '',
++    supplier TEXT NOT NULL DEFAULT 'other',
++    fulfillment_mode TEXT NOT NULL DEFAULT 'tracked',
++    supplier_product_id TEXT NOT NULL DEFAULT '',
++    source_url TEXT NOT NULL DEFAULT '',
++    sales_channels_json TEXT NOT NULL DEFAULT '[]',
++    cost_cents INTEGER NOT NULL DEFAULT 0,
++    price_cents INTEGER NOT NULL DEFAULT 0,
++    quantity_on_hand INTEGER NOT NULL DEFAULT 0,
++    quantity_reserved INTEGER NOT NULL DEFAULT 0,
++    reorder_point INTEGER NOT NULL DEFAULT 0,
++    status TEXT NOT NULL DEFAULT 'active',
++    notes TEXT NOT NULL DEFAULT '',
++    version INTEGER NOT NULL DEFAULT 1,
++    created_at TEXT NOT NULL,
++    updated_at TEXT NOT NULL,
++    updated_by TEXT NOT NULL DEFAULT ''
++  )`).run();
++  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_inventory_events (
++    id TEXT PRIMARY KEY,
++    item_id TEXT NOT NULL,
++    sku TEXT NOT NULL DEFAULT '',
++    action TEXT NOT NULL,
++    quantity_before INTEGER NOT NULL DEFAULT 0,
++    quantity_after INTEGER NOT NULL DEFAULT 0,
++    reserved_before INTEGER NOT NULL DEFAULT 0,
++    reserved_after INTEGER NOT NULL DEFAULT 0,
++    details_json TEXT NOT NULL DEFAULT '{}',
++    admin_email TEXT NOT NULL DEFAULT '',
++    created_at TEXT NOT NULL
++  )`).run();
++  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_inventory_items_updated ON eus_inventory_items(updated_at DESC)").run();
++  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_inventory_events_item ON eus_inventory_events(item_id, created_at DESC)").run();
++  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_inventory_events_created ON eus_inventory_events(created_at DESC)").run();
++}
++
++function inventoryRow(row) {
++  if (!row) return null;
++  const onHand = inventoryInteger(row.quantity_on_hand, 0);
++  const reserved = inventoryInteger(row.quantity_reserved, 0);
++  const available = Math.max(0, onHand - reserved);
++  const mode = INVENTORY_FULFILLMENT_MODES.has(String(row.fulfillment_mode || "")) ? row.fulfillment_mode : "tracked";
++  const reorderPoint = inventoryInteger(row.reorder_point, 0);
++  return {
++    id: inventoryString(row.id, 100),
++    sku: inventoryString(row.sku, 80),
++    name: inventoryString(row.name, 180),
++    category: inventoryString(row.category, 100),
++    supplier: inventoryString(row.supplier, 100),
++    fulfillmentMode: mode,
++    supplierProductId: inventoryString(row.supplier_product_id, 180),
++    sourceUrl: inventoryString(row.source_url, 700),
++    salesChannels: inventoryChannelsFromRow(row.sales_channels_json),
++    costCents: inventoryMoneyCents(row.cost_cents, 0),
++    priceCents: inventoryMoneyCents(row.price_cents, 0),
++    quantityOnHand: onHand,
++    quantityReserved: reserved,
++    quantityAvailable: available,
++    reorderPoint,
++    lowStock: mode === "tracked" && String(row.status) === "active" && available <= reorderPoint,
++    status: INVENTORY_STATUSES.has(String(row.status || "")) ? row.status : "active",
++    notes: inventoryString(row.notes, 4000),
++    version: inventoryInteger(row.version, 1, 2_000_000_000),
++    createdAt: inventoryString(row.created_at, 80),
++    updatedAt: inventoryString(row.updated_at, 80),
++    updatedBy: inventoryString(row.updated_by, 180),
++  };
++}
++
++function inventoryEventRow(row) {
