@@ -17,7 +17,17 @@
   let shopping = loadList();
   let lastLoadAt = 0;
   const saveList = () => { try { localStorage.setItem(LIST_KEY, JSON.stringify([...shopping])); } catch (_) {} };
-  const productImage = (item) => /solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : "/assets/logo-mark.webp";
+  const fallbackProductImage = (item) => /solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : "/assets/logo-mark.webp";
+  const productImage = (item) => {
+    const raw = String(item?.imageUrl || "").trim();
+    if (raw) {
+      try {
+        const parsed = new URL(raw, location.origin);
+        if (parsed.origin === location.origin || parsed.protocol === "https:") return parsed.href;
+      } catch (_) {}
+    }
+    return fallbackProductImage(item);
+  };
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
   function syncList() {
     const selected = state.items.filter((item) => shopping.has(item.id));
@@ -33,7 +43,14 @@
   function card(item) {
     const article = document.createElement("article"); article.className = "rv-product-card";
     const canBuy = item.fulfillmentMode !== "tracked" || Number(item.quantityAvailable) > 0;
-    article.innerHTML = `<div class="rv-product-media"><img src="${productImage(item)}" alt="" width="420" height="320" loading="lazy"></div><div class="rv-product-copy"><p class="eyebrow">${item.category || "RV & Outdoor"}</p><h3></h3><div class="rv-product-meta"><span class="rv-product-price">${money(item.priceCents)}</span><span class="rv-product-stock"></span></div><div class="rv-product-actions"><button type="button" data-list-item="${item.id}">+ Shopping List</button><a ${canBuy ? `href="${item.buyUrl}" target="_blank" rel="noopener"` : 'aria-disabled="true"'}>Buy Now</a></div></div>`;
+    article.innerHTML = `<div class="rv-product-media"><img alt="" width="420" height="320" loading="lazy" decoding="async"></div><div class="rv-product-copy"><p class="eyebrow">${item.category || "RV & Outdoor"}</p><h3></h3><div class="rv-product-meta"><span class="rv-product-price">${money(item.priceCents)}</span><span class="rv-product-stock"></span></div><div class="rv-product-actions"><button type="button" data-list-item="${item.id}">+ Shopping List</button><a ${canBuy ? `href="${item.buyUrl}" target="_blank" rel="noopener"` : 'aria-disabled="true"'}>Buy Now</a></div></div>`;
+    const image = article.querySelector("img");
+    image.src = productImage(item);
+    image.alt = `${item.name} product image`;
+    image.addEventListener("error", () => {
+      const fallback = fallbackProductImage(item);
+      if (image.src !== new URL(fallback, location.origin).href) image.src = fallback;
+    }, { once: true });
     article.querySelector("h3").textContent = item.name;
     article.querySelector(".rv-product-stock").textContent = item.availability;
     const buy = article.querySelector("a");
