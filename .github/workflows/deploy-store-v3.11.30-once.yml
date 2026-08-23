@@ -1,0 +1,168 @@
+name: One-time production deploy v3.11.30 Store Repair
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - site/store.html
+      - site/site-shell.js
+      - site/rv-store.html
+      - site/rv-store.css
+      - site/rv-store.js
+      - site/sitemap.xml
+      - site/_redirects
+      - .github/patches/v3.11.30-store-worker.patch
+      - .github/workflows/deploy-pages.yml
+      - .github/workflows/deploy-store-v3.11.30-once.yml
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: elevation-pages-production
+  cancel-in-progress: false
+
+jobs:
+  validate-and-deploy:
+    name: Validate and deploy v3.11.30 to production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out authoritative main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Apply public inventory Worker patch safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          patch=.github/patches/v3.11.30-store-worker.patch
+          if grep -q '3.11.30-store-navigation-repair' site/_worker.js; then
+            echo "v3.11.30 Worker patch is already present."
+          else
+            git apply --check "$patch"
+            git apply "$patch"
+          fi
+
+      - name: Validate Store repair and protected systems
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '3.11.30-store-navigation-repair' site/_worker.js
+          grep -q 'const PUBLIC_INVENTORY_PATH = "/api/store-inventory"' site/_worker.js
+          grep -q 'shopping_list' site/_worker.js
+
+          # Apparel page must show useful products even before JavaScript runs.
+          test -f site/store.html
+          grep -q '<title>Apparel Store | Elevation UpScales</title>' site/store.html
+          grep -q 'RV & Outdoor Store' site/store.html
+          test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
+
+          # Dedicated RV storefront and simple shopping path.
+          test -f site/rv-store.html
+          test -f site/rv-store.css
+          test -f site/rv-store.js
+          grep -q 'Add items to a simple shopping list' site/rv-store.html
+          grep -q '+ Shopping List' site/rv-store.js
+          grep -q '>Buy Now<' site/rv-store.js
+          grep -q '/api/store-inventory' site/rv-store.js
+          grep -q '/rv-store' site/site-shell.js
+          grep -q 'https://elevationupscales.com/rv-store' site/sitemap.xml
+          grep -q '^/outdoor-store /rv-store 301$' site/_redirects
+
+          # Public API must not directly serialize sensitive inventory fields.
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('site/_worker.js').read_text()
+          start = text.index('function publicInventoryRecord(row)')
+          end = text.index('async function handlePublicInventory', start)
+          block = text[start:end]
+          for forbidden in ('costCents:', 'supplierProductId:', 'notes:', 'updatedBy:'):
+              if forbidden in block:
+                  raise SystemExit(f'sensitive field exposed: {forbidden}')
+          PY
+
+          # Preserve accepted Solar, Store analytics, Inventory and intake systems.
+          grep -q 'Stage 1 of 7' site/solar-project.html
+          grep -q 'data-jump="panels"' site/solar-project.html
+          grep -q 'data-jump="services"' site/solar-project.html
+          cmp -s site/solar-project.html site/solar-project/index.html
+          test -f site/store-channel-analytics.js
+          grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
+          grep -q '/api/admin/inventory' site/_worker.js
+          grep -q 'eus_inventory_items' site/_worker.js
+          grep -q 'admin-inventory.html' site/admin-listings.html
+          grep -q '/start-a-project' site/index.html
+          test -f site/marketplace.html
+
+          # Syntax gate across production JavaScript.
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find site -type f -name '*.js' -print0)
+
+          # Pages limits and credential scan.
+          file_count=$(find site -type f | wc -l)
+          test "$file_count" -le 20000
+          oversized=$(find site -type f -size +25M -print -quit)
+          test -z "$oversized"
+          blocked=$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)
+          test -z "$blocked"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
+            echo "Credential-like value detected in site source."
+            exit 1
+          fi
+
+      - name: Synchronize patched Worker to main
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- site/_worker.js; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add site/_worker.js
+            git commit -m "Apply v3.11.30 public Store inventory API"
+            git push origin HEAD:main
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy production to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Record production deployment
+        shell: bash
+        run: |
+          echo "### v3.11.30 Store Navigation Repair" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist successful deployment receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+          mkdir -p .github/deployments
+          deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          cat > .github/deployments/v3.11.30-store-navigation-repair.txt <<EOF
+          build=3.11.30-store-navigation-repair
+          source_commit=${{ steps.source.outputs.sha }}
+          deployment_url=${{ steps.deploy.outputs.deployment-url }}
+          workflow_run=${{ github.run_id }}
+          deployed_at=$deployed_at
+          status=success
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/deployments/v3.11.30-store-navigation-repair.txt
+          git commit -m "Record v3.11.30 Store production deployment"
+          git push origin HEAD:main
