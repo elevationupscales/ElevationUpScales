@@ -2,6 +2,7 @@
   "use strict";
   const API = "/api/store-inventory";
   const LIST_KEY = "eus-rv-shopping-list:v1";
+  const FALLBACK_IMAGE = "/assets/marketplace/marketplace-hero-mobile.webp";
   const grid = document.querySelector("#rv-product-grid");
   const status = document.querySelector("#rv-catalog-status");
   const search = document.querySelector("#rv-search");
@@ -16,7 +17,7 @@
   const loadList = () => { try { return new Set(JSON.parse(localStorage.getItem(LIST_KEY) || "[]")); } catch (_) { return new Set(); } };
   let shopping = loadList();
   const saveList = () => { try { localStorage.setItem(LIST_KEY, JSON.stringify([...shopping])); } catch (_) {} };
-  const productImage = (item) => item.imageUrl || (/solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : "/assets/logo-mark.webp");
+  const productImage = (item) => item.imageUrl || (/solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : FALLBACK_IMAGE);
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
   function syncList() {
     const selected = state.items.filter((item) => shopping.has(item.id));
@@ -33,7 +34,15 @@
     const article = document.createElement("article"); article.className = "rv-product-card";
     const canBuy = item.fulfillmentMode !== "tracked" || Number(item.quantityAvailable) > 0;
     article.innerHTML = `<div class="rv-product-media"><img alt="" width="420" height="320" loading="lazy"></div><div class="rv-product-copy"><p class="eyebrow">${item.category || "RV & Outdoor"}</p><h3></h3><div class="rv-product-meta"><span class="rv-product-price">${money(item.priceCents)}</span><span class="rv-product-stock"></span></div><div class="rv-product-actions"><button type="button" data-list-item="${item.id}">+ Shopping List</button><a ${canBuy ? `href="${item.buyUrl}" target="_blank" rel="noopener"` : 'aria-disabled="true"'}>Buy Now</a></div></div>`;
-    const image = article.querySelector("img"); image.src = productImage(item); image.alt = item.name;
+    const image = article.querySelector("img");
+    image.src = productImage(item);
+    image.alt = item.name;
+    image.addEventListener("error", () => {
+      if (!image.dataset.fallbackApplied) {
+        image.dataset.fallbackApplied = "true";
+        image.src = FALLBACK_IMAGE;
+      }
+    }, { once: true });
     article.querySelector("h3").textContent = item.name;
     article.querySelector(".rv-product-stock").textContent = item.availability;
     const buy = article.querySelector("a");
