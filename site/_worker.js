@@ -917,13 +917,15 @@ const SITE_INTENT_EVENT_TYPES = new Set([
   "solar_builder_opened", "solar_builder_entry", "package_selected", "power_snapshot_viewed", "build_summary_viewed", "review_opened",
   "solar_contact_captured", "solar_lead_created", "solar_build_started", "solar_review_opened", "solar_completed_submitted",
   "submit_attempt", "lead_submitted", "out_of_area_path_selected", "outside_area_review_selected", "outside_area_to_work_with_us",
+  "store_open", "store_section_view", "store_category_select", "store_search_used", "store_sort_changed", "store_destination_click", "store_product_click",
   "work_with_us_open", "opportunity_type_selected", "opportunity_form_started", "opportunity_submitted"
 ]);
 const SITE_INTENT_SERVER_ONLY_EVENT_TYPES = new Set(["lead_submitted","opportunity_submitted","solar_contact_captured","solar_lead_created","solar_build_started","solar_review_opened","solar_completed_submitted"]);
 const SITE_INTENT_CLIENT_EVENT_TYPES = new Set([...SITE_INTENT_EVENT_TYPES].filter((type) => !SITE_INTENT_SERVER_ONLY_EVENT_TYPES.has(type)));
 const SITE_ANALYTICS_APPROVED_EVENTS = new Set([
   "session_start", "page_view", "start_project_open", "project_family_selected", "project_submit",
-  "solar_builder_open", "work_with_us_open", "marketplace_open", "listing_interest"
+  "solar_builder_open", "work_with_us_open", "marketplace_open", "listing_interest",
+  "store_open", "store_destination_click"
 ]);
 const SITE_ANALYTICS_EVENT_ALIASES = Object.freeze({
   project_type_selected: "project_family_selected",
@@ -2610,7 +2612,7 @@ async function getMarketplaceRowWithViews(env, id) {
 }
 
 function sanitizeSiteEventDetails(raw = {}) {
-  const allowedStrings = new Set(["package", "classification", "projectType", "intakeIntent", "serviceArea", "source", "status", "journeyReference", "contactMethod", "visitorMarket", "cta_id", "source_page", "contact_method", "build", "buildReference", "builderStage", "builderStep", "milestone"]);
+  const allowedStrings = new Set(["package", "classification", "projectType", "intakeIntent", "serviceArea", "source", "status", "journeyReference", "contactMethod", "visitorMarket", "cta_id", "source_page", "contact_method", "build", "buildReference", "builderStage", "builderStep", "milestone", "destination", "section", "category", "product", "referrerHost", "utmSource", "utmMedium", "utmCampaign"]);
   const allowedNumbers = new Set(["arrayWatts", "batteryKwh", "inverterWatts", "dailySolarKwh", "estimatedUsageKwh"]);
   const output = {};
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return output;
@@ -2675,6 +2677,9 @@ async function handleSiteEvent(request, env) {
   if (eventType === "project_type_selected" && !["home", "rv", "solar"].includes(value)) return jsonResponse({ error: "Invalid project type" }, 400);
   if (eventType === "package_selected" && !["standard", "gold", "platinum", "custom"].includes(value)) return jsonResponse({ error: "Invalid Solar package" }, 400);
   if (eventType === "contact_click" && !["call", "text", "email", "follow_up_request"].includes(value)) return jsonResponse({ error: "Invalid contact method" }, 400);
+  if (eventType === "store_destination_click" && !["ebay", "fourthwall", "collector"].includes(value)) return jsonResponse({ error: "Invalid Store destination" }, 400);
+  if (eventType === "store_product_click" && !["ebay", "fourthwall", "collector"].includes(value)) return jsonResponse({ error: "Invalid Store product destination" }, 400);
+  if (eventType === "store_section_view" && !["rv_shop", "brand_catalog"].includes(value)) return jsonResponse({ error: "Invalid Store section" }, 400);
   if (eventType === "service_area_classified" && !["treasure_valley","southern_colorado","denver_metro","outside_standard_area","manual_review"].includes(value)) return jsonResponse({ error: "Invalid service area" }, 400);
   if (eventType === "out_of_area_path_selected" && !["project_review","work_with_us"].includes(value)) return jsonResponse({ error: "Invalid out-of-area path" }, 400);
   if (eventType === "opportunity_type_selected" && !["affiliate","marketing","technician","investment"].includes(value)) return jsonResponse({ error: "Invalid opportunity type" }, 400);
@@ -3884,10 +3889,79 @@ async function handleAdminMarketAnalytics(request, env) {
     const selected = marketKey === "all" ? overall : (marketKey === "other" ? other : allMarkets[marketKey]);
     const selectedBreakdown = Object.fromEntries(selectedKeys.filter((key) => allMarkets[key]).map((key) => [key, allMarkets[key]]));
 
+    let storeAnalytics = {
+      sessions: 0, rvShopSessions: 0,
+      ebayClicks: 0, ebayClickSessions: 0,
+      fourthwallClicks: 0, fourthwallClickSessions: 0,
+      collectorClicks: 0, collectorClickSessions: 0,
+      productClicks: 0, categorySelections: 0, searchUses: 0,
+      ebayCtr: null, recentEvents: []
+    };
+    try {
+      const storeMetricRow = await env.MARKETPLACE_DB.prepare(`SELECT
+        COUNT(DISTINCT CASE WHEN event_type='store_open' THEN session_hash END) AS store_sessions,
+        COUNT(DISTINCT CASE WHEN event_type='store_section_view' AND event_value='rv_shop' THEN session_hash END) AS rv_shop_sessions,
+        SUM(CASE WHEN event_type='store_destination_click' AND event_value='ebay' THEN 1 ELSE 0 END) AS ebay_clicks,
+        COUNT(DISTINCT CASE WHEN event_type='store_destination_click' AND event_value='ebay' THEN session_hash END) AS ebay_click_sessions,
+        SUM(CASE WHEN event_type='store_destination_click' AND event_value='fourthwall' THEN 1 ELSE 0 END) AS fourthwall_clicks,
+        COUNT(DISTINCT CASE WHEN event_type='store_destination_click' AND event_value='fourthwall' THEN session_hash END) AS fourthwall_click_sessions,
+        SUM(CASE WHEN event_type='store_destination_click' AND event_value='collector' THEN 1 ELSE 0 END) AS collector_clicks,
+        COUNT(DISTINCT CASE WHEN event_type='store_destination_click' AND event_value='collector' THEN session_hash END) AS collector_click_sessions,
+        SUM(CASE WHEN event_type='store_product_click' THEN 1 ELSE 0 END) AS product_clicks,
+        SUM(CASE WHEN event_type='store_category_select' THEN 1 ELSE 0 END) AS category_selections,
+        SUM(CASE WHEN event_type='store_search_used' THEN 1 ELSE 0 END) AS search_uses
+        FROM eus_site_events
+        WHERE created_at>=? AND created_at<=?`).bind(window.start, window.end).first();
+      const storeSessions = Math.max(0, Number(storeMetricRow?.store_sessions) || 0);
+      const rvShopSessions = Math.max(0, Number(storeMetricRow?.rv_shop_sessions) || 0);
+      const ebayClickSessions = Math.max(0, Number(storeMetricRow?.ebay_click_sessions) || 0);
+      const storeEventRows = await env.MARKETPLACE_DB.prepare(`SELECT
+        substr(session_hash,1,10) AS visitor_tag,
+        event_type, event_value, page, details_json, created_at
+        FROM eus_site_events
+        WHERE created_at>=? AND created_at<=?
+          AND event_type IN ('store_open','store_section_view','store_category_select','store_search_used','store_sort_changed','store_destination_click','store_product_click')
+        ORDER BY created_at DESC LIMIT 80`).bind(window.start, window.end).all();
+      storeAnalytics = {
+        sessions: storeSessions,
+        rvShopSessions,
+        ebayClicks: Math.max(0, Number(storeMetricRow?.ebay_clicks) || 0),
+        ebayClickSessions,
+        fourthwallClicks: Math.max(0, Number(storeMetricRow?.fourthwall_clicks) || 0),
+        fourthwallClickSessions: Math.max(0, Number(storeMetricRow?.fourthwall_click_sessions) || 0),
+        collectorClicks: Math.max(0, Number(storeMetricRow?.collector_clicks) || 0),
+        collectorClickSessions: Math.max(0, Number(storeMetricRow?.collector_click_sessions) || 0),
+        productClicks: Math.max(0, Number(storeMetricRow?.product_clicks) || 0),
+        categorySelections: Math.max(0, Number(storeMetricRow?.category_selections) || 0),
+        searchUses: Math.max(0, Number(storeMetricRow?.search_uses) || 0),
+        ebayCtr: rvShopSessions > 0 ? Math.round((ebayClickSessions / rvShopSessions) * 1000) / 10 : null,
+        recentEvents: (storeEventRows.results || []).map((row) => {
+          const details = parseJsonObject(row.details_json);
+          return {
+            visitorTag: cleanString(row.visitor_tag, 12) || "anonymous",
+            eventType: cleanString(row.event_type, 60),
+            eventValue: cleanString(row.event_value, 120),
+            page: analyticsPath(row.page || "/store"),
+            destination: cleanString(details.destination, 40),
+            section: cleanString(details.section, 60),
+            category: cleanString(details.category, 60),
+            product: cleanString(details.product, 120),
+            referrerHost: cleanString(details.referrerHost, 120),
+            utmSource: cleanString(details.utmSource, 80),
+            utmMedium: cleanString(details.utmMedium, 80),
+            utmCampaign: cleanString(details.utmCampaign, 120),
+            createdAt: cleanString(row.created_at, 80),
+          };
+        })
+      };
+    } catch (error) {
+      console.error(JSON.stringify({ event: "admin_store_analytics_error", message: error instanceof Error ? error.message : String(error) }));
+    }
+
     const payload = {
       ok: true, available: true, source: "D1 eus_site_events", range: window, selectedMarket: marketKey,
       collection: { firstEventAt: cleanString(collectionRow?.first_event_at, 80) || null, marketGeographyAt: cleanString(collectionRow?.market_geography_at, 80) || null, historicalGeographyBackfill: false },
-      overall, selected, markets: allMarkets, selectedBreakdown, projectDataAvailable,
+      overall, selected, markets: allMarkets, selectedBreakdown, projectDataAvailable, store: storeAnalytics,
       analyticsEngine: "disabled_deferred", webAnalytics: "independent_cloudflare_layer",
       privacyNote: "Visitor geography is approximate and based on network location. Project Market is determined separately from the submitted service address.",
       build: OPERATIONS_BUILD,
