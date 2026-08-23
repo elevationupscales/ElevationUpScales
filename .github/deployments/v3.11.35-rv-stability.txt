@@ -1,0 +1,10 @@
+build=3.11.35-rv-stability
+source_commit=07c253d74042eb1e81751b1b08347584722c0132
+deployment_url=https://d5656514.elevationupscales.pages.dev
+workflow_run=32622961426
+deployed_at=2026-08-23T06:27:41Z
+rv_inventory_count=49
+seller_hub_validated=49
+image_fallback=verified
+scroll_refresh=removed
+status=success
