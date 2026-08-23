@@ -34,9 +34,24 @@ jobs:
           set -euo pipefail
           test -f site/index.html
           test -f site/_worker.js
+          test -f site/_worker_core.js
+          test -f site/ebay-inventory-sync.js
           test -f site/_routes.json
           test -f site/_headers
-          grep -q '3.11.31-ebay-inventory-sync' site/_worker.js
+
+          # Split Worker: storefront sync wrapper delegates protected systems to core.
+          grep -q 'import core from "./_worker_core.js"' site/_worker.js
+          grep -q 'handleStoreInventory' site/_worker.js
+          grep -q 'url.pathname === "/api/store-inventory"' site/_worker.js
+          grep -q 'return core.fetch(request, env, ctx)' site/_worker.js
+          grep -q '3.11.31-ebay-inventory-sync' site/ebay-inventory-sync.js
+          grep -q 'const SELLER = "elevationupscalesshop"' site/ebay-inventory-sync.js
+          grep -q 'ebay-auto-sync-v1' site/ebay-inventory-sync.js
+          grep -q 'eus_inventory_sync_state' site/ebay-inventory-sync.js
+          grep -q 'EBAY_CLIENT_ID' site/ebay-inventory-sync.js
+          grep -q 'EBAY_CLIENT_SECRET' site/ebay-inventory-sync.js
+          grep -q 'fromPublic' site/ebay-inventory-sync.js
+          grep -q 'protectedManual' site/ebay-inventory-sync.js
 
           # Preserve accepted Solar lineage.
           test -f site/solar-visual-guide.css
@@ -55,26 +70,23 @@ jobs:
           grep -q 'href="/rv-store"' site/store.html
           grep -q 'href="/rv-store"' site/rv-store.html
           grep -q '/rv-store' site/site-shell.js
-          grep -q '/api/store-inventory' site/_worker.js
-          grep -q 'EBAY_SYNC_SELLER' site/_worker.js
-          grep -q 'ebay-auto-sync-v1' site/_worker.js
-          grep -q 'eus_inventory_sync_state' site/_worker.js
           grep -q 'imageUrl' site/rv-store.js
           grep -q 'hero-galaxy-rv.webp' site/rv-store.html
-          grep -q 'shopping_list' site/_worker.js
+          grep -q 'Automatic eBay sync' site/rv-store.html
           grep -q 'shopping_list' site/rv-store.js
           test -f .github/workflows/sync-ebay-inventory.yml
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
 
-          # Preserve Store analytics + Inventory foundation.
+          # Preserve Store analytics + Inventory foundation in delegated core.
           test -f site/store-channel.css
           test -f site/store-channel-analytics.js
           grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
           test -f site/admin-inventory.html
           test -f site/admin-inventory.css
           test -f site/admin-inventory.js
-          grep -q '/api/admin/inventory' site/_worker.js
-          grep -q 'eus_inventory_items' site/_worker.js
+          grep -q '/api/admin/inventory' site/_worker_core.js
+          grep -q 'eus_inventory_items' site/_worker_core.js
+          grep -q 'shopping_list' site/_worker_core.js
           grep -q 'admin-inventory.html' site/admin-listings.html
 
       - name: Check JavaScript syntax
