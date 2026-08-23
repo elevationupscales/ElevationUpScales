@@ -3,7 +3,7 @@ const PUBLIC_ORIGIN = "https://elevationupscales.com";
 const MAX_PAGES = 10;
 const MAX_PAGE_BYTES = 2_000_000;
 const STORE_BUILD = "3.0.3";
-const OPERATIONS_BUILD = "3.11.29-inventory-foundation";
+const OPERATIONS_BUILD = "3.11.30-store-navigation-repair";
 
 const SOLAR_NOTIFY_PATH = "/api/solar-build-notify";
 const SOLAR_NOTIFY_MAX_BYTES = 56_000;
@@ -886,6 +886,7 @@ const ADMIN_OPPORTUNITIES_PATH = "/api/admin/opportunities";
 const ADMIN_MARKET_ANALYTICS_PATH = "/api/admin/market-analytics";
 const ADMIN_SOLAR_QA_TOKEN_PATH = "/api/admin/solar-qa-token";
 const ADMIN_INVENTORY_PATH = "/api/admin/inventory";
+const PUBLIC_INVENTORY_PATH = "/api/store-inventory";
 const SOLAR_QA_VALIDATE_PATH = "/api/solar/qa-validate";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const DEFAULT_MARKETPLACE_EMAIL_TO = "casey@elevationupscales.com";
@@ -2679,7 +2680,7 @@ async function handleSiteEvent(request, env) {
   if (eventType === "package_selected" && !["standard", "gold", "platinum", "custom"].includes(value)) return jsonResponse({ error: "Invalid Solar package" }, 400);
   if (eventType === "contact_click" && !["call", "text", "email", "follow_up_request"].includes(value)) return jsonResponse({ error: "Invalid contact method" }, 400);
   if (eventType === "store_destination_click" && !["ebay", "fourthwall", "collector"].includes(value)) return jsonResponse({ error: "Invalid Store destination" }, 400);
-  if (eventType === "store_product_click" && !["ebay", "fourthwall", "collector"].includes(value)) return jsonResponse({ error: "Invalid Store product destination" }, 400);
+  if (eventType === "store_product_click" && !["ebay", "fourthwall", "collector", "shopping_list"].includes(value)) return jsonResponse({ error: "Invalid Store product destination" }, 400);
   if (eventType === "store_section_view" && !["rv_shop", "brand_catalog"].includes(value)) return jsonResponse({ error: "Invalid Store section" }, 400);
   if (eventType === "service_area_classified" && !["treasure_valley","southern_colorado","denver_metro","outside_standard_area","manual_review"].includes(value)) return jsonResponse({ error: "Invalid service area" }, 400);
   if (eventType === "out_of_area_path_selected" && !["project_review","work_with_us"].includes(value)) return jsonResponse({ error: "Invalid out-of-area path" }, 400);
@@ -3317,6 +3318,60 @@ async function inventoryReadBody(request) {
   if (parsed.error === "too_large") return { response: jsonResponse({ error: "Inventory request is too large" }, 413) };
   if (parsed.error) return { response: jsonResponse({ error: "Invalid inventory request" }, 400) };
   return { body: parsed.value || {} };
+}
+
+
+function publicInventoryRecord(row) {
+  const item = inventoryRow(row);
+  if (!item) return null;
+  const channels = item.salesChannels || [];
+  const tracked = item.fulfillmentMode === "tracked";
+  const available = tracked ? item.quantityAvailable : null;
+  const fallback = new URL("https://www.ebay.com/sch/i.html");
+  fallback.searchParams.set("_ssn", "elevationupscalesshop");
+  fallback.searchParams.set("_nkw", item.name);
+  let buyUrl = fallback.toString();
+  if (item.sourceUrl) {
+    try {
+      const source = new URL(item.sourceUrl);
+      const host = source.hostname.toLowerCase();
+      if (host === "ebay.com" || host === "www.ebay.com" || host === "elevationupscales.com" || host.endsWith(".elevationupscales.com")) buyUrl = source.toString();
+    } catch (_) {}
+  }
+  return {
+    id: item.id,
+    sku: item.sku,
+    name: item.name,
+    category: item.category || "RV & Outdoor",
+    priceCents: item.priceCents,
+    fulfillmentMode: item.fulfillmentMode,
+    quantityAvailable: available,
+    availability: tracked ? (available > 0 ? "In Stock" : "Out of Stock") : "Available from supplier",
+    salesChannels: channels,
+    buyUrl,
+    updatedAt: item.updatedAt,
+  };
+}
+
+async function handlePublicInventory(request, env) {
+  if (request.method !== "GET" && request.method !== "HEAD") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+  if (!env.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return jsonResponse({ items: [], count: 0, storageConfigured: false, build: OPERATIONS_BUILD }, 200, { "Cache-Control": "public, max-age=3, s-maxage=3" });
+  try {
+    const result = await env.MARKETPLACE_DB.prepare(`SELECT * FROM eus_inventory_items
+      WHERE status='active'
+        AND lower(COALESCE(supplier,'')) <> 'fourthwall'
+        AND fulfillment_mode <> 'pod'
+      ORDER BY updated_at DESC, name COLLATE NOCASE ASC
+      LIMIT 500`).all();
+    const items = (result.results || []).map(publicInventoryRecord).filter(Boolean);
+    const response = jsonResponse({ items, count: items.length, storageConfigured: true, syncedAt: new Date().toISOString(), build: OPERATIONS_BUILD }, 200, { "Cache-Control": "public, max-age=3, s-maxage=3" });
+    return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
+  } catch (error) {
+    const message = String(error?.message || error || "");
+    if (/no such table/i.test(message)) return jsonResponse({ items: [], count: 0, storageConfigured: true, inventoryReady: false, build: OPERATIONS_BUILD }, 200, { "Cache-Control": "public, max-age=3, s-maxage=3" });
+    console.error(JSON.stringify({ event: "public_inventory_error", message: cleanString(message, 240) }));
+    return jsonResponse({ error: "Store inventory is temporarily unavailable", items: [], count: 0 }, 503);
+  }
 }
 
 async function handleAdminInventory(request, env, pathname) {
@@ -4517,6 +4572,7 @@ export default {
     if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
     if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
+    if (url.pathname === PUBLIC_INVENTORY_PATH) return handlePublicInventory(request, env);
     if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
     if (url.pathname === SOLAR_QA_VALIDATE_PATH) return handleSolarQaValidate(request, env);
     if (url.pathname === ADMIN_LEADS_PATH || url.pathname.startsWith(`${ADMIN_LEADS_PATH}/`)) return handleAdminLeads(request, env, url.pathname);
