@@ -21,7 +21,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (!document.body?.classList.contains("store-page") || !document.querySelector("#product-grid")) return;
   if (document.querySelector('script[data-eus-full-catalog="true"]')) return;
   const script = document.createElement("script");
-  script.src = "/store-catalog-resilience.js?v=3.11.38";
+  script.src = "/store-catalog-resilience.js?v=3.11.39";
   script.defer = true;
   script.dataset.eusFullCatalog = "true";
   document.head.appendChild(script);
