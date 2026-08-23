@@ -27,6 +27,15 @@
     url.searchParams.set("_sop", "10");
     return url.toString();
   };
+  const listingUrl = (item) => {
+    try {
+      const url = new URL(item?.buyUrl || "");
+      const host = url.hostname.toLowerCase();
+      const itemNumber = String(item?.itemNumber || "");
+      if ((host === "ebay.com" || host === "www.ebay.com") && itemNumber && url.pathname.includes(`/itm/${itemNumber}`)) return url.toString();
+    } catch (_) {}
+    return sellerSearchUrl(item);
+  };
 
   function syncList() {
     const selected = state.items.filter((item) => shopping.has(item.id));
@@ -92,11 +101,11 @@
     listButton.dataset.listItem = item.id;
     listButton.textContent = "+ Shopping List";
     const buy = document.createElement("a");
-    buy.href = sellerSearchUrl(item);
+    buy.href = listingUrl(item);
     buy.target = "_blank";
     buy.rel = "noopener";
-    buy.textContent = "View in eBay Store";
-    buy.setAttribute("aria-label", `View ${item.name} in the Elevation UpScales eBay store`);
+    buy.textContent = "Buy Now";
+    buy.setAttribute("aria-label", `Buy ${item.name} on eBay`);
     buy.addEventListener("click", () => track("store_destination_click", "ebay", { product: item.name, itemNumber: item.itemNumber, destination: "ebay", seller: EBAY_SELLER }));
     actions.append(listButton, buy);
     copy.append(category, title, meta, actions);
@@ -124,7 +133,7 @@
     empty.hidden = rows.length !== 0;
     grid.hidden = rows.length === 0;
     status.textContent = state.items.length
-      ? `${state.items.length} Seller Hub–verified products · every product link stays inside the Elevation UpScales eBay store`
+      ? `${state.items.length} Seller Hub–verified products · direct item links and Seller Hub images`
       : "The verified eBay catalog could not be loaded. Use the eBay Store link below.";
     syncList();
   }
