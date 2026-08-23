@@ -34,12 +34,13 @@ jobs:
           grep -q 'manualRvCatalog' site/_worker.js
           grep -q 'Stage 1 of 7' site/solar-project.html
           ! grep -q 'setInterval.*5000' site/rv-store.js
-          grep -q 'onerror' site/rv-store.js
+          grep -q 'addEventListener("error"' site/rv-store.js
           grep -q 'sellerValidated: true' site/rv-manual-catalog.js
           python - <<'PY'
           from pathlib import Path
           text=Path('site/rv-manual-catalog.js').read_text()
-          assert text.count('["ebay-') == 49, f"Expected 49 validated listings, got {text.count('[\"ebay-')}"
+          count=text.count('["ebay-')
+          assert count == 49, f'Expected 49 validated listings, got {count}'
           PY
       - name: Deploy production
         id: deploy
@@ -60,7 +61,7 @@ jobs:
           grep -q 'rv-store-trust,.rv-store-hero__media{display:none}' /tmp/rv-store.css
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store.js" > /tmp/rv-store.js
           ! grep -q 'setInterval.*5000' /tmp/rv-store.js
-          grep -q 'onerror' /tmp/rv-store.js
+          grep -q 'addEventListener("error"' /tmp/rv-store.js
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=validated-49" > /tmp/inventory.json
           python - <<'PY'
           import json, os
