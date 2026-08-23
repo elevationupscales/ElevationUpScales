@@ -1,2 +1,0 @@
-deploy=rv-manual-catalog
-attempt=1
