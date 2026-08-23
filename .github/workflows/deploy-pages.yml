@@ -62,7 +62,7 @@ jobs:
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
 
-          # Preserve split-store navigation from the last known-good deployment.
+          # Preserve split-store navigation.
           test -f site/store.html
           test -f site/rv-store.html
           test -f site/rv-store.css
@@ -75,7 +75,7 @@ jobs:
           grep -q '/rv-store' site/site-shell.js
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
 
-          # Validate the current static, Seller Hub-verified eBay catalog architecture.
+          # Validate the static Seller Hub-verified eBay catalog architecture.
           grep -q 'rv-ebay-catalog.js?v=3.11.35' site/rv-store.html
           grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-ebay-catalog.js
           grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-store.js
@@ -139,8 +139,6 @@ jobs:
     needs: validate
     if: ${{ inputs.target == 'preview' }}
     runs-on: ubuntu-latest
-    # Reuse the proven production environment credentials, but deploy only to the
-    # non-production github-preview branch. This cannot replace the main alias.
     environment: production
     steps:
       - name: Check out authoritative main
@@ -167,14 +165,14 @@ jobs:
           test -n "$base"
           for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
             echo "Smoke testing ${base}${route}"
-            code=$(curl --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 2 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}")
+            code=$(curl --silent --show-error --location --retry 6 --retry-all-errors --retry-delay 2 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}")
             if [[ "$code" != "200" ]]; then
               echo "Smoke test failed for ${route}: HTTP ${code}"
               exit 1
             fi
           done
-          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
-          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
+          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
+          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
 
       - name: Record preview URL
         run: |
@@ -204,28 +202,47 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Smoke production customer routes
+      - name: Verify production customer routes
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
         run: |
           set -euo pipefail
-          base="${DEPLOYMENT_URL%/}"
-          test -n "$base"
-          for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
-            echo "Smoke testing ${base}${route}"
-            code=$(curl --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 2 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}")
-            if [[ "$code" != "200" ]]; then
-              echo "Smoke test failed for ${route}: HTTP ${code}"
-              exit 1
-            fi
-          done
-          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
-          curl --silent --show-error --location --retry 4 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
+
+          deployment_base="${DEPLOYMENT_URL%/}"
+          production_base="${PRODUCTION_URL%/}"
+          test -n "$deployment_base"
+
+          smoke_routes() {
+            local base="$1"
+            local route code
+            for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
+              echo "Smoke testing ${base}${route}"
+              code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
+              if [[ "$code" != "200" ]]; then
+                echo "Route check did not return HTTP 200 for ${base}${route}: ${code:-curl-error}"
+                return 1
+              fi
+            done
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG' || return 1
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/store" | grep -q 'Apparel Store' || return 1
+          }
+
+          # The deployment-specific pages.dev hostname can lag immediately after a
+          # successful publish. Prefer it because it identifies this deployment, but
+          # fall back to the real production alias before declaring the release bad.
+          if smoke_routes "$deployment_base"; then
+            echo "Deployment-specific Pages URL verified."
+          else
+            echo "Deployment-specific URL was not ready; verifying the production alias."
+            sleep 8
+            smoke_routes "$production_base"
+          fi
 
       - name: Record production deployment URL
         run: |
           echo "### Cloudflare production deployment" >> "$GITHUB_STEP_SUMMARY"
           echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Production smoke tests: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production verification: PASS" >> "$GITHUB_STEP_SUMMARY"
