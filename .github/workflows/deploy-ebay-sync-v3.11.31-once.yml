@@ -12,6 +12,13 @@ on:
       - site/rv-store.css
       - site/rv-store.js
       - .github/workflows/deploy-ebay-sync-v3.11.31-once.yml
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+    paths:
+      - site/rv-store.html
+      - .github/workflows/deploy-ebay-sync-v3.11.31-once.yml
 
 permissions:
   contents: write
@@ -43,14 +50,10 @@ jobs:
           test -f site/ebay-inventory-sync.js
           test -f site/_routes.json
           test -f site/_headers
-
-          # Wrapper owns only the public RV inventory route and delegates everything else.
           grep -q 'import core from "./_worker_core.js"' site/_worker.js
           grep -q 'handleStoreInventory' site/_worker.js
           grep -q 'url.pathname === "/api/store-inventory"' site/_worker.js
           grep -q 'return core.fetch(request, env, ctx)' site/_worker.js
-
-          # Automatic eBay -> Elevation Inventory mirror.
           grep -q '3.11.31-ebay-inventory-sync' site/ebay-inventory-sync.js
           grep -q 'const SELLER = "elevationupscalesshop"' site/ebay-inventory-sync.js
           grep -q 'ebay-auto-sync-v1' site/ebay-inventory-sync.js
@@ -62,15 +65,11 @@ jobs:
           grep -q 'fromPublic' site/ebay-inventory-sync.js
           grep -q 'protectedManual' site/ebay-inventory-sync.js
           grep -q 'export async function handleStoreInventory' site/ebay-inventory-sync.js
-
-          # Preserve accepted Solar lineage.
           test -f site/solar-visual-guide.css
           grep -q 'data-jump="panels"' site/solar-project.html
           grep -q 'data-jump="services"' site/solar-project.html
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
-
-          # Preserve split Store + corrected RV hero.
           test -f site/store.html
           test -f site/rv-store.html
           test -f site/rv-store.css
@@ -83,8 +82,6 @@ jobs:
           grep -q 'Automatic eBay sync' site/rv-store.html
           grep -q 'item.imageUrl' site/rv-store.js
           grep -q 'shopping_list' site/rv-store.js
-
-          # Preserve Inventory/Admin/analytics foundations in delegated core.
           test -f site/admin-inventory.html
           test -f site/admin-inventory.css
           test -f site/admin-inventory.js
@@ -94,20 +91,13 @@ jobs:
           grep -q 'admin-inventory.html' site/admin-listings.html
           test -f site/store-channel-analytics.js
           grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
-
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find site -type f -name '*.js' -print0)
-
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
           file_count=$(find site -type f | wc -l)
           test "$file_count" -le 20000
           test -z "$(find site -type f -size +25M -print -quit)"
           blocked=$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)
           test -z "$blocked"
-          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
-            echo 'Credential-like value detected in site source.'
-            exit 1
-          fi
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then echo 'Credential-like value detected in site source.'; exit 1; fi
 
       - name: Deploy production to Cloudflare Pages
         id: deploy
@@ -128,14 +118,10 @@ jobs:
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store" > /tmp/rv-store.html
           grep -q 'hero-galaxy-rv.webp' /tmp/rv-store.html
           grep -q 'Automatic eBay sync' /tmp/rv-store.html
-
-          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 120 \
-            -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=3.11.31" > /tmp/inventory.json
-
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 120 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=3.11.31" > /tmp/inventory.json
           python - <<'PY'
           import json, os
-          with open('/tmp/inventory.json', encoding='utf-8') as f:
-              data=json.load(f)
+          with open('/tmp/inventory.json', encoding='utf-8') as f: data=json.load(f)
           sync=data.get('supplierSync') or {}
           count=int(data.get('count') or 0)
           status=str(sync.get('status') or '')
@@ -145,10 +131,8 @@ jobs:
           print('sync_source=', source)
           print('last_success=', sync.get('lastSuccessAt'))
           print('last_error=', sync.get('lastError'))
-          if status == 'error':
-              raise SystemExit('eBay supplier synchronization returned an error')
-          if count < 1:
-              raise SystemExit('RV storefront still has zero synchronized products')
+          if status == 'error': raise SystemExit('eBay supplier synchronization returned an error')
+          if count < 1: raise SystemExit('RV storefront still has zero synchronized products')
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
               out.write(f"inventory_count={count}\n")
               out.write(f"sync_status={status}\n")
