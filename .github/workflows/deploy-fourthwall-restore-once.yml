@@ -1,0 +1,89 @@
+name: One-time deploy Fourthwall catalog restore
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/triggers/fourthwall-restore.txt
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: elevation-pages-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Validate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/_worker.js
+          node --check site/fourthwall-catalog.js
+          node --check site/store-patch-8.js
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('site/fourthwall-catalog.js').read_text()
+          assert text.count('["') >= 24
+          assert '/api/store-products' in Path('site/_worker.js').read_text()
+          assert 'Stage 1 of 7' in Path('site/solar-project.html').read_text()
+          PY
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke apparel store
+        id: smoke
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-products?release=fourthwall-restore" > /tmp/products.json
+          python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/products.json',encoding='utf-8'))
+          products=data.get('products') or []
+          count=int(data.get('count') or len(products))
+          print('apparel_product_count=',count)
+          assert count == 24, f'Expected 24 Fourthwall products, got {count}'
+          assert len(products) == 24
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f'count={count}\n')
+          PY
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/store" > /tmp/store.html
+          grep -q 'Apparel Store' /tmp/store.html
+          grep -q 'store-patch-8.js' /tmp/store.html
+      - name: Record receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .github/deployments
+          cat > .github/deployments/v3.11.36-fourthwall-catalog-restore.txt <<EOF
+          build=3.11.36-fourthwall-catalog-restore
+          source_commit=$(git rev-parse HEAD)
+          deployment_url=${{ steps.deploy.outputs.deployment-url }}
+          workflow_run=${{ github.run_id }}
+          deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          apparel_product_count=${{ steps.smoke.outputs.count }}
+          status=success
+          EOF
+          git pull --rebase origin main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/deployments/v3.11.36-fourthwall-catalog-restore.txt
+          git commit -m 'Record v3.11.36 Fourthwall catalog restore deployment'
+          git push origin HEAD:main
