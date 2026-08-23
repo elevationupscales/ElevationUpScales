@@ -8,7 +8,7 @@
     ["186831025949","12V Electric Scissor Car Jack & Impact Wrench for Easy Tire Changes","Solar & Off-Grid",5712],
     ["186831036536","VEVOR Portable Walk-In Greenhouse 20' x 10' Hot House with Steel Hoops & Windows","Camping & Outdoor",13455],
     ["186831039073","8L Hot Water Heater Tankless Instant Boiler Outdoor","RV Parts & Accessories",19433],
-    ["186831041650","3 x 3m Three Sides Waterproof Tent with Spiral Tubes White","Camping & Outdoor",4987],
+    ["186831041650","3 x 3m Waterproof Tent with Spiral Tubes White","Camping & Outdoor",4987],
     ["186831041393","VEVOR Super Bright Rechargeable 200,000 Lumens LED Spotlight for Outdoor Use","Camping & Outdoor",3498],
     ["186831058246","Quick Set Brown Pop-Up Gazebo Tent with Removable Wind Cloths","Camping & Outdoor",21500],
     ["186831061492","VEVOR Stainless Steel Moonshine Still with Copper Tube for Home Distilling","Elevation Picks",9734],
