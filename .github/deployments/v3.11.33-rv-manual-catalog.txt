@@ -1,0 +1,8 @@
+build=3.11.33-rv-manual-catalog
+source_commit=2f0450bf4515fdec2aa752cd37d14634d5a0f40a
+deployment_url=https://aee0a157.elevationupscales.pages.dev
+workflow_run=32622195741
+deployed_at=2026-08-23T06:10:12Z
+rv_inventory_count=12
+catalog_mode=manual-fallback
+status=success
