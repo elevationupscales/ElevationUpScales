@@ -1,0 +1,394 @@
+--- a/site/_worker.js
++++ b/site/_worker.js
+@@ -3,7 +3,7 @@
+ const MAX_PAGES = 10;
+ const MAX_PAGE_BYTES = 2_000_000;
+ const STORE_BUILD = "3.0.3";
+-const OPERATIONS_BUILD = "3.11.30-store-navigation-repair";
++const OPERATIONS_BUILD = "3.11.31-ebay-inventory-sync";
+ 
+ const SOLAR_NOTIFY_PATH = "/api/solar-build-notify";
+ const SOLAR_NOTIFY_MAX_BYTES = 56_000;
+@@ -3317,9 +3317,358 @@
+   if (parsed.error) return { response: jsonResponse({ error: "Invalid inventory request" }, 400) };
+   return { body: parsed.value || {} };
+ }
+ 
++
++const EBAY_SYNC_SELLER = "elevationupscalesshop";
++const EBAY_SYNC_INTERVAL_MS = 10 * 60 * 1000;
++const EBAY_SYNC_MANAGED_BY = "ebay-auto-sync-v1";
++const EBAY_SYNC_UPDATED_BY = "ebay-auto-sync";
++
++function ebayDecodeHtml(value) {
++  return String(value || "")
++    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
++    .replace(/&#(\d+);/g, (_, num) => String.fromCodePoint(Number.parseInt(num, 10)))
++    .replace(/&quot;/gi, '"')
++    .replace(/&#39;|&apos;/gi, "'")
++    .replace(/&amp;/gi, "&")
++    .replace(/&lt;/gi, "<")
++    .replace(/&gt;/gi, ">")
++    .replace(/&nbsp;/gi, " ");
++}
++
++function ebayPlainText(value, max = 240) {
++  return cleanString(ebayDecodeHtml(String(value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ")), max);
++}
++
++function ebayLegacyItemId(value) {
++  const raw = String(value || "");
++  const restMatch = raw.match(/^v1\|(\d{9,15})\|/i);
++  if (restMatch) return restMatch[1];
++  const urlMatch = raw.match(/\/itm\/(?:[^/?#]+\/)?(\d{9,15})(?:[/?#]|$)/i);
++  if (urlMatch) return urlMatch[1];
++  const direct = raw.match(/\b(\d{9,15})\b/);
++  return direct ? direct[1] : "";
++}
++
++function ebaySafeItemUrl(value) {
++  try {
++    const url = new URL(String(value || ""), "https://www.ebay.com");
++    const host = url.hostname.toLowerCase();
++    if (url.protocol !== "https:" || (host !== "ebay.com" && host !== "www.ebay.com")) return "";
++    return url.toString();
++  } catch (_) {
++    return "";
++  }
++}
++
++function ebaySafeImageUrl(value) {
++  try {
++    const url = new URL(String(value || ""));
++    const host = url.hostname.toLowerCase();
++    if (url.protocol !== "https:" || !(host === "ebayimg.com" || host.endsWith(".ebayimg.com") || host === "ebaystatic.com" || host.endsWith(".ebaystatic.com"))) return "";
++    return url.toString();
++  } catch (_) {
++    return "";
++  }
++}
++
++function ebayMoneyCents(value) {
++  const number = Number(String(value ?? "").replace(/[^0-9.-]/g, ""));
++  return Number.isFinite(number) && number >= 0 ? Math.round(number * 100) : 0;
++}
++
++function ebayCategoryFromTitle(title) {
++  const text = String(title || "").toLowerCase();
++  if (/\b(rv|camper|motorhome|motor home|travel trailer|fifth wheel|5th wheel|tow|towing|hitch|awning|water pump|fresh water|black water|sewer|propane|leveling|stabilizer|roof vent|slide.?out|refrigerator|converter|shore power)\b/.test(text)) return "RV Parts & Accessories";
++  if (/\b(solar|battery|inverter|charge controller|power station|generator|12v|24v|48v|off.?grid)\b/.test(text)) return "Solar & Off-Grid";
++  if (/\b(camp|camping|outdoor|hiking|tent|lantern|cooler|camp chair|sleeping bag|picnic)\b/.test(text)) return "Camping & Outdoor";
++  return "RV & Outdoor";
++}
++
++function ebaySyncMeta(notes) {
++  try {
++    const parsed = JSON.parse(String(notes || "{}"));
++    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
++  } catch (_) {
++    return {};
++  }
++}
++
++function ebaySyncNotes(listing, source) {
++  return JSON.stringify({
++    managedBy: EBAY_SYNC_MANAGED_BY,
++    seller: EBAY_SYNC_SELLER,
++    source,
++    imageUrl: ebaySafeImageUrl(listing.imageUrl),
++  });
++}
++
++function ebayListingCandidate({ id, title, price, url, imageUrl }) {
++  const itemUrl = ebaySafeItemUrl(url);
++  const itemId = ebayLegacyItemId(id || itemUrl);
++  const name = ebayPlainText(title, 180);
++  if (!itemId || !name || !itemUrl) return null;
++  return {
++    id: itemId,
++    name,
++    priceCents: ebayMoneyCents(price),
++    url: itemUrl,
++    imageUrl: ebaySafeImageUrl(imageUrl),
++  };
++}
++
++function ebayCollectJsonLd(node, listings, depth = 0) {
++  if (!node || depth > 10 || listings.size >= 500) return;
++  if (Array.isArray(node)) {
++    for (const value of node) ebayCollectJsonLd(value, listings, depth + 1);
++    return;
++  }
++  if (typeof node !== "object") return;
++  const item = node.item && typeof node.item === "object" ? node.item : node;
++  const offer = Array.isArray(item.offers) ? item.offers[0] : (item.offers || {});
++  const image = Array.isArray(item.image) ? item.image[0] : item.image;
++  const imageUrl = typeof image === "string" ? image : image?.url;
++  const candidate = ebayListingCandidate({
++    id: item.itemId || item.sku || "",
++    title: item.name || item.title || "",
++    price: offer?.price ?? offer?.lowPrice ?? "",
++    url: item.url || "",
++    imageUrl,
++  });
++  if (candidate) listings.set(candidate.id, candidate);
++  for (const value of Object.values(node)) ebayCollectJsonLd(value, listings, depth + 1);
++}
++
++function ebayListingsFromHtml(html) {
++  const source = String(html || "");
++  const listings = new Map();
++  for (const match of source.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
++    try { ebayCollectJsonLd(JSON.parse(ebayDecodeHtml(match[1])), listings); } catch (_) {}
++  }
++  const linkPattern = /href=["'](https:\/\/www\.ebay\.com\/itm\/[^"'<>]+|\/itm\/[^"'<>]+)["']/gi;
++  for (const match of source.matchAll(linkPattern)) {
++    const itemUrl = ebaySafeItemUrl(match[1]);
++    const id = ebayLegacyItemId(itemUrl);
++    if (!id || listings.has(id)) continue;
++    const start = Math.max(0, (match.index || 0) - 1200);
++    const end = Math.min(source.length, (match.index || 0) + 6500);
++    const window = source.slice(start, end);
++    const titleMatch = window.match(/class=["'][^"']*s-item__title[^"']*["'][^>]*>([\s\S]{0,600}?)<\/[^>]+>/i)
++      || window.match(/(?:title|aria-label)=["']([^"']{4,220})["']/i);
++    const priceMatch = window.match(/class=["'][^"']*s-item__price[^"']*["'][^>]*>([\s\S]{0,160}?)<\/[^>]+>/i);
++    const imageMatch = window.match(/(?:src|data-src)=["'](https:\/\/[^"']*(?:ebayimg|ebaystatic)\.com\/[^"']+)["']/i);
++    const candidate = ebayListingCandidate({
++      id,
++      title: titleMatch?.[1] || "",
++      price: ebayPlainText(priceMatch?.[1] || "", 80),
++      url: itemUrl,
++      imageUrl: imageMatch?.[1] || "",
++    });
++    if (candidate) listings.set(candidate.id, candidate);
++  }
++  return [...listings.values()];
++}
++
++async function ebayListingsFromApi(env) {
++  const clientId = cleanString(env.EBAY_CLIENT_ID, 300);
++  const clientSecret = cleanString(env.EBAY_CLIENT_SECRET, 500);
++  if (!clientId || !clientSecret) return null;
++  const tokenResponse = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
++    method: "POST",
++    headers: {
++      Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
++      "Content-Type": "application/x-www-form-urlencoded",
++    },
++    body: "grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope",
++  });
++  if (!tokenResponse.ok) throw new Error(`eBay OAuth returned ${tokenResponse.status}`);
++  const tokenJson = await tokenResponse.json();
++  const accessToken = cleanString(tokenJson.access_token, 4000);
++  if (!accessToken) throw new Error("eBay OAuth did not return an access token");
++  const search = new URL("https://api.ebay.com/buy/browse/v1/item_summary/search");
++  search.searchParams.set("filter", `sellers:{${EBAY_SYNC_SELLER}}`);
++  search.searchParams.set("limit", "200");
++  search.searchParams.set("sort", "newlyListed");
++  const response = await fetch(search, {
++    headers: {
++      Authorization: `Bearer ${accessToken}`,
++      "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
++      Accept: "application/json",
++    },
++  });
++  if (!response.ok) throw new Error(`eBay Browse API returned ${response.status}`);
++  const data = await response.json();
++  const listings = [];
++  for (const item of Array.isArray(data.itemSummaries) ? data.itemSummaries : []) {
++    const candidate = ebayListingCandidate({
++      id: item.itemId,
++      title: item.title,
++      price: item.price?.value,
++      url: item.itemWebUrl,
++      imageUrl: item.image?.imageUrl,
++    });
++    if (candidate) listings.push(candidate);
++  }
++  return { listings, source: "ebay-api", coverageComplete: listings.length < 200 };
++}
++
++async function ebayListingsFromPublicPages() {
++  const urls = [
++    `https://www.ebay.com/sch/i.html?_ssn=${encodeURIComponent(EBAY_SYNC_SELLER)}&_sop=10&_ipg=240&rt=nc`,
++    `https://www.ebay.com/usr/${encodeURIComponent(EBAY_SYNC_SELLER)}`,
++  ];
++  let lastError = "";
++  for (const url of urls) {
++    try {
++      const response = await fetch(url, {
++        headers: {
++          Accept: "text/html,application/xhtml+xml",
++          "Accept-Language": "en-US,en;q=0.8",
++          "User-Agent": "Mozilla/5.0 (compatible; ElevationUpScalesStoreSync/1.0; +https://elevationupscales.com)",
++        },
++        redirect: "follow",
++      });
++      if (!response.ok) {
++        lastError = `eBay public page returned ${response.status}`;
++        continue;
++      }
++      const html = await response.text();
++      const listings = ebayListingsFromHtml(html);
++      if (listings.length) return { listings, source: "ebay-public", coverageComplete: false };
++      lastError = "eBay public page did not expose listing cards";
++    } catch (error) {
++      lastError = error instanceof Error ? error.message : String(error);
++    }
++  }
++  throw new Error(lastError || "eBay public listings are unavailable");
++}
++
++async function fetchEbayListings(env) {
++  try {
++    const api = await ebayListingsFromApi(env);
++    if (api?.listings?.length) return api;
++  } catch (error) {
++    console.error(JSON.stringify({ event: "ebay_inventory_api_sync_error", message: cleanString(error?.message || error, 240) }));
++  }
++  return ebayListingsFromPublicPages();
++}
++
++async function ensureInventorySyncState(db) {
++  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_inventory_sync_state (
++    source TEXT PRIMARY KEY,
++    last_started_at TEXT NOT NULL DEFAULT '',
++    last_success_at TEXT NOT NULL DEFAULT '',
++    last_error TEXT NOT NULL DEFAULT '',
++    last_count INTEGER NOT NULL DEFAULT 0,
++    updated_at TEXT NOT NULL DEFAULT ''
++  )`).run();
++}
++
++async function maybeSyncEbayInventory(env, { force = false } = {}) {
++  const db = env.MARKETPLACE_DB;
++  if (!db || typeof db.prepare !== "function") return { status: "unconfigured", source: "ebay", count: 0 };
++  await ensureInventorySchema(db);
++  await ensureInventorySyncState(db);
++  const state = await db.prepare("SELECT * FROM eus_inventory_sync_state WHERE source='ebay' LIMIT 1").first();
++  const lastStartedMs = Date.parse(state?.last_started_at || "");
++  if (!force && Number.isFinite(lastStartedMs) && Date.now() - lastStartedMs < EBAY_SYNC_INTERVAL_MS) {
++    return {
++      status: state?.last_error ? "stale" : "current",
++      source: "ebay",
++      count: Number(state?.last_count || 0),
++      lastSuccessAt: inventoryString(state?.last_success_at, 80),
++      lastError: inventoryString(state?.last_error, 240),
++    };
++  }
++  const startedAt = new Date().toISOString();
++  await db.prepare(`INSERT INTO eus_inventory_sync_state (source,last_started_at,last_success_at,last_error,last_count,updated_at)
++    VALUES ('ebay',?,'','',0,?)
++    ON CONFLICT(source) DO UPDATE SET last_started_at=excluded.last_started_at, updated_at=excluded.updated_at`)
++    .bind(startedAt, startedAt).run();
++  try {
++    const feed = await fetchEbayListings(env);
++    const listings = Array.isArray(feed?.listings) ? feed.listings.slice(0, 500) : [];
++    if (!listings.length) throw new Error("No active eBay listings were returned");
++    const seen = new Set();
++    let created = 0;
++    let updated = 0;
++    let unchanged = 0;
++    let protectedManual = 0;
++    const seenAt = new Date().toISOString();
++    for (const listing of listings) {
++      seen.add(listing.id);
++      const sku = `EBAY-${listing.id}`;
++      const existingRow = await db.prepare(`SELECT * FROM eus_inventory_items
++        WHERE (lower(COALESCE(supplier,''))='ebay' AND supplier_product_id=?) OR sku=? COLLATE NOCASE
++        LIMIT 1`).bind(listing.id, sku).first();
++      const notes = ebaySyncNotes(listing, feed.source);
++      const category = ebayCategoryFromTitle(listing.name);
++      if (!existingRow) {
++        const id = `inv_ebay_${listing.id}`;
++        await db.prepare(`INSERT INTO eus_inventory_items
++          (id,sku,name,category,supplier,fulfillment_mode,supplier_product_id,source_url,sales_channels_json,cost_cents,price_cents,quantity_on_hand,quantity_reserved,reorder_point,status,notes,version,created_at,updated_at,updated_by)
++          VALUES (?,?,?,?,?,'dropship',?,?,?,0,?,0,0,0,'active',?,1,?,?,?)`)
++          .bind(id, sku, listing.name, category, "eBay", listing.id, listing.url, JSON.stringify(["ebay","website"]), listing.priceCents, notes, seenAt, seenAt, EBAY_SYNC_UPDATED_BY).run();
++        await inventoryLog(db, { itemId: id, sku, action: "supplier_sync_created", details: { source: feed.source, seller: EBAY_SYNC_SELLER }, adminEmail: EBAY_SYNC_UPDATED_BY }).catch(() => {});
++        created += 1;
++        continue;
++      }
++      const existing = inventoryRow(existingRow);
++      const meta = ebaySyncMeta(existing.notes);
++      const managed = existing.updatedBy === EBAY_SYNC_UPDATED_BY || meta.managedBy === EBAY_SYNC_MANAGED_BY;
++      if (!managed) {
++        protectedManual += 1;
++        continue;
++      }
++      const changed = existing.name !== listing.name
++        || existing.category !== category
++        || existing.priceCents !== listing.priceCents
++        || existing.sourceUrl !== listing.url
++        || existing.status !== "active"
++        || existing.fulfillmentMode !== "dropship"
++        || existing.notes !== notes;
++      if (!changed) {
++        unchanged += 1;
++        continue;
++      }
++      await db.prepare(`UPDATE eus_inventory_items SET
++        name=?,category=?,supplier='eBay',fulfillment_mode='dropship',supplier_product_id=?,source_url=?,sales_channels_json=?,price_cents=?,
++        quantity_on_hand=0,quantity_reserved=0,reorder_point=0,status='active',notes=?,version=version+1,updated_at=?,updated_by=?
++        WHERE id=?`)
++        .bind(listing.name, category, listing.id, listing.url, JSON.stringify(["ebay","website"]), listing.priceCents, notes, seenAt, EBAY_SYNC_UPDATED_BY, existing.id).run();
++      await inventoryLog(db, { itemId: existing.id, sku: existing.sku, action: "supplier_sync_updated", details: { source: feed.source, seller: EBAY_SYNC_SELLER }, adminEmail: EBAY_SYNC_UPDATED_BY }).catch(() => {});
++      updated += 1;
++    }
++    if (feed.coverageComplete) {
++      const managedRows = await db.prepare(`SELECT * FROM eus_inventory_items
++        WHERE lower(COALESCE(supplier,''))='ebay' AND updated_by=? AND status='active'`).bind(EBAY_SYNC_UPDATED_BY).all();
++      for (const row of managedRows.results || []) {
++        const existing = inventoryRow(row);
++        if (!existing.supplierProductId || seen.has(existing.supplierProductId)) continue;
++        await db.prepare("UPDATE eus_inventory_items SET status='archived',version=version+1,updated_at=?,updated_by=? WHERE id=?")
++          .bind(seenAt, EBAY_SYNC_UPDATED_BY, existing.id).run();
++        await inventoryLog(db, { itemId: existing.id, sku: existing.sku, action: "supplier_sync_archived", details: { source: feed.source, seller: EBAY_SYNC_SELLER }, adminEmail: EBAY_SYNC_UPDATED_BY }).catch(() => {});
++      }
++    }
++    await db.prepare(`UPDATE eus_inventory_sync_state SET last_success_at=?,last_error='',last_count=?,updated_at=? WHERE source='ebay'`)
++      .bind(seenAt, listings.length, seenAt).run();
++    return { status: "success", source: feed.source, count: listings.length, created, updated, unchanged, protectedManual, lastSuccessAt: seenAt };
++  } catch (error) {
++    const message = cleanString(error instanceof Error ? error.message : String(error), 240);
++    const failedAt = new Date().toISOString();
++    await db.prepare(`UPDATE eus_inventory_sync_state SET last_error=?,updated_at=? WHERE source='ebay'`).bind(message, failedAt).run().catch(() => {});
++    console.error(JSON.stringify({ event: "ebay_inventory_sync_error", message }));
++    return {
++      status: "error",
++      source: "ebay",
++      count: Number(state?.last_count || 0),
++      lastSuccessAt: inventoryString(state?.last_success_at, 80),
++      lastError: message,
++    };
++  }
++}
++
++ 
+ function publicInventoryRecord(row) {
+   const item = inventoryRow(row);
+   if (!item) return null;
+@@ -3352,5 +3701,6 @@
+     availability: tracked ? (available > 0 ? "In Stock" : "Out of Stock") : "Available from supplier",
+     salesChannels: channels,
++    imageUrl: ebaySafeImageUrl(ebaySyncMeta(item.notes).imageUrl),
+     buyUrl,
+     updatedAt: item.updatedAt,
+   };
+@@ -3361,6 +3711,7 @@
+ async function handlePublicInventory(request, env) {
+   if (request.method !== "GET" && request.method !== "HEAD") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+   if (!env.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return jsonResponse({ items: [], count: 0, storageConfigured: false, build: OPERATIONS_BUILD }, 200, { "Cache-Control": "public, max-age=3, s-maxage=3" });
++  const supplierSync = await maybeSyncEbayInventory(env);
+   try {
+     const result = await env.MARKETPLACE_DB.prepare(`SELECT * FROM eus_inventory_items
+       WHERE status='active'
+@@ -3370,7 +3720,7 @@
+       ORDER BY updated_at DESC, name COLLATE NOCASE ASC
+       LIMIT 500`).all();
+     const items = (result.results || []).map(publicInventoryRecord).filter(Boolean);
+-    const response = jsonResponse({ items, count: items.length, storageConfigured: true, syncedAt: new Date().toISOString(), build: OPERATIONS_BUILD }, 200, { "Cache-Control": "public, max-age=3, s-maxage=3" });
++    const response = jsonResponse({ items, count: items.length, storageConfigured: true, supplierSync, syncedAt: new Date().toISOString(), build: OPERATIONS_BUILD }, 200, { "Cache-Control": "public, max-age=3, s-maxage=3" });
+     return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
+   } catch (error) {
+     const message = String(error?.message || error || "");
