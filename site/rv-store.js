@@ -1,6 +1,7 @@
 (() => {
   "use strict";
   const LIST_KEY = "eus-rv-shopping-list:v1";
+  const EBAY_SELLER = "elevationupscalesshop";
   const grid = document.querySelector("#rv-product-grid");
   const status = document.querySelector("#rv-catalog-status");
   const search = document.querySelector("#rv-search");
@@ -19,6 +20,13 @@
   let shopping = loadList();
   const saveList = () => { try { localStorage.setItem(LIST_KEY, JSON.stringify([...shopping])); } catch (_) {} };
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
+  const sellerSearchUrl = (item) => {
+    const url = new URL("https://www.ebay.com/sch/i.html");
+    url.searchParams.set("_ssn", EBAY_SELLER);
+    url.searchParams.set("_nkw", item?.name || "");
+    url.searchParams.set("_sop", "10");
+    return url.toString();
+  };
 
   function syncList() {
     const selected = state.items.filter((item) => shopping.has(item.id));
@@ -75,7 +83,7 @@
     price.textContent = money(item.priceCents);
     const stock = document.createElement("span");
     stock.className = "rv-product-stock";
-    stock.textContent = "Verified eBay listing";
+    stock.textContent = "Elevation eBay Store";
     meta.append(price, stock);
     const actions = document.createElement("div");
     actions.className = "rv-product-actions";
@@ -84,12 +92,12 @@
     listButton.dataset.listItem = item.id;
     listButton.textContent = "+ Shopping List";
     const buy = document.createElement("a");
-    buy.href = item.buyUrl;
+    buy.href = sellerSearchUrl(item);
     buy.target = "_blank";
     buy.rel = "noopener";
-    buy.textContent = "Buy Now";
-    buy.setAttribute("aria-label", `Buy ${item.name} on eBay`);
-    buy.addEventListener("click", () => track("store_destination_click", "ebay", { product: item.name, itemNumber: item.itemNumber, destination: "ebay" }));
+    buy.textContent = "View in eBay Store";
+    buy.setAttribute("aria-label", `View ${item.name} in the Elevation UpScales eBay store`);
+    buy.addEventListener("click", () => track("store_destination_click", "ebay", { product: item.name, itemNumber: item.itemNumber, destination: "ebay", seller: EBAY_SELLER }));
     actions.append(listButton, buy);
     copy.append(category, title, meta, actions);
     article.append(media, copy);
@@ -116,7 +124,7 @@
     empty.hidden = rows.length !== 0;
     grid.hidden = rows.length === 0;
     status.textContent = state.items.length
-      ? `${state.items.length} Seller Hub–verified eBay listings · full-size product images · direct item links`
+      ? `${state.items.length} Seller Hub–verified products · every product link stays inside the Elevation UpScales eBay store`
       : "The verified eBay catalog could not be loaded. Use the eBay Store link below.";
     syncList();
   }
