@@ -163,3 +163,5 @@ jobs:
           git add .github/deployments/v3.11.31-ebay-inventory-sync.txt
           git commit -m 'Record v3.11.31 eBay inventory sync production deployment'
           git push origin HEAD:main
+
+# observable-pr-trigger
