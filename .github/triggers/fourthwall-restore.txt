@@ -1,2 +1,0 @@
-deploy=fourthwall-catalog-restore
-count=24
