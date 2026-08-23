@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const LIST_KEY = "eus-rv-shopping-list:v1";
-  const SPRITE_DATA_PATH = "/rv-ebay-sprite-data.txt?v=3.11.35";
+  const SPRITE_DATA_PATH = "/rv-ebay-sprite-v2.txt?v=3.11.35";
   const SPRITE_COLUMNS = 7;
   const grid = document.querySelector("#rv-product-grid");
   const status = document.querySelector("#rv-catalog-status");
@@ -28,7 +28,9 @@
       const response = await fetch(SPRITE_DATA_PATH, { cache: "force-cache" });
       if (!response.ok) throw new Error(`thumbnail sheet returned ${response.status}`);
       const encoded = (await response.text()).replace(/\s+/g, "");
-      if (encoded.length < 15000 || !/^[A-Za-z0-9+/=]+$/.test(encoded)) throw new Error("invalid thumbnail sheet");
+      if (encoded.length < 15000 || !encoded.startsWith("UklGR") || !/^[A-Za-z0-9+/=]+$/.test(encoded)) {
+        throw new Error("invalid thumbnail sheet");
+      }
       spriteDataUrl = `data:image/webp;base64,${encoded}`;
     } catch (error) {
       console.warn("Verified eBay thumbnail sheet unavailable:", error);
