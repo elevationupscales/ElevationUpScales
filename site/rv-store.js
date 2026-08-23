@@ -16,7 +16,7 @@
   const loadList = () => { try { return new Set(JSON.parse(localStorage.getItem(LIST_KEY) || "[]")); } catch (_) { return new Set(); } };
   let shopping = loadList();
   const saveList = () => { try { localStorage.setItem(LIST_KEY, JSON.stringify([...shopping])); } catch (_) {} };
-  const productImage = (item) => /solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : "/assets/logo-mark.webp";
+  const productImage = (item) => item.imageUrl || (/solar|power|electrical|off.?grid/i.test(`${item.category} ${item.name}`) ? "/assets/solar/builder/panel.svg" : "/assets/logo-mark.webp");
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
   function syncList() {
     const selected = state.items.filter((item) => shopping.has(item.id));
@@ -32,7 +32,8 @@
   function card(item) {
     const article = document.createElement("article"); article.className = "rv-product-card";
     const canBuy = item.fulfillmentMode !== "tracked" || Number(item.quantityAvailable) > 0;
-    article.innerHTML = `<div class="rv-product-media"><img src="${productImage(item)}" alt="" width="420" height="320" loading="lazy"></div><div class="rv-product-copy"><p class="eyebrow">${item.category || "RV & Outdoor"}</p><h3></h3><div class="rv-product-meta"><span class="rv-product-price">${money(item.priceCents)}</span><span class="rv-product-stock"></span></div><div class="rv-product-actions"><button type="button" data-list-item="${item.id}">+ Shopping List</button><a ${canBuy ? `href="${item.buyUrl}" target="_blank" rel="noopener"` : 'aria-disabled="true"'}>Buy Now</a></div></div>`;
+    article.innerHTML = `<div class="rv-product-media"><img alt="" width="420" height="320" loading="lazy"></div><div class="rv-product-copy"><p class="eyebrow">${item.category || "RV & Outdoor"}</p><h3></h3><div class="rv-product-meta"><span class="rv-product-price">${money(item.priceCents)}</span><span class="rv-product-stock"></span></div><div class="rv-product-actions"><button type="button" data-list-item="${item.id}">+ Shopping List</button><a ${canBuy ? `href="${item.buyUrl}" target="_blank" rel="noopener"` : 'aria-disabled="true"'}>Buy Now</a></div></div>`;
+    const image = article.querySelector("img"); image.src = productImage(item); image.alt = item.name;
     article.querySelector("h3").textContent = item.name;
     article.querySelector(".rv-product-stock").textContent = item.availability;
     const buy = article.querySelector("a");
@@ -54,13 +55,21 @@
     syncList();
   }
   async function load() {
-    status.textContent = "Loading live RV & outdoor inventory…";
+    status.textContent = "Syncing eBay and Elevation Inventory…";
     try {
       const response = await fetch(`${API}?t=${Date.now()}`, { headers: { Accept: "application/json" }, cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || `Inventory returned ${response.status}`);
       state.items = Array.isArray(data.items) ? data.items : [];
-      status.textContent = state.items.length ? `${state.items.length} live items available` : "Inventory is being added now. Check back as new RV and outdoor items go live.";
+      const sync = data.supplierSync || {};
+      if (state.items.length) {
+        const source = sync.source === "ebay-api" ? "eBay API" : sync.source === "ebay-public" ? "eBay" : "Elevation Inventory";
+        status.textContent = `${state.items.length} live items · ${source} sync active`;
+      } else if (sync.status === "error") {
+        status.textContent = "eBay inventory sync needs attention. Use the eBay Store link while the catalog reconnects.";
+      } else {
+        status.textContent = "Inventory is syncing now. New eBay and Elevation Inventory items will appear automatically.";
+      }
       render();
     } catch (error) {
       status.textContent = "Live inventory could not be loaded. Use the eBay store link below while we reconnect the catalog.";
