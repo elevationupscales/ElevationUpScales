@@ -1,8 +1,8 @@
 build=3.11.30-emergency-recovery
 baseline=e75862f28428a3e1a660b2f95f0c07e5e6dc9c82
-source_commit=f2a332d861b33120d3487ae5f6ae2cdec09b7be6
-deployment_url=https://abda0813.elevationupscales.pages.dev
+source_commit=ed845e54b572519dd3c3017af7f16097b1a66497
+deployment_url=https://69bf35ae.elevationupscales.pages.dev
 workflow_run=32624819485
-deployed_at=2026-08-23T19:05:23Z
+deployed_at=2026-08-23T19:59:19Z
 apparel_catalog_count=28
 status=success
