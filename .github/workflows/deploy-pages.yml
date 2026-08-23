@@ -39,7 +39,7 @@ jobs:
           test -f site/assets/solar/builder-v2/rv-solar-install-field-desktop.webp
           test -f site/assets/solar/builder-v2/rv-solar-install-field-mobile.webp
           test -f site/assets/solar/builder-v2/rv-solar-install-field-social.webp
-          grep -q '3.11.24-guided-solar-builder' site/_worker.js
+          grep -q '3.11.29-inventory-foundation' site/_worker.js
           grep -q 'v3.11.21 — interactive Solar power planner' site/solar-builder.css
           test -f site/solar-visual-guide.css
           grep -q 'solar-visual-guide' site/solar-project.html
@@ -60,6 +60,14 @@ jobs:
           grep -q 'store-channel-analytics.js' site/store.html
           grep -q 'store_destination_click' site/_worker.js
           grep -q 'store_section_view' site/_worker.js
+
+          # v3.11.29 protected Inventory foundation release gates.
+          test -f site/admin-inventory.html
+          test -f site/admin-inventory.css
+          test -f site/admin-inventory.js
+          grep -q '/api/admin/inventory' site/_worker.js
+          grep -q 'eus_inventory_items' site/_worker.js
+          grep -q 'admin-inventory.html' site/admin-listings.html
 
       - name: Check JavaScript syntax
         shell: bash
