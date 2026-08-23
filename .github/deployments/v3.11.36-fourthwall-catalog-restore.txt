@@ -1,0 +1,7 @@
+build=3.11.36-fourthwall-catalog-restore
+source_commit=943817b81e6083d4d0b2a371d90af59133c1f650
+deployment_url=https://41965aeb.elevationupscales.pages.dev
+workflow_run=32624219938
+deployed_at=2026-08-23T06:56:37Z
+apparel_product_count=24
+status=success
