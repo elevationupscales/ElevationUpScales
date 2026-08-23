@@ -40,13 +40,26 @@ jobs:
           test -f site/assets/solar/builder-v2/rv-solar-install-field-mobile.webp
           test -f site/assets/solar/builder-v2/rv-solar-install-field-social.webp
           grep -q '3.11.24-guided-solar-builder' site/_worker.js
-          grep -q 'v3.11.25 — interactive Builder navigation + visual live summary' site/solar-builder.css
-          grep -q 'id="builder-mobile-stage"' site/solar-project.html
-          grep -q 'data-jump="hardware"' site/solar-project.html
-          grep -q 'class="summary-system-map"' site/solar-project.html
+          grep -q 'v3.11.21 — interactive Solar power planner' site/solar-builder.css
+          test -f site/solar-visual-guide.css
+          grep -q 'solar-visual-guide' site/solar-project.html
+          grep -q 'data-jump="panels"' site/solar-project.html
+          grep -q 'data-jump="services"' site/solar-project.html
           grep -q 'builder-scene-next' site/solar-builder.js
-          grep -q 'Stage 1 of 5' site/solar-project.html
+          grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
+
+          # v3.11.27 RV Shop + first-party Store analytics release gates.
+          test -f site/store.html
+          test -f site/store-channel.css
+          test -f site/store-channel-analytics.js
+          test -f site/admin-store-analytics.css
+          test -f site/admin-store-analytics.js
+          grep -q 'https://www.ebay.com/usr/elevationupscalesshop' site/store.html
+          grep -q 'data-store-destination="ebay"' site/store.html
+          grep -q 'store-channel-analytics.js' site/store.html
+          grep -q 'store_destination_click' site/_worker.js
+          grep -q 'store_section_view' site/_worker.js
 
       - name: Check JavaScript syntax
         shell: bash
