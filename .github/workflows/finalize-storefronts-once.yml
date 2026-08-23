@@ -1,11 +1,10 @@
 name: Finalize storefronts v3.11.35
 
 on:
-  pull_request:
+  push:
     branches: [main]
-    types: [opened, synchronize, reopened]
     paths:
-      - .github/triggers/finalize-storefronts.txt
+      - .github/triggers/finalize-storefronts-main.txt
 
 permissions:
   contents: write
