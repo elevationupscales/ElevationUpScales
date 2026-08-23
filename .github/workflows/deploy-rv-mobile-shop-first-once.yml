@@ -28,10 +28,14 @@ jobs:
         run: |
           set -euo pipefail
           node --check site/rv-store.js
+          node --check site/rv-manual-catalog.js
           grep -q 'rv-store-trust,.rv-store-hero__media{display:none}' site/rv-store.css
           grep -q 'rv-store-market{padding:18px 0 44px}' site/rv-store.css
           grep -q 'manualRvCatalog' site/_worker.js
           grep -q 'Stage 1 of 7' site/solar-project.html
+          ! grep -q 'setInterval.*5000' site/rv-store.js
+          grep -q 'onerror' site/rv-store.js
+          grep -q 'imageUrl:' site/rv-manual-catalog.js
       - name: Deploy production
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -49,12 +53,17 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store.css" > /tmp/rv-store.css
           grep -q 'rv-store-trust,.rv-store-hero__media{display:none}' /tmp/rv-store.css
-          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=mobile-shop-first" > /tmp/inventory.json
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store.js" > /tmp/rv-store.js
+          ! grep -q 'setInterval.*5000' /tmp/rv-store.js
+          grep -q 'onerror' /tmp/rv-store.js
+          curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=stability" > /tmp/inventory.json
           python - <<'PY'
           import json, os
           data=json.load(open('/tmp/inventory.json',encoding='utf-8'))
+          items=data.get('items') or []
           count=int(data.get('count') or 0)
           assert count >= 10, f'Expected >=10 products, got {count}'
+          assert any((i.get('imageUrl') or '').strip() for i in items), 'No product images returned'
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
               f.write(f'count={count}\n')
           PY
@@ -63,18 +72,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .github/deployments
-          cat > .github/deployments/v3.11.34-rv-mobile-shop-first.txt <<EOF
-          build=3.11.34-rv-mobile-shop-first
+          cat > .github/deployments/v3.11.35-rv-stability.txt <<EOF
+          build=3.11.35-rv-stability
           source_commit=$(git rev-parse HEAD)
           deployment_url=${{ steps.deploy.outputs.deployment-url }}
           workflow_run=${{ github.run_id }}
           deployed_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           rv_inventory_count=${{ steps.smoke.outputs.count }}
+          image_fallback=verified
+          scroll_refresh=removed
           status=success
           EOF
           git pull --rebase origin main
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/deployments/v3.11.34-rv-mobile-shop-first.txt
-          git commit -m 'Record v3.11.34 RV mobile shop-first deployment'
+          git add .github/deployments/v3.11.35-rv-stability.txt
+          git commit -m 'Record v3.11.35 RV stability deployment'
           git push origin HEAD:main
