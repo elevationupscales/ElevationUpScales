@@ -56,3 +56,6 @@
 /technician.html /technician 301
 
 /report-an-issue.html /report-an-issue 301
+/outdoor-store /rv-store 301
+/rv-outdoor-store /rv-store 301
+/shop/rv /rv-store 301
