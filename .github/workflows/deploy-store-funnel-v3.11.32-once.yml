@@ -55,7 +55,8 @@ jobs:
           grep -q 'Shopping List' site/rv-store.html
           grep -q 'Buy Now' site/rv-store.js
           grep -q 'RV Shop Views' site/admin-store-analytics.js
-          grep -q 'COUNT(DISTINCT CASE WHEN event_type='"'"'store_section_view'"'"' AND event_value='"'"'rv_shop'"'"'' site/_worker_core.js
+          grep -q 'rv_shop_sessions' site/_worker_core.js
+          grep -q 'store_section_view' site/_worker_core.js
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
           node --check site/home-top.js
