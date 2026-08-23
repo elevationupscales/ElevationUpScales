@@ -78,8 +78,8 @@ jobs:
           grep -q 'RV & Outdoor Store' site/store.html
           grep -q 'href="/rv-store"' site/store.html
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
-          grep -q 'hero-galaxy-rv.webp' site/rv-store.html
-          grep -q 'Automatic eBay sync' site/rv-store.html
+          grep -q 'mountain-bull-bear-header.webp' site/rv-store.html
+          grep -q 'eBay inventory sync' site/rv-store.html
           grep -q 'item.imageUrl' site/rv-store.js
           grep -q 'shopping_list' site/rv-store.js
           test -f site/admin-inventory.html
@@ -116,8 +116,8 @@ jobs:
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 90 "$DEPLOYMENT_URL/rv-store" > /tmp/rv-store.html
-          grep -q 'hero-galaxy-rv.webp' /tmp/rv-store.html
-          grep -q 'Automatic eBay sync' /tmp/rv-store.html
+          grep -q 'mountain-bull-bear-header.webp' /tmp/rv-store.html
+          grep -q 'eBay inventory sync' /tmp/rv-store.html
           curl --fail --silent --show-error --retry 8 --retry-delay 3 --max-time 120 -H 'Accept: application/json' "$DEPLOYMENT_URL/api/store-inventory?release=3.11.31" > /tmp/inventory.json
           python - <<'PY'
           import json, os
