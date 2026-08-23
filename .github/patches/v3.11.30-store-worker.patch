@@ -26,7 +26,7 @@
    if (eventType === "store_section_view" && !["rv_shop", "brand_catalog"].includes(value)) return jsonResponse({ error: "Invalid Store section" }, 400);
    if (eventType === "service_area_classified" && !["treasure_valley","southern_colorado","denver_metro","outside_standard_area","manual_review"].includes(value)) return jsonResponse({ error: "Invalid service area" }, 400);
    if (eventType === "out_of_area_path_selected" && !["project_review","work_with_us"].includes(value)) return jsonResponse({ error: "Invalid out-of-area path" }, 400);
-@@ -3319,6 +3320,52 @@
+@@ -3319,6 +3320,60 @@
    return { body: parsed.value || {} };
  }
  
@@ -40,6 +40,14 @@
 +  const fallback = new URL("https://www.ebay.com/sch/i.html");
 +  fallback.searchParams.set("_ssn", "elevationupscalesshop");
 +  fallback.searchParams.set("_nkw", item.name);
++  let buyUrl = fallback.toString();
++  if (item.sourceUrl) {
++    try {
++      const source = new URL(item.sourceUrl);
++      const host = source.hostname.toLowerCase();
++      if (host === "ebay.com" || host === "www.ebay.com" || host === "elevationupscales.com" || host.endsWith(".elevationupscales.com")) buyUrl = source.toString();
++    } catch (_) {}
++  }
 +  return {
 +    id: item.id,
 +    sku: item.sku,
@@ -50,7 +58,7 @@
 +    quantityAvailable: available,
 +    availability: tracked ? (available > 0 ? "In Stock" : "Out of Stock") : "Available from supplier",
 +    salesChannels: channels,
-+    buyUrl: item.sourceUrl || fallback.toString(),
++    buyUrl,
 +    updatedAt: item.updatedAt,
 +  };
 +}
@@ -79,7 +87,7 @@
  async function handleAdminInventory(request, env, pathname) {
    const auth = await requireAdmin(request, env);
    if (auth.response) return auth.response;
-@@ -4517,6 +4564,7 @@
+@@ -4517,6 +4572,7 @@
      if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
      if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
      if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
