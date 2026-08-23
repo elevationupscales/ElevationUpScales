@@ -2,8 +2,6 @@
   "use strict";
 
   const topLinks = [...document.querySelectorAll('a[href="#top"]')];
-  if (!topLinks.length) return;
-
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
 
   topLinks.forEach((link) => {
@@ -24,4 +22,21 @@
       }
     });
   });
+
+  // Keep the main project CTA intact while giving the RV retail store a
+  // prominent, direct homepage entry point.
+  const heroActions = document.querySelector('.hero-actions');
+  if (heroActions && !heroActions.querySelector('a[data-online-rv-store]')) {
+    const rvStoreButton = document.createElement('a');
+    rvStoreButton.className = 'button button-outline';
+    rvStoreButton.href = '/store';
+    rvStoreButton.dataset.onlineRvStore = '';
+    rvStoreButton.textContent = 'Online RV Store';
+    heroActions.appendChild(rvStoreButton);
+  }
+
+  const storeUtilityLink = document.querySelector('.hero-utility-links a[href="/store"]');
+  if (storeUtilityLink) {
+    storeUtilityLink.textContent = 'Online RV Store';
+  }
 })();
