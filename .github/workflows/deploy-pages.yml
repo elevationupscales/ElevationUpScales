@@ -38,9 +38,12 @@ jobs:
       - name: Require explicit production confirmation
         if: ${{ inputs.target == 'production' }}
         shell: bash
+        env:
+          PRODUCTION_CONFIRMATION: ${{ inputs.production_confirmation }}
         run: |
           set -euo pipefail
-          if [[ "${{ inputs.production_confirmation }}" != "DEPLOY" ]]; then
+          confirmation="$(printf '%s' "$PRODUCTION_CONFIRMATION" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')"
+          if [[ "$confirmation" != "DEPLOY" ]]; then
             echo "Production deployment blocked: type DEPLOY in the production confirmation field."
             exit 1
           fi
@@ -62,8 +65,10 @@ jobs:
           grep -q 'Stage 1 of 7' site/solar-project.html
           cmp -s site/solar-project.html site/solar-project/index.html
 
-          # Preserve split-store navigation.
+          # Preserve split-store navigation and require the current storefront repairs.
           test -f site/store.html
+          test -f site/store-config.js
+          test -f site/store-catalog-resilience.js
           test -f site/rv-store.html
           test -f site/rv-store.css
           test -f site/rv-store.js
@@ -73,6 +78,11 @@ jobs:
           grep -q 'href="/rv-store"' site/store.html
           grep -q 'href="/rv-store"' site/rv-store.html
           grep -q '/rv-store' site/site-shell.js
+          grep -q 'store-catalog-resilience.js?v=3.11.38' site/store-config.js
+          grep -q 'MIN_FULL_COUNT = 13' site/store-catalog-resilience.js
+          grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
+          grep -q 'grid-template-columns:1fr' site/rv-store.html
+          ! grep -q 'rv-store-hero__media' site/rv-store.html
           test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
 
           # Validate the static Seller Hub-verified eBay catalog architecture.
@@ -92,6 +102,7 @@ jobs:
 
           html = Path('site/rv-store.html').read_text(encoding='utf-8')
           assert html.index('rv-ebay-catalog.js') < html.index('rv-store.js'), 'catalog must load before renderer'
+          assert 'rv-store-hero__media' not in html, 'retired RV hero image block returned'
           print('verified_ebay_items=', len(ids))
           PY
 
@@ -171,8 +182,11 @@ jobs:
               exit 1
             fi
           done
-          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
+          rv_html="$(curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/rv-store")"
+          printf '%s' "$rv_html" | grep -q 'VERIFIED EBAY CATALOG'
+          ! printf '%s' "$rv_html" | grep -q 'rv-store-hero__media'
           curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
+          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/store-config.js" | grep -q 'store-catalog-resilience.js?v=3.11.38'
 
       - name: Record preview URL
         run: |
@@ -216,7 +230,7 @@ jobs:
 
           smoke_routes() {
             local base="$1"
-            local route code
+            local route code rv_html
             for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
               echo "Smoke testing ${base}${route}"
               code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
@@ -225,8 +239,14 @@ jobs:
                 return 1
               fi
             done
-            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG' || return 1
+            rv_html="$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/rv-store")" || return 1
+            printf '%s' "$rv_html" | grep -q 'VERIFIED EBAY CATALOG' || return 1
+            if printf '%s' "$rv_html" | grep -q 'rv-store-hero__media'; then
+              echo "Retired RV hero image is still present on ${base}."
+              return 1
+            fi
             curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/store" | grep -q 'Apparel Store' || return 1
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/store-config.js" | grep -q 'store-catalog-resilience.js?v=3.11.38' || return 1
           }
 
           # The deployment-specific pages.dev hostname can lag immediately after a
