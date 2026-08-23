@@ -1,0 +1,13 @@
+build=3.11.35-storefront-complete
+source_commit=aea4ad7d2a6a526497b4a111ae7f8f0e9a0bbcef
+deployment_url=https://782c5cec.elevationupscales.pages.dev
+workflow_run=32624819485
+deployed_at=2026-08-23T18:00:13Z
+apparel_catalog_count=28
+ebay_catalog_count=49
+ebay_catalog_source=Seller Hub validated screenshots
+ebay_images=Seller Hub thumbnail sheet via rv-ebay-sprite-v2.txt
+buy_links=direct eBay item URLs
+scroll_refresh=disabled
+protected_routes=homepage,start-a-project,marketplace,solar
+status=success
