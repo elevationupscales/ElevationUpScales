@@ -36,7 +36,16 @@
     heroActions.append(shop);
   }
 
-  document.querySelectorAll('.hero-utility-links a[href="/store"]').forEach((link) => {
-    link.textContent = 'Shop Apparel & RV Gear';
+  // Turn the old single store shortcut into clear routes for both storefronts.
+  document.querySelectorAll('.hero-utility-links').forEach((group) => {
+    const apparel = group.querySelector('a[href="/store"]');
+    if (apparel) apparel.textContent = 'Apparel Store';
+    if (!group.querySelector('a[href="/rv-store"]')) {
+      const rv = document.createElement('a');
+      rv.href = '/rv-store';
+      rv.textContent = 'RV & Outdoor Store';
+      rv.setAttribute('aria-label', 'Visit the Elevation UpScales RV and Outdoor Store');
+      apparel?.insertAdjacentElement('afterend', rv);
+    }
   });
 })();
