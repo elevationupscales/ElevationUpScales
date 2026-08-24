@@ -2,8 +2,6 @@
   "use strict";
 
   const topLinks = [...document.querySelectorAll('a[href="#top"]')];
-  if (!topLinks.length) return;
-
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
 
   topLinks.forEach((link) => {
@@ -23,5 +21,22 @@
         history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
       }
     });
+  });
+
+  // Keep Start a Project as the primary homepage CTA while giving the new
+  // split storefront a prominent, customer-visible entry point.
+  const heroActions = document.querySelector('.hero-actions');
+  if (heroActions && !heroActions.querySelector('[data-home-shop-cta]')) {
+    const shop = document.createElement('a');
+    shop.className = 'button button-outline';
+    shop.href = '/store';
+    shop.dataset.homeShopCta = 'true';
+    shop.textContent = 'Shop Elevation';
+    shop.setAttribute('aria-label', 'Shop Elevation apparel and RV outdoor gear');
+    heroActions.append(shop);
+  }
+
+  document.querySelectorAll('.hero-utility-links a[href="/store"]').forEach((link) => {
+    link.textContent = 'Shop Apparel & RV Gear';
   });
 })();
