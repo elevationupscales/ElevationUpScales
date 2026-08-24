@@ -18,12 +18,26 @@ window.EUS_STORE = Object.freeze({
 });
 
 (() => {
-  if (!document.body?.classList.contains("store-page") || !document.querySelector("#product-grid")) return;
-  if (document.querySelector('script[data-eus-full-catalog="true"]')) return;
+  "use strict";
 
-  const script = document.createElement("script");
-  script.src = "/store-catalog-resilience.js?v=3.11.38&quality=original-r2";
-  script.async = false;
-  script.dataset.eusFullCatalog = "true";
-  document.head.appendChild(script);
+  if (!document.body?.classList.contains("store-page") || !document.querySelector("#product-grid")) return;
+
+  const loadFullCatalog = (phase) => {
+    if (document.querySelector(`script[data-eus-catalog-phase="${phase}"]`)) return;
+    const script = document.createElement("script");
+    script.src = `/store-catalog-resilience.js?v=3.11.38&quality=original-r3&phase=${encodeURIComponent(phase)}`;
+    script.async = false;
+    script.dataset.eusFullCatalog = "true";
+    script.dataset.eusCatalogPhase = phase;
+    document.head.appendChild(script);
+  };
+
+  // Load immediately, then run two post-load reconciliation passes. The legacy
+  // renderer can finish its own fetch later; these passes make the full catalog
+  // the final owner of the product grid and controls.
+  loadFullCatalog("initial");
+  window.addEventListener("load", () => {
+    window.setTimeout(() => loadFullCatalog("settled"), 400);
+    window.setTimeout(() => loadFullCatalog("final"), 2800);
+  }, { once: true });
 })();
