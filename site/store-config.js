@@ -19,9 +19,18 @@ window.EUS_STORE = Object.freeze({
 
 window.addEventListener("DOMContentLoaded", () => {
   if (!document.body?.classList.contains("store-page") || !document.querySelector("#product-grid")) return;
+
+  if (!document.querySelector('script[data-eus-store-image-quality="true"]')) {
+    const quality = document.createElement("script");
+    quality.src = "/store-image-quality.js?v=3.11.40";
+    quality.defer = true;
+    quality.dataset.eusStoreImageQuality = "true";
+    document.head.appendChild(quality);
+  }
+
   if (document.querySelector('script[data-eus-full-catalog="true"]')) return;
   const script = document.createElement("script");
-  script.src = "/store-catalog-resilience.js?v=3.11.38&quality=original";
+  script.src = "/store-catalog-resilience.js?v=3.11.40&quality=1920";
   script.defer = true;
   script.dataset.eusFullCatalog = "true";
   document.head.appendChild(script);
