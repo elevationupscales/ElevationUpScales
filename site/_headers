@@ -22,6 +22,10 @@
   Cache-Control: no-cache, no-store, must-revalidate
   X-EUS-Store-Build: 3.0.3
 
+/rv-store
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-EUS-Store-Build: 3.11.38
+
 /marketplace
   Cache-Control: no-cache, no-store, must-revalidate
 
@@ -52,6 +56,10 @@
 /store.html
   Cache-Control: no-cache, no-store, must-revalidate
   X-EUS-Store-Build: 3.0.3
+
+/rv-store.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-EUS-Store-Build: 3.11.38
 
 /list-a-vehicle
   Cache-Control: no-cache, no-store, must-revalidate
