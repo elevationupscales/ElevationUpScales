@@ -1,7 +1,7 @@
 
 /* Elevation UpScales v3.4.2 — Control Center recovery facelift
    Presentation-only layer on the known-working v3.4.0 DOM/JS contract.
-   No existing element IDs or initialization hooks are removed. */
+   No existing element IDs, notification hooks, analytics formulas, or initialization hooks are removed. */
 
 .admin-shell__header{padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
 .admin-subhead{max-width:780px}
@@ -27,7 +27,7 @@
   letter-spacing:.09em;text-transform:uppercase
 }
 .admin-summary-grid::before{content:"Marketplace Snapshot"}
-.admin-command-actions::before{content:"Solar · Needs Attention"}
+.admin-command-actions::before{content:"Attention Center · What Needs Action Now"}
 
 .admin-summary-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .admin-summary-grid article:nth-child(6){display:none}
@@ -37,8 +37,13 @@
   border-color:rgba(255,255,255,.11)
 }
 .admin-summary-grid strong,.admin-command-actions strong{font-variant-numeric:tabular-nums}
-.admin-command-actions article:nth-child(n+5){display:none}
-.admin-command-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.admin-command-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:8px}
+.admin-command-actions article{display:block!important;min-width:0}
+.admin-command-actions article.is-urgent,.admin-command-actions article.summary-alert{
+  border-color:rgba(215,83,83,.42)!important;
+  background:linear-gradient(180deg,rgba(215,83,83,.09),rgba(12,12,12,.98))!important
+}
+.admin-command-actions article.is-urgent strong,.admin-command-actions article.summary-alert strong{color:#ffb0a8}
 
 .admin-owner-signals{
   margin-top:20px;
@@ -117,13 +122,16 @@
 @media(max-width:1250px){
   .admin-signal-groups{grid-template-columns:1fr!important}
   .admin-signal-group:first-child .admin-signal-group__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-command-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
 @media(max-width:760px){
   .admin-summary-grid,.admin-command-actions{padding-top:25px}
+  .admin-command-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .admin-signal-group__grid,
   .admin-signal-group:first-child .admin-signal-group__grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:480px){
+  .admin-command-actions,
   .admin-signal-group__grid,
   .admin-signal-group:first-child .admin-signal-group__grid,
   .followup-metrics{grid-template-columns:1fr!important}
