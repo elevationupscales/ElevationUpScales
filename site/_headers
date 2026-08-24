@@ -41,6 +41,22 @@
 /rv-project
   Cache-Control: no-cache, no-store, must-revalidate
 
+/home-top.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/site-shell.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/store-config.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/store-catalog-resilience.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
 /*.css
   Cache-Control: public, max-age=3600, must-revalidate
   CDN-Cache-Control: public, max-age=3600, must-revalidate
