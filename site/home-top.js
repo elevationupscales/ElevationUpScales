@@ -23,6 +23,14 @@
     });
   });
 
+  const trackStorePath = (destination, source) => {
+    window.EUSIntent?.track?.('store_destination_click', destination, {
+      source,
+      source_page: '/',
+      destination
+    });
+  };
+
   // Keep Start a Project as the primary homepage CTA while giving the new
   // split storefront a prominent, customer-visible entry point.
   const heroActions = document.querySelector('.hero-actions');
@@ -31,20 +39,25 @@
     shop.className = 'button button-outline';
     shop.href = '/store';
     shop.dataset.homeShopCta = 'true';
-    shop.textContent = 'Shop Elevation';
+    shop.textContent = 'New: Shop Elevation';
     shop.setAttribute('aria-label', 'Shop Elevation apparel and RV outdoor gear');
+    shop.addEventListener('click', () => trackStorePath('apparel-store', 'home-hero'));
     heroActions.append(shop);
   }
 
   // Turn the old single store shortcut into clear routes for both storefronts.
   document.querySelectorAll('.hero-utility-links').forEach((group) => {
     const apparel = group.querySelector('a[href="/store"]');
-    if (apparel) apparel.textContent = 'Apparel Store';
+    if (apparel) {
+      apparel.textContent = 'Apparel Store';
+      apparel.addEventListener('click', () => trackStorePath('apparel-store', 'home-utility'));
+    }
     if (!group.querySelector('a[href="/rv-store"]')) {
       const rv = document.createElement('a');
       rv.href = '/rv-store';
       rv.textContent = 'RV & Outdoor Store';
       rv.setAttribute('aria-label', 'Visit the Elevation UpScales RV and Outdoor Store');
+      rv.addEventListener('click', () => trackStorePath('rv-outdoor-store', 'home-utility'));
       apparel?.insertAdjacentElement('afterend', rv);
     }
   });
