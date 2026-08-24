@@ -22,22 +22,32 @@ window.EUS_STORE = Object.freeze({
 
   if (!document.body?.classList.contains("store-page") || !document.querySelector("#product-grid")) return;
 
-  const loadFullCatalog = (phase) => {
-    if (document.querySelector(`script[data-eus-catalog-phase="${phase}"]`)) return;
+  // Warm the Fourthwall connection before the authoritative catalog request.
+  const storefrontOrigin = new URL(window.EUS_STORE.storefront).origin;
+  if (!document.querySelector('link[data-eus-fourthwall-preconnect]')) {
+    const preconnect = document.createElement("link");
+    preconnect.rel = "preconnect";
+    preconnect.href = storefrontOrigin;
+    preconnect.crossOrigin = "anonymous";
+    preconnect.dataset.eusFourthwallPreconnect = "true";
+    document.head.appendChild(preconnect);
+  }
+
+  const loadFullCatalog = () => {
+    if (document.querySelector('script[data-eus-full-catalog="true"]')) return;
     const script = document.createElement("script");
-    script.src = `/store-catalog-resilience.js?v=3.11.38&quality=original-r3&phase=${encodeURIComponent(phase)}`;
+    script.src = "/store-catalog-resilience.js?v=3.11.38&quality=original-r4";
     script.async = false;
     script.dataset.eusFullCatalog = "true";
-    script.dataset.eusCatalogPhase = phase;
     document.head.appendChild(script);
   };
 
-  // Load immediately, then run two post-load reconciliation passes. The legacy
-  // renderer can finish its own fetch later; these passes make the full catalog
-  // the final owner of the product grid and controls.
-  loadFullCatalog("initial");
-  window.addEventListener("load", () => {
-    window.setTimeout(() => loadFullCatalog("settled"), 400);
-    window.setTimeout(() => loadFullCatalog("final"), 2800);
-  }, { once: true });
+  // Let the lightweight fallback/legacy renderer establish the page first, then
+  // run one authoritative full-catalog pass. This avoids three duplicate catalog
+  // downloads while still ensuring the complete Fourthwall catalog owns the UI.
+  if (document.readyState === "complete") {
+    window.setTimeout(loadFullCatalog, 250);
+  } else {
+    window.addEventListener("load", () => window.setTimeout(loadFullCatalog, 250), { once: true });
+  }
 })();
