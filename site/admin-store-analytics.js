@@ -29,10 +29,12 @@
     section.className = "admin-signal-group admin-store-analytics";
     section.setAttribute("aria-labelledby", "admin-store-analytics-heading");
     section.innerHTML = `
-      <header><p class="eyebrow">Store Analytics</p><h3 id="admin-store-analytics-heading">Brand Store + RV Shop</h3><small>First-party, anonymous session tracking for where Store visitors go and what they click. eBay and Fourthwall activity after the handoff stays inside those platforms.</small></header>
+      <header><p class="eyebrow">Store Analytics</p><h3 id="admin-store-analytics-heading">Homepage → Store → Checkout</h3><small>First-party, anonymous tracking for storefront discovery and outbound handoffs. Homepage and Other Ways CTA clicks stay separate from eBay/Fourthwall checkout destinations.</small></header>
       <div class="admin-signal-group__grid admin-store-metrics">
         <article class="is-primary"><span>Store Sessions</span><strong data-store-metric="sessions">—</strong><small>Unique Store visitors</small></article>
         <article><span>RV Shop Views</span><strong data-store-metric="rvShopSessions">—</strong><small>Unique visitors who reached the RV section</small></article>
+        <article class="is-primary"><span>Homepage Shop CTA</span><strong data-store-metric="homeShopClicks">—</strong><small>Recent tracked storefront choices from Home</small></article>
+        <article><span>Other Ways Shop CTA</span><strong data-store-metric="otherWaysShopClicks">—</strong><small>Recent tracked storefront choices from Other Ways</small></article>
         <article class="is-primary"><span>eBay Clicks</span><strong data-store-metric="ebayClicks">—</strong><small>Outbound RV Shop handoffs</small></article>
         <article><span>Fourthwall Clicks</span><strong data-store-metric="fourthwallClicks">—</strong><small>Brand product handoffs</small></article>
         <article><span>RV → eBay CTR</span><strong data-store-metric="ebayCtr">—</strong><small>Unique eBay visitors ÷ RV Shop viewers</small></article>
@@ -58,7 +60,11 @@
     const product = event.product ? ` · ${event.product}` : "";
     switch (event.eventType) {
       case "store_open": return "Opened Store";
-      case "store_section_view": return value === "rv_shop" ? "Viewed RV Shop" : "Viewed Brand Catalog";
+      case "store_section_view": {
+        if (event.page === "/") return value === "rv_shop" ? "Homepage → RV & Outdoor Store" : "Homepage → Apparel Store";
+        if (event.page === "/other-ways-we-can-help") return value === "rv_shop" ? "Other Ways → RV & Outdoor Store" : "Other Ways → Apparel Store";
+        return value === "rv_shop" ? "Viewed RV Shop" : "Viewed Brand Catalog";
+      }
       case "store_category_select": return `Filtered ${value || "catalog"}`;
       case "store_search_used": return value === "[redacted]" ? "Used Store search" : `Searched “${value}”`;
       case "store_sort_changed": return `Changed sort to ${value}`;
@@ -92,9 +98,14 @@
     const section = ensureSection();
     if (!section) return;
     const store = payload?.store || {};
+    const events = Array.isArray(store.recentEvents) ? store.recentEvents : [];
+    const homeShopClicks = events.filter((event) => event.eventType === "store_section_view" && event.page === "/" && ["brand_catalog", "rv_shop"].includes(event.eventValue)).length;
+    const otherWaysShopClicks = events.filter((event) => event.eventType === "store_section_view" && event.page === "/other-ways-we-can-help" && ["brand_catalog", "rv_shop"].includes(event.eventValue)).length;
     const set = (key, value) => { const el = section.querySelector(`[data-store-metric="${key}"]`); if (el) el.textContent = value; };
     set("sessions", num(store.sessions));
     set("rvShopSessions", num(store.rvShopSessions));
+    set("homeShopClicks", num(homeShopClicks));
+    set("otherWaysShopClicks", num(otherWaysShopClicks));
     set("ebayClicks", num(store.ebayClicks));
     set("fourthwallClicks", num(store.fourthwallClicks));
     set("ebayCtr", pct(store.ebayCtr));
@@ -110,9 +121,9 @@
       destinations.innerHTML = rows.map(([label, clicks, sessions]) => `<span><b>${esc(label)}</b><strong>${num(clicks)} clicks</strong><small>${num(sessions)} unique visitors</small></span>`).join("");
     }
     const journeys = section.querySelector("[data-store-journeys]");
-    if (journeys) renderJourneys(journeys, store.recentEvents || []);
+    if (journeys) renderJourneys(journeys, events);
     const status = section.querySelector("[data-store-status]");
-    if (status) status.textContent = `Store analytics · ${payload?.range?.label || currentRange()} · D1 first-party events. External platform behavior after the click is reported by eBay/Fourthwall, not this website.`;
+    if (status) status.textContent = `Store analytics · ${payload?.range?.label || currentRange()} · D1 first-party events. Homepage/Other Ways CTA counters use the recent Store journey event window; eBay/Fourthwall totals use the full selected analytics range.`;
   }
 
   async function load(force = false) {
