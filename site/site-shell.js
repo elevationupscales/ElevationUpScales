@@ -1,4 +1,4 @@
-/* Elevation UpScales shared navigation 3.11.30 store navigation repair */
+/* Elevation UpScales shared navigation 3.11.31 funnel clarity */
 (() => {
   "use strict";
 
@@ -35,6 +35,46 @@
   } catch (_) { intentTrack("session_start"); }
   intentTrack("page_view");
   if (location.pathname === "/marketplace" || location.pathname.startsWith("/marketplace/listing/")) intentTrack("marketplace_open");
+
+  // Client-funnel clarity layer. Presentation/copy only: no intake field names,
+  // values, storage, submission, lead creation, or Solar deduplication behavior changes.
+  if (location.pathname === "/start-a-project") {
+    document.body.classList.add("eus-funnel-upgrade");
+    const setText = (selector, text) => {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = text;
+    };
+    setText('.sap-hero h1 + p', 'Choose your project location, then the type of help you need. We’ll only show the questions that apply.');
+    setText('[data-progress="location"] b', 'Location');
+    setText('[data-progress="intent"] b', 'Service');
+    setText('[data-progress="details"] b', 'Project');
+    setText('[data-progress="contact"] b', 'Contact');
+    setText('[data-progress="review"] b', 'Review');
+    setText('[data-step="location"] .sap-step-head > p:last-child', 'Choose where the project is located. City and ZIP come after you choose the service.');
+    setText('[data-state-choice="CO"] small', 'Continue with Colorado service routing.');
+    setText('[data-state-choice="ID"] small', 'Continue with Idaho service routing.');
+    setText('[data-state-choice="OTHER"] small', 'Request an outside-area project review.');
+    setText('[data-step="intent"] .sap-step-head h2', 'What kind of help do you need?');
+    setText('[data-step="intent"] .sap-step-head > p:last-child', 'Pick the closest match. We’ll narrow the details on the next step.');
+    const intentCopy = {
+      emergency_repair: 'Leaks, water damage, urgent repairs, or safety concerns.',
+      small_repair_handyman: 'Maintenance, fixtures, tile, flooring, minor plumbing, and punch-list work.',
+      restoration_remodel_larger_project: 'Restoration, remodels, inspections, and larger multi-step projects.',
+      rv: 'RV repair, restoration, inspections, systems, and upgrades.',
+      solar_off_grid: 'Solar, batteries, inverters, troubleshooting, and off-grid power systems.'
+    };
+    Object.entries(intentCopy).forEach(([intent, copy]) => setText(`[data-intake-intent="${intent}"] small`, copy));
+    setText('.sap-emergency-actions p', 'Need immediate help? Call now. Or continue the intake so the project is saved for follow-up.');
+    setText('[data-step="details"] .sap-step-head > p:last-child', 'Tell us only what we need to understand the project. Deeper scope can happen during follow-up.');
+    const progress = document.querySelector('.sap-progress');
+    if (progress && !document.querySelector('[data-eus-funnel-guidance]')) {
+      const guidance = document.createElement('p');
+      guidance.className = 'sap-location-context';
+      guidance.dataset.eusFunnelGuidance = 'true';
+      guidance.innerHTML = '<strong>One step at a time.</strong> Your answers determine what appears next, so you do not have to fill out unrelated questions.';
+      progress.insertAdjacentElement('afterend', guidance);
+    }
+  }
 
   const contactAnalyticsBuild = "3.11.13-contact-cta-integrity";
   const contactToken = (value) => String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
