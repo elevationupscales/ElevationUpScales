@@ -57,6 +57,26 @@
   Cache-Control: no-cache, no-store, must-revalidate
   CDN-Cache-Control: no-cache, no-store, must-revalidate
 
+/admin-control-center-v342.css
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/admin-workspace.css
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/admin-workspace.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/admin-store-analytics.css
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/admin-store-analytics.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
 /*.css
   Cache-Control: public, max-age=3600, must-revalidate
   CDN-Cache-Control: public, max-age=3600, must-revalidate
