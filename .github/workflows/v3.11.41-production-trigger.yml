@@ -1,0 +1,117 @@
+name: v3.11.41 Production Gate
+
+on:
+  push:
+    branches:
+      - release/v3.11.41-production-trigger
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-v3-11-41-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out approved production commit
+        uses: actions/checkout@v6
+        with:
+          ref: bc92dc7640d8956d04a68b30cdee9841855227a1
+
+      - name: Verify exact approved source and protected lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "bc92dc7640d8956d04a68b30cdee9841855227a1"
+          test -f site/index.html
+          test -f site/_worker.js
+          test -f site/store.html
+          test -f site/store-config.js
+          test -f site/store-catalog-resilience.js
+          test -f site/store-image-quality.js
+          test -f site/rv-store.html
+          test -f site/solar-project.html
+          grep -q '3.11.30-store-navigation-repair' site/_worker.js
+          grep -q 'store-catalog-resilience.js?v=3.11.38&quality=original-r4' site/store-config.js
+          grep -q 'store-image-quality.js?v=3.11.41' site/store-config.js
+          grep -q 'TARGET_WIDTH = 1920' site/store-image-quality.js
+          grep -q 'MIN_FULL_COUNT = 13' site/store-catalog-resilience.js
+          grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
+          grep -q 'VERIFIED EBAY CATALOG' site/rv-store.html
+          cmp -s site/solar-project.html site/solar-project/index.html
+
+      - name: Check all JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find site -type f -name '*.js' -print0)
+
+      - name: Block secrets and release archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          blocked=$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)
+          test -z "$blocked"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
+            echo "Credential-like value found in website source."
+            exit 1
+          fi
+
+      - name: Deploy approved source to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production routes and v3.11.41 asset
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          deployment_base="${DEPLOYMENT_URL%/}"
+          production_base="${PRODUCTION_URL%/}"
+
+          smoke_routes() {
+            local base="$1"
+            local route code
+            for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
+              echo "Smoke testing ${base}${route}"
+              code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
+              test "$code" = "200" || return 1
+            done
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 "${base}/store-config.js" | grep -q 'store-image-quality.js?v=3.11.41' || return 1
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 "${base}/store-image-quality.js" | grep -q 'TARGET_WIDTH = 1920' || return 1
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 "${base}/store" | grep -q 'Apparel Store' || return 1
+            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG' || return 1
+          }
+
+          if smoke_routes "$deployment_base"; then
+            echo "Deployment-specific production URL verified."
+          else
+            echo "Deployment URL not ready; validating custom production alias."
+            sleep 8
+            smoke_routes "$production_base"
+          fi
+
+          # Final custom-domain assertion after propagation/fallback check.
+          smoke_routes "$production_base"
+
+      - name: Record production receipt
+        shell: bash
+        run: |
+          echo "### Elevation UpScales v3.11.41 production" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: bc92dc7640d8956d04a68b30cdee9841855227a1" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production verification: PASS" >> "$GITHUB_STEP_SUMMARY"
