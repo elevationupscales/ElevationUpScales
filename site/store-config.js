@@ -33,6 +33,14 @@ window.EUS_STORE = Object.freeze({
     document.head.appendChild(preconnect);
   }
 
+  if (!document.querySelector('script[data-eus-store-image-quality="true"]')) {
+    const quality = document.createElement("script");
+    quality.src = "/store-image-quality.js?v=3.11.41";
+    quality.async = false;
+    quality.dataset.eusStoreImageQuality = "true";
+    document.head.appendChild(quality);
+  }
+
   const loadFullCatalog = () => {
     if (document.querySelector('script[data-eus-full-catalog="true"]')) return;
     const script = document.createElement("script");
