@@ -1,5 +1,6 @@
 import coreWorker from "./worker-core.js";
 import { handleStoreCheckoutApi } from "./store-checkout-server.js";
+import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
 
 // Protected production invariants continue to execute inside worker-core.js.
 // 3.11.30-store-navigation-repair
@@ -24,6 +25,17 @@ const RV_ROUTING_LOADER = `
   script.src = "/rv-checkout-routing.js?v=3.11.42";
   script.async = false;
   script.dataset.eusRvCheckoutRouting = "true";
+  document.head.appendChild(script);
+})();
+`;
+
+const ADMIN_ORDERS_LOADER = `
+;(() => {
+  if (document.querySelector('script[data-eus-admin-orders-link="true"]')) return;
+  const script = document.createElement("script");
+  script.src = "/admin-store-orders-link.js?v=3.11.42";
+  script.async = false;
+  script.dataset.eusAdminOrdersLink = "true";
   document.head.appendChild(script);
 })();
 `;
@@ -84,7 +96,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/worker-core.js" || url.pathname === "/store-checkout-server.js") {
+    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js"].includes(url.pathname)) {
       return new Response("Not found", {
         status: 404,
         headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
@@ -103,12 +115,20 @@ export default {
       return handleStoreCheckoutApi(request, env, url.pathname);
     }
 
+    if (url.pathname === "/api/admin/store-orders" || url.pathname.startsWith("/api/admin/store-orders/")) {
+      return handleStoreOrdersAdminApi(request, env, url.pathname);
+    }
+
     if (url.pathname === "/store-config.js") {
       return appendRuntimeLoader(await coreWorker.fetch(request, env, ctx), APPAREL_ROUTING_LOADER);
     }
 
     if (url.pathname === "/rv-store.js") {
       return appendRuntimeLoader(await coreWorker.fetch(request, env, ctx), RV_ROUTING_LOADER);
+    }
+
+    if (url.pathname === "/admin-listings.js") {
+      return appendRuntimeLoader(await coreWorker.fetch(request, env, ctx), ADMIN_ORDERS_LOADER);
     }
 
     const response = await coreWorker.fetch(request, env, ctx);
