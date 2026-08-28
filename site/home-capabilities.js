@@ -33,10 +33,6 @@
     link.querySelector(".eus-home-capability-card__eyebrow").textContent = item.eyebrow;
     link.querySelector("strong").textContent = item.title;
     link.querySelector(".eus-home-capability-card__description").textContent = item.description;
-    link.addEventListener("click", () => window.EUSIntent?.track?.("service_shortcut_click", item.id, {
-      source: "homepage_what_we_do",
-      destination: item.href,
-    }));
     grid.appendChild(link);
   });
 
