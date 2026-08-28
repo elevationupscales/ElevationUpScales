@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070707">
+  <meta name="robots" content="noindex,follow">
+  <title>Checkout | Elevation UpScales, Inc.</title>
+  <link rel="icon" href="/assets/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/site-shell.css?v=3.4.0">
+  <link rel="stylesheet" href="/store-checkout.css?v=3.11.42">
+  <script defer src="/site-shell.js?v=3.4.1"></script>
+  <script defer src="/store-checkout.js?v=3.11.42"></script>
+</head>
+<body class="eus-checkout-page">
+  <a class="skip-link" href="#main">Skip to checkout</a>
+  <header class="eus-header" id="top">
+    <div class="container eus-header__inner">
+      <a class="eus-brand" href="/" aria-label="Elevation UpScales home">
+        <img src="/assets/logo-mark.webp" width="128" height="80" alt="Elevation UpScales bull and polar bear emblem">
+        <span class="eus-wordmark"><strong>ELEVATION</strong><span class="eus-wordmark__sub">UPSCALES</span><small class="eus-wordmark__tagline">Elevate the Experience</small></span>
+      </a>
+    </div>
+  </header>
+
+  <main id="main" class="eus-checkout-main">
+    <section class="eus-checkout-card" aria-labelledby="checkout-title">
+      <h1 id="checkout-title">Checkout</h1>
+
+      <div class="eus-checkout-item">
+        <strong id="checkout-product">Loading item…</strong>
+        <span id="checkout-unit-price">—</span>
+      </div>
+
+      <form id="checkout-form" class="eus-checkout-form" novalidate>
+        <label id="checkout-variant-row" hidden>
+          <span>Option</span>
+          <select id="checkout-variant" name="variant"></select>
+        </label>
+
+        <label>
+          <span>Quantity</span>
+          <input id="checkout-quantity" name="quantity" type="number" min="1" max="10" step="1" value="1" required>
+        </label>
+
+        <label>
+          <span>Full name</span>
+          <input id="checkout-name" name="fullName" autocomplete="name" required>
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input id="checkout-email" name="email" type="email" autocomplete="email" required>
+        </label>
+
+        <label>
+          <span>Phone</span>
+          <input id="checkout-phone" name="phone" type="tel" autocomplete="tel">
+        </label>
+
+        <label>
+          <span>Address</span>
+          <input id="checkout-address1" name="address1" autocomplete="address-line1" required>
+        </label>
+
+        <label>
+          <span>Address 2</span>
+          <input id="checkout-address2" name="address2" autocomplete="address-line2">
+        </label>
+
+        <label>
+          <span>City</span>
+          <input id="checkout-city" name="city" autocomplete="address-level2" required>
+        </label>
+
+        <div class="eus-checkout-row">
+          <label>
+            <span>State</span>
+            <input id="checkout-state" name="state" maxlength="2" autocomplete="address-level1" required>
+          </label>
+          <label>
+            <span>ZIP</span>
+            <input id="checkout-postal" name="postalCode" autocomplete="postal-code" required>
+          </label>
+        </div>
+      </form>
+
+      <dl class="eus-checkout-summary">
+        <div><dt>Items</dt><dd id="checkout-merchandise">—</dd></div>
+        <div><dt>Shipping</dt><dd id="checkout-shipping">—</dd></div>
+        <div><dt>Total</dt><dd id="checkout-total">—</dd></div>
+      </dl>
+
+      <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>
+      <div id="checkout-paypal" class="eus-checkout-paypal" hidden></div>
+
+      <section id="checkout-success" class="eus-checkout-success" hidden>
+        <h2>Payment complete</h2>
+        <p id="checkout-success-reference"></p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
