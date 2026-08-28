@@ -56,10 +56,34 @@ jobs:
         run: |
           set -euo pipefail
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
-          if grep -RIqE '(PAYPAL_CLIENT_SECRET\s*[=:]\s*["'"'][^"'"']+|cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
-            echo 'BLOCKED: credential-like value found in source.'
-            exit 1
-          fi
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          patterns = [
+              re.compile(r'cfat_[A-Za-z0-9_-]+'),
+              re.compile(r'github_pat_[A-Za-z0-9_]+'),
+              re.compile(r'ghp_[A-Za-z0-9]+'),
+              re.compile(r'sk_live_[A-Za-z0-9]+'),
+              re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),
+              re.compile(r'PAYPAL_CLIENT_SECRET\s*[=:]\s*["\'][^"\']+["\']'),
+          ]
+          hits = []
+          for path in Path('site').rglob('*'):
+              if not path.is_file():
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except (UnicodeDecodeError, OSError):
+                  continue
+              for pattern in patterns:
+                  if pattern.search(text):
+                      hits.append(str(path))
+                      break
+          if hits:
+              raise SystemExit('BLOCKED: credential-like value found in source: ' + ', '.join(sorted(set(hits))))
+          print('credential_scan=PASS')
+          PY
       - name: Record pre-Cloudflare receipt
         run: |
           echo '### Store v3.11.42 pre-Cloudflare validation' >> "$GITHUB_STEP_SUMMARY"
