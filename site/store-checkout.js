@@ -120,6 +120,9 @@
     }
 
     renderQuote(body);
+    if (Array.isArray(body.variants) && body.variants.length && !body.variantId && variantEl.value) {
+      return requestQuote();
+    }
     setStatus(config?.configured ? "PayPal is ready." : "PayPal checkout is not configured.", config?.configured ? "ready" : "error");
     return body;
   }
