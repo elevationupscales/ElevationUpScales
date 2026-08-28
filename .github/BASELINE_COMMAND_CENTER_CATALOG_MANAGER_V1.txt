@@ -1,0 +1,6 @@
+Elevation UpScales — Command Center Store Catalog Manager v1
+Production deployment verified: https://05592aa4.elevationupscales.pages.dev
+Production code commit verified during deployment: b25787e (runtime relocation descendant of Catalog Manager v1)
+Clean source baseline commit will be the commit containing this record.
+Parent Lithium/Hawaii baseline: e8f157e5474a396ee80e07073b33ff77fa19c29d
+Date: 2026-08-28
