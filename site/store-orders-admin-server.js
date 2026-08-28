@@ -158,7 +158,7 @@ function orderRecord(row) {
     supplier,
     paypalOrderId: clean(row.paypal_order_id, 100),
     paypalCaptureId: clean(row.paypal_capture_id, 100),
-    paymentStatus: clean(row.payment_status, 40),
+    paymentStatus: clean(row.payment_status, 40).toLowerCase(),
     fulfillmentStatus: normalizedStatus(row),
     supplierOrderId: clean(row.supplier_order_id, 160),
     trackingNumber: clean(row.tracking_number, 180),
