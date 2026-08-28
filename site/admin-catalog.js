@@ -82,9 +82,11 @@
     for(let i=0;i<line.length;i+=1){const ch=line[i]; if(ch==='"'){if(quoted&&line[i+1]==='"'){current+='"';i+=1;}else quoted=!quoted;}else if(ch===delimiter&&!quoted){out.push(current);current="";}else current+=ch;} out.push(current); return out.map((v)=>v.trim());
   }
   function parseDelimited(raw) {
-    const lines = String(raw||"").replace(/\r/g,"").split("\n").filter((line)=>line.trim()); if(!lines.length)return [];
-    const delimiter = lines[0].includes("\t") ? "\t" : lines[0].includes(",") ? "," : "\t";
-    const headers = splitDelimitedLine(lines[0],delimiter).map((h)=>h.trim());
+    let lines = String(raw||"").replace(/\r/g,"").split("\n").filter((line)=>line.trim()); if(!lines.length)return [];
+    const pipe = !lines[0].includes("\t") && lines[0].includes("|");
+    const delimiter = lines[0].includes("\t") ? "\t" : pipe ? "|" : lines[0].includes(",") ? "," : "\t";
+    if (pipe) lines = lines.map((line)=>line.trim().replace(/^\|/,"").replace(/\|$/,"")).filter((line)=>!/^\s*:?-{3,}/.test(line));
+    const headers = splitDelimitedLine(lines[0],delimiter).map((h)=>h.trim()).filter(Boolean);
     return lines.slice(1).map((line)=>{const cells=splitDelimitedLine(line,delimiter); const row={}; headers.forEach((header,index)=>{row[header]=cells[index]??"";}); return row;}).filter((row)=>Object.values(row).some((v)=>text(v)));
   }
   const normKey = (value) => text(value).toLowerCase().replace(/[^a-z0-9]+/g,"");
