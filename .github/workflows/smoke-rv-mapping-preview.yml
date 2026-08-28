@@ -45,10 +45,36 @@ jobs:
               print('rv_mapping_unauth_panel=',auth_visible)
               print('rv_mapping_dashboard_hidden=',dashboard_hidden)
               print('rv_mapping_queue=',queue_count)
-              assert count == 50, count  # 49 catalog items + placeholder
+              assert count == 50, count
               assert auth_visible is True
               assert dashboard_hidden is True
               assert queue_count == 5
+
+              # Account snapshot prefill: data may prefill, but activation must remain off.
+              driver.execute_script("""
+                const e=document.getElementById('rv-map-product');
+                e.value='186833010961';
+                e.dispatchEvent(new Event('change',{bubbles:true}));
+              """)
+              time.sleep(.25)
+              snapshot=driver.execute_script("""
+                return {
+                  itemNo:document.getElementById('rv-map-item-no').value,
+                  cost:document.getElementById('rv-map-cost').value,
+                  shipping:document.getElementById('rv-map-shipping').value,
+                  verified:document.getElementById('rv-map-verified').checked,
+                  notes:document.getElementById('rv-map-notes').value,
+                  status:document.getElementById('rv-map-status').textContent
+                };
+              """)
+              assert snapshot['itemNo'] == 'D010275E6ZT', snapshot
+              assert snapshot['cost'] == '7.86', snapshot
+              assert snapshot['shipping'] == '0.00', snapshot
+              assert snapshot['verified'] is False, snapshot
+              assert 'inventory 1' in snapshot['status'], snapshot
+              assert 'Destination scope is not proven' in snapshot['notes'], snapshot
+              print('rv_mapping_account_snapshot_prefill=PASS')
+              print('rv_mapping_shipping_activation_lock=PASS')
 
               # UI-only synthetic generation test. Nothing is saved to Cloudflare or checkout config.
               driver.execute_script("""
@@ -69,8 +95,10 @@ jobs:
               assert entry['shippingVerified'] is True
               assert entry['priceCents'] == 1799
               assert entry['shippingCents'] == 525
+              assert entry['supplierCostCents'] == 1000
               assert entry['blockedStates'] == ['AK','HI']
               assert entry['ebayUrl'] == 'https://www.ebay.com/itm/186833010961'
+              assert entry['sourceSnapshot']['storeSku'] == 'D010275E6ZT-934006'
               print('rv_mapping_synthetic_generation=PASS')
 
               driver.get(base + '/admin-listings')
