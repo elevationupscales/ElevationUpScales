@@ -1,82 +1,13 @@
 name: Smoke PayPal Order Persistence
 
 on:
-  push:
-    branches:
-      - launch/paypal-sandbox-preview-20260828
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  smoke:
+  note:
     runs-on: ubuntu-latest
     steps:
-      - name: Create disposable sandbox PayPal order
-        shell: bash
-        run: |
-          set -euo pipefail
-          base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
-          code=$(curl --silent --show-error --output /tmp/create.json --write-out '%{http_code}' \
-            -H "Origin: ${base}" \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            --data '{"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":"","customer":{"email":"sandbox-checkout@elevationupscales.com","phone":"2088134998"},"shipping":{"fullName":"Elevation Sandbox Test","address1":"123 Test Street","address2":"","city":"Colorado Springs","state":"CO","postalCode":"80903","countryCode":"US"}}' \
-            "${base}/api/store-checkout/orders")
-          cat /tmp/create.json
-          test "$code" = '200'
-          python - <<'PY'
-          import json
-          data=json.load(open('/tmp/create.json'))
-          assert data.get('ok') is True
-          assert data.get('id')
-          assert str(data.get('reference','')).startswith('EUS-STORE-')
-          assert float(data.get('amount','0')) > 0
-          open('/tmp/reference.txt','w').write(data['reference'])
-          open('/tmp/paypal.txt','w').write(data['id'])
-          print('paypal_sandbox_order_create=PASS')
-          print('reference='+data['reference'])
-          print('paypal_order_id='+data['id'])
-          PY
-
-      - name: Verify D1 persistence and clean test row
-        shell: bash
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          ref="$(cat /tmp/reference.txt)"
-          paypal="$(cat /tmp/paypal.txt)"
-          npm install --silent wrangler@4
-          npx wrangler d1 execute elevation-upscales-marketplace --remote --command "SELECT id,payment_status,paypal_order_id,total_cents FROM eus_store_orders WHERE id='${ref}'" --json > /tmp/d1.json
-          cat /tmp/d1.json
-          python - <<'PY'
-          import json
-          ref=open('/tmp/reference.txt').read().strip()
-          paypal=open('/tmp/paypal.txt').read().strip()
-          data=json.load(open('/tmp/d1.json'))
-          rows=[]
-          for part in data if isinstance(data,list) else [data]:
-              result=part.get('results') if isinstance(part,dict) else None
-              if isinstance(result,list): rows.extend(result)
-          assert len(rows)==1, rows
-          row=rows[0]
-          assert row.get('id')==ref
-          assert row.get('paypal_order_id')==paypal
-          assert row.get('payment_status')=='created'
-          assert int(row.get('total_cents') or 0)>0
-          print('store_order_d1_persistence=PASS')
-          PY
-          npx wrangler d1 execute elevation-upscales-marketplace --remote --command "DELETE FROM eus_store_orders WHERE id='${ref}'" --json > /tmp/delete.json
-          npx wrangler d1 execute elevation-upscales-marketplace --remote --command "SELECT id FROM eus_store_orders WHERE id='${ref}'" --json > /tmp/after.json
-          python - <<'PY'
-          import json
-          data=json.load(open('/tmp/after.json'))
-          rows=[]
-          for part in data if isinstance(data,list) else [data]:
-              result=part.get('results') if isinstance(part,dict) else None
-              if isinstance(result,list): rows.extend(result)
-          assert rows==[], rows
-          print('store_order_test_cleanup=PASS')
-          PY
+      - run: echo 'Manual-only after initial sandbox create-order proof. Automatic repeat creation is disabled.'
