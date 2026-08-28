@@ -88,6 +88,35 @@ function priceFromProduct(product) {
   return Number.isInteger(direct) ? direct : (variantPrices.length ? Math.min(...variantPrices) : null);
 }
 
+function imageUrl(value) {
+  if (typeof value === "string") return clean(value, 1200);
+  return clean(value?.url || value?.src || value?.imageUrl || value?.transformedUrl, 1200);
+}
+
+function variantImages(variant) {
+  const candidates = [
+    ...(Array.isArray(variant?.images) ? variant.images : []),
+    ...(Array.isArray(variant?.media) ? variant.media : []),
+    variant?.thumbnailImage,
+    variant?.image,
+  ];
+  return candidates.map(imageUrl).filter(Boolean);
+}
+
+function productImages(product) {
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  const candidates = [
+    ...(Array.isArray(product?.images) ? product.images : []),
+    ...(Array.isArray(product?.media) ? product.media : []),
+    product?.image,
+    product?.featuredImage,
+    product?.primaryImage,
+    product?.thumbnailImage,
+    ...variants.flatMap(variantImages),
+  ];
+  return [...new Set(candidates.map(imageUrl).filter(Boolean))];
+}
+
 function variantId(variant, index) {
   return clean(variant?.id || variant?.variantId || variant?.sku || variant?.offerId || `variant-${index + 1}`, 240);
 }
@@ -188,21 +217,29 @@ async function quoteApparel(raw) {
     selectedVariant = variants[0];
   }
 
-  const selectedBaseCents = selectedVariant
+  // Fourthwall frequently supplies a verified product-level price while variant
+  // records carry option data only. A selected variant therefore inherits the
+  // verified product price when its own price field is absent.
+  const productBaseCents = priceFromProduct(product);
+  const variantBaseCents = selectedVariant
     ? dollarsToCents(selectedVariant?.unitPrice?.value ?? selectedVariant?.price?.value ?? selectedVariant?.price ?? selectedVariant?.amount)
-    : priceFromProduct(product);
+    : null;
+  const selectedBaseCents = Number.isInteger(variantBaseCents) ? variantBaseCents : productBaseCents;
   if (!Number.isInteger(selectedBaseCents)) return { ok: false, status: 502, error: "Product price unavailable" };
 
   const unitPriceCents = Math.round(selectedBaseCents * APPAREL_MARKUP);
   const merchandiseCents = unitPriceCents * qty;
   const shippingCents = physicalApparel(product) ? APPAREL_SHIPPING_CENTS * qty : 0;
   const totalCents = merchandiseCents + shippingCents;
+  const defaultImage = productImages(product)[0] || "";
+  const selectedImage = selectedVariant ? (variantImages(selectedVariant)[0] || defaultImage) : defaultImage;
 
   return {
     ok: true,
     source: "apparel",
     id: productId(product),
     productName: clean(product?.name || product?.title, 240) || "Elevation UpScales item",
+    productImage: selectedImage,
     quantity: qty,
     unitPriceCents,
     merchandiseCents,
@@ -211,10 +248,12 @@ async function quoteApparel(raw) {
     variantId: selectedVariant ? variantId(selectedVariant, variants.indexOf(selectedVariant)) : "",
     variantName: selectedVariant ? variantLabel(selectedVariant, variants.indexOf(selectedVariant)) : "",
     variants: variants.map((variant, index) => {
-      const base = dollarsToCents(variant?.unitPrice?.value ?? variant?.price?.value ?? variant?.price ?? variant?.amount);
+      const directBase = dollarsToCents(variant?.unitPrice?.value ?? variant?.price?.value ?? variant?.price ?? variant?.amount);
+      const base = Number.isInteger(directBase) ? directBase : productBaseCents;
       return {
         id: variantId(variant, index),
         label: variantLabel(variant, index),
+        image: variantImages(variant)[0] || defaultImage,
         priceCents: Number.isInteger(base) ? Math.round(base * APPAREL_MARKUP) : unitPriceCents,
       };
     }),
@@ -253,6 +292,7 @@ async function quoteRv(raw, env) {
     source: "rv",
     id,
     productName: clean(entry.name || raw?.name, 240) || "RV & Outdoor item",
+    productImage: clean(entry.imageUrl || entry.image, 1200),
     quantity: qty,
     unitPriceCents,
     merchandiseCents: unitPriceCents * qty,
