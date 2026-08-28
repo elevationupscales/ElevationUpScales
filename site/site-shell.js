@@ -171,22 +171,13 @@
   const header = document.querySelector(".eus-header");
   if (!header) return;
 
-  const headerInner = header.querySelector(".eus-header__inner");
-  if (headerInner && !header.querySelector(".eus-capability-rail")) {
-    const rail = document.createElement("nav");
-    rail.className = "eus-capability-rail";
-    rail.setAttribute("aria-label", "Popular Elevation UpScales services");
-    rail.innerHTML = `
-      <div class="container eus-capability-rail__inner">
-        <span class="eus-capability-rail__label">What We Do</span>
-        <a href="/home-services" data-eus-capability="tile"><span class="eus-capability-rail__icon" aria-hidden="true">◆</span>Tile &amp; Showers</a>
-        <a href="/home-services" data-eus-capability="flooring"><span class="eus-capability-rail__icon" aria-hidden="true">▤</span>Flooring</a>
-        <a href="/home-services" data-eus-capability="home"><span class="eus-capability-rail__icon" aria-hidden="true">⌂</span>Home Repairs</a>
-        <a href="/home-services" data-eus-capability="inspection"><span class="eus-capability-rail__icon" aria-hidden="true">⌕</span>Roof &amp; Leak Inspections</a>
-        <a href="/rv-services" data-eus-capability="rv"><span class="eus-capability-rail__icon" aria-hidden="true">▰</span>RV Repair &amp; Restoration</a>
-        <a href="/solar-services" data-eus-capability="solar"><span class="eus-capability-rail__icon" aria-hidden="true">☀</span>Solar &amp; Off-Grid</a>
-      </div>`;
-    headerInner.insertAdjacentElement("afterend", rail);
+  const homePath = location.pathname === "/" || location.pathname === "/index.html";
+  if (homePath && !document.querySelector('script[data-eus-home-capabilities]')) {
+    const capabilityScript = document.createElement("script");
+    capabilityScript.src = "/home-capabilities.js?v=3.11.43";
+    capabilityScript.defer = true;
+    capabilityScript.dataset.eusHomeCapabilities = "true";
+    document.head.appendChild(capabilityScript);
   }
 
   const shopMenu = header.querySelector(".eus-menu--shop");
