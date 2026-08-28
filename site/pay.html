@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070707">
+  <meta name="robots" content="noindex,follow">
+  <title>Pay Elevation | Elevation UpScales, Inc.</title>
+  <meta name="description" content="Secure one-time PayPal payment for Elevation UpScales, Inc.">
+  <link rel="canonical" href="https://elevationupscales.com/pay">
+  <link rel="icon" href="/assets/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/site-shell.css?v=3.4.0">
+  <link rel="stylesheet" href="/paypal-checkout.css?v=3.11.42">
+  <script defer src="/site-shell.js?v=3.4.1"></script>
+  <script defer src="/paypal-checkout.js?v=3.11.42"></script>
+</head>
+<body class="eus-pay-page">
+  <a class="skip-link" href="#main">Skip to payment</a>
+  <header class="eus-header" id="top">
+    <div class="container eus-header__inner">
+      <a class="eus-brand" href="/" aria-label="Elevation UpScales home">
+        <img src="/assets/logo-mark.webp" width="128" height="80" alt="Elevation UpScales bull and polar bear emblem">
+        <span class="eus-wordmark"><strong>ELEVATION</strong><span class="eus-wordmark__sub">UPSCALES</span><small class="eus-wordmark__tagline">Elevate the Experience</small></span>
+      </a>
+      <a class="eus-project-trigger eus-project-trigger--direct" href="/">Back to Website</a>
+    </div>
+  </header>
+
+  <main id="main" class="eus-pay-main">
+    <section class="eus-pay-card" aria-labelledby="pay-title">
+      <div class="eus-pay-heading">
+        <p class="eyebrow">Secure One-Time Payment</p>
+        <h1 id="pay-title">Pay Elevation UpScales</h1>
+        <p>Use this page for an approved service payment, deposit, invoice, or other amount you have already discussed with Elevation UpScales, Inc.</p>
+      </div>
+
+      <form class="eus-pay-form" id="eus-pay-form" novalidate>
+        <label>
+          <span>Amount (USD)</span>
+          <div class="eus-pay-amount"><span aria-hidden="true">$</span><input id="eus-pay-amount" name="amount" inputmode="decimal" autocomplete="off" placeholder="0.00" required></div>
+          <small>Minimum $1.00. Maximum $10,000.00 per payment.</small>
+        </label>
+        <label>
+          <span>Reference or invoice number <em>optional</em></span>
+          <input id="eus-pay-reference" name="reference" maxlength="100" autocomplete="off" placeholder="Example: INV-1042">
+        </label>
+        <label>
+          <span>Payment description <em>optional</em></span>
+          <input id="eus-pay-description" name="description" maxlength="127" autocomplete="off" placeholder="Example: RV inspection deposit">
+        </label>
+      </form>
+
+      <div class="eus-pay-summary" aria-live="polite">
+        <span>Payment total</span>
+        <strong id="eus-pay-total">$0.00 USD</strong>
+      </div>
+
+      <div class="eus-pay-status" id="eus-pay-status" role="status">Checking PayPal availability…</div>
+      <div id="eus-paypal-buttons" class="eus-paypal-buttons" hidden></div>
+
+      <section id="eus-pay-success" class="eus-pay-success" hidden aria-labelledby="eus-pay-success-title">
+        <p class="eyebrow">Payment Complete</p>
+        <h2 id="eus-pay-success-title">Thank you.</h2>
+        <p>Your PayPal payment was captured successfully.</p>
+        <dl>
+          <div><dt>Order</dt><dd id="eus-pay-success-order">—</dd></div>
+          <div><dt>Capture</dt><dd id="eus-pay-success-capture">—</dd></div>
+          <div><dt>Amount</dt><dd id="eus-pay-success-amount">—</dd></div>
+        </dl>
+        <a class="eus-pay-home" href="/">Return to Elevation UpScales</a>
+      </section>
+
+      <p class="eus-pay-fineprint">Payments are processed by PayPal. This page does not replace the separate Fourthwall apparel checkout or eBay seller checkout used by the Elevation storefronts.</p>
+    </section>
+  </main>
+</body>
+</html>
