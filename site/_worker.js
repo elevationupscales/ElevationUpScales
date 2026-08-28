@@ -92,6 +92,116 @@ function checkoutJson(data, status) {
   });
 }
 
+function clean(value, max = 500) {
+  return String(value ?? "").trim().slice(0, max);
+}
+
+function validEmail(value) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean(value, 180));
+}
+
+function validUsAddress(raw = {}) {
+  const state = clean(raw.state, 2).toUpperCase();
+  const postalCode = clean(raw.postalCode, 10);
+  const countryCode = (clean(raw.countryCode, 2).toUpperCase() || "US");
+  return Boolean(
+    clean(raw.fullName, 120) &&
+    clean(raw.address1, 180) &&
+    clean(raw.city, 120) &&
+    /^[A-Z]{2}$/.test(state) &&
+    /^\d{5}(?:-\d{4})?$/.test(postalCode) &&
+    countryCode === "US"
+  );
+}
+
+function sameOriginPost(request) {
+  if (request.method !== "POST") return true;
+  const origin = clean(request.headers.get("Origin"), 500);
+  if (!origin) return false;
+  try { return origin === new URL(request.url).origin; }
+  catch (_) { return false; }
+}
+
+function readDobaMap(env) {
+  try {
+    const parsed = JSON.parse(clean(env?.DOBA_PRODUCT_MAP_JSON, 50_000) || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function verifiedRvEntry(env, raw = {}) {
+  const id = clean(raw.id, 20);
+  const entry = readDobaMap(env)[id];
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+  const priceCents = Number.parseInt(String(entry.priceCents ?? ""), 10);
+  const shippingCents = Number.parseInt(String(entry.shippingCents ?? ""), 10);
+  if (entry.shippingVerified !== true || !Number.isInteger(priceCents) || priceCents < 1 || !Number.isInteger(shippingCents) || shippingCents < 0) return null;
+  return entry;
+}
+
+function validEbayItemUrl(value) {
+  const url = clean(value, 300);
+  return /^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(url) ? url : "";
+}
+
+function rvFallback(raw = {}, entry = null, message = "Doba shipping is not verified for this item") {
+  return checkoutJson({
+    ok: false,
+    fallback: "ebay",
+    error: message,
+    ebayUrl: validEbayItemUrl(entry?.ebayUrl) || validEbayItemUrl(raw.ebayUrl),
+  }, 409);
+}
+
+function rvDestinationAllowed(entry, raw = {}) {
+  const state = clean(raw?.shipping?.state, 2).toUpperCase();
+  if (!state) return true;
+  const blocked = Array.isArray(entry?.blockedStates) ? entry.blockedStates.map((value) => clean(value, 2).toUpperCase()) : [];
+  if (blocked.includes(state)) return false;
+  const allowed = Array.isArray(entry?.allowedStates) ? entry.allowedStates.map((value) => clean(value, 2).toUpperCase()).filter(Boolean) : [];
+  return !allowed.length || allowed.includes(state);
+}
+
+async function ensureStoreOrderTable(env) {
+  if (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return false;
+  try {
+    await env.MARKETPLACE_DB.prepare(`
+      CREATE TABLE IF NOT EXISTS eus_store_orders (
+        id TEXT PRIMARY KEY,
+        source TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        product_name TEXT NOT NULL,
+        variant_id TEXT,
+        variant_name TEXT,
+        quantity INTEGER NOT NULL,
+        unit_price_cents INTEGER NOT NULL,
+        merchandise_cents INTEGER NOT NULL,
+        shipping_cents INTEGER NOT NULL,
+        total_cents INTEGER NOT NULL,
+        customer_json TEXT NOT NULL,
+        shipping_json TEXT NOT NULL,
+        supplier_json TEXT NOT NULL,
+        paypal_order_id TEXT UNIQUE,
+        paypal_capture_id TEXT,
+        payment_status TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        paid_at TEXT
+      )
+    `).run();
+    return true;
+  } catch (error) {
+    console.error(JSON.stringify({ event: "store_order_schema_preflight_error", message: clean(error?.message, 240) }));
+    return false;
+  }
+}
+
+async function checkoutRequestBody(request) {
+  try { return await request.clone().json(); }
+  catch (_) { return {}; }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -103,14 +213,30 @@ export default {
       });
     }
 
-    if (url.pathname === "/api/store-checkout/orders" &&
-        (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function")) {
-      return checkoutJson({ error: "Store order storage is not configured" }, 503);
+    const isQuote = url.pathname === "/api/store-checkout/quote";
+    const isCreate = url.pathname === "/api/store-checkout/orders";
+
+    if ((isQuote || isCreate) && request.method === "POST") {
+      if (!sameOriginPost(request)) return checkoutJson({ error: "Cross-origin request denied" }, 403);
+      const raw = await checkoutRequestBody(request);
+      const source = clean(raw.source, 20).toLowerCase();
+
+      if (source === "rv") {
+        const entry = verifiedRvEntry(env, raw);
+        if (!entry) return rvFallback(raw);
+        if (!rvDestinationAllowed(entry, raw)) return rvFallback(raw, entry, "This Doba item is not available for the selected shipping state");
+      }
+
+      if (isCreate) {
+        if (!validEmail(raw?.customer?.email)) return checkoutJson({ error: "A valid customer email is required" }, 400);
+        if (!validUsAddress(raw?.shipping)) return checkoutJson({ error: "A valid U.S. shipping address is required" }, 400);
+        if (!await ensureStoreOrderTable(env)) return checkoutJson({ error: "Store order storage is not configured" }, 503);
+      }
     }
 
     if (url.pathname === "/api/store-checkout/config" ||
-        url.pathname === "/api/store-checkout/quote" ||
-        url.pathname === "/api/store-checkout/orders" ||
+        isQuote ||
+        isCreate ||
         /^\/api\/store-checkout\/orders\/[A-Z0-9]{8,40}\/capture$/i.test(url.pathname)) {
       return handleStoreCheckoutApi(request, env, url.pathname);
     }
