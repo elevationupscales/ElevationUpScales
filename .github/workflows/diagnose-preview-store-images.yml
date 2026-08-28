@@ -12,53 +12,45 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect preview catalog image URLs
+      - name: Inspect Store and image response headers
         shell: bash
         run: |
           set -euo pipefail
           base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
-          curl --silent --show-error --location --retry 5 --retry-all-errors \
-            -H 'Accept: application/json' \
+          echo '--- STORE HEADERS ---'
+          curl --silent --show-error --location --head "${base}/store" | sed -n '1,80p'
+          curl --silent --show-error --location --retry 5 --retry-all-errors -H 'Accept: application/json' \
             "${base}/api/store-products?catalog=full&ts=$(date +%s)" > /tmp/catalog.json
           python - <<'PY'
           import json
           data=json.load(open('/tmp/catalog.json'))
           rows = data if isinstance(data,list) else next((data.get(k) for k in ('products','results','items') if isinstance(data.get(k),list)), [])
-          print('rows=', len(rows))
           def image_url(v):
               if isinstance(v,str): return v.strip()
               if isinstance(v,dict):
                   for k in ('url','src','imageUrl','transformedUrl'):
                       if v.get(k): return str(v[k]).strip()
               return ''
-          urls=[]
-          for i,p in enumerate(rows[:12]):
-              candidates=[]
+          p=rows[0]
+          c=[]
+          for k in ('images','media'):
+              if isinstance(p.get(k),list): c+=p[k]
+          c += [p.get('image'),p.get('featuredImage'),p.get('primaryImage'),p.get('thumbnailImage')]
+          for v in p.get('variants') or []:
               for k in ('images','media'):
-                  if isinstance(p.get(k),list): candidates += p[k]
-              candidates += [p.get('image'),p.get('featuredImage'),p.get('primaryImage'),p.get('thumbnailImage')]
-              variants=p.get('variants') if isinstance(p.get('variants'),list) else []
-              for v in variants:
-                  for k in ('images','media'):
-                      if isinstance(v.get(k),list): candidates += v[k]
-                  candidates.append(v.get('thumbnailImage'))
-              u=next((image_url(x) for x in candidates if image_url(x)), '')
-              print(f'product[{i}] name={p.get("name") or p.get("title")} image={u}')
-              if u: urls.append(u)
-          open('/tmp/image_urls.txt','w').write('\n'.join(urls))
+                  if isinstance(v.get(k),list): c+=v[k]
+              c.append(v.get('thumbnailImage'))
+          u=next((image_url(x) for x in c if image_url(x)), '')
+          print('FIRST_IMAGE='+u)
+          open('/tmp/first_image.txt','w').write(u)
           PY
-          echo '--- image HTTP checks ---'
-          while IFS= read -r url; do
-            [ -n "$url" ] || continue
-            case "$url" in
-              //*) url="https:${url}" ;;
-              /*) url="https://elevationupscales-shop.fourthwall.com${url}" ;;
-            esac
-            code=$(curl --silent --show-error --location --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "$url" || true)
-            echo "$code $url"
-          done < /tmp/image_urls.txt
+          image="$(cat /tmp/first_image.txt)"
+          echo '--- IMAGE HEADERS DEFAULT ---'
+          curl --silent --show-error --location --head "$image" | sed -n '1,100p'
+          echo '--- IMAGE HEADERS CHROME UA ---'
+          curl --silent --show-error --location --head -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36' "$image" | sed -n '1,100p'
 
-      - name: Browser-render Store images
+      - name: Capture Chrome image network failures
         shell: bash
         run: |
           set -euo pipefail
@@ -73,15 +65,12 @@ jobs:
           opts.add_argument('--no-sandbox')
           opts.add_argument('--disable-dev-shm-usage')
           opts.add_argument('--window-size=1440,2400')
+          opts.set_capability('goog:loggingPrefs', {'performance':'ALL','browser':'ALL'})
           driver=webdriver.Chrome(options=opts)
           try:
               url='https://paypal-sandbox-launch.elevationupscales.pages.dev/store'
               driver.get(url)
-              for _ in range(30):
-                  count=driver.execute_script("return document.querySelectorAll('.market-product-image-primary').length")
-                  if count >= 10:
-                      break
-                  time.sleep(1)
+              time.sleep(8)
               rows=driver.execute_script("""
                 return Array.from(document.querySelectorAll('.market-product-image-primary')).slice(0,15).map(img => ({
                   src: img.currentSrc || img.src,
@@ -91,12 +80,22 @@ jobs:
                   alt: img.alt
                 }));
               """)
-              print('browser_image_count=',len(rows))
-              print(json.dumps(rows,indent=2))
-              failed=[r for r in rows if not r['complete'] or r['naturalWidth'] == 0]
-              print('browser_image_failures=',len(failed))
-              print('csp=',driver.execute_script("return document.querySelector('meta[http-equiv=\"Content-Security-Policy\"]')?.content || ''"))
-              print('body_catalog=',driver.execute_script("return document.body.dataset.fullFourthwallCatalog || ''"))
+              print('browser_images=',json.dumps(rows,indent=2))
+              print('browser_image_failures=',sum(1 for r in rows if not r['complete'] or r['naturalWidth']==0))
+              for entry in driver.get_log('performance'):
+                  try: msg=json.loads(entry['message'])['message']
+                  except Exception: continue
+                  if msg.get('method') == 'Network.loadingFailed':
+                      p=msg.get('params',{})
+                      print('NETWORK_FAILED',json.dumps({k:p.get(k) for k in ('requestId','errorText','blockedReason','corsErrorStatus','type','canceled')}))
+                  elif msg.get('method') == 'Network.responseReceived':
+                      p=msg.get('params',{})
+                      resp=p.get('response',{})
+                      u=resp.get('url','')
+                      if 'imgproxy.fourthwall.dev' in u:
+                          print('IMG_RESPONSE',json.dumps({'status':resp.get('status'),'url':u,'mimeType':resp.get('mimeType'),'fromDiskCache':resp.get('fromDiskCache'),'fromServiceWorker':resp.get('fromServiceWorker'),'headers':resp.get('headers')}))
+              for entry in driver.get_log('browser'):
+                  print('BROWSER_LOG',entry)
           finally:
               driver.quit()
           PY
