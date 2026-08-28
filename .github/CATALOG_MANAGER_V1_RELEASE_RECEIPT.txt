@@ -1,0 +1,10 @@
+Command Center Store Catalog Manager v1 — release verification
+Deployment: https://05592aa4.elevationupscales.pages.dev
+Verified production routes: /, /store, /rv-store, /solar-project, /lithium-batteries, /hawaii-lithium-batteries, /checkout, /admin-catalog, /admin-inventory.html, /admin-store-orders.html
+Catalog server paths: /catalog-admin-server.js = 404; /catalog-admin-runtime.js = 404
+Catalog API without Admin session: 401
+Apparel PayPal configuration: live/enabled/approved
+Verified RV quote: 200
+Held gazebo eBay fallback: 409
+Authenticated Catalog write operations were not exercised by the automated smoke because no production Admin credential was supplied to the workflow. The UI/API implementation was source-validated and remains Admin-session gated.
+Date: 2026-08-28
