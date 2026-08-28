@@ -2,7 +2,15 @@
   "version": 1,
   "include": [
     "/api/*",
-    "/marketplace/listing/*"
+    "/marketplace/listing/*",
+    "/checkout",
+    "/checkout/*",
+    "/store-config.js",
+    "/rv-store.js",
+    "/admin-listings.js",
+    "/worker-core.js",
+    "/store-checkout-server.js",
+    "/store-orders-admin-server.js"
   ],
   "exclude": []
 }
