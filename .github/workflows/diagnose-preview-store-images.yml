@@ -81,7 +81,9 @@ jobs:
                 }));
               """)
               print('browser_images=',json.dumps(rows,indent=2))
-              print('browser_image_failures=',sum(1 for r in rows if not r['complete'] or r['naturalWidth']==0))
+              failures=sum(1 for r in rows if not r['complete'] or r['naturalWidth']==0)
+              print('browser_image_failures=',failures)
+              assert failures == 0, rows
               for entry in driver.get_log('performance'):
                   try: msg=json.loads(entry['message'])['message']
                   except Exception: continue
@@ -93,9 +95,93 @@ jobs:
                       resp=p.get('response',{})
                       u=resp.get('url','')
                       if 'imgproxy.fourthwall.dev' in u:
-                          print('IMG_RESPONSE',json.dumps({'status':resp.get('status'),'url':u,'mimeType':resp.get('mimeType'),'fromDiskCache':resp.get('fromDiskCache'),'fromServiceWorker':resp.get('fromServiceWorker'),'headers':resp.get('headers')}))
+                          print('IMG_RESPONSE',json.dumps({'status':resp.get('status'),'url':u,'mimeType':resp.get('mimeType'),'fromDiskCache':resp.get('fromDiskCache'),'fromServiceWorker':resp.get('fromServiceWorker')}))
               for entry in driver.get_log('browser'):
                   print('BROWSER_LOG',entry)
+          finally:
+              driver.quit()
+          PY
+
+      - name: Smoke homepage scope and apparel variant images
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet selenium requests
+          python - <<'PY'
+          import json, re, time
+          from urllib.parse import quote
+          import requests
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+
+          base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_argument('--window-size=1440,2200')
+          driver=webdriver.Chrome(options=opts)
+          try:
+              driver.get(base + '/')
+              for _ in range(20):
+                  cards=driver.find_elements(By.CSS_SELECTOR,'.eus-home-capability-card')
+                  if len(cards)==6: break
+                  time.sleep(.5)
+              cards=driver.find_elements(By.CSS_SELECTOR,'.eus-home-capability-card')
+              title=driver.find_elements(By.CSS_SELECTOR,'#eus-home-capabilities-title')
+              print('home_capability_cards=',len(cards))
+              print('home_capability_title=',title[0].text if title else '')
+              assert len(cards)==6
+              assert title and title[0].text.strip()=='What We Do'
+
+              for route in ['/store','/rv-store']:
+                  driver.get(base+route)
+                  time.sleep(1.5)
+                  rails=driver.find_elements(By.CSS_SELECTOR,'.eus-capability-rail,.eus-home-capabilities')
+                  print('nonhome_capabilities',route,len(rails))
+                  assert len(rails)==0
+
+              catalog=requests.get(base+'/api/store-products?catalog=full',timeout=30).json()
+              rows=catalog if isinstance(catalog,list) else next((catalog.get(k) for k in ('products','results','items') if isinstance(catalog.get(k),list)), [])
+              product=next(p for p in rows if 'Signature Collection Bull vs Bear Hoodie' in str(p.get('name') or p.get('title') or ''))
+              def slug_from(p):
+                  direct=str(p.get('slug') or p.get('handle') or '').strip('/').replace('products/','',1)
+                  if direct: return direct
+                  for key in ('url','productUrl','permalink'):
+                      m=re.search(r'/products/([^/?#]+)',str(p.get(key) or ''))
+                      if m: return m.group(1)
+                  return str(p.get('id') or p.get('productId') or p.get('offerId') or '')
+              slug=slug_from(product)
+              driver.get(base+'/checkout/?source=apparel&id='+quote(slug))
+              for _ in range(30):
+                  tiles=driver.find_elements(By.CSS_SELECTOR,'.eus-variant-option')
+                  imgw=driver.execute_script("return document.querySelector('#checkout-product-image')?.naturalWidth || 0")
+                  if len(tiles)>=12 and imgw>0: break
+                  time.sleep(.5)
+              time.sleep(2)
+              assert not driver.find_elements(By.CSS_SELECTOR,'.eus-capability-rail,.eus-home-capabilities')
+
+              tiles=driver.find_elements(By.CSS_SELECTOR,'.eus-variant-option')
+              labels=[t.text.replace('\n',' ') for t in tiles]
+              white_i=next(i for i,x in enumerate(labels) if x.lower().startswith('white'))
+              black_i=next(i for i,x in enumerate(labels) if x.lower().startswith('black'))
+              tiles[white_i].click(); time.sleep(1.3)
+              white=driver.execute_script("return {src:document.querySelector('#checkout-product-image')?.currentSrc||'',w:document.querySelector('#checkout-product-image')?.naturalWidth||0,selected:document.querySelector('#checkout-selected-option')?.textContent||'',price:document.querySelector('#checkout-unit-price')?.textContent||'',total:document.querySelector('#checkout-total')?.textContent||''}")
+              tiles=driver.find_elements(By.CSS_SELECTOR,'.eus-variant-option')
+              tiles[black_i].click(); time.sleep(1.3)
+              black=driver.execute_script("return {src:document.querySelector('#checkout-product-image')?.currentSrc||'',w:document.querySelector('#checkout-product-image')?.naturalWidth||0,selected:document.querySelector('#checkout-selected-option')?.textContent||'',price:document.querySelector('#checkout-unit-price')?.textContent||'',total:document.querySelector('#checkout-total')?.textContent||''}")
+              print('WHITE_VARIANT=',json.dumps(white))
+              print('BLACK_VARIANT=',json.dumps(black))
+              print('variant_image_changed=',white['src'] != black['src'])
+              assert white['w']>0 and black['w']>0
+              assert white['price']=='$58.39' and black['price']=='$58.39'
+              assert white['total']=='$65.39' and black['total']=='$65.39'
+              if white['src'] == black['src']:
+                  print('VARIANT_IMAGE_DATA_LIMITATION: Fourthwall returned the same usable preview image for White and Black in this catalog path.')
+                  raise AssertionError('Apparel color selection did not change image source')
+              print('homepage_scope=PASS')
+              print('apparel_variant_image_switch=PASS')
           finally:
               driver.quit()
           PY
