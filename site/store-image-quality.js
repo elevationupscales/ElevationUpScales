@@ -9,6 +9,15 @@
     const raw = String(value || "").trim();
     if (!raw || raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
 
+    // Fourthwall imgproxy URLs are signed. Rewriting the transform path (for
+    // example w:422 -> w:1920) invalidates that signature and makes the image
+    // fail in the browser. Preserve signed imgproxy URLs exactly as supplied.
+    try {
+      const original = new URL(raw, location.href);
+      const originalHost = original.hostname.toLowerCase();
+      if (originalHost.includes("imgproxy")) return raw;
+    } catch (_) {}
+
     let next = raw
       .replace(/\/w%3A\d+(?=\/)/gi, `/w%3A${TARGET_WIDTH}`)
       .replace(/\/w:\d+(?=\/)/gi, `/w:${TARGET_WIDTH}`)
@@ -18,7 +27,7 @@
     try {
       const url = new URL(next, location.href);
       const host = url.hostname.toLowerCase();
-      const fourthwallImage = host.includes("fourthwall") || host.includes("imgproxy");
+      const fourthwallImage = host.includes("fourthwall");
       if (!fourthwallImage) return next;
 
       for (const key of ["w", "width", "maxWidth", "max_width"]) {
