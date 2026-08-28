@@ -7,88 +7,97 @@ on:
 
 permissions:
   contents: read
+  deployments: write
+
+concurrency:
+  group: sandbox-store-order-cleanup
+  cancel-in-progress: false
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      TEST_REFERENCE: EUS-STORE-20260828-95171470
+    environment: production
     steps:
-      - name: Find Marketplace D1 database
+      - name: Check out sandbox candidate
+        uses: actions/checkout@v6
+
+      - name: Add workspace-only exact cleanup route
         shell: bash
         run: |
           set -euo pipefail
-          curl --silent --show-error --fail-with-body \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            -H 'Content-Type: application/json' \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database?name=elevation-upscales-marketplace&per_page=100" > /tmp/databases.json
+          cp site/_worker.js /tmp/worker-clean.js
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          needle='    const url = new URL(request.url);\n'
+          route='''    const url = new URL(request.url);\n\n    if (url.pathname === "/api/store-checkout/_sandbox-cleanup-EUS-STORE-20260828-95171470") {\n      if (request.method !== "POST") return checkoutJson({ error: "Method not allowed" }, 405);\n      if (clean(env?.PAYPAL_ENV, 20).toLowerCase() === "live") return checkoutJson({ error: "Not found" }, 404);\n      if (!sameOriginPost(request)) return checkoutJson({ error: "Cross-origin request denied" }, 403);\n      if (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return checkoutJson({ error: "Store order storage unavailable" }, 503);\n      const testId = "EUS-STORE-20260828-95171470";\n      const before = await env.MARKETPLACE_DB.prepare("SELECT id,payment_status,paypal_order_id,total_cents FROM eus_store_orders WHERE id=?").bind(testId).first();\n      if (before && (String(before.payment_status || "") !== "created" || Number(before.total_cents || 0) !== 2914 || String(before.paypal_order_id || "") !== "8N78904915208701J")) return checkoutJson({ ok: false, error: "Sandbox row safety check failed" }, 409);\n      if (before) await env.MARKETPLACE_DB.prepare("DELETE FROM eus_store_orders WHERE id=? AND payment_status='created' AND total_cents=2914").bind(testId).run();\n      const after = await env.MARKETPLACE_DB.prepare("SELECT id FROM eus_store_orders WHERE id=?").bind(testId).first();\n      return checkoutJson({ ok: true, found: Boolean(before), paymentStatus: before ? String(before.payment_status || "") : "", paypalOrderId: before ? String(before.paypal_order_id || "") : "", totalCents: before ? Number(before.total_cents || 0) : 0, deleted: Boolean(before) && !after, remaining: Boolean(after) }, 200);\n    }\n'''
+          assert needle in s
+          p.write_text(s.replace(needle, route, 1))
+          PY
+          node --check site/_worker.js
+
+      - name: Deploy temporary cleanup preview
+        id: tempdeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=paypal-sandbox-cleanup-temp
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify and remove exact disposable row
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.tempdeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          endpoint='/api/store-checkout/_sandbox-cleanup-EUS-STORE-20260828-95171470'
+          code=$(curl --silent --show-error --retry 8 --retry-all-errors --retry-delay 2 --output /tmp/result.json --write-out '%{http_code}' -X POST -H "Origin: ${base}" -H 'Accept: application/json' "${base}${endpoint}")
+          cat /tmp/result.json
+          test "$code" = '200'
           python - <<'PY'
           import json
-          data=json.load(open('/tmp/databases.json'))
-          assert data.get('success') is True, data.get('errors')
-          rows=data.get('result') or []
-          db=next((x for x in rows if x.get('name')=='elevation-upscales-marketplace'), None)
-          assert db and db.get('uuid'), [(x.get('name'),x.get('uuid')) for x in rows]
-          open('/tmp/database_id.txt','w').write(db['uuid'])
-          print('d1_database_lookup=PASS')
+          d=json.load(open('/tmp/result.json'))
+          assert d.get('ok') is True, d
+          assert d.get('remaining') is False, d
+          if d.get('found'):
+              assert d.get('paymentStatus') == 'created', d
+              assert d.get('paypalOrderId') == '8N78904915208701J', d
+              assert d.get('totalCents') == 2914, d
+              assert d.get('deleted') is True, d
+              print('store_order_d1_persistence=PASS')
+              print('sandbox_store_order_cleanup=PASS')
+          else:
+              print('sandbox_row_not_present=PASS')
           PY
 
-      - name: Verify and remove only disposable sandbox row
+      - name: Restore clean Worker
         shell: bash
         run: |
           set -euo pipefail
-          db="$(cat /tmp/database_id.txt)"
-          python - <<'PY' > /tmp/select-payload.json
-          import json, os
-          print(json.dumps({"sql":"SELECT id,payment_status,paypal_order_id,total_cents FROM eus_store_orders WHERE id = ?","params":[os.environ['TEST_REFERENCE']]}))
-          PY
-          curl --silent --show-error --fail-with-body \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            -H 'Content-Type: application/json' \
-            --data @/tmp/select-payload.json \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db}/query" > /tmp/select.json
-          python - <<'PY'
-          import json, os
-          data=json.load(open('/tmp/select.json'))
-          assert data.get('success') is True, data.get('errors')
-          result=data.get('result') or []
-          rows=[]
-          for part in result:
-              rows.extend(part.get('results') or [])
-          print('sandbox_rows_found='+str(len(rows)))
-          assert len(rows) <= 1, rows
-          if rows:
-              row=rows[0]
-              assert row.get('id')==os.environ['TEST_REFERENCE']
-              assert row.get('payment_status')=='created'
-              assert int(row.get('total_cents') or 0)==2914
-              print('store_order_d1_persistence=PASS')
-          else:
-              print('sandbox_row_already_absent=PASS')
-          PY
-          python - <<'PY' > /tmp/delete-payload.json
-          import json, os
-          print(json.dumps({"sql":"DELETE FROM eus_store_orders WHERE id = ? AND payment_status = 'created'","params":[os.environ['TEST_REFERENCE']]}))
-          PY
-          curl --silent --show-error --fail-with-body \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            -H 'Content-Type: application/json' \
-            --data @/tmp/delete-payload.json \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db}/query" > /tmp/delete.json
-          curl --silent --show-error --fail-with-body \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            -H 'Content-Type: application/json' \
-            --data @/tmp/select-payload.json \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db}/query" > /tmp/after.json
-          python - <<'PY'
-          import json
-          data=json.load(open('/tmp/after.json'))
-          assert data.get('success') is True, data.get('errors')
-          rows=[]
-          for part in data.get('result') or []:
-              rows.extend(part.get('results') or [])
-          assert rows==[], rows
-          print('sandbox_store_order_cleanup=PASS')
-          PY
+          cp /tmp/worker-clean.js site/_worker.js
+          node --check site/_worker.js
+          ! grep -q '_sandbox-cleanup-EUS-STORE-20260828-95171470' site/_worker.js
+
+      - name: Redeploy clean temporary preview
+        id: cleandeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=paypal-sandbox-cleanup-temp
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Confirm temporary endpoint removed
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.cleandeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          code=$(curl --silent --show-error --retry 5 --retry-all-errors --output /tmp/gone.txt --write-out '%{http_code}' -X POST -H "Origin: ${base}" "${base}/api/store-checkout/_sandbox-cleanup-EUS-STORE-20260828-95171470" || true)
+          echo "cleanup_endpoint_after_restore_http=${code}"
+          test "$code" = '404'
+          echo 'temporary_cleanup_endpoint_removed=PASS'
