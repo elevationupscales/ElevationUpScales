@@ -1,0 +1,125 @@
+name: One-Time RV Direct Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    if: ${{ contains(github.event.head_commit.message, '[rv-direct-deploy]') }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Validate guarded RV source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/store-checkout-server.js
+          node --check site/rv-checkout-routing.js
+          node --check site/rv-ebay-catalog.js
+          grep -q 'entry.shippingVerified !== true' site/store-checkout-server.js
+          grep -q '168631001484' site/rv-ebay-catalog.js
+          grep -q '168631043193' site/rv-ebay-catalog.js
+          grep -q '168631001484' site/rv-checkout-routing.js
+          ! grep -q '168631058246' site/rv-checkout-routing.js
+          ! grep -q '168637439895' site/rv-checkout-routing.js
+
+      - name: Install Wrangler
+        shell: bash
+        run: npm install --no-save wrangler@4
+
+      - name: Install verified Doba map
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/doba-map.json <<'JSON'
+          {
+            "168646573395":{"name":"Inflatable Movie Screen 20FT Inflatable Projector Screen for outside with 350W","priceCents":13500,"shippingCents":0,"shippingVerified":true,"itemNo":"D0102HQ4KJV","skuId":"D0102HQ4KJV-861319","imageUrl":"https://image.doba.com/dg7-aBOYSNRpqCJH/dspic.jpg","ebayUrl":"https://www.ebay.com/itm/168646573395"},
+            "168631043193":{"name":"VEVOR Super Bright Rechargeable 200,000 Lumens LED Spotlight for Outdoor Use","priceCents":3498,"shippingCents":0,"shippingVerified":true,"itemNo":"D010277TCB2","skuId":"D010277TCB2-470279","ebayUrl":"https://www.ebay.com/itm/168631043193"},
+            "168631039073":{"name":"8L Hot Water Heater Tankless Instant Boiler Outdoor","priceCents":19433,"shippingCents":0,"shippingVerified":true,"itemNo":"D01027HXHHA","skuId":"D01027HXHHA-472564","ebayUrl":"https://www.ebay.com/itm/168631039073"},
+            "168631036536":{"name":"VEVOR Portable Walk-In Greenhouse 20' x 10' Hot House with Steel Hoops & Windows","priceCents":13455,"shippingCents":0,"shippingVerified":true,"itemNo":"D0102HRMZW6","skuId":"D0102HRMZW6-224407","ebayUrl":"https://www.ebay.com/itm/168631036536"},
+            "168631025949":{"name":"12V Electric Scissor Car Jack & Impact Wrench for Easy Tire Changes","priceCents":5712,"shippingCents":0,"shippingVerified":true,"itemNo":"D0102HGWKXG","skuId":"D0102HGWKXG-682100","ebayUrl":"https://www.ebay.com/itm/168631025949"},
+            "168631017090":{"name":"VEVOR High-Performance 12V Water Diaphragm Pump - 5.5 GPM & 70 PSI Adjustable","priceCents":7999,"shippingCents":0,"shippingVerified":true,"itemNo":"D0102H2V6BY","skuId":"D0102H2V6BY-183069","ebayUrl":"https://www.ebay.com/itm/168631017090"},
+            "168631006501":{"name":"VEVOR Heavy-Duty 5.3 Gallon Metal Fuel Can with Spout & Comfort Handle","priceCents":3676,"shippingCents":0,"shippingVerified":true,"itemNo":"D01027HX25W","skuId":"D01027HX25W-351940","ebayUrl":"https://www.ebay.com/itm/168631006501"},
+            "168631001484":{"name":"Vevor Portable 5 Gallon Fuel Container with Spout for Cars and Motorcycles, Red","priceCents":6500,"shippingCents":0,"shippingVerified":true,"itemNo":"D01027HHGCG","skuId":"D01027HHGCG-645458","ebayUrl":"https://www.ebay.com/itm/168631001484"}
+          }
+          JSON
+          cat /tmp/doba-map.json | npx wrangler pages secret put DOBA_PRODUCT_MAP_JSON --project-name="$CLOUDFLARE_PAGES_PROJECT"
+
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production
+        shell: bash
+        env:
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for route in / /store /checkout /rv-store; do
+            code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/page.html --write-out '%{http_code}' "${PRODUCTION_URL}${route}" || true)
+            test "$code" = "200"
+          done
+
+          curl --silent --show-error --fail --location --retry 10 --retry-all-errors "${PRODUCTION_URL}/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const c = JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          if (c.environment !== 'live' || c.credentialsConfigured !== true || c.checkoutEnabled !== true || c.liveCheckoutApproved !== true) throw new Error('Apparel live checkout regressed');
+          NODE
+
+          curl --silent --show-error --fail --location --retry 10 --retry-all-errors "${PRODUCTION_URL}/rv-ebay-catalog.js" > /tmp/catalog.js
+          curl --silent --show-error --fail --location --retry 10 --retry-all-errors "${PRODUCTION_URL}/rv-checkout-routing.js" > /tmp/routing.js
+          curl --silent --show-error --fail --location --retry 10 --retry-all-errors "${PRODUCTION_URL}/store-checkout-server.js" > /tmp/server.js
+          grep -q '168631001484' /tmp/catalog.js
+          grep -q '168631043193' /tmp/catalog.js
+          ! grep -q '"186831001484"' /tmp/catalog.js
+          grep -q '168631001484' /tmp/routing.js
+          ! grep -q '168631058246' /tmp/routing.js
+          ! grep -q '168637439895' /tmp/routing.js
+          grep -q 'entry.shippingVerified !== true' /tmp/server.js
+
+          code=$(curl --silent --show-error --output /tmp/mapped.json --write-out '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}')
+          test "$code" = "200"
+          node - <<'NODE'
+          const fs = require('fs');
+          const q = JSON.parse(fs.readFileSync('/tmp/mapped.json','utf8'));
+          if (q.ok !== true || q.source !== 'rv' || q.unitPriceCents !== 6500 || q.shippingCents !== 0 || q.totalCents !== 6500) throw new Error(`Mapped quote mismatch: ${JSON.stringify(q)}`);
+          NODE
+
+          code=$(curl --silent --show-error --output /tmp/blocked.json --write-out '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}')
+          test "$code" = "409"
+          node - <<'NODE'
+          const fs = require('fs');
+          const q = JSON.parse(fs.readFileSync('/tmp/blocked.json','utf8'));
+          if (q.fallback !== 'ebay') throw new Error(`Blocked fallback mismatch: ${JSON.stringify(q)}`);
+          NODE
+
+      - name: Receipt
+        run: |
+          echo '### RV direct PayPal release' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'New 168-series eBay IDs: active for release set' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Shipping verification guard: active' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Direct mappings: 8' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Blocked/unmapped: eBay fallback' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Apparel PayPal: still live' >> "$GITHUB_STEP_SUMMARY"
