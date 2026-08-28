@@ -1,2 +1,0 @@
-Authoritative baseline branch name: baseline-2026-08-28-elevation-4-3-audit-repairs
-This pointer is repository bookkeeping only and does not change deployed site files.

@@ -1,5 +1,0 @@
-Current production baseline: Elevation 4.3 Audit Repairs — 2026-08-28
-Rollback branch: baseline-2026-08-28-elevation-4-3-audit-repairs
-Production deployment: https://4ccccad3.elevationupscales.pages.dev
-Verified repair source: 40721e77768cd47f17e0c96f3909c0304e94bba8
-Final verification workflow: 33214003656 (PASS)
