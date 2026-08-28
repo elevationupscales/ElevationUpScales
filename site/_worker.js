@@ -1,7 +1,7 @@
 import coreWorker from "./worker-core.js";
 import { handleStoreCheckoutApi } from "./store-checkout-server.js";
 import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
-import { handleCatalogAdminApi } from "./catalog-admin-runtime.js";
+import { handleCatalogAdminApi, handleCatalogPublicApi } from "./catalog-admin-runtime.js";
 
 // Protected production invariants continue to execute inside worker-core.js.
 // 3.11.30-store-navigation-repair
@@ -252,6 +252,10 @@ export default {
 
     if (url.pathname === "/api/admin/store-orders" || url.pathname.startsWith("/api/admin/store-orders/")) {
       return handleStoreOrdersAdminApi(request, env, url.pathname);
+    }
+
+    if (url.pathname === "/api/store-catalog") {
+      return handleCatalogPublicApi(request, env, url.pathname);
     }
 
     if (url.pathname === "/api/admin/catalog" || url.pathname.startsWith("/api/admin/catalog/")) {
