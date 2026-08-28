@@ -21,7 +21,7 @@ jobs:
             -H 'Accept: application/json' \
             "${base}/api/store-products?catalog=full&ts=$(date +%s)" > /tmp/catalog.json
           python - <<'PY'
-          import json, urllib.parse
+          import json
           data=json.load(open('/tmp/catalog.json'))
           rows = data if isinstance(data,list) else next((data.get(k) for k in ('products','results','items') if isinstance(data.get(k),list)), [])
           print('rows=', len(rows))
@@ -57,3 +57,46 @@ jobs:
             code=$(curl --silent --show-error --location --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "$url" || true)
             echo "$code $url"
           done < /tmp/image_urls.txt
+
+      - name: Browser-render Store images
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet selenium
+          python - <<'PY'
+          import json, time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_argument('--window-size=1440,2400')
+          driver=webdriver.Chrome(options=opts)
+          try:
+              url='https://paypal-sandbox-launch.elevationupscales.pages.dev/store'
+              driver.get(url)
+              for _ in range(30):
+                  count=driver.execute_script("return document.querySelectorAll('.market-product-image-primary').length")
+                  if count >= 10:
+                      break
+                  time.sleep(1)
+              rows=driver.execute_script("""
+                return Array.from(document.querySelectorAll('.market-product-image-primary')).slice(0,15).map(img => ({
+                  src: img.currentSrc || img.src,
+                  complete: img.complete,
+                  naturalWidth: img.naturalWidth,
+                  naturalHeight: img.naturalHeight,
+                  alt: img.alt
+                }));
+              """)
+              print('browser_image_count=',len(rows))
+              print(json.dumps(rows,indent=2))
+              failed=[r for r in rows if not r['complete'] or r['naturalWidth'] == 0]
+              print('browser_image_failures=',len(failed))
+              print('csp=',driver.execute_script("return document.querySelector('meta[http-equiv=\"Content-Security-Policy\"]')?.content || ''"))
+              print('body_catalog=',driver.execute_script("return document.body.dataset.fullFourthwallCatalog || ''"))
+          finally:
+              driver.quit()
+          PY
