@@ -1,0 +1,142 @@
+name: One-Time Sandbox D1 Cleanup
+
+on:
+  push:
+    branches:
+      - launch/paypal-sandbox-preview-20260828
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: one-time-sandbox-d1-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out sandbox candidate
+        uses: actions/checkout@v6
+
+      - name: Inject exact-reference cleanup endpoint in workspace only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp site/_worker.js /tmp/eus-worker-clean.js
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/_worker.js')
+          text=p.read_text()
+          needle='    const url = new URL(request.url);\n'
+          assert needle in text
+          injected=r'''    const url = new URL(request.url);
+
+    // ONE-TIME SANDBOX WORKSPACE-ONLY CLEANUP. Never committed to Store candidate.
+    if (url.pathname === "/api/store-checkout/_sandbox-cleanup-EUS-STORE-20260828-95171470") {
+      if (request.method !== "POST") return checkoutJson({ error: "Method not allowed" }, 405);
+      if (clean(env?.PAYPAL_ENV, 20).toLowerCase() === "live") return checkoutJson({ error: "Not found" }, 404);
+      if (!sameOriginPost(request)) return checkoutJson({ error: "Cross-origin request denied" }, 403);
+      if (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return checkoutJson({ error: "Store order storage unavailable" }, 503);
+      const testId = "EUS-STORE-20260828-95171470";
+      const before = await env.MARKETPLACE_DB.prepare(
+        "SELECT id,payment_status,paypal_order_id,total_cents FROM eus_store_orders WHERE id=?"
+      ).bind(testId).first();
+      if (before && (String(before.payment_status || "") !== "created" || Number(before.total_cents || 0) !== 2914)) {
+        return checkoutJson({ ok: false, error: "Sandbox row safety check failed", found: true }, 409);
+      }
+      if (before) {
+        await env.MARKETPLACE_DB.prepare(
+          "DELETE FROM eus_store_orders WHERE id=? AND payment_status='created' AND total_cents=2914"
+        ).bind(testId).run();
+      }
+      const after = await env.MARKETPLACE_DB.prepare(
+        "SELECT id FROM eus_store_orders WHERE id=?"
+      ).bind(testId).first();
+      return checkoutJson({
+        ok: true,
+        found: Boolean(before),
+        paymentStatus: before ? String(before.payment_status || "") : "",
+        paypalOrderId: before ? String(before.paypal_order_id || "") : "",
+        totalCents: before ? Number(before.total_cents || 0) : 0,
+        deleted: Boolean(before) && !after,
+        remaining: Boolean(after),
+      }, 200);
+    }
+'''
+          p.write_text(text.replace(needle,injected,1))
+          PY
+          node --check site/_worker.js
+          grep -q '_sandbox-cleanup-EUS-STORE-20260828-95171470' site/_worker.js
+
+      - name: Deploy isolated temporary cleanup preview
+        id: tempdeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=paypal-sandbox-cleanup-temp
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify persistence and delete exact disposable row
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.tempdeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          endpoint='/api/store-checkout/_sandbox-cleanup-EUS-STORE-20260828-95171470'
+          code=$(curl --silent --show-error --retry 8 --retry-all-errors --retry-delay 2 \
+            --output /tmp/cleanup.json --write-out '%{http_code}' \
+            -X POST -H "Origin: ${base}" -H 'Accept: application/json' \
+            "${base}${endpoint}")
+          cat /tmp/cleanup.json
+          test "$code" = '200'
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/cleanup.json'))
+          assert data.get('ok') is True, data
+          assert data.get('remaining') is False, data
+          if data.get('found'):
+              assert data.get('paymentStatus') == 'created', data
+              assert data.get('totalCents') == 2914, data
+              assert data.get('paypalOrderId') == '8N78904915208701J', data
+              assert data.get('deleted') is True, data
+              print('store_order_d1_persistence=PASS')
+              print('sandbox_store_order_cleanup=PASS')
+          else:
+              print('sandbox_row_not_present=PASS')
+          PY
+
+      - name: Restore clean Worker in workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/eus-worker-clean.js site/_worker.js
+          node --check site/_worker.js
+          ! grep -q '_sandbox-cleanup-EUS-STORE-20260828-95171470' site/_worker.js
+
+      - name: Redeploy clean temporary preview
+        id: cleandeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=paypal-sandbox-cleanup-temp
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Confirm cleanup endpoint is gone
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.cleandeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          endpoint='/api/store-checkout/_sandbox-cleanup-EUS-STORE-20260828-95171470'
+          code=$(curl --silent --show-error --retry 5 --retry-all-errors --output /tmp/gone.txt --write-out '%{http_code}' \
+            -X POST -H "Origin: ${base}" "${base}${endpoint}" || true)
+          echo "cleanup_endpoint_after_restore_http=${code}"
+          test "$code" = '404'
+          echo 'temporary_cleanup_endpoint_removed=PASS'
