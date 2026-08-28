@@ -1,0 +1,118 @@
+name: PayPal Sandbox Preview Launch
+
+on:
+  push:
+    branches:
+      - launch/paypal-sandbox-preview-20260828
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-paypal-sandbox-preview-launch
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out PayPal Store candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify release lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          git merge-base --is-ancestor origin/main HEAD
+          grep -q 'const APPAREL_MARKUP = 1.20' site/store-checkout-server.js
+          grep -q 'const APPAREL_SHIPPING_CENTS = 700' site/store-checkout-server.js
+          grep -q 'entry.shippingVerified !== true' site/_worker.js
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+
+      - name: Deploy isolated PayPal sandbox preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=paypal-sandbox-launch
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Store and PayPal sandbox configuration
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          test -n "$base"
+
+          for route in / /store /rv-store /checkout /start-a-project /marketplace /solar-project /admin-listings /admin-store-orders.html; do
+            code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-route.html --write-out '%{http_code}' "${base}${route}" || true)
+            test "$code" = "200"
+          done
+
+          config_code=$(curl --silent --show-error --output /tmp/eus-config.json --write-out '%{http_code}' "${base}/api/store-checkout/config")
+          test "$config_code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/eus-config.json'))
+          assert data['ok'] is True
+          assert data['configured'] is True
+          assert data['environment'] == 'sandbox'
+          assert data['clientId']
+          assert data['apparelMarkupPercent'] == 20
+          assert data['apparelShippingPerItem'] == '7.00'
+          print('paypal_sandbox_config=PASS')
+          PY
+
+          apparel_code=$(curl --silent --show-error --output /tmp/eus-apparel.json --write-out '%{http_code}' \
+            -H "Origin: ${base}" -H 'Content-Type: application/json' -H 'Accept: application/json' \
+            --data '{"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":""}' \
+            "${base}/api/store-checkout/quote")
+          test "$apparel_code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/eus-apparel.json'))
+          assert data['ok'] is True and data['source'] == 'apparel'
+          assert data['unitPriceCents'] > 0
+          assert data['shippingCents'] == 700
+          assert data['totalCents'] == data['merchandiseCents'] + data['shippingCents']
+          print('apparel_quote=PASS')
+          PY
+
+          rv_code=$(curl --silent --show-error --output /tmp/eus-rv.json --write-out '%{http_code}' \
+            -H "Origin: ${base}" -H 'Content-Type: application/json' -H 'Accept: application/json' \
+            --data '{"source":"rv","id":"999999999999","quantity":1,"ebayUrl":"https://www.ebay.com/itm/999999999999","shipping":{"state":"CO","postalCode":"80901"}}' \
+            "${base}/api/store-checkout/quote")
+          test "$rv_code" = "409"
+
+          admin_code=$(curl --silent --show-error --output /tmp/eus-admin.json --write-out '%{http_code}' "${base}/api/admin/store-orders")
+          test "$admin_code" = "401"
+
+          for internal in /worker-core.js /store-checkout-server.js /store-orders-admin-server.js; do
+            code=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "${base}${internal}")
+            test "$code" = "404"
+          done
+
+          headers=$(curl --silent --show-error --head "${base}/checkout")
+          printf '%s' "$headers" | grep -qi 'content-security-policy:.*paypal.com'
+
+      - name: Record PayPal sandbox receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### PayPal sandbox preview launch' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal configured: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal environment: sandbox' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Apparel pricing/quote: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV unmapped fallback: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
