@@ -20,14 +20,18 @@ This candidate adds an Elevation-owned PayPal checkout path for Apparel and RV /
 - Physical Apparel shipping is $7.00 per item.
 - Digital/download products are not assigned physical shipping.
 - Variant selection is completed on the checkout page for manual fulfillment.
+- Quantity is limited to 1–10 and is validated server-side.
+- Customer email and U.S. shipping address are validated server-side before a PayPal order can be created.
 
 ### RV / Outdoor
 
 - Existing eBay/Seller Hub catalog and product card renderer remain unchanged.
 - `Buy Now` is routed through `/checkout/` first.
-- RV items only stay in Elevation checkout when a server-side Doba mapping contains both an authoritative item price and a Doba-derived shipping amount.
-- If the item cannot be quoted from the Doba mapping, checkout immediately falls back to that item's existing eBay listing.
-- This preserves eBay as the safe fulfillment path for items that cannot yet be calculated.
+- RV items only stay in Elevation checkout when a server-side Doba mapping contains an authoritative item price, Doba-derived shipping amount, and `shippingVerified: true`.
+- The map key is the exact 12-digit eBay item number used by the current RV catalog.
+- Optional `blockedStates` / `allowedStates` rules can prevent direct checkout for destinations the Doba supplier does not serve.
+- If the item is unmapped, unverified, invalid, or blocked for the selected state, checkout falls back to that item's existing exact eBay listing.
+- This preserves eBay as the safe fulfillment path for items whose direct shipping cannot be represented safely.
 
 ## PayPal bindings
 
@@ -40,16 +44,18 @@ Set in Cloudflare, never in repository source:
 
 ## Doba mapping
 
-The Worker reads `DOBA_PRODUCT_MAP_JSON` as a Cloudflare environment value. Keys may be the storefront's `ebay-<itemNumber>` product ID or the 12-digit eBay item number used by the RV storefront.
+The Worker reads `DOBA_PRODUCT_MAP_JSON` as a Cloudflare environment value. Keys are the exact 12-digit eBay item numbers used by the RV storefront.
 
 Example shape only:
 
 ```json
 {
-  "ebay-186830991402": {
+  "186830991402": {
     "name": "Product name",
     "priceCents": 6200,
     "shippingCents": 1299,
+    "shippingVerified": true,
+    "blockedStates": ["AK", "HI"],
     "itemNo": "DOBA_ITEM_NO",
     "skuId": "DOBA_SKU_ID",
     "spuNo": "DOBA_SPU_NO",
@@ -58,13 +64,15 @@ Example shape only:
 }
 ```
 
-`priceCents` and `shippingCents` must be values confirmed from Doba for the item. If either is absent or invalid, the buyer is sent to eBay instead of being allowed to pay an unverified total.
+`shippingVerified` must be exactly `true` before an RV item can enter Elevation PayPal checkout. `priceCents` and `shippingCents` must be values confirmed from Doba for the item. If the verification flag or either amount is absent/invalid, the buyer is sent to eBay instead of being allowed to pay an unverified total.
 
-Doba's Retailer API supports shipping-rate estimation. A later automated-rate pass can replace mapped shipping amounts once Doba API credentials/item identifiers are fully mapped. Doba API credentials must not be committed to GitHub.
+`blockedStates` is optional. `allowedStates` can be used instead when a supplier provides an explicit destination list. These checks run again when the buyer submits the order, so a blocked destination cannot create a PayPal order.
+
+The current v3.11.42 mapping treats `shippingCents` as a verified per-item shipping amount. Items whose Doba rate changes by destination in a way that cannot safely be represented by the mapping should remain unmapped and use eBay until live Doba destination-rate automation is added.
 
 ## Order storage
 
-Before the PayPal order is created, `MARKETPLACE_DB` must be available. Checkout creates/uses `eus_store_orders` to retain:
+Before the PayPal order is created, `MARKETPLACE_DB` must be available and the `eus_store_orders` table must pass a schema preflight. Checkout retains:
 
 - order reference
 - source
@@ -79,11 +87,11 @@ Before the PayPal order is created, `MARKETPLACE_DB` must be available. Checkout
 - PayPal order and capture identifiers
 - payment status
 
-The Worker wrapper blocks new PayPal store-order creation if D1 order storage is not available.
+The Worker wrapper blocks PayPal store-order creation if D1 order storage cannot be created/accessed. This prevents a payment from being created without an order-storage path for manual fulfillment.
 
 ## Command Center Store Orders
 
-The candidate now includes a protected purchase-operations workspace using the existing signed Mission Control admin session.
+The candidate includes a protected purchase-operations workspace using the existing signed Mission Control admin session.
 
 Files:
 
@@ -118,16 +126,18 @@ The previous 4,604-line `site/_worker.js` is preserved byte-for-byte as `site/wo
 
 The new `site/_worker.js` is a thin wrapper that:
 
-1. handles store-checkout API routes,
-2. handles protected Store Orders admin API routes,
-3. appends behavior-only routing scripts to the existing Apparel/RV JavaScript responses,
-4. surfaces the Orders workspace in Mission Control at runtime,
-5. adds PayPal CSP allowances only to `/checkout/`, and
-6. delegates every other request to the unchanged worker core.
+1. handles and hardens store-checkout API routes,
+2. performs server-side source, quantity, customer-email, U.S.-address and Doba-verification preflight,
+3. verifies Store order storage before PayPal order creation,
+4. handles protected Store Orders admin API routes,
+5. appends behavior-only routing scripts to the existing Apparel/RV JavaScript responses,
+6. surfaces the Orders workspace in Mission Control at runtime,
+7. adds PayPal CSP allowances only to `/checkout/`, and
+8. delegates every other request to the unchanged worker core.
 
 ## Validation completed before Cloudflare activation
 
-Pre-Cloudflare validation passed after the test-harness quoting issue was corrected:
+The first pre-Cloudflare validation run exposed only a Bash quoting mistake in the temporary test harness, not a website-code defect. After correcting the harness, the clean validation passed:
 
 - current-main ancestry PASS
 - public Store presentation files unchanged PASS
@@ -139,7 +149,9 @@ Pre-Cloudflare validation passed after the test-harness quoting issue was correc
 - JavaScript syntax PASS
 - credential scan PASS
 
-The temporary validation workflow is not part of the final deployable candidate.
+The temporary validation workflow was removed after PASS and is not part of the final deployable candidate.
+
+Additional hardening after that pass added explicit Doba `shippingVerified` gating, destination allow/block support, server-side customer/address validation, quantity validation, and D1 schema preflight. These additions are to be exercised by the isolated Cloudflare preview before morning sandbox promotion.
 
 ## Morning runbook
 
@@ -153,7 +165,7 @@ Do not promote until:
 2. `MARKETPLACE_DB` is confirmed available to the candidate.
 3. `/checkout/` loads PayPal successfully in the candidate preview.
 4. At least one Apparel sandbox purchase validates product, variant, +20% price, $7-per-item shipping, stored address, and captured payment.
-5. At least one RV item has a verified Doba mapping and completes a sandbox purchase with the expected shipping amount.
-6. An unmapped RV item is verified to fall back to its exact eBay listing.
+5. At least one RV item has a `shippingVerified: true` Doba mapping and completes a sandbox purchase with the expected shipping amount to an allowed destination.
+6. An unmapped/unverified/blocked RV item is verified to fall back to its exact eBay listing.
 7. Store Orders is verified with a sandbox purchase and fulfillment-status update.
 8. Sales-tax handling for direct website orders is explicitly approved/configured before live customer payments.
