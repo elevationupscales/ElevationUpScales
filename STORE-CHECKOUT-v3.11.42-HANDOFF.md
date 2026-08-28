@@ -1,6 +1,10 @@
 # Elevation UpScales Store Checkout v3.11.42
 
-Parent: `main @ 1c68f9fd38cc3ca773778fdeef57b035a3afa18c`
+Current required main ancestor: `31faa0998a52437c0b305f42d6b8f87d6cece696`
+
+Candidate: `feature/apparel-onsite-checkout-v3.11.42`
+
+Pull request: `#18 — v3.11.42 — Apparel + RV on-site PayPal checkout`
 
 ## Scope
 
@@ -36,13 +40,13 @@ Set in Cloudflare, never in repository source:
 
 ## Doba mapping
 
-The Worker reads `DOBA_PRODUCT_MAP_JSON` as a Cloudflare environment value. Keys are the 12-digit eBay item numbers already used by the RV storefront.
+The Worker reads `DOBA_PRODUCT_MAP_JSON` as a Cloudflare environment value. Keys may be the storefront's `ebay-<itemNumber>` product ID or the 12-digit eBay item number used by the RV storefront.
 
 Example shape only:
 
 ```json
 {
-  "186830991402": {
+  "ebay-186830991402": {
     "name": "Product name",
     "priceCents": 6200,
     "shippingCents": 1299,
@@ -56,7 +60,7 @@ Example shape only:
 
 `priceCents` and `shippingCents` must be values confirmed from Doba for the item. If either is absent or invalid, the buyer is sent to eBay instead of being allowed to pay an unverified total.
 
-Doba's Retailer API also supports Product Shipping Rate Estimate. A later automated-rate pass can replace the mapped shipping amount once Doba API credentials/item identifiers are fully mapped. Doba API credentials must not be committed to GitHub.
+Doba's Retailer API supports shipping-rate estimation. A later automated-rate pass can replace mapped shipping amounts once Doba API credentials/item identifiers are fully mapped. Doba API credentials must not be committed to GitHub.
 
 ## Order storage
 
@@ -77,6 +81,37 @@ Before the PayPal order is created, `MARKETPLACE_DB` must be available. Checkout
 
 The Worker wrapper blocks new PayPal store-order creation if D1 order storage is not available.
 
+## Command Center Store Orders
+
+The candidate now includes a protected purchase-operations workspace using the existing signed Mission Control admin session.
+
+Files:
+
+- `site/admin-store-orders.html`
+- `site/admin-store-orders.css`
+- `site/admin-store-orders.js`
+- `site/admin-store-orders-link.js`
+- `site/store-orders-admin-server.js`
+
+Mission Control gets an `Orders` action at runtime without rewriting the existing Admin page source.
+
+Order operations include:
+
+- Apparel / RV source filtering
+- order/customer/product/tracking search
+- Paid / Needs Fulfillment / Supplier Ordered / Shipped / Completed / Refund Needed counts
+- buyer contact and shipping address
+- item, variant, quantity, merchandise, shipping and total
+- PayPal order/capture IDs
+- supplier/Doba data
+- supplier order ID
+- carrier and tracking number
+- fulfillment notes
+- copyable fulfillment summary
+- fulfillment state updates
+
+`Refund Needed` and `Refunded` are tracking states in v3.11.42. They do not automatically call the PayPal refund API.
+
 ## Preserved production source
 
 The previous 4,604-line `site/_worker.js` is preserved byte-for-byte as `site/worker-core.js` with original blob SHA `8bd4e5157317a8121e1cc96f4befa86bd744f117`.
@@ -84,17 +119,41 @@ The previous 4,604-line `site/_worker.js` is preserved byte-for-byte as `site/wo
 The new `site/_worker.js` is a thin wrapper that:
 
 1. handles store-checkout API routes,
-2. appends behavior-only routing scripts to the existing Apparel/RV JavaScript responses,
-3. adds PayPal CSP allowances only to `/checkout/`, and
-4. delegates every other request to the unchanged worker core.
+2. handles protected Store Orders admin API routes,
+3. appends behavior-only routing scripts to the existing Apparel/RV JavaScript responses,
+4. surfaces the Orders workspace in Mission Control at runtime,
+5. adds PayPal CSP allowances only to `/checkout/`, and
+6. delegates every other request to the unchanged worker core.
+
+## Validation completed before Cloudflare activation
+
+Pre-Cloudflare validation passed after the test-harness quoting issue was corrected:
+
+- current-main ancestry PASS
+- public Store presentation files unchanged PASS
+- existing `Buy Now` source wording PASS
+- +20% Apparel markup rule PASS
+- $7-per-item Apparel shipping rule PASS
+- RV eBay fallback rule PASS
+- Store Orders / existing admin-session integration PASS
+- JavaScript syntax PASS
+- credential scan PASS
+
+The temporary validation workflow is not part of the final deployable candidate.
+
+## Morning runbook
+
+Use `MORNING-STORE-v3.11.42-RUNBOOK.md` for the exact Cloudflare → preview → sandbox → Command Center → live promotion sequence.
 
 ## Production boundary
 
 Do not promote until:
 
 1. PayPal sandbox credentials are installed in Cloudflare.
-2. `/checkout/` loads PayPal successfully in the candidate preview.
-3. At least one Apparel sandbox purchase validates product, variant, +20% price, $7-per-item shipping, stored address, and captured payment.
-4. At least one RV item has a verified Doba mapping and completes a sandbox purchase with the expected shipping amount.
-5. An unmapped RV item is verified to fall back to its exact eBay listing.
-6. Sales-tax handling for direct website orders is explicitly approved/configured before live customer payments.
+2. `MARKETPLACE_DB` is confirmed available to the candidate.
+3. `/checkout/` loads PayPal successfully in the candidate preview.
+4. At least one Apparel sandbox purchase validates product, variant, +20% price, $7-per-item shipping, stored address, and captured payment.
+5. At least one RV item has a verified Doba mapping and completes a sandbox purchase with the expected shipping amount.
+6. An unmapped RV item is verified to fall back to its exact eBay listing.
+7. Store Orders is verified with a sandbox purchase and fulfillment-status update.
+8. Sales-tax handling for direct website orders is explicitly approved/configured before live customer payments.
