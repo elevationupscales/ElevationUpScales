@@ -1,0 +1,2 @@
+Baseline name: baseline-2026-08-28-command-center-catalog-manager-v1
+Create the rollback branch from this commit or its exact clean main descendant.
