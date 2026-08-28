@@ -1,0 +1,120 @@
+name: One-Time RV Source Patch
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ contains(github.event.head_commit.message, '[rv-source-patch]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 2
+
+      - name: Patch RV checkout source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('site/store-checkout-server.js')
+          s = p.read_text()
+          start = s.index('async function quoteRv(raw, env)')
+          marker = '  const qty = quantity(raw?.quantity);\n'
+          pos = s.index(marker, start)
+          if 'entry.shippingVerified !== true' not in s[start:pos]:
+              guard = '''  if (entry.shippingVerified !== true) {
+            return {
+              ok: false,
+              fallback: "ebay",
+              status: 409,
+              error: "Doba shipping is not verified for this item",
+              ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),
+            };
+          }
+
+          '''
+              s = s[:pos] + guard + s[pos:]
+          p.write_text(s)
+
+          p = Path('site/rv-ebay-catalog.js')
+          s = p.read_text()
+          replacements = {
+            '186831001484':'168631001484',
+            '186831006501':'168631006501',
+            '186831017090':'168631017090',
+            '186831025949':'168631025949',
+            '186831036536':'168631036536',
+            '186831039073':'168631039073',
+            '186831041650':'168631041650',
+            '186831041393':'168631043193',
+            '186831058246':'168631058246',
+            '186830995525':'168637439895',
+          }
+          for old, new in replacements.items():
+              s = s.replace(f'"{old}"', f'"{new}"')
+          p.write_text(s)
+
+          Path('site/rv-checkout-routing.js').write_text(r'''(() => {
+            "use strict";
+            const DIRECT_CHECKOUT_IDS = new Set([
+              "168646573395",
+              "168631043193",
+              "168631039073",
+              "168631036536",
+              "168631025949",
+              "168631017090",
+              "168631006501",
+              "168631001484",
+            ]);
+            const grid = document.querySelector("#rv-product-grid");
+            if (!grid) return;
+            const apply = () => {
+              grid.querySelectorAll(".rv-product-card").forEach((card) => {
+                const link = card.querySelector(".rv-product-actions a");
+                if (!link || link.dataset.eusCheckoutRoute === "true") return;
+                try {
+                  const external = new URL(link.href, location.origin);
+                  const match = external.hostname === "www.ebay.com" ? external.pathname.match(/^\/itm\/(\d{12})/i) : null;
+                  if (!match || !DIRECT_CHECKOUT_IDS.has(match[1])) return;
+                  const name = String(card.querySelector("h3")?.textContent || "").trim();
+                  const original = external.href;
+                  link.href = `/checkout/?source=rv&id=${encodeURIComponent(match[1])}&ebay=${encodeURIComponent(original)}&name=${encodeURIComponent(name)}`;
+                  link.removeAttribute("target");
+                  link.removeAttribute("rel");
+                  link.dataset.eusCheckoutRoute = "true";
+                } catch (_) {}
+              });
+            };
+            new MutationObserver(apply).observe(grid, { childList: true, subtree: true });
+            apply();
+          })();
+          ''')
+          PY
+
+          node --check site/store-checkout-server.js
+          node --check site/rv-ebay-catalog.js
+          node --check site/rv-checkout-routing.js
+          grep -q 'entry.shippingVerified !== true' site/store-checkout-server.js
+          grep -q '168631001484' site/rv-ebay-catalog.js
+          grep -q '168631043193' site/rv-ebay-catalog.js
+          ! grep -q '"186831001484"' site/rv-ebay-catalog.js
+          ! grep -q '168631058246' site/rv-checkout-routing.js
+          ! grep -q '168637439895' site/rv-checkout-routing.js
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/store-checkout-server.js site/rv-ebay-catalog.js site/rv-checkout-routing.js
+          git commit -m 'Enable verified RV direct checkout routing with new eBay IDs'
+          git push origin HEAD:main
