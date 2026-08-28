@@ -68,9 +68,26 @@ function checkoutResponse(response) {
   });
 }
 
+function checkoutJson(data, status) {
+  return Response.json(data, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "Referrer-Policy": "no-referrer",
+    },
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/store-checkout/orders" &&
+        (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function")) {
+      return checkoutJson({ error: "Store order storage is not configured" }, 503);
+    }
 
     if (url.pathname === "/api/store-checkout/config" ||
         url.pathname === "/api/store-checkout/quote" ||
