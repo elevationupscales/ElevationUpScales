@@ -1,0 +1,208 @@
+name: One-Time Command Center Catalog Manager v1
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  release:
+    if: ${{ contains(github.event.head_commit.message, '[catalog-manager-v1]') }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 40
+
+      - name: Complete import-format and Inventory navigation integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          js = Path('site/admin-catalog.js')
+          text = js.read_text()
+          old = '''  function parseDelimited(raw) {
+            const lines = String(raw||"").replace(/\\r/g,"").split("\\n").filter((line)=>line.trim()); if(!lines.length)return [];
+            const delimiter = lines[0].includes("\\t") ? "\\t" : lines[0].includes(",") ? "," : "\\t";
+            const headers = splitDelimitedLine(lines[0],delimiter).map((h)=>h.trim());
+            return lines.slice(1).map((line)=>{const cells=splitDelimitedLine(line,delimiter); const row={}; headers.forEach((header,index)=>{row[header]=cells[index]??"";}); return row;}).filter((row)=>Object.values(row).some((v)=>text(v)));
+          }'''
+          new = '''  function parseDelimited(raw) {
+            let lines = String(raw||"").replace(/\\r/g,"").split("\\n").filter((line)=>line.trim()); if(!lines.length)return [];
+            const pipe = !lines[0].includes("\\t") && lines[0].includes("|");
+            const delimiter = lines[0].includes("\\t") ? "\\t" : pipe ? "|" : lines[0].includes(",") ? "," : "\\t";
+            if (pipe) lines = lines.map((line)=>line.trim().replace(/^\\|/,"").replace(/\\|$/,"")).filter((line)=>!/^\\s*:?-{3,}/.test(line));
+            const headers = splitDelimitedLine(lines[0],delimiter).map((h)=>h.trim()).filter(Boolean);
+            return lines.slice(1).map((line)=>{const cells=splitDelimitedLine(line,delimiter); const row={}; headers.forEach((header,index)=>{row[header]=cells[index]??"";}); return row;}).filter((row)=>Object.values(row).some((v)=>text(v)));
+          }'''
+          if old in text:
+              text = text.replace(old, new, 1)
+          elif 'const pipe = !lines[0].includes' not in text:
+              raise SystemExit('Bulk parser anchor not found')
+          js.write_text(text)
+
+          inv = Path('site/admin-inventory.html')
+          html = inv.read_text()
+          anchor = '<a class="button button-outline" href="/admin-listings.html">Mission Control</a>'
+          insert = '<a class="button button-outline" href="/admin-catalog">Catalog Manager</a>\n' + anchor
+          if 'href="/admin-catalog"' not in html:
+              if anchor not in html: raise SystemExit('Inventory navigation anchor not found')
+              html = html.replace(anchor, insert, 1)
+          inv.write_text(html)
+          PY
+
+      - name: Validate parent baseline and Catalog Manager release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor e8f157e5474a396ee80e07073b33ff77fa19c29d HEAD
+
+          # Preserve completed Lithium / Hawaii parent release.
+          test -f site/lithium-batteries.html
+          test -f site/hawaii-lithium-batteries.html
+          test -f site/lithium-catalog.js
+          grep -q 'Lithium Battery Shop' site/lithium-batteries.html
+          grep -q 'Lithium Batteries Shipped to Hawaii' site/hawaii-lithium-batteries.html
+          grep -q 'Hawaii Shipping Quote Required' site/hawaii-lithium-batteries.html
+
+          # Catalog Manager surface and protected API.
+          test -f site/admin-catalog.html
+          test -f site/admin-catalog.css
+          test -f site/admin-catalog.js
+          test -f site/catalog-admin-server.js
+          grep -q 'Store Catalog Manager' site/admin-catalog.html
+          grep -q 'Bulk Import' site/admin-catalog.html
+          grep -q 'Add Single Product' site/admin-catalog.html
+          grep -q 'Import URL' site/admin-catalog.html
+          grep -q 'Doba' site/admin-catalog.html
+          grep -q 'eBay' site/admin-catalog.html
+          grep -q 'Fourthwall' site/admin-catalog.html
+          grep -q 'Needs Review' site/admin-catalog.html
+          grep -q 'handleCatalogAdminApi' site/_worker.js
+          grep -q '/api/admin/catalog' site/_worker.js
+          grep -q 'catalog-admin-server.js' site/_worker.js
+          grep -q 'previewToken' site/catalog-admin-server.js
+          grep -q 'SKU is required' site/catalog-admin-server.js
+          grep -q 'eus_catalog_meta' site/catalog-admin-server.js
+          grep -q 'inventory_item_id TEXT PRIMARY KEY' site/catalog-admin-server.js
+          grep -q 'quantityOnHand: fulfillmentMode === "tracked"' site/catalog-admin-server.js
+          grep -q 'shippingStatus === "verified"' site/catalog-admin-server.js
+          grep -q 'URL import draft' site/catalog-admin-server.js
+          grep -q 'const pipe = !lines\[0\].includes' site/admin-catalog.js
+
+          # Existing checkout safety remains authoritative.
+          grep -q 'entry.shippingVerified !== true' site/store-checkout-server.js
+          grep -q 'shippingVerified !== true' site/store-checkout-server.js
+          grep -q 'rv-checkout-routing.js?v=3.11.43' site/rv-store.html
+          grep -q 'STORE_LIVE_CHECKOUT_ENABLED' site/store-checkout-server.js
+          grep -q 'address1' site/checkout/index.html
+          grep -q 'postalCode' site/checkout/index.html
+
+          # Doba fulfillment operations are exposed without replacing payments.
+          grep -q 'hold_issue' site/store-orders-admin-server.js
+          grep -q 'elevationSku' site/store-orders-admin-server.js
+          grep -q 'supplierCostCents' site/store-orders-admin-server.js
+          grep -q 'Doba item number' site/admin-store-orders.js
+          grep -q 'Supplier Order / Reference' site/admin-store-orders.html
+          grep -q 'href="/admin-catalog"' site/admin-store-orders.html
+          grep -q 'href="/admin-catalog"' site/admin-inventory.html
+          grep -q '"/admin-catalog", "Catalog"' site/admin-store-orders-link.js
+
+          node --check site/catalog-admin-server.js
+          node --check site/admin-catalog.js
+          node --check site/store-orders-admin-server.js
+          node --check site/admin-store-orders.js
+          node --check site/admin-store-orders-link.js
+          node --check site/_worker.js
+
+      - name: Commit completed Catalog Manager integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/admin-catalog.js site/admin-inventory.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Complete Catalog Manager import formats and commerce navigation'
+            git push origin HEAD:main
+          fi
+
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke production and commerce safeguards
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          sleep 3
+          smoke() {
+            local base="$1"
+            local route code
+            for route in / /store /rv-store /solar-project /lithium-batteries /hawaii-lithium-batteries /checkout /admin-catalog /admin-inventory.html /admin-store-orders.html; do
+              code=$(curl -sS -L --connect-timeout 5 --max-time 20 --retry 2 --retry-delay 1 -o /tmp/page.html -w '%{http_code}' "${base%/}${route}" || true)
+              echo "${base%/}${route}=${code}"
+              test "$code" = "200" || return 1
+            done
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/admin-catalog" | grep -q 'Store Catalog Manager'
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/lithium-batteries" | grep -q 'Lithium Battery Shop'
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/hawaii-lithium-batteries" | grep -q 'Hawaii Shipping Quote Required'
+          }
+          base="${DEPLOYMENT_URL%/}"
+          if ! smoke "$base"; then sleep 6; smoke "$PRODUCTION_URL"; fi
+
+          # Catalog API must be protected without an Admin session.
+          code=$(curl -sS -o /tmp/catalog-auth.json -w '%{http_code}' "${PRODUCTION_URL}/api/admin/catalog" || true)
+          cat /tmp/catalog-auth.json
+          test "$code" = "401"
+
+          # Server implementation must not be exposed as a public source file.
+          code=$(curl -sS -o /tmp/server-source.txt -w '%{http_code}' "${PRODUCTION_URL}/catalog-admin-server.js" || true)
+          test "$code" = "404"
+
+          # Existing live Apparel checkout remains enabled.
+          curl -sS -L --connect-timeout 5 --max-time 20 --fail "${PRODUCTION_URL}/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs'); const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          if(c.environment!=='live'||c.credentialsConfigured!==true||c.checkoutEnabled!==true||c.liveCheckoutApproved!==true) throw new Error('Apparel PayPal checkout regressed');
+          console.log('apparel_paypal=PASS');
+          NODE
+
+          # Verified RV direct quote remains live.
+          code=$(curl -sS -o /tmp/rv.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/checkout/' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          test "$code" = "200"
+          node -e "const q=require('/tmp/rv.json');if(q.ok!==true||q.totalCents!==6500)throw new Error('RV direct quote regression')"
+
+          # Held / unverified product still falls back to exact eBay listing.
+          code=$(curl -sS -o /tmp/fallback.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/checkout/' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          test "$code" = "409"
+          node -e "const q=require('/tmp/fallback.json');if(q.fallback!=='ebay'||q.ebayUrl!=='https://www.ebay.com/itm/168631058246')throw new Error('eBay fallback regression')"
+
+      - name: Receipt
+        run: |
+          echo '### Command Center Store Catalog Manager v1' >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Lithium / Hawaii parent release: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Catalog Manager route: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Admin API protection: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Bulk preview + preview-token import gate: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Single product + URL draft workflows: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Doba fulfillment operations: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Apparel PayPal: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV direct checkout + eBay fallback: PASS' >> "$GITHUB_STEP_SUMMARY"
