@@ -1,0 +1,159 @@
+name: One-Time Lithium Hawaii Phase 1
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  release:
+    if: ${{ contains(github.event.head_commit.message, '[lithium-phase1]') }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 2
+
+      - name: Integrate lightweight storefront navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          shell = Path('site/site-shell.js')
+          text = shell.read_text()
+          rv = '["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],'
+          additions = rv + '\n      ["/lithium-batteries", "Lithium Battery Shop", "LiFePO4 batteries for RV, solar, van, and off-grid power"],\n      ["/hawaii-lithium-batteries", "Hawaii Lithium Shipping", "Hawaii eligibility, rates, and island shipping information"],'
+          if '"/lithium-batteries", "Lithium Battery Shop"' not in text:
+              if rv not in text:
+                  raise SystemExit('Shop navigation anchor not found')
+              text = text.replace(rv, additions, 1)
+          shell.write_text(text)
+
+          version_updates = {
+              'site/store.html': [('site-shell.js?v=3.11.30', 'site-shell.js?v=3.11.44')],
+              'site/rv-store.html': [('site-shell.js?v=3.11.30', 'site-shell.js?v=3.11.44')],
+              'site/solar-services.html': [('site-shell.js?v=3.4.1', 'site-shell.js?v=3.11.44')],
+          }
+          for filename, replacements in version_updates.items():
+              path = Path(filename)
+              value = path.read_text()
+              for old, new in replacements:
+                  if old in value:
+                      value = value.replace(old, new, 1)
+                  elif new not in value:
+                      raise SystemExit(f'Expected site-shell version anchor missing in {filename}')
+              path.write_text(value)
+          PY
+
+      - name: Validate Phase 1 scope and reusable catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f site/lithium-batteries.html
+          test -f site/hawaii-lithium-batteries.html
+          test -f site/lithium-catalog.js
+          test -f site/lithium-shop.js
+          test -f site/lithium-shop.css
+          node --check site/lithium-catalog.js
+          node --check site/lithium-shop.js
+          node --check site/site-shell.js
+          grep -q 'Lithium Battery Shop' site/lithium-batteries.html
+          grep -q 'Lithium Batteries Shipped to Hawaii' site/hawaii-lithium-batteries.html
+          grep -q 'Hawaii Shipping Available on Eligible Lithium Batteries' site/hawaii-lithium-batteries.html
+          grep -q 'Hawaii Shipping Quote Required' site/hawaii-lithium-batteries.html
+          grep -q '"/lithium-batteries", "Lithium Battery Shop"' site/site-shell.js
+          grep -q '"/hawaii-lithium-batteries", "Hawaii Lithium Shipping"' site/site-shell.js
+          grep -q 'site-shell.js?v=3.11.44' site/store.html
+          grep -q 'site-shell.js?v=3.11.44' site/rv-store.html
+          grep -q 'site-shell.js?v=3.11.44' site/solar-services.html
+          grep -q 'rv-checkout-routing.js?v=3.11.43' site/rv-store.html
+          grep -q 'entry.shippingVerified !== true' site/store-checkout-server.js
+          node - <<'NODE'
+          global.window = {};
+          require('./site/lithium-catalog.js');
+          const c = window.EUS_LITHIUM_CATALOG;
+          if (!Array.isArray(c) || c.length !== 6) throw new Error(`Expected 6 starter products, got ${c?.length}`);
+          const required = ['D0102X3GZZA-221080','D0102X364CU-972550','D0102X30VF7-591857','D01027HH5RV-681904','D01027R3A8P-737772','D010277UEBX-329545'];
+          for (const id of required) if (!c.some((p) => p.id === id)) throw new Error(`Missing ${id}`);
+          for (const p of c) {
+            if (!p.source?.sku || !p.source?.ebayItemId || !p.purchase?.url) throw new Error(`Unstructured product ${p.id}`);
+            const hi = p.shipping?.hawaii;
+            if (!hi || hi.verified !== false || hi.eligible !== false || hi.priceCents !== null) throw new Error(`Unsafe Hawaii rule ${p.id}`);
+          }
+          console.log('reusable_lithium_catalog=PASS');
+          NODE
+
+      - name: Commit permanent navigation integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/site-shell.js site/store.html site/rv-store.html site/solar-services.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Integrate Lithium Battery Shop into existing store navigation'
+            git push origin HEAD:main
+          fi
+
+      - name: Deploy Phase 1 to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify new routes and existing commerce
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          sleep 3
+          smoke() {
+            local base="$1"
+            local route code
+            for route in / /store /rv-store /solar-services /checkout /lithium-batteries /hawaii-lithium-batteries; do
+              code=$(curl -sS -L --connect-timeout 5 --max-time 20 --retry 2 --retry-delay 1 -o /tmp/page.html -w '%{http_code}' "${base%/}${route}" || true)
+              echo "${base%/}${route}=${code}"
+              test "$code" = "200" || return 1
+            done
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/lithium-batteries" | grep -q 'Lithium Battery Shop'
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/hawaii-lithium-batteries" | grep -q 'Hawaii Shipping Quote Required'
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/lithium-catalog.js?v=3.11.44" | grep -q 'D01027R3A8P-737772'
+            curl -sS -L --connect-timeout 5 --max-time 20 --fail "${base%/}/rv-store" | grep -q 'rv-checkout-routing.js?v=3.11.43'
+          }
+          deployment_base="${DEPLOYMENT_URL%/}"
+          if ! smoke "$deployment_base"; then
+            echo 'Deployment hostname not ready; checking production alias.'
+            sleep 6
+            smoke "$PRODUCTION_URL"
+          fi
+
+          curl -sS -L --connect-timeout 5 --max-time 20 --fail "${PRODUCTION_URL}/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          if(c.environment!=='live'||c.credentialsConfigured!==true||c.checkoutEnabled!==true||c.liveCheckoutApproved!==true) throw new Error('Existing Apparel checkout regressed');
+          console.log('existing_apparel_checkout=PASS');
+          NODE
+
+      - name: Record Phase 1 receipt
+        run: |
+          echo '### Lithium Battery Shop + Hawaii Phase 1' >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Lithium page: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hawaii page: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Reusable structured catalog: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hawaii verified rates enabled: 0' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Existing Apparel/RV safeguards: PASS' >> "$GITHUB_STEP_SUMMARY"
