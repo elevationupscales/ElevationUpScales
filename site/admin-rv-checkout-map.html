@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#070707">
+<title>RV Checkout Mapping | Elevation UpScales, Inc.</title>
+<link href="/styles.css?v=3.5.0" rel="stylesheet">
+<link href="/site-shell.css?v=3.5.0" rel="stylesheet">
+<link href="/admin-listings.css?v=3.11.11" rel="stylesheet">
+<link href="/admin-rv-checkout-map.css?v=3.11.43" rel="stylesheet">
+<script defer src="/rv-ebay-catalog.js?v=3.11.31"></script>
+<script defer src="/admin-rv-checkout-map.js?v=3.11.43"></script>
+</head>
+<body class="admin-framework-page rv-map-page">
+<main class="admin-shell rv-map-shell">
+<header class="admin-shell__header">
+<div><p class="eyebrow">Elevation UpScales, Inc. · Store Operations</p><h1>RV / Doba Checkout Mapping</h1><p class="admin-subhead">Turn verified Doba product and shipping data into the exact Cloudflare checkout mapping. This tool never stores API keys or payment secrets.</p></div>
+<div class="admin-header-actions"><a class="button button-outline" href="/admin-listings">Mission Control</a><a class="button button-outline" href="/admin-inventory.html">Inventory</a><a class="button button-outline" href="/admin-store-orders.html">Orders</a><a class="button button-outline" href="/rv-store">RV Store</a></div>
+</header>
+<section class="admin-login" id="rv-map-auth" hidden><div><p class="eyebrow">Admin Login Required</p><h2>Open Mission Control to sign in.</h2><p>This builder uses the same signed Admin session as Mission Control and Inventory.</p></div><div><a class="button button-primary" href="/admin-listings">Go to Mission Control</a></div></section>
+<section id="rv-map-dashboard" hidden>
+<section class="rv-map-notice"><strong>Shipping verification rule</strong><p>Only map an item after its shipping charge has been verified in Doba for the intended destination policy. Do not calculate Doba shipping from product weight. If shipping is uncertain, leave the item unmapped so checkout falls back to the exact eBay listing.</p></section>
+<div class="rv-map-layout">
+<section class="rv-map-card"><div class="admin-section-head"><div><p class="eyebrow">1 · Product</p><h2>Select RV Store Item</h2></div><span class="rv-map-status" id="rv-map-catalog-status">Loading catalog…</span></div><label class="rv-map-field">Existing RV / eBay item<select id="rv-map-product" required><option value="">Choose a product</option></select></label><div class="rv-map-product-readout" id="rv-map-product-readout" hidden><strong id="rv-map-product-name">—</strong><span id="rv-map-product-category">—</span><code id="rv-map-ebay-item">—</code><a id="rv-map-ebay-link" target="_blank" rel="noopener">Open exact eBay listing</a></div></section>
+<section class="rv-map-card"><div class="admin-section-head"><div><p class="eyebrow">2 · Doba</p><h2>Verified Supplier Data</h2></div></div><div class="rv-map-grid"><label class="rv-map-field">Doba Item No.<input id="rv-map-item-no" maxlength="120" placeholder="Required"></label><label class="rv-map-field">Doba SKU ID<input id="rv-map-sku-id" maxlength="120" placeholder="Optional if unavailable"></label><label class="rv-map-field">Doba SPU No.<input id="rv-map-spu-no" maxlength="120" placeholder="Optional if unavailable"></label><label class="rv-map-field">Doba Product Cost <span>internal only</span><input id="rv-map-cost" min="0" step="0.01" inputmode="decimal" type="number" placeholder="0.00"></label><label class="rv-map-field">Website Checkout Price<input id="rv-map-price" min="0.01" step="0.01" inputmode="decimal" type="number" placeholder="0.00"></label><label class="rv-map-field">Verified Doba Shipping / item<input id="rv-map-shipping" min="0" step="0.01" inputmode="decimal" type="number" placeholder="0.00"></label><label class="rv-map-field">Shipping Verification Basis<select id="rv-map-shipping-basis"><option value="doba_cart">Doba cart / checkout</option><option value="doba_rate_api">Doba Shipping Rate Estimate API</option><option value="doba_support">Doba support confirmation</option></select></label><label class="rv-map-field">Verified Date<input id="rv-map-verified-date" type="date"></label><label class="rv-map-field rv-map-wide">Allowed States <span>optional; comma separated</span><input id="rv-map-allowed" maxlength="180" placeholder="CO, ID"></label><label class="rv-map-field rv-map-wide">Blocked States <span>optional; comma separated</span><input id="rv-map-blocked" maxlength="180" placeholder="AK, HI"></label><label class="rv-map-field rv-map-full">Verification Notes <span>internal context only</span><textarea id="rv-map-notes" maxlength="600" rows="3" placeholder="What was checked, destination assumptions, supplier notes, freight limitations, etc."></textarea></label></div><label class="rv-map-confirm"><input id="rv-map-verified" type="checkbox"> <span>I verified the Doba merchandise price and shipping basis above. This item is eligible for direct checkout under the state rules entered here.</span></label><div class="rv-map-math" aria-label="Margin preview"><div><span>Product margin before fees/tax</span><strong id="rv-map-margin">—</strong></div><div><span>Customer total before tax</span><strong id="rv-map-total">—</strong></div></div></section>
+<section class="rv-map-card rv-map-output-card"><div class="admin-section-head"><div><p class="eyebrow">3 · Output</p><h2>Cloudflare Mapping</h2></div><button class="button button-primary" id="rv-map-generate" type="button">Generate Mapping</button></div><p class="admin-muted">Paste an existing <code>DOBA_PRODUCT_MAP_JSON</code> below to merge this verified item into it. Leave it blank to generate a one-item map.</p><label class="rv-map-field">Existing map JSON <span>optional</span><textarea id="rv-map-existing" rows="6" spellcheck="false" placeholder="{}"></textarea></label><label class="rv-map-field">Generated <code>DOBA_PRODUCT_MAP_JSON</code><textarea id="rv-map-output" rows="18" readonly spellcheck="false"></textarea></label><div class="rv-map-actions"><button class="button button-outline" id="rv-map-copy" type="button" disabled>Copy JSON</button><button class="button button-outline" id="rv-map-reset" type="button">Reset</button><span class="rv-map-status" id="rv-map-status" role="status"></span></div></section>
+</div>
+<section class="rv-map-card rv-map-queue"><div class="admin-section-head"><div><p class="eyebrow">Verification Queue</p><h2>Recommended First Direct-Checkout Tests</h2><p class="admin-muted">Start with ordinary RV accessories. Lithium batteries and other destination-sensitive freight stay on the stricter verification path until state/freight eligibility is explicit.</p></div></div><div id="rv-map-queue-list" class="rv-map-queue-list"></div></section>
+</section>
+</main>
+</body>
+</html>
