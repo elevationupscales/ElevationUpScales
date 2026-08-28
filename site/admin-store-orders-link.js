@@ -17,6 +17,7 @@
     return link;
   };
 
-  const orders = ensureLink("/admin-store-orders.html", "Orders", inventory);
+  const catalog = ensureLink("/admin-catalog", "Catalog", inventory);
+  const orders = ensureLink("/admin-store-orders.html", "Orders", catalog);
   ensureLink("/admin-rv-checkout-map.html", "RV Mapping", orders);
 })();
