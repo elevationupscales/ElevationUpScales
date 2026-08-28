@@ -10,7 +10,8 @@
     "/admin-listings.js",
     "/worker-core.js",
     "/store-checkout-server.js",
-    "/store-orders-admin-server.js"
+    "/store-orders-admin-server.js",
+    "/catalog-admin-server.js"
   ],
   "exclude": []
 }
