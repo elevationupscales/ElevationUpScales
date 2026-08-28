@@ -1,0 +1,59 @@
+name: Diagnose Preview Store Images
+
+on:
+  push:
+    branches:
+      - launch/paypal-sandbox-preview-20260828
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect preview catalog image URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
+          curl --silent --show-error --location --retry 5 --retry-all-errors \
+            -H 'Accept: application/json' \
+            "${base}/api/store-products?catalog=full&ts=$(date +%s)" > /tmp/catalog.json
+          python - <<'PY'
+          import json, urllib.parse
+          data=json.load(open('/tmp/catalog.json'))
+          rows = data if isinstance(data,list) else next((data.get(k) for k in ('products','results','items') if isinstance(data.get(k),list)), [])
+          print('rows=', len(rows))
+          def image_url(v):
+              if isinstance(v,str): return v.strip()
+              if isinstance(v,dict):
+                  for k in ('url','src','imageUrl','transformedUrl'):
+                      if v.get(k): return str(v[k]).strip()
+              return ''
+          urls=[]
+          for i,p in enumerate(rows[:12]):
+              candidates=[]
+              for k in ('images','media'):
+                  if isinstance(p.get(k),list): candidates += p[k]
+              candidates += [p.get('image'),p.get('featuredImage'),p.get('primaryImage'),p.get('thumbnailImage')]
+              variants=p.get('variants') if isinstance(p.get('variants'),list) else []
+              for v in variants:
+                  for k in ('images','media'):
+                      if isinstance(v.get(k),list): candidates += v[k]
+                  candidates.append(v.get('thumbnailImage'))
+              u=next((image_url(x) for x in candidates if image_url(x)), '')
+              print(f'product[{i}] name={p.get("name") or p.get("title")} image={u}')
+              if u: urls.append(u)
+          open('/tmp/image_urls.txt','w').write('\n'.join(urls))
+          PY
+          echo '--- image HTTP checks ---'
+          while IFS= read -r url; do
+            [ -n "$url" ] || continue
+            case "$url" in
+              //*) url="https:${url}" ;;
+              /*) url="https://elevationupscales-shop.fourthwall.com${url}" ;;
+            esac
+            code=$(curl --silent --show-error --location --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "$url" || true)
+            echo "$code $url"
+          done < /tmp/image_urls.txt
