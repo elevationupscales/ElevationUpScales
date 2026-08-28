@@ -1,0 +1,144 @@
+name: Patch Home Capabilities and Variant Images
+on:
+  push:
+    branches: [launch/paypal-sandbox-preview-20260828]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[home-capabilities-patched]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Patch scoped components
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          shell=Path('site/site-shell.js')
+          text=shell.read_text()
+          old='''  const headerInner = header.querySelector(".eus-header__inner");
+          if (headerInner && !header.querySelector(".eus-capability-rail")) {
+            const rail = document.createElement("nav");
+            rail.className = "eus-capability-rail";
+            rail.setAttribute("aria-label", "Popular Elevation UpScales services");
+            rail.innerHTML = `
+              <div class="container eus-capability-rail__inner">
+                <span class="eus-capability-rail__label">What We Do</span>
+                <a href="/home-services" data-eus-capability="tile"><span class="eus-capability-rail__icon" aria-hidden="true">◆</span>Tile &amp; Showers</a>
+                <a href="/home-services" data-eus-capability="flooring"><span class="eus-capability-rail__icon" aria-hidden="true">▤</span>Flooring</a>
+                <a href="/home-services" data-eus-capability="home"><span class="eus-capability-rail__icon" aria-hidden="true">⌂</span>Home Repairs</a>
+                <a href="/home-services" data-eus-capability="inspection"><span class="eus-capability-rail__icon" aria-hidden="true">⌕</span>Roof &amp; Leak Inspections</a>
+                <a href="/rv-services" data-eus-capability="rv"><span class="eus-capability-rail__icon" aria-hidden="true">▰</span>RV Repair &amp; Restoration</a>
+                <a href="/solar-services" data-eus-capability="solar"><span class="eus-capability-rail__icon" aria-hidden="true">☀</span>Solar &amp; Off-Grid</a>
+              </div>`;
+            headerInner.insertAdjacentElement("afterend", rail);
+          }
+'''
+          new='''  const headerInner = header.querySelector(".eus-header__inner");
+          const homePath = location.pathname === "/" || location.pathname === "/index.html";
+          if (homePath && !document.querySelector('script[data-eus-home-capabilities]')) {
+            const capabilityScript = document.createElement("script");
+            capabilityScript.src = "/home-capabilities.js?v=3.11.43";
+            capabilityScript.defer = true;
+            capabilityScript.dataset.eusHomeCapabilities = "true";
+            document.head.appendChild(capabilityScript);
+          }
+'''
+          if old not in text:
+              raise SystemExit('capability rail block not found')
+          shell.write_text(text.replace(old,new,1))
+
+          server=Path('site/store-checkout-server.js')
+          text=server.read_text()
+          old='''function variantImages(variant) {
+            const candidates = [
+              ...(Array.isArray(variant?.images) ? variant.images : []),
+              ...(Array.isArray(variant?.media) ? variant.media : []),
+              variant?.thumbnailImage,
+              variant?.image,
+            ];
+            return candidates.map(imageUrl).filter(Boolean);
+          }
+'''
+          new='''function variantImages(variant) {
+            const found = [];
+            const seen = new Set();
+            const visit = (value, key = "", depth = 0) => {
+              if (value == null || depth > 6) return;
+              if (typeof value === "string") {
+                const url = imageUrl(value);
+                const looksLikeImage = /^https?:\\/\\//i.test(url) && (
+                  /imgproxy|image|media|mockup|thumbnail/i.test(url) ||
+                  /\\.(?:avif|webp|png|jpe?g)(?:[?#]|$)/i.test(url)
+                );
+                if (looksLikeImage && !seen.has(url)) { seen.add(url); found.push(url); }
+                return;
+              }
+              if (Array.isArray(value)) { value.forEach((item) => visit(item, key, depth + 1)); return; }
+              if (typeof value !== "object") return;
+              for (const [childKey, child] of Object.entries(value)) {
+                if (depth < 2 || /image|media|thumb|preview|mockup|photo|url|src/i.test(childKey)) {
+                  visit(child, childKey, depth + 1);
+                }
+              }
+            };
+            visit(variant);
+            return found;
+          }
+'''
+          if old not in text:
+              raise SystemExit('variantImages block not found')
+          server.write_text(text.replace(old,new,1))
+
+          Path('site/home-capabilities.js').write_text(r'''(() => {
+            "use strict";
+            if (!(location.pathname === "/" || location.pathname === "/index.html")) return;
+            if (document.querySelector(".eus-home-capabilities")) return;
+
+            // EDIT THIS LIST to change homepage service cards. No global navigation code required.
+            const HOME_SERVICES = [
+              { id: "tile", eyebrow: "INTERIORS", title: "Tile & Showers", description: "Tile installation, shower systems, waterproofing, repair, and restoration.", href: "/home-services" },
+              { id: "flooring", eyebrow: "INTERIORS", title: "Flooring", description: "Floor repair, replacement, finishing, and practical upgrades for lived-in spaces.", href: "/home-services" },
+              { id: "home", eyebrow: "PROPERTY", title: "Home Repairs", description: "Repairs, maintenance, punch-list work, and restoration support for homes and properties.", href: "/home-services" },
+              { id: "inspection", eyebrow: "INSPECTIONS", title: "Roof & Leak Inspections", description: "Leak investigation, moisture concerns, roof observations, and next-step documentation.", href: "/home-services" },
+              { id: "rv", eyebrow: "RV", title: "RV Repair & Restoration", description: "RV systems, repairs, restoration, upgrades, inspections, and off-grid improvements.", href: "/rv-services" },
+              { id: "solar", eyebrow: "OFF-GRID", title: "Solar & Off-Grid", description: "Solar, lithium batteries, inverters, troubleshooting, and off-grid power planning.", href: "/solar-services" },
+            ];
+
+            const css = document.createElement("link");
+            css.rel = "stylesheet";
+            css.href = "/home-capabilities.css?v=3.11.43";
+            document.head.appendChild(css);
+
+            const section = document.createElement("section");
+            section.className = "eus-home-capabilities";
+            section.setAttribute("aria-labelledby", "eus-home-capabilities-title");
+            section.innerHTML = `<div class="container eus-home-capabilities__inner"><div class="eus-home-capabilities__heading"><p class="eus-home-capabilities__eyebrow">ELEVATION UPSCALES</p><h2 id="eus-home-capabilities-title">What We Do</h2><p>Practical repair, restoration, RV, and off-grid services built around real projects.</p></div><div class="eus-home-capabilities__grid"></div></div>`;
+            const grid = section.querySelector(".eus-home-capabilities__grid");
+            HOME_SERVICES.forEach((item) => {
+              const link = document.createElement("a");
+              link.className = "eus-home-capability-card";
+              link.href = item.href;
+              link.dataset.eusCapability = item.id;
+              link.innerHTML = `<span class="eus-home-capability-card__eyebrow"></span><strong></strong><span class="eus-home-capability-card__description"></span><span class="eus-home-capability-card__action">Explore service <span aria-hidden="true">→</span></span>`;
+              link.querySelector(".eus-home-capability-card__eyebrow").textContent = item.eyebrow;
+              link.querySelector("strong").textContent = item.title;
+              link.querySelector(".eus-home-capability-card__description").textContent = item.description;
+              link.addEventListener("click", () => window.EUSIntent?.track?.("service_shortcut_click", item.id, { source: "homepage_what_we_do", destination: item.href }));
+              grid.appendChild(link);
+            });
+            document.querySelector(".eus-header")?.insertAdjacentElement("afterend", section);
+          })();
+          ''')
+
+          Path('site/home-capabilities.css').write_text(r'''.eus-home-capabilities{border-bottom:1px solid rgba(255,200,61,.16);background:linear-gradient(180deg,#090909,#050505);color:#f5f1e8}.eus-home-capabilities__inner{padding:clamp(1.6rem,3vw,2.5rem) 0}.eus-home-capabilities__heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);gap:.45rem 2rem;align-items:end;margin-bottom:1.15rem}.eus-home-capabilities__eyebrow{grid-column:1/-1;margin:0;color:#d9aa34;font:800 .72rem/1 Arial,sans-serif;letter-spacing:.18em}.eus-home-capabilities__heading h2{margin:0;font:800 clamp(1.65rem,3vw,2.55rem)/1.05 Georgia,serif;color:#fff}.eus-home-capabilities__heading>p:last-child{margin:0;color:#bdb8ae;line-height:1.55}.eus-home-capabilities__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}.eus-home-capability-card{display:grid;gap:.55rem;min-height:168px;padding:1rem;border:1px solid rgba(255,200,61,.18);border-radius:10px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,200,61,.018));color:#fff;text-decoration:none;box-shadow:0 14px 28px rgba(0,0,0,.18);transition:transform .18s ease,border-color .18s ease,background .18s ease}.eus-home-capability-card:hover,.eus-home-capability-card:focus-visible{transform:translateY(-2px);border-color:rgba(255,200,61,.52);background:linear-gradient(145deg,rgba(255,200,61,.075),rgba(255,255,255,.025));outline:none}.eus-home-capability-card__eyebrow{color:#d9aa34;font:800 .66rem/1 Arial,sans-serif;letter-spacing:.14em}.eus-home-capability-card strong{font:800 1.02rem/1.2 Arial,sans-serif}.eus-home-capability-card__description{color:#bdb8ae;font:.86rem/1.45 Arial,sans-serif}.eus-home-capability-card__action{margin-top:auto;color:#ffc83d;font:800 .74rem/1 Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase}@media(max-width:900px){.eus-home-capabilities__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.eus-home-capabilities__heading{grid-template-columns:1fr}}@media(max-width:560px){.eus-home-capabilities__inner{padding-inline:14px}.eus-home-capabilities__grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:.35rem}.eus-home-capability-card{min-width:min(84vw,310px);scroll-snap-align:start}.eus-home-capabilities__heading{margin-bottom:.9rem}}''')
+          PY
+      - name: Commit scoped patch
+        run: |
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/site-shell.js site/store-checkout-server.js site/home-capabilities.js site/home-capabilities.css
+          git diff --cached --quiet && exit 0
+          git commit -m "Homepage-only service cards and variant image resolution [home-capabilities-patched]"
+          git push
