@@ -40,6 +40,14 @@ function paypalConfigured(env) {
   return Boolean(clean(env?.PAYPAL_CLIENT_ID, 300) && clean(env?.PAYPAL_CLIENT_SECRET, 300));
 }
 
+function envFlag(value) {
+  return ["1", "true", "yes", "on"].includes(clean(value, 20).toLowerCase());
+}
+
+function liveCheckoutAllowed(env) {
+  return paypalMode(env) !== "live" || envFlag(env?.STORE_LIVE_CHECKOUT_ENABLED);
+}
+
 function centsToValue(cents) {
   return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
 }
@@ -222,9 +230,6 @@ async function quoteApparel(raw) {
     selectedVariant = variants[0];
   }
 
-  // Fourthwall frequently supplies a verified product-level price while variant
-  // records carry option data only. A selected variant therefore inherits the
-  // verified product price when its own price field is absent.
   const productBaseCents = priceFromProduct(product);
   const variantBaseCents = selectedVariant
     ? dollarsToCents(selectedVariant?.unitPrice?.value ?? selectedVariant?.price?.value ?? selectedVariant?.price ?? selectedVariant?.amount)
@@ -374,7 +379,7 @@ async function ensureStoreOrderSchema(env) {
       customer_json TEXT NOT NULL,
       shipping_json TEXT NOT NULL,
       supplier_json TEXT NOT NULL,
-      paypal_order_id TEXT UNIQUE,
+      paypal_order_id TEXT,
       paypal_capture_id TEXT,
       payment_status TEXT NOT NULL,
       created_at TEXT NOT NULL,
@@ -393,6 +398,7 @@ async function createStoreOrder(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
   if (!sameOriginRequest(request)) return json({ error: "Cross-origin request denied" }, 403);
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
+  if (!liveCheckoutAllowed(env)) return json({ error: "Live checkout is locked pending launch approval" }, 503);
 
   const raw = await request.json().catch(() => ({}));
   const quote = await quoteStoreItem(raw, env);
@@ -499,6 +505,7 @@ async function captureStoreOrder(request, env, orderId) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
   if (!sameOriginRequest(request)) return json({ error: "Cross-origin request denied" }, 403);
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
+  if (!liveCheckoutAllowed(env)) return json({ error: "Live checkout is locked pending launch approval" }, 503);
   const id = validOrderId(orderId);
   if (!id) return json({ error: "Invalid PayPal order ID" }, 400);
 
@@ -538,11 +545,16 @@ export async function handleStoreCheckoutApi(request, env, pathname) {
 
   if (path === "/api/store-checkout/config") {
     if (request.method !== "GET" && request.method !== "HEAD") return json({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+    const credentialsConfigured = paypalConfigured(env);
+    const checkoutEnabled = credentialsConfigured && liveCheckoutAllowed(env);
     const response = json({
       ok: true,
-      configured: paypalConfigured(env),
+      configured: checkoutEnabled,
+      credentialsConfigured,
+      checkoutEnabled,
+      liveCheckoutApproved: paypalMode(env) === "live" ? envFlag(env?.STORE_LIVE_CHECKOUT_ENABLED) : false,
       environment: paypalMode(env),
-      clientId: paypalConfigured(env) ? clean(env.PAYPAL_CLIENT_ID, 300) : "",
+      clientId: checkoutEnabled ? clean(env.PAYPAL_CLIENT_ID, 300) : "",
       currency: DEFAULT_CURRENCY,
       apparelMarkupPercent: 20,
       apparelShippingPerItem: "7.00",
