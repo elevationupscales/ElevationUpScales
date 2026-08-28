@@ -1,12 +1,20 @@
 (() => {
   "use strict";
   const actions = document.querySelector(".admin-header-actions");
-  if (!actions || actions.querySelector('[href="/admin-store-orders.html"]')) return;
+  if (!actions) return;
   const inventory = actions.querySelector('[href="/admin-inventory.html"]');
-  const link = document.createElement("a");
-  link.className = "button button-outline";
-  link.href = "/admin-store-orders.html";
-  link.textContent = "Orders";
-  if (inventory) inventory.insertAdjacentElement("afterend", link);
-  else actions.prepend(link);
+  const ensureLink = (href, label, after) => {
+    const existing = actions.querySelector(`[href="${href}"]`);
+    if (existing) return existing;
+    const link = document.createElement("a");
+    link.className = "button button-outline";
+    link.href = href;
+    link.textContent = label;
+    if (after?.parentNode === actions) after.insertAdjacentElement("afterend", link);
+    else if (inventory) inventory.insertAdjacentElement("afterend", link);
+    else actions.prepend(link);
+    return link;
+  };
+  const orders = ensureLink("/admin-store-orders.html", "Orders", inventory);
+  ensureLink("/admin-rv-checkout-map.html", "RV Mapping", orders);
 })();
