@@ -153,12 +153,10 @@
   const buildShopCard = (product) => {
     const article = document.createElement('article');
     article.className = 'home-feature-card';
-    const href = product.slug ? `${STORE_ORIGIN}/products/${encodeURIComponent(product.slug)}` : STORE_ORIGIN;
+    const href = product.slug ? `/checkout/?source=apparel&id=${encodeURIComponent(product.slug)}` : '/store';
     const media = document.createElement('a');
     media.className = 'home-feature-card-image';
     media.href = href;
-    media.target = '_blank';
-    media.rel = 'noopener';
     media.append(imageNode(product.image, product.name));
     if (productPriority(product) < 2) media.append(text('span', 'FEATURED', 'home-feature-badge'));
 
@@ -168,8 +166,6 @@
     const h = document.createElement('h4');
     const titleLink = document.createElement('a');
     titleLink.href = href;
-    titleLink.target = '_blank';
-    titleLink.rel = 'noopener';
     titleLink.textContent = product.name;
     h.append(titleLink);
     copy.append(h);
@@ -177,8 +173,6 @@
     const cta = document.createElement('a');
     cta.className = 'home-feature-link';
     cta.href = href;
-    cta.target = '_blank';
-    cta.rel = 'noopener';
     cta.textContent = 'Shop Item →';
     copy.append(cta);
     article.append(media, copy);
