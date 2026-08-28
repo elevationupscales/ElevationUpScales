@@ -1,0 +1,1 @@
+No redeploy is required for post-verification repository bookkeeping; deployed site bytes remain from production repair commit 40721e77768cd47f17e0c96f3909c0304e94bba8.
