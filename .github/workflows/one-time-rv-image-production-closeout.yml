@@ -1,0 +1,112 @@
+name: One-Time RV Image Production Closeout
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: rv-image-production-closeout
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ contains(github.event.head_commit.message, '[rv-image-closeout]') }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out authoritative main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Validate RV image repair and release invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/rv-ebay-catalog.js
+          node --check site/rv-store.js
+          grep -q 'imageUrl' site/rv-ebay-catalog.js
+          grep -q 'function productImage' site/rv-store.js
+          grep -q 'rv-product-image' site/rv-store.css
+          ! grep -q 'SPRITE_DATA_PATH' site/rv-store.js
+          ! grep -q 'rv-product-thumb' site/rv-store.js
+          ! grep -q 'spriteIndex' site/rv-ebay-catalog.js
+          grep -q 'EBAY_SELLER = "elevationupscalesshop"' site/rv-store.js
+          grep -q 'buy.href = item.buyUrl' site/rv-store.js
+          grep -q 'STORE_LIVE_CHECKOUT_ENABLED' site/store-checkout-server.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const source = fs.readFileSync('site/rv-ebay-catalog.js', 'utf8');
+          const sandbox = { window: {} };
+          vm.runInNewContext(source, sandbox);
+          const rows = sandbox.window.EUS_VERIFIED_EBAY_CATALOG || [];
+          if (rows.length !== 49) throw new Error(`expected 49 RV items, got ${rows.length}`);
+          const missing = rows.filter((item) => !/^https:\/\//.test(String(item.imageUrl || '')));
+          if (missing.length) throw new Error(`missing full-size image URL for ${missing.length} item(s)`);
+          const badBuy = rows.filter((item) => !/^https:\/\/www\.ebay\.com\/itm\/\d{12}$/.test(String(item.buyUrl || '')));
+          if (badBuy.length) throw new Error(`invalid eBay Buy Now URL for ${badBuy.length} item(s)`);
+          console.log(`rv_full_size_images=${rows.length}`);
+          NODE
+
+      - name: Deploy repaired site to Cloudflare Pages production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke production and verify no thumbnail regression
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for base in "${DEPLOYMENT_URL%/}" "${PRODUCTION_URL%/}"; do
+            for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
+              code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
+              test "$code" = "200"
+            done
+          done
+          curl --silent --show-error --fail --location --retry 8 --retry-all-errors "${PRODUCTION_URL}/rv-ebay-catalog.js" > /tmp/rv-catalog.js
+          curl --silent --show-error --fail --location --retry 8 --retry-all-errors "${PRODUCTION_URL}/rv-store.js" > /tmp/rv-store.js
+          curl --silent --show-error --fail --location --retry 8 --retry-all-errors "${PRODUCTION_URL}/rv-store.css" > /tmp/rv-store.css
+          grep -q 'imageUrl' /tmp/rv-catalog.js
+          grep -q 'function productImage' /tmp/rv-store.js
+          grep -q 'rv-product-image' /tmp/rv-store.css
+          ! grep -q 'SPRITE_DATA_PATH' /tmp/rv-store.js
+          ! grep -q 'rv-product-thumb' /tmp/rv-store.js
+          curl --silent --show-error --fail --location --retry 8 --retry-all-errors "${PRODUCTION_URL}/api/store-checkout/config" > /tmp/paypal-config.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const c = JSON.parse(fs.readFileSync('/tmp/paypal-config.json','utf8'));
+          const safe = {
+            environment: c.environment,
+            credentialsConfigured: c.credentialsConfigured === true,
+            checkoutEnabled: c.checkoutEnabled === true,
+            liveCheckoutApproved: c.liveCheckoutApproved === true,
+          };
+          console.log(JSON.stringify(safe));
+          if (safe.environment !== 'live' || !safe.credentialsConfigured) throw new Error('PayPal live environment regressed');
+          if (safe.checkoutEnabled || safe.liveCheckoutApproved) throw new Error('Live checkout unexpectedly enabled during image repair');
+          NODE
+
+      - name: Record closeout receipt
+        run: |
+          echo '### RV image production closeout' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV catalog: 49 full-size image URLs' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Thumbnail sprite renderer: removed' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal live credentials: preserved' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Live payment approval: remains locked' >> "$GITHUB_STEP_SUMMARY"
