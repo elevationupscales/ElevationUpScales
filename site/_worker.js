@@ -1,11 +1,13 @@
 import coreWorker from "./worker-core.js";
 import { handleStoreCheckoutApi } from "./store-checkout-server.js";
 import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
+import { handleCatalogAdminApi } from "./catalog-admin-server.js";
 
 // Protected production invariants continue to execute inside worker-core.js.
 // 3.11.30-store-navigation-repair
 // /api/admin/inventory
 // eus_inventory_items
+// 4.3.1-store-catalog-manager
 
 const APPAREL_ROUTING_LOADER = `
 ;(() => {
@@ -211,7 +213,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js"].includes(url.pathname)) {
+    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js"].includes(url.pathname)) {
       return new Response("Not found", {
         status: 404,
         headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
@@ -250,6 +252,10 @@ export default {
 
     if (url.pathname === "/api/admin/store-orders" || url.pathname.startsWith("/api/admin/store-orders/")) {
       return handleStoreOrdersAdminApi(request, env, url.pathname);
+    }
+
+    if (url.pathname === "/api/admin/catalog" || url.pathname.startsWith("/api/admin/catalog/")) {
+      return handleCatalogAdminApi(request, env, url.pathname);
     }
 
     if (url.pathname === "/store-config.js") {
