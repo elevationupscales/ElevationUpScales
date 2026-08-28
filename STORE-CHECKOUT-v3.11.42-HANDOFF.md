@@ -169,3 +169,12 @@ Do not promote until:
 6. An unmapped/unverified/blocked RV item is verified to fall back to its exact eBay listing.
 7. Store Orders is verified with a sandbox purchase and fulfillment-status update.
 8. Sales-tax handling for direct website orders is explicitly approved/configured before live customer payments.
+
+
+## Live commerce safety gate
+
+Real-money checkout requires an explicit Cloudflare variable in addition to live PayPal credentials:
+
+- `STORE_LIVE_CHECKOUT_ENABLED=true`
+
+Sandbox checkout does not require this flag. When `PAYPAL_ENV=live` and the flag is absent/false, Store checkout reports disabled and blocks order creation/capture. Set it only after all production release gates, including sales-tax handling, are approved.
