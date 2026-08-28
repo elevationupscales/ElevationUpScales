@@ -1,0 +1,84 @@
+name: Navigation Prep Production Gate
+
+on:
+  push:
+    branches:
+      - release/navigation-prep-production-trigger
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-navigation-prep-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out authoritative main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Require expected production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="31faa0998a52437c0b305f42d6b8f87d6cece696"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
+
+      - name: Verify protected navigation and customer invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'href="/start-a-project"' site/index.html
+          grep -q '+1-208-813-4998' site/index.html
+          grep -q 'href="/store"' site/index.html
+          grep -q 'href="/rv-store"' site/index.html
+          grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-ebay-catalog.js
+          grep -q 'TARGET_WIDTH = 1920' site/store-image-quality.js
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('site/404.html').read_text(encoding='utf-8')
+          marker = '<summary class="eus-nav-trigger is-current">Marketplace'
+          assert marker not in text, '404 still marks Marketplace current'
+          assert 'href="/start-a-project"' in text
+          print('navigation_prep=PASS')
+          PY
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+
+      - name: Deploy authoritative main to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke production routes
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          for route in / /store /rv-store /start-a-project /marketplace /solar-project /404.html; do
+            code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus.html --write-out '%{http_code}' "${base}${route}" || true)
+            test "$code" = "200"
+          done
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/404.html" | grep -q 'Page Not Found'
+
+      - name: Record production receipt
+        shell: bash
+        run: |
+          echo '### Navigation prep production release' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Source: 31faa0998a52437c0b305f42d6b8f87d6cece696' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Scope: navigation-only 404 current-state correction' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Store checkout: unchanged / deferred' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
