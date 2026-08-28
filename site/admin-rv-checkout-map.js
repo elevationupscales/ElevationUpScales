@@ -19,24 +19,91 @@
     "186833285491", // screen door guard
   ];
 
-  // Public Doba product matches only. These prefill supplier identity, never price,
-  // shipping, inventory, or shippingVerified. Re-verify those inside Doba before activation.
+  // Exact Doba product matches from the operator's Doba account snapshot.
+  // These identify the supplier item only; checkout activation still requires
+  // destination-specific shipping verification through Doba cart/rate/support.
   const PUBLIC_DOBA_MATCHES = Object.freeze({
     "186833010961": {
       itemNo: "D010275E6ZT",
-      url: "https://www.doba.com/product/wEeybzdltKva/dropshipping-vevor-fast-blow-glass-fuses-assortment-kit-120-pcs-125-volt-5-x-20-mm-1a-2a-3a-4a-5a-8a-10a-36-x-10-mm-25a-3a-5a-tube-fuses-suitable-for-electrical-boxes-led-strips-electronics-appliances.html",
+      url: "https://dropshipping.doba.com/v/detail/D010275E6ZT",
     },
     "186833034172": {
       itemNo: "D0102774602",
-      url: "https://www.doba.com/product/HKCaDASijeqr/dropshipping-paper-towel-holder-countertop-stainless-steel-paper-towel-stand-for-kitchen.html",
+      url: "https://dropshipping.doba.com/v/detail/D0102774602",
+    },
+    "186833049170": {
+      itemNo: "D010277UX8J",
+      url: "https://dropshipping.doba.com/v/detail/D010277UX8J",
     },
     "186833063926": {
       itemNo: "D010275RYD2",
-      url: "https://www.doba.com/product/wIQvDkdGOFVi/dropshipping-vevor-adhesive-hooks-4-pack-self-adhesive-towel-coat-hooks-heavy-duty-wall-hook-hold-15-lbs-max-stainless-steel-sticky-hanger-for-bathroom-kitchen-hanging-towel-coat-keys-matte-black.html",
+      url: "https://dropshipping.doba.com/v/detail/D010275RYD2",
     },
     "186833285491": {
       itemNo: "D01027RQMT2",
-      url: "https://www.doba.com/product/tPQWeGKBuFvC/dropshipping-vevor-rv-screen-door-protector-adjusts-from-22-to-315-inch-adjustable-door-grille-easy-to-install-reinforced-breathable-honeycomb-holes-iron-camper-rv-entry-protector-for-pet-protection-black.html",
+      url: "https://dropshipping.doba.com/v/detail/D01027RQMT2",
+    },
+  });
+
+  // Account snapshot supplied 2026-08-28. Values below are current listing data
+  // from Doba, not a universal shipping promise. "Free" is prefilled as $0 while
+  // the direct-checkout confirmation remains intentionally unchecked until the
+  // destination policy is verified.
+  const ACCOUNT_DOBA_SNAPSHOTS = Object.freeze({
+    "186833010961": {
+      observedAt: "2026-08-22 18:38:50 UTC-07:00",
+      storeSku: "D010275E6ZT-934006",
+      storePriceCents: 1799,
+      inventory: 1,
+      itemNo: "D010275E6ZT",
+      supplierPriceCents: 786,
+      shippingCents: 0,
+      shippingLabel: "Free",
+      marginPercent: 56.3,
+    },
+    "186833034172": {
+      observedAt: "2026-08-22 19:11:28 UTC-07:00",
+      storeSku: "D0102774602-304255",
+      storePriceCents: 2566,
+      inventory: 1,
+      itemNo: "D0102774602",
+      supplierPriceCents: 1272,
+      shippingCents: 0,
+      shippingLabel: "Free",
+      marginPercent: 50.4,
+    },
+    "186833049170": {
+      observedAt: "2026-08-22 19:27:45 UTC-07:00",
+      storeSku: "D010277UX8J-980664",
+      storePriceCents: 1988,
+      inventory: 1,
+      itemNo: "D010277UX8J",
+      supplierPriceCents: 1032,
+      shippingCents: 0,
+      shippingLabel: "Free",
+      marginPercent: 48.1,
+    },
+    "186833063926": {
+      observedAt: "2026-08-22 19:44:28 UTC-07:00",
+      storeSku: "D010275RYD2-323785",
+      storePriceCents: 2332,
+      inventory: 1,
+      itemNo: "D010275RYD2",
+      supplierPriceCents: 872,
+      shippingCents: 0,
+      shippingLabel: "Free",
+      marginPercent: 62.6,
+    },
+    "186833285491": {
+      observedAt: "2026-08-22 22:25:37 UTC-07:00",
+      storeSku: "D01027RQMT2-738035",
+      storePriceCents: 3766,
+      inventory: 1,
+      itemNo: "D01027RQMT2",
+      supplierPriceCents: 2872,
+      shippingCents: 0,
+      shippingLabel: "Free",
+      marginPercent: 23.7,
     },
   });
 
@@ -101,12 +168,20 @@
     $("rv-map-ebay-item").textContent = product.itemNumber;
     $("rv-map-ebay-link").href = product.buyUrl;
     $("rv-map-price").value = centsToInput(product.priceCents);
+
     const known = PUBLIC_DOBA_MATCHES[product.itemNumber];
-    if (known) {
-      $("rv-map-item-no").value = known.itemNo;
+    const snapshot = ACCOUNT_DOBA_SNAPSHOTS[product.itemNumber];
+    if (known) $("rv-map-item-no").value = known.itemNo;
+    if (snapshot) {
+      $("rv-map-cost").value = centsToInput(snapshot.supplierPriceCents);
+      $("rv-map-shipping").value = centsToInput(snapshot.shippingCents);
+      $("rv-map-notes").value = `Doba account snapshot ${snapshot.observedAt}; Store SKU ${snapshot.storeSku}; Doba inventory ${snapshot.inventory}; listed shipping ${snapshot.shippingLabel}; listed margin ${snapshot.marginPercent}%. Destination scope is not proven by this snapshot. Re-verify shipping in Doba cart/rate/support before checking direct-checkout confirmation.`;
+      const priceChanged = Number(product.priceCents) !== Number(snapshot.storePriceCents);
+      setStatus(`Doba account snapshot prefilled (${snapshot.itemNo}): supplier ${money(snapshot.supplierPriceCents)}, listed shipping ${snapshot.shippingLabel}, inventory ${snapshot.inventory}.${priceChanged ? ` Current RV Store price ${money(product.priceCents)} differs from snapshot ${money(snapshot.storePriceCents)}.` : ""} Shipping scope still requires verification.`, priceChanged ? "error" : "");
+    } else if (known) {
       setStatus(`Doba product match prefilled (${known.itemNo}). Verify current Doba cost, inventory, and shipping before activation.`, "");
     } else {
-      setStatus("No public Doba product ID match is stored for this item yet. Verify it in Doba before mapping.", "");
+      setStatus("No Doba product ID match is stored for this item yet. Verify it in Doba before mapping.", "");
     }
     updateMath();
   }
@@ -125,9 +200,10 @@
     catalogStatus.textContent = `${rows.length} RV Store items`;
     queueList.innerHTML = FIRST_QUEUE.map((itemNumber) => rows.find((item) => item.itemNumber === itemNumber)).filter(Boolean).map((item) => {
       const match = PUBLIC_DOBA_MATCHES[item.itemNumber];
+      const snapshot = ACCOUNT_DOBA_SNAPSHOTS[item.itemNumber];
       return `
       <article>
-        <div><strong>${item.name}</strong><span>${item.category} · ${money(item.priceCents)}</span><code>${item.itemNumber}${match ? ` · ${match.itemNo}` : " · Doba ID pending"}</code></div>
+        <div><strong>${item.name}</strong><span>${item.category} · ${money(item.priceCents)}</span><code>${item.itemNumber}${match ? ` · ${match.itemNo}` : " · Doba ID pending"}</code>${snapshot ? `<span>Doba ${money(snapshot.supplierPriceCents)} · ${snapshot.shippingLabel} listed shipping · inv ${snapshot.inventory} · destination scope pending</span>` : ""}</div>
         <button class="button button-outline" type="button" data-queue-item="${item.itemNumber}">Map This Item</button>
       </article>`;
     }).join("") || '<p class="admin-muted">Queue items are unavailable in the current catalog.</p>';
@@ -139,6 +215,7 @@
     const itemNo = clean($("rv-map-item-no").value);
     if (!itemNo) throw new Error("Enter the verified Doba Item No.");
     const priceCents = dollarsToCents($("rv-map-price").value);
+    const costCents = dollarsToCents($("rv-map-cost").value);
     const shippingCents = dollarsToCents($("rv-map-shipping").value);
     if (!Number.isInteger(priceCents) || priceCents < 1) throw new Error("Enter a valid website checkout price.");
     if (!Number.isInteger(shippingCents) || shippingCents < 0) throw new Error("Enter the verified Doba shipping charge.");
@@ -166,12 +243,25 @@
       shippingBasis: $("rv-map-shipping-basis").value,
       verifiedAt: $("rv-map-verified-date").value || new Date().toISOString().slice(0, 10),
     };
+    if (Number.isInteger(costCents) && costCents >= 0) entry.supplierCostCents = costCents;
     const known = PUBLIC_DOBA_MATCHES[product.itemNumber];
+    const snapshot = ACCOUNT_DOBA_SNAPSHOTS[product.itemNumber];
     const skuId = clean($("rv-map-sku-id").value);
     const spuNo = clean($("rv-map-spu-no").value);
+    const verificationNotes = clean($("rv-map-notes").value);
     if (skuId) entry.skuId = skuId;
     if (spuNo) entry.spuNo = spuNo;
     if (known?.url) entry.dobaProductUrl = known.url;
+    if (verificationNotes) entry.verificationNotes = verificationNotes;
+    if (snapshot) {
+      entry.sourceSnapshot = {
+        observedAt: snapshot.observedAt,
+        storeSku: snapshot.storeSku,
+        inventory: snapshot.inventory,
+        listedShipping: snapshot.shippingLabel,
+        listedMarginPercent: snapshot.marginPercent,
+      };
+    }
     if (allowedStates.length) entry.allowedStates = allowedStates;
     if (blockedStates.length) entry.blockedStates = blockedStates;
 
