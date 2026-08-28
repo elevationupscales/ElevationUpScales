@@ -1,0 +1,86 @@
+name: Smoke RV Mapping Preview
+
+on:
+  push:
+    branches:
+      - launch/paypal-sandbox-preview-20260828
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke RV mapping workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet selenium
+          python - <<'PY'
+          import json, time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+
+          base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_argument('--window-size=1440,2200')
+          driver=webdriver.Chrome(options=opts)
+          try:
+              driver.get(base + '/admin-rv-checkout-map.html')
+              for _ in range(30):
+                  count=driver.execute_script("return document.querySelectorAll('#rv-map-product option').length")
+                  auth_visible=driver.execute_script("const e=document.querySelector('#rv-map-auth'); return e && !e.hidden")
+                  if count >= 50 and auth_visible: break
+                  time.sleep(.4)
+              count=driver.execute_script("return document.querySelectorAll('#rv-map-product option').length")
+              auth_visible=driver.execute_script("const e=document.querySelector('#rv-map-auth'); return e && !e.hidden")
+              dashboard_hidden=driver.execute_script("return document.querySelector('#rv-map-dashboard')?.hidden === true")
+              queue_count=driver.execute_script("return document.querySelectorAll('[data-queue-item]').length")
+              print('rv_mapping_catalog_options=',count)
+              print('rv_mapping_unauth_panel=',auth_visible)
+              print('rv_mapping_dashboard_hidden=',dashboard_hidden)
+              print('rv_mapping_queue=',queue_count)
+              assert count == 50, count  # 49 catalog items + placeholder
+              assert auth_visible is True
+              assert dashboard_hidden is True
+              assert queue_count == 5
+
+              # UI-only synthetic generation test. Nothing is saved to Cloudflare or checkout config.
+              driver.execute_script("""
+                const set=(id,v)=>{const e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};
+                set('rv-map-product','186833010961');
+                set('rv-map-item-no','SMOKE-DO-NOT-USE');
+                set('rv-map-cost','10.00');
+                set('rv-map-price','17.99');
+                set('rv-map-shipping','5.25');
+                set('rv-map-blocked','AK, HI');
+                document.getElementById('rv-map-verified').checked=true;
+                document.getElementById('rv-map-generate').click();
+              """)
+              time.sleep(.5)
+              generated=driver.execute_script("return document.getElementById('rv-map-output').value")
+              data=json.loads(generated)
+              entry=data['186833010961']
+              assert entry['shippingVerified'] is True
+              assert entry['priceCents'] == 1799
+              assert entry['shippingCents'] == 525
+              assert entry['blockedStates'] == ['AK','HI']
+              assert entry['ebayUrl'] == 'https://www.ebay.com/itm/186833010961'
+              print('rv_mapping_synthetic_generation=PASS')
+
+              driver.get(base + '/admin-listings')
+              for _ in range(20):
+                  links=driver.find_elements(By.CSS_SELECTOR,'a[href="/admin-rv-checkout-map.html"]')
+                  if links: break
+                  time.sleep(.4)
+              print('mission_control_rv_mapping_link=',len(links))
+              assert len(links) == 1
+              print('rv_mapping_workspace=PASS')
+          finally:
+              driver.quit()
+          PY
