@@ -1,0 +1,71 @@
+name: Store v3.11.42 Pre-Cloudflare Validation
+
+on:
+  push:
+    branches:
+      - feature/apparel-onsite-checkout-v3.11.42
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Enforce current-main lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          git merge-base --is-ancestor origin/main HEAD
+          echo "main=$(git rev-parse origin/main)"
+          echo "candidate=$(git rev-parse HEAD)"
+      - name: Protect existing public Store presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          changed="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed"
+          for protected in site/store.html site/store-catalog-resilience.js site/rv-store.html site/rv-store.js site/rv-ebay-catalog.js; do
+            if printf '%s\n' "$changed" | grep -Fxq "$protected"; then
+              echo "BLOCKED: public Store presentation file changed: $protected"
+              exit 1
+            fi
+          done
+          grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
+          grep -q 'buy.textContent = "Buy Now"' site/rv-store.js
+      - name: Verify approved checkout rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'const APPAREL_MARKUP = 1.20' site/store-checkout-server.js
+          grep -q 'const APPAREL_SHIPPING_CENTS = 700' site/store-checkout-server.js
+          grep -q 'fallback: "ebay"' site/store-checkout-server.js
+          grep -q '/api/store-checkout/orders' site/_worker.js
+          grep -q '/api/admin/store-orders' site/_worker.js
+          grep -q 'eus_store_orders' site/store-orders-admin-server.js
+          grep -q 'eus_admin_session' site/store-orders-admin-server.js
+          grep -q 'Store Orders' site/admin-store-orders.html
+          grep -q 'Copy Fulfillment Summary' site/admin-store-orders.html
+      - name: JavaScript syntax and credential scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          if grep -RIqE '(PAYPAL_CLIENT_SECRET\s*[=:]\s*["'"'][^"'"']+|cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
+            echo 'BLOCKED: credential-like value found in source.'
+            exit 1
+          fi
+      - name: Record pre-Cloudflare receipt
+        run: |
+          echo '### Store v3.11.42 pre-Cloudflare validation' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public Store design/wording files: unchanged' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Apparel markup: 20%' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Apparel shipping: $7/item' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV fallback: eBay when no Doba mapping/quote exists' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Command Center Store Orders: present' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Cloudflare/PayPal live activation: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
