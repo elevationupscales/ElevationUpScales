@@ -1,8 +1,6 @@
 (() => {
   "use strict";
   const LIST_KEY = "eus-rv-shopping-list:v1";
-  const SPRITE_DATA_PATH = "/rv-ebay-sprite-v2.txt?v=3.11.35";
-  const SPRITE_COLUMNS = 7;
   const EBAY_SELLER = "elevationupscalesshop";
   const grid = document.querySelector("#rv-product-grid");
   const status = document.querySelector("#rv-catalog-status");
@@ -15,7 +13,6 @@
   const listCount = document.querySelector("#shopping-list-count");
   const catalog = Array.isArray(window.EUS_VERIFIED_EBAY_CATALOG) ? [...window.EUS_VERIFIED_EBAY_CATALOG] : [];
   const state = { items: catalog, query: "", sort: "updated" };
-  let spriteDataUrl = "";
   const money = (cents) => Number.isFinite(Number(cents)) && Number(cents) > 0
     ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(cents) / 100)
     : "View price";
@@ -23,21 +20,6 @@
   let shopping = loadList();
   const saveList = () => { try { localStorage.setItem(LIST_KEY, JSON.stringify([...shopping])); } catch (_) {} };
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
-
-  async function loadSprite() {
-    try {
-      const response = await fetch(SPRITE_DATA_PATH, { cache: "force-cache" });
-      if (!response.ok) throw new Error(`thumbnail sheet returned ${response.status}`);
-      const encoded = (await response.text()).replace(/\s+/g, "");
-      if (encoded.length < 15000 || !encoded.startsWith("UklGR") || !/^[A-Za-z0-9+/=]+$/.test(encoded)) {
-        throw new Error("invalid thumbnail sheet");
-      }
-      spriteDataUrl = `data:image/webp;base64,${encoded}`;
-    } catch (error) {
-      console.warn("Verified eBay thumbnail sheet unavailable:", error);
-      spriteDataUrl = "";
-    }
-  }
 
   function syncList() {
     const selected = state.items.filter((item) => shopping.has(item.id));
@@ -51,23 +33,27 @@
     });
   }
 
-  function productThumb(item) {
-    const thumb = document.createElement("div");
-    thumb.className = "rv-product-thumb";
-    thumb.setAttribute("role", "img");
-    thumb.setAttribute("aria-label", `${item.name} eBay listing image`);
-    const index = Number(item.spriteIndex);
-    if (spriteDataUrl && Number.isInteger(index) && index >= 0) {
-      const col = index % SPRITE_COLUMNS;
-      const row = Math.floor(index / SPRITE_COLUMNS);
-      const denominator = SPRITE_COLUMNS - 1;
-      thumb.style.backgroundImage = `url("${spriteDataUrl}")`;
-      thumb.style.backgroundPosition = `${(col / denominator) * 100}% ${(row / denominator) * 100}%`;
-    } else {
-      thumb.classList.add("is-missing");
-      thumb.textContent = "Listing image unavailable";
+  function productImage(item) {
+    if (!item.imageUrl) {
+      const placeholder = document.createElement("div");
+      placeholder.className = "rv-product-image-fallback";
+      placeholder.textContent = "Listing image unavailable";
+      return placeholder;
     }
-    return thumb;
+    const image = document.createElement("img");
+    image.className = "rv-product-image";
+    image.src = item.imageUrl;
+    image.alt = item.name;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.referrerPolicy = "no-referrer";
+    image.addEventListener("error", () => {
+      const placeholder = document.createElement("div");
+      placeholder.className = "rv-product-image-fallback";
+      placeholder.textContent = "Listing image unavailable";
+      image.replaceWith(placeholder);
+    }, { once: true });
+    return image;
   }
 
   function card(item) {
@@ -75,7 +61,7 @@
     article.className = "rv-product-card";
     const media = document.createElement("div");
     media.className = "rv-product-media";
-    media.append(productThumb(item));
+    media.append(productImage(item));
     const copy = document.createElement("div");
     copy.className = "rv-product-copy";
     const category = document.createElement("p");
@@ -120,7 +106,7 @@
         ? (a.priceCents || 0) - (b.priceCents || 0)
         : state.sort === "price-high"
           ? (b.priceCents || 0) - (a.priceCents || 0)
-          : Number(a.spriteIndex) - Number(b.spriteIndex));
+          : Number(a.order || 0) - Number(b.order || 0));
     return rows;
   }
 
@@ -131,7 +117,7 @@
     empty.hidden = rows.length !== 0;
     grid.hidden = rows.length === 0;
     status.textContent = state.items.length
-      ? `${state.items.length} Seller Hub–verified eBay listings · direct item links and Seller Hub images`
+      ? `${state.items.length} Seller Hub–verified eBay listings · full-size product images · direct item links`
       : "The verified eBay catalog could not be loaded. Use the eBay Store link below.";
     syncList();
   }
@@ -160,10 +146,6 @@
   search?.addEventListener("input", () => { state.query = search.value; render(); });
   sort?.addEventListener("change", () => { state.sort = sort.value; render(); });
 
-  async function init() {
-    await loadSprite();
-    track("store_open", "rv_store", { section: "rv_shop", catalogCount: state.items.length, seller: EBAY_SELLER });
-    render();
-  }
-  init();
+  track("store_open", "rv_store", { section: "rv_shop", catalogCount: state.items.length, seller: EBAY_SELLER });
+  render();
 })();
