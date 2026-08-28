@@ -11,7 +11,8 @@
     "/worker-core.js",
     "/store-checkout-server.js",
     "/store-orders-admin-server.js",
-    "/catalog-admin-server.js"
+    "/catalog-admin-server.js",
+    "/catalog-admin-runtime.js"
   ],
   "exclude": []
 }

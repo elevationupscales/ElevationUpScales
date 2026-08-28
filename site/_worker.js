@@ -1,7 +1,7 @@
 import coreWorker from "./worker-core.js";
 import { handleStoreCheckoutApi } from "./store-checkout-server.js";
 import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
-import { handleCatalogAdminApi } from "./catalog-admin-server.js";
+import { handleCatalogAdminApi } from "./catalog-admin-runtime.js";
 
 // Protected production invariants continue to execute inside worker-core.js.
 // 3.11.30-store-navigation-repair
@@ -213,7 +213,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js"].includes(url.pathname)) {
+    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js", "/catalog-admin-runtime.js"].includes(url.pathname)) {
       return new Response("Not found", {
         status: 404,
         headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
