@@ -287,6 +287,16 @@ async function quoteRv(raw, env) {
     };
   }
 
+  if (entry.shippingVerified !== true) {
+  return {
+    ok: false,
+    fallback: "ebay",
+    status: 409,
+    error: "Doba shipping is not verified for this item",
+    ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),
+  };
+}
+
   const qty = quantity(raw?.quantity);
   const unitPriceCents = Number.parseInt(String(entry.priceCents ?? ""), 10);
   const shippingCents = Number.parseInt(String(entry.shippingCents ?? ""), 10);

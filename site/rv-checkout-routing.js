@@ -1,13 +1,17 @@
 (() => {
   "use strict";
-
-  // RV direct checkout is intentionally held for a later Doba/shipping release.
-  // On the public production storefront, preserve the existing exact eBay Buy Now links.
-  if (/(^|\.)elevationupscales\.com$/i.test(location.hostname)) return;
-
+  const DIRECT_CHECKOUT_IDS = new Set([
+    "168646573395",
+    "168631043193",
+    "168631039073",
+    "168631036536",
+    "168631025949",
+    "168631017090",
+    "168631006501",
+    "168631001484",
+  ]);
   const grid = document.querySelector("#rv-product-grid");
   if (!grid) return;
-
   const apply = () => {
     grid.querySelectorAll(".rv-product-card").forEach((card) => {
       const link = card.querySelector(".rv-product-actions a");
@@ -15,7 +19,7 @@
       try {
         const external = new URL(link.href, location.origin);
         const match = external.hostname === "www.ebay.com" ? external.pathname.match(/^\/itm\/(\d{12})/i) : null;
-        if (!match) return;
+        if (!match || !DIRECT_CHECKOUT_IDS.has(match[1])) return;
         const name = String(card.querySelector("h3")?.textContent || "").trim();
         const original = external.href;
         link.href = `/checkout/?source=rv&id=${encodeURIComponent(match[1])}&ebay=${encodeURIComponent(original)}&name=${encodeURIComponent(name)}`;
@@ -25,7 +29,6 @@
       } catch (_) {}
     });
   };
-
   new MutationObserver(apply).observe(grid, { childList: true, subtree: true });
   apply();
 })();
