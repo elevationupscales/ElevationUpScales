@@ -1,0 +1,100 @@
+name: Diagnose Sandbox Checkout UI
+
+on:
+  push:
+    branches:
+      - diagnostic/paypal-checkout-ui-20260828
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify exact hoodie quote and checkout UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet selenium requests
+          python - <<'PY'
+          import json, re, time
+          from urllib.parse import quote
+          import requests
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+
+          base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
+          catalog=requests.get(base+'/api/store-products?catalog=full',timeout=30).json()
+          rows=catalog if isinstance(catalog,list) else next((catalog.get(k) for k in ('products','results','items') if isinstance(catalog.get(k),list)), [])
+          product=next(p for p in rows if 'Signature Collection Bull vs Bear Hoodie' in str(p.get('name') or p.get('title') or ''))
+
+          def slug_from(p):
+              direct=str(p.get('slug') or p.get('handle') or '').strip('/').replace('products/','',1)
+              if direct: return direct
+              for key in ('url','productUrl','permalink'):
+                  val=str(p.get(key) or '')
+                  m=re.search(r'/products/([^/?#]+)',val)
+                  if m: return m.group(1)
+              return str(p.get('id') or p.get('productId') or p.get('offerId') or '')
+
+          slug=slug_from(product)
+          assert slug
+          first=requests.post(base+'/api/store-checkout/quote',headers={'Origin':base,'Content-Type':'application/json'},json={'source':'apparel','id':slug,'quantity':1,'variantId':''},timeout=30)
+          assert first.status_code==200, first.text
+          q1=first.json()
+          variants=q1.get('variants') or []
+          assert variants, q1
+          vid=variants[0]['id']
+          selected=requests.post(base+'/api/store-checkout/quote',headers={'Origin':base,'Content-Type':'application/json'},json={'source':'apparel','id':slug,'quantity':1,'variantId':vid},timeout=30)
+          assert selected.status_code==200, selected.text
+          q2=selected.json()
+          assert q2['unitPriceCents']==5839, q2
+          assert q2['shippingCents']==700, q2
+          assert q2.get('variantId')==vid, q2
+          assert q2.get('productImage','').startswith('https://imgproxy.fourthwall.dev/'), q2.get('productImage')
+          print('selected_variant_quote=PASS',q2['variantName'],q2['unitPriceCents'],q2['totalCents'])
+
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_argument('--window-size=1440,1800')
+          driver=webdriver.Chrome(options=opts)
+          try:
+              driver.get(base+'/checkout/?source=apparel&id='+quote(slug))
+              for _ in range(30):
+                  status=driver.execute_script("return document.querySelector('#checkout-status')?.textContent || ''")
+                  imgw=driver.execute_script("return document.querySelector('#checkout-product-image')?.naturalWidth || 0")
+                  options=driver.execute_script("return document.querySelectorAll('.eus-variant-option').length")
+                  if imgw>0 and options>1 and 'Updating order' not in status and 'Loading checkout' not in status:
+                      break
+                  time.sleep(1)
+              data=driver.execute_script("""
+                return {
+                  product: document.querySelector('#checkout-product')?.textContent || '',
+                  price: document.querySelector('#checkout-unit-price')?.textContent || '',
+                  total: document.querySelector('#checkout-total')?.textContent || '',
+                  selected: document.querySelector('#checkout-selected-option')?.textContent || '',
+                  status: document.querySelector('#checkout-status')?.textContent || '',
+                  imageSrc: document.querySelector('#checkout-product-image')?.currentSrc || '',
+                  imageWidth: document.querySelector('#checkout-product-image')?.naturalWidth || 0,
+                  variantTiles: document.querySelectorAll('.eus-variant-option').length,
+                  backHref: document.querySelector('.eus-checkout-back')?.getAttribute('href') || '',
+                  dropdownVisible: !!document.querySelector('#checkout-variant:not(.eus-checkout-native-select)')
+                };
+              """)
+              print(json.dumps(data,indent=2))
+              assert 'Signature Collection Bull vs Bear Hoodie' in data['product'], data
+              assert data['price']=='$58.39', data
+              assert data['total']=='$65.39', data
+              assert data['selected'], data
+              assert 'price unavailable' not in data['status'].lower(), data
+              assert data['imageWidth']>0 and 'imgproxy.fourthwall.dev' in data['imageSrc'], data
+              assert data['variantTiles']>=12, data
+              assert data['backHref']=='/store', data
+              assert data['dropdownVisible'] is False, data
+              print('checkout_ui=PASS')
+          finally:
+              driver.quit()
+          PY
