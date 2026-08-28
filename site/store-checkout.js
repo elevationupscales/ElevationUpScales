@@ -36,15 +36,6 @@
     statusEl.classList.toggle("is-ready", kind === "ready");
   };
 
-  const payload = () => ({
-    source,
-    id,
-    ebayUrl,
-    name: rvName,
-    quantity: Number.parseInt(quantityEl.value || "1", 10) || 1,
-    variantId: variantEl?.value || "",
-  });
-
   const customer = () => ({
     email: document.querySelector("#checkout-email").value.trim(),
     phone: document.querySelector("#checkout-phone").value.trim(),
@@ -55,9 +46,19 @@
     address1: document.querySelector("#checkout-address1").value.trim(),
     address2: document.querySelector("#checkout-address2").value.trim(),
     city: document.querySelector("#checkout-city").value.trim(),
-    state: document.querySelector("#checkout-state").value.trim(),
+    state: document.querySelector("#checkout-state").value.trim().toUpperCase(),
     postalCode: document.querySelector("#checkout-postal").value.trim(),
     countryCode: "US",
+  });
+
+  const payload = () => ({
+    source,
+    id,
+    ebayUrl,
+    name: rvName,
+    quantity: Number.parseInt(quantityEl.value || "1", 10) || 1,
+    variantId: variantEl?.value || "",
+    ...(source === "rv" ? { shipping: shipping() } : {}),
   });
 
   const formReady = () => {
@@ -67,10 +68,15 @@
       address.fullName &&
       address.address1 &&
       address.city &&
-      address.state.length === 2 &&
-      address.postalCode &&
+      /^[A-Z]{2}$/.test(address.state) &&
+      /^\d{5}(?:-\d{4})?$/.test(address.postalCode) &&
       /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(buyer.email)
     );
+  };
+
+  const fallbackUrl = (body = {}) => {
+    const fallback = String(body.ebayUrl || ebayUrl || "").trim();
+    return /^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(fallback) ? fallback : "";
   };
 
   function renderQuote(next) {
@@ -110,8 +116,8 @@
 
     if (!response.ok) {
       if (source === "rv" && body?.fallback === "ebay") {
-        const fallback = String(body.ebayUrl || ebayUrl || "");
-        if (/^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(fallback)) {
+        const fallback = fallbackUrl(body);
+        if (fallback) {
           location.assign(fallback);
           return null;
         }
@@ -178,6 +184,10 @@
         });
         const body = await response.json().catch(() => ({}));
         if (!response.ok || !body?.id) {
+          if (source === "rv" && body?.fallback === "ebay") {
+            const fallback = fallbackUrl(body);
+            if (fallback) location.assign(fallback);
+          }
           throw new Error(body.error || "Unable to create PayPal order");
         }
         window.__EUS_STORE_REFERENCE__ = body.reference || "";
@@ -234,6 +244,11 @@
 
   quantityEl.addEventListener("change", refreshQuote);
   variantEl.addEventListener("change", refreshQuote);
+  if (source === "rv") {
+    for (const selector of ["#checkout-address1", "#checkout-city", "#checkout-state", "#checkout-postal"]) {
+      document.querySelector(selector)?.addEventListener("change", refreshQuote);
+    }
+  }
 
   async function init() {
     if (!["apparel", "rv"].includes(source) || !id) {
