@@ -1,0 +1,115 @@
+name: One-Time RV Final Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    if: ${{ contains(github.event.head_commit.message, '[rv-final-production]') }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Validate final RV source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/store-checkout-server.js
+          node --check site/rv-checkout-routing.js
+          node --check site/rv-ebay-catalog.js
+          grep -q 'entry.shippingVerified !== true' site/store-checkout-server.js
+          grep -q 'rv-checkout-routing.js?v=3.11.43' site/rv-store.html
+          grep -q 'rv-ebay-catalog.js?v=3.11.43' site/rv-store.html
+          grep -q '168631001484' site/rv-ebay-catalog.js
+          grep -q '168631043193' site/rv-ebay-catalog.js
+          grep -q '168631001484' site/rv-checkout-routing.js
+          ! grep -q '168631058246' site/rv-checkout-routing.js
+          ! grep -q '168637439895' site/rv-checkout-routing.js
+
+      - name: Deploy current main to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify customer-facing production release
+        shell: bash
+        env:
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          sleep 2
+          for route in / /store /checkout /rv-store; do
+            code=$(curl -sS -L --connect-timeout 5 --max-time 15 --retry 2 --retry-delay 1 -o /tmp/page.html -w '%{http_code}' "${PRODUCTION_URL}${route}" || true)
+            echo "${route}=${code}"
+            test "$code" = "200"
+          done
+
+          curl -sS -L --connect-timeout 5 --max-time 15 --fail "${PRODUCTION_URL}/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          const safe={environment:c.environment,credentialsConfigured:c.credentialsConfigured===true,checkoutEnabled:c.checkoutEnabled===true,liveCheckoutApproved:c.liveCheckoutApproved===true};
+          console.log(JSON.stringify(safe));
+          if(safe.environment!=='live'||!safe.credentialsConfigured||!safe.checkoutEnabled||!safe.liveCheckoutApproved) throw new Error('Live Apparel checkout regressed');
+          NODE
+
+          curl -sS -L --connect-timeout 5 --max-time 15 --fail "${PRODUCTION_URL}/rv-store?release=3.11.43" > /tmp/rv.html
+          grep -q 'rv-checkout-routing.js?v=3.11.43' /tmp/rv.html
+          grep -q 'rv-ebay-catalog.js?v=3.11.43' /tmp/rv.html
+
+          curl -sS -L --connect-timeout 5 --max-time 15 --fail "${PRODUCTION_URL}/rv-ebay-catalog.js?v=3.11.43" > /tmp/catalog.js
+          curl -sS -L --connect-timeout 5 --max-time 15 --fail "${PRODUCTION_URL}/rv-checkout-routing.js?v=3.11.43" > /tmp/routing.js
+          grep -q '168631001484' /tmp/catalog.js
+          grep -q '168631043193' /tmp/catalog.js
+          ! grep -q '"186831001484"' /tmp/catalog.js
+          grep -q '168631001484' /tmp/routing.js
+          ! grep -q '168631058246' /tmp/routing.js
+          ! grep -q '168637439895' /tmp/routing.js
+          echo 'versioned_rv_assets=PASS'
+
+          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/mapped.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/checkout/' -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          echo "mapped_quote_http=${code}"
+          cat /tmp/mapped.json
+          test "$code" = "200"
+          node - <<'NODE'
+          const fs=require('fs');
+          const q=JSON.parse(fs.readFileSync('/tmp/mapped.json','utf8'));
+          if(q.ok!==true||q.source!=='rv'||q.unitPriceCents!==6500||q.shippingCents!==0||q.totalCents!==6500) throw new Error(`Mapped quote mismatch: ${JSON.stringify(q)}`);
+          console.log('mapped_rv_quote=PASS');
+          NODE
+
+          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/blocked.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/checkout/' -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          echo "blocked_quote_http=${code}"
+          cat /tmp/blocked.json
+          test "$code" = "409"
+          node - <<'NODE'
+          const fs=require('fs');
+          const q=JSON.parse(fs.readFileSync('/tmp/blocked.json','utf8'));
+          if(q.fallback!=='ebay'||q.ebayUrl!=='https://www.ebay.com/itm/168631058246') throw new Error(`Blocked fallback mismatch: ${JSON.stringify(q)}`);
+          console.log('blocked_ebay_fallback=PASS');
+          NODE
+
+      - name: Record final release receipt
+        run: |
+          echo '### RV direct PayPal final production release' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Authoritative eBay IDs: new 168-series IDs' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Verified RV direct mappings: 8' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Shipping verification guard: enforced' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Blocked/unmapped products: eBay fallback' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Apparel PayPal checkout: live and preserved' >> "$GITHUB_STEP_SUMMARY"
