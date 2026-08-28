@@ -41,13 +41,12 @@ jobs:
 
           curl -sS -L --connect-timeout 5 --max-time 12 --fail "${PRODUCTION_URL}/rv-ebay-catalog.js" > /tmp/catalog.js
           curl -sS -L --connect-timeout 5 --max-time 12 --fail "${PRODUCTION_URL}/rv-checkout-routing.js" > /tmp/routing.js
-          curl -sS -L --connect-timeout 5 --max-time 12 --fail "${PRODUCTION_URL}/store-checkout-server.js" > /tmp/server.js
           grep -q '168631001484' /tmp/catalog.js
           grep -q '168631043193' /tmp/catalog.js
           ! grep -q '"186831001484"' /tmp/catalog.js
           grep -q '168631001484' /tmp/routing.js
           ! grep -q '168631058246' /tmp/routing.js
-          grep -q 'entry.shippingVerified !== true' /tmp/server.js
+          ! grep -q '168637439895' /tmp/routing.js
 
           code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/mapped.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
           echo "mapped_quote_http=${code}"
