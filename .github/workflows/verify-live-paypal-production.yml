@@ -1,0 +1,36 @@
+name: Verify Live PayPal Production Config
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ contains(github.event.head_commit.message, '[verify-live-paypal]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify safe production checkout state
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --retry 8 --retry-all-errors --retry-delay 2 \
+            https://elevationupscales.com/api/store-checkout/config > /tmp/store-config.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const c = JSON.parse(fs.readFileSync('/tmp/store-config.json', 'utf8'));
+          const safe = {
+            environment: c.environment,
+            credentialsConfigured: c.credentialsConfigured === true,
+            checkoutEnabled: c.checkoutEnabled === true,
+            liveCheckoutApproved: c.liveCheckoutApproved === true,
+          };
+          console.log(JSON.stringify(safe));
+          if (safe.environment !== 'live') throw new Error('PAYPAL_ENV is not live');
+          if (!safe.credentialsConfigured) throw new Error('Live PayPal credentials are not configured');
+          if (safe.checkoutEnabled) throw new Error('Checkout unexpectedly enabled before final approval');
+          if (safe.liveCheckoutApproved) throw new Error('Live checkout approval flag unexpectedly enabled');
+          NODE
