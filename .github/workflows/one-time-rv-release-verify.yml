@@ -1,0 +1,70 @@
+name: One-Time RV Release Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ contains(github.event.head_commit.message, '[rv-release-verify]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Verify live release with bounded network checks
+        shell: bash
+        env:
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for route in / /store /checkout /rv-store; do
+            code=$(curl -sS -L --connect-timeout 5 --max-time 12 --retry 1 --retry-delay 1 -o /tmp/page.html -w '%{http_code}' "${PRODUCTION_URL}${route}" || true)
+            echo "${route}=${code}"
+            test "$code" = "200"
+          done
+
+          curl -sS -L --connect-timeout 5 --max-time 12 --retry 1 --retry-delay 1 --fail "${PRODUCTION_URL}/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          const safe={environment:c.environment,credentialsConfigured:c.credentialsConfigured===true,checkoutEnabled:c.checkoutEnabled===true,liveCheckoutApproved:c.liveCheckoutApproved===true};
+          console.log(JSON.stringify(safe));
+          if(safe.environment!=='live'||!safe.credentialsConfigured||!safe.checkoutEnabled||!safe.liveCheckoutApproved) throw new Error('Apparel checkout regression');
+          NODE
+
+          curl -sS -L --connect-timeout 5 --max-time 12 --fail "${PRODUCTION_URL}/rv-ebay-catalog.js" > /tmp/catalog.js
+          curl -sS -L --connect-timeout 5 --max-time 12 --fail "${PRODUCTION_URL}/rv-checkout-routing.js" > /tmp/routing.js
+          curl -sS -L --connect-timeout 5 --max-time 12 --fail "${PRODUCTION_URL}/store-checkout-server.js" > /tmp/server.js
+          grep -q '168631001484' /tmp/catalog.js
+          grep -q '168631043193' /tmp/catalog.js
+          ! grep -q '"186831001484"' /tmp/catalog.js
+          grep -q '168631001484' /tmp/routing.js
+          ! grep -q '168631058246' /tmp/routing.js
+          grep -q 'entry.shippingVerified !== true' /tmp/server.js
+
+          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/mapped.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          echo "mapped_quote_http=${code}"
+          test "$code" = "200"
+          node - <<'NODE'
+          const fs=require('fs');
+          const q=JSON.parse(fs.readFileSync('/tmp/mapped.json','utf8'));
+          if(q.ok!==true||q.source!=='rv'||q.unitPriceCents!==6500||q.shippingCents!==0||q.totalCents!==6500) throw new Error(`Mapped quote mismatch: ${JSON.stringify(q)}`);
+          console.log('mapped_quote=PASS');
+          NODE
+
+          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/blocked.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          echo "blocked_quote_http=${code}"
+          test "$code" = "409"
+          node - <<'NODE'
+          const fs=require('fs');
+          const q=JSON.parse(fs.readFileSync('/tmp/blocked.json','utf8'));
+          if(q.fallback!=='ebay') throw new Error(`Blocked fallback mismatch: ${JSON.stringify(q)}`);
+          console.log('blocked_fallback=PASS');
+          NODE
