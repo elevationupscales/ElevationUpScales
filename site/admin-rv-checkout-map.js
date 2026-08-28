@@ -19,6 +19,27 @@
     "186833285491", // screen door guard
   ];
 
+  // Public Doba product matches only. These prefill supplier identity, never price,
+  // shipping, inventory, or shippingVerified. Re-verify those inside Doba before activation.
+  const PUBLIC_DOBA_MATCHES = Object.freeze({
+    "186833010961": {
+      itemNo: "D010275E6ZT",
+      url: "https://www.doba.com/product/wEeybzdltKva/dropshipping-vevor-fast-blow-glass-fuses-assortment-kit-120-pcs-125-volt-5-x-20-mm-1a-2a-3a-4a-5a-8a-10a-36-x-10-mm-25a-3a-5a-tube-fuses-suitable-for-electrical-boxes-led-strips-electronics-appliances.html",
+    },
+    "186833034172": {
+      itemNo: "D0102774602",
+      url: "https://www.doba.com/product/HKCaDASijeqr/dropshipping-paper-towel-holder-countertop-stainless-steel-paper-towel-stand-for-kitchen.html",
+    },
+    "186833063926": {
+      itemNo: "D010275RYD2",
+      url: "https://www.doba.com/product/wIQvDkdGOFVi/dropshipping-vevor-adhesive-hooks-4-pack-self-adhesive-towel-coat-hooks-heavy-duty-wall-hook-hold-15-lbs-max-stainless-steel-sticky-hanger-for-bathroom-kitchen-hanging-towel-coat-keys-matte-black.html",
+    },
+    "186833285491": {
+      itemNo: "D01027RQMT2",
+      url: "https://www.doba.com/product/tPQWeGKBuFvC/dropshipping-vevor-rv-screen-door-protector-adjusts-from-22-to-315-inch-adjustable-door-grille-easy-to-install-reinforced-breathable-honeycomb-holes-iron-camper-rv-entry-protector-for-pet-protection-black.html",
+    },
+  });
+
   const catalog = () => Array.isArray(window.EUS_VERIFIED_EBAY_CATALOG) ? window.EUS_VERIFIED_EBAY_CATALOG : [];
   const money = (cents) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format((Number(cents) || 0) / 100);
   const dollarsToCents = (value) => {
@@ -55,12 +76,22 @@
     status.dataset.state = state;
   }
 
+  function clearSupplierVerification() {
+    ["rv-map-item-no","rv-map-sku-id","rv-map-spu-no","rv-map-cost","rv-map-shipping","rv-map-allowed","rv-map-blocked","rv-map-notes","rv-map-output"].forEach((id) => { $(id).value = ""; });
+    $("rv-map-shipping-basis").value = "doba_cart";
+    $("rv-map-verified-date").value = new Date().toISOString().slice(0, 10);
+    $("rv-map-verified").checked = false;
+    copyButton.disabled = true;
+  }
+
   function renderProduct() {
+    clearSupplierVerification();
     const product = selectedProduct();
     const readout = $("rv-map-product-readout");
     if (!product) {
       readout.hidden = true;
       $("rv-map-price").value = "";
+      setStatus();
       updateMath();
       return;
     }
@@ -70,6 +101,13 @@
     $("rv-map-ebay-item").textContent = product.itemNumber;
     $("rv-map-ebay-link").href = product.buyUrl;
     $("rv-map-price").value = centsToInput(product.priceCents);
+    const known = PUBLIC_DOBA_MATCHES[product.itemNumber];
+    if (known) {
+      $("rv-map-item-no").value = known.itemNo;
+      setStatus(`Doba product match prefilled (${known.itemNo}). Verify current Doba cost, inventory, and shipping before activation.`, "");
+    } else {
+      setStatus("No public Doba product ID match is stored for this item yet. Verify it in Doba before mapping.", "");
+    }
     updateMath();
   }
 
@@ -85,11 +123,14 @@
     const rows = catalog();
     productSelect.innerHTML = '<option value="">Choose a product</option>' + rows.map((item) => `<option value="${item.itemNumber}">${item.name} · ${money(item.priceCents)}</option>`).join("");
     catalogStatus.textContent = `${rows.length} RV Store items`;
-    queueList.innerHTML = FIRST_QUEUE.map((itemNumber) => rows.find((item) => item.itemNumber === itemNumber)).filter(Boolean).map((item) => `
+    queueList.innerHTML = FIRST_QUEUE.map((itemNumber) => rows.find((item) => item.itemNumber === itemNumber)).filter(Boolean).map((item) => {
+      const match = PUBLIC_DOBA_MATCHES[item.itemNumber];
+      return `
       <article>
-        <div><strong>${item.name}</strong><span>${item.category} · ${money(item.priceCents)}</span><code>${item.itemNumber}</code></div>
+        <div><strong>${item.name}</strong><span>${item.category} · ${money(item.priceCents)}</span><code>${item.itemNumber}${match ? ` · ${match.itemNo}` : " · Doba ID pending"}</code></div>
         <button class="button button-outline" type="button" data-queue-item="${item.itemNumber}">Map This Item</button>
-      </article>`).join("") || '<p class="admin-muted">Queue items are unavailable in the current catalog.</p>';
+      </article>`;
+    }).join("") || '<p class="admin-muted">Queue items are unavailable in the current catalog.</p>';
   }
 
   function buildMap() {
@@ -125,10 +166,12 @@
       shippingBasis: $("rv-map-shipping-basis").value,
       verifiedAt: $("rv-map-verified-date").value || new Date().toISOString().slice(0, 10),
     };
+    const known = PUBLIC_DOBA_MATCHES[product.itemNumber];
     const skuId = clean($("rv-map-sku-id").value);
     const spuNo = clean($("rv-map-spu-no").value);
     if (skuId) entry.skuId = skuId;
     if (spuNo) entry.spuNo = spuNo;
+    if (known?.url) entry.dobaProductUrl = known.url;
     if (allowedStates.length) entry.allowedStates = allowedStates;
     if (blockedStates.length) entry.blockedStates = blockedStates;
 
@@ -159,7 +202,8 @@
     $("rv-map-verified").checked = false;
     copyButton.disabled = true;
     setStatus();
-    renderProduct();
+    $("rv-map-product-readout").hidden = true;
+    updateMath();
   }
 
   productSelect.addEventListener("change", renderProduct);
