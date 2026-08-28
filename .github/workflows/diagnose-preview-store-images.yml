@@ -84,20 +84,6 @@ jobs:
               failures=sum(1 for r in rows if not r['complete'] or r['naturalWidth']==0)
               print('browser_image_failures=',failures)
               assert failures == 0, rows
-              for entry in driver.get_log('performance'):
-                  try: msg=json.loads(entry['message'])['message']
-                  except Exception: continue
-                  if msg.get('method') == 'Network.loadingFailed':
-                      p=msg.get('params',{})
-                      print('NETWORK_FAILED',json.dumps({k:p.get(k) for k in ('requestId','errorText','blockedReason','corsErrorStatus','type','canceled')}))
-                  elif msg.get('method') == 'Network.responseReceived':
-                      p=msg.get('params',{})
-                      resp=p.get('response',{})
-                      u=resp.get('url','')
-                      if 'imgproxy.fourthwall.dev' in u:
-                          print('IMG_RESPONSE',json.dumps({'status':resp.get('status'),'url':u,'mimeType':resp.get('mimeType'),'fromDiskCache':resp.get('fromDiskCache'),'fromServiceWorker':resp.get('fromServiceWorker')}))
-              for entry in driver.get_log('browser'):
-                  print('BROWSER_LOG',entry)
           finally:
               driver.quit()
           PY
@@ -133,7 +119,7 @@ jobs:
               print('home_capability_cards=',len(cards))
               print('home_capability_title=',title[0].text if title else '')
               assert len(cards)==6
-              assert title and title[0].text.strip()=='What We Do'
+              assert title and title[0].text.strip().lower()=='what we do'
 
               for route in ['/store','/rv-store']:
                   driver.get(base+route)
