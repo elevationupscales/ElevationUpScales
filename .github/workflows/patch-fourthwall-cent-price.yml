@@ -1,0 +1,45 @@
+name: Patch Fourthwall Cent Price
+on:
+  push:
+    branches:
+      - feature/apparel-onsite-checkout-v3.11.42
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[cent-price-patched]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Patch Fourthwall cents object handling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/store-checkout-server.js')
+          text=p.read_text()
+          old='''function dollarsToCents(value) {
+            const parsed = Number.parseFloat(String(value ?? "").replace(/[^0-9.-]/g, ""));
+            return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) : null;
+          }'''
+          new='''function dollarsToCents(value) {
+            if (value && typeof value === "object") {
+              const directCents = Number.parseInt(String(value.cents ?? ""), 10);
+              if (Number.isInteger(directCents) && directCents >= 0) return directCents;
+              value = value.value ?? value.amount ?? value.price ?? "";
+            }
+            const parsed = Number.parseFloat(String(value ?? "").replace(/[^0-9.-]/g, ""));
+            return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) : null;
+          }'''
+          if old not in text:
+              raise SystemExit('dollarsToCents block not found')
+          p.write_text(text.replace(old,new,1))
+          PY
+      - name: Verify syntax
+        run: node --check site/store-checkout-server.js
+      - name: Commit patch
+        run: |
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/store-checkout-server.js
+          git commit -m "Handle Fourthwall cent-denominated variant prices [cent-price-patched]"
+          git push
