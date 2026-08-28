@@ -103,6 +103,53 @@ jobs:
           headers=$(curl --silent --show-error --head "${base}/checkout")
           printf '%s' "$headers" | grep -qi 'content-security-policy:.*paypal.com'
 
+      - name: Diagnose Store product images
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          curl --silent --show-error --location --retry 5 --retry-all-errors -H 'Accept: application/json' \
+            "${base}/api/store-products?catalog=full&ts=$(date +%s)" > /tmp/catalog.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/catalog.json'))
+          rows=data if isinstance(data,list) else next((data.get(k) for k in ('products','results','items') if isinstance(data.get(k),list)), [])
+          print('catalog_rows=',len(rows))
+          def img(v):
+              if isinstance(v,str): return v.strip()
+              if isinstance(v,dict):
+                  for k in ('url','src','imageUrl','transformedUrl'):
+                      if v.get(k): return str(v[k]).strip()
+              return ''
+          urls=[]
+          for i,p in enumerate(rows[:12]):
+              c=[]
+              for k in ('images','media'):
+                  if isinstance(p.get(k),list): c+=p[k]
+              c += [p.get('image'),p.get('featuredImage'),p.get('primaryImage'),p.get('thumbnailImage')]
+              for v in p.get('variants') or []:
+                  for k in ('images','media'):
+                      if isinstance(v.get(k),list): c+=v[k]
+                  c.append(v.get('thumbnailImage'))
+              u=next((img(x) for x in c if img(x)), '')
+              print(f'IMAGE_URL[{i}]={u}')
+              if u: urls.append(u)
+          open('/tmp/image_urls.txt','w').write('\n'.join(urls))
+          PY
+          echo '--- image HTTP checks ---'
+          while IFS= read -r url; do
+            [ -n "$url" ] || continue
+            original="$url"
+            case "$url" in
+              //*) url="https:${url}" ;;
+              /*) url="https://elevationupscales-shop.fourthwall.com${url}" ;;
+            esac
+            code=$(curl --silent --show-error --location --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "$url" || true)
+            echo "IMAGE_HTTP=$code ORIGINAL=$original RESOLVED=$url"
+          done < /tmp/image_urls.txt
+
       - name: Record PayPal sandbox receipt
         shell: bash
         env:
