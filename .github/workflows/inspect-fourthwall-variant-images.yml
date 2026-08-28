@@ -1,0 +1,23 @@
+name: Inspect Fourthwall Variant Images
+on:
+  push:
+    branches: [diagnostic/paypal-checkout-ui-20260828]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect hoodie variant image fields
+        run: |
+          python - <<'PY'
+          import requests, json
+          base='https://paypal-sandbox-launch.elevationupscales.pages.dev'
+          data=requests.get(base+'/api/store-products?catalog=full',timeout=30).json()
+          rows=data if isinstance(data,list) else next((data.get(k) for k in ('products','results','items') if isinstance(data.get(k),list)), [])
+          p=next(x for x in rows if 'Signature Collection Bull vs Bear Hoodie' in str(x.get('name') or x.get('title') or ''))
+          print('PRODUCT_KEYS', sorted(p.keys()))
+          for i,v in enumerate(p.get('variants') or []):
+              print('\nVARIANT',i, v.get('name') or v.get('title') or v.get('id'))
+              print(json.dumps(v, indent=2)[:6000])
+          PY
