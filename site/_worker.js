@@ -100,6 +100,11 @@ function validEmail(value) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean(value, 180));
 }
 
+function validQuantity(value) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 10;
+}
+
 function validUsAddress(raw = {}) {
   const state = clean(raw.state, 2).toUpperCase();
   const postalCode = clean(raw.postalCode, 10);
@@ -220,6 +225,8 @@ export default {
       if (!sameOriginPost(request)) return checkoutJson({ error: "Cross-origin request denied" }, 403);
       const raw = await checkoutRequestBody(request);
       const source = clean(raw.source, 20).toLowerCase();
+      if (!["apparel", "rv"].includes(source)) return checkoutJson({ error: "Invalid store source" }, 400);
+      if (!validQuantity(raw.quantity)) return checkoutJson({ error: "Quantity must be from 1 to 10" }, 400);
 
       if (source === "rv") {
         const entry = verifiedRvEntry(env, raw);
