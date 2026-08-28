@@ -84,6 +84,13 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    if (url.pathname === "/worker-core.js" || url.pathname === "/store-checkout-server.js") {
+      return new Response("Not found", {
+        status: 404,
+        headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+      });
+    }
+
     if (url.pathname === "/api/store-checkout/orders" &&
         (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function")) {
       return checkoutJson({ error: "Store order storage is not configured" }, 503);
