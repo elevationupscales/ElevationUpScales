@@ -1,0 +1,1 @@
+Catalog Manager v1 source cleanup complete. Permanent workflows only; one-time release workflows removed. Production site bytes were verified before cleanup. This file is repository metadata only and does not change deployed site behavior.
