@@ -1,0 +1,97 @@
+name: One-Time Audit Repair Final Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ contains(github.event.head_commit.message, '[audit-final-verify]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Verify production audit repairs
+        shell: bash
+        env:
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for route in / /home-services /rv-services /solar-services /marketplace /store /rv-store /collector /start-a-project /lithium-batteries /hawaii-lithium-batteries /checkout /admin-catalog; do
+            code=$(curl -sS -L --connect-timeout 5 --max-time 20 --retry 2 --retry-delay 1 -o /tmp/page.html -w '%{http_code}' "${PRODUCTION_URL}${route}" || true)
+            echo "${route}=${code}"
+            test "$code" = "200"
+          done
+
+          curl -sS -L --fail "$PRODUCTION_URL/" > /tmp/home.html
+          grep -Fq 'Apparel, RV & outdoor, and lithium power' /tmp/home.html
+          grep -Fq 'Shop Lithium Batteries' /tmp/home.html
+          grep -Fq 'Hawaii Lithium Shipping' /tmp/home.html
+          ! grep -Fq 'Two storefronts. One Elevation experience.' /tmp/home.html
+          curl -sS -L --fail "$PRODUCTION_URL/home-featured.js?v=3.11.45" > /tmp/featured.js
+          grep -Fq '/checkout/?source=apparel&id=' /tmp/featured.js
+          ! grep -Fq 'const href = product.slug ? `${STORE_ORIGIN}/products/' /tmp/featured.js
+
+          for route in /home-services /rv-services /solar-services /marketplace /store /rv-store /collector /start-a-project /lithium-batteries /hawaii-lithium-batteries; do
+            curl -sS -L --fail "${PRODUCTION_URL}${route}" > /tmp/nav.html
+            grep -Fq 'Lithium Battery Shop' /tmp/nav.html
+            grep -Fq 'Hawaii Lithium Shipping' /tmp/nav.html
+            ! grep -Fq 'Shop the Brand' /tmp/nav.html
+          done
+
+          curl -sS -L --fail "$PRODUCTION_URL/rv-store" > /tmp/rv.html
+          grep -Fq 'ELEVATION CATALOG' /tmp/rv.html
+          ! grep -Fq 'VERIFIED EBAY CATALOG' /tmp/rv.html
+          curl -sS --fail "$PRODUCTION_URL/api/store-catalog?section=rv-outdoor" > /tmp/catalog.json
+          node - <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('/tmp/catalog.json','utf8'));
+          if(!Array.isArray(d.products)||d.products.length<8) throw new Error(`Published RV catalog count ${d.products?.length}`);
+          const required=['168631001484','168631006501','168631017090','168631025949','168631036536','168631039073','168631043193','168646573395'];
+          for(const id of required) if(!d.products.some(p=>p.ebayItemId===id)) throw new Error(`Missing ${id}`);
+          if(d.products.some(p=>p.publishStatus!=='published'||p.storeSection!=='rv-outdoor')) throw new Error('Unsafe public catalog record');
+          console.log(`published_rv_catalog=${d.products.length}`);
+          NODE
+
+          curl -sS --fail "$PRODUCTION_URL/api/marketplace/listings" > /tmp/market.json
+          node - <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('/tmp/market.json','utf8'));
+          const count=Number(d.count ?? d.listings?.length ?? 0);
+          if(count<1) throw new Error('Marketplace unexpectedly has no published listings');
+          console.log(`marketplace_published_count=${count}`);
+          NODE
+          curl -sS -L --fail "$PRODUCTION_URL/marketplace-feed.js?v=3.11.46" > /tmp/feed.js
+          grep -Fq "fetch('/api/marketplace/listings'" /tmp/feed.js
+
+          curl -sS -L --fail "$PRODUCTION_URL/checkout" > /tmp/checkout.html
+          grep -Fq 'Secure checkout' /tmp/checkout.html
+          ! grep -Fq 'Sandbox checkout' /tmp/checkout.html
+          curl -sS --fail "$PRODUCTION_URL/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs');const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          if(c.environment!=='live'||c.credentialsConfigured!==true||c.checkoutEnabled!==true||c.liveCheckoutApproved!==true) throw new Error('PayPal live checkout regression');
+          console.log('paypal_live=PASS');
+          NODE
+
+          rv_code=$(curl -sS -o /tmp/rvquote.json -w '%{http_code}' -X POST "$PRODUCTION_URL/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/rv-store' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          echo "verified_rv_quote=${rv_code}"
+          test "$rv_code" = "200"
+          held_code=$(curl -sS -o /tmp/held.json -w '%{http_code}' -X POST "$PRODUCTION_URL/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/rv-store' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          echo "held_rv_fallback=${held_code}"
+          test "$held_code" = "409"
+
+      - name: Receipt
+        run: |
+          echo '### Elevation 4.3 audit repair final verification — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public routes: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Shop navigation: standardized' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Homepage Apparel rail: internal checkout' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV Store: published Elevation catalog' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Marketplace: published API data present + feed path intact' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal: live + secure checkout label' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV direct checkout / held fallback: PASS' >> "$GITHUB_STEP_SUMMARY"
