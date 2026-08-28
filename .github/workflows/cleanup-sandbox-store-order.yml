@@ -1,0 +1,94 @@
+name: Cleanup Sandbox Store Order
+
+on:
+  push:
+    branches:
+      - launch/paypal-sandbox-preview-20260828
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TEST_REFERENCE: EUS-STORE-20260828-95171470
+    steps:
+      - name: Find Marketplace D1 database
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail-with-body \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database?name=elevation-upscales-marketplace&per_page=100" > /tmp/databases.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/databases.json'))
+          assert data.get('success') is True, data.get('errors')
+          rows=data.get('result') or []
+          db=next((x for x in rows if x.get('name')=='elevation-upscales-marketplace'), None)
+          assert db and db.get('uuid'), [(x.get('name'),x.get('uuid')) for x in rows]
+          open('/tmp/database_id.txt','w').write(db['uuid'])
+          print('d1_database_lookup=PASS')
+          PY
+
+      - name: Verify and remove only disposable sandbox row
+        shell: bash
+        run: |
+          set -euo pipefail
+          db="$(cat /tmp/database_id.txt)"
+          python - <<'PY' > /tmp/select-payload.json
+          import json, os
+          print(json.dumps({"sql":"SELECT id,payment_status,paypal_order_id,total_cents FROM eus_store_orders WHERE id = ?","params":[os.environ['TEST_REFERENCE']]}))
+          PY
+          curl --silent --show-error --fail-with-body \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            --data @/tmp/select-payload.json \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db}/query" > /tmp/select.json
+          python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/select.json'))
+          assert data.get('success') is True, data.get('errors')
+          result=data.get('result') or []
+          rows=[]
+          for part in result:
+              rows.extend(part.get('results') or [])
+          print('sandbox_rows_found='+str(len(rows)))
+          assert len(rows) <= 1, rows
+          if rows:
+              row=rows[0]
+              assert row.get('id')==os.environ['TEST_REFERENCE']
+              assert row.get('payment_status')=='created'
+              assert int(row.get('total_cents') or 0)==2914
+              print('store_order_d1_persistence=PASS')
+          else:
+              print('sandbox_row_already_absent=PASS')
+          PY
+          python - <<'PY' > /tmp/delete-payload.json
+          import json, os
+          print(json.dumps({"sql":"DELETE FROM eus_store_orders WHERE id = ? AND payment_status = 'created'","params":[os.environ['TEST_REFERENCE']]}))
+          PY
+          curl --silent --show-error --fail-with-body \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            --data @/tmp/delete-payload.json \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db}/query" > /tmp/delete.json
+          curl --silent --show-error --fail-with-body \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            --data @/tmp/select-payload.json \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db}/query" > /tmp/after.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/after.json'))
+          assert data.get('success') is True, data.get('errors')
+          rows=[]
+          for part in data.get('result') or []:
+              rows.extend(part.get('results') or [])
+          assert rows==[], rows
+          print('sandbox_store_order_cleanup=PASS')
+          PY
