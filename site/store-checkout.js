@@ -8,10 +8,13 @@
   const rvName = String(params.get("name") || "").trim();
 
   const productEl = document.querySelector("#checkout-product");
+  const productImageEl = document.querySelector("#checkout-product-image");
   const unitPriceEl = document.querySelector("#checkout-unit-price");
+  const selectedOptionEl = document.querySelector("#checkout-selected-option");
   const quantityEl = document.querySelector("#checkout-quantity");
   const variantRow = document.querySelector("#checkout-variant-row");
   const variantEl = document.querySelector("#checkout-variant");
+  const variantOptionsEl = document.querySelector("#checkout-variant-options");
   const merchandiseEl = document.querySelector("#checkout-merchandise");
   const shippingEl = document.querySelector("#checkout-shipping");
   const totalEl = document.querySelector("#checkout-total");
@@ -24,6 +27,7 @@
   let quote = null;
   let paypalButtons = null;
   let config = null;
+  let quoteTimer = 0;
 
   const money = (cents) => new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -34,6 +38,18 @@
     statusEl.textContent = message;
     statusEl.classList.toggle("is-error", kind === "error");
     statusEl.classList.toggle("is-ready", kind === "ready");
+    statusEl.classList.toggle("is-loading", !kind);
+  };
+
+  const setProductImage = (value, alt) => {
+    if (!productImageEl) return;
+    const next = String(value || "").trim();
+    productImageEl.alt = alt ? `${alt} preview` : "Selected item preview";
+    productImageEl.onerror = () => {
+      productImageEl.onerror = null;
+      productImageEl.src = "/assets/logo.webp";
+    };
+    productImageEl.src = next || "/assets/logo.webp";
   };
 
   const customer = () => ({
@@ -79,33 +95,79 @@
     return /^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(fallback) ? fallback : "";
   };
 
+  function selectedVariant(variants = []) {
+    return variants.find((variant) => variant.id === variantEl?.value) || null;
+  }
+
+  function renderVariantOptions(variants) {
+    if (!variantOptionsEl || !variantEl) return;
+    if (!variants.length) {
+      variantRow.hidden = true;
+      variantEl.replaceChildren();
+      variantOptionsEl.replaceChildren();
+      selectedOptionEl.textContent = "Standard item";
+      return;
+    }
+
+    const preferred = variantEl.value || quote?.variantId || variants[0].id;
+    variantEl.replaceChildren(...variants.map((variant) => {
+      const option = document.createElement("option");
+      option.value = variant.id;
+      option.textContent = variant.label;
+      option.selected = variant.id === preferred;
+      return option;
+    }));
+
+    const active = selectedVariant(variants) || variants[0];
+    if (!variantEl.value && active) variantEl.value = active.id;
+
+    variantOptionsEl.replaceChildren(...variants.map((variant) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "eus-variant-option";
+      button.dataset.variantId = variant.id;
+      button.setAttribute("aria-pressed", variant.id === variantEl.value ? "true" : "false");
+
+      const label = document.createElement("strong");
+      label.textContent = variant.label;
+      const price = document.createElement("span");
+      price.textContent = money(variant.priceCents);
+      button.append(label, price);
+
+      button.addEventListener("click", () => {
+        if (variantEl.value === variant.id) return;
+        variantEl.value = variant.id;
+        variantOptionsEl.querySelectorAll(".eus-variant-option").forEach((item) => {
+          item.setAttribute("aria-pressed", item === button ? "true" : "false");
+        });
+        selectedOptionEl.textContent = variant.label;
+        if (variant.image) setProductImage(variant.image, productEl.textContent);
+        refreshQuote();
+      });
+      return button;
+    }));
+
+    variantRow.hidden = false;
+    selectedOptionEl.textContent = active?.label || "Select an option";
+  }
+
   function renderQuote(next) {
     quote = next;
-    productEl.textContent = next.productName || rvName || "Store item";
+    const productName = next.productName || rvName || "Store item";
+    productEl.textContent = productName;
     unitPriceEl.textContent = money(next.unitPriceCents);
     merchandiseEl.textContent = money(next.merchandiseCents);
     shippingEl.textContent = money(next.shippingCents);
     totalEl.textContent = money(next.totalCents);
+    setProductImage(next.productImage, productName);
 
     const variants = Array.isArray(next.variants) ? next.variants : [];
-    if (variants.length) {
-      const selected = variantEl.value || next.variantId || variants[0].id;
-      variantEl.replaceChildren(...variants.map((variant) => {
-        const option = document.createElement("option");
-        option.value = variant.id;
-        option.textContent = `${variant.label} — ${money(variant.priceCents)}`;
-        option.selected = variant.id === selected;
-        return option;
-      }));
-      variantRow.hidden = false;
-    } else {
-      variantRow.hidden = true;
-      variantEl.replaceChildren();
-    }
+    renderVariantOptions(variants);
+    if (next.variantName) selectedOptionEl.textContent = next.variantName;
   }
 
   async function requestQuote() {
-    setStatus("Loading checkout…");
+    setStatus("Updating order…");
     const response = await fetch("/api/store-checkout/quote", {
       method: "POST",
       credentials: "same-origin",
@@ -129,7 +191,7 @@
     if (Array.isArray(body.variants) && body.variants.length && !body.variantId && variantEl.value) {
       return requestQuote();
     }
-    setStatus(config?.configured ? "PayPal is ready." : "PayPal checkout is not configured.", config?.configured ? "ready" : "error");
+    setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");
     return body;
   }
 
@@ -160,11 +222,12 @@
     if (!window.paypal?.Buttons || paypalButtons) return;
 
     paypalButtons = window.paypal.Buttons({
-      style: { layout: "vertical", shape: "rect", label: "paypal" },
+      style: { layout: "vertical", shape: "rect", label: "paypal", height: 48 },
 
       onClick(_data, actions) {
         if (!formReady()) {
           setStatus("Complete the shipping and contact information before paying.", "error");
+          document.querySelector("#checkout-name")?.focus();
           return actions.reject();
         }
         return actions.resolve();
@@ -234,7 +297,6 @@
     await paypalButtons.render("#checkout-paypal");
   }
 
-  let quoteTimer = 0;
   const refreshQuote = () => {
     clearTimeout(quoteTimer);
     quoteTimer = setTimeout(() => {
@@ -243,7 +305,6 @@
   };
 
   quantityEl.addEventListener("change", refreshQuote);
-  variantEl.addEventListener("change", refreshQuote);
   if (source === "rv") {
     for (const selector of ["#checkout-address1", "#checkout-city", "#checkout-state", "#checkout-postal"]) {
       document.querySelector(selector)?.addEventListener("change", refreshQuote);
@@ -260,7 +321,7 @@
       await requestQuote();
       if (!quote) return;
       if (await loadPayPal()) {
-        setStatus("PayPal is ready.", "ready");
+        setStatus("Secure PayPal checkout ready.", "ready");
         await renderPayPal();
       }
     } catch (error) {
