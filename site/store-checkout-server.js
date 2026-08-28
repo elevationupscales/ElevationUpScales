@@ -45,6 +45,11 @@ function centsToValue(cents) {
 }
 
 function dollarsToCents(value) {
+  if (value && typeof value === "object") {
+    const directCents = Number.parseInt(String(value.cents ?? ""), 10);
+    if (Number.isInteger(directCents) && directCents >= 0) return directCents;
+    value = value.value ?? value.amount ?? value.price ?? "";
+  }
   const parsed = Number.parseFloat(String(value ?? "").replace(/[^0-9.-]/g, ""));
   return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) : null;
 }
