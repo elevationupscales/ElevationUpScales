@@ -4,6 +4,28 @@
   const grid = document.querySelector("#product-grid");
   if (!grid) return;
 
+  const isProductionStorefront = /(^|\.)elevationupscales\.com$/i.test(location.hostname);
+
+  async function checkoutRoutingAllowed() {
+    if (!isProductionStorefront) return true;
+    try {
+      const response = await fetch("/api/store-checkout/config", {
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+      });
+      const config = await response.json().catch(() => ({}));
+      return Boolean(
+        response.ok &&
+        config?.environment === "live" &&
+        config?.checkoutEnabled === true &&
+        config?.liveCheckoutApproved === true
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
   const formatMarkedPrice = (text, amount) => {
     const decimals = /\.\d{2}\b/.test(text) ? 2 : 0;
     return new Intl.NumberFormat("en-US", {
@@ -38,6 +60,9 @@
     });
   };
 
-  new MutationObserver(apply).observe(grid, { childList: true, subtree: true });
-  apply();
+  checkoutRoutingAllowed().then((allowed) => {
+    if (!allowed) return;
+    new MutationObserver(apply).observe(grid, { childList: true, subtree: true });
+    apply();
+  });
 })();

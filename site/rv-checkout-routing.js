@@ -1,6 +1,10 @@
 (() => {
   "use strict";
 
+  // RV direct checkout is intentionally held for a later Doba/shipping release.
+  // On the public production storefront, preserve the existing exact eBay Buy Now links.
+  if (/(^|\.)elevationupscales\.com$/i.test(location.hostname)) return;
+
   const grid = document.querySelector("#rv-product-grid");
   if (!grid) return;
 
