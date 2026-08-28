@@ -48,7 +48,7 @@ jobs:
           ! grep -q '168631058246' /tmp/routing.js
           ! grep -q '168637439895' /tmp/routing.js
 
-          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/mapped.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/mapped.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/checkout/' -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
           echo "mapped_quote_http=${code}"
           test "$code" = "200"
           node - <<'NODE'
@@ -58,7 +58,7 @@ jobs:
           console.log('mapped_quote=PASS');
           NODE
 
-          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/blocked.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          code=$(curl -sS --connect-timeout 5 --max-time 15 -o /tmp/blocked.json -w '%{http_code}' -X POST "${PRODUCTION_URL}/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/checkout/' -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
           echo "blocked_quote_http=${code}"
           test "$code" = "409"
           node - <<'NODE'
