@@ -1,0 +1,1 @@
+This repository is currently baselined to the Elevation 4.3 production audit repair release completed and verified on 2026-08-28. See CURRENT_PRODUCTION_BASELINE.txt for the rollback branch and deployment receipt.
