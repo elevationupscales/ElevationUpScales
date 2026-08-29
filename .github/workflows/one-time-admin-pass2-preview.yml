@@ -77,12 +77,11 @@ jobs:
           check_contains 'admin nav label' "$nav" 'Shipping & Logistics'
           check_contains 'advanced details control' "$home" 'Advanced Shipping Details'
           check_contains 'source-of-truth statement' "$home" 'Catalog tells us what it is'
-          # Block only unsupported positive public claims; explanatory negative wording is allowed.
           check_absent 'blanket Hawaii shipped claim' "$hawaii" 'Lithium Batteries Shipped to Hawaii'
           check_absent 'free Hawaii shipping claim' "$hawaii" 'Free Hawaii Shipping'
           session=$(curl --silent --output /tmp/session --write-out '%{http_code}' "${base}/api/admin/session" || true)
           echo "/api/admin/session -> $session"
-          test "$session" = "200"
+          test "$session" = "401"
           for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
             code=$(curl --silent --output /tmp/protected --write-out '%{http_code}' "${base}${api}" || true)
             echo "protected ${api} -> ${code}"
