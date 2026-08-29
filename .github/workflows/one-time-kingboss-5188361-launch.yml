@@ -1,0 +1,92 @@
+name: One-Time Kingboss 5188361 Supplier Integration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/one-time-kingboss-5188361-launch.yml
+
+permissions:
+  contents: write
+
+env:
+  SOURCE_SHA256: 4c1c424c314ccf384f0db854617bb5a97b3481bda869597c43bbc7853c3e3f66
+  SOURCE_BYTES: "226980"
+  SOURCE_ROWS: "43"
+  SOURCE_COLUMNS: "163"
+  INPUT_BRANCH: ops/kingboss-supplier-20260829
+
+jobs:
+  integrate:
+    if: contains(github.event.head_commit.message, '[kingboss-5188361-authorized]')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Reconstruct exact Kingboss export
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$INPUT_BRANCH:refs/remotes/origin/$INPUT_BRANCH"
+          mkdir -p /tmp/kingboss
+          git show "origin/$INPUT_BRANCH:.deployment-input/kingboss-20260829-5188361/source.xz.b64" | tr -d '\r\n\t ' | base64 --decode > /tmp/kingboss/source.xz
+          git show "origin/$INPUT_BRANCH:.deployment-input/kingboss-20260829-5188361/launch.mjs" > /tmp/kingboss/launch.mjs
+          xz -t /tmp/kingboss/source.xz
+          xz -dc /tmp/kingboss/source.xz > /tmp/kingboss/source.csv
+          test "$(wc -c < /tmp/kingboss/source.csv | tr -d ' ')" = "$SOURCE_BYTES"
+          test "$(sha256sum /tmp/kingboss/source.csv | awk '{print $1}')" = "$SOURCE_SHA256"
+          python - <<'PY'
+          import csv,os
+          with open('/tmp/kingboss/source.csv',newline='',encoding='utf-8-sig') as f:
+              r=csv.reader(f);h=next(r);rows=list(r)
+          assert len(h)==int(os.environ['SOURCE_COLUMNS'])
+          assert len(rows)==int(os.environ['SOURCE_ROWS'])
+          print('Kingboss source PASS',len(rows),len(h))
+          PY
+      - name: Integrate Kingboss supplier catalog
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          cp site/doba-csv-sync-runtime.js /tmp/kingboss/runtime.mjs
+          echo 'export { ensureSchema, createPreview, applyRun };' >> /tmp/kingboss/runtime.mjs
+          cd /tmp/kingboss
+          node launch.mjs
+      - name: Verify public safety and storefront health
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 https://elevationupscales.com/lithium-batteries > /tmp/kingboss/lithium.html
+          curl -fsS --retry 3 https://elevationupscales.com/rv-store > /tmp/kingboss/rv.html
+          grep -qi 'Lithium' /tmp/kingboss/lithium.html
+          grep -qi 'RV' /tmp/kingboss/rv.html
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/kingboss/receipt.json'))
+          assert r['disposition']=='PASS'
+          assert r['rowCount']==43
+          assert r['integrated']==43
+          assert r['publicPublished']==0
+          print('Kingboss integration PASS',r)
+          PY
+      - name: Upload integration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kingboss-5188361-supplier-integration
+          path: /tmp/kingboss/receipt.json
+          retention-days: 14
+      - name: Retire one-time workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-kingboss-5188361-launch.yml
+          git commit -m 'Remove completed Kingboss 5188361 one-time launch workflow'
+          git push origin HEAD:main
