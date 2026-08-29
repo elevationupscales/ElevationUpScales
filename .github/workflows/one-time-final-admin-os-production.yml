@@ -24,7 +24,7 @@ jobs:
           ref: main
       - name: Validate final source and recovery guards
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           node --check site/sync-admin-runtime.js
           node --check site/admin-channels.js
           node --check site/admin-system.js
@@ -39,7 +39,7 @@ jobs:
           grep -q 'Duplicate eBay listing ID' site/sync-admin-runtime.js
           grep -q 'Minimum contribution guard not met' site/sync-admin-runtime.js
           grep -q 'Product does not pass publish readiness' site/sync-admin-runtime.js
-          grep -q 'Legacy recovery draft' site/sync-admin-runtime.js
+          grep -q 'Listing recovery draft' site/sync-admin-runtime.js
           grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
           grep -q 'Hawaii Lithium Program' site/hawaii-lithium-batteries.html
           grep -q 'Secure checkout' site/checkout/index.html
