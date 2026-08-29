@@ -1,0 +1,122 @@
+name: One-Time Doba CSV Sync Build
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-doba-csv-sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out isolated Doba release branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/doba-csv-sync
+          fetch-depth: 0
+
+      - name: Assemble importer and wire Admin
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .staging/doba/runtime-*.txt > site/doba-csv-sync-runtime.js
+          cat .staging/doba/ui-*.txt > site/doba-csv-sync.js
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace(path, old, new, count=1):
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              if old not in s:
+                  raise SystemExit(f'marker missing in {path}: {old[:120]}')
+              p.write_text(s.replace(old,new,count),encoding='utf-8')
+
+          # Protected Doba CSV Admin API.
+          replace('site/_worker.js',
+            'import { handleSyncAdminApi, handleSyncScheduledApi } from "./sync-admin-runtime.js";\n',
+            'import { handleSyncAdminApi, handleSyncScheduledApi } from "./sync-admin-runtime.js";\nimport { handleDobaCsvSyncAdminApi } from "./doba-csv-sync-runtime.js";\n')
+          replace('site/_worker.js',
+            '"/hawaii-lithium-runtime.js", "/sync-admin-runtime.js"].includes(url.pathname)',
+            '"/hawaii-lithium-runtime.js", "/sync-admin-runtime.js", "/doba-csv-sync-runtime.js"].includes(url.pathname)')
+          replace('site/_worker.js',
+            '    if (url.pathname === "/api/admin/sync" || url.pathname.startsWith("/api/admin/sync/")) {\n      return handleSyncAdminApi(request, env, url.pathname);\n    }\n',
+            '    if (url.pathname === "/api/admin/sync" || url.pathname.startsWith("/api/admin/sync/")) {\n      return handleSyncAdminApi(request, env, url.pathname);\n    }\n\n    if (url.pathname === "/api/admin/doba-csv-sync") {\n      return handleDobaCsvSyncAdminApi(request, env, url.pathname);\n    }\n')
+
+          # Doba is officially CSV Sync; no API/feed requirement.
+          p=Path('site/sync-admin-runtime.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace('  const dobaApi=envPresent(env,["DOBA_APP_KEY","DOBA_API_APP_KEY"])&&envPresent(env,["DOBA_PRIVATE_KEY","DOBA_API_PRIVATE_KEY","DOBA_SECRET"]);\n  const dobaFeed=envPresent(env,["DOBA_FEED_URL","DOBA_FTP_HOST"]);\n','')
+          s=s.replace('    doba:{configured:dobaApi||dobaFeed,mode:dobaApi?"api":dobaFeed?"feed":"manual",label:dobaApi?"API Connected":dobaFeed?"Feed Connected":"Manual Source"},','    doba:{configured:true,mode:"csv",label:"Doba — CSV Sync"},')
+          s=s.replace('if(channel==="doba")return channelsFor(p).has("doba")?(cap.doba.configured?"SOURCE MAPPED":"MANUAL SOURCE"):"NOT CONFIGURED";', 'if(channel==="doba")return channelsFor(p).has("doba")?"CSV SOURCE — UPLOAD / RECONCILE":"NOT CONFIGURED";')
+          s=s.replace('if(channel==="doba"){if(!channelsFor(p).has("doba"))return"DISABLED";if(!cap.doba.configured)return"STALE";return"REVIEW REQUIRED";}', 'if(channel==="doba"){if(!channelsFor(p).has("doba"))return"DISABLED";return"UPLOAD NEEDED";}')
+          s=s.replace('const targets=target==="all"?CHANNELS:', 'const targets=target==="all"?CHANNELS.filter(channel=>channel!=="doba"):')
+          p.write_text(s,encoding='utf-8')
+
+          # Channels & Sync: compact Doba CSV workflow in the existing page.
+          p=Path('site/admin-channels.html'); s=p.read_text(encoding='utf-8')
+          s=s.replace('<script defer src="/admin-channels.js?v=4.3.7"></script>', '<script defer src="/admin-channels.js?v=4.3.8"></script><script defer src="/doba-csv-sync.js?v=4.3.8"></script>')
+          marker='<section class="eus-section"><div class="eus-section__head"><div><span class="eus-admin-kicker">Sync Health</span>'
+          doba='''<section class="eus-section" id="doba-csv-sync"><div class="eus-section__head"><div><span class="eus-admin-kicker">Doba — CSV Sync</span><h2>Upload supplier snapshot</h2><p>Download the current Doba product CSV, preview the difference, then approve reconciliation. No Catalog or Inventory product fields change during Preview Diff.</p></div><div class="eus-admin-actions"><span id="doba-sync-state" class="eus-pill is-warn">Upload Needed</span></div></div><div class="eus-metric-grid"><article class="eus-metric"><span>Last CSV Upload</span><strong id="doba-last-upload">No upload yet</strong></article><article class="eus-metric"><span>Last Successful Import</span><strong id="doba-last-import">No import yet</strong></article><article class="eus-metric"><span>Source Rows Stored</span><strong id="doba-source-count">0</strong></article><article class="eus-metric"><span>Stale Source Records</span><strong id="doba-source-stale">0</strong></article></div><div class="eus-filter-row" style="margin-top:16px"><label class="eus-admin-filter eus-admin-filter--grow">Doba CSV<input id="doba-file" type="file" accept=".csv,text/csv"></label><label class="eus-admin-filter">Import Profile<select id="doba-profile"><option value="doba-download-center-25">Doba Download Center — 25% Markup</option></select></label><label class="eus-admin-filter">Markup %<input id="doba-markup" type="number" min="0" max="500" step="0.01" value="25"></label><label class="eus-admin-filter">Snapshot Scope<select id="doba-scope"><option value="partial" selected>Partial Snapshot — default</option><option value="full">Full Snapshot</option></select></label><button class="eus-admin-button eus-admin-button--primary" id="doba-preview" type="button">Preview Diff</button></div><p class="eus-admin-statusline" id="doba-sync-status">Doba CSV Sync is the official supplier refresh process.</p><div class="eus-callout"><strong>Pricing rule:</strong> the saved 25% profile derives base supplier cost as <code>Dropshipping Price ÷ 1.25</code>. Partial Snapshot leaves missing products untouched. New products never auto-publish.</div><section id="doba-preview-panel" hidden style="margin-top:18px"><div class="eus-section__head"><div><span class="eus-admin-kicker">Preview Diff</span><h3>Review before Apply</h3><p id="doba-preview-meta"></p></div><button class="eus-admin-button eus-admin-button--primary" id="doba-apply" type="button" disabled>Apply Sync</button></div><div id="doba-preview-metrics" class="eus-metric-grid"></div><div id="doba-sample-baseline" class="eus-callout" hidden style="margin:14px 0"></div><div class="eus-admin-table-wrap"><table class="eus-admin-table"><thead><tr><th>Row</th><th>Item / SKU</th><th>Product</th><th>Stock</th><th>Ship-to</th><th>Export / Base Cost</th><th>Catalog</th><th>Classification</th><th>Blocker / Change</th></tr></thead><tbody id="doba-preview-table"><tr><td colspan="9">Upload a CSV and choose Preview Diff.</td></tr></tbody></table></div></section><div class="eus-section__head" style="margin-top:20px"><div><span class="eus-admin-kicker">Import History</span><h3>Recent Doba CSV runs</h3></div></div><div class="eus-admin-table-wrap"><table class="eus-admin-table"><thead><tr><th>File</th><th>Status</th><th>Scope</th><th>Profile</th><th>Rows</th><th>Matches</th><th>New</th><th>Review</th><th>Error</th><th>Open</th></tr></thead><tbody id="doba-runs"><tr><td colspan="10">No Doba CSV runs yet.</td></tr></tbody></table></div></section>'''
+          if marker not in s: raise SystemExit('Channels Sync Health marker missing')
+          s=s.replace(marker,doba+marker,1)
+          p.write_text(s,encoding='utf-8')
+
+          # Doba action sends owner to CSV upload, not generic monitor sync.
+          p=Path('site/admin-channels.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace('>${name}</strong></td><td>${esc(c[name]?.mode||"monitor")}', '>${name}</strong></td><td>${esc(c[name]?.mode||"monitor")}') if False else s
+          s=s.replace('data-sync-target="${name}">Sync Now</button>', 'data-sync-target="${name}">${name==="doba"?"Upload CSV":"Sync Now"}</button>')
+          s=s.replace('if(target){run(target.dataset.syncTarget);return;}', 'if(target){if(target.dataset.syncTarget==="doba"){document.getElementById("doba-csv-sync")?.scrollIntoView({behavior:"smooth",block:"start"});return;}run(target.dataset.syncTarget);return;}')
+          p.write_text(s,encoding='utf-8')
+
+          # Expose Doba freshness/error state to Mission Control data load.
+          p=Path('site/admin-command-center.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace('  const getSync=()=>api("/api/admin/sync");\n', '  const getSync=()=>api("/api/admin/sync");\n  const getDoba=()=>api("/api/admin/doba-csv-sync");\n')
+          s=s.replace('settle("lithium",getLithium),settle("sync",getSync)', 'settle("lithium",getLithium),settle("sync",getSync),settle("doba",getDoba)')
+          s=s.replace('getLithium,getSync,orderActions', 'getLithium,getSync,getDoba,orderActions')
+          p.write_text(s,encoding='utf-8')
+
+          # Lightweight Mission Control Doba action card.
+          p=Path('site/admin-overview.js'); s=p.read_text(encoding='utf-8')
+          needle='    const sync=snapshot.sync?.ok?(snapshot.sync.data||{}):{};\n'
+          if needle in s:
+              s=s.replace(needle,needle+'    const doba=snapshot.doba?.ok?(snapshot.doba.data||{}):{};\n',1)
+          action='''      action("Doba CSV Sync",snapshot.doba?.ok?(doba.runs?.[0]?.status|| (doba.latestSuccessfulImport?"Fresh":"Upload Needed")):"N/A","Upload supplier snapshot, preview changes, then approve reconciliation.","/admin-channels#doba-csv-sync",snapshot.doba?.ok&&!doba.latestSuccessfulImport?"is-warning":""),\n'''
+          anchor='      action("Products needing review"'
+          idx=s.find(anchor)
+          if idx!=-1 and 'action("Doba CSV Sync"' not in s:
+              s=s[:idx]+action+s[idx:]
+          p.write_text(s,encoding='utf-8')
+          PY
+
+          rm -rf .staging/doba
+          node --check site/doba-csv-sync-runtime.js
+          node --check site/doba-csv-sync.js
+          node --check site/sync-admin-runtime.js
+          node --check site/admin-channels.js
+          node --check site/admin-command-center.js
+          node --check site/admin-overview.js
+          node --check site/_worker.js
+          grep -q 'Doba — CSV Sync' site/admin-channels.html
+          grep -q 'Dropshipping Price ÷ 1.25' site/admin-channels.html
+          grep -q 'handleDobaCsvSyncAdminApi' site/_worker.js
+          grep -q 'mode:"csv"' site/sync-admin-runtime.js
+          ! grep -q 'DOBA_FEED_URL' site/sync-admin-runtime.js
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site .staging
+          git commit -m 'Build Doba CSV source sync and preview reconciliation'
+          git push origin HEAD:release/doba-csv-sync
+
+      - name: Remove build bootstrap
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm .github/workflows/one-time-doba-csv-build.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Remove completed Doba CSV build bootstrap'
+          git push origin main
