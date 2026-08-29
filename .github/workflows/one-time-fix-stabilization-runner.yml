@@ -1,0 +1,31 @@
+name: One-Time Stabilization Runner Repair
+
+on:
+  push:
+    branches:
+      - stabilization/elevation-4-3-2026-08-29
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.head_commit.message == 'Repair stabilization patch runner'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: stabilization/elevation-4-3-2026-08-29
+          fetch-depth: 0
+      - name: Repair exact source matcher
+        run: python .github/fix_stabilize_runner.py
+      - name: Commit repair and remove repair tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/stabilize_4_3.py
+          git rm .github/fix_stabilize_runner.py .github/workflows/one-time-fix-stabilization-runner.yml
+          git commit -m 'Fix stabilization runtime matching'
+          git push origin HEAD:stabilization/elevation-4-3-2026-08-29
