@@ -1,0 +1,129 @@
+name: One-Time Commerce Launch Build
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-commerce-launch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/commerce-launch-apparel-providers
+          fetch-depth: 0
+      - name: Integrate checkout, provider, media and RV category release
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def rep(path, old, new, count=1):
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              if old not in s: raise SystemExit(f'marker missing: {path}: {old[:100]}')
+              p.write_text(s.replace(old,new,count),encoding='utf-8')
+
+          # Worker: provider runtime, protected route, Admin media loader, provider API.
+          p=Path('site/_worker.js'); s=p.read_text(encoding='utf-8')
+          imp='import { handleDobaCsvSyncAdminApi } from "./doba-csv-sync-runtime.js";'
+          if 'handleApparelProviderAdminApi' not in s:
+              s=s.replace(imp, imp+'\nimport { handleApparelProviderAdminApi } from "./apparel-provider-runtime.js";',1)
+          s=s.replace('"/sync-admin-runtime.js", "/doba-csv-sync-runtime.js"','"/sync-admin-runtime.js", "/doba-csv-sync-runtime.js", "/apparel-provider-runtime.js"',1)
+          old='''const ADMIN_COMMAND_CENTER_LOADER = `\n<script src="/admin-command-center.js?v=4.3.7"></script>\n`;'''
+          new='''const ADMIN_COMMAND_CENTER_LOADER = `\n<link rel="stylesheet" href="/admin-commerce-media.css?v=4.3.9" data-eus-commerce-media>\n<script src="/admin-command-center.js?v=4.3.7"></script>\n<script src="/admin-commerce-media.js?v=4.3.9"></script>\n`;'''
+          if old in s: s=s.replace(old,new,1)
+          route='''    if (url.pathname === "/api/admin/doba-csv-sync") {\n      return handleDobaCsvSyncAdminApi(request, env, url.pathname);\n    }'''
+          if '/api/admin/apparel-providers' not in s:
+              s=s.replace(route,route+'''\n\n    if (url.pathname === "/api/admin/apparel-providers") {\n      return handleApparelProviderAdminApi(request, env, url.pathname);\n    }''',1)
+          p.write_text(s,encoding='utf-8')
+
+          # Checkout: Catalog/D1-backed Doba entry for newly published products.
+          p=Path('site/store-checkout-server.js'); s=p.read_text(encoding='utf-8')
+          marker='''function rvMapEntry(env, id) {\n  const map = readDobaMap(env);\n  const entry = map[clean(id, 120)];\n  return entry && typeof entry === "object" && !Array.isArray(entry) ? entry : null;\n}\n'''
+          helper='''function rvMapEntry(env, id) {\n  const map = readDobaMap(env);\n  const entry = map[clean(id, 120)];\n  return entry && typeof entry === "object" && !Array.isArray(entry) ? entry : null;\n}\n\nasync function catalogRvEntry(env, id) {\n  const db = env?.MARKETPLACE_DB;\n  const wanted = clean(id, 140);\n  if (!db || typeof db.prepare !== "function" || !wanted) return null;\n  try {\n    const row = await db.prepare(`SELECT i.id,i.name,i.sku,i.supplier_product_id,i.price_cents,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.publish_status,m.review_state,s.spu_no,s.supplier_sku AS source_supplier_sku,s.supplier_stock AS source_stock,s.ship_to,s.shipping_method,s.estimated_shipping_cents,s.shipping_limitations,s.source_state\n      FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id\n      LEFT JOIN eus_doba_source_state s ON lower(s.item_no)=lower(i.supplier_product_id) AND lower(s.supplier_sku)=lower(m.supplier_sku)\n      WHERE (i.id=? OR lower(i.supplier_product_id)=lower(?)) AND i.supplier='doba' LIMIT 1`).bind(wanted,wanted).first();\n    if (!row || clean(row.publish_status,30) !== "published" || clean(row.shipping_status,30) !== "verified") return null;\n    const priceCents = Number.parseInt(String(row.price_cents ?? ""),10);\n    const stock = row.source_stock ?? row.supplier_stock;\n    const shippingCents = row.shipping_cents ?? row.estimated_shipping_cents;\n    const exactSku = clean(row.supplier_sku,180);\n    const sourceSku = clean(row.source_supplier_sku,180);\n    if (!exactSku || !sourceSku || exactSku.toLowerCase() !== sourceSku.toLowerCase()) return null;\n    if (!Number.isInteger(priceCents) || priceCents < 1 || Number(stock) <= 0) return null;\n    if (!Number.isInteger(Number(shippingCents)) || Number(shippingCents) < 0) return null;\n    if (/stale|missing|error/i.test(clean(row.source_state,80))) return null;\n    const shipTo = clean(row.ship_to,300);\n    const blockedStates = /excluding[^a-z]*(ak|alaska).*?(hi|hawaii)|excluding[^a-z]*(hi|hawaii).*?(ak|alaska)/i.test(shipTo) ? ["AK","HI"] : [];\n    return {\n      catalogProductId: row.id, name: clean(row.name,240), imageUrl: clean(row.primary_image,1200),\n      priceCents, shippingCents: Number(shippingCents), shippingVerified: true,\n      itemNo: clean(row.supplier_product_id,120), skuId: exactSku, spuNo: clean(row.spu_no,120),\n      blockedStates, shipTo, shippingMethod: clean(row.shipping_method,180), sourceUrl: clean(row.source_url,1000),\n    };\n  } catch (error) {\n    console.error(JSON.stringify({event:"catalog_rv_entry_error",message:clean(error?.message,240)}));\n    return null;\n  }\n}\n'''
+          if 'async function catalogRvEntry' not in s:
+              if marker not in s: raise SystemExit('store checkout rvMapEntry marker missing')
+              s=s.replace(marker,helper,1)
+          s=s.replace('''  const entry = rvMapEntry(env, id);''','''  const entry = rvMapEntry(env, id) || await catalogRvEntry(env, id);''',1)
+          p.write_text(s,encoding='utf-8')
+
+          # Worker preflight: allow Catalog-backed RV IDs to reach the authoritative checkout server.
+          p=Path('site/_worker.js'); s=p.read_text(encoding='utf-8')
+          old='''      if (source === "rv") {\n        const entry = verifiedRvEntry(env, raw);\n        if (!entry) return rvFallback(raw);\n        if (!rvDestinationAllowed(entry, raw)) return rvFallback(raw, entry, "This Doba item is not available for the selected shipping state");\n      }'''
+          new='''      if (source === "rv") {\n        const entry = verifiedRvEntry(env, raw);\n        if (entry && !rvDestinationAllowed(entry, raw)) return rvFallback(raw, entry, "This Doba item is not available for the selected shipping state");\n        // Catalog-backed Doba products are authoritatively checked in store-checkout-server.js.\n        // Legacy static map entries retain the preflight destination guard above.\n      }'''
+          if old in s: s=s.replace(old,new,1)
+          else: raise SystemExit('worker RV preflight marker missing')
+          p.write_text(s,encoding='utf-8')
+
+          # RV Store: catalog-backed checkout + dynamic category rail + debounced search.
+          p=Path('site/rv-store.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace('''  const state = { items: fallbackCatalog, query: "", sort: "updated", source: fallbackCatalog.length ? "fallback" : "loading" };''','''  const state = { items: fallbackCatalog, query: "", sort: "updated", category: "all", source: fallbackCatalog.length ? "fallback" : "loading" };\n  const debounce = (fn, ms=160) => { let timer=0; return (...args) => { clearTimeout(timer); timer=setTimeout(()=>fn(...args),ms); }; };''',1)
+          oldnorm='''    return { id: ebayItemId || String(product?.id || product?.sku || `catalog-${index}`), itemNumber: ebayItemId, sku: String(product?.sku || ""), name: String(product?.title || product?.name || "Elevation store product"), category: String(product?.category || "RV & Outdoor"), priceCents: Number(product?.priceCents || 0), imageUrl: String(product?.primaryImage || product?.images?.[0] || ""), buyUrl, supplier: String(product?.supplier || product?.sourceType || "Elevation"), shippingStatus: String(product?.shippingStatus || "unverified"), fulfillmentMode: String(product?.fulfillmentMode || "supplier_managed"), order: index, catalogSource: "elevation-catalog" };'''
+          newnorm='''    const catalogId = String(product?.id || product?.sku || `catalog-${index}`);\n    const supplier = String(product?.supplier || product?.sourceType || "Elevation").toLowerCase();\n    const directCatalog = supplier === "doba" && String(product?.publishStatus || "") === "published" && String(product?.shippingStatus || "") === "verified" && Number(product?.priceCents || 0) > 0;\n    const directUrl = directCatalog ? `/checkout/?source=rv&id=${encodeURIComponent(catalogId)}&name=${encodeURIComponent(String(product?.title || product?.name || "RV & Outdoor item"))}${ebayItemId?`&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebayItemId}`)}`:""}` : buyUrl;\n    return { id: catalogId, itemNumber: ebayItemId, sku: String(product?.sku || ""), name: String(product?.title || product?.name || "Elevation store product"), category: String(product?.category || "RV & Outdoor"), priceCents: Number(product?.priceCents || 0), imageUrl: String(product?.primaryImage || product?.images?.[0] || ""), buyUrl: directUrl, supplier, shippingStatus: String(product?.shippingStatus || "unverified"), fulfillmentMode: String(product?.fulfillmentMode || "supplier_managed"), order: index, catalogSource: "elevation-catalog" };'''
+          if oldnorm not in s: raise SystemExit('rv normalize marker missing')
+          s=s.replace(oldnorm,newnorm,1)
+          s=s.replace('''    const q = state.query.trim().toLowerCase(); const rows = state.items.filter((item) => !q || `${item.name} ${item.category} ${item.sku} ${item.itemNumber}`.toLowerCase().includes(q));''','''    const q = state.query.trim().toLowerCase(); const rows = state.items.filter((item) => (state.category === "all" || item.category === state.category) && (!q || `${item.name} ${item.category} ${item.sku} ${item.itemNumber}`.toLowerCase().includes(q)));''',1)
+          render_marker='''  function render() {\n    const rows = visible(); grid.replaceChildren(...rows.map(card)); count.textContent = String(rows.length); empty.hidden = rows.length !== 0; grid.hidden = rows.length === 0;'''
+          render_new='''  function renderCategoryRail() {\n    let rail = document.querySelector("#rv-category-rail");\n    const categories = [...new Set(state.items.map(item => item.category).filter(Boolean))];\n    const preferred = ["RV Essentials & Water","Solar & Off-Grid","Camping & Shelter","Automotive, ATV & Towing","Tools & Workshop","Outdoor Lighting & Power","Travel & Organization"];\n    const shown = preferred.filter(cat => categories.includes(cat));\n    if (!shown.length) { rail?.remove(); state.category="all"; return; }\n    if (!rail) { rail=document.createElement("div"); rail.id="rv-category-rail"; rail.className="rv-category-rail"; rail.setAttribute("aria-label","Filter products by category"); document.querySelector(".marketplace-summary")?.before(rail); }\n    const active = categories.includes(state.category) ? state.category : "all"; state.category=active;\n    rail.replaceChildren(...[["All Gear","all"],...shown.map(x=>[x,x])].map(([label,value])=>{ const button=document.createElement("button");button.type="button";button.textContent=label;button.dataset.category=value;button.classList.toggle("is-active",value===active);button.setAttribute("aria-pressed",String(value===active));return button;}));\n  }\n\n  function render() {\n    renderCategoryRail();\n    const rows = visible(); grid.replaceChildren(...rows.map(card)); count.textContent = String(rows.length); empty.hidden = rows.length !== 0; grid.hidden = rows.length === 0;'''
+          if render_marker not in s: raise SystemExit('rv render marker missing')
+          s=s.replace(render_marker,render_new,1)
+          oldevents='''  search?.addEventListener("input", () => { state.query = search.value; render(); }); sort?.addEventListener("change", () => { state.sort = sort.value; render(); });'''
+          newevents='''  search?.addEventListener("input", debounce(() => { state.query = search.value; render(); })); sort?.addEventListener("change", () => { state.sort = sort.value; render(); });\n  document.addEventListener("click", (event) => { const button=event.target.closest("#rv-category-rail [data-category]"); if(!button)return; state.category=button.dataset.category||"all"; const url=new URL(location.href); if(state.category==="all")url.searchParams.delete("category");else url.searchParams.set("category",state.category); history.replaceState({},"",url); render(); });\n  const initialCategory=new URLSearchParams(location.search).get("category"); if(initialCategory) state.category=initialCategory;'''
+          if oldevents not in s: raise SystemExit('rv events marker missing')
+          s=s.replace(oldevents,newevents,1)
+          p.write_text(s,encoding='utf-8')
+
+          # Public RV category rail styles.
+          p=Path('site/rv-store.css'); s=p.read_text(encoding='utf-8')
+          if '.rv-category-rail{' not in s:
+              s += '''\n.rv-category-rail{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;margin:0 0 14px;scrollbar-width:thin}.rv-category-rail button{white-space:nowrap;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.35);color:#eee;border-radius:999px;padding:8px 12px;font-size:.82rem;cursor:pointer}.rv-category-rail button.is-active{background:#d6ad45;border-color:#d6ad45;color:#090909;font-weight:700}@media(max-width:700px){.rv-category-rail{margin-left:-4px;margin-right:-4px;padding-left:4px;padding-right:4px}}\n'''
+          p.write_text(s,encoding='utf-8')
+
+          # Provider identities in Catalog/Inventory forms.
+          p=Path('site/catalog-admin-runtime.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace('if (["doba","fourthwall","self-stock","other"].includes(supplied)) return supplied;','if (["doba","fourthwall","printful","spreadconnect","self-stock","other"].includes(supplied)) return supplied;',1)
+          p.write_text(s,encoding='utf-8')
+          for path in ['site/admin-catalog.html','site/admin-inventory.html']:
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              s=s.replace('<option value="fourthwall">Fourthwall</option><option value="self-stock">Self Stock</option>', '<option value="fourthwall">Fourthwall</option><option value="printful">Printful</option><option value="spreadconnect">Spreadconnect</option><option value="self-stock">Self Stock</option>')
+              p.write_text(s,encoding='utf-8')
+          p=Path('site/admin-inventory.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace("const POLL_MS = 3000;","const POLL_MS = 15000;",1)
+          s=s.replace("{ doba: 'Doba', fourthwall: 'Fourthwall', 'self-stock': 'Self Stock', other: 'Other' }","{ doba: 'Doba', fourthwall: 'Fourthwall', printful: 'Printful', spreadconnect: 'Spreadconnect', 'self-stock': 'Self Stock', other: 'Other' }",1)
+          s=s.replace("['doba', 'fourthwall', 'self-stock', 'other'].includes(item.supplier)","['doba', 'fourthwall', 'printful', 'spreadconnect', 'self-stock', 'other'].includes(item.supplier)",1)
+          p.write_text(s,encoding='utf-8')
+
+          # Channels copy version; no eager provider network calls are added outside this page.
+          p=Path('site/admin-channels.html'); s=p.read_text(encoding='utf-8')
+          s=s.replace('src="/admin-channels.js?v=4.3.8"','src="/admin-channels.js?v=4.3.9"',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+          for file in site/apparel-provider-runtime.js site/admin-commerce-media.js site/store-checkout-server.js site/_worker.js site/rv-store.js site/catalog-admin-runtime.js site/admin-inventory.js; do node --check "$file"; done
+          grep -q 'handleApparelProviderAdminApi' site/_worker.js
+          grep -q 'catalogRvEntry' site/store-checkout-server.js
+          grep -q 'rv-category-rail' site/rv-store.js
+          grep -q 'printful' site/admin-catalog.html
+          grep -q 'spreadconnect' site/admin-inventory.html
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site
+          git commit -m 'Build commerce launch provider media checkout and category release'
+          git push origin HEAD:release/commerce-launch-apparel-providers
+      - name: Remove build workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm .github/workflows/one-time-commerce-launch-build.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Remove completed Commerce Launch build workflow'
+          git push origin main
