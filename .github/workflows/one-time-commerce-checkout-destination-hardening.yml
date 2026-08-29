@@ -1,0 +1,50 @@
+name: One-Time Commerce Checkout Destination Hardening
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  harden-checkout:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/commerce-launch-apparel-providers
+          fetch-depth: 0
+      - name: Add destination enforcement to Catalog-backed RV checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/store-checkout-server.js');s=p.read_text(encoding='utf-8')
+          marker='''  if (entry.shippingVerified !== true) {\n  return {\n    ok: false,\n    fallback: "ebay",\n    status: 409,\n    error: "Doba shipping is not verified for this item",\n    ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),\n  };\n}\n\n  const qty = quantity(raw?.quantity);'''
+          replacement='''  if (entry.shippingVerified !== true) {\n  return {\n    ok: false,\n    fallback: "ebay",\n    status: 409,\n    error: "Doba shipping is not verified for this item",\n    ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),\n  };\n}\n\n  const destinationState = clean(raw?.shipping?.state, 2).toUpperCase();\n  const blockedStates = Array.isArray(entry.blockedStates) ? entry.blockedStates.map((value) => clean(value, 2).toUpperCase()) : [];\n  if (destinationState && blockedStates.includes(destinationState)) {\n    return {\n      ok: false, fallback: "ebay", status: 409,\n      error: "This Doba item is not available for the selected shipping state",\n      ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),\n    };\n  }\n\n  const qty = quantity(raw?.quantity);'''
+          if marker not in s: raise SystemExit('quoteRv shipping marker missing')
+          p.write_text(s.replace(marker,replacement,1),encoding='utf-8')
+          PY
+          node --check site/store-checkout-server.js
+          grep -q 'destinationState' site/store-checkout-server.js
+          grep -q 'blockedStates.includes' site/store-checkout-server.js
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site/store-checkout-server.js
+          git commit -m 'Enforce destination blocks for Catalog-backed Doba checkout'
+          git push origin HEAD:release/commerce-launch-apparel-providers
+      - name: Remove one-time workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm .github/workflows/one-time-commerce-checkout-destination-hardening.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Remove completed destination hardening workflow'
+          git push origin main
