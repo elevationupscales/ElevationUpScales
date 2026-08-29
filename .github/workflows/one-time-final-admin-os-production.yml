@@ -1,0 +1,161 @@
+name: One-Time Final Admin OS Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: final-admin-os-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: ${{ contains(github.event.head_commit.message, '[admin-os-production]') }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Validate final source and recovery guards
+        run: |
+          set -euo pipefail
+          node --check site/sync-admin-runtime.js
+          node --check site/admin-channels.js
+          node --check site/admin-system.js
+          node --check site/admin-products-final.js
+          node --check site/admin-command-center.js
+          node --check site/admin-overview.js
+          node --check site/_worker.js
+          grep -q 'Products & Listings' site/admin-catalog.html
+          grep -q 'Channels & Sync' site/admin-channels.html
+          grep -q 'System / QA' site/admin-system.html
+          grep -q 'Shipping & Logistics' site/admin-lithium-shipping.html
+          grep -q 'Duplicate eBay listing ID' site/sync-admin-runtime.js
+          grep -q 'Minimum contribution guard not met' site/sync-admin-runtime.js
+          grep -q 'Product does not pass publish readiness' site/sync-admin-runtime.js
+          grep -q 'Legacy recovery draft' site/sync-admin-runtime.js
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'Hawaii Lithium Program' site/hawaii-lithium-batteries.html
+          grep -q 'Secure checkout' site/checkout/index.html
+          git diff --check
+      - name: Reconcile known catalog against legacy listing reference
+        id: recovery
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          legacy=Path('site/rv-ebay-catalog.js').read_text(encoding='utf-8')
+          catalog=Path('site/catalog-admin-runtime.js').read_text(encoding='utf-8')
+          legacy_ids=[]
+          for item in re.findall(r'\["(\d{12})"',legacy):
+              if item not in legacy_ids: legacy_ids.append(item)
+          block=catalog.split('const KNOWN_SEED = [',1)[1].split('];',1)[0]
+          seed={}
+          for line in block.splitlines():
+              ids=re.findall(r'"(\d{12})"',line)
+              if not ids: continue
+              status='hold' if '"hold"' in line else 'published' if '"published"' in line else 'other'
+              seed[ids[0]]=status
+          legacy_set=set(legacy_ids); seed_set=set(seed)
+          matched=legacy_set & seed_set
+          live={i for i in matched if seed.get(i)=='published'}
+          held={i for i in matched if seed.get(i)=='hold'}
+          unresolved=legacy_set-seed_set
+          expected_hold={'168631058246','168637439895','168631041650'}
+          assert expected_hold <= held, f'Known HOLD items changed: {expected_hold-held}'
+          assert len(live) >= 8, f'Expected at least 8 published master products, got {len(live)}'
+          assert len(held) >= 3, f'Expected at least 3 HOLD master products, got {len(held)}'
+          result={
+            'legacy_candidates':len(legacy_set),'master_seed_records':len(seed_set),
+            'exact_matched':len(matched),'matched_live':len(live),'matched_hold':len(held),
+            'unresolved_legacy':len(unresolved),'staged':0,'published_by_recovery':0,
+            'hold_ids':sorted(held),'unresolved_ids':sorted(unresolved)
+          }
+          Path('/tmp/recovery.json').write_text(json.dumps(result,indent=2))
+          print(json.dumps(result,indent=2))
+          PY
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify production routes and protected APIs
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          smoke() {
+            local base="$1" route code
+            for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-system; do
+              code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 10 --max-time 40 -o /tmp/page.html -w '%{http_code}' "${base%/}${route}" || true)
+              echo "${base%/}${route}=$code"
+              test "$code" = "200" || return 1
+            done
+            curl -sS -L --fail "${base%/}/admin-catalog" | grep -q 'Products & Listings'
+            curl -sS -L --fail "${base%/}/admin-channels" | grep -q 'Channels & Sync'
+            curl -sS -L --fail "${base%/}/admin-system" | grep -q 'System / QA'
+            curl -sS -L --fail "${base%/}/rv-store.js" | grep -q '/api/store-catalog?section=rv-outdoor'
+          }
+          if ! smoke "$DEPLOYMENT_URL"; then sleep 7; smoke "$PRODUCTION_URL"; fi
+          sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$PRODUCTION_URL/api/admin/sync" || true)
+          test "$sync_code" = "401"
+          scheduler_code=$(curl -sS -o /tmp/scheduled.json -w '%{http_code}' -X POST "$PRODUCTION_URL/api/sync/run" -H 'Content-Type: application/json' --data '{"target":"all","runId":"production-unauthorized"}' || true)
+          test "$scheduler_code" = "401"
+          runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$PRODUCTION_URL/sync-admin-runtime.js" || true)
+          test "$runtime_code" = "404"
+      - name: Verify commerce regressions
+        env:
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          curl -sS --fail "$PRODUCTION_URL/api/store-checkout/config" > /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs');const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          if(c.environment!=='live'||c.credentialsConfigured!==true||c.checkoutEnabled!==true||c.liveCheckoutApproved!==true) throw new Error('PayPal live config regression');
+          console.log('paypal_live=PASS');
+          NODE
+          allowed=$(curl -sS -o /tmp/allowed.json -w '%{http_code}' -X POST "$PRODUCTION_URL/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/rv-store' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          test "$allowed" = "200"
+          held=$(curl -sS -o /tmp/held.json -w '%{http_code}' -X POST "$PRODUCTION_URL/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/rv-store' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          test "$held" = "409"
+          curl -sS --fail "$PRODUCTION_URL/api/store-catalog?section=rv-outdoor" > /tmp/catalog.json
+          curl -sS --fail "$PRODUCTION_URL/api/marketplace/listings" > /tmp/market.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const catalog=JSON.parse(fs.readFileSync('/tmp/catalog.json','utf8'));
+          const market=JSON.parse(fs.readFileSync('/tmp/market.json','utf8'));
+          if(!Array.isArray(catalog.products)||catalog.products.length<8) throw new Error('Published RV catalog regression');
+          const mc=Number(market.count ?? market.listings?.length ?? 0); if(mc<1) throw new Error('Marketplace regression');
+          console.log('rv_catalog=',catalog.products.length,'marketplace=',mc);
+          NODE
+      - name: Optional signed monitor initialization
+        continue-on-error: true
+        env:
+          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          if [[ -z "${SYNC_JOB_TOKEN:-}" ]]; then echo 'scheduler_sync=NOT_CONFIGURED'; exit 0; fi
+          code=$(curl -sS -o /tmp/signed-sync.json -w '%{http_code}' -X POST "$PRODUCTION_URL/api/sync/run" -H "X-EUS-Sync-Token: $SYNC_JOB_TOKEN" -H 'Content-Type: application/json' --data "{\"target\":\"all\",\"runId\":\"release-${GITHUB_RUN_ID}\"}" || true)
+          echo "signed_sync_http=$code"
+          test "$code" = "200"
+      - name: Release receipt
+        run: |
+          echo '### Final Admin Operating System + Listing Recovery — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Admin navigation / Products & Listings / Inventory / Channels & Sync / Shipping & Logistics / System QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal / RV guards / Marketplace / Hawaii / Start Project / Solar: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Recovery dry-run:' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/recovery.json >> "$GITHUB_STEP_SUMMARY"
