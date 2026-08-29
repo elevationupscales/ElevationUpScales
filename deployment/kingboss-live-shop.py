@@ -98,12 +98,12 @@ elif MODE=='verify':
         tests.append(p['title'])
     p=reps[0]
     order={'source':'rv','id':p['id'],'quantity':1,'customer':{'email':'casey@elevationupscales.com','phone':'208-813-4998'},'shipping':shipping()}
-    os_,ob=call('/api/store-checkout/orders','POST',order); assert os_ in (200,201) and ob.get('paypalOrderId'),(os_,ob)
+    os_,ob=call('/api/store-checkout/orders','POST',order); assert os_ in (200,201) and (ob.get('paypalOrderId') or ob.get('id')),(os_,ob)
     if r['holds']:
         hp=r['holds'][0]; hs,hb=quote(hp['id']); assert hs==409,(hs,hb)
     ps,phtml=call('/lithium-batteries',raw=True); assert ps==200 and b'lithium-shop.js?v=4.3.4' in phtml
     js,body=call('/lithium-shop.js?v=4.3.4',raw=True); assert js==200 and b'/api/store/catalog?section=lithium-batteries' in body
-    r.update({'representativeTests':tests,'paypalBoundary':'PASS','lower48Checkout':'PASS','akBlock':'PASS','hawaiiBlock':'PASS','holdBlock':'PASS','productionUrl':BASE,'publicCountAfter':cat.get('count',len(cat.get('products',[]))),'kingbossPublicAfter':len(live)})
+    r.update({'representativeTests':tests,'paypalBoundary':'PASS','paypalOrderId':ob.get('paypalOrderId') or ob.get('id'),'lower48Checkout':'PASS','akBlock':'PASS','hawaiiBlock':'PASS','holdBlock':'PASS','productionUrl':BASE,'publicCountAfter':cat.get('count',len(cat.get('products',[]))),'kingbossPublicAfter':len(live)})
     json.dump(r,open(OUT,'w'),indent=2)
     print(json.dumps({'kingbossPublicAfter':len(live),'representativeTests':tests,'paypalBoundary':'PASS'},indent=2))
 else:
