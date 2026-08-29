@@ -6,7 +6,7 @@
 
 **Authority:** Newest accepted production state + explicit owner/management decisions control. Do not revive superseded plans because an older chat or handoff contains them.
 
-**Last status update:** 2026-08-28 — Admin Portal Organization & Visual Pass 1 deployed and verified.
+**Last status update:** 2026-08-28 — Admin Portal Pass 2 Shipping & Logistics simplification authorized for Deployment.
 
 ---
 
@@ -41,6 +41,8 @@ Before handing work back, record or report parent SHA, resulting SHA/branch/PR, 
 
 **Rollback baseline:** `baseline-2026-08-28-admin-portal-pass1`
 
+**Active deployment handoff:** `coordination/handoffs/2026-08-28-admin-portal-pass2-shipping-logistics-simplification.md`
+
 **Release rule:** small controlled patch → preview → verify → production → verify → baseline → stop. Management gates still apply when a controlling handoff explicitly requires one.
 
 **Do not:** stack unrelated fixes, reopen completed repairs, or mix Portal code into Website.
@@ -55,9 +57,13 @@ Before handing work back, record or report parent SHA, resulting SHA/branch/PR, 
 
 **Current controls include:** exact Catalog/SKU/supplier identity; manufacturer/model and origin fields; supplier inventory confirmation/recheck states; UN 38.3/document/packaging review controls; server-side route approval blockers; reservation aging/contact/reconfirmation; batch-line compatibility checks; READY TO COMMIT / BOOKED no-go gates; landed direct-cost/gross-contribution fields; demand-quality separation; conservative public Hawaii status language; supplier cost > $0 requirement; non-zero Hawaii freight economics requirement; and incomplete economics returning null/incomplete rather than artificial profit.
 
+**Owner-interface decision:** preserve the backend controls, but retire `Lithium Shipping Matrix` as the primary owner-facing concept. Shipping operations move to a simplified `Shipping & Logistics` owner workflow while Catalog, Inventory, Orders, and Mission Control retain their natural responsibilities.
+
+**Decision:** `coordination/decisions/DEC-004-retire-lithium-matrix-owner-ui.md`
+
 **Business objective:** prove a repeatable, financially sensible, customer-safe exact-SKU Hawaii lithium lane with real delivered costs and customer outcome.
 
-**Next action:** operate the pilot and prove one exact-SKU lane. Do not broaden Hawaii claims merely because the software is complete.
+**Next action:** simplify the Admin owner workflow without weakening any shipping/no-go gates; continue commercial pilot after Pass 2.
 
 ---
 
@@ -122,26 +128,28 @@ Before handing work back, record or report parent SHA, resulting SHA/branch/PR, 
 
 ## Mission Control / Admin
 
-**State:** PASS 1 DEPLOYED / ORGANIZATION & VISUAL BASELINE ACCEPTED
+**State:** PASS 1 DEPLOYED / PASS 2 AUTHORIZED
 
 **Accepted Admin application baseline:** `d4476ca43760930bf759d470931665a94b3d063c`
 
-**Pass 1 changes:**
-- global Admin navigation reorganized into `Daily Operations`, `Commerce`, `Shipping`, `Marketplace`, and `Insights & System`;
-- existing Admin routes/data models preserved;
-- dedicated visual layer `admin-command-center-pass1.css?v=4.3.5` added;
-- oversized headers/actions compacted;
-- stronger section hierarchy, filters, tables, row separation, audit-log density, and responsive behavior;
-- Marketplace remains separate from Elevation Store/Commerce;
-- Hawaii/Lithium remains a dedicated Shipping operation.
+**Pass 1:** global Admin navigation reorganized into `Daily Operations`, `Commerce`, `Shipping`, `Marketplace`, and `Insights & System`; existing routes/data models preserved; black/gold visual layer added; oversized headers/actions compacted; stronger section/table/filter hierarchy introduced; Marketplace remains separate from Elevation Store/Commerce.
 
-**Production verification:** `/admin`, Admin Listings, Catalog, Inventory, Store Orders, Lithium Shipping, Analytics, Channels, Store, Marketplace, Start a Project, Solar Builder, and Checkout all returned HTTP 200 in the Pass 1 verification run.
+**Pass 2 controlling handoff:** `coordination/handoffs/2026-08-28-admin-portal-pass2-shipping-logistics-simplification.md`
 
-**Receipt:** `coordination/receipts/2026-08-28-admin-portal-organization-pass1-production.md`
+**Pass 2 owner direction:**
+- replace the owner-facing `Lithium Shipping Matrix` concept with `Shipping & Logistics`;
+- preserve `/admin-lithium-shipping` route compatibility;
+- preserve all Hawaii backend gates/data;
+- Catalog = product identity;
+- Inventory = supplier cost/stock/origin;
+- Store Orders = paid customer order/fulfillment;
+- Shipping & Logistics = route/freight/reservations/batches/blockers;
+- Mission Control = action-required summary only;
+- use progressive disclosure for technical/compliance fields instead of giant default forms.
 
-**Decision:** `coordination/decisions/DEC-003-admin-portal-pass1-baseline.md`
+**Decision:** `coordination/decisions/DEC-004-retire-lithium-matrix-owner-ui.md`
 
-**Next action:** future Admin organization/usability work must build from Pass 1 or an accepted descendant. Do not rebuild working functionality merely for visual cleanup.
+**Next action:** Deployment implements Pass 2 from the accepted Pass 1 baseline/current `main`, verifies preview + production, creates a receipt/baseline, and stops.
 
 ---
 
@@ -176,6 +184,7 @@ Before handing work back, record or report parent SHA, resulting SHA/branch/PR, 
 - Missing/zero supplier cost must never be interpreted as free inventory, zero landed cost, or valid margin.
 - Last-known supplier cost is not a current supplier quote; recheck before ordering.
 - Future Admin work builds forward from the accepted Pass 1 organization/visual baseline.
+- Simplifying the Shipping & Logistics UI must never weaken Hawaii backend/no-go controls.
 - When a task is complete, produce evidence and stop; do not automatically continue into adjacent work.
 
 ---
