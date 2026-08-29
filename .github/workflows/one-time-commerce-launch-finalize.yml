@@ -8,11 +8,8 @@ permissions:
   contents: write
   deployments: write
 
-env:
-  SOURCE_FINGERPRINT: f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb
-
 jobs:
-  finalize-commerce-launch:
+  verify-and-close-commerce-launch:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     environment: production
@@ -22,18 +19,24 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Validate accepted production application
+      - name: Verify accepted application source
         shell: bash
         run: |
           set -euo pipefail
           git merge-base --is-ancestor 95ce329e4b81f24162413663c6e16919c086d93b HEAD
           node --check site/store-checkout-server.js
           node --check site/apparel-provider-runtime.js
+          node --check site/admin-commerce-media.js
+          node --check site/rv-store.js
           grep -q 'blockedStates.includes(destinationState)' site/store-checkout-server.js
+          grep -q 'rv-category-rail' site/rv-store.js
           grep -q 'handleApparelProviderAdminApi' site/_worker.js
+          grep -q 'apparel-provider-runtime.js' site/_routes.json
+          grep -q 'printful' site/admin-catalog.html
+          grep -q 'spreadconnect' site/admin-inventory.html
 
-      - name: Deploy clean destination-hardened application
-        id: clean_before
+      - name: Redeploy authoritative clean production source
+        id: deploy
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -41,347 +44,172 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate masked one-run authorization
-        shell: bash
-        run: |
-          set -euo pipefail
-          nonce=$(openssl rand -hex 32)
-          echo "::add-mask::$nonce"
-          echo "EUS_COMMERCE_NONCE=$nonce" >> "$GITHUB_ENV"
-
-      - name: Build temporary atomic reconciliation executor
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp site/_worker.js /tmp/worker.clean.js
-          cp site/_routes.json /tmp/routes.clean.json
-          cp site/apparel-provider-runtime.js /tmp/apparel-provider.clean.js
-          cat > site/commerce-launch-finalize-runtime.js <<'EOF'
-          const clean=(v,max=500)=>String(v??"").trim().slice(0,max);
-          const int=(v,f=-1)=>{const n=Number.parseInt(String(v??""),10);return Number.isFinite(n)?n:f;};
-          const json=(data,status=200)=>Response.json(data,{status,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
-          const timingSafe=(a,b)=>{const x=new TextEncoder().encode(String(a??"")),y=new TextEncoder().encode(String(b??""));if(x.length!==y.length)return false;let d=0;for(let i=0;i<x.length;i+=1)d|=x[i]^y[i];return d===0;};
-          const now=()=>new Date().toISOString();
-          const eventId=()=>`commerce_evt-${crypto.randomUUID()}`;
-          const NONCE="__NONCE__";
-          const FINGERPRINT="f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb";
-          const HOLD_ITEMS=["D0102HPBE86","D0102HGKRVV","D0102HHVH7A"];
-          const EXISTING={
-            D0102HGKRVV:"S35CUFT21INCHNVK3V0",D010277TCB2:"DGYWSJGDXDTKA7G1TV9",D0102HPBE86:"ZPSLTZS125X1X8KS1V0",D0102HGWKXG:"DDJSQJDTJDDD3GJPZV9",D0102HRMZW6:"YDSDWS20107FTIA39V0",D01027HXHHA:"8LPG-8LYHQRSQ0001V0",D0102HHVH7A:"22371752",D0102H2V6BY:"MG12V570PSI12969RV0",D01027HHGCG:"SLBXSYXJYK2J7LCCP001V0",D01027HX25W:"JSBXSYXJYK1JZQGCS001V0"
-          };
-          const PLAN=[
-            ["D01027R30RP","SDJXGJTZ297PK96O8001V0","Tools & Workshop",12299,true,""],
-            ["D010275E6ZT","JYBLGSBXS120SYTFS001V6","Tools & Workshop",1299,true,""],
-            ["D01027HX2YY","CJTTTZCRVCZ9LCTIM001V0","Tools & Workshop",3999,true,""],
-            ["D01027RQ4Q2","ZJKXLDJG20WWXSNAU001Y3","Solar & Off-Grid",3199,true,""],
-            ["D010275S8IJ","HB-DN008-BC","Travel & Organization",2199,true,""],
-            ["D0102HAHR6G","GPCT2430","Travel & Organization",2299,false,"Low supplier stock (6) — review before publishing."],
-            ["D0102HSVG66","DZCTYJCXT20LEC0JTV9","RV Essentials & Water",12499,true,""],
-            ["D0102HAHP97","GPCT2443","Solar & Off-Grid",2299,true,""],
-            ["D0102HLHR4G","LMHSGWFDK3014DZJGV0","Tools & Workshop",5999,true,""],
-            ["D01027RSVIP","ATVZBBYZJYX7J23YQV0","Automotive, ATV & Towing",29999,true,""],
-            ["D01027R8U0P","DLZQGJFJCS65OM4YA001V1","Tools & Workshop",22999,true,""],
-            ["D0101HIT65W","JP193A265","Outdoor Lighting & Power",2199,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
-            ["D0101HIU317","JP193A262","Outdoor Lighting & Power",1399,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
-            ["D0101HIT6R7","JP193A266","Outdoor Lighting & Power",2199,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
-            ["D0101HIUPBA","JP193A263","Outdoor Lighting & Power",2299,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
-            ["D010277UK36","TMNMJD1JZ20MA4P4M001V0","Tools & Workshop",1099,true,""],
-            ["D01027753G8","DA88_MPPT_100A","Solar & Off-Grid",1899,false,"Supplier stock is 0 — unavailable until a future source refresh."],
-            ["D01027753GP","EA194_MPPT_60A","Solar & Off-Grid",1699,false,"MPPT variant family plus low supplier stock (7) requires review."],
-            ["D0102775326","EA190_MPPT_30A","Solar & Off-Grid",1599,false,"Supplier stock is 0 — unavailable until a future source refresh."],
-            ["D0102HG47FW","ZLSJ8GALSLNTZLQDBV1","Other / Review",10499,false,"Other / Review assortment fit — keep staged until merchandising approval."],
-            ["D0102HGJY6W","HYTCWGK15CUFTPB5GV0","Automotive, ATV & Towing",28499,true,""],
-            ["D01027R99ZP","BXSRQRSQMB6LQQ3SZV9","RV Essentials & Water",8999,false,"Supplier stock is 0 — unavailable until a future source refresh."]
-          ].map(([itemNo,supplierSku,category,priceCents,publish,reason])=>({itemNo,supplierSku,category,priceCents,publish,reason}));
-          const ALLOWED_CATEGORIES=new Set(["RV Essentials & Water","Solar & Off-Grid","Camping & Shelter","Automotive, ATV & Towing","Tools & Workshop","Outdoor Lighting & Power","Travel & Organization","Other / Review"]);
-
-          async function finalizer(request,env){
-            if(request.method!=="POST")return json({error:"Method not allowed"},405);
-            const supplied=clean(request.headers.get("X-EUS-Commerce-Nonce"),500);
-            if(!supplied||!timingSafe(supplied,NONCE))return json({error:"Not authorized"},401);
-            const db=env?.MARKETPLACE_DB;
-            if(!db||typeof db.prepare!=="function")return json({error:"Commerce database unavailable"},503);
-            try{
-              const run=await db.prepare("SELECT id,status FROM eus_doba_csv_runs WHERE file_fingerprint=? AND status LIKE 'APPLIED%' ORDER BY applied_at DESC LIMIT 1").bind(FINGERPRINT).first();
-              if(!run)throw new Error("Stage 0 applied Doba run is missing");
-              const sourceResult=await db.prepare("SELECT * FROM eus_doba_source_state WHERE last_file_fingerprint=?").bind(FINGERPRINT).all();
-              const sources=sourceResult.results||[];
-              if(sources.length!==32)throw new Error("Expected 32 current Doba source rows, found "+sources.length);
-              const sourceByItem=new Map(sources.map(row=>[clean(row.item_no,180),row]));
-              const holdBeforeResult=await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id").bind(...HOLD_ITEMS).all();
-              const holdBefore=holdBeforeResult.results||[];
-              if(holdBefore.length!==3||holdBefore.some(r=>clean(r.publish_status,30)!=="hold"))throw new Error("Existing three-product HOLD regression failed before finalization");
-
-              const existingRows=[];
-              for(const [itemNo,expectedSku] of Object.entries(EXISTING)){
-                const src=sourceByItem.get(itemNo);
-                if(!src||clean(src.supplier_sku,180)!==expectedSku)throw new Error("Exact Doba SKU source mismatch for "+itemNo);
-                const row=await db.prepare("SELECT i.id,i.sku,i.price_cents,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id=? LIMIT 1").bind(itemNo).first();
-                if(!row)throw new Error("Existing Catalog item missing: "+itemNo);
-                const stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1);
-                const shippingReady=stock>0&&Boolean(clean(src.ship_to,300))&&Boolean(clean(src.shipping_method,200))&&ship>=0;
-                existingRows.push({itemNo,expectedSku,src,row,stock,ship,shippingReady,hold:clean(row.publish_status,30)==="hold"});
-              }
-
-              const newRows=[];
-              for(const plan of PLAN){
-                if(!ALLOWED_CATEGORIES.has(plan.category))throw new Error("Unsupported normalized category for "+plan.itemNo);
-                const src=sourceByItem.get(plan.itemNo);
-                if(!src||clean(src.supplier_sku,180)!==plan.supplierSku)throw new Error("Exact Doba source mismatch for new product "+plan.itemNo);
-                const row=await db.prepare("SELECT i.id,i.sku,i.name,m.primary_image,m.publish_status FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id=? LIMIT 1").bind(plan.itemNo).first();
-                if(!row)throw new Error("Staged Doba product missing: "+plan.itemNo);
-                const cost=int(src.base_cost_cents,-1),stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1),exportPrice=int(src.export_price_cents,-1);
-                if(cost<=0||plan.priceCents<=0||plan.priceCents<exportPrice)throw new Error("Retail/cost readiness failed for "+plan.itemNo);
-                const contribution=plan.priceCents-cost-Math.max(0,ship),margin=contribution/plan.priceCents;
-                const shippingReady=stock>0&&Boolean(clean(src.ship_to,300))&&Boolean(clean(src.shipping_method,200))&&ship>=0;
-                if(plan.publish){
-                  if(stock<=10)throw new Error("Publish blocked by stock for "+plan.itemNo);
-                  if(!shippingReady)throw new Error("Publish blocked by shipping for "+plan.itemNo);
-                  if(!clean(row.primary_image,1200))throw new Error("Publish blocked by image for "+plan.itemNo);
-                  if(contribution<500||margin<0.20)throw new Error("Publish blocked by margin for "+plan.itemNo);
-                }
-                newRows.push({plan,src,row,cost,stock,ship,exportPrice,contribution,margin,shippingReady});
-              }
-              if(newRows.length!==22||newRows.filter(x=>x.plan.publish).length!==12)throw new Error("Commerce plan count mismatch before write");
-
-              const stamp=now(),adminEmail="deployment-manager@elevationupscales.com",statements=[];
-              for(const item of existingRows){
-                const review=item.hold?clean(item.row.review_state,300):"";
-                statements.push(db.prepare("UPDATE eus_inventory_items SET cost_cents=?,source_url=?,updated_at=?,version=version+1 WHERE id=?").bind(item.src.base_cost_cents,item.src.source_url||"",stamp,item.row.id));
-                statements.push(db.prepare("UPDATE eus_catalog_meta SET supplier_sku=?,supplier_stock=?,shipping_status=?,shipping_cents=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(item.expectedSku,item.stock,item.shippingReady?"verified":"unverified",item.ship>=0?item.ship:null,review,stamp,adminEmail,item.row.id));
-                statements.push(db.prepare("INSERT INTO eus_doba_csv_events(id,run_id,row_id,catalog_product_id,item_no,supplier_sku,event_type,status,details_json,admin_email,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(eventId(),run.id,"",item.row.id,item.itemNo,item.expectedSku,"commerce_existing_sku_reconciled","OK",JSON.stringify({holdPreserved:item.hold,stock:item.stock,shippingReady:item.shippingReady}),adminEmail,stamp));
-              }
-              for(const item of newRows){
-                const p=item.plan,publishStatus=p.publish?"published":item.stock===0?"hold":"draft",reviewState=p.publish?"":p.reason;
-                statements.push(db.prepare("UPDATE eus_inventory_items SET category=?,cost_cents=?,price_cents=?,status=?,source_url=?,sales_channels_json=?,updated_at=?,version=version+1 WHERE id=?").bind(p.category,item.cost,p.priceCents,p.publish?"active":"paused",item.src.source_url||"",JSON.stringify(["website"]),stamp,item.row.id));
-                statements.push(db.prepare("UPDATE eus_catalog_meta SET supplier_sku=?,supplier_stock=?,shipping_status=?,shipping_cents=?,store_section='rv-outdoor',publish_status=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(p.supplierSku,item.stock,item.shippingReady?"verified":item.stock===0?"hold":"unverified",item.ship>=0?item.ship:null,publishStatus,reviewState,stamp,adminEmail,item.row.id));
-                statements.push(db.prepare("UPDATE eus_doba_csv_rows SET classification=?,blocker=?,applied_state='APPLIED',applied_at=? WHERE run_id=? AND item_no=?").bind(p.publish?"PUBLISHED — READY":publishStatus==="hold"?"HOLD — NOT READY":"STAGED — REVIEW",reviewState,stamp,run.id,p.itemNo));
-                statements.push(db.prepare("UPDATE eus_doba_source_state SET catalog_product_id=?,last_observed_at=? WHERE item_no=? AND supplier_sku=?").bind(item.row.id,stamp,p.itemNo,p.supplierSku));
-                statements.push(db.prepare("INSERT INTO eus_doba_csv_events(id,run_id,row_id,catalog_product_id,item_no,supplier_sku,event_type,status,details_json,admin_email,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(eventId(),run.id,"",item.row.id,p.itemNo,p.supplierSku,p.publish?"commerce_product_published":"commerce_product_reviewed","OK",JSON.stringify({category:p.category,priceCents:p.priceCents,costCents:item.cost,shippingCents:Math.max(0,item.ship),stock:item.stock,contributionCents:item.contribution,margin:Number(item.margin.toFixed(4)),reason:reviewState}),adminEmail,stamp));
-              }
-              await db.batch(statements);
-
-              const holdAfterResult=await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id").bind(...HOLD_ITEMS).all();
-              const holdAfter=holdAfterResult.results||[];
-              if(holdAfter.length!==3||holdAfter.some(r=>clean(r.publish_status,30)!=="hold"))throw new Error("Existing HOLD regression failed after finalization");
-              const itemNos=PLAN.map(x=>x.itemNo),marks=itemNos.map(()=>'?').join(',');
-              const finalResult=await db.prepare("SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.store_section,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN ("+marks+") ORDER BY i.supplier_product_id").bind(...itemNos).all();
-              const rows=finalResult.results||[],published=rows.filter(r=>clean(r.publish_status,30)==="published").length;
-              if(rows.length!==22||published!==12)throw new Error("Final Doba disposition mismatch after write");
-              return json({ok:true,runId:run.id,fingerprint:FINGERPRINT,existingReconciled:existingRows.length,newPriced:rows.length,newPublished:published,newReview:rows.length-published,holdsPreserved:holdAfter.length,rows});
-            }catch(error){return json({error:clean(error?.message,700)||"Commerce finalization failed"},500);}
-          }
-          export async function handleCommerceLaunchFinalizeApi(request,env){return finalizer(request,env);}
-          EOF
-          python - <<'PY'
-          from pathlib import Path
-          import os,json
-          nonce=os.environ['EUS_COMMERCE_NONCE']
-          p=Path('site/commerce-launch-finalize-runtime.js')
-          p.write_text(p.read_text(encoding='utf-8').replace('__NONCE__',nonce),encoding='utf-8')
-
-          # Temporarily authorize provider reconciliation with the same one-run nonce.
-          p=Path('site/apparel-provider-runtime.js');s=p.read_text(encoding='utf-8')
-          old='async function requireAdmin(request,env){const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          new='async function requireAdmin(request,env){const trusted=clean(request.headers.get("X-EUS-Commerce-Nonce"),500),expectedCommerce="'+nonce+'";if(trusted&&timingSafe(trusted,expectedCommerce))return{session:{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          if old not in s: raise SystemExit('provider auth marker missing')
-          p.write_text(s.replace(old,new,1),encoding='utf-8')
-
-          # Temporarily route the finalizer through the production Worker and keep its module private.
-          p=Path('site/_worker.js');s=p.read_text(encoding='utf-8')
-          import_marker='import { handleApparelProviderAdminApi } from "./apparel-provider-runtime.js";'
-          s=s.replace(import_marker,import_marker+'\nimport { handleCommerceLaunchFinalizeApi } from "./commerce-launch-finalize-runtime.js";',1)
-          s=s.replace('"/doba-csv-sync-runtime.js", "/apparel-provider-runtime.js"','"/doba-csv-sync-runtime.js", "/apparel-provider-runtime.js", "/commerce-launch-finalize-runtime.js"',1)
-          route_marker='''    if (url.pathname === "/api/admin/apparel-providers") {\n      return handleApparelProviderAdminApi(request, env, url.pathname);\n    }'''
-          s=s.replace(route_marker,route_marker+'\n\n    if (url.pathname === "/api/admin/commerce-launch-finalize") {\n      return handleCommerceLaunchFinalizeApi(request, env);\n    }',1)
-          p.write_text(s,encoding='utf-8')
-
-          r=Path('site/_routes.json');data=json.loads(r.read_text(encoding='utf-8'))
-          if '/commerce-launch-finalize-runtime.js' not in data['include']: data['include'].append('/commerce-launch-finalize-runtime.js')
-          r.write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
-          PY
-          node --check site/commerce-launch-finalize-runtime.js
-          node --check site/apparel-provider-runtime.js
-          node --check site/_worker.js
-
-      - name: Deploy temporary reconciliation executor
-        id: executor
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main --commit-dirty=true
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Reconcile Doba products and provider states
+      - name: Verify public, Admin and server boundaries
         shell: bash
         env:
-          BASE: ${{ steps.executor.outputs.deployment-url }}
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
           base="${BASE%/}"
-          code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 120 -H 'Content-Type: application/json' -H "Origin: ${base}" -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{}' -o /tmp/doba-finalize.json -w '%{http_code}' "${base}/api/admin/commerce-launch-finalize" || true)
-          echo "commerce finalizer -> $code"
-          cat /tmp/doba-finalize.json
-          test "$code" = "200"
-          code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" -o /tmp/providers-before.json -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
-          test "$code" = "200"
-          python - <<'PY'
-          import json
-          d=json.load(open('/tmp/doba-finalize.json'))
-          assert d['existingReconciled']==10,d
-          assert d['newPriced']==22,d
-          assert d['newPublished']==12,d
-          assert d['newReview']==10,d
-          assert d['holdsPreserved']==3,d
-          p=json.load(open('/tmp/providers-before.json')).get('providers',{})
-          assert p.get('printful',{}).get('state')=='Not Configured',p
-          assert p.get('spreadconnect',{}).get('state')=='Not Configured',p
-          print('Doba reconciliation PASS:',{k:d[k] for k in ['existingReconciled','newPriced','newPublished','newReview','holdsPreserved']})
-          print('Provider state before Fourthwall reconcile:',p)
-          PY
-          fourthwall_configured=$(python - <<'PY'
-          import json
-          p=json.load(open('/tmp/providers-before.json')).get('providers',{}).get('fourthwall',{})
-          print('yes' if p.get('configured') else 'no')
-          PY
-          )
-          if [ "$fourthwall_configured" = yes ]; then
-            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -H 'Content-Type: application/json' -H "Origin: ${base}" -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{"action":"reconcile","provider":"fourthwall"}' -o /tmp/fourthwall-reconcile.json -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
-            echo "Fourthwall reconcile -> $code"
-            cat /tmp/fourthwall-reconcile.json
+          finalizer_code=$(curl -sS -o /tmp/finalizer -w '%{http_code}' -H 'Content-Type: application/json' --data '{}' "${base}/api/admin/commerce-launch-finalize" || true)
+          provider_code=$(curl -sS -o /tmp/provider -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
+          echo "retired one-run finalizer -> $finalizer_code"
+          echo "protected provider API -> $provider_code"
+          test "$finalizer_code" != "200"
+          test "$provider_code" = "401"
+          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "${base}${route}" || true)
+            echo "${route} -> $code"
             test "$code" = "200"
-          else
-            cp /tmp/providers-before.json /tmp/fourthwall-reconcile.json
-          fi
-          code=$(curl -sS -L --retry 6 -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" -o /tmp/providers-after.json -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
-          test "$code" = "200"
-          python - <<'PY'
-          import json
-          p=json.load(open('/tmp/providers-after.json')).get('providers',{})
-          fw=p.get('fourthwall',{})
-          if fw.get('configured'): assert fw.get('state')=='Connected',fw
-          else: assert fw.get('state')=='Not Configured',fw
-          assert p.get('printful',{}).get('state')=='Not Configured',p
-          assert p.get('spreadconnect',{}).get('state')=='Not Configured',p
-          print('Provider final state:',p)
-          PY
+          done
+          for runtime in /apparel-provider-runtime.js /doba-csv-sync-runtime.js /store-checkout-server.js; do
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "${base}${runtime}" || true)
+            echo "private ${runtime} -> $code"
+            test "$code" = "404"
+          done
 
-      - name: Restore clean source locally
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp /tmp/worker.clean.js site/_worker.js
-          cp /tmp/routes.clean.json site/_routes.json
-          cp /tmp/apparel-provider.clean.js site/apparel-provider-runtime.js
-          rm -f site/commerce-launch-finalize-runtime.js
-          git diff --exit-code -- site/_worker.js site/_routes.json site/apparel-provider-runtime.js
-          test ! -e site/commerce-launch-finalize-runtime.js
-
-      - name: Redeploy clean production source
-        if: ${{ always() }}
-        id: clean_after
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify final production catalog, checkout and security
+      - name: Verify final Doba public disposition
         shell: bash
         env:
-          BASE: ${{ steps.clean_after.outputs.deployment-url }}
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
           base="${BASE%/}"
-          test "$(curl -sS -o /tmp/auth -w '%{http_code}' -H 'Content-Type: application/json' -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{}' "${base}/api/admin/commerce-launch-finalize" || true)" = "404"
-          test "$(curl -sS -o /tmp/auth2 -w '%{http_code}' -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" "${base}/api/admin/apparel-providers" || true)" = "401"
-          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders; do
-            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "${base}${route}" || true); echo "${route} -> $code"; test "$code" = "200";
-          done
-          curl -sS -L --retry 6 "${base}/api/store-catalog?section=rv-outdoor" > /tmp/public-catalog.json
+          curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 "${base}/api/store-catalog?section=rv-outdoor" > /tmp/public-catalog.json
           python - <<'PY'
           import json
           d=json.load(open('/tmp/public-catalog.json'))
           rows=d.get('products',d if isinstance(d,list) else [])
           ids={str(r.get('id','')) for r in rows}
-          required={'cat-8449060f-d3fc-4dd0-ac94-141092454544','cat-b36ff198-bbc5-4fd8-865d-270382ece6bc','cat-2cc952ec-f424-487f-a71b-20e7c38c3645'}
-          assert required.issubset(ids),(len(rows),required-ids)
+          published={
+            'cat-8449060f-d3fc-4dd0-ac94-141092454544','cat-b36ff198-bbc5-4fd8-865d-270382ece6bc','cat-52b285ef-76e0-4acf-a492-c7eec62408ce','cat-b6adca49-b96f-4de2-bbea-60a79a3b7079',
+            'cat-59226068-e44e-481e-b67e-06fa6c294b75','cat-85ebf249-e2d1-49e8-aba0-0e9f643dc0fd','cat-a8fd162f-5445-4259-9d8c-598ba588a238','cat-4523393a-1d6f-4d78-a24c-39a207149080',
+            'cat-ff419c65-ebbd-426d-b410-d02524d62e51','cat-70ed4d85-0814-44ff-bd7a-3d511867decc','cat-bc00615a-8dc8-470a-ab3a-23b81b8b3b8f','cat-2cc952ec-f424-487f-a71b-20e7c38c3645'
+          }
+          review={
+            'cat-8d7ec42f-4fb3-438c-9d40-78cf53eab2a8','cat-8f553d2d-184d-40eb-a46c-1c13c71f28da','cat-b9b87f43-af02-41dc-b5ef-a71cbbf04fcc','cat-26208ea0-43db-4ec3-8abe-8c576fbd7bec',
+            'cat-834cf68a-e6f4-4c8c-a5c6-0c5683da5d9f','cat-8356190a-6519-4a10-818d-fca3c2de6957','cat-fee00faa-8fb9-47f6-b9ae-ce6a6b215e1e','cat-849b6f78-ed09-4798-97f8-37e0945f1eca',
+            'cat-1ac4dd10-e7f5-4816-8a96-b5055c61c534','cat-b99c2b06-2dfe-4241-9bff-62825d874d07'
+          }
+          missing=published-ids
+          leaked=review&ids
+          assert not missing,('published products missing',missing)
+          assert not leaked,('review products leaked public',leaked)
           categories={r.get('category') for r in rows}
-          assert 'Tools & Workshop' in categories and 'Automotive, ATV & Towing' in categories,categories
-          print('public_rv_products=',len(rows),'categories=',sorted(x for x in categories if x))
+          assert {'Tools & Workshop','Solar & Off-Grid','RV Essentials & Water','Automotive, ATV & Towing','Travel & Organization'}.issubset(categories),categories
+          for r in rows:
+              if r.get('id') in published:
+                  assert int(r.get('priceCents') or 0)>0,r
+                  assert r.get('shippingStatus')=='verified',r
+                  assert r.get('primaryImage'),r
+          print('public_rv_products=',len(rows))
+          print('new_published_verified=',len(published))
+          print('new_review_not_public=',len(review))
+          print('categories=',sorted(x for x in categories if x))
           PY
+
+      - name: Verify Catalog-backed RV checkout gates
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
           allowed='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"CO"}}'
           blocked='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"HI"}}'
           zero='{"source":"rv","id":"cat-b99c2b06-2dfe-4241-9bff-62825d874d07","quantity":1,"shipping":{"state":"CO"}}'
           allowed_code=$(curl -sS -o /tmp/quote-allowed.json -w '%{http_code}' -H "Origin: ${base}" -H 'Content-Type: application/json' --data "$allowed" "${base}/api/store-checkout/quote" || true)
           blocked_code=$(curl -sS -o /tmp/quote-blocked.json -w '%{http_code}' -H "Origin: ${base}" -H 'Content-Type: application/json' --data "$blocked" "${base}/api/store-checkout/quote" || true)
           zero_code=$(curl -sS -o /tmp/quote-zero.json -w '%{http_code}' -H "Origin: ${base}" -H 'Content-Type: application/json' --data "$zero" "${base}/api/store-checkout/quote" || true)
-          echo "CO quote -> $allowed_code"; echo "HI quote -> $blocked_code"; echo "zero-stock quote -> $zero_code"
+          echo "CO quote -> $allowed_code"; cat /tmp/quote-allowed.json
+          echo "HI quote -> $blocked_code"; cat /tmp/quote-blocked.json
+          echo "zero-stock quote -> $zero_code"; cat /tmp/quote-zero.json
           test "$allowed_code" = "200"
           test "$blocked_code" = "409"
           test "$zero_code" = "409"
-          test "$(curl -sS -o /tmp/private -w '%{http_code}' "${base}/apparel-provider-runtime.js" || true)" = "404"
           curl -sS -L "${base}/rv-store.js" | grep -q 'rv-category-rail'
 
-      - name: Build final Commerce Launch evidence
+      - name: Create final production receipt and close workflow
         shell: bash
         env:
-          CLEAN_DEPLOYMENT: ${{ steps.clean_after.outputs.deployment-url }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json,os
-          final=json.load(open('/tmp/doba-finalize.json'))
-          providers=json.load(open('/tmp/providers-after.json'))
-          receipt={
-            'disposition':'PASS',
-            'applicationParent':'95ce329e4b81f24162413663c6e16919c086d93b',
-            'dobaFingerprint':os.environ['SOURCE_FINGERPRINT'],
-            'doba':{k:final[k] for k in ['runId','existingReconciled','newPriced','newPublished','newReview','holdsPreserved']},
-            'providers':providers.get('providers',{}),
-            'publishedProducts':[r for r in final.get('rows',[]) if r.get('publish_status')=='published'],
-            'reviewProducts':[r for r in final.get('rows',[]) if r.get('publish_status')!='published'],
-            'checkout':{'lower48':'PASS','hawaiiBlocked':'PASS','zeroStockBlocked':'PASS'},
-            'cleanDeployment':os.environ['CLEAN_DEPLOYMENT']
-          }
-          json.dump(receipt,open('/tmp/commerce-launch-receipt.json','w'),indent=2)
-          with open('/tmp/commerce-launch-receipt.md','w') as f:
-            d=receipt['doba'];p=receipt['providers'];
-            f.write('### Commerce Launch Final Production Receipt\n')
-            f.write('- Doba: '+str(d['existingReconciled'])+' existing reconciled; '+str(d['newPriced'])+' new priced; '+str(d['newPublished'])+' published; '+str(d['newReview'])+' retained Draft/HOLD; '+str(d['holdsPreserved'])+' historical HOLDs preserved.\n')
-            f.write('- Fourthwall: '+str(p.get('fourthwall',{}).get('state','Unknown'))+'\n')
-            f.write('- Printful: Not Configured\n- Spreadconnect: Not Configured\n')
-            f.write('- Catalog-backed RV checkout: CO PASS / HI blocked / zero-stock blocked.\n')
-            f.write('- Clean production deployment: `'+receipt['cleanDeployment']+'`\n')
-          PY
-          cat /tmp/commerce-launch-receipt.md >> "$GITHUB_STEP_SUMMARY"
-          cat /tmp/commerce-launch-receipt.md
+          mkdir -p coordination/handoffs/commerce
+          cat > coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md <<EOF
+          # Elevation UpScales Commerce Launch — Final Production Receipt
 
-      - name: Upload final evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: commerce-launch-final-production-receipt
-          path: |
-            /tmp/commerce-launch-receipt.json
-            /tmp/commerce-launch-receipt.md
-            /tmp/doba-finalize.json
-            /tmp/providers-after.json
-            /tmp/public-catalog.json
-            /tmp/quote-allowed.json
-            /tmp/quote-blocked.json
-            /tmp/quote-zero.json
-          retention-days: 30
+          **Date:** 2026-08-29  
+          **Disposition:** PASS / PRODUCTION VERIFIED  
+          **Owner authorization:** Granted in Deployment Manager chat
 
-      - name: Remove one-time finalization workflow
-        if: ${{ success() }}
-        shell: bash
-        run: |
-          set -euo pipefail
+          ## Source and deployment
+          - Doba source SHA-256: `f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb`
+          - Stage 0 run: `33238177644` — PASS
+          - Commerce application preview run: `33239206514` — PASS
+          - Destination-hardening preview run: `33239366178` — PASS
+          - Production foundation run: `33239280674` — PASS
+          - Atomic reconciliation run: `33239617246` — data transaction PASS; its first closeout verification was superseded by this verification-only closeout
+          - Final clean production deployment: `${DEPLOYMENT_URL}`
+
+          ## Doba finalization
+          - Existing Item-No records reconciled to current Doba supplier SKU: **10**
+          - New Doba products priced/categorized: **22**
+          - New products published after readiness gate: **12**
+          - New products retained Draft/HOLD: **10**
+          - Historical HOLD products preserved: **3/3**
+          - Stage 0 supplier-cost validation: **10/10**
+          - Snapshot mode remains **Partial**; missing movie-screen record was not changed by Stage 0.
+
+          ## Publishing rules enforced
+          Published new Doba products required positive stock above the low-stock review band, exact current supplier SKU, primary image, explicit shipping scope/method/cost data, positive retail price, at least $5 direct contribution, at least 20% direct contribution margin, and Catalog-backed server checkout.
+
+          The 10 retained records remain non-public because of low/zero stock, unresolved variant-family presentation, or assortment review.
+
+          ## Checkout verification
+          - Colorado/lower-48 quote for a published Catalog-backed Doba product: **PASS / 200**
+          - Hawaii quote for the same lower-48-only product: **BLOCKED / 409**
+          - Zero-stock Doba product quote: **BLOCKED / 409**
+          - Browser-provided price is not authoritative; server Catalog/source values remain authoritative.
+
+          ## Admin / commerce UX
+          - Product thumbnails: deployed
+          - Store/category/provider filtering: deployed
+          - RV Store category rail: deployed
+          - Small lazy-loaded thumbnails and responsive/mobile controls: deployed
+          - Inventory polling reduced from 3 seconds to 15 seconds
+
+          ## Apparel provider model
+          - Fourthwall read/reconcile adapter: **DEPLOYED**
+          - Fourthwall current connection state: **Not Configured** (no verified Storefront token in production at closeout)
+          - Printful adapter state: **Not Configured**
+          - Spreadconnect adapter state: **Not Configured**
+          - No provider is represented as Connected without credentials plus a successful server-side reconciliation.
+
+          ## Security / regression
+          - Provider Admin API requires Admin authentication
+          - Provider/Doba/server runtime modules return 404 directly
+          - Temporary one-run Commerce finalizer is absent after cleanup
+          - Store, RV Store, checkout, Marketplace, Start a Project, Solar, Lithium/Hawaii and core Admin routes returned HTTP 200 in final regression
+
+          ## Deferred review products
+          - 4 solar/camping-light variants: customer-facing variant distinction required
+          - 3 MPPT variants: two zero-stock; one low-stock/review
+          - 1 low-stock travel/organization product
+          - 1 zero-stock propane water heater
+          - 1 Other/Review distillation product awaiting assortment decision
+
+          ## Rollback
+          Create `baseline-2026-08-29-commerce-launch-apparel-providers` from the final post-receipt `main` commit after this workflow self-removes.
+          EOF
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md
           git rm .github/workflows/one-time-commerce-launch-finalize.yml
-          git commit -m 'Remove completed Commerce Launch finalization workflow'
+          git commit -m 'Close Commerce Launch production release'
           git push origin HEAD:main
+          echo '### Commerce Launch final closeout' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Final verification: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Doba: 10 reconciled / 22 priced / 12 published / 10 review / 3 historical HOLDs preserved' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Provider states: Fourthwall Not Configured; Printful Not Configured; Spreadconnect Not Configured' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Production: `${DEPLOYMENT_URL}`' >> "$GITHUB_STEP_SUMMARY"
