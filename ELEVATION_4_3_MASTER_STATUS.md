@@ -6,7 +6,7 @@
 
 **Authority:** Newest accepted production state + explicit owner/management decisions control. Do not revive superseded plans because an older chat or handoff contains them.
 
-**Last status update:** 2026-08-28 — supplier-cost / logistics production repair completed.
+**Last status update:** 2026-08-28 — Admin Portal Organization & Visual Pass 1 deployed and verified.
 
 ---
 
@@ -21,21 +21,7 @@
 
 ## Worker Finish Protocol
 
-Before handing work back, record or report:
-
-- parent SHA
-- resulting SHA / branch / PR
-- files changed
-- deployment/preview URL when applicable
-- tests run and results
-- regressions checked
-- blockers/anomalies
-- deferred work
-- production state
-- rollback reference
-- next action
-
-Update this status file or provide an exact status block for Master Coordination to merge into it.
+Before handing work back, record or report parent SHA, resulting SHA/branch/PR, files changed, deployment/preview URL, tests, regressions, blockers, deferred work, production state, rollback reference, and next action. Update this status file or provide an exact status block for Master Coordination.
 
 ---
 
@@ -45,13 +31,15 @@ Update this status file or provide an exact status block for Master Coordination
 
 **State:** ACTIVE / CONTROLLED RELEASES
 
-**Current accepted production application SHA:** `0c4d4c5131aeb68f6afcd2967973ebababbfa0fa`
+**Current accepted production application SHA:** `d4476ca43760930bf759d470931665a94b3d063c`
 
-**Production deployment for latest application repair:** `https://22b7f943.elevationupscales.pages.dev`
+**Latest production deployment:** `https://9755cd4f.elevationupscales.pages.dev`
 
-**Latest verified preview:** `https://259ff273.elevationupscales.pages.dev`
+**Latest verified preview:** `https://111e887b.elevationupscales.pages.dev`
 
-**Verification run:** GitHub Actions `33232283625` — PASS.
+**Verification run:** GitHub Actions `33232727325` — PASS.
+
+**Rollback baseline:** `baseline-2026-08-28-admin-portal-pass1`
 
 **Release rule:** small controlled patch → preview → verify → production → verify → baseline → stop. Management gates still apply when a controlling handoff explicitly requires one.
 
@@ -63,26 +51,9 @@ Update this status file or provide an exact status block for Master Coordination
 
 **State:** PHASE 2 PRODUCTION / COST + LOGISTICS HARDENED / COMMERCIAL PILOT ACTIVE
 
-**Foundation:** Phase 1 CLOSED; Phase 1.2 integrated; Phase 2 controls deployed to production before this latest repair.
+**Foundation:** Phase 1 CLOSED; Phase 1.2 integrated; Phase 2 controls deployed to production.
 
-**Latest production hardening:** supplier-cost truth and logistics economics repair at application SHA `0c4d4c5131aeb68f6afcd2967973ebababbfa0fa`.
-
-**Current controls include:**
-- exact Catalog/SKU/supplier identity
-- manufacturer/model and origin fields
-- supplier inventory confirmation/recheck states
-- UN 38.3/document/packaging review controls
-- server-side route approval blockers
-- reservation aging/contact/reconfirmation
-- batch-line compatibility checks
-- READY TO COMMIT / BOOKED no-go gates
-- landed direct-cost / gross-contribution fields
-- demand quality separation
-- conservative public Hawaii status language
-- supplier cost > $0 requirement before a route can become APPROVED
-- non-zero Hawaii freight quote/ocean freight requirement before route approval
-- batch commitment blocked when Catalog or route supplier cost is missing/zero
-- batch economics return incomplete/null rather than artificial profit when cost/freight data is missing
+**Current controls include:** exact Catalog/SKU/supplier identity; manufacturer/model and origin fields; supplier inventory confirmation/recheck states; UN 38.3/document/packaging review controls; server-side route approval blockers; reservation aging/contact/reconfirmation; batch-line compatibility checks; READY TO COMMIT / BOOKED no-go gates; landed direct-cost/gross-contribution fields; demand-quality separation; conservative public Hawaii status language; supplier cost > $0 requirement; non-zero Hawaii freight economics requirement; and incomplete economics returning null/incomplete rather than artificial profit.
 
 **Business objective:** prove a repeatable, financially sensible, customer-safe exact-SKU Hawaii lithium lane with real delivered costs and customer outcome.
 
@@ -106,24 +77,24 @@ Update this status file or provide an exact status block for Master Coordination
 
 **State:** PASS / SUPPLIER-COST TRUTH HARDENED
 
-**Owner-view baseline:** 11 total Inventory records; current Active filter previously showed 8 active Doba dropship records. Supplier-managed/dropship products correctly keep physical `On Hand`, `Reserved`, and `Available` separate from supplier availability.
+**Owner-view baseline:** 11 total Catalog records: 8 published and 3 HOLD. Supplier-managed/dropship products correctly keep physical `On Hand`, `Reserved`, and `Available` separate from supplier availability.
 
-**2026-08-28 production repair:** known Doba records with stored `cost_cents <= 0` now receive an idempotent backfill from the last-known 2026-08-28 supplier snapshot. Existing non-zero costs are never overwritten by this repair.
+**2026-08-28 production repair:** known Doba records with stored `cost_cents <= 0` received an idempotent backfill from the last-known 2026-08-28 supplier snapshot. Existing non-zero costs are never overwritten.
 
-**Important freshness rule:** backfilled values are last-known supplier costs, not a promise of current Doba pricing. Recheck supplier price and inventory before supplier purchase/commitment.
+**Freshness rule:** backfilled values are last-known supplier costs, not a promise of current Doba pricing. Recheck supplier price and inventory before supplier purchase/commitment.
 
-**Prevention:**
-- an active Doba Inventory item can no longer be created/edited with a zero supplier cost;
-- a Doba Catalog import/upsert cannot remain `published` with missing/zero supplier cost — it is forced to HOLD/review;
-- Catalog upserts preserve an existing supplier cost when an update payload omits cost;
-- the Inventory summary label is now `Physical Inventory Cost`, meaning tracked available units × unit cost;
-- supplier-managed items are not converted into fake physical stock.
+**Prevention:** active Doba Inventory items cannot be created/edited with zero supplier cost; Doba Catalog imports cannot stay published with missing/zero supplier cost; Catalog upserts preserve existing supplier cost when omitted; Inventory summary is `Physical Inventory Cost`; supplier-managed products are never converted into fake physical stock.
 
-**Auditability:** cost backfill records a Catalog event and attempts an Inventory event using actor `system-cost-reconcile` and a note that supplier cost must be rechecked before purchase.
+**Current Catalog state from owner view:**
+- 8 published products
+- 3 HOLD products
+- Gazebo HOLD — conflicting prior inventory snapshots
+- Lawn Sweeper HOLD — SKU mismatch + prior inventory sync failure
+- 3×3 Tent HOLD — price mismatch
+- all 11 rows now show non-zero supplier cost
+- Catalog audit records the supplier cost backfill
 
-**Production verification:** RV public Catalog remained healthy with 8 published RV/Outdoor products after the cost backfill trigger.
-
-**Next action:** normal operations. Recheck supplier cost/stock at purchase time; do not treat stored supplier cost as permanently current.
+**Next action:** normal operations. Resolve HOLD items only from current supplier evidence; recheck supplier cost/stock at purchase time.
 
 ---
 
@@ -145,21 +116,32 @@ Update this status file or provide an exact status block for Master Coordination
 
 **Near-term rule:** preserve current calculations/caveats. Use stable Catalog IDs/SKUs for future-facing hooks only when needed.
 
-**Future direction:** education + system planning + compatible Elevation products + quote/cart/pro review.
-
 **Do not:** create a separate product database.
 
 ---
 
 ## Mission Control / Admin
 
-**State:** PHASE 3 COMMAND CENTER DEPLOYED / FURTHER BROAD EXPANSION CONTROLLED
+**State:** PASS 1 DEPLOYED / ORGANIZATION & VISUAL BASELINE ACCEPTED
 
-**Current role:** action-required summaries, leads, commerce/admin visibility, seller/fulfillment/analytics coordination.
+**Accepted Admin application baseline:** `d4476ca43760930bf759d470931665a94b3d063c`
 
-**Hawaii rule:** Mission Control shows actionable Hawaii summaries; detailed lithium records remain in Lithium Shipping Matrix / Hawaii Shipping Batches.
+**Pass 1 changes:**
+- global Admin navigation reorganized into `Daily Operations`, `Commerce`, `Shipping`, `Marketplace`, and `Insights & System`;
+- existing Admin routes/data models preserved;
+- dedicated visual layer `admin-command-center-pass1.css?v=4.3.5` added;
+- oversized headers/actions compacted;
+- stronger section hierarchy, filters, tables, row separation, audit-log density, and responsive behavior;
+- Marketplace remains separate from Elevation Store/Commerce;
+- Hawaii/Lithium remains a dedicated Shipping operation.
 
-**Do not:** start additional broad Admin/Seller/Fulfillment/Analytics redesign work unless explicitly authorized as a new phase.
+**Production verification:** `/admin`, Admin Listings, Catalog, Inventory, Store Orders, Lithium Shipping, Analytics, Channels, Store, Marketplace, Start a Project, Solar Builder, and Checkout all returned HTTP 200 in the Pass 1 verification run.
+
+**Receipt:** `coordination/receipts/2026-08-28-admin-portal-organization-pass1-production.md`
+
+**Decision:** `coordination/decisions/DEC-003-admin-portal-pass1-baseline.md`
+
+**Next action:** future Admin organization/usability work must build from Pass 1 or an accepted descendant. Do not rebuild working functionality merely for visual cleanup.
 
 ---
 
@@ -188,11 +170,12 @@ Update this status file or provide an exact status block for Master Coordination
 - Newest explicit owner/management decision beats superseded instructions.
 - Public copy must not expose internal workflow/deployment language.
 - Planned capability must not be represented as already operational.
+- Marketplace remains separate from Elevation-owned Store commerce.
 - Exact-SKU shipping eligibility must never be generalized to an entire battery class or all Hawaii destinations.
 - Supplier-managed inventory must not be represented as physically on hand.
 - Missing/zero supplier cost must never be interpreted as free inventory, zero landed cost, or valid margin.
 - Last-known supplier cost is not a current supplier quote; recheck before ordering.
-- Hawaii route approval requires real supplier cost plus real Hawaii freight economics and required compliance/provider controls.
+- Future Admin work builds forward from the accepted Pass 1 organization/visual baseline.
 - When a task is complete, produce evidence and stop; do not automatically continue into adjacent work.
 
 ---
