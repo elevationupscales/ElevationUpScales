@@ -24,8 +24,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "d5a90267b59f372ed7dcfc2f9ae7d2e3bbc73927"
-          for f in site/doba-csv-sync-runtime.js site/doba-csv-sync.js site/admin-channels.html site/admin-channels.js site/sync-admin-runtime.js site/_worker.js; do test -f "$f"; done
+          test "$(git rev-parse HEAD)" = "0226aea3abf9c0f8a02aaa35dc7661562e08dd5e"
+          for f in site/doba-csv-sync-runtime.js site/doba-csv-sync.js site/admin-channels.html site/admin-channels.js site/sync-admin-runtime.js site/_worker.js site/_routes.json; do test -f "$f"; done
           node --check site/doba-csv-sync-runtime.js
           node --check site/doba-csv-sync.js
           node --check site/admin-channels.js
@@ -47,6 +47,7 @@ jobs:
           ! grep -q 'DOBA_FEED_URL' site/sync-admin-runtime.js
           ! grep -q 'DOBA_APP_KEY' site/sync-admin-runtime.js
           grep -q 'handleDobaCsvSyncAdminApi' site/_worker.js
+          grep -q 'doba-csv-sync-runtime.js' site/_routes.json
           test ! -d .staging/doba
 
       - name: Deploy isolated Doba preview
@@ -72,7 +73,6 @@ jobs:
           done
           channels=$(curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/admin-channels")
           ui=$(curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/doba-csv-sync.js")
-          syncjs=$(curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/sync-admin-runtime.js" || true)
           printf '%s' "$channels" | grep -q 'Doba — CSV Sync'
           printf '%s' "$channels" | grep -q 'Partial Snapshot — default'
           printf '%s' "$channels" | grep -q 'Preview Diff'
@@ -99,6 +99,7 @@ jobs:
             echo "Preview: ${{ steps.deploy.outputs.deployment-url }}"
             echo 'Doba mode: CSV Sync / no API-feed prerequisite'
             echo 'Preview-first mutation boundary: PASS'
+            echo 'Internal runtime route protection: PASS'
             echo 'Unauthenticated Admin boundary: PASS'
             echo 'Exact 32-row raw-file ingestion: pending owner CSV upload; workbook audit baseline is encoded in acceptance UI.'
           } >> "$GITHUB_STEP_SUMMARY"
