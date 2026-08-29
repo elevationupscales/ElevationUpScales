@@ -22,13 +22,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "c57bb559c5874d01f5bc741871a9d764e496efa1"
+          test "$(git rev-parse HEAD)" = "d3e32f179c42e9e3f33dc3d42f85bc29b94ecfee"
           for f in site/apparel-provider-runtime.js site/admin-commerce-media.js site/admin-commerce-media.css site/store-checkout-server.js site/_worker.js site/rv-store.js site/rv-store.css site/catalog-admin-runtime.js; do test -f "$f"; done
           for f in site/apparel-provider-runtime.js site/admin-commerce-media.js site/store-checkout-server.js site/_worker.js site/rv-store.js site/catalog-admin-runtime.js site/admin-inventory.js; do node --check "$f"; done
           grep -q 'catalogRvEntry' site/store-checkout-server.js
           grep -q 'handleApparelProviderAdminApi' site/_worker.js
           grep -q 'rv-category-rail' site/rv-store.js
           grep -q 'FOURTHWALL_STOREFRONT_TOKEN' site/apparel-provider-runtime.js
+          grep -q 'apparel-provider-runtime.js' site/_routes.json
           grep -q 'printful' site/admin-catalog.html
           grep -q 'spreadconnect' site/admin-inventory.html
           ! grep -RIqE '(storefront_token=[A-Za-z0-9_-]{16,}|PRINTFUL_API_TOKEN\s*=|SPREADCONNECT_API_KEY\s*=)' site
@@ -74,7 +75,7 @@ jobs:
         shell: bash
         run: |
           echo '### Commerce Launch preview' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Candidate: `c57bb559c5874d01f5bc741871a9d764e496efa1`' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Candidate: `d3e32f179c42e9e3f33dc3d42f85bc29b94ecfee`' >> "$GITHUB_STEP_SUMMARY"
           echo '- Preview: `${{ steps.deploy.outputs.deployment-url }}`' >> "$GITHUB_STEP_SUMMARY"
           echo '- Route/auth/private-runtime regression: PASS' >> "$GITHUB_STEP_SUMMARY"
       - name: Remove preview workflow
