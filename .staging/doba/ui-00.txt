@@ -1,0 +1,66 @@
+(() => {
+  "use strict";
+  if (window.EUSDobaCsvSyncLoaded) return;
+  window.EUSDobaCsvSyncLoaded = true;
+  const $ = (id) => document.getElementById(id);
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  const money = (cents) => cents === null || cents === undefined ? "—" : new Intl.NumberFormat("en-US", {style:"currency",currency:"USD"}).format(Number(cents || 0) / 100);
+  const clean = (value) => String(value ?? "").trim();
+  let state = { summary: null, preview: null, fileText: "", fileName: "" };
+  async function api(options = {}) {
+    const response = await fetch("/api/admin/doba-csv-sync", {credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json",...(options.body?{"Content-Type":"application/json"}:{})},...options});
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) { const error = new Error(body.error || `Doba CSV Sync failed (${response.status})`); error.status = response.status; throw error; }
+    return body;
+  }
+  const badge = (value) => { const label = clean(value) || "UNKNOWN"; const cls = /APPLIED|FRESH|EXACT MATCH|UPDATE/i.test(label) ? "is-good" : /ERROR|ZERO STOCK|HOLD|SKU CHANGED/i.test(label) ? "is-alert" : /REVIEW|LOW STOCK|PREVIEW|STALE|UPLOAD NEEDED/i.test(label) ? "is-warn" : ""; return `<span class="eus-pill ${cls}">${esc(label)}</span>`; };
+  function statusLabel(summary) {
+    const runs = summary?.runs || [], latest = runs[0], successful = summary?.latestSuccessfulImport;
+    if (latest && /ERROR/.test(latest.status)) return "Error";
+    if (latest && latest.status === "PREVIEW") return "Import Review";
+    if (!successful) return "Upload Needed";
+    if ((summary?.source?.stale || 0) > 0) return "Stale";
+    return "Fresh";
+  }
+  function age(value) { if (!value) return "never"; const ms = Date.now() - new Date(value).getTime(); if (!Number.isFinite(ms) || ms < 0) return "—"; const min = Math.floor(ms / 60000); if (min < 60) return `${min}m ago`; const hr = Math.floor(min / 60); if (hr < 48) return `${hr}h ago`; return `${Math.floor(hr/24)}d ago`; }
+  function renderSummary() {
+    const s = state.summary || {}, latest = s.latestSuccessfulImport, runs = s.runs || [];
+    const status = statusLabel(s);
+    $("doba-sync-state").innerHTML = badge(status);
+    $("doba-last-upload").textContent = runs[0]?.previewedAt ? new Date(runs[0].previewedAt).toLocaleString() : "No upload yet";
+    $("doba-last-import").textContent = latest?.appliedAt ? `${new Date(latest.appliedAt).toLocaleString()} · ${age(latest.appliedAt)}` : "No successful import yet";
+    $("doba-source-count").textContent = String(s.source?.total ?? 0);
+    $("doba-source-stale").textContent = String(s.source?.stale ?? 0);
+    const select = $("doba-profile"); const current = select.value;
+    select.innerHTML = (s.profiles || []).map(p => `<option value="${esc(p.id)}" data-markup="${esc(p.markup_percent)}" data-scope="${esc(p.default_scope)}">${esc(p.name)}</option>`).join("");
+    if ([...select.options].some(o => o.value === current)) select.value = current;
+    const chosen = select.selectedOptions[0]; if (chosen && !$("doba-markup").dataset.touched) $("doba-markup").value = chosen.dataset.markup || "25";
+    renderRuns();
+  }
+  function renderRuns() {
+    const rows = state.summary?.runs || [];
+    $("doba-runs").innerHTML = rows.length ? rows.slice(0,10).map(r => `<tr><td><strong>${esc(r.fileName)}</strong><br><small>${esc((r.fileFingerprint || "").slice(0,12))}…</small></td><td>${badge(r.status)}</td><td>${esc(r.scope)}</td><td>${esc(r.profileName)}<br><small>${esc(r.markupPercent)}% markup</small></td><td>${r.rowCount}</td><td>${r.itemMatchCount}</td><td>${r.newCount}</td><td>${r.reviewCount}</td><td>${r.errorSummary ? esc(r.errorSummary) : "—"}</td><td>${r.id ? `<button type="button" class="eus-admin-button" data-doba-run="${esc(r.id)}">Open</button>` : "—"}</td></tr>`).join("") : '<tr><td colspan="10" class="eus-empty">No Doba CSV runs recorded yet.</td></tr>';
+  }
+  function metric(label, value, note = "") { return `<article class="eus-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong>${note?`<small>${esc(note)}</small>`:""}</article>`; }
+  function renderPreview(detail) {
+    state.preview = detail;
+    const r = detail?.run || {}, rows = detail?.rows || [];
+    $("doba-preview-panel").hidden = false;
+    $("doba-preview-metrics").innerHTML = [
+      metric("Source Rows", r.rowCount ?? "—"),
+      metric("Existing Item Matches", r.itemMatchCount ?? "—"),
+      metric("Exact SKU Updates", r.exactSkuCount ?? "—"),
+      metric("New Candidates", r.newCount ?? "—"),
+      metric("Review Items", r.reviewCount ?? "—"),
+      metric("Holds / Unavailable", r.holdCount ?? "—"),
+      metric("Zero Stock", r.zeroStockCount ?? "—"),
+      metric("Low Stock", r.lowStockCount ?? "—"),
+      metric("Cost Check", `${r.costReferencePassCount ?? 0}/${r.costReferenceCount ?? 0}`, "within 2¢ tolerance")
+    ].join("");
+    $("doba-preview-meta").textContent = `${r.fileName || "CSV"} · ${r.scope || "partial"} snapshot · ${r.profileName || "profile"} · fingerprint ${(r.fileFingerprint || "").slice(0,16)}…`;
+    const baselinePass = r.rowCount === 32 && r.itemMatchCount === 10 && r.newCount === 22 && r.zeroStockCount === 3 && r.lowStockCount === 3 && r.costReferenceCount === 10 && r.costReferencePassCount === 10;
+    $("doba-sample-baseline").hidden = !(r.rowCount === 32 || /25/i.test(r.fileName || ""));
+    $("doba-sample-baseline").className = baselinePass ? "eus-callout" : "eus-error";
+    $("doba-sample-baseline").innerHTML = baselinePass ? '<strong>32-row audit baseline: PASS.</strong> 10 existing Item No. matches, 22 new candidates, 3 zero-stock, 3 low-stock, and 10/10 cost derivations match stored cost.' : '<strong>32-row audit baseline differs.</strong> Do not Apply until the difference is investigated.';
+    $("doba-apply").disabled = r.status !== "PREVIEW" || !rows.length;
+    $("doba-apply").dataset.runId = r.id || "";
