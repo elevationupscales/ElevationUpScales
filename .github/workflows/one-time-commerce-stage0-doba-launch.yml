@@ -1,0 +1,257 @@
+name: One-Time Commerce Stage 0 Doba Launch
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+env:
+  EXPECTED_SOURCE_SHA256: f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb
+  EXPECTED_SOURCE_BYTES: "343306"
+  EXPECTED_SOURCE_ROWS: "32"
+  EXPECTED_SOURCE_COLUMNS: "163"
+  EXPECTED_ITEM_MATCHES: "10"
+  EXPECTED_NEW: "22"
+  EXPECTED_ZERO_STOCK: "3"
+  EXPECTED_LOW_STOCK: "3"
+  EXPECTED_COST_REFS: "10"
+  EXPECTED_COST_PASS: "10"
+  SOURCE_FILENAME: US_Dropshipping_Product_Data_with_25%_Markup_20260829_5188491.csv
+
+jobs:
+  launch-doba-stage0:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current commerce control plane
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Reconstruct and verify exact owner Doba CSV
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 968de93b58f1f529d1a768cc24fd74b8d941e303 HEAD
+          git fetch origin staging/doba-commerce-launch-input:refs/remotes/origin/staging/doba-commerce-launch-input
+          mkdir -p /tmp/doba
+          : > /tmp/doba/source.xz.b64
+          for n in $(seq -w 0 13); do
+            git show "origin/staging/doba-commerce-launch-input:.deployment-input/xz/${n}.b64" >> /tmp/doba/source.xz.b64
+          done
+          test "$(wc -c < /tmp/doba/source.xz.b64 | tr -d ' ')" = "52252"
+          base64 --decode /tmp/doba/source.xz.b64 > /tmp/doba/source.xz
+          xz -t /tmp/doba/source.xz
+          xz -dc /tmp/doba/source.xz > /tmp/doba/source.csv
+          test "$(wc -c < /tmp/doba/source.csv | tr -d ' ')" = "$EXPECTED_SOURCE_BYTES"
+          actual_sha=$(sha256sum /tmp/doba/source.csv | awk '{print $1}')
+          echo "source_sha256=$actual_sha"
+          test "$actual_sha" = "$EXPECTED_SOURCE_SHA256"
+          python - <<'PY'
+          import csv, os
+          path='/tmp/doba/source.csv'
+          with open(path, newline='', encoding='utf-8-sig') as f:
+              reader=csv.reader(f)
+              headers=next(reader)
+              rows=list(reader)
+          print('source_columns=',len(headers))
+          print('source_rows=',len(rows))
+          assert len(headers)==int(os.environ['EXPECTED_SOURCE_COLUMNS'])
+          assert len(rows)==int(os.environ['EXPECTED_SOURCE_ROWS'])
+          PY
+
+      - name: Preview and apply through production Doba reconciliation engine
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          cp site/doba-csv-sync-runtime.js /tmp/doba/runtime.mjs
+          cat >> /tmp/doba/runtime.mjs <<'EOF'
+          export { ensureSchema, createPreview, applyRun, runDetail };
+          EOF
+          cat > /tmp/doba/launch.mjs <<'EOF'
+          import fs from 'node:fs';
+          import { ensureSchema, createPreview, applyRun } from './runtime.mjs';
+
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          const account=process.env.CLOUDFLARE_ACCOUNT_ID;
+          const base='https://api.cloudflare.com/client/v4';
+          const expected={
+            fingerprint:process.env.EXPECTED_SOURCE_SHA256,
+            rows:Number(process.env.EXPECTED_SOURCE_ROWS),
+            matches:Number(process.env.EXPECTED_ITEM_MATCHES),
+            fresh:Number(process.env.EXPECTED_NEW),
+            zero:Number(process.env.EXPECTED_ZERO_STOCK),
+            low:Number(process.env.EXPECTED_LOW_STOCK),
+            costRefs:Number(process.env.EXPECTED_COST_REFS),
+            costPass:Number(process.env.EXPECTED_COST_PASS),
+          };
+          const csvText=fs.readFileSync('/tmp/doba/source.csv','utf8');
+          const adminEmail='deployment-manager@elevationupscales.com';
+
+          async function cf(path,options={}){
+            const response=await fetch(base+path,{...options,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',...(options.headers||{})}});
+            const body=await response.json().catch(()=>({}));
+            if(!response.ok||body.success===false){throw new Error(`Cloudflare API ${response.status}: ${JSON.stringify(body.errors||body)}`);}
+            return body;
+          }
+          async function query(databaseId,sql,params=[]){
+            const payload=await cf(`/accounts/${account}/d1/database/${databaseId}/query`,{method:'POST',body:JSON.stringify({sql,params})});
+            const entry=Array.isArray(payload.result)?payload.result[0]:payload.result;
+            if(!entry||entry.success===false){throw new Error(`D1 query failed: ${JSON.stringify(entry||payload)}`);}
+            return {results:Array.isArray(entry.results)?entry.results:[],meta:entry.meta||{}};
+          }
+          class Statement{
+            constructor(db,sql,params=[]){this.db=db;this.sql=sql;this.params=params;}
+            bind(...params){return new Statement(this.db,this.sql,params);}
+            async all(){return this.db.query(this.sql,this.params);}
+            async first(column){const result=await this.db.query(this.sql,this.params);const row=result.results[0]??null;return column&&row?row[column]??null:row;}
+            async run(){const result=await this.db.query(this.sql,this.params);return {success:true,meta:result.meta,results:result.results};}
+          }
+          class RestD1{
+            constructor(id){this.id=id;}
+            prepare(sql){return new Statement(this,sql);}
+            query(sql,params=[]){return query(this.id,sql,params);}
+          }
+
+          const dbList=await cf(`/accounts/${account}/d1/database?per_page=100`);
+          const databases=Array.isArray(dbList.result)?dbList.result:[];
+          let chosen=null;
+          for(const candidate of databases){
+            const id=candidate.uuid||candidate.id;
+            if(!id)continue;
+            try{
+              const probe=await query(id,"SELECT name FROM sqlite_master WHERE type='table' AND name='eus_inventory_items' LIMIT 1");
+              if(probe.results.length){chosen={id,name:candidate.name||id};break;}
+            }catch(error){console.log('D1 probe skipped',candidate.name||id,error.message);}
+          }
+          if(!chosen)throw new Error('Could not identify the production Catalog D1 database. No mutation performed.');
+          console.log('catalog_database=',chosen.name);
+          const db=new RestD1(chosen.id);
+          await ensureSchema({MARKETPLACE_DB:db});
+
+          const holdItems=['D0102HPBE86','D0102HGKRVV','D0102HHVH7A'];
+          async function catalogSnapshot(whereSql,params=[]){
+            return (await db.query(`SELECT i.id,i.sku,i.name,i.category,i.supplier,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,i.source_url,i.updated_at,m.supplier_sku,m.supplier_stock,m.shipping_status,m.store_section,m.publish_status,m.review_state,m.primary_image,m.updated_at AS meta_updated_at FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE ${whereSql} ORDER BY i.id`,params)).results;
+          }
+          const holdsBefore=await catalogSnapshot(`i.supplier_product_id IN (?,?,?)`,holdItems);
+          if(holdsBefore.length!==3)throw new Error(`Expected 3 prior HOLD products, found ${holdsBefore.length}. STOP BEFORE APPLY.`);
+          for(const row of holdsBefore){if(String(row.publish_status||'').toLowerCase()!=='hold')throw new Error(`Prior HOLD ${row.supplier_product_id} is no longer HOLD before Apply. STOP.`);}
+          const movieBefore=await catalogSnapshot(`lower(i.name) LIKE '%movie%' OR (lower(i.name) LIKE '%screen%' AND lower(i.name) NOT LIKE '%screen door%')`);
+          if(!movieBefore.length)throw new Error('Movie-screen Partial Snapshot regression record could not be identified. STOP BEFORE APPLY.');
+
+          const previewResponse=await createPreview(db,{
+            fileName:process.env.SOURCE_FILENAME,
+            csvText,
+            scope:'partial',
+            profileId:'doba-download-center-25',
+            markupPercent:25,
+          },adminEmail);
+          const detail=previewResponse?.alreadyApplied?previewResponse.run:previewResponse;
+          const run=detail?.run;
+          if(!run)throw new Error('Doba Preview did not return a run receipt.');
+          console.log('PREVIEW_RECEIPT',JSON.stringify(run));
+          const failures=[];
+          const check=(label,actual,want)=>{if(actual!==want)failures.push(`${label}: expected ${want}, got ${actual}`);};
+          check('fingerprint',run.fileFingerprint,expected.fingerprint);
+          check('scope',run.scope,'partial');
+          check('rowCount',run.rowCount,expected.rows);
+          check('itemMatchCount',run.itemMatchCount,expected.matches);
+          check('newCount',run.newCount,expected.fresh);
+          check('zeroStockCount',run.zeroStockCount,expected.zero);
+          check('lowStockCount',run.lowStockCount,expected.low);
+          check('costReferenceCount',run.costReferenceCount,expected.costRefs);
+          check('costReferencePassCount',run.costReferencePassCount,expected.costPass);
+          if(failures.length){
+            console.error('DOBA_PREVIEW_HOLD',failures.join('; '));
+            fs.writeFileSync('/tmp/doba/stage0.json',JSON.stringify({disposition:'HOLD',run,failures},null,2));
+            process.exit(42);
+          }
+
+          let applied=detail;
+          if(!previewResponse?.alreadyApplied){applied=await applyRun(db,run.id,adminEmail);}
+          const appliedRun=applied.run;
+          const receipt=appliedRun?.receipt||{};
+          console.log('APPLY_RECEIPT',JSON.stringify({run:appliedRun,receipt}));
+          if(!String(appliedRun?.status||'').startsWith('APPLIED'))throw new Error(`Apply status is ${appliedRun?.status}`);
+          if(Number(receipt.errors||0)!==0)throw new Error(`Apply returned ${receipt.errors} row errors`);
+          if(Number(receipt.staged||0)!==22)throw new Error(`Expected 22 staged new products, got ${receipt.staged}`);
+
+          const holdsAfter=await catalogSnapshot(`i.supplier_product_id IN (?,?,?)`,holdItems);
+          for(const row of holdsAfter){if(String(row.publish_status||'').toLowerCase()!=='hold')throw new Error(`Prior HOLD ${row.supplier_product_id} was cleared during Apply.`);}
+          const movieAfter=await catalogSnapshot(`lower(i.name) LIKE '%movie%' OR (lower(i.name) LIKE '%screen%' AND lower(i.name) NOT LIKE '%screen door%')`);
+          const stable=(rows)=>rows.map(row=>{const copy={...row};delete copy.updated_at;delete copy.meta_updated_at;return copy;});
+          if(JSON.stringify(stable(movieBefore))!==JSON.stringify(stable(movieAfter)))throw new Error('Movie-screen Catalog record changed during Partial Snapshot Apply.');
+
+          const staged=(await db.query(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,m.supplier_sku,m.supplier_stock,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier='doba' AND m.created_by=? AND m.publish_status='draft' ORDER BY i.created_at DESC`,[adminEmail])).results;
+          const runRows=applied.rows||[];
+          const stagedIds=new Set(runRows.filter(r=>r.catalogProductId).map(r=>r.catalogProductId));
+          const stagedThisRun=staged.filter(r=>stagedIds.has(r.id));
+          if(stagedThisRun.length!==22)throw new Error(`Expected 22 new Draft/Review Catalog rows after Apply, found ${stagedThisRun.length}`);
+          const result={
+            disposition:'PASS',
+            database:chosen.name,
+            sourceFile:process.env.SOURCE_FILENAME,
+            fingerprint:run.fileFingerprint,
+            preview:run,
+            apply:receipt,
+            holdsBefore,
+            holdsAfter,
+            movieBefore:stable(movieBefore),
+            movieAfter:stable(movieAfter),
+            staged:stagedThisRun,
+            rows:runRows,
+          };
+          fs.writeFileSync('/tmp/doba/stage0.json',JSON.stringify(result,null,2));
+          EOF
+          node /tmp/doba/launch.mjs
+
+      - name: Record Stage 0 receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/doba/stage0.json'))
+          run=p['preview']; receipt=p['apply']
+          with open('/tmp/doba/summary.md','w') as f:
+              f.write('### Commerce Launch — Stage 0 Doba Apply\n')
+              f.write(f"- File: `{p['sourceFile']}`\n")
+              f.write(f"- SHA-256: `{p['fingerprint']}`\n")
+              f.write(f"- Scope: `{run['scope']}`\n")
+              f.write(f"- Preview: {run['rowCount']} rows / {run['itemMatchCount']} matches / {run['newCount']} new / {run['zeroStockCount']} zero / {run['lowStockCount']} low / {run['costReferencePassCount']}/{run['costReferenceCount']} cost checks\n")
+              f.write(f"- Apply: {run['status']} — updated {receipt.get('updated',0)}, staged {receipt.get('staged',0)}, review {receipt.get('review',0)}, errors {receipt.get('errors',0)}, holds {receipt.get('holds',0)}\n")
+              f.write(f"- Prior HOLD regression: PASS ({len(p['holdsAfter'])}/3 remain HOLD)\n")
+              f.write(f"- Movie-screen Partial Snapshot regression: PASS ({len(p['movieAfter'])} record(s) unchanged)\n")
+              f.write(f"- New Draft/Review records: {len(p['staged'])}\n")
+          PY
+          cat /tmp/doba/summary.md >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/doba/summary.md
+
+      - name: Upload Stage 0 reconciliation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-stage0-doba-reconciliation
+          path: |
+            /tmp/doba/stage0.json
+            /tmp/doba/summary.md
+          retention-days: 14
+
+      - name: Remove one-time Stage 0 workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-commerce-stage0-doba-launch.yml
+          git commit -m 'Remove completed Commerce Stage 0 Doba workflow'
+          git push origin HEAD:main
