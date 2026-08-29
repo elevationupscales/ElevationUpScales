@@ -1,3 +1,4 @@
+import { ensureCommerceSchema } from "./commerce-schema-migrations.js";
 const PAYPAL_SANDBOX_ORIGIN = "https://api-m.sandbox.paypal.com";
 const PAYPAL_LIVE_ORIGIN = "https://api-m.paypal.com";
 const FOURTHWALL_ORIGIN = "https://elevationupscales-shop.fourthwall.com";
@@ -22,11 +23,6 @@ function clean(value, max = 300) {
   return String(value ?? "").trim().slice(0, max);
 }
 
-function sameOriginRequest(request) {
-  const origin = clean(request.headers.get("Origin"), 500);
-  if (!origin) return true;
-  try { return origin === new URL(request.url).origin; } catch (_) { return false; }
-}
 
 function paypalMode(env) {
   return clean(env?.PAYPAL_ENV, 20).toLowerCase() === "live" ? "live" : "sandbox";
@@ -65,6 +61,15 @@ function dollarsToCents(value) {
 function quantity(value) {
   const parsed = Number.parseInt(String(value ?? "1"), 10);
   return Number.isInteger(parsed) && parsed >= 1 && parsed <= MAX_QTY ? parsed : 1;
+}
+
+function validQuantity(value) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= MAX_QTY;
+}
+
+function validEmail(value) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean(value, 180));
 }
 
 function validOrderId(value) {
@@ -158,7 +163,7 @@ function physicalApparel(product) {
   return !/(digital|download|printable|pdf\b)/.test(text);
 }
 
-async function fetchFourthwallProduct(id) {
+async function fetchFourthwallProductLegacy(id) {
   const wanted = clean(id, 300);
   if (!wanted) return null;
   for (let page = 1; page <= 10; page += 1) {
@@ -238,7 +243,12 @@ function normalizeAddress(raw = {}) {
 }
 
 function validAddress(address) {
-  return Boolean(address.fullName && address.address1 && address.city && address.state && address.postalCode && /^[A-Z]{2}$/.test(address.countryCode));
+  return Boolean(
+    address.fullName && address.address1 && address.city &&
+    /^[A-Z]{2}$/.test(address.state) &&
+    /^\d{5}(?:-\d{4})?$/.test(address.postalCode) &&
+    address.countryCode === "US"
+  );
 }
 
 function normalizeCustomer(raw = {}) {
@@ -248,8 +258,62 @@ function normalizeCustomer(raw = {}) {
   };
 }
 
-async function quoteApparel(raw) {
-  const product = await fetchFourthwallProduct(raw?.id);
+const fourthwallProductCache = new Map();
+
+function slugFromUrl(value) {
+  try {
+    const match = new URL(String(value || ""), FOURTHWALL_ORIGIN).pathname.match(/\/products\/([^/?#]+)/i);
+    return match ? decodeURIComponent(match[1]) : "";
+  } catch (_) { return ""; }
+}
+
+async function catalogApparelReference(env, id) {
+  const wanted = clean(id, 300);
+  const db = env?.MARKETPLACE_DB;
+  if (!wanted || !db || typeof db.prepare !== "function") return { slug: wanted };
+  try {
+    const like = `%/products/${wanted}`;
+    const row = await db.prepare(`SELECT i.id,i.source_url,m.fourthwall_product_id,l.provider_product_id,l.provider_product_url,l.provider_state
+      FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id
+      LEFT JOIN eus_catalog_provider_links l ON l.catalog_product_id=i.id AND l.provider='fourthwall'
+      WHERE m.store_section='apparel' AND (i.id=? OR m.fourthwall_product_id=? OR l.provider_product_id=? OR lower(i.source_url) LIKE lower(?) OR lower(l.provider_product_url) LIKE lower(?))
+      ORDER BY CASE WHEN l.provider_state='MAPPED' THEN 0 ELSE 1 END LIMIT 1`)
+      .bind(wanted,wanted,wanted,like,like).first();
+    if (!row) return { slug: wanted };
+    return { slug: slugFromUrl(row.provider_product_url) || slugFromUrl(row.source_url) || clean(row.fourthwall_product_id,300) || clean(row.provider_product_id,300) || wanted };
+  } catch (error) {
+    console.error(JSON.stringify({event:"apparel_catalog_reference_error",message:clean(error?.message,240)}));
+    return { slug: wanted };
+  }
+}
+
+async function fetchFourthwallProductExact(reference) {
+  const slug = clean(reference?.slug, 300);
+  if (!slug) return null;
+  const cached = fourthwallProductCache.get(slug);
+  if (cached && cached.expiresAt > Date.now()) return cached.product;
+  try {
+    const response = await fetch(`${FOURTHWALL_ORIGIN}/products/${encodeURIComponent(slug)}.json`, {
+      headers: { Accept: "application/json" },
+      cf: { cacheTtl: 300, cacheEverything: true },
+    });
+    if (response.ok) {
+      const body = await response.json().catch(() => ({}));
+      const product = body?.product || body?.data?.product || body;
+      if (product && [productId(product), slugFromProduct(product), slug].includes(slug)) {
+        fourthwallProductCache.set(slug, { product, expiresAt: Date.now() + 300000 });
+        return product;
+      }
+    }
+  } catch (_) {}
+  const product = await fetchFourthwallProductLegacy(slug);
+  if (product) fourthwallProductCache.set(slug, { product, expiresAt: Date.now() + 120000 });
+  return product;
+}
+
+async function quoteApparel(raw, env) {
+  const reference = await catalogApparelReference(env, raw?.id);
+  const product = await fetchFourthwallProductExact(reference);
   if (!product) return { ok: false, status: 404, error: "Product unavailable" };
 
   const qty = quantity(raw?.quantity);
@@ -378,14 +442,25 @@ async function quoteRv(raw, env) {
 
 async function quoteStoreItem(raw, env) {
   const source = clean(raw?.source, 20).toLowerCase();
-  if (source === "apparel") return quoteApparel(raw);
+  if (source === "apparel") return quoteApparel(raw, env);
   if (source === "rv") return quoteRv(raw, env);
   return { ok: false, status: 400, error: "Invalid store source" };
 }
 
-async function paypalAccessToken(env) {
+let paypalTokenCache = { key: "", token: "", expiresAt: 0 };
+
+function clearPaypalTokenCache() {
+  paypalTokenCache = { key: "", token: "", expiresAt: 0 };
+}
+
+async function paypalAccessToken(env, forceRefresh = false) {
   if (!paypalConfigured(env)) throw new Error("PayPal credentials are not configured");
-  const basic = btoa(`${clean(env.PAYPAL_CLIENT_ID, 300)}:${clean(env.PAYPAL_CLIENT_SECRET, 300)}`);
+  const clientId = clean(env.PAYPAL_CLIENT_ID, 300);
+  const cacheKey = `${paypalMode(env)}:${clientId}`;
+  if (!forceRefresh && paypalTokenCache.key === cacheKey && paypalTokenCache.token && Date.now() < paypalTokenCache.expiresAt) {
+    return paypalTokenCache.token;
+  }
+  const basic = btoa(`${clientId}:${clean(env.PAYPAL_CLIENT_SECRET, 300)}`);
   const response = await fetch(`${paypalOrigin(env)}/v1/oauth2/token`, {
     method: "POST",
     headers: {
@@ -397,53 +472,40 @@ async function paypalAccessToken(env) {
     body: "grant_type=client_credentials",
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok || !body?.access_token) throw new Error("Unable to authorize PayPal checkout");
-  return clean(body.access_token, 4000);
+  if (!response.ok || !body?.access_token) {
+    clearPaypalTokenCache();
+    throw new Error("Unable to authorize PayPal checkout");
+  }
+  const expiresIn = Number.parseInt(String(body?.expires_in ?? "300"), 10);
+  const ttlSeconds = Number.isInteger(expiresIn) && expiresIn > 60 ? expiresIn - 30 : 270;
+  paypalTokenCache = { key: cacheKey, token: clean(body.access_token, 4000), expiresAt: Date.now() + ttlSeconds * 1000 };
+  return paypalTokenCache.token;
 }
 
 async function paypalRequest(env, path, options = {}) {
-  const token = await paypalAccessToken(env);
-  const response = await fetch(`${paypalOrigin(env)}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "PayPal-Request-Id": crypto.randomUUID(),
-      ...(options.headers || {}),
-    },
-  });
+  const requestId = crypto.randomUUID();
+  const send = async (forceRefresh = false) => {
+    const token = await paypalAccessToken(env, forceRefresh);
+    return fetch(`${paypalOrigin(env)}${path}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "PayPal-Request-Id": requestId,
+        ...(options.headers || {}),
+      },
+    });
+  };
+  let response = await send(false);
+  if (response.status === 401) {
+    clearPaypalTokenCache();
+    response = await send(true);
+  }
   const body = await response.json().catch(() => ({}));
   return { response, body };
 }
 
-async function ensureStoreOrderSchema(env) {
-  if (!env?.MARKETPLACE_DB || typeof env.MARKETPLACE_DB.prepare !== "function") return false;
-  await env.MARKETPLACE_DB.prepare(`
-    CREATE TABLE IF NOT EXISTS eus_store_orders (
-      id TEXT PRIMARY KEY,
-      source TEXT NOT NULL,
-      product_id TEXT NOT NULL,
-      product_name TEXT NOT NULL,
-      variant_id TEXT,
-      variant_name TEXT,
-      quantity INTEGER NOT NULL,
-      unit_price_cents INTEGER NOT NULL,
-      merchandise_cents INTEGER NOT NULL,
-      shipping_cents INTEGER NOT NULL,
-      total_cents INTEGER NOT NULL,
-      customer_json TEXT NOT NULL,
-      shipping_json TEXT NOT NULL,
-      supplier_json TEXT NOT NULL,
-      paypal_order_id TEXT UNIQUE,
-      paypal_capture_id TEXT,
-      payment_status TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      paid_at TEXT
-    )
-  `).run();
-  return true;
-}
 
 function storeReference() {
   const day = new Date().toISOString().slice(0, 10).replaceAll("-", "");
@@ -452,17 +514,25 @@ function storeReference() {
 
 async function createStoreOrder(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
-  if (!sameOriginRequest(request)) return json({ error: "Cross-origin request denied" }, 403);
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
   if (!liveCheckoutAllowed(env)) return json({ error: "Live checkout is locked pending launch approval" }, 503);
 
   const raw = await request.json().catch(() => ({}));
+  const source = clean(raw?.source, 20).toLowerCase();
+  if (!["apparel", "rv"].includes(source)) return json({ error: "Invalid store source" }, 400);
+  if (!validQuantity(raw?.quantity)) return json({ error: "Quantity must be from 1 to 10" }, 400);
+  const customer = normalizeCustomer(raw?.customer);
+  if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
   const quote = await quoteStoreItem(raw, env);
   if (!quote.ok) return json(quote, quote.status || 400);
-
   const address = normalizeAddress(raw?.shipping);
-  const customer = normalizeCustomer(raw?.customer);
-  if (quote.physical && !validAddress(address)) return json({ error: "A complete shipping address is required" }, 400);
+  if (quote.physical && !validAddress(address)) return json({ error: "A valid U.S. shipping address is required" }, 400);
+  let db;
+  try { db = await ensureCommerceSchema(env); }
+  catch (error) {
+    console.error(JSON.stringify({event:"commerce_schema_error",message:clean(error?.message,240)}));
+    return json({ error: "Store order storage is not configured" }, 503);
+  }
 
   const reference = storeReference();
   const purchaseUnit = {
@@ -514,14 +584,19 @@ async function createStoreOrder(request, env) {
     },
   };
 
-  const { response, body } = await paypalRequest(env, "/v2/checkout/orders", {
-    method: "POST",
-    body: JSON.stringify(requestBody),
-  });
+  let response, body;
+  try {
+    ({ response, body } = await paypalRequest(env, "/v2/checkout/orders", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+    }));
+  } catch (error) {
+    console.error(JSON.stringify({ event: "paypal_create_error", message: clean(error?.message, 240) }));
+    return json({ error: "PayPal checkout is temporarily unavailable" }, 502);
+  }
   if (!response.ok || !body?.id) return json({ error: "PayPal could not create the order" }, 502);
 
-  if (await ensureStoreOrderSchema(env)) {
-    await env.MARKETPLACE_DB.prepare(`
+  await db.prepare(`
       INSERT INTO eus_store_orders
       (id,source,product_id,product_name,variant_id,variant_name,quantity,unit_price_cents,merchandise_cents,shipping_cents,total_cents,customer_json,shipping_json,supplier_json,paypal_order_id,paypal_capture_id,payment_status,created_at,paid_at)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
@@ -546,7 +621,6 @@ async function createStoreOrder(request, env) {
       new Date().toISOString(),
       null,
     ).run();
-  }
 
   return json({
     ok: true,
@@ -559,16 +633,27 @@ async function createStoreOrder(request, env) {
 
 async function captureStoreOrder(request, env, orderId) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
-  if (!sameOriginRequest(request)) return json({ error: "Cross-origin request denied" }, 403);
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
   if (!liveCheckoutAllowed(env)) return json({ error: "Live checkout is locked pending launch approval" }, 503);
   const id = validOrderId(orderId);
   if (!id) return json({ error: "Invalid PayPal order ID" }, 400);
+  let db;
+  try { db = await ensureCommerceSchema(env); }
+  catch (error) {
+    console.error(JSON.stringify({event:"commerce_schema_error",message:clean(error?.message,240)}));
+    return json({ error: "Store order storage is not configured" }, 503);
+  }
 
-  const { response, body } = await paypalRequest(env, `/v2/checkout/orders/${encodeURIComponent(id)}/capture`, {
-    method: "POST",
-    body: "{}",
-  });
+  let response, body;
+  try {
+    ({ response, body } = await paypalRequest(env, `/v2/checkout/orders/${encodeURIComponent(id)}/capture`, {
+      method: "POST",
+      body: "{}",
+    }));
+  } catch (error) {
+    console.error(JSON.stringify({ event: "paypal_capture_error", message: clean(error?.message, 240) }));
+    return json({ error: "PayPal could not capture the payment" }, 502);
+  }
 
   if (!response.ok) {
     const issue = clean(body?.details?.[0]?.issue, 100);
@@ -576,14 +661,11 @@ async function captureStoreOrder(request, env, orderId) {
   }
 
   const capture = body?.purchase_units?.[0]?.payments?.captures?.[0] || {};
-  if (env?.MARKETPLACE_DB && typeof env.MARKETPLACE_DB.prepare === "function") {
-    await ensureStoreOrderSchema(env);
-    await env.MARKETPLACE_DB.prepare(`
+  await db.prepare(`
       UPDATE eus_store_orders
       SET paypal_capture_id=?,payment_status=?,paid_at=?
       WHERE paypal_order_id=?
     `).bind(clean(capture?.id, 80), clean(capture?.status, 40) || clean(body?.status, 40), new Date().toISOString(), id).run();
-  }
 
   return json({
     ok: true,
@@ -620,8 +702,10 @@ export async function handleStoreCheckoutApi(request, env, pathname) {
 
   if (path === "/api/store-checkout/quote") {
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
-    if (!sameOriginRequest(request)) return json({ error: "Cross-origin request denied" }, 403);
-    const raw = await request.json().catch(() => ({}));
+      const raw = await request.json().catch(() => ({}));
+    const source = clean(raw?.source, 20).toLowerCase();
+    if (!["apparel", "rv"].includes(source)) return json({ error: "Invalid store source" }, 400);
+    if (!validQuantity(raw?.quantity)) return json({ error: "Quantity must be from 1 to 10" }, 400);
     const quote = await quoteStoreItem(raw, env);
     return json(quote, quote.ok ? 200 : (quote.status || 400));
   }

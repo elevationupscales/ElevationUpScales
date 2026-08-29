@@ -5,9 +5,6 @@
     "/marketplace/listing/*",
     "/checkout",
     "/checkout/*",
-    "/store-config.js",
-    "/rv-store.js",
-    "/admin-listings.js",
     "/worker-core.js",
     "/store-checkout-server.js",
     "/store-orders-admin-server.js",
@@ -16,7 +13,8 @@
     "/hawaii-lithium-runtime.js",
     "/sync-admin-runtime.js",
     "/doba-csv-sync-runtime.js",
-    "/apparel-provider-runtime.js"
+    "/apparel-provider-runtime.js",
+    "/commerce-schema-migrations.js"
   ],
   "exclude": []
 }

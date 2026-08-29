@@ -1,3 +1,4 @@
+import { ensureCommerceSchema } from "./commerce-schema-migrations.js";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const JSON_HEADERS = Object.freeze({
   "Cache-Control":"no-store",
@@ -35,33 +36,7 @@ function capability(env){
     scheduler:{configured:envPresent(env,["SYNC_JOB_TOKEN"]),mode:"signed-post",label:envPresent(env,["SYNC_JOB_TOKEN"])?"Configured":"Not Configured"}
   };
 }
-async function ensureSchema(env){const db=env?.MARKETPLACE_DB;if(!db||typeof db.prepare!=="function")throw new Error("Commerce sync storage is not configured");
-  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_sync_runs (
-    id TEXT PRIMARY KEY,target TEXT NOT NULL,trigger TEXT NOT NULL,mode TEXT NOT NULL,started_at TEXT NOT NULL,completed_at TEXT,status TEXT NOT NULL,
-    discovered_count INTEGER NOT NULL DEFAULT 0,matched_count INTEGER NOT NULL DEFAULT 0,changed_count INTEGER NOT NULL DEFAULT 0,updated_count INTEGER NOT NULL DEFAULT 0,
-    review_count INTEGER NOT NULL DEFAULT 0,error_count INTEGER NOT NULL DEFAULT 0,cursor_reference TEXT NOT NULL DEFAULT '',error_summary TEXT NOT NULL DEFAULT ''
-  )`).run();
-  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_sync_runs_started ON eus_sync_runs(started_at DESC)").run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_channel_sync_state (
-    catalog_product_id TEXT NOT NULL,sku TEXT NOT NULL DEFAULT '',channel TEXT NOT NULL,external_id TEXT NOT NULL DEFAULT '',desired_state TEXT NOT NULL DEFAULT 'NOT LISTED',
-    observed_state TEXT NOT NULL DEFAULT 'UNKNOWN',sync_status TEXT NOT NULL DEFAULT 'NOT CONFIGURED',mode TEXT NOT NULL DEFAULT 'monitor',last_attempt_at TEXT,last_success_at TEXT,
-    last_observed_at TEXT,last_error TEXT NOT NULL DEFAULT '',external_quantity INTEGER,external_price_cents INTEGER,external_updated_at TEXT,metadata_json TEXT NOT NULL DEFAULT '{}',
-    PRIMARY KEY(catalog_product_id,channel)
-  )`).run();
-  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_channel_sync_status ON eus_channel_sync_state(channel,sync_status,last_observed_at DESC)").run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_sync_item_events (
-    id TEXT PRIMARY KEY,run_id TEXT NOT NULL,catalog_product_id TEXT NOT NULL DEFAULT '',sku TEXT NOT NULL DEFAULT '',channel TEXT NOT NULL DEFAULT '',event_type TEXT NOT NULL,
-    status TEXT NOT NULL,details_json TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL
-  )`).run();
-  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_sync_events_created ON eus_sync_item_events(created_at DESC)").run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_recovery_candidates (
-    id TEXT PRIMARY KEY,source_type TEXT NOT NULL,external_id TEXT NOT NULL DEFAULT '',sku TEXT NOT NULL DEFAULT '',title TEXT NOT NULL DEFAULT '',price_cents INTEGER,
-    image_url TEXT NOT NULL DEFAULT '',source_url TEXT NOT NULL DEFAULT '',classification TEXT NOT NULL DEFAULT 'UNRESOLVED',matched_catalog_product_id TEXT NOT NULL DEFAULT '',
-    blocker TEXT NOT NULL DEFAULT '',ignored INTEGER NOT NULL DEFAULT 0,metadata_json TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL,updated_at TEXT NOT NULL
-  )`).run();
-  await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_eus_recovery_source_external ON eus_recovery_candidates(source_type,external_id)").run();
-  return db;
-}
+async function ensureSchema(env){return ensureCommerceSchema(env);}
 async function catalogRows(db){const result=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier,i.fulfillment_mode,i.supplier_product_id,i.source_url,i.sales_channels_json,i.cost_cents,i.price_cents,i.quantity_on_hand,i.quantity_reserved,i.status,i.notes,i.updated_at,
     m.source_type,m.description,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.images_json,m.ebay_item_id,m.fourthwall_product_id,m.store_section,m.publish_status,m.review_state,m.updated_at AS catalog_updated_at
     FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id ORDER BY m.updated_at DESC`).all();return result.results||[];}
@@ -75,7 +50,6 @@ function readiness(p,allProducts,minContribution=500){const blockers=[];const du
 function desiredFor(p,channel){const cs=channelsFor(p);if(channel==="website")return p.publishStatus==="published"?"LIVE":p.publishStatus==="hold"?"HOLD":"NOT LISTED";if(channel==="doba")return cs.has("doba")?"SOURCE":"NOT CONFIGURED";return cs.has(channel)?"LIVE":"NOT LISTED";}
 function observedFor(p,channel,cap){if(channel==="website")return p.publishStatus==="published"?"LIVE":"NOT LISTED";if(channel==="doba")return channelsFor(p).has("doba")?"CSV SOURCE — UPLOAD / RECONCILE":"NOT CONFIGURED";if(channel==="ebay")return p.ebayItemId?"MAPPED — EXTERNAL STATE UNVERIFIED":"NOT LISTED";if(channel==="fourthwall")return p.fourthwallProductId||p.sourceType==="fourthwall"?"MAPPED — EXTERNAL STATE UNVERIFIED":"NOT LISTED";if(channel==="tiktok")return channelsFor(p).has("tiktok")?(cap.tiktok.configured?"MAPPED — MONITOR ONLY":"NOT CONFIGURED"):"NOT LISTED";return"UNKNOWN";}
 function syncStatusFor(p,channel,cap,dup){if(channel==="website")return p.publishStatus==="published"?"SYNCED":p.publishStatus==="hold"?"REVIEW REQUIRED":"SYNCED";if(channel==="doba"){if(!channelsFor(p).has("doba"))return"DISABLED";return"UPLOAD NEEDED";}if(channel==="ebay"){if(!channelsFor(p).has("ebay"))return"DISABLED";if(p.ebayItemId&&dup.has(p.ebayItemId))return"REVIEW REQUIRED";if(!cap.ebay.configured)return"NOT CONFIGURED";return"REVIEW REQUIRED";}if(channel==="tiktok"){if(!channelsFor(p).has("tiktok"))return"DISABLED";return cap.tiktok.configured?"REVIEW REQUIRED":"NOT CONFIGURED";}if(channel==="fourthwall"){if(!channelsFor(p).has("fourthwall"))return"DISABLED";return cap.fourthwall.configured?"REVIEW REQUIRED":"STALE";}return"NOT CONFIGURED";}
-async function upsertState(db,p,channel,cap,runAt,runId){const dup=duplicateExternalIds([p]);void dup;}
 async function executeMonitorRun(db,env,{target="all",trigger="manual",runId=""}={}){const id=clean(runId,120)||uid("sync"),existing=await db.prepare("SELECT * FROM eus_sync_runs WHERE id=?").bind(id).first();if(existing&&existing.completed_at)return existing;const started=now();await db.prepare(`INSERT OR IGNORE INTO eus_sync_runs(id,target,trigger,mode,started_at,status) VALUES(?,?,?,?,?,?)`).bind(id,clean(target,40)||"all",clean(trigger,30)||"manual","monitor",started,"RUNNING").run();
   const cap=capability(env),products=(await catalogRows(db)).map(rowObject),dup=duplicateExternalIds(products);let discovered=0,changed=0,updated=0,review=0,errors=0,matched=0;const targets=target==="all"?CHANNELS.filter(channel=>channel!=="doba"):CHANNELS.includes(target)?[target]:CHANNELS;
   for(const p of products){for(const channel of targets){const cs=channelsFor(p);if(channel!=="website"&&!cs.has(channel))continue;discovered+=1;const desired=desiredFor(p,channel),observed=observedFor(p,channel,cap),status=syncStatusFor(p,channel,cap,dup);if(["REVIEW REQUIRED","STALE","ERROR","NOT CONFIGURED"].includes(status))review+=1;const externalId=channel==="ebay"?p.ebayItemId:channel==="fourthwall"?p.fourthwallProductId:"";const previous=await db.prepare("SELECT desired_state,observed_state,sync_status,external_id FROM eus_channel_sync_state WHERE catalog_product_id=? AND channel=?").bind(p.id,channel).first();if(previous&&(previous.desired_state!==desired||previous.observed_state!==observed||previous.sync_status!==status||previous.external_id!==externalId))changed+=1;if(previous)matched+=1;
