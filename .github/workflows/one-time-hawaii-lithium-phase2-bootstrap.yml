@@ -57,7 +57,10 @@ jobs:
           node --check site/admin-lithium-shipping.js
           node --check site/lithium-shop.js
           node --check site/admin-store-orders-link.js
-          cmp -s site/solar-project.html site/solar-project/index.html
+          for f in site/solar-project.html site/solar-project/index.html; do
+            ! grep -Fq 'Casey verifies final fit, protection, and pricing.' "$f"
+            grep -Fq 'Elevation reviews final fit, protection, and pricing.' "$f"
+          done
           ! grep -Eqi 'Lithium Batteries Shipped to Hawaii|Qualification in Progress|Hawaii Shipping Qualification in Progress|DOT approved|hazmat approved|carrier approved|ships anywhere|free Hawaii shipping' site/hawaii-lithium-batteries.html site/lithium-batteries.html
           git config user.name 'elevationupscales'
           git config user.email 'caseymyoung@gmail.com'
