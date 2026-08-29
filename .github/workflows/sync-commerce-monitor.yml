@@ -1,0 +1,46 @@
+name: Commerce Monitor Sync
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: commerce-monitor-sync
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Run signed monitor sync when configured
+        shell: bash
+        env:
+          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
+          SYNC_URL: https://elevationupscales.com/api/sync/run
+        run: |
+          set -euo pipefail
+          if [[ -z "${SYNC_JOB_TOKEN:-}" ]]; then
+            echo "SYNC_JOB_TOKEN is not configured in GitHub Actions; scheduled sync remains safely disabled."
+            exit 0
+          fi
+          run_id="scheduled-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          response=$(curl --fail --silent --show-error --retry 3 --retry-delay 3 --max-time 90 \
+            -X POST "$SYNC_URL" \
+            -H "X-EUS-Sync-Token: $SYNC_JOB_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "{\"target\":\"all\",\"runId\":\"${run_id}\"}")
+          printf '%s' "$response" > /tmp/sync.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const data=JSON.parse(fs.readFileSync('/tmp/sync.json','utf8'));
+          if(data.ok!==true) throw new Error(data.error||'Scheduled sync failed');
+          console.log('sync_status=',data.run?.status);
+          console.log('discovered=',data.run?.discovered_count);
+          console.log('review=',data.run?.review_count);
+          console.log('errors=',data.run?.error_count);
+          NODE
