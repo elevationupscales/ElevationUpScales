@@ -64,19 +64,24 @@ jobs:
               status='hold' if '"hold"' in line else 'published' if '"published"' in line else 'other'
               seed[ids[0]]=status
           legacy_set=set(legacy_ids); seed_set=set(seed)
+          master_live={i for i,v in seed.items() if v=='published'}
+          master_hold={i for i,v in seed.items() if v=='hold'}
           matched=legacy_set & seed_set
-          live={i for i in matched if seed.get(i)=='published'}
-          held={i for i in matched if seed.get(i)=='hold'}
+          matched_live=matched & master_live
+          matched_hold=matched & master_hold
           unresolved=legacy_set-seed_set
+          current_only=seed_set-legacy_set
           expected_hold={'168631058246','168637439895','168631041650'}
-          assert expected_hold <= held, f'Known HOLD items changed: {expected_hold-held}'
-          assert len(live) >= 8, f'Expected at least 8 published master products, got {len(live)}'
-          assert len(held) >= 3, f'Expected at least 3 HOLD master products, got {len(held)}'
+          assert expected_hold <= master_hold, f'Known HOLD items changed: {expected_hold-master_hold}'
+          assert len(master_live) >= 8, f'Expected at least 8 published Master Catalog products, got {len(master_live)}'
+          assert len(master_hold) >= 3, f'Expected at least 3 Master Catalog HOLD products, got {len(master_hold)}'
           result={
             'legacy_candidates':len(legacy_set),'master_seed_records':len(seed_set),
-            'exact_matched':len(matched),'matched_live':len(live),'matched_hold':len(held),
-            'unresolved_legacy':len(unresolved),'staged':0,'published_by_recovery':0,
-            'hold_ids':sorted(held),'unresolved_ids':sorted(unresolved)
+            'master_published':len(master_live),'master_hold':len(master_hold),
+            'exact_matched':len(matched),'matched_live':len(matched_live),'matched_hold':len(matched_hold),
+            'current_catalog_not_in_legacy':len(current_only),'unresolved_legacy':len(unresolved),
+            'staged':0,'published_by_recovery':0,
+            'hold_ids':sorted(master_hold),'current_only_ids':sorted(current_only),'unresolved_ids':sorted(unresolved)
           }
           Path('/tmp/recovery.json').write_text(json.dumps(result,indent=2))
           print(json.dumps(result,indent=2))
