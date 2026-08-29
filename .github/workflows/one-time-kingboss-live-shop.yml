@@ -14,6 +14,7 @@ env:
   PARENT_SHA: 6996330c3371b3ca7b48d2cfce392d70e4f0c7fe
   FINAL_BASELINE: baseline-2026-08-29-kingboss-live-shop
 
+# verifier v2: PayPal create-order returns its order identifier as id.
 jobs:
   live-shop:
     runs-on: ubuntu-latest
