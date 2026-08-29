@@ -57,7 +57,7 @@ jobs:
           echo "protected provider API -> $provider_code"
           test "$finalizer_code" != "200"
           test "$provider_code" = "401"
-          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics; do
+          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /solar-services /home-services /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics; do
             code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "${base}${route}" || true)
             echo "${route} -> $code"
             test "$code" = "200"
@@ -136,72 +136,78 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p coordination/handoffs/commerce
-          cat > coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md <<EOF
-          # Elevation UpScales Commerce Launch — Final Production Receipt
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          deployment=os.environ['DEPLOYMENT_URL']
+          text=f'''# Elevation UpScales Commerce Launch — Final Production Receipt
 
-          **Date:** 2026-08-29  
-          **Disposition:** PASS / PRODUCTION VERIFIED  
-          **Owner authorization:** Granted in Deployment Manager chat
+**Date:** 2026-08-29  
+**Disposition:** PASS / PRODUCTION VERIFIED  
+**Owner authorization:** Granted in Deployment Manager chat
 
-          ## Source and deployment
-          - Doba source SHA-256: `f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb`
-          - Stage 0 run: `33238177644` — PASS
-          - Commerce application preview run: `33239206514` — PASS
-          - Destination-hardening preview run: `33239366178` — PASS
-          - Production foundation run: `33239280674` — PASS
-          - Atomic reconciliation run: `33239617246` — data transaction PASS; its first closeout verification was superseded by this verification-only closeout
-          - Final clean production deployment: `${DEPLOYMENT_URL}`
+## Source and deployment
+- Doba source SHA-256: `f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb`
+- Stage 0 run: `33238177644` — PASS
+- Commerce application preview run: `33239206514` — PASS
+- Destination-hardening preview run: `33239366178` — PASS
+- Production foundation run: `33239280674` — PASS
+- Atomic reconciliation run: `33239617246` — data transaction PASS; superseded closeout verification completed here
+- Verification-only closeout predecessor run: `33239691708` — all production checks PASS; receipt shell quoting failed only
+- Final clean production deployment: `{deployment}`
 
-          ## Doba finalization
-          - Existing Item-No records reconciled to current Doba supplier SKU: **10**
-          - New Doba products priced/categorized: **22**
-          - New products published after readiness gate: **12**
-          - New products retained Draft/HOLD: **10**
-          - Historical HOLD products preserved: **3/3**
-          - Stage 0 supplier-cost validation: **10/10**
-          - Snapshot mode remains **Partial**; missing movie-screen record was not changed by Stage 0.
+## Doba finalization
+- Existing Item-No records reconciled to current Doba supplier SKU: **10**
+- New Doba products priced/categorized: **22**
+- New products published after readiness gate: **12**
+- New products retained Draft/HOLD: **10**
+- Historical HOLD products preserved: **3/3**
+- Stage 0 supplier-cost validation: **10/10**
+- Snapshot mode remains **Partial**; missing movie-screen record was not changed by Stage 0.
 
-          ## Publishing rules enforced
-          Published new Doba products required positive stock above the low-stock review band, exact current supplier SKU, primary image, explicit shipping scope/method/cost data, positive retail price, at least $5 direct contribution, at least 20% direct contribution margin, and Catalog-backed server checkout.
+## Publishing rules enforced
+Published new Doba products required positive stock above the low-stock review band, exact current supplier SKU, primary image, explicit shipping scope/method/cost data, positive retail price, at least $5 direct contribution, at least 20% direct contribution margin, and Catalog-backed server checkout.
 
-          The 10 retained records remain non-public because of low/zero stock, unresolved variant-family presentation, or assortment review.
+The 10 retained records remain non-public because of low/zero stock, unresolved variant-family presentation, or assortment review.
 
-          ## Checkout verification
-          - Colorado/lower-48 quote for a published Catalog-backed Doba product: **PASS / 200**
-          - Hawaii quote for the same lower-48-only product: **BLOCKED / 409**
-          - Zero-stock Doba product quote: **BLOCKED / 409**
-          - Browser-provided price is not authoritative; server Catalog/source values remain authoritative.
+## Checkout verification
+- Colorado/lower-48 quote for a published Catalog-backed Doba product: **PASS / 200**
+- Hawaii quote for the same lower-48-only product: **BLOCKED / 409**
+- Zero-stock Doba product quote: **BLOCKED / 409**
+- Browser-provided price is not authoritative; server Catalog/source values remain authoritative.
 
-          ## Admin / commerce UX
-          - Product thumbnails: deployed
-          - Store/category/provider filtering: deployed
-          - RV Store category rail: deployed
-          - Small lazy-loaded thumbnails and responsive/mobile controls: deployed
-          - Inventory polling reduced from 3 seconds to 15 seconds
+## Admin / commerce UX
+- Product thumbnails: deployed
+- Store/category/provider filtering: deployed
+- RV Store category rail: deployed
+- Small lazy-loaded thumbnails and responsive/mobile controls: deployed
+- Inventory polling reduced from 3 seconds to 15 seconds
 
-          ## Apparel provider model
-          - Fourthwall read/reconcile adapter: **DEPLOYED**
-          - Fourthwall current connection state: **Not Configured** (no verified Storefront token in production at closeout)
-          - Printful adapter state: **Not Configured**
-          - Spreadconnect adapter state: **Not Configured**
-          - No provider is represented as Connected without credentials plus a successful server-side reconciliation.
+## Apparel provider model
+- Fourthwall read/reconcile adapter: **DEPLOYED**
+- Fourthwall current connection state: **Not Configured**
+- Printful adapter state: **Not Configured**
+- Spreadconnect adapter state: **Not Configured**
+- No provider is represented as Connected without credentials plus a successful server-side reconciliation.
 
-          ## Security / regression
-          - Provider Admin API requires Admin authentication
-          - Provider/Doba/server runtime modules return 404 directly
-          - Temporary one-run Commerce finalizer is absent after cleanup
-          - Store, RV Store, checkout, Marketplace, Start a Project, Solar, Lithium/Hawaii and core Admin routes returned HTTP 200 in final regression
+## Security / regression
+- Provider Admin API requires Admin authentication
+- Provider/Doba/server runtime modules return 404 directly
+- Temporary one-run Commerce finalizer is non-operational after cleanup
+- Store, RV Store, checkout, Marketplace, Start a Project, Solar, Lithium/Hawaii and core Admin routes returned HTTP 200 in final regression
 
-          ## Deferred review products
-          - 4 solar/camping-light variants: customer-facing variant distinction required
-          - 3 MPPT variants: two zero-stock; one low-stock/review
-          - 1 low-stock travel/organization product
-          - 1 zero-stock propane water heater
-          - 1 Other/Review distillation product awaiting assortment decision
+## Deferred review products
+- 4 solar/camping-light variants: customer-facing variant distinction required
+- 3 MPPT variants: two zero-stock; one low-stock/review
+- 1 low-stock travel/organization product
+- 1 zero-stock propane water heater
+- 1 Other/Review distillation product awaiting assortment decision
 
-          ## Rollback
-          Create `baseline-2026-08-29-commerce-launch-apparel-providers` from the final post-receipt `main` commit after this workflow self-removes.
-          EOF
+## Rollback
+Create `baseline-2026-08-29-commerce-launch-apparel-providers` from the final post-receipt `main` commit after this workflow self-removes.
+'''
+          Path('coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md').write_text(text,encoding='utf-8')
+          PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md
@@ -212,4 +218,4 @@ jobs:
           echo '- Final verification: PASS' >> "$GITHUB_STEP_SUMMARY"
           echo '- Doba: 10 reconciled / 22 priced / 12 published / 10 review / 3 historical HOLDs preserved' >> "$GITHUB_STEP_SUMMARY"
           echo '- Provider states: Fourthwall Not Configured; Printful Not Configured; Spreadconnect Not Configured' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Production: `${DEPLOYMENT_URL}`' >> "$GITHUB_STEP_SUMMARY"
+          echo "- Production: ${DEPLOYMENT_URL}" >> "$GITHUB_STEP_SUMMARY"
