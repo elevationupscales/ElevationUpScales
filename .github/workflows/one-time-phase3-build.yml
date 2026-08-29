@@ -22,61 +22,35 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-
-          def replace(path, old, new, count=1):
-              p=Path(path); s=p.read_text(encoding='utf-8')
+          def replace(path,old,new,count=1):
+              p=Path(path);s=p.read_text(encoding='utf-8')
               if old not in s: raise SystemExit(f'marker missing in {path}: {old[:90]}')
               p.write_text(s.replace(old,new,count),encoding='utf-8')
 
-          # Global protected Admin shell loader on every Admin HTML route.
-          p=Path('site/_worker.js'); s=p.read_text(encoding='utf-8')
-          marker='const CHECKOUT_CSP = ['
-          insert='''const ADMIN_COMMAND_CENTER_LOADER = `\n<script src="/admin-command-center.js?v=4.3.4"></script>\n`;\n\n'''
+          p=Path('site/_worker.js');s=p.read_text(encoding='utf-8')
           if 'ADMIN_COMMAND_CENTER_LOADER' not in s:
-              if marker not in s: raise SystemExit('worker loader marker missing')
-              s=s.replace(marker,insert+marker,1)
-          helper='''\nasync function appendHtmlLoader(response, loader) {\n  if (!response || !response.ok) return response;\n  const type = String(response.headers.get("Content-Type") || "");\n  if (!/text\\/html/i.test(type)) return response;\n  const headers = new Headers(response.headers);\n  headers.delete("Content-Length");\n  headers.set("Cache-Control", "no-store");\n  return new Response(`${await response.text()}\\n${loader}`, { status: response.status, statusText: response.statusText, headers });\n}\n'''
+              s=s.replace('const CHECKOUT_CSP = [','const ADMIN_COMMAND_CENTER_LOADER = `\n<script src="/admin-command-center.js?v=4.3.4"></script>\n`;\n\nconst CHECKOUT_CSP = [',1)
           if 'async function appendHtmlLoader' not in s:
-              if 'function checkoutResponse(response) {' not in s: raise SystemExit('worker response marker missing')
+              helper='''\nasync function appendHtmlLoader(response, loader) {\n  if (!response || !response.ok) return response;\n  const type = String(response.headers.get("Content-Type") || "");\n  if (!/text\\/html/i.test(type)) return response;\n  const headers = new Headers(response.headers);\n  headers.delete("Content-Length"); headers.set("Cache-Control", "no-store");\n  return new Response(`${await response.text()}\\n${loader}`, { status: response.status, statusText: response.statusText, headers });\n}\n'''
               s=s.replace('function checkoutResponse(response) {',helper+'\nfunction checkoutResponse(response) {',1)
           old='''    const response = await coreWorker.fetch(request, env, ctx);\n    if (url.pathname === "/checkout" || url.pathname === "/checkout/") return checkoutResponse(response);\n    return response;'''
           new='''    const response = await coreWorker.fetch(request, env, ctx);\n    if (url.pathname === "/checkout" || url.pathname === "/checkout/") return checkoutResponse(response);\n    const adminHtml = url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname.startsWith("/admin-") || url.pathname === "/admin.html";\n    if (adminHtml) return appendHtmlLoader(response, ADMIN_COMMAND_CENTER_LOADER);\n    return response;'''
           if old not in s: raise SystemExit('worker return marker missing')
           s=s.replace(old,new,1);p.write_text(s,encoding='utf-8')
 
-          # Canonical admin routes.
-          r=Path('site/_redirects'); rs=r.read_text(encoding='utf-8')
-          block='''/admin/ /admin 308\n/admin.html /admin 301\n/admin-analytics.html /admin-analytics 301\n/admin-channels.html /admin-channels 301\n'''
+          r=Path('site/_redirects');rs=r.read_text(encoding='utf-8')
           if '/admin.html /admin 301' not in rs:
-              rs=rs.replace('/admin-listings/ /admin-listings 308\n',block+'/admin-listings/ /admin-listings 308\n',1)
-              r.write_text(rs,encoding='utf-8')
+              rs=rs.replace('/admin-listings/ /admin-listings 308\n','/admin/ /admin 308\n/admin.html /admin 301\n/admin-analytics.html /admin-analytics 301\n/admin-channels.html /admin-channels 301\n/admin-listings/ /admin-listings 308\n',1);r.write_text(rs,encoding='utf-8')
 
-          # TikTok Shop as a supported Catalog import source/channel relationship.
           replace('site/catalog-admin-runtime.js','const SOURCES = new Set(["doba", "ebay", "fourthwall", "other"]);','const SOURCES = new Set(["doba", "ebay", "tiktok", "fourthwall", "other"]);')
           replace('site/catalog-admin-runtime.js','sourceType === "ebay" ? ["ebay"] : ["website"]','sourceType === "ebay" ? ["ebay"] : sourceType === "tiktok" ? ["tiktok"] : ["website"]')
-          p=Path('site/admin-catalog.html'); hs=p.read_text(encoding='utf-8')
+          p=Path('site/admin-catalog.html');hs=p.read_text(encoding='utf-8')
           hs=hs.replace('<button class="catalog-action" data-source-open="fourthwall" type="button"><strong>Fourthwall</strong>','<button class="catalog-action" data-source-open="tiktok" type="button"><strong>TikTok Shop</strong><span>Seller Center import / channel staging</span></button><button class="catalog-action" data-source-open="fourthwall" type="button"><strong>Fourthwall</strong>',1)
           hs=hs.replace('<option value="ebay">eBay</option><option value="fourthwall">Fourthwall</option>','<option value="ebay">eBay</option><option value="tiktok">TikTok Shop</option><option value="fourthwall">Fourthwall</option>')
-          hs=hs.replace('<option value="ebay">eBay</option><option value="fourthwall">Fourthwall</option><option value="other">Other</option></select></label><label>Supplier', '<option value="ebay">eBay</option><option value="tiktok">TikTok Shop</option><option value="fourthwall">Fourthwall</option><option value="other">Other</option></select></label><label>Supplier',1)
-          hs=hs.replace('<option value="ebay">eBay</option><option value="fourthwall">Fourthwall</option><option value="other">Other</option></select></label><label>Status', '<option value="ebay">eBay</option><option value="tiktok">TikTok Shop</option><option value="fourthwall">Fourthwall</option><option value="other">Other</option></select></label><label>Status',1)
           p.write_text(hs,encoding='utf-8')
-
           replace('site/admin-catalog.js','source==="ebay"?["ebay"]:source==="fourthwall"?["website","fourthwall"]:["website"]','source==="ebay"?["ebay"]:source==="tiktok"?["tiktok"]:source==="fourthwall"?["website","fourthwall"]:["website"]')
-          p=Path('site/admin-channels.js'); cs=p.read_text(encoding='utf-8')
-          cs=cs.replace('if(p.sourceType==="doba"||p.supplier==="doba")set.add("doba");return set;','if(p.sourceType==="doba"||p.supplier==="doba")set.add("doba");if(p.sourceType==="tiktok")set.add("tiktok");return set;',1)
-          p.write_text(cs,encoding='utf-8')
-
-          # Repair permanent release gate: both Solar routes must carry the accepted wording; they need not be byte-identical.
-          dp=Path('.github/workflows/deploy-pages.yml'); ds=dp.read_text(encoding='utf-8')
-          ds=ds.replace('          cmp -s site/solar-project.html site/solar-project/index.html\n','''          for file in site/solar-project.html site/solar-project/index.html; do\n            grep -q 'Elevation reviews final fit, protection, and pricing.' "$file"\n            ! grep -q 'Casey verifies final fit, protection, and pricing.' "$file"\n          done\n''',1)
-          admin_checks='''          # Phase 3 Admin Command Center.\n          test -f site/admin.html\n          test -f site/admin-command-center.js\n          test -f site/admin-command-center.css\n          test -f site/admin-analytics.html\n          test -f site/admin-analytics-v2.js\n          test -f site/admin-channels.html\n          test -f site/admin-channels.js\n          grep -q 'Admin Command Center' site/admin.html\n          grep -q 'TikTok Shop' site/admin-catalog.html\n'''
-          marker='          # Preserve Store analytics + Inventory administration foundation.\n'
-          if admin_checks not in ds:
-              if marker not in ds: raise SystemExit('deploy admin marker missing')
-              ds=ds.replace(marker,admin_checks+'\n'+marker,1)
-          dp.write_text(ds,encoding='utf-8')
+          p=Path('site/admin-channels.js');cs=p.read_text(encoding='utf-8');cs=cs.replace('if(p.sourceType==="doba"||p.supplier==="doba")set.add("doba");return set;','if(p.sourceType==="doba"||p.supplier==="doba")set.add("doba");if(p.sourceType==="tiktok")set.add("tiktok");return set;',1);p.write_text(cs,encoding='utf-8')
           PY
-
           node --check site/admin-command-center.js
           node --check site/admin-overview.js
           node --check site/admin-analytics-v2.js
@@ -87,10 +61,9 @@ jobs:
           grep -q 'TikTok Shop' site/admin-catalog.html
           grep -q 'ADMIN_COMMAND_CENTER_LOADER' site/_worker.js
           grep -q '/admin.html /admin 301' site/_redirects
-
           git config user.name 'elevationupscales'
           git config user.email 'caseymyoung@gmail.com'
-          git add site .github/workflows/deploy-pages.yml
+          git add site
           git commit -m 'Build Phase 3 admin seller fulfillment analytics command center'
           git push origin HEAD:release/admin-command-center-phase3
       - name: Remove build bootstrap
