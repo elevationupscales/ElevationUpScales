@@ -1,0 +1,119 @@
+name: One-Time Admin Pass 2 Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  deploy-pass2-production:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Validate production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 8fd5741a684b0a45b18077132575534c59a9ea39 HEAD
+          node --check site/admin-command-center.js
+          node --check site/admin-overview.js
+          node --check site/admin-lithium-shipping.js
+          node --check site/admin-shipping-pass2.js
+          grep -q 'Shipping & Logistics' site/admin-command-center.js
+          grep -q '<h1>Shipping & Logistics</h1>' site/admin-lithium-shipping.html
+          grep -q 'admin-shipping-pass2.css?v=4.3.6' site/admin-lithium-shipping.html
+          grep -q 'admin-shipping-pass2.js?v=4.3.6' site/admin-lithium-shipping.html
+          grep -q 'Reservations Waiting' site/admin-shipping-pass2.js
+          grep -q 'Products Needing Review' site/admin-shipping-pass2.js
+          grep -q 'Supplier Rechecks' site/admin-shipping-pass2.js
+          grep -q 'Quote / Route Needed' site/admin-shipping-pass2.js
+          grep -q 'Open Shipment Batches' site/admin-shipping-pass2.js
+          grep -q 'Ready to Book' site/admin-shipping-pass2.js
+          grep -q 'Advanced Shipping Details' site/admin-shipping-pass2.js
+          ! grep -q '<h1>Lithium Shipping Matrix</h1>' site/admin-lithium-shipping.html
+          test -f site/catalog-admin-runtime.js
+          test -f site/inventory-admin-runtime.js
+          test -f site/store-order-admin-runtime.js
+          test -f site/hawaii-lithium-runtime.js
+          test -f site/_worker.js
+      - name: Deploy Pass 2 to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify production
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          verify_base(){
+            local base="${1%/}" route code shipping nav home hawaii session
+            for route in /admin /admin-catalog /admin-inventory /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-channels /store /marketplace /checkout /start-a-project /solar-project /hawaii-lithium-batteries /admin-shipping-pass2.js /admin-shipping-pass2.css; do
+              code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-pass2 --write-out '%{http_code}' "${base}${route}" || true)
+              echo "${base}${route} -> ${code:-curl-error}"
+              test "$code" = "200"
+            done
+            shipping="$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/admin-lithium-shipping")"
+            nav="$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/admin-command-center.js")"
+            home="$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/admin-shipping-pass2.js")"
+            hawaii="$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/hawaii-lithium-batteries")"
+            printf '%s' "$shipping" | grep -q '<h1>Shipping & Logistics</h1>'
+            ! printf '%s' "$shipping" | grep -q '<h1>Lithium Shipping Matrix</h1>'
+            printf '%s' "$nav" | grep -q 'Shipping & Logistics'
+            printf '%s' "$home" | grep -q 'Advanced Shipping Details'
+            printf '%s' "$home" | grep -q 'Catalog tells us what it is'
+            ! printf '%s' "$hawaii" | grep -q 'Lithium Batteries Shipped to Hawaii'
+            ! printf '%s' "$hawaii" | grep -q 'Free Hawaii Shipping'
+            session=$(curl --silent --output /tmp/session --write-out '%{http_code}' "${base}/api/admin/session" || true)
+            echo "session -> ${session}"
+            test "$session" = "401"
+            for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
+              code=$(curl --silent --output /tmp/protected --write-out '%{http_code}' "${base}${api}" || true)
+              echo "protected ${api} -> ${code}"
+              test "$code" = "401"
+            done
+          }
+          if ! verify_base "$DEPLOYMENT_URL"; then
+            echo 'Deployment-specific hostname not fully ready; checking production alias.'
+            sleep 8
+            verify_base "$PRODUCTION_URL"
+          fi
+      - name: Record production receipt
+        shell: bash
+        run: |
+          {
+            echo '### Admin Portal Pass 2 — Production'
+            echo "Parent handoff SHA: 33e153a5a0bdde95639a651f535cd539026e5370"
+            echo "Verified preview application SHA: ec808444d921e21af56aae7ebc8dcecabfa47e3f"
+            echo "Production source SHA: $(git rev-parse HEAD)"
+            echo "Production deployment: ${{ steps.deploy.outputs.deployment-url }}"
+            echo 'Shipping & Logistics simplified UI: PASS'
+            echo 'Legacy /admin-lithium-shipping compatibility: PASS'
+            echo 'Protected Admin API unauthenticated boundary: PASS'
+            echo 'Public Hawaii / Store / Marketplace / Checkout / Start Project / Solar regressions: PASS'
+            echo 'Schema migration: NONE'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove one-time production workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-admin-pass2-production.yml
+          git commit -m 'Remove completed Admin Pass 2 production workflow'
+          git push origin HEAD:main
