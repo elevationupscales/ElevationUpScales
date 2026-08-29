@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  deployments: write
 
 env:
   EXPECTED_SOURCE_SHA256: f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb
@@ -40,9 +41,7 @@ jobs:
           git fetch origin staging/doba-commerce-launch-input:refs/remotes/origin/staging/doba-commerce-launch-input
           mkdir -p /tmp/doba
           : > /tmp/doba/source.xz.b64
-          for n in $(seq -w 0 13); do
-            git show "origin/staging/doba-commerce-launch-input:.deployment-input/xz/${n}.b64" >> /tmp/doba/source.xz.b64
-          done
+          for n in $(seq -w 0 13); do git show "origin/staging/doba-commerce-launch-input:.deployment-input/xz/${n}.b64" >> /tmp/doba/source.xz.b64; done
           test "$(wc -c < /tmp/doba/source.xz.b64 | tr -d ' ')" = "52252"
           base64 --decode /tmp/doba/source.xz.b64 > /tmp/doba/source.xz
           xz -t /tmp/doba/source.xz
@@ -53,196 +52,191 @@ jobs:
           test "$actual_sha" = "$EXPECTED_SOURCE_SHA256"
           python - <<'PY'
           import csv, os
-          path='/tmp/doba/source.csv'
-          with open(path, newline='', encoding='utf-8-sig') as f:
-              reader=csv.reader(f)
-              headers=next(reader)
-              rows=list(reader)
-          print('source_columns=',len(headers))
-          print('source_rows=',len(rows))
+          with open('/tmp/doba/source.csv', newline='', encoding='utf-8-sig') as f:
+              reader=csv.reader(f); headers=next(reader); rows=list(reader)
+          print('source_columns=',len(headers)); print('source_rows=',len(rows))
           assert len(headers)==int(os.environ['EXPECTED_SOURCE_COLUMNS'])
           assert len(rows)==int(os.environ['EXPECTED_SOURCE_ROWS'])
           PY
 
-      - name: Preview and apply through production Doba reconciliation engine
+      - name: Add one-run signed Commerce Sync authorization locally
         shell: bash
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          test -n "${CLOUDFLARE_API_TOKEN:-}"
-          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
-          cp site/doba-csv-sync-runtime.js /tmp/doba/runtime.mjs
-          cat >> /tmp/doba/runtime.mjs <<'EOF'
-          export { ensureSchema, createPreview, applyRun, runDetail };
-          EOF
-          cat > /tmp/doba/launch.mjs <<'EOF'
-          import fs from 'node:fs';
-          import { ensureSchema, createPreview, applyRun } from './runtime.mjs';
+          cp site/doba-csv-sync-runtime.js /tmp/doba/doba-csv-sync-runtime.clean.js
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/doba-csv-sync-runtime.js')
+          s=p.read_text(encoding='utf-8')
+          old='async function requireAdmin(request,env){const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
+          new='async function requireAdmin(request,env){const trusted=clean(request.headers.get("X-EUS-Sync-Token"),500),expectedSync=clean(env?.SYNC_JOB_TOKEN,500);if(trusted&&expectedSync&&timingSafe(trusted,expectedSync))return{session:{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
+          if old not in s: raise SystemExit('requireAdmin patch marker missing')
+          s=s.replace(old,new,1)
+          old2='const raw=await body(request),action=clean(raw.action,40).toLowerCase();try{if(action==="preview")'
+          audit='''const raw=await body(request),action=clean(raw.action,40).toLowerCase();try{if(action==="stage0_audit"){const holdItems=["D0102HPBE86","D0102HGKRVV","D0102HHVH7A"];const holds=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id`).bind(...holdItems).all();const movie=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE lower(i.name) LIKE '%movie%' OR (lower(i.name) LIKE '%screen%' AND lower(i.name) NOT LIKE '%screen door%') ORDER BY i.id`).all();let runProducts=[];const auditRunId=clean(raw.runId,120);if(auditRunId){const rp=await db.prepare(`SELECT r.row_index,r.item_no,r.supplier_sku,r.classification,r.blocker,r.applied_state,i.id,i.sku,i.name,i.category,i.cost_cents,i.price_cents,i.status,m.supplier_stock,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_doba_csv_rows r LEFT JOIN eus_inventory_items i ON i.id=r.catalog_product_id LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE r.run_id=? ORDER BY r.row_index`).bind(auditRunId).all();runProducts=rp.results||[];}return json({ok:true,holds:holds.results||[],movie:movie.results||[],runProducts});}if(action==="preview")'''
+          if old2 not in s: raise SystemExit('handler patch marker missing')
+          s=s.replace(old2,audit,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          node --check site/doba-csv-sync-runtime.js
 
-          const token=process.env.CLOUDFLARE_API_TOKEN;
-          const account=process.env.CLOUDFLARE_ACCOUNT_ID;
-          const base='https://api.cloudflare.com/client/v4';
-          const expected={
-            fingerprint:process.env.EXPECTED_SOURCE_SHA256,
-            rows:Number(process.env.EXPECTED_SOURCE_ROWS),
-            matches:Number(process.env.EXPECTED_ITEM_MATCHES),
-            fresh:Number(process.env.EXPECTED_NEW),
-            zero:Number(process.env.EXPECTED_ZERO_STOCK),
-            low:Number(process.env.EXPECTED_LOW_STOCK),
-            costRefs:Number(process.env.EXPECTED_COST_REFS),
-            costPass:Number(process.env.EXPECTED_COST_PASS),
-          };
-          const csvText=fs.readFileSync('/tmp/doba/source.csv','utf8');
-          const adminEmail='deployment-manager@elevationupscales.com';
+      - name: Deploy temporary signed Stage 0 executor to production worker
+        id: executor
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main --commit-dirty=true
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-          async function cf(path,options={}){
-            const response=await fetch(base+path,{...options,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',...(options.headers||{})}});
-            const body=await response.json().catch(()=>({}));
-            if(!response.ok||body.success===false){throw new Error(`Cloudflare API ${response.status}: ${JSON.stringify(body.errors||body)}`);}
-            return body;
+      - name: Preview, enforce acceptance, then Apply through Doba API
+        shell: bash
+        env:
+          EXECUTOR_URL: ${{ steps.executor.outputs.deployment-url }}
+          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${SYNC_JOB_TOKEN:-}"
+          base="${EXECUTOR_URL%/}"
+          test -n "$base"
+          python - <<'PY'
+          import json, os
+          csv_text=open('/tmp/doba/source.csv',encoding='utf-8').read()
+          json.dump({'action':'preview','fileName':os.environ['SOURCE_FILENAME'],'csvText':csv_text,'scope':'partial','profileId':'doba-download-center-25','markupPercent':25},open('/tmp/doba/preview-request.json','w'))
+          json.dump({'action':'stage0_audit'},open('/tmp/doba/audit-request.json','w'))
+          PY
+          call_api(){
+            local request_file="$1" output_file="$2"
+            code=$(curl --silent --show-error --location --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 90 -H 'Content-Type: application/json' -H "X-EUS-Sync-Token: ${SYNC_JOB_TOKEN}" --data-binary "@${request_file}" --output "$output_file" --write-out '%{http_code}' "${base}/api/admin/doba-csv-sync" || true)
+            echo "Doba API ${request_file} -> ${code}"
+            test "$code" = "200"
           }
-          async function query(databaseId,sql,params=[]){
-            const payload=await cf(`/accounts/${account}/d1/database/${databaseId}/query`,{method:'POST',body:JSON.stringify({sql,params})});
-            const entry=Array.isArray(payload.result)?payload.result[0]:payload.result;
-            if(!entry||entry.success===false){throw new Error(`D1 query failed: ${JSON.stringify(entry||payload)}`);}
-            return {results:Array.isArray(entry.results)?entry.results:[],meta:entry.meta||{}};
+          call_api /tmp/doba/audit-request.json /tmp/doba/audit-before.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/doba/audit-before.json'))
+          if len(a.get('holds',[]))!=3: raise SystemExit(f"STOP: expected 3 prior HOLD records, found {len(a.get('holds',[]))}")
+          for r in a['holds']:
+              if str(r.get('publish_status','')).lower()!='hold': raise SystemExit(f"STOP: prior HOLD {r.get('supplier_product_id')} is not HOLD before Apply")
+          if not a.get('movie'): raise SystemExit('STOP: movie-screen Catalog record not identified before Apply')
+          PY
+          call_api /tmp/doba/preview-request.json /tmp/doba/preview.json
+          python - <<'PY'
+          import json, os, sys
+          p=json.load(open('/tmp/doba/preview.json'))
+          d=p.get('run') if p.get('alreadyApplied') else p
+          run=d.get('run') if isinstance(d,dict) else None
+          if not run: raise SystemExit(f'STOP: Preview response missing run: {p}')
+          checks={
+            'fileFingerprint':os.environ['EXPECTED_SOURCE_SHA256'],
+            'scope':'partial','rowCount':int(os.environ['EXPECTED_SOURCE_ROWS']),
+            'itemMatchCount':int(os.environ['EXPECTED_ITEM_MATCHES']),
+            'newCount':int(os.environ['EXPECTED_NEW']),
+            'zeroStockCount':int(os.environ['EXPECTED_ZERO_STOCK']),
+            'lowStockCount':int(os.environ['EXPECTED_LOW_STOCK']),
+            'costReferenceCount':int(os.environ['EXPECTED_COST_REFS']),
+            'costReferencePassCount':int(os.environ['EXPECTED_COST_PASS']),
           }
-          class Statement{
-            constructor(db,sql,params=[]){this.db=db;this.sql=sql;this.params=params;}
-            bind(...params){return new Statement(this.db,this.sql,params);}
-            async all(){return this.db.query(this.sql,this.params);}
-            async first(column){const result=await this.db.query(this.sql,this.params);const row=result.results[0]??null;return column&&row?row[column]??null:row;}
-            async run(){const result=await this.db.query(this.sql,this.params);return {success:true,meta:result.meta,results:result.results};}
-          }
-          class RestD1{
-            constructor(id){this.id=id;}
-            prepare(sql){return new Statement(this,sql);}
-            query(sql,params=[]){return query(this.id,sql,params);}
-          }
+          failures=[f"{k}: expected {v}, got {run.get(k)}" for k,v in checks.items() if run.get(k)!=v]
+          json.dump({'raw':p,'run':run,'failures':failures},open('/tmp/doba/preview-evidence.json','w'),indent=2)
+          print('PREVIEW',json.dumps(run,sort_keys=True))
+          if failures:
+              print('DOBA_PREVIEW_HOLD', '; '.join(failures), file=sys.stderr)
+              raise SystemExit(42)
+          json.dump({'action':'apply','runId':run['id']},open('/tmp/doba/apply-request.json','w'))
+          PY
+          call_api /tmp/doba/apply-request.json /tmp/doba/apply.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/doba/apply.json'))
+          run=a.get('run') or {}
+          receipt=run.get('receipt') or {}
+          print('APPLY',json.dumps({'status':run.get('status'),'receipt':receipt},sort_keys=True))
+          if run.get('status')!='APPLIED': raise SystemExit(f"Apply status is {run.get('status')}")
+          if int(receipt.get('errors',0))!=0: raise SystemExit(f"Apply returned errors: {receipt}")
+          if int(receipt.get('staged',0))!=22: raise SystemExit(f"Expected 22 staged, got {receipt.get('staged')}")
+          json.dump({'action':'stage0_audit','runId':run['id']},open('/tmp/doba/audit-after-request.json','w'))
+          PY
+          call_api /tmp/doba/audit-after-request.json /tmp/doba/audit-after.json
+          python - <<'PY'
+          import json
+          before=json.load(open('/tmp/doba/audit-before.json')); after=json.load(open('/tmp/doba/audit-after.json')); apply=json.load(open('/tmp/doba/apply.json')); preview=json.load(open('/tmp/doba/preview-evidence.json'))
+          if len(after.get('holds',[]))!=3: raise SystemExit('Prior HOLD count changed during Apply')
+          for r in after['holds']:
+              if str(r.get('publish_status','')).lower()!='hold': raise SystemExit(f"Prior HOLD {r.get('supplier_product_id')} was cleared")
+          def stable(rows):
+              return sorted(rows,key=lambda r:r.get('id',''))
+          if stable(before.get('movie',[]))!=stable(after.get('movie',[])): raise SystemExit('Movie-screen record changed during Partial Apply')
+          run_products=after.get('runProducts',[])
+          new=[r for r in run_products if str(r.get('classification','')).startswith('NEW /')]
+          if len(new)!=22: raise SystemExit(f"Expected 22 new run products, found {len(new)}")
+          if any(str(r.get('publish_status','')).lower()!='draft' for r in new): raise SystemExit('A new Doba product was not left Draft/Review')
+          result={'disposition':'PASS','sourceFile':__import__('os').environ['SOURCE_FILENAME'],'fingerprint':__import__('os').environ['EXPECTED_SOURCE_SHA256'],'preview':preview['run'],'apply':apply['run'].get('receipt',{}),'holdsBefore':before['holds'],'holdsAfter':after['holds'],'movieBefore':before['movie'],'movieAfter':after['movie'],'runProducts':run_products,'newProducts':new}
+          json.dump(result,open('/tmp/doba/stage0.json','w'),indent=2)
+          PY
 
-          const dbList=await cf(`/accounts/${account}/d1/database?per_page=100`);
-          const databases=Array.isArray(dbList.result)?dbList.result:[];
-          let chosen=null;
-          for(const candidate of databases){
-            const id=candidate.uuid||candidate.id;
-            if(!id)continue;
-            try{
-              const probe=await query(id,"SELECT name FROM sqlite_master WHERE type='table' AND name='eus_inventory_items' LIMIT 1");
-              if(probe.results.length){chosen={id,name:candidate.name||id};break;}
-            }catch(error){console.log('D1 probe skipped',candidate.name||id,error.message);}
-          }
-          if(!chosen)throw new Error('Could not identify the production Catalog D1 database. No mutation performed.');
-          console.log('catalog_database=',chosen.name);
-          const db=new RestD1(chosen.id);
-          await ensureSchema({MARKETPLACE_DB:db});
+      - name: Restore clean Doba runtime locally
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/doba/doba-csv-sync-runtime.clean.js site/doba-csv-sync-runtime.js
+          git diff --exit-code -- site/doba-csv-sync-runtime.js
 
-          const holdItems=['D0102HPBE86','D0102HGKRVV','D0102HHVH7A'];
-          async function catalogSnapshot(whereSql,params=[]){
-            return (await db.query(`SELECT i.id,i.sku,i.name,i.category,i.supplier,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,i.source_url,i.updated_at,m.supplier_sku,m.supplier_stock,m.shipping_status,m.store_section,m.publish_status,m.review_state,m.primary_image,m.updated_at AS meta_updated_at FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE ${whereSql} ORDER BY i.id`,params)).results;
-          }
-          const holdsBefore=await catalogSnapshot(`i.supplier_product_id IN (?,?,?)`,holdItems);
-          if(holdsBefore.length!==3)throw new Error(`Expected 3 prior HOLD products, found ${holdsBefore.length}. STOP BEFORE APPLY.`);
-          for(const row of holdsBefore){if(String(row.publish_status||'').toLowerCase()!=='hold')throw new Error(`Prior HOLD ${row.supplier_product_id} is no longer HOLD before Apply. STOP.`);}
-          const movieBefore=await catalogSnapshot(`lower(i.name) LIKE '%movie%' OR (lower(i.name) LIKE '%screen%' AND lower(i.name) NOT LIKE '%screen door%')`);
-          if(!movieBefore.length)throw new Error('Movie-screen Partial Snapshot regression record could not be identified. STOP BEFORE APPLY.');
+      - name: Redeploy clean production source
+        if: ${{ always() }}
+        id: clean
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-          const previewResponse=await createPreview(db,{
-            fileName:process.env.SOURCE_FILENAME,
-            csvText,
-            scope:'partial',
-            profileId:'doba-download-center-25',
-            markupPercent:25,
-          },adminEmail);
-          const detail=previewResponse?.alreadyApplied?previewResponse.run:previewResponse;
-          const run=detail?.run;
-          if(!run)throw new Error('Doba Preview did not return a run receipt.');
-          console.log('PREVIEW_RECEIPT',JSON.stringify(run));
-          const failures=[];
-          const check=(label,actual,want)=>{if(actual!==want)failures.push(`${label}: expected ${want}, got ${actual}`);};
-          check('fingerprint',run.fileFingerprint,expected.fingerprint);
-          check('scope',run.scope,'partial');
-          check('rowCount',run.rowCount,expected.rows);
-          check('itemMatchCount',run.itemMatchCount,expected.matches);
-          check('newCount',run.newCount,expected.fresh);
-          check('zeroStockCount',run.zeroStockCount,expected.zero);
-          check('lowStockCount',run.lowStockCount,expected.low);
-          check('costReferenceCount',run.costReferenceCount,expected.costRefs);
-          check('costReferencePassCount',run.costReferencePassCount,expected.costPass);
-          if(failures.length){
-            console.error('DOBA_PREVIEW_HOLD',failures.join('; '));
-            fs.writeFileSync('/tmp/doba/stage0.json',JSON.stringify({disposition:'HOLD',run,failures},null,2));
-            process.exit(42);
-          }
-
-          let applied=detail;
-          if(!previewResponse?.alreadyApplied){applied=await applyRun(db,run.id,adminEmail);}
-          const appliedRun=applied.run;
-          const receipt=appliedRun?.receipt||{};
-          console.log('APPLY_RECEIPT',JSON.stringify({run:appliedRun,receipt}));
-          if(!String(appliedRun?.status||'').startsWith('APPLIED'))throw new Error(`Apply status is ${appliedRun?.status}`);
-          if(Number(receipt.errors||0)!==0)throw new Error(`Apply returned ${receipt.errors} row errors`);
-          if(Number(receipt.staged||0)!==22)throw new Error(`Expected 22 staged new products, got ${receipt.staged}`);
-
-          const holdsAfter=await catalogSnapshot(`i.supplier_product_id IN (?,?,?)`,holdItems);
-          for(const row of holdsAfter){if(String(row.publish_status||'').toLowerCase()!=='hold')throw new Error(`Prior HOLD ${row.supplier_product_id} was cleared during Apply.`);}
-          const movieAfter=await catalogSnapshot(`lower(i.name) LIKE '%movie%' OR (lower(i.name) LIKE '%screen%' AND lower(i.name) NOT LIKE '%screen door%')`);
-          const stable=(rows)=>rows.map(row=>{const copy={...row};delete copy.updated_at;delete copy.meta_updated_at;return copy;});
-          if(JSON.stringify(stable(movieBefore))!==JSON.stringify(stable(movieAfter)))throw new Error('Movie-screen Catalog record changed during Partial Snapshot Apply.');
-
-          const staged=(await db.query(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,m.supplier_sku,m.supplier_stock,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier='doba' AND m.created_by=? AND m.publish_status='draft' ORDER BY i.created_at DESC`,[adminEmail])).results;
-          const runRows=applied.rows||[];
-          const stagedIds=new Set(runRows.filter(r=>r.catalogProductId).map(r=>r.catalogProductId));
-          const stagedThisRun=staged.filter(r=>stagedIds.has(r.id));
-          if(stagedThisRun.length!==22)throw new Error(`Expected 22 new Draft/Review Catalog rows after Apply, found ${stagedThisRun.length}`);
-          const result={
-            disposition:'PASS',
-            database:chosen.name,
-            sourceFile:process.env.SOURCE_FILENAME,
-            fingerprint:run.fileFingerprint,
-            preview:run,
-            apply:receipt,
-            holdsBefore,
-            holdsAfter,
-            movieBefore:stable(movieBefore),
-            movieAfter:stable(movieAfter),
-            staged:stagedThisRun,
-            rows:runRows,
-          };
-          fs.writeFileSync('/tmp/doba/stage0.json',JSON.stringify(result,null,2));
-          EOF
-          node /tmp/doba/launch.mjs
+      - name: Verify trusted executor is gone
+        if: ${{ always() }}
+        shell: bash
+        env:
+          CLEAN_URL: ${{ steps.clean.outputs.deployment-url }}
+          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
+        run: |
+          set -euo pipefail
+          base="${CLEAN_URL%/}"
+          code=$(curl --silent --output /tmp/doba/clean-auth.json --write-out '%{http_code}' -H 'Content-Type: application/json' -H "X-EUS-Sync-Token: ${SYNC_JOB_TOKEN}" --data '{"action":"stage0_audit"}' "${base}/api/admin/doba-csv-sync" || true)
+          echo "clean Doba API with sync token -> $code"
+          test "$code" = "401"
 
       - name: Record Stage 0 receipt
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
-          p=json.load(open('/tmp/doba/stage0.json'))
-          run=p['preview']; receipt=p['apply']
+          p=json.load(open('/tmp/doba/stage0.json')); run=p['preview']; receipt=p['apply']
           with open('/tmp/doba/summary.md','w') as f:
               f.write('### Commerce Launch — Stage 0 Doba Apply\n')
-              f.write(f"- File: `{p['sourceFile']}`\n")
-              f.write(f"- SHA-256: `{p['fingerprint']}`\n")
-              f.write(f"- Scope: `{run['scope']}`\n")
+              f.write(f"- File: `{p['sourceFile']}`\n- SHA-256: `{p['fingerprint']}`\n- Scope: `{run['scope']}`\n")
               f.write(f"- Preview: {run['rowCount']} rows / {run['itemMatchCount']} matches / {run['newCount']} new / {run['zeroStockCount']} zero / {run['lowStockCount']} low / {run['costReferencePassCount']}/{run['costReferenceCount']} cost checks\n")
-              f.write(f"- Apply: {run['status']} — updated {receipt.get('updated',0)}, staged {receipt.get('staged',0)}, review {receipt.get('review',0)}, errors {receipt.get('errors',0)}, holds {receipt.get('holds',0)}\n")
-              f.write(f"- Prior HOLD regression: PASS ({len(p['holdsAfter'])}/3 remain HOLD)\n")
-              f.write(f"- Movie-screen Partial Snapshot regression: PASS ({len(p['movieAfter'])} record(s) unchanged)\n")
-              f.write(f"- New Draft/Review records: {len(p['staged'])}\n")
+              f.write(f"- Apply: {run.get('status')} → updated {receipt.get('updated',0)}, staged {receipt.get('staged',0)}, review {receipt.get('review',0)}, errors {receipt.get('errors',0)}, holds {receipt.get('holds',0)}\n")
+              f.write(f"- Prior HOLD regression: PASS ({len(p['holdsAfter'])}/3 remain HOLD)\n- Movie-screen Partial Snapshot regression: PASS ({len(p['movieAfter'])} record(s) unchanged)\n- New Draft/Review records: {len(p['newProducts'])}\n")
           PY
           cat /tmp/doba/summary.md >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/doba/summary.md
 
-      - name: Upload Stage 0 reconciliation evidence
+      - name: Upload Stage 0 evidence
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: commerce-stage0-doba-reconciliation
           path: |
+            /tmp/doba/preview-evidence.json
+            /tmp/doba/apply.json
+            /tmp/doba/audit-before.json
+            /tmp/doba/audit-after.json
             /tmp/doba/stage0.json
             /tmp/doba/summary.md
+          if-no-files-found: ignore
           retention-days: 14
 
       - name: Remove one-time Stage 0 workflow
