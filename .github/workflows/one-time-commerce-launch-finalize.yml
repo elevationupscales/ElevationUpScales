@@ -22,7 +22,7 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Validate production application lineage
+      - name: Validate accepted production application
         shell: bash
         run: |
           set -euo pipefail
@@ -32,7 +32,7 @@ jobs:
           grep -q 'blockedStates.includes(destinationState)' site/store-checkout-server.js
           grep -q 'handleApparelProviderAdminApi' site/_worker.js
 
-      - name: Deploy final clean application code before data mutation
+      - name: Deploy clean destination-hardened application
         id: clean_before
         uses: cloudflare/wrangler-action@v4
         with:
@@ -49,65 +49,160 @@ jobs:
           echo "::add-mask::$nonce"
           echo "EUS_COMMERCE_NONCE=$nonce" >> "$GITHUB_ENV"
 
-      - name: Add temporary one-run reconciliation actions locally
+      - name: Build temporary atomic reconciliation executor
         shell: bash
         run: |
           set -euo pipefail
-          cp site/doba-csv-sync-runtime.js /tmp/doba-runtime.clean.js
-          cp site/apparel-provider-runtime.js /tmp/apparel-runtime.clean.js
+          cp site/_worker.js /tmp/worker.clean.js
+          cp site/_routes.json /tmp/routes.clean.json
+          cp site/apparel-provider-runtime.js /tmp/apparel-provider.clean.js
+          cat > site/commerce-launch-finalize-runtime.js <<'EOF'
+          const clean=(v,max=500)=>String(v??"").trim().slice(0,max);
+          const int=(v,f=-1)=>{const n=Number.parseInt(String(v??""),10);return Number.isFinite(n)?n:f;};
+          const json=(data,status=200)=>Response.json(data,{status,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
+          const timingSafe=(a,b)=>{const x=new TextEncoder().encode(String(a??"")),y=new TextEncoder().encode(String(b??""));if(x.length!==y.length)return false;let d=0;for(let i=0;i<x.length;i+=1)d|=x[i]^y[i];return d===0;};
+          const now=()=>new Date().toISOString();
+          const eventId=()=>`commerce_evt-${crypto.randomUUID()}`;
+          const NONCE="__NONCE__";
+          const FINGERPRINT="f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb";
+          const HOLD_ITEMS=["D0102HPBE86","D0102HGKRVV","D0102HHVH7A"];
+          const EXISTING={
+            D0102HGKRVV:"S35CUFT21INCHNVK3V0",D010277TCB2:"DGYWSJGDXDTKA7G1TV9",D0102HPBE86:"ZPSLTZS125X1X8KS1V0",D0102HGWKXG:"DDJSQJDTJDDD3GJPZV9",D0102HRMZW6:"YDSDWS20107FTIA39V0",D01027HXHHA:"8LPG-8LYHQRSQ0001V0",D0102HHVH7A:"22371752",D0102H2V6BY:"MG12V570PSI12969RV0",D01027HHGCG:"SLBXSYXJYK2J7LCCP001V0",D01027HX25W:"JSBXSYXJYK1JZQGCS001V0"
+          };
+          const PLAN=[
+            ["D01027R30RP","SDJXGJTZ297PK96O8001V0","Tools & Workshop",12299,true,""],
+            ["D010275E6ZT","JYBLGSBXS120SYTFS001V6","Tools & Workshop",1299,true,""],
+            ["D01027HX2YY","CJTTTZCRVCZ9LCTIM001V0","Tools & Workshop",3999,true,""],
+            ["D01027RQ4Q2","ZJKXLDJG20WWXSNAU001Y3","Solar & Off-Grid",3199,true,""],
+            ["D010275S8IJ","HB-DN008-BC","Travel & Organization",2199,true,""],
+            ["D0102HAHR6G","GPCT2430","Travel & Organization",2299,false,"Low supplier stock (6) — review before publishing."],
+            ["D0102HSVG66","DZCTYJCXT20LEC0JTV9","RV Essentials & Water",12499,true,""],
+            ["D0102HAHP97","GPCT2443","Solar & Off-Grid",2299,true,""],
+            ["D0102HLHR4G","LMHSGWFDK3014DZJGV0","Tools & Workshop",5999,true,""],
+            ["D01027RSVIP","ATVZBBYZJYX7J23YQV0","Automotive, ATV & Towing",29999,true,""],
+            ["D01027R8U0P","DLZQGJFJCS65OM4YA001V1","Tools & Workshop",22999,true,""],
+            ["D0101HIT65W","JP193A265","Outdoor Lighting & Power",2199,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
+            ["D0101HIU317","JP193A262","Outdoor Lighting & Power",1399,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
+            ["D0101HIT6R7","JP193A266","Outdoor Lighting & Power",2199,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
+            ["D0101HIUPBA","JP193A263","Outdoor Lighting & Power",2299,false,"Camping-light variant family needs customer-facing variant distinction before publishing."],
+            ["D010277UK36","TMNMJD1JZ20MA4P4M001V0","Tools & Workshop",1099,true,""],
+            ["D01027753G8","DA88_MPPT_100A","Solar & Off-Grid",1899,false,"Supplier stock is 0 — unavailable until a future source refresh."],
+            ["D01027753GP","EA194_MPPT_60A","Solar & Off-Grid",1699,false,"MPPT variant family plus low supplier stock (7) requires review."],
+            ["D0102775326","EA190_MPPT_30A","Solar & Off-Grid",1599,false,"Supplier stock is 0 — unavailable until a future source refresh."],
+            ["D0102HG47FW","ZLSJ8GALSLNTZLQDBV1","Other / Review",10499,false,"Other / Review assortment fit — keep staged until merchandising approval."],
+            ["D0102HGJY6W","HYTCWGK15CUFTPB5GV0","Automotive, ATV & Towing",28499,true,""],
+            ["D01027R99ZP","BXSRQRSQMB6LQQ3SZV9","RV Essentials & Water",8999,false,"Supplier stock is 0 — unavailable until a future source refresh."]
+          ].map(([itemNo,supplierSku,category,priceCents,publish,reason])=>({itemNo,supplierSku,category,priceCents,publish,reason}));
+          const ALLOWED_CATEGORIES=new Set(["RV Essentials & Water","Solar & Off-Grid","Camping & Shelter","Automotive, ATV & Towing","Tools & Workshop","Outdoor Lighting & Power","Travel & Organization","Other / Review"]);
+
+          async function finalizer(request,env){
+            if(request.method!=="POST")return json({error:"Method not allowed"},405);
+            const supplied=clean(request.headers.get("X-EUS-Commerce-Nonce"),500);
+            if(!supplied||!timingSafe(supplied,NONCE))return json({error:"Not authorized"},401);
+            const db=env?.MARKETPLACE_DB;
+            if(!db||typeof db.prepare!=="function")return json({error:"Commerce database unavailable"},503);
+            try{
+              const run=await db.prepare("SELECT id,status FROM eus_doba_csv_runs WHERE file_fingerprint=? AND status LIKE 'APPLIED%' ORDER BY applied_at DESC LIMIT 1").bind(FINGERPRINT).first();
+              if(!run)throw new Error("Stage 0 applied Doba run is missing");
+              const sourceResult=await db.prepare("SELECT * FROM eus_doba_source_state WHERE last_file_fingerprint=?").bind(FINGERPRINT).all();
+              const sources=sourceResult.results||[];
+              if(sources.length!==32)throw new Error("Expected 32 current Doba source rows, found "+sources.length);
+              const sourceByItem=new Map(sources.map(row=>[clean(row.item_no,180),row]));
+              const holdBeforeResult=await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id").bind(...HOLD_ITEMS).all();
+              const holdBefore=holdBeforeResult.results||[];
+              if(holdBefore.length!==3||holdBefore.some(r=>clean(r.publish_status,30)!=="hold"))throw new Error("Existing three-product HOLD regression failed before finalization");
+
+              const existingRows=[];
+              for(const [itemNo,expectedSku] of Object.entries(EXISTING)){
+                const src=sourceByItem.get(itemNo);
+                if(!src||clean(src.supplier_sku,180)!==expectedSku)throw new Error("Exact Doba SKU source mismatch for "+itemNo);
+                const row=await db.prepare("SELECT i.id,i.sku,i.price_cents,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id=? LIMIT 1").bind(itemNo).first();
+                if(!row)throw new Error("Existing Catalog item missing: "+itemNo);
+                const stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1);
+                const shippingReady=stock>0&&Boolean(clean(src.ship_to,300))&&Boolean(clean(src.shipping_method,200))&&ship>=0;
+                existingRows.push({itemNo,expectedSku,src,row,stock,ship,shippingReady,hold:clean(row.publish_status,30)==="hold"});
+              }
+
+              const newRows=[];
+              for(const plan of PLAN){
+                if(!ALLOWED_CATEGORIES.has(plan.category))throw new Error("Unsupported normalized category for "+plan.itemNo);
+                const src=sourceByItem.get(plan.itemNo);
+                if(!src||clean(src.supplier_sku,180)!==plan.supplierSku)throw new Error("Exact Doba source mismatch for new product "+plan.itemNo);
+                const row=await db.prepare("SELECT i.id,i.sku,i.name,m.primary_image,m.publish_status FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id=? LIMIT 1").bind(plan.itemNo).first();
+                if(!row)throw new Error("Staged Doba product missing: "+plan.itemNo);
+                const cost=int(src.base_cost_cents,-1),stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1),exportPrice=int(src.export_price_cents,-1);
+                if(cost<=0||plan.priceCents<=0||plan.priceCents<exportPrice)throw new Error("Retail/cost readiness failed for "+plan.itemNo);
+                const contribution=plan.priceCents-cost-Math.max(0,ship),margin=contribution/plan.priceCents;
+                const shippingReady=stock>0&&Boolean(clean(src.ship_to,300))&&Boolean(clean(src.shipping_method,200))&&ship>=0;
+                if(plan.publish){
+                  if(stock<=10)throw new Error("Publish blocked by stock for "+plan.itemNo);
+                  if(!shippingReady)throw new Error("Publish blocked by shipping for "+plan.itemNo);
+                  if(!clean(row.primary_image,1200))throw new Error("Publish blocked by image for "+plan.itemNo);
+                  if(contribution<500||margin<0.20)throw new Error("Publish blocked by margin for "+plan.itemNo);
+                }
+                newRows.push({plan,src,row,cost,stock,ship,exportPrice,contribution,margin,shippingReady});
+              }
+              if(newRows.length!==22||newRows.filter(x=>x.plan.publish).length!==12)throw new Error("Commerce plan count mismatch before write");
+
+              const stamp=now(),adminEmail="deployment-manager@elevationupscales.com",statements=[];
+              for(const item of existingRows){
+                const review=item.hold?clean(item.row.review_state,300):"";
+                statements.push(db.prepare("UPDATE eus_inventory_items SET cost_cents=?,source_url=?,updated_at=?,version=version+1 WHERE id=?").bind(item.src.base_cost_cents,item.src.source_url||"",stamp,item.row.id));
+                statements.push(db.prepare("UPDATE eus_catalog_meta SET supplier_sku=?,supplier_stock=?,shipping_status=?,shipping_cents=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(item.expectedSku,item.stock,item.shippingReady?"verified":"unverified",item.ship>=0?item.ship:null,review,stamp,adminEmail,item.row.id));
+                statements.push(db.prepare("INSERT INTO eus_doba_csv_events(id,run_id,row_id,catalog_product_id,item_no,supplier_sku,event_type,status,details_json,admin_email,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(eventId(),run.id,"",item.row.id,item.itemNo,item.expectedSku,"commerce_existing_sku_reconciled","OK",JSON.stringify({holdPreserved:item.hold,stock:item.stock,shippingReady:item.shippingReady}),adminEmail,stamp));
+              }
+              for(const item of newRows){
+                const p=item.plan,publishStatus=p.publish?"published":item.stock===0?"hold":"draft",reviewState=p.publish?"":p.reason;
+                statements.push(db.prepare("UPDATE eus_inventory_items SET category=?,cost_cents=?,price_cents=?,status=?,source_url=?,sales_channels_json=?,updated_at=?,version=version+1 WHERE id=?").bind(p.category,item.cost,p.priceCents,p.publish?"active":"paused",item.src.source_url||"",JSON.stringify(["website"]),stamp,item.row.id));
+                statements.push(db.prepare("UPDATE eus_catalog_meta SET supplier_sku=?,supplier_stock=?,shipping_status=?,shipping_cents=?,store_section='rv-outdoor',publish_status=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(p.supplierSku,item.stock,item.shippingReady?"verified":item.stock===0?"hold":"unverified",item.ship>=0?item.ship:null,publishStatus,reviewState,stamp,adminEmail,item.row.id));
+                statements.push(db.prepare("UPDATE eus_doba_csv_rows SET classification=?,blocker=?,applied_state='APPLIED',applied_at=? WHERE run_id=? AND item_no=?").bind(p.publish?"PUBLISHED — READY":publishStatus==="hold"?"HOLD — NOT READY":"STAGED — REVIEW",reviewState,stamp,run.id,p.itemNo));
+                statements.push(db.prepare("UPDATE eus_doba_source_state SET catalog_product_id=?,last_observed_at=? WHERE item_no=? AND supplier_sku=?").bind(item.row.id,stamp,p.itemNo,p.supplierSku));
+                statements.push(db.prepare("INSERT INTO eus_doba_csv_events(id,run_id,row_id,catalog_product_id,item_no,supplier_sku,event_type,status,details_json,admin_email,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(eventId(),run.id,"",item.row.id,p.itemNo,p.supplierSku,p.publish?"commerce_product_published":"commerce_product_reviewed","OK",JSON.stringify({category:p.category,priceCents:p.priceCents,costCents:item.cost,shippingCents:Math.max(0,item.ship),stock:item.stock,contributionCents:item.contribution,margin:Number(item.margin.toFixed(4)),reason:reviewState}),adminEmail,stamp));
+              }
+              await db.batch(statements);
+
+              const holdAfterResult=await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id").bind(...HOLD_ITEMS).all();
+              const holdAfter=holdAfterResult.results||[];
+              if(holdAfter.length!==3||holdAfter.some(r=>clean(r.publish_status,30)!=="hold"))throw new Error("Existing HOLD regression failed after finalization");
+              const itemNos=PLAN.map(x=>x.itemNo),marks=itemNos.map(()=>'?').join(',');
+              const finalResult=await db.prepare("SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.store_section,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN ("+marks+") ORDER BY i.supplier_product_id").bind(...itemNos).all();
+              const rows=finalResult.results||[],published=rows.filter(r=>clean(r.publish_status,30)==="published").length;
+              if(rows.length!==22||published!==12)throw new Error("Final Doba disposition mismatch after write");
+              return json({ok:true,runId:run.id,fingerprint:FINGERPRINT,existingReconciled:existingRows.length,newPriced:rows.length,newPublished:published,newReview:rows.length-published,holdsPreserved:holdAfter.length,rows});
+            }catch(error){return json({error:clean(error?.message,700)||"Commerce finalization failed"},500);}
+          }
+          export async function handleCommerceLaunchFinalizeApi(request,env){return finalizer(request,env);}
+          EOF
           python - <<'PY'
           from pathlib import Path
-          import json, os
+          import os,json
           nonce=os.environ['EUS_COMMERCE_NONCE']
-          plan=[
-            {"itemNo":"D01027R30RP","supplierSku":"SDJXGJTZ297PK96O8001V0","category":"Tools & Workshop","priceCents":12299,"publish":True,"reason":""},
-            {"itemNo":"D010275E6ZT","supplierSku":"JYBLGSBXS120SYTFS001V6","category":"Tools & Workshop","priceCents":1299,"publish":True,"reason":""},
-            {"itemNo":"D01027HX2YY","supplierSku":"CJTTTZCRVCZ9LCTIM001V0","category":"Tools & Workshop","priceCents":3999,"publish":True,"reason":""},
-            {"itemNo":"D01027RQ4Q2","supplierSku":"ZJKXLDJG20WWXSNAU001Y3","category":"Solar & Off-Grid","priceCents":3199,"publish":True,"reason":""},
-            {"itemNo":"D010275S8IJ","supplierSku":"HB-DN008-BC","category":"Travel & Organization","priceCents":2199,"publish":True,"reason":""},
-            {"itemNo":"D0102HAHR6G","supplierSku":"GPCT2430","category":"Travel & Organization","priceCents":2299,"publish":False,"reason":"Low supplier stock (6) — review before publishing."},
-            {"itemNo":"D0102HSVG66","supplierSku":"DZCTYJCXT20LEC0JTV9","category":"RV Essentials & Water","priceCents":12499,"publish":True,"reason":""},
-            {"itemNo":"D0102HAHP97","supplierSku":"GPCT2443","category":"Solar & Off-Grid","priceCents":2299,"publish":True,"reason":""},
-            {"itemNo":"D0102HLHR4G","supplierSku":"LMHSGWFDK3014DZJGV0","category":"Tools & Workshop","priceCents":5999,"publish":True,"reason":""},
-            {"itemNo":"D01027RSVIP","supplierSku":"ATVZBBYZJYX7J23YQV0","category":"Automotive, ATV & Towing","priceCents":29999,"publish":True,"reason":""},
-            {"itemNo":"D01027R8U0P","supplierSku":"DLZQGJFJCS65OM4YA001V1","category":"Tools & Workshop","priceCents":22999,"publish":True,"reason":""},
-            {"itemNo":"D0101HIT65W","supplierSku":"JP193A265","category":"Outdoor Lighting & Power","priceCents":2199,"publish":False,"reason":"Camping-light variant family needs customer-facing variant distinction before publishing."},
-            {"itemNo":"D0101HIU317","supplierSku":"JP193A262","category":"Outdoor Lighting & Power","priceCents":1399,"publish":False,"reason":"Camping-light variant family needs customer-facing variant distinction before publishing."},
-            {"itemNo":"D0101HIT6R7","supplierSku":"JP193A266","category":"Outdoor Lighting & Power","priceCents":2199,"publish":False,"reason":"Camping-light variant family needs customer-facing variant distinction before publishing."},
-            {"itemNo":"D0101HIUPBA","supplierSku":"JP193A263","category":"Outdoor Lighting & Power","priceCents":2299,"publish":False,"reason":"Camping-light variant family needs customer-facing variant distinction before publishing."},
-            {"itemNo":"D010277UK36","supplierSku":"TMNMJD1JZ20MA4P4M001V0","category":"Tools & Workshop","priceCents":1099,"publish":True,"reason":""},
-            {"itemNo":"D01027753G8","supplierSku":"DA88_MPPT_100A","category":"Solar & Off-Grid","priceCents":1899,"publish":False,"reason":"Supplier stock is 0 — unavailable until a future source refresh."},
-            {"itemNo":"D01027753GP","supplierSku":"EA194_MPPT_60A","category":"Solar & Off-Grid","priceCents":1699,"publish":False,"reason":"MPPT variant family plus low supplier stock (7) requires review."},
-            {"itemNo":"D0102775326","supplierSku":"EA190_MPPT_30A","category":"Solar & Off-Grid","priceCents":1599,"publish":False,"reason":"Supplier stock is 0 — unavailable until a future source refresh."},
-            {"itemNo":"D0102HG47FW","supplierSku":"ZLSJ8GALSLNTZLQDBV1","category":"Other / Review","priceCents":10499,"publish":False,"reason":"Other / Review assortment fit — keep staged until merchandising approval."},
-            {"itemNo":"D0102HGJY6W","supplierSku":"HYTCWGK15CUFTPB5GV0","category":"Automotive, ATV & Towing","priceCents":28499,"publish":True,"reason":""},
-            {"itemNo":"D01027R99ZP","supplierSku":"BXSRQRSQMB6LQQ3SZV9","category":"RV Essentials & Water","priceCents":8999,"publish":False,"reason":"Supplier stock is 0 — unavailable until a future source refresh."}
-          ]
-          existing={
-            "D0102HGKRVV":"S35CUFT21INCHNVK3V0","D010277TCB2":"DGYWSJGDXDTKA7G1TV9","D0102HPBE86":"ZPSLTZS125X1X8KS1V0","D0102HGWKXG":"DDJSQJDTJDDD3GJPZV9","D0102HRMZW6":"YDSDWS20107FTIA39V0","D01027HXHHA":"8LPG-8LYHQRSQ0001V0","D0102HHVH7A":"22371752","D0102H2V6BY":"MG12V570PSI12969RV0","D01027HHGCG":"SLBXSYXJYK2J7LCCP001V0","D01027HX25W":"JSBXSYXJYK1JZQGCS001V0"
-          }
-          p=Path('site/doba-csv-sync-runtime.js');s=p.read_text(encoding='utf-8')
-          old='async function requireAdmin(request,env){const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          new=f'async function requireAdmin(request,env){{const trusted=clean(request.headers.get("X-EUS-Commerce-Nonce"),500),expectedCommerce="{nonce}";if(trusted&&timingSafe(trusted,expectedCommerce))return{{session:{{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}}}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          if old not in s: raise SystemExit('Doba requireAdmin marker missing')
-          s=s.replace(old,new,1)
-          fn=f'''\nconst COMMERCE_LAUNCH_PLAN={json.dumps(plan,separators=(',',':'))};\nconst COMMERCE_EXISTING_SKUS={json.dumps(existing,separators=(',',':'))};\nasync function finalizeCommerceLaunch(db,adminEmail){{\n  const fingerprint="f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb",stamp=now();\n  const run=await db.prepare("SELECT id,status FROM eus_doba_csv_runs WHERE file_fingerprint=? AND status LIKE 'APPLIED%' ORDER BY applied_at DESC LIMIT 1").bind(fingerprint).first();\n  if(!run)throw new Error("Stage 0 applied Doba run is missing");\n  const sourceResult=await db.prepare("SELECT * FROM eus_doba_source_state WHERE last_file_fingerprint=?").bind(fingerprint).all(),sources=sourceResult.results||[];\n  if(sources.length!==32)throw new Error(`Expected 32 current Doba source rows, found ${{sources.length}}`);\n  const sourceByItem=new Map(sources.map(row=>[clean(row.item_no,180),row]));\n  const holdItems=["D0102HPBE86","D0102HGKRVV","D0102HHVH7A"];\n  const holdBefore=await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id").bind(...holdItems).all();\n  if((holdBefore.results||[]).length!==3||(holdBefore.results||[]).some(r=>clean(r.publish_status,30)!=="hold"))throw new Error("Existing three-product HOLD regression failed before finalization");\n  let existingReconciled=0,newPriced=0,newPublished=0,newReview=0;const events=[];\n  for(const [itemNo,expectedSku] of Object.entries(COMMERCE_EXISTING_SKUS)){{\n    const src=sourceByItem.get(itemNo);if(!src||clean(src.supplier_sku,180)!==expectedSku)throw new Error(`Exact Doba SKU source mismatch for ${{itemNo}}`);\n    const row=await db.prepare("SELECT i.id,i.sku,i.price_cents,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id=? LIMIT 1").bind(itemNo).first();if(!row)throw new Error(`Existing Catalog item missing: ${{itemNo}}`);\n    const stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1),shippingReady=stock>0&&clean(src.ship_to,300)&&clean(src.shipping_method,200)&&ship>=0;\n    const hold=clean(row.publish_status,30)==="hold",review=hold?clean(row.review_state,300):"";\n    await db.prepare("UPDATE eus_inventory_items SET cost_cents=?,source_url=?,updated_at=?,version=version+1 WHERE id=?").bind(src.base_cost_cents,src.source_url||"",stamp,row.id).run();\n    await db.prepare("UPDATE eus_catalog_meta SET supplier_sku=?,supplier_stock=?,shipping_status=?,shipping_cents=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(expectedSku,stock,shippingReady?"verified":"unverified",ship>=0?ship:null,review,stamp,adminEmail,row.id).run();\n    await saveEvent(db,{{runId:run.id,catalogProductId:row.id,itemNo,supplierSku:expectedSku,eventType:"commerce_existing_sku_reconciled",details:{{holdPreserved:hold,stock,shippingReady}},adminEmail}});existingReconciled+=1;\n  }}\n  const allowedCategories=new Set(["RV Essentials & Water","Solar & Off-Grid","Camping & Shelter","Automotive, ATV & Towing","Tools & Workshop","Outdoor Lighting & Power","Travel & Organization","Other / Review"]);\n  for(const plan of COMMERCE_LAUNCH_PLAN){{\n    if(!allowedCategories.has(plan.category))throw new Error(`Unsupported normalized category for ${{plan.itemNo}}`);\n    const src=sourceByItem.get(plan.itemNo);if(!src||clean(src.supplier_sku,180)!==plan.supplierSku)throw new Error(`Exact Doba source mismatch for new product ${{plan.itemNo}}`);\n    const row=await db.prepare("SELECT i.id,i.sku,i.name,m.primary_image,m.publish_status FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id=? LIMIT 1").bind(plan.itemNo).first();if(!row)throw new Error(`Staged Doba product missing: ${{plan.itemNo}}`);\n    const cost=int(src.base_cost_cents,-1),stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1),exportPrice=int(src.export_price_cents,-1);\n    if(cost<=0||plan.priceCents<=0||plan.priceCents<exportPrice)throw new Error(`Retail/cost readiness failed for ${{plan.itemNo}}`);\n    const contribution=plan.priceCents-cost-Math.max(0,ship),margin=contribution/plan.priceCents;\n    const shippingReady=stock>0&&clean(src.ship_to,300)&&clean(src.shipping_method,200)&&ship>=0;\n    if(plan.publish){{if(stock<=10)throw new Error(`Publish blocked by stock for ${{plan.itemNo}}`);if(!shippingReady)throw new Error(`Publish blocked by shipping for ${{plan.itemNo}}`);if(!clean(row.primary_image,1200))throw new Error(`Publish blocked by image for ${{plan.itemNo}}`);if(contribution<500||margin<0.20)throw new Error(`Publish blocked by margin for ${{plan.itemNo}}`);}}\n    const publishStatus=plan.publish?"published":stock===0?"hold":"draft",reviewState=plan.publish?"":plan.reason;\n    await db.prepare("UPDATE eus_inventory_items SET category=?,cost_cents=?,price_cents=?,status=?,source_url=?,sales_channels_json='[\\\"website\\\"]',updated_at=?,version=version+1 WHERE id=?").bind(plan.category,cost,plan.priceCents,plan.publish?"active":"paused",src.source_url||"",stamp,row.id).run();\n    await db.prepare("UPDATE eus_catalog_meta SET supplier_sku=?,supplier_stock=?,shipping_status=?,shipping_cents=?,store_section='rv-outdoor',publish_status=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(plan.supplierSku,stock,shippingReady?"verified":stock===0?"hold":"unverified",ship>=0?ship:null,publishStatus,reviewState,stamp,adminEmail,row.id).run();\n    await db.prepare("UPDATE eus_doba_csv_rows SET classification=?,blocker=?,applied_state='APPLIED',applied_at=? WHERE run_id=? AND item_no=?").bind(plan.publish?"PUBLISHED — READY":publishStatus==="hold"?"HOLD — NOT READY":"STAGED — REVIEW",reviewState,stamp,run.id,plan.itemNo).run();\n    await db.prepare("UPDATE eus_doba_source_state SET catalog_product_id=?,last_observed_at=? WHERE item_no=? AND supplier_sku=?").bind(row.id,stamp,plan.itemNo,plan.supplierSku).run();\n    await saveEvent(db,{{runId:run.id,catalogProductId:row.id,itemNo:plan.itemNo,supplierSku:plan.supplierSku,eventType:plan.publish?"commerce_product_published":"commerce_product_reviewed",details:{{category:plan.category,priceCents:plan.priceCents,costCents:cost,shippingCents:Math.max(0,ship),stock,contributionCents:contribution,margin:Number(margin.toFixed(4)),reason:reviewState}},adminEmail}});\n    newPriced+=1;if(plan.publish)newPublished+=1;else newReview+=1;\n  }}\n  const holdAfter=await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id").bind(...holdItems).all();\n  if((holdAfter.results||[]).length!==3||(holdAfter.results||[]).some(r=>clean(r.publish_status,30)!=="hold"))throw new Error("Existing HOLD regression failed after finalization");\n  const newItems=COMMERCE_LAUNCH_PLAN.map(x=>x.itemNo),marks=newItems.map(()=>'?').join(',');\n  const finalRows=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.store_section,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (${{marks}}) ORDER BY i.supplier_product_id`).bind(...newItems).all();\n  const published=(finalRows.results||[]).filter(r=>clean(r.publish_status,30)==="published").length,reviewed=(finalRows.results||[]).length-published;\n  if((finalRows.results||[]).length!==22||published!==12||reviewed!==10)throw new Error(`Final Doba disposition mismatch: rows=${{(finalRows.results||[]).length}}, published=${{published}}, review=${{reviewed}}`);\n  return{{ok:true,runId:run.id,fingerprint,existingReconciled,newPriced,newPublished,newReview,holdsPreserved:3,rows:finalRows.results||[]}};\n}}\n'''
-          marker='export async function handleDobaCsvSyncAdminApi(request,env,pathname)'
-          if marker not in s: raise SystemExit('Doba handler insertion marker missing')
-          s=s.replace(marker,fn+'\n'+marker,1)
-          oldaction='const raw=await body(request),action=clean(raw.action,40).toLowerCase();try{if(action==="preview")'
-          newaction='const raw=await body(request),action=clean(raw.action,40).toLowerCase();try{if(action==="commerce_launch_finalize")return json(await finalizeCommerceLaunch(db,auth.session.email));if(action==="preview")'
-          if oldaction not in s: raise SystemExit('Doba action marker missing')
-          s=s.replace(oldaction,newaction,1);p.write_text(s,encoding='utf-8')
+          p=Path('site/commerce-launch-finalize-runtime.js')
+          p.write_text(p.read_text(encoding='utf-8').replace('__NONCE__',nonce),encoding='utf-8')
 
+          # Temporarily authorize provider reconciliation with the same one-run nonce.
           p=Path('site/apparel-provider-runtime.js');s=p.read_text(encoding='utf-8')
           old='async function requireAdmin(request,env){const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          new=f'async function requireAdmin(request,env){{const trusted=clean(request.headers.get("X-EUS-Commerce-Nonce"),500),expectedCommerce="{nonce}";if(trusted&&timingSafe(trusted,expectedCommerce))return{{session:{{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}}}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          if old not in s: raise SystemExit('Provider requireAdmin marker missing')
+          new='async function requireAdmin(request,env){const trusted=clean(request.headers.get("X-EUS-Commerce-Nonce"),500),expectedCommerce="'+nonce+'";if(trusted&&timingSafe(trusted,expectedCommerce))return{session:{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
+          if old not in s: raise SystemExit('provider auth marker missing')
           p.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          # Temporarily route the finalizer through the production Worker and keep its module private.
+          p=Path('site/_worker.js');s=p.read_text(encoding='utf-8')
+          import_marker='import { handleApparelProviderAdminApi } from "./apparel-provider-runtime.js";'
+          s=s.replace(import_marker,import_marker+'\nimport { handleCommerceLaunchFinalizeApi } from "./commerce-launch-finalize-runtime.js";',1)
+          s=s.replace('"/doba-csv-sync-runtime.js", "/apparel-provider-runtime.js"','"/doba-csv-sync-runtime.js", "/apparel-provider-runtime.js", "/commerce-launch-finalize-runtime.js"',1)
+          route_marker='''    if (url.pathname === "/api/admin/apparel-providers") {\n      return handleApparelProviderAdminApi(request, env, url.pathname);\n    }'''
+          s=s.replace(route_marker,route_marker+'\n\n    if (url.pathname === "/api/admin/commerce-launch-finalize") {\n      return handleCommerceLaunchFinalizeApi(request, env);\n    }',1)
+          p.write_text(s,encoding='utf-8')
+
+          r=Path('site/_routes.json');data=json.loads(r.read_text(encoding='utf-8'))
+          if '/commerce-launch-finalize-runtime.js' not in data['include']: data['include'].append('/commerce-launch-finalize-runtime.js')
+          r.write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
           PY
-          node --check site/doba-csv-sync-runtime.js
+          node --check site/commerce-launch-finalize-runtime.js
           node --check site/apparel-provider-runtime.js
+          node --check site/_worker.js
 
       - name: Deploy temporary reconciliation executor
         id: executor
@@ -125,27 +220,25 @@ jobs:
         run: |
           set -euo pipefail
           base="${BASE%/}"
-          call(){
-            method="$1" path="$2" body="$3" out="$4"
-            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 120 -X "$method" -H 'Content-Type: application/json' -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" ${body:+--data "$body"} -o "$out" -w '%{http_code}' "${base}${path}" || true)
-            echo "${path} -> ${code}"
-            test "$code" = "200"
-          }
-          call POST /api/admin/doba-csv-sync '{"action":"commerce_launch_finalize"}' /tmp/doba-finalize.json
-          call GET /api/admin/apparel-providers '' /tmp/providers-before.json
+          code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 120 -H 'Content-Type: application/json' -H "Origin: ${base}" -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{}' -o /tmp/doba-finalize.json -w '%{http_code}' "${base}/api/admin/commerce-launch-finalize" || true)
+          echo "commerce finalizer -> $code"
+          cat /tmp/doba-finalize.json
+          test "$code" = "200"
+          code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" -o /tmp/providers-before.json -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
+          test "$code" = "200"
           python - <<'PY'
           import json
-          p=json.load(open('/tmp/doba-finalize.json'))
-          assert p['existingReconciled']==10,p
-          assert p['newPriced']==22,p
-          assert p['newPublished']==12,p
-          assert p['newReview']==10,p
-          assert p['holdsPreserved']==3,p
-          providers=json.load(open('/tmp/providers-before.json')).get('providers',{})
-          assert providers.get('printful',{}).get('state')=='Not Configured',providers
-          assert providers.get('spreadconnect',{}).get('state')=='Not Configured',providers
-          print('Doba finalization receipt:',{k:p[k] for k in ['existingReconciled','newPriced','newPublished','newReview','holdsPreserved']})
-          print('Provider initial state:',providers)
+          d=json.load(open('/tmp/doba-finalize.json'))
+          assert d['existingReconciled']==10,d
+          assert d['newPriced']==22,d
+          assert d['newPublished']==12,d
+          assert d['newReview']==10,d
+          assert d['holdsPreserved']==3,d
+          p=json.load(open('/tmp/providers-before.json')).get('providers',{})
+          assert p.get('printful',{}).get('state')=='Not Configured',p
+          assert p.get('spreadconnect',{}).get('state')=='Not Configured',p
+          print('Doba reconciliation PASS:',{k:d[k] for k in ['existingReconciled','newPriced','newPublished','newReview','holdsPreserved']})
+          print('Provider state before Fourthwall reconcile:',p)
           PY
           fourthwall_configured=$(python - <<'PY'
           import json
@@ -154,32 +247,37 @@ jobs:
           PY
           )
           if [ "$fourthwall_configured" = yes ]; then
-            call POST /api/admin/apparel-providers '{"action":"reconcile","provider":"fourthwall"}' /tmp/fourthwall-reconcile.json
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -H 'Content-Type: application/json' -H "Origin: ${base}" -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{"action":"reconcile","provider":"fourthwall"}' -o /tmp/fourthwall-reconcile.json -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
+            echo "Fourthwall reconcile -> $code"
+            cat /tmp/fourthwall-reconcile.json
+            test "$code" = "200"
           else
             cp /tmp/providers-before.json /tmp/fourthwall-reconcile.json
           fi
-          call GET /api/admin/apparel-providers '' /tmp/providers-after.json
+          code=$(curl -sS -L --retry 6 -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" -o /tmp/providers-after.json -w '%{http_code}' "${base}/api/admin/apparel-providers" || true)
+          test "$code" = "200"
           python - <<'PY'
           import json
           p=json.load(open('/tmp/providers-after.json')).get('providers',{})
           fw=p.get('fourthwall',{})
-          if fw.get('configured'):
-              assert fw.get('state')=='Connected',fw
-          else:
-              assert fw.get('state')=='Not Configured',fw
+          if fw.get('configured'): assert fw.get('state')=='Connected',fw
+          else: assert fw.get('state')=='Not Configured',fw
           assert p.get('printful',{}).get('state')=='Not Configured',p
           assert p.get('spreadconnect',{}).get('state')=='Not Configured',p
           print('Provider final state:',p)
           PY
 
-      - name: Restore clean production source locally
+      - name: Restore clean source locally
         if: ${{ always() }}
         shell: bash
         run: |
           set -euo pipefail
-          cp /tmp/doba-runtime.clean.js site/doba-csv-sync-runtime.js
-          cp /tmp/apparel-runtime.clean.js site/apparel-provider-runtime.js
-          git diff --exit-code -- site/doba-csv-sync-runtime.js site/apparel-provider-runtime.js
+          cp /tmp/worker.clean.js site/_worker.js
+          cp /tmp/routes.clean.json site/_routes.json
+          cp /tmp/apparel-provider.clean.js site/apparel-provider-runtime.js
+          rm -f site/commerce-launch-finalize-runtime.js
+          git diff --exit-code -- site/_worker.js site/_routes.json site/apparel-provider-runtime.js
+          test ! -e site/commerce-launch-finalize-runtime.js
 
       - name: Redeploy clean production source
         if: ${{ always() }}
@@ -191,18 +289,18 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify final production catalog, checkout and providers
+      - name: Verify final production catalog, checkout and security
         shell: bash
         env:
           BASE: ${{ steps.clean_after.outputs.deployment-url }}
         run: |
           set -euo pipefail
           base="${BASE%/}"
-          # Temporary nonce must no longer authenticate.
-          test "$(curl -sS -o /tmp/auth -w '%{http_code}' -H 'Content-Type: application/json' -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{"action":"commerce_launch_finalize"}' "${base}/api/admin/doba-csv-sync" || true)" = "401"
+          test "$(curl -sS -o /tmp/auth -w '%{http_code}' -H 'Content-Type: application/json' -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" --data '{}' "${base}/api/admin/commerce-launch-finalize" || true)" = "404"
           test "$(curl -sS -o /tmp/auth2 -w '%{http_code}' -H "X-EUS-Commerce-Nonce: ${EUS_COMMERCE_NONCE}" "${base}/api/admin/apparel-providers" || true)" = "401"
-          # Public regression and new catalog visibility.
-          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders; do test "$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "${base}${route}" || true)" = "200"; done
+          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "${base}${route}" || true); echo "${route} -> $code"; test "$code" = "200";
+          done
           curl -sS -L --retry 6 "${base}/api/store-catalog?section=rv-outdoor" > /tmp/public-catalog.json
           python - <<'PY'
           import json
@@ -211,9 +309,9 @@ jobs:
           ids={str(r.get('id','')) for r in rows}
           required={'cat-8449060f-d3fc-4dd0-ac94-141092454544','cat-b36ff198-bbc5-4fd8-865d-270382ece6bc','cat-2cc952ec-f424-487f-a71b-20e7c38c3645'}
           assert required.issubset(ids),(len(rows),required-ids)
-          cats={r.get('category') for r in rows}
-          assert 'Tools & Workshop' in cats and 'Automotive, ATV & Towing' in cats,cats
-          print('public_rv_products=',len(rows),'categories=',sorted(x for x in cats if x))
+          categories={r.get('category') for r in rows}
+          assert 'Tools & Workshop' in categories and 'Automotive, ATV & Towing' in categories,categories
+          print('public_rv_products=',len(rows),'categories=',sorted(x for x in categories if x))
           PY
           allowed='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"CO"}}'
           blocked='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"HI"}}'
@@ -221,15 +319,17 @@ jobs:
           allowed_code=$(curl -sS -o /tmp/quote-allowed.json -w '%{http_code}' -H "Origin: ${base}" -H 'Content-Type: application/json' --data "$allowed" "${base}/api/store-checkout/quote" || true)
           blocked_code=$(curl -sS -o /tmp/quote-blocked.json -w '%{http_code}' -H "Origin: ${base}" -H 'Content-Type: application/json' --data "$blocked" "${base}/api/store-checkout/quote" || true)
           zero_code=$(curl -sS -o /tmp/quote-zero.json -w '%{http_code}' -H "Origin: ${base}" -H 'Content-Type: application/json' --data "$zero" "${base}/api/store-checkout/quote" || true)
-          echo "allowed CO quote -> $allowed_code"; echo "blocked HI quote -> $blocked_code"; echo "zero-stock quote -> $zero_code"
+          echo "CO quote -> $allowed_code"; echo "HI quote -> $blocked_code"; echo "zero-stock quote -> $zero_code"
           test "$allowed_code" = "200"
           test "$blocked_code" = "409"
           test "$zero_code" = "409"
-          grep -q 'rv-category-rail' <(curl -sS -L "${base}/rv-store.js")
-          test "$(curl -sS -o /tmp/private -w '%{http_code}' "${base}/apparel-provider-runtime.js")" = "404"
+          test "$(curl -sS -o /tmp/private -w '%{http_code}' "${base}/apparel-provider-runtime.js" || true)" = "404"
+          curl -sS -L "${base}/rv-store.js" | grep -q 'rv-category-rail'
 
       - name: Build final Commerce Launch evidence
         shell: bash
+        env:
+          CLEAN_DEPLOYMENT: ${{ steps.clean_after.outputs.deployment-url }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -245,16 +345,17 @@ jobs:
             'publishedProducts':[r for r in final.get('rows',[]) if r.get('publish_status')=='published'],
             'reviewProducts':[r for r in final.get('rows',[]) if r.get('publish_status')!='published'],
             'checkout':{'lower48':'PASS','hawaiiBlocked':'PASS','zeroStockBlocked':'PASS'},
-            'cleanDeployment':'${{ steps.clean_after.outputs.deployment-url }}'
+            'cleanDeployment':os.environ['CLEAN_DEPLOYMENT']
           }
           json.dump(receipt,open('/tmp/commerce-launch-receipt.json','w'),indent=2)
           with open('/tmp/commerce-launch-receipt.md','w') as f:
+            d=receipt['doba'];p=receipt['providers'];
             f.write('### Commerce Launch Final Production Receipt\n')
-            f.write(f"- Doba: {receipt['doba']['existingReconciled']} existing reconciled; {receipt['doba']['newPriced']} new priced; {receipt['doba']['newPublished']} published; {receipt['doba']['newReview']} retained Draft/HOLD; {receipt['doba']['holdsPreserved']} historical HOLDs preserved.\n")
-            f.write(f"- Fourthwall: {receipt['providers'].get('fourthwall',{}).get('state','Unknown')}\n")
+            f.write('- Doba: '+str(d['existingReconciled'])+' existing reconciled; '+str(d['newPriced'])+' new priced; '+str(d['newPublished'])+' published; '+str(d['newReview'])+' retained Draft/HOLD; '+str(d['holdsPreserved'])+' historical HOLDs preserved.\n')
+            f.write('- Fourthwall: '+str(p.get('fourthwall',{}).get('state','Unknown'))+'\n')
             f.write('- Printful: Not Configured\n- Spreadconnect: Not Configured\n')
             f.write('- Catalog-backed RV checkout: CO PASS / HI blocked / zero-stock blocked.\n')
-            f.write(f"- Clean production deployment: `{receipt['cleanDeployment']}`\n")
+            f.write('- Clean production deployment: `'+receipt['cleanDeployment']+'`\n')
           PY
           cat /tmp/commerce-launch-receipt.md >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/commerce-launch-receipt.md
