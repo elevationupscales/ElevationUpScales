@@ -3418,6 +3418,9 @@ async function handleAdminInventory(request, env, pathname) {
       status,
       notes: inventoryString(body.notes, 4000),
     };
+    if (item.supplier.toLowerCase() === "doba" && item.status === "active" && item.costCents <= 0) {
+      return jsonResponse({ error: "Active Doba items require a non-zero supplier cost. Save the supplier cost or place the item on hold/paused." }, 409);
+    }
     try {
       await db.prepare(`INSERT INTO eus_inventory_items
         (id,sku,name,category,supplier,fulfillment_mode,supplier_product_id,source_url,sales_channels_json,cost_cents,price_cents,quantity_on_hand,quantity_reserved,reorder_point,status,notes,version,created_at,updated_at,updated_by)
@@ -3477,6 +3480,9 @@ async function handleAdminInventory(request, env, pathname) {
       notes: body.notes === undefined ? existing.notes : inventoryString(body.notes, 4000),
     };
     if (!next.sku || !next.name) return jsonResponse({ error: "SKU and product name are required" }, 400);
+    if (next.supplier.toLowerCase() === "doba" && next.status === "active" && next.costCents <= 0) {
+      return jsonResponse({ error: "Active Doba items require a non-zero supplier cost. Save the supplier cost or place the item on hold/paused." }, 409);
+    }
     const changed = [];
     const compare = {
       sku: existing.sku, name: existing.name, category: existing.category, supplier: existing.supplier,

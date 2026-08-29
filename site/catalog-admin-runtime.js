@@ -92,6 +92,37 @@ const KNOWN_SEED = [
   ["D0102HPBE86-428316","Quick Set Brown Pop-Up Gazebo Tent with Removable Wind Cloths","Camping & Outdoor",21500,"D0102HPBE86","168631058246","https://www.mathishome.com/on/demandware.static/-/Sites-mathisbrothers-master/default/dwa79f59f4/hires/9a1a70ce445543358d7c4f5c6d9ae114.jpg","hold","Conflicting prior inventory snapshots; recheck current Doba state"]
 ];
 
+const KNOWN_DOBA_COST_REFERENCE = new Map([
+  ["D0102HQ4KJV-861319",10392],
+  ["D010277TCB2-470279",2872],
+  ["D01027HXHHA-472564",15789],
+  ["D0102HRMZW6-224407",11759],
+  ["D0102HGWKXG-682100",4712],
+  ["D0102H2V6BY-183069",5192],
+  ["D01027HX25W-351940",2312],
+  ["D01027HHGCG-645458",5439],
+  ["D0102HHVH7A-285520",3519],
+  ["D0102HGKRVV-521042",6152],
+  ["D0102HPBE86-428316",15992],
+]);
+
+async function backfillKnownDobaCosts(db) {
+  const actor = "system-cost-reconcile";
+  const createdAt = new Date().toISOString();
+  for (const [sku,costCents] of KNOWN_DOBA_COST_REFERENCE) {
+    const row = await db.prepare("SELECT id,sku,cost_cents,quantity_on_hand,quantity_reserved FROM eus_inventory_items WHERE sku=? COLLATE NOCASE LIMIT 1").bind(sku).first();
+    if (!row || Number(row.cost_cents || 0) > 0) continue;
+    const result = await db.prepare("UPDATE eus_inventory_items SET cost_cents=?,version=version+1,updated_at=?,updated_by=? WHERE id=? AND (cost_cents IS NULL OR cost_cents<=0)")
+      .bind(costCents,createdAt,actor,row.id).run();
+    if (!result?.meta?.changes) continue;
+    const details = JSON.stringify({ changed:["costCents"], source:"2026-08-28 Doba supplier snapshot", note:"Last-known supplier cost backfill; recheck before supplier purchase" });
+    await db.prepare("INSERT INTO eus_catalog_events (id,inventory_item_id,sku,action,details_json,admin_email,created_at) VALUES (?,?,?,?,?,?,?)")
+      .bind(`cat_evt_${crypto.randomUUID()}`,row.id,sku,"supplier_cost_backfilled",details,actor,createdAt).run().catch(()=>{});
+    await db.prepare("INSERT INTO eus_inventory_events (id,item_id,sku,action,quantity_before,quantity_after,reserved_before,reserved_after,details_json,admin_email,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(`inv_evt_${crypto.randomUUID()}`,row.id,sku,"supplier_cost_backfilled",Number(row.quantity_on_hand||0),Number(row.quantity_on_hand||0),Number(row.quantity_reserved||0),Number(row.quantity_reserved||0),details,actor,createdAt).run().catch(()=>{});
+  }
+}
+
 function baseStatus(publishStatus) { return publishStatus === "published" ? "active" : publishStatus === "archived" ? "archived" : "paused"; }
 function normalizeSource(value) { const source = clean(value, 30).toLowerCase(); return SOURCES.has(source) ? source : "other"; }
 function baseSupplier(source, value) {
@@ -161,6 +192,12 @@ async function upsert(db, raw, sourceHint, adminEmail, action = "upsert") {
   if (!item.title) throw new Error(`Product title is required for ${item.sku}`);
   let existing = item.id ? await getById(db,item.id) : null;
   if (!existing) existing = await getBySku(db,item.sku);
+  if (existing && raw.supplierCostCents === undefined && raw.costCents === undefined) item.supplierCostCents = Number(existing.cost_cents || 0);
+  if (item.sourceType === "doba" && item.publishStatus === "published" && Number(item.supplierCostCents || 0) <= 0) {
+    item.publishStatus = "hold";
+    item.reviewState = [item.reviewState, "COST MISSING"].filter(Boolean).join(" · ");
+    item.internalNotes = [item.internalNotes, "Doba product cannot publish with a missing/zero supplier cost."].filter(Boolean).join("\n");
+  }
   const now = new Date().toISOString();
   const id = existing?.id || item.id || `EUS-CAT-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
   const createdAt = existing?.created_at || now;
@@ -185,6 +222,7 @@ async function upsert(db, raw, sourceHint, adminEmail, action = "upsert") {
 }
 
 async function seedKnown(db) {
+  await backfillKnownDobaCosts(db);
   const key = "catalog-manager-v1-known-mappings";
   if (await db.prepare("SELECT seed_key FROM eus_catalog_seed_state WHERE seed_key=? LIMIT 1").bind(key).first()) return;
   for (const [sku,title,category,priceCents,itemNo,ebayItemId,image,publishStatus,reviewState] of KNOWN_SEED) {
