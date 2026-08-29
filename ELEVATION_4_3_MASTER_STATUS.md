@@ -45,7 +45,9 @@ Update this status file or provide an exact status block for Master Coordination
 
 **State:** ACTIVE / CONTROLLED RELEASES
 
-**Current authoritative main at coordination setup:** `893877b4d2d36d6c7de66837ea1b784e2486f5cf`
+**Current authoritative application baseline before coordination-only commits:** `893877b4d2d36d6c7de66837ea1b784e2486f5cf`
+
+**Coordination commits after that baseline do not by themselves authorize a production application promotion.** Workers must confirm the current repository SHA and the current accepted production SHA separately before deployment.
 
 **Release rule:** small controlled patch → preview → verify → management gate when required → production → verify → baseline → stop.
 
@@ -61,7 +63,7 @@ Update this status file or provide an exact status block for Master Coordination
 
 **Foundation:** Phase 1 CLOSED; Phase 1.2 integrated.
 
-**Authoritative parent:** `893877b4d2d36d6c7de66837ea1b784e2486f5cf` or accepted descendant.
+**Authoritative application parent:** `893877b4d2d36d6c7de66837ea1b784e2486f5cf` or accepted application descendant. Coordination-only commits do not change the production gate.
 
 **Controlling handoff:** `Elevation_UpScales_Hawaii_Lithium_Phase2_FINAL_CLOSEOUT_DEPLOYMENT_INSTRUCTIONS_2026-08-28.md`
 
@@ -97,6 +99,26 @@ Update this status file or provide an exact status block for Master Coordination
 **Permanent boundary:** Elevation Store products are company retail inventory. Marketplace items are independent/community seller listings. Never merge the two systems or use “Marketplace” as a generic synonym for store catalog.
 
 **Catalog rule:** Catalog Manager remains the commerce product source of truth. Do not create duplicate inventory/catalog databases for Hawaii, Solar Builder, or other storefronts.
+
+---
+
+## Inventory / Catalog Operations
+
+**State:** OPERATIONAL UI / DATA-QUALITY FOLLOW-UP REQUIRED
+
+**Owner-view audit evidence — 2026-08-28:** Inventory page shows 11 total records, with the current Active filter displaying 8 active Doba dropship records. All 8 active displayed items are supplier-managed/dropship, so physical `On Hand`, `Reserved`, and `Available` totals of 0 are expected and should not be interpreted as the supplier having zero stock.
+
+**Important distinction:** Inventory `On Hand` represents Elevation-physically-tracked stock. Supplier-managed availability is a separate concept and must not be inferred from the physical stock counters.
+
+**Open data-quality issue:** the 8 displayed Doba rows currently show `Unit Cost $0.00`. This does not match prior supplier cost snapshots for these products and must be reconciled from current supplier/source records before cost, landed-cost, margin, or Hawaii batch economics rely on Inventory cost data.
+
+**Inventory Cost summary:** the top `Inventory Cost` metric is defined as physically available tracked units × unit cost. Because the visible items are supplier-managed, `$0.00` for this summary is structurally expected even after supplier unit-cost fields are corrected. If management needs supplier-managed catalog cost exposure, add a separate metric rather than changing the meaning of physical inventory value.
+
+**Audit trail:** owner view currently shows `No inventory changes yet.` Treat as informational until verified whether the existing records were seeded/imported outside the Inventory mutation event path. Do not call it a production defect without confirming the backend event history.
+
+**Next action:** reconcile current Doba supplier costs for the 8 active records, preserve supplier-managed mode, and verify that Catalog/Hawaii landed-cost calculations do not consume zero/missing supplier cost as if it were a real cost.
+
+**Do not:** convert supplier-managed dropship items into fake physical stock merely to make On Hand/Available counters nonzero.
 
 ---
 
@@ -165,6 +187,8 @@ Update this status file or provide an exact status block for Master Coordination
 - Planned capability must not be represented as already operational.
 - Exact-SKU shipping eligibility must never be generalized to an entire battery class or all Hawaii destinations.
 - Production promotion requires the gate defined by the controlling handoff.
+- Supplier-managed inventory must not be represented as physically on hand.
+- Missing/zero supplier cost must not be interpreted as free inventory or zero landed cost.
 - When a task is complete, produce evidence and stop; do not automatically continue into adjacent parked work.
 
 ---
