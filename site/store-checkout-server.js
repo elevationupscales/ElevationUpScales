@@ -192,6 +192,39 @@ function rvMapEntry(env, id) {
   return entry && typeof entry === "object" && !Array.isArray(entry) ? entry : null;
 }
 
+async function catalogRvEntry(env, id) {
+  const db = env?.MARKETPLACE_DB;
+  const wanted = clean(id, 140);
+  if (!db || typeof db.prepare !== "function" || !wanted) return null;
+  try {
+    const row = await db.prepare(`SELECT i.id,i.name,i.sku,i.supplier_product_id,i.price_cents,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.publish_status,m.review_state,s.spu_no,s.supplier_sku AS source_supplier_sku,s.supplier_stock AS source_stock,s.ship_to,s.shipping_method,s.estimated_shipping_cents,s.shipping_limitations,s.source_state
+      FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id
+      LEFT JOIN eus_doba_source_state s ON lower(s.item_no)=lower(i.supplier_product_id) AND lower(s.supplier_sku)=lower(m.supplier_sku)
+      WHERE (i.id=? OR lower(i.supplier_product_id)=lower(?)) AND i.supplier='doba' LIMIT 1`).bind(wanted,wanted).first();
+    if (!row || clean(row.publish_status,30) !== "published" || clean(row.shipping_status,30) !== "verified") return null;
+    const priceCents = Number.parseInt(String(row.price_cents ?? ""),10);
+    const stock = row.source_stock ?? row.supplier_stock;
+    const shippingCents = row.shipping_cents ?? row.estimated_shipping_cents;
+    const exactSku = clean(row.supplier_sku,180);
+    const sourceSku = clean(row.source_supplier_sku,180);
+    if (!exactSku || !sourceSku || exactSku.toLowerCase() !== sourceSku.toLowerCase()) return null;
+    if (!Number.isInteger(priceCents) || priceCents < 1 || Number(stock) <= 0) return null;
+    if (!Number.isInteger(Number(shippingCents)) || Number(shippingCents) < 0) return null;
+    if (/stale|missing|error/i.test(clean(row.source_state,80))) return null;
+    const shipTo = clean(row.ship_to,300);
+    const blockedStates = /excluding[^a-z]*(ak|alaska).*?(hi|hawaii)|excluding[^a-z]*(hi|hawaii).*?(ak|alaska)/i.test(shipTo) ? ["AK","HI"] : [];
+    return {
+      catalogProductId: row.id, name: clean(row.name,240), imageUrl: clean(row.primary_image,1200),
+      priceCents, shippingCents: Number(shippingCents), shippingVerified: true,
+      itemNo: clean(row.supplier_product_id,120), skuId: exactSku, spuNo: clean(row.spu_no,120),
+      blockedStates, shipTo, shippingMethod: clean(row.shipping_method,180), sourceUrl: clean(row.source_url,1000),
+    };
+  } catch (error) {
+    console.error(JSON.stringify({event:"catalog_rv_entry_error",message:clean(error?.message,240)}));
+    return null;
+  }
+}
+
 function normalizeAddress(raw = {}) {
   return {
     fullName: clean(raw.fullName, 120),
@@ -276,7 +309,7 @@ async function quoteApparel(raw) {
 
 async function quoteRv(raw, env) {
   const id = clean(raw?.id, 120);
-  const entry = rvMapEntry(env, id);
+  const entry = rvMapEntry(env, id) || await catalogRvEntry(env, id);
   if (!entry) {
     return {
       ok: false,

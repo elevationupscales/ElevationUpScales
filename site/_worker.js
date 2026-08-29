@@ -5,6 +5,7 @@ import { handleCatalogAdminApi, handleCatalogPublicApi } from "./catalog-admin-r
 import { handleHawaiiLithiumAdminApi, handleHawaiiLithiumPublicApi } from "./hawaii-lithium-runtime.js";
 import { handleSyncAdminApi, handleSyncScheduledApi } from "./sync-admin-runtime.js";
 import { handleDobaCsvSyncAdminApi } from "./doba-csv-sync-runtime.js";
+import { handleApparelProviderAdminApi } from "./apparel-provider-runtime.js";
 
 // Protected production invariants continue to execute inside worker-core.js.
 // 3.11.30-store-navigation-repair
@@ -46,7 +47,9 @@ const ADMIN_ORDERS_LOADER = `
 `;
 
 const ADMIN_COMMAND_CENTER_LOADER = `
+<link rel="stylesheet" href="/admin-commerce-media.css?v=4.3.9" data-eus-commerce-media>
 <script src="/admin-command-center.js?v=4.3.7"></script>
+<script src="/admin-commerce-media.js?v=4.3.9"></script>
 `;
 
 const CHECKOUT_CSP = [
@@ -230,7 +233,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js", "/catalog-admin-runtime.js", "/hawaii-lithium-runtime.js", "/sync-admin-runtime.js", "/doba-csv-sync-runtime.js"].includes(url.pathname)) {
+    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js", "/catalog-admin-runtime.js", "/hawaii-lithium-runtime.js", "/sync-admin-runtime.js", "/doba-csv-sync-runtime.js", "/apparel-provider-runtime.js"].includes(url.pathname)) {
       return new Response("Not found", {
         status: 404,
         headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
@@ -249,8 +252,9 @@ export default {
 
       if (source === "rv") {
         const entry = verifiedRvEntry(env, raw);
-        if (!entry) return rvFallback(raw);
-        if (!rvDestinationAllowed(entry, raw)) return rvFallback(raw, entry, "This Doba item is not available for the selected shipping state");
+        if (entry && !rvDestinationAllowed(entry, raw)) return rvFallback(raw, entry, "This Doba item is not available for the selected shipping state");
+        // Catalog-backed Doba products are authoritatively checked in store-checkout-server.js.
+        // Legacy static map entries retain the preflight destination guard above.
       }
 
       if (isCreate) {
@@ -293,6 +297,10 @@ export default {
 
     if (url.pathname === "/api/admin/doba-csv-sync") {
       return handleDobaCsvSyncAdminApi(request, env, url.pathname);
+    }
+
+    if (url.pathname === "/api/admin/apparel-providers") {
+      return handleApparelProviderAdminApi(request, env, url.pathname);
     }
 
     if (url.pathname === "/api/sync/run") {

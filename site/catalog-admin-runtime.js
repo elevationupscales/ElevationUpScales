@@ -127,7 +127,7 @@ function baseStatus(publishStatus) { return publishStatus === "published" ? "act
 function normalizeSource(value) { const source = clean(value, 30).toLowerCase(); return SOURCES.has(source) ? source : "other"; }
 function baseSupplier(source, value) {
   const supplied = clean(value, 30).toLowerCase();
-  if (["doba","fourthwall","self-stock","other"].includes(supplied)) return supplied;
+  if (["doba","fourthwall","printful","spreadconnect","self-stock","other"].includes(supplied)) return supplied;
   if (source === "doba" || source === "fourthwall") return source;
   return "other";
 }
