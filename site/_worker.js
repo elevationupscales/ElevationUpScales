@@ -55,9 +55,6 @@ function clean(value, max = 500) {
   return String(value ?? "").trim().slice(0, max);
 }
 
-
-
-
 function sameOriginPost(request) {
   if (request.method !== "POST") return true;
   const origin = clean(request.headers.get("Origin"), 500);
@@ -65,13 +62,6 @@ function sameOriginPost(request) {
   try { return origin === new URL(request.url).origin; }
   catch (_) { return false; }
 }
-
-
-
-
-
-
-
 
 export default {
   async fetch(request, env, ctx) {
@@ -100,7 +90,7 @@ export default {
       return handleStoreOrdersAdminApi(request, env, url.pathname);
     }
 
-    if (url.pathname === "/api/store-catalog") {
+    if (url.pathname === "/api/store-catalog" || url.pathname === "/api/store/catalog") {
       return handleCatalogPublicApi(request, env, url.pathname);
     }
 
@@ -131,7 +121,6 @@ export default {
     if (url.pathname === "/api/sync/run") {
       return handleSyncScheduledApi(request, env, url.pathname);
     }
-
 
     const response = await coreWorker.fetch(request, env, ctx);
     if (url.pathname === "/checkout" || url.pathname === "/checkout/") return checkoutResponse(response);
