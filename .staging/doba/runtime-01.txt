@@ -1,0 +1,46 @@
+  prohibitedMarketplaces:row.prohibitedMarketplaces,processingTime:row.processingTime,upc:row.upc,asin:row.asin,productWeight:row.productWeight,
+  images:row.images,description:clean(row.description,12000),htmlDescription:clean(row.htmlDescription,12000),parameters:clean(row.parameters,10000)
+};}
+async function fingerprint(text){const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(String(text)));return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+async function addColumn(db,sql){try{await db.prepare(sql).run();}catch(error){if(!/duplicate column name/i.test(String(error?.message||error)))throw error;}}
+async function ensureSchema(env){const db=env?.MARKETPLACE_DB;if(!db||typeof db.prepare!=="function")throw new Error("Doba CSV sync storage is not configured");
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_sync_runs (
+    id TEXT PRIMARY KEY,target TEXT NOT NULL,trigger TEXT NOT NULL,mode TEXT NOT NULL,started_at TEXT NOT NULL,completed_at TEXT,status TEXT NOT NULL,
+    discovered_count INTEGER NOT NULL DEFAULT 0,matched_count INTEGER NOT NULL DEFAULT 0,changed_count INTEGER NOT NULL DEFAULT 0,updated_count INTEGER NOT NULL DEFAULT 0,
+    review_count INTEGER NOT NULL DEFAULT 0,error_count INTEGER NOT NULL DEFAULT 0,cursor_reference TEXT NOT NULL DEFAULT '',error_summary TEXT NOT NULL DEFAULT ''
+  )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_channel_sync_state (
+    catalog_product_id TEXT NOT NULL,sku TEXT NOT NULL DEFAULT '',channel TEXT NOT NULL,external_id TEXT NOT NULL DEFAULT '',desired_state TEXT NOT NULL DEFAULT 'NOT LISTED',
+    observed_state TEXT NOT NULL DEFAULT 'UNKNOWN',sync_status TEXT NOT NULL DEFAULT 'NOT CONFIGURED',mode TEXT NOT NULL DEFAULT 'monitor',last_attempt_at TEXT,last_success_at TEXT,last_observed_at TEXT,last_error TEXT NOT NULL DEFAULT '',
+    external_quantity INTEGER,external_price_cents INTEGER,external_updated_at TEXT,metadata_json TEXT NOT NULL DEFAULT '{}',PRIMARY KEY(catalog_product_id,channel)
+  )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_doba_csv_profiles (
+    id TEXT PRIMARY KEY,name TEXT NOT NULL,source_label TEXT NOT NULL DEFAULT 'Doba Download Center',markup_percent REAL NOT NULL DEFAULT 0,default_scope TEXT NOT NULL DEFAULT 'partial',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,updated_by TEXT NOT NULL DEFAULT ''
+  )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_doba_csv_runs (
+    id TEXT PRIMARY KEY,file_name TEXT NOT NULL,file_fingerprint TEXT NOT NULL,profile_id TEXT NOT NULL,profile_name TEXT NOT NULL,markup_percent REAL NOT NULL,snapshot_scope TEXT NOT NULL,
+    row_count INTEGER NOT NULL DEFAULT 0,item_match_count INTEGER NOT NULL DEFAULT 0,exact_sku_count INTEGER NOT NULL DEFAULT 0,new_count INTEGER NOT NULL DEFAULT 0,review_count INTEGER NOT NULL DEFAULT 0,
+    hold_count INTEGER NOT NULL DEFAULT 0,zero_stock_count INTEGER NOT NULL DEFAULT 0,low_stock_count INTEGER NOT NULL DEFAULT 0,cost_reference_count INTEGER NOT NULL DEFAULT 0,cost_reference_pass_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'PREVIEW',error_summary TEXT NOT NULL DEFAULT '',previewed_at TEXT NOT NULL,applied_at TEXT,admin_email TEXT NOT NULL DEFAULT '',receipt_json TEXT NOT NULL DEFAULT '{}'
+  )`).run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_doba_runs_previewed ON eus_doba_csv_runs(previewed_at DESC)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_doba_runs_fingerprint ON eus_doba_csv_runs(file_fingerprint,profile_id,snapshot_scope)").run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_doba_csv_rows (
+    id TEXT PRIMARY KEY,run_id TEXT NOT NULL,row_index INTEGER NOT NULL,spu_no TEXT NOT NULL DEFAULT '',item_no TEXT NOT NULL,supplier_sku TEXT NOT NULL DEFAULT '',title TEXT NOT NULL DEFAULT '',source_url TEXT NOT NULL DEFAULT '',
+    export_price_cents INTEGER,derived_cost_cents INTEGER,inventory_qty INTEGER,inventory_location TEXT NOT NULL DEFAULT '',ship_to TEXT NOT NULL DEFAULT '',shipping_method TEXT NOT NULL DEFAULT '',estimated_shipping_cents INTEGER,
+    shipping_limitations TEXT NOT NULL DEFAULT '',prohibited_marketplaces_json TEXT NOT NULL DEFAULT '[]',source_json TEXT NOT NULL DEFAULT '{}',catalog_product_id TEXT NOT NULL DEFAULT '',catalog_sku TEXT NOT NULL DEFAULT '',
+    classification TEXT NOT NULL,blocker TEXT NOT NULL DEFAULT '',changes_json TEXT NOT NULL DEFAULT '[]',applied_state TEXT NOT NULL DEFAULT 'PENDING',created_at TEXT NOT NULL,applied_at TEXT
+  )`).run();
+  await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_eus_doba_run_row ON eus_doba_csv_rows(run_id,row_index)").run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_doba_source_state (
+    item_no TEXT NOT NULL,supplier_sku TEXT NOT NULL DEFAULT '',spu_no TEXT NOT NULL DEFAULT '',catalog_product_id TEXT NOT NULL DEFAULT '',title TEXT NOT NULL DEFAULT '',base_cost_cents INTEGER,export_price_cents INTEGER,
+    supplier_stock INTEGER,inventory_location TEXT NOT NULL DEFAULT '',ship_to TEXT NOT NULL DEFAULT '',shipping_method TEXT NOT NULL DEFAULT '',estimated_shipping_cents INTEGER,shipping_limitations TEXT NOT NULL DEFAULT '',
+    prohibited_marketplaces_json TEXT NOT NULL DEFAULT '[]',source_url TEXT NOT NULL DEFAULT '',source_json TEXT NOT NULL DEFAULT '{}',source_state TEXT NOT NULL DEFAULT 'CURRENT',last_run_id TEXT NOT NULL DEFAULT '',last_file_fingerprint TEXT NOT NULL DEFAULT '',last_observed_at TEXT NOT NULL,
+    PRIMARY KEY(item_no,supplier_sku)
+  )`).run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_doba_state_catalog ON eus_doba_source_state(catalog_product_id,last_observed_at DESC)").run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS eus_doba_csv_events (
+    id TEXT PRIMARY KEY,run_id TEXT NOT NULL,row_id TEXT NOT NULL DEFAULT '',catalog_product_id TEXT NOT NULL DEFAULT '',item_no TEXT NOT NULL DEFAULT '',supplier_sku TEXT NOT NULL DEFAULT '',event_type TEXT NOT NULL,status TEXT NOT NULL,
+    details_json TEXT NOT NULL DEFAULT '{}',admin_email TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL
+  )`).run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_doba_events_created ON eus_doba_csv_events(created_at DESC)").run();
