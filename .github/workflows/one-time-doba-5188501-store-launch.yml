@@ -1,0 +1,240 @@
+name: One-Time Doba 5188501 Store Launch
+
+on:
+  push:
+    branches: [ops/doba-store-launch-20260829]
+
+permissions:
+  contents: read
+
+env:
+  SOURCE_SHA256: cdf7b0a1695eaa267161fde529bef6c4725477d2e354fe374ecd29c0ed9ad08a
+  SOURCE_BYTES: "874962"
+  SOURCE_ROWS: "134"
+  SOURCE_COLUMNS: "163"
+  SOURCE_FILENAME: US_Dropshipping_Product_Data_with_25%_Markup_20260829_5188501.csv
+
+jobs:
+  curated-doba-launch:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out isolated launch branch
+        uses: actions/checkout@v6
+        with:
+          ref: ops/doba-store-launch-20260829
+          fetch-depth: 0
+
+      - name: Reconstruct and verify exact owner export
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/doba
+          base64 --decode .deployment-input/doba-20260829-5188501/000.b64 > /tmp/doba/source.xz
+          xz -t /tmp/doba/source.xz
+          xz -dc /tmp/doba/source.xz > /tmp/doba/source.csv
+          test "$(wc -c < /tmp/doba/source.csv | tr -d ' ')" = "$SOURCE_BYTES"
+          test "$(sha256sum /tmp/doba/source.csv | awk '{print $1}')" = "$SOURCE_SHA256"
+          python - <<'PY'
+          import csv, os
+          with open('/tmp/doba/source.csv', newline='', encoding='utf-8-sig') as f:
+              r=csv.reader(f); headers=next(r); rows=list(r)
+          assert len(headers)==int(os.environ['SOURCE_COLUMNS']), (len(headers),'columns')
+          assert len(rows)==int(os.environ['SOURCE_ROWS']), (len(rows),'rows')
+          print(f'Exact source verified: {len(rows)} rows / {len(headers)} columns')
+          PY
+
+      - name: Reconcile source and publish only qualified RV Outdoor products
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          cp site/doba-csv-sync-runtime.js /tmp/doba/runtime.mjs
+          cat >> /tmp/doba/runtime.mjs <<'EOF'
+          export { ensureSchema, createPreview, applyRun };
+          EOF
+          cat > /tmp/doba/launch.mjs <<'EOF'
+          import fs from 'node:fs';
+          import { ensureSchema, createPreview, applyRun } from './runtime.mjs';
+
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          const account=process.env.CLOUDFLARE_ACCOUNT_ID;
+          const base='https://api.cloudflare.com/client/v4';
+          const csvText=fs.readFileSync('/tmp/doba/source.csv','utf8');
+          const adminEmail='website-operations@elevationupscales.com';
+          const stamp=new Date().toISOString();
+          const clean=(v,m=1000)=>String(v??'').trim().slice(0,m);
+          const int=(v,d=0)=>{const n=Number.parseInt(String(v??''),10);return Number.isFinite(n)?n:d;};
+          const safe=(v,d={})=>{try{return JSON.parse(v||'')??d}catch{return d}};
+          const money99=(cents)=>Math.max(99,Math.ceil(cents/100)*100-1);
+
+          async function cf(path,options={}){
+            const r=await fetch(base+path,{...options,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',...(options.headers||{})}});
+            const b=await r.json().catch(()=>({}));
+            if(!r.ok||b.success===false)throw new Error(`Cloudflare API ${r.status}: ${JSON.stringify(b.errors||b)}`);
+            return b;
+          }
+          async function query(databaseId,sql,params=[]){
+            const p=await cf(`/accounts/${account}/d1/database/${databaseId}/query`,{method:'POST',body:JSON.stringify({sql,params})});
+            const e=Array.isArray(p.result)?p.result[0]:p.result;
+            if(!e||e.success===false)throw new Error(`D1 query failed: ${JSON.stringify(e||p)}`);
+            return {results:Array.isArray(e.results)?e.results:[],meta:e.meta||{}};
+          }
+          class Statement{constructor(db,sql,params=[]){this.db=db;this.sql=sql;this.params=params;}bind(...p){return new Statement(this.db,this.sql,p)}async all(){return this.db.query(this.sql,this.params)}async first(col){const r=await this.db.query(this.sql,this.params),row=r.results[0]??null;return col&&row?row[col]??null:row}async run(){return this.db.query(this.sql,this.params)}}
+          class RestD1{constructor(id){this.id=id}prepare(sql){return new Statement(this,sql)}query(sql,params=[]){return query(this.id,sql,params)}}
+
+          const list=await cf(`/accounts/${account}/d1/database?per_page=100`);
+          let chosen=null;
+          for(const c of (list.result||[])){
+            const id=c.uuid||c.id;if(!id)continue;
+            try{const p=await query(id,"SELECT name FROM sqlite_master WHERE type='table' AND name='eus_inventory_items' LIMIT 1");if(p.results.length){chosen={id,name:c.name||id};break;}}catch{}
+          }
+          if(!chosen)throw new Error('Production Catalog D1 database not found. No mutation performed.');
+          const db=new RestD1(chosen.id);
+          await ensureSchema({MARKETPLACE_DB:db});
+
+          const before=await db.prepare("SELECT COUNT(*) AS n FROM eus_catalog_meta WHERE publish_status='published' AND store_section='rv-outdoor'").first();
+          const publishedBefore=int(before?.n,0);
+          const holdsBefore=(await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE m.publish_status='hold' ORDER BY i.supplier_product_id").all()).results||[];
+
+          const previewResponse=await createPreview(db,{fileName:process.env.SOURCE_FILENAME,csvText,scope:'partial',profileId:'doba-download-center-25',markupPercent:25},adminEmail);
+          const previewDetail=previewResponse?.alreadyApplied?previewResponse.run:previewResponse;
+          const run=previewDetail?.run;
+          if(!run)throw new Error('Preview receipt missing');
+          if(run.fileFingerprint!==process.env.SOURCE_SHA256)throw new Error(`Fingerprint mismatch ${run.fileFingerprint}`);
+          if(Number(run.rowCount)!==134)throw new Error(`Expected 134 source rows, got ${run.rowCount}`);
+          if(Number(run.costReferenceCount||0)>0 && Number(run.costReferencePassCount||0)!==Number(run.costReferenceCount||0))throw new Error('Existing Catalog cost-reference mismatch. HOLD before apply.');
+          let applied=previewDetail;
+          if(!previewResponse?.alreadyApplied)applied=await applyRun(db,run.id,adminEmail);
+          if(!String(applied?.run?.status||'').startsWith('APPLIED'))throw new Error(`Apply failed: ${applied?.run?.status}`);
+          if(Number(applied?.run?.receipt?.errors||0)!==0)throw new Error(`Apply returned ${applied.run.receipt.errors} errors`);
+
+          const runRows=(applied.rows||[]);
+          const currentRunRows=runRows.filter(r=>String(r.classification||'').startsWith('NEW /'));
+          let published=0,review=0,held=0,skippedExisting=runRows.length-currentRunRows.length;
+          const decisions=[];
+
+          function classify(title,category){
+            const t=`${title} ${category}`.toLowerCase();
+            if(/lifepo|lithium battery|power station|solar generator|jump starter|battery booster|interchangeable battery pack/.test(t))return {section:'lithium-batteries',category:'Lithium & Portable Power',eligible:false,reason:'Lithium/battery product requires dedicated shipping and document qualification before publication.'};
+            if(/rv|camper|tankless water heater|water filtration|water filter|water storage|mattress|diesel air heater|screen door/.test(t))return {section:'rv-outdoor',category:'RV Essentials & Water',eligible:true};
+            if(/solar|wind turbine|pv combiner|inverter|dc to dc|dual battery isolation|battery box/.test(t))return {section:'rv-outdoor',category:'Solar & Off-Grid',eligible:true};
+            if(/camp|tent|outdoor cooking|wood stove|portable toilet|survival|first aid|walking pole|camping stool|outdoor rug|misting fan|camping fan|lantern/.test(t))return {section:'rv-outdoor',category:'Camping & Shelter',eligible:true};
+            if(/flashlight|pen light|solar powered fan/.test(t))return {section:'rv-outdoor',category:'Outdoor Lighting & Power',eligible:true};
+            if(/car jack|vehicle lift|fuel container|jerry can|fluid extractor|car wireless charger|seat organizer|marine tank/.test(t))return {section:'rv-outdoor',category:'Automotive, ATV & Towing',eligible:true};
+            if(/pressure washer|wrench|ladder|endoscope|borescope|cnc router|laser engraver|platform scale/.test(t))return {section:'rv-outdoor',category:'Tools & Workshop',eligible:true};
+            if(/portable car refrigerator|portable freezer|ice maker/.test(t))return {section:'rv-outdoor',category:'RV Essentials & Water',eligible:true};
+            if(/outdoor storage|outdoor furniture|patio umbrella|porch swing|rv steps|hot tub steps|party tent|carport/.test(t))return {section:'rv-outdoor',category:'Travel & Organization',eligible:true};
+            return {section:'other',category:'Other / Review',eligible:false,reason:'Outside the curated RV / outdoor / solar assortment.'};
+          }
+
+          for(const rr of currentRunRows){
+            const src=await db.prepare("SELECT * FROM eus_doba_source_state WHERE item_no=? AND supplier_sku=? LIMIT 1").bind(rr.itemNo,rr.supplierSku).first();
+            const p=await db.prepare("SELECT i.id,i.sku,i.name,i.category,i.cost_cents,i.price_cents,i.status,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.publish_status,m.review_state,m.store_section FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.id=? LIMIT 1").bind(rr.catalogProductId).first();
+            if(!src||!p)throw new Error(`Staged product/source missing for ${rr.itemNo}`);
+            const source=safe(src.source_json,{}),merch=classify(p.name,source.category||p.category);
+            const stock=int(src.supplier_stock,-1),ship=int(src.estimated_shipping_cents,-1),cost=int(src.base_cost_cents,-1),exportPrice=int(src.export_price_cents,-1);
+            const shippingReady=stock>0&&clean(src.ship_to,300)&&clean(src.shipping_method,200)&&ship>=0;
+            const variant=String(rr.classification||'').includes('VARIANT GROUP');
+            const low=stock<=10;
+            const hasImage=Boolean(clean(p.primary_image,1200));
+            let reason='';
+            if(!merch.eligible)reason=merch.reason;
+            else if(variant)reason='Variant family requires customer-facing differentiation before publication.';
+            else if(stock===0)reason='Supplier out of stock.';
+            else if(low)reason=`Low supplier stock (${stock}).`;
+            else if(!shippingReady)reason='Supplier shipping path is not fully represented in the source export.';
+            else if(!hasImage)reason='Primary product image missing.';
+            else if(cost<=0||exportPrice<=0)reason='Supplier cost/price data incomplete.';
+
+            const landed=Math.max(0,cost)+Math.max(0,ship);
+            const minimumByMargin=Math.ceil(landed/0.80);
+            const minimumByContribution=landed+500;
+            const target=money99(Math.max(exportPrice,minimumByMargin,minimumByContribution));
+            if(!reason && target<=0)reason='Retail price calculation failed.';
+
+            if(reason){
+              const hold=/lithium|battery product|out of stock/i.test(reason);
+              await db.prepare("UPDATE eus_inventory_items SET category=?,price_cents=?,status='paused',sales_channels_json='[]',updated_at=?,updated_by=?,version=version+1 WHERE id=?").bind(merch.category,Math.max(0,target),stamp,adminEmail,p.id).run();
+              await db.prepare("UPDATE eus_catalog_meta SET store_section=?,publish_status=?,shipping_status=?,shipping_cents=?,review_state=?,updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(merch.section,hold?'hold':'draft',shippingReady?'verified':stock===0?'hold':'unverified',ship>=0?ship:null,reason,stamp,adminEmail,p.id).run();
+              if(hold)held+=1; else review+=1;
+              decisions.push({itemNo:rr.itemNo,title:p.name,decision:hold?'HOLD':'REVIEW',reason,stock,priceCents:target,supplier:source.supplier||''});
+              continue;
+            }
+
+            const contribution=target-landed,margin=contribution/target;
+            if(contribution<500||margin<0.20)throw new Error(`Margin guard failed for ${rr.itemNo}`);
+            await db.prepare("UPDATE eus_inventory_items SET category=?,price_cents=?,status='active',sales_channels_json='[\"website\"]',updated_at=?,updated_by=?,version=version+1 WHERE id=?").bind(merch.category,target,stamp,adminEmail,p.id).run();
+            await db.prepare("UPDATE eus_catalog_meta SET store_section='rv-outdoor',publish_status='published',shipping_status='verified',shipping_cents=?,review_state='',updated_at=?,updated_by=? WHERE inventory_item_id=?").bind(ship,stamp,adminEmail,p.id).run();
+            await db.prepare("INSERT INTO eus_catalog_events(id,inventory_item_id,sku,action,details_json,admin_email,created_at) VALUES(?,?,?,?,?,?,?)").bind(`cat_evt-${crypto.randomUUID()}`,p.id,p.sku,'doba_curated_product_published',JSON.stringify({runId:run.id,itemNo:rr.itemNo,supplierSku:rr.supplierSku,stock,landedCents:landed,priceCents:target,margin}),adminEmail,stamp).run().catch(()=>{});
+            published+=1;
+            decisions.push({itemNo:rr.itemNo,title:p.name,decision:'PUBLISHED',category:merch.category,stock,priceCents:target,landedCents:landed,margin});
+          }
+
+          const holdsAfter=(await db.prepare("SELECT i.supplier_product_id,m.publish_status,m.review_state FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE m.publish_status='hold' ORDER BY i.supplier_product_id").all()).results||[];
+          for(const h of holdsBefore){const same=holdsAfter.find(x=>x.supplier_product_id===h.supplier_product_id);if(!same||same.publish_status!=='hold')throw new Error(`Pre-existing HOLD cleared: ${h.supplier_product_id}`);}
+          const invalidPublished=(await db.prepare("SELECT COUNT(*) AS n FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE m.publish_status='published' AND (COALESCE(m.supplier_stock,0)<=0 OR i.price_cents<=0 OR COALESCE(m.primary_image,'')='')").first());
+          if(int(invalidPublished?.n,0)!==0)throw new Error(`Published Catalog integrity failed: ${invalidPublished.n} invalid rows`);
+          const lithiumAuto=(await db.prepare("SELECT COUNT(*) AS n FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.updated_by=? AND m.publish_status='published' AND m.store_section='lithium-batteries'").bind(adminEmail).first());
+          if(int(lithiumAuto?.n,0)!==0)throw new Error('Lithium product was auto-published unexpectedly');
+          const after=await db.prepare("SELECT COUNT(*) AS n FROM eus_catalog_meta WHERE publish_status='published' AND store_section='rv-outdoor'").first();
+          const publishedAfter=int(after?.n,0);
+          if(publishedAfter < publishedBefore + published)throw new Error(`Public Catalog count did not advance as expected: before ${publishedBefore}, after ${publishedAfter}, published ${published}`);
+
+          const receipt={disposition:'PASS',database:chosen.name,sourceFile:process.env.SOURCE_FILENAME,fingerprint:run.fileFingerprint,preview:run,apply:applied.run.receipt,publishedBefore,publishedAfter,newSourceRows:currentRunRows.length,published,review,held,skippedExisting,preExistingHoldsPreserved:holdsBefore.length,decisions};
+          fs.writeFileSync('/tmp/doba/receipt.json',JSON.stringify(receipt,null,2));
+          console.log('LAUNCH_RECEIPT',JSON.stringify({...receipt,decisions:undefined}));
+          EOF
+          node /tmp/doba/launch.mjs
+
+      - name: Verify public storefront after catalog mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 https://elevationupscales.com/rv-store > /tmp/doba/rv-store.html
+          curl -fsS --retry 3 https://elevationupscales.com/api/store/catalog > /tmp/doba/catalog.json
+          python - <<'PY'
+          import json
+          receipt=json.load(open('/tmp/doba/receipt.json'))
+          catalog=json.load(open('/tmp/doba/catalog.json'))
+          items=catalog.get('products',catalog if isinstance(catalog,list) else [])
+          if not isinstance(items,list): raise SystemExit('Public Catalog response shape invalid')
+          if len(items) < receipt['publishedAfter']:
+              raise SystemExit(f"Public API returned {len(items)} products but D1 has {receipt['publishedAfter']} published RV/Outdoor products")
+          print(f"Public Catalog PASS: {len(items)} products; D1 RV/Outdoor published={receipt['publishedAfter']}")
+          PY
+          grep -qi 'RV' /tmp/doba/rv-store.html
+
+      - name: Publish reconciliation summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          p=json.load(open('/tmp/doba/receipt.json'))
+          out=os.environ['GITHUB_STEP_SUMMARY']
+          with open(out,'a') as f:
+              f.write('## Doba 5188501 Curated Store Launch — PASS\n')
+              f.write(f"- Exact export: `{p['sourceFile']}` / `{p['fingerprint']}`\n")
+              f.write(f"- Source rows: {p['preview']['rowCount']}\n")
+              f.write(f"- Existing matches: {p['preview']['itemMatchCount']}\n")
+              f.write(f"- New staged source rows: {p['newSourceRows']}\n")
+              f.write(f"- Newly published to RV/Outdoor Store: **{p['published']}**\n")
+              f.write(f"- Review/Draft: {p['review']}\n")
+              f.write(f"- HOLD: {p['held']}\n")
+              f.write(f"- Public RV/Outdoor count: {p['publishedBefore']} → **{p['publishedAfter']}**\n")
+              f.write(f"- Pre-existing HOLD records preserved: {p['preExistingHoldsPreserved']}\n")
+              f.write('- Lithium/battery auto-publish guard: PASS\n')
+          PY
+
+      - name: Upload launch evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: doba-5188501-curated-store-launch
+          path: |
+            /tmp/doba/receipt.json
+            /tmp/doba/catalog.json
+          retention-days: 14
