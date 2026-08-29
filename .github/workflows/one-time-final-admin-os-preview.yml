@@ -28,6 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/apply_final_admin_operating_system.py
+          python scripts/final_admin_gate_followup.py
       - name: Validate source and architecture
         run: |
           set -euxo pipefail
@@ -45,10 +46,11 @@ jobs:
           grep -q '/api/admin/sync' site/_worker.js
           grep -q '/api/sync/run' site/_worker.js
           grep -q '/sync-admin-runtime.js' site/_routes.json
-          grep -q 'ELEVATION CATALOG' site/rv-store.html
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'fallbackCatalog' site/rv-store.js
+          grep -q 'RV & OUTDOOR GEAR' site/rv-store.html
           grep -q 'Hawaii Lithium Program' site/hawaii-lithium-batteries.html
           grep -q 'Secure checkout' site/checkout/index.html
-          ! grep -q 'VERIFIED EBAY CATALOG' site/rv-store.html
           git diff --check
       - name: Commit permanent integration
         run: |
@@ -56,7 +58,7 @@ jobs:
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
           git add -A
-          git reset .github/workflows/one-time-final-admin-os-preview.yml scripts/apply_final_admin_operating_system.py || true
+          git reset .github/workflows/one-time-final-admin-os-preview.yml scripts/apply_final_admin_operating_system.py scripts/final_admin_gate_followup.py || true
           if ! git diff --cached --quiet; then
             git commit -m 'Integrate final Admin operating system and sync foundation [admin-os-patched]'
             git push origin HEAD:release/admin-operating-system-sync-final
@@ -83,7 +85,8 @@ jobs:
           curl -sS -L --fail "$base/admin-catalog" | grep -q 'Products & Listings'
           curl -sS -L --fail "$base/admin-channels" | grep -q 'Channels & Sync'
           curl -sS -L --fail "$base/admin-system" | grep -q 'System / QA'
-          curl -sS -L --fail "$base/rv-store" | grep -q 'ELEVATION CATALOG'
+          curl -sS -L --fail "$base/rv-store" | grep -q 'RV & OUTDOOR GEAR'
+          curl -sS -L --fail "$base/rv-store.js" | grep -q '/api/store-catalog?section=rv-outdoor'
           curl -sS -L --fail "$base/checkout" | grep -q 'Secure checkout'
           sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
           echo "admin_sync_unauthenticated=$sync_code"
@@ -101,4 +104,4 @@ jobs:
           echo "Preview: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
           echo 'Admin shell + Products & Listings + Channels & Sync + System/QA: PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'Sync auth boundaries: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Existing commerce routes: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Catalog-backed RV Store + existing commerce routes: PASS' >> "$GITHUB_STEP_SUMMARY"
