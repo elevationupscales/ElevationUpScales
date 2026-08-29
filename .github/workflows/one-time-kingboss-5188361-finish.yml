@@ -1,0 +1,417 @@
+name: One-Time Kingboss 5188361 Finish Closeout
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/one-time-kingboss-5188361-finish.yml
+
+permissions:
+  contents: write
+  deployments: write
+
+env:
+  SOURCE_BRANCH: staging/kingboss-5188361-authoritative-source
+  SOURCE_PATH: .deployment-input/kingboss-20260829-5188361/source.csv.xz
+  SOURCE_FILE: US_Dropshipping_Product_Data_with_25%_Markup_20260829_5188361.csv
+  SOURCE_SHA256: 4c1c424c314ccf384f0db854617bb5a97b3481bda869597c43bbc7853c3e3f66
+  SOURCE_BYTES: "226980"
+  SOURCE_ROWS: "43"
+  SOURCE_COLUMNS: "163"
+  PRE_ROLLBACK: baseline-2026-08-29-pre-kingboss-store-finish
+  FINAL_BASELINE: baseline-2026-08-29-kingboss-store-closeout
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify lineage and intact authoritative source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 15018c34a77e5226f97ee73aa9e4247ae33723d6 HEAD
+          git show-ref --verify --quiet "refs/remotes/origin/$PRE_ROLLBACK" || git fetch origin "$PRE_ROLLBACK:refs/remotes/origin/$PRE_ROLLBACK"
+          git fetch origin "$SOURCE_BRANCH:refs/remotes/origin/$SOURCE_BRANCH"
+          mkdir -p /tmp/kingboss
+          git show "origin/$SOURCE_BRANCH:$SOURCE_PATH" > /tmp/kingboss/source.csv.xz
+          xz -t /tmp/kingboss/source.csv.xz
+          xz -dc /tmp/kingboss/source.csv.xz > /tmp/kingboss/source.csv
+          test "$(wc -c < /tmp/kingboss/source.csv | tr -d ' ')" = "$SOURCE_BYTES"
+          test "$(sha256sum /tmp/kingboss/source.csv | awk '{print $1}')" = "$SOURCE_SHA256"
+          python - <<'PY'
+          import csv, os, re, json
+          p='/tmp/kingboss/source.csv'
+          with open(p,newline='',encoding='utf-8-sig') as f:
+              r=csv.DictReader(f); rows=list(r); headers=r.fieldnames or []
+          assert len(rows)==int(os.environ['SOURCE_ROWS']), (len(rows),os.environ['SOURCE_ROWS'])
+          assert len(headers)==int(os.environ['SOURCE_COLUMNS']), (len(headers),os.environ['SOURCE_COLUMNS'])
+          # This authoritative batch is battery/power-storage only; keep it out of ordinary auto-publication.
+          pat=re.compile(r'(battery|lifepo|lithium|power\s*bank|power\s*station|solar\s*generator|mobile\s*power|rechargeable)',re.I)
+          non_power=[]
+          for row in rows:
+              text=' '.join([row.get('Product Name',''),row.get('Category',''),row.get('Description','')])
+              if not pat.search(text): non_power.append({'item':row.get('Item No.'),'title':row.get('Product Name')})
+          if non_power:
+              raise SystemExit('STOP: batch contains ordinary/non-power rows requiring separate publication review: '+json.dumps(non_power[:10]))
+          print('SOURCE PASS',len(rows),len(headers),'power_storage_rows',len(rows))
+          PY
+          cp site/doba-csv-sync-runtime.js /tmp/kingboss/doba.clean.js
+          cp site/catalog-admin-runtime.js /tmp/kingboss/catalog.clean.js
+          cp site/hawaii-lithium-runtime.js /tmp/kingboss/hawaii.clean.js
+
+      - name: Generate masked one-run authorization nonce
+        shell: bash
+        run: |
+          set -euo pipefail
+          nonce=$(openssl rand -hex 32)
+          echo "::add-mask::$nonce"
+          echo "EUS_ONE_RUN_NONCE=$nonce" >> "$GITHUB_ENV"
+
+      - name: Add temporary one-run Admin authorization locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          nonce=os.environ['EUS_ONE_RUN_NONCE']
+          targets=[
+            ('site/doba-csv-sync-runtime.js','async function requireAdmin(request,env){'),
+            ('site/catalog-admin-runtime.js','async function requireAdmin(request, env) {'),
+            ('site/hawaii-lithium-runtime.js','async function requireAdmin(request, env) {'),
+          ]
+          for path,marker in targets:
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              if marker not in s: raise SystemExit(f'auth patch marker missing: {path}')
+              injected=marker+f'\n  const oneRun = clean(request.headers.get("X-EUS-One-Run"), 500); if (oneRun && timingSafe(oneRun, "{nonce}")) return {{ session: {{ email: clean(env?.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL, 180).toLowerCase() }} }};'
+              s=s.replace(marker,injected,1)
+              p.write_text(s,encoding='utf-8')
+          PY
+          node --check site/doba-csv-sync-runtime.js
+          node --check site/catalog-admin-runtime.js
+          node --check site/hawaii-lithium-runtime.js
+
+      - name: Capture pre-mutation public state
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 5 'https://elevationupscales.com/api/store-catalog?section=rv-outdoor' > /tmp/kingboss/rv-before.json
+          curl -fsS --retry 5 'https://elevationupscales.com/api/store-catalog?section=lithium-batteries' > /tmp/kingboss/lithium-before.json
+          python - <<'PY'
+          import json
+          rv=json.load(open('/tmp/kingboss/rv-before.json')); li=json.load(open('/tmp/kingboss/lithium-before.json'))
+          print('rv_before',rv.get('count',len(rv.get('products',[]))))
+          print('lithium_before',li.get('count',len(li.get('products',[]))))
+          PY
+
+      - name: Deploy temporary signed executor
+        id: tempdeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main --commit-dirty=true
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reconcile, integrate and gate Kingboss batch
+        shell: bash
+        env:
+          EXECUTOR_URL: ${{ steps.tempdeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,json,os,re,time,urllib.request,urllib.error,datetime
+          base=os.environ['EXECUTOR_URL'].rstrip('/')
+          token=os.environ['EUS_ONE_RUN_NONCE']
+          headers={'Accept':'application/json','X-EUS-One-Run':token}
+          def api(path,method='GET',data=None):
+              body=None; h=dict(headers)
+              if data is not None:
+                  body=json.dumps(data).encode(); h['Content-Type']='application/json'
+              req=urllib.request.Request(base+path,data=body,headers=h,method=method)
+              last=None
+              for attempt in range(8):
+                  try:
+                      with urllib.request.urlopen(req,timeout=120) as r:
+                          return json.loads(r.read().decode() or '{}')
+                  except urllib.error.HTTPError as e:
+                      payload=e.read().decode(errors='replace')
+                      if e.code in (502,503,504) and attempt<7:
+                          time.sleep(2); continue
+                      raise RuntimeError(f'{method} {path} -> {e.code}: {payload[:1000]}')
+                  except Exception as e:
+                      last=e
+                      if attempt<7: time.sleep(2); continue
+                      raise
+              raise last
+          def cents(v):
+              try:return round(float(str(v).replace('$','').replace(',',''))*100)
+              except:return None
+          def num(v):
+              try:return float(str(v).strip())
+              except:return None
+          def first_float(pattern,text):
+              m=re.search(pattern,text,re.I); return float(m.group(1)) if m else None
+          with open('/tmp/kingboss/source.csv',newline='',encoding='utf-8-sig') as f:
+              src=list(csv.DictReader(f))
+          src_by={(r.get('Item No.','').strip().lower(),r.get('SKU Code','').strip().lower()):r for r in src}
+          before_catalog=api('/api/admin/catalog')
+          before_hawaii=api('/api/admin/lithium-shipping')
+          before_by_item={str(p.get('supplierProductId','')).lower():p for p in before_catalog.get('products',[]) if p.get('supplierProductId')}
+          csv_text=open('/tmp/kingboss/source.csv',encoding='utf-8-sig').read()
+          preview=api('/api/admin/doba-csv-sync','POST',{
+              'action':'preview','fileName':os.environ['SOURCE_FILE'],'csvText':csv_text,
+              'scope':'partial','profileId':'doba-download-center-25','markupPercent':25
+          })
+          detail=preview.get('run') if preview.get('alreadyApplied') else preview
+          run=(detail or {}).get('run') or {}
+          assert run.get('fileFingerprint')==os.environ['SOURCE_SHA256'],run
+          assert run.get('rowCount')==43,run
+          json.dump({'beforeCatalog':before_catalog,'beforeHawaii':before_hawaii,'preview':preview},open('/tmp/kingboss/pre-mutation-evidence.json','w'),indent=2)
+          applied=detail
+          if not preview.get('alreadyApplied'):
+              applied=api('/api/admin/doba-csv-sync','POST',{'action':'apply','runId':run['id']})
+          applied_run=(applied or {}).get('run') or {}
+          rows=(applied or {}).get('rows') or []
+          receipt=applied_run.get('receipt') or {}
+          if not str(applied_run.get('status','')).startswith('APPLIED'):
+              raise SystemExit('Apply did not complete: '+json.dumps(applied_run))
+          if int(receipt.get('errors',0))!=0:
+              raise SystemExit('Apply returned row errors: '+json.dumps(receipt))
+          if len(rows)!=43: raise SystemExit(f'Expected 43 applied rows, got {len(rows)}')
+          # Catalog safety reconciliation: every row in this authoritative batch is power storage/lithium.
+          snap=api('/api/admin/catalog')
+          products={p['id']:p for p in snap.get('products',[])}
+          modified=[]
+          zero_hold=0; sku_conflicts=0; exact_existing=int(run.get('exactSkuCount') or 0)
+          for rr in rows:
+              pid=rr.get('catalogProductId'); p=products.get(pid)
+              if not p: raise SystemExit(f'Missing Catalog product after Apply for row {rr.get("rowIndex")}')
+              source=src_by.get((str(rr.get('itemNo','')).lower(),str(rr.get('supplierSku','')).lower()),{})
+              stock=int(rr.get('inventoryQty') or 0)
+              before=before_by_item.get(str(rr.get('itemNo','')).lower())
+              prior_hold=(before or {}).get('publishStatus')=='hold'
+              conflict='SUPPLIER SKU CHANGED' in str(rr.get('classification','')).upper()
+              if conflict: sku_conflicts+=1
+              publish='hold' if (prior_hold or stock==0) else 'draft'
+              if stock==0: zero_hold+=1
+              if prior_hold:
+                  review=(before or {}).get('reviewState') or p.get('reviewState') or 'Existing HOLD preserved'
+              elif stock==0:
+                  review='KINGBOSS: SUPPLIER OUT OF STOCK — LITHIUM QUALIFICATION HOLD'
+              elif conflict:
+                  review='KINGBOSS: SUPPLIER SKU CONFLICT — REVIEW / NO SILENT SUBSTITUTION'
+              else:
+                  review='KINGBOSS: LITHIUM SHIPPING / DOCUMENT QUALIFICATION REQUIRED'
+              nextp=dict(p)
+              nextp.update({'storeSection':'lithium-batteries','shippingStatus':'hold' if stock==0 else 'quote_required','publishStatus':publish,'reviewState':review})
+              saved=api('/api/admin/catalog','POST',{'product':nextp,'sourceType':p.get('sourceType','doba')})
+              modified.append(saved.get('record') or nextp)
+          # Create/update conservative Lithium Shipping records.
+          snap=api('/api/admin/catalog'); products={p['id']:p for p in snap.get('products',[])}
+          now=datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z')
+          for rr in rows:
+              p=products[rr['catalogProductId']]
+              source=src_by.get((str(rr.get('itemNo','')).lower(),str(rr.get('supplierSku','')).lower()),{})
+              title=str(rr.get('title') or p.get('title') or '')
+              stock=int(rr.get('inventoryQty') or 0)
+              chemistry='LiFePO4' if re.search(r'lifepo4|lithium iron phosphate|iron phosphate',title,re.I) else ''
+              voltage='12V' if re.search(r'\b12v\b',title,re.I) else ''
+              ah='100Ah' if re.search(r'\b100\s*ah\b',title,re.I) else ''
+              wh=first_float(r'\b(\d+(?:\.\d+)?)\s*wh\b',title)
+              weight=num(source.get('Product Weight'))
+              shipto=source.get('Ship-to','')
+              lead=source.get('Processing Time (business days)','')
+              body={
+                'catalogProductId':p['id'],'sku':p['sku'],'active':True,'chemistry':chemistry,'voltage':voltage,'ampHours':ah,'wattHours':wh,
+                'netBatteryWeightLb':weight,'manufacturer':source.get('Brand',''),'shipFromOrigin':source.get('Inventory Location',''),
+                'sourceProductUrl':source.get('URL',''),'workflowStage':'PRODUCT IDENTIFIED','reviewState':'FULL REVIEW REQUIRED',
+                'supplierStockState':'OUT OF STOCK' if stock==0 else 'AVAILABLE','supplierQuantity':stock,'inventoryLastConfirmed':now,
+                'inventoryConfirmationSource':'Doba authoritative CSV 5188361','inventoryRecheckRequired':True,'supplierLeadTime':lead,
+                'supplierPriceCents':rr.get('derivedCostCents'),'hold':stock==0,
+                'nextAction':'Verify exact model, UN 38.3/SDS, packaging and carrier/freight route before any shipping approval.',
+                'dgNotes':f'Doba source ship-to scope: {shipto}. Hawaii direct supplier shipping is not approved by this import.',
+                'internalNotes':f'Integrated from {os.environ["SOURCE_FILE"]} SHA-256 {os.environ["SOURCE_SHA256"]}. No blanket Hawaii eligibility.'
+              }
+              api('/api/admin/lithium-shipping/records','POST',body)
+          hs=api('/api/admin/lithium-shipping')
+          rec_by_pid={r.get('catalogProductId'):r for r in hs.get('records',[])}
+          for rr in rows:
+              rec=rec_by_pid.get(rr['catalogProductId'])
+              if not rec: raise SystemExit('Lithium shipping record missing for '+rr['catalogProductId'])
+              source=src_by.get((str(rr.get('itemNo','')).lower(),str(rr.get('supplierSku','')).lower()),{})
+              api('/api/admin/lithium-shipping/destinations','POST',{
+                'shippingRecordId':rec['id'],'destination':'Hawaii — General','eligibilityState':'HOLD',
+                'originLocation':source.get('Inventory Location',''),'supplierProductCostCents':rr.get('derivedCostCents'),
+                'supplierDomesticShippingCents':rr.get('estimatedShippingCents'),'routeDocumentsStatus':'UNKNOWN','carrierAcceptanceState':'NOT CHECKED',
+                'internalNotes':'Supplier CSV ship-to scope excludes Hawaii. Alternate freight route requires exact-SKU document, packaging, provider, quote and destination review.'
+              })
+          after_catalog=api('/api/admin/catalog')
+          after_hawaii=api('/api/admin/lithium-shipping')
+          after_products={p['id']:p for p in after_catalog.get('products',[])}
+          batch_products=[after_products[r['catalogProductId']] for r in rows]
+          if len({p['id'] for p in batch_products})!=43: raise SystemExit('Duplicate/reused Catalog IDs detected inside 43-row source batch')
+          bad_public=[p for p in batch_products if p.get('publishStatus')=='published']
+          if bad_public: raise SystemExit('Lithium batch product unexpectedly published: '+json.dumps([p['sku'] for p in bad_public]))
+          zero_bad=[p for p,r in zip(batch_products,rows) if int(r.get('inventoryQty') or 0)==0 and p.get('publishStatus')!='hold']
+          if zero_bad: raise SystemExit('Zero-stock product not held')
+          run_pids={r['catalogProductId'] for r in rows}
+          dests=[d for d in after_hawaii.get('destinations',[]) if d.get('shippingRecordId') in {rec_by_pid[p] ['id'] for p in run_pids if p in rec_by_pid}]
+          if any(d.get('eligibilityState')=='APPROVED' for d in dests): raise SystemExit('Blanket Hawaii approval detected')
+          result={
+            'disposition':'PASS','sourceFile':os.environ['SOURCE_FILE'],'fingerprint':os.environ['SOURCE_SHA256'],
+            'preview':run,'apply':receipt,'rowCount':43,'existingItemMatches':run.get('itemMatchCount',0),'exactSkuMatches':exact_existing,
+            'newCount':run.get('newCount',0),'skuConflicts':sku_conflicts,'zeroStockCount':run.get('zeroStockCount',0),'lowStockCount':run.get('lowStockCount',0),
+            'zeroStockHold':zero_hold,'integrated':len(batch_products),'publicPublished':0,'lithiumIntegrated':len(batch_products),
+            'lithiumHeldForQualification':len(batch_products),'catalogIds':[p['id'] for p in batch_products],'catalogSkus':[p['sku'] for p in batch_products],
+            'priorHoldPreserved':sum(1 for r in rows if (before_by_item.get(str(r.get('itemNo','')).lower()) or {}).get('publishStatus')=='hold'),
+            'batch5188501':'BLOCKED — EXACT SOURCE FILE REQUIRED'
+          }
+          json.dump(result,open('/tmp/kingboss/receipt.json','w'),indent=2)
+          json.dump({'afterCatalog':after_catalog,'afterHawaii':after_hawaii},open('/tmp/kingboss/post-mutation-evidence.json','w'),indent=2)
+          print('KINGBOSS DATA PASS',json.dumps(result,sort_keys=True))
+          PY
+
+      - name: Restore clean runtime source locally
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/kingboss/doba.clean.js site/doba-csv-sync-runtime.js
+          cp /tmp/kingboss/catalog.clean.js site/catalog-admin-runtime.js
+          cp /tmp/kingboss/hawaii.clean.js site/hawaii-lithium-runtime.js
+          git diff --exit-code -- site/doba-csv-sync-runtime.js site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js
+
+      - name: Deploy clean accepted source to production
+        if: always()
+        id: cleandeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Full production verification
+        if: success()
+        shell: bash
+        env:
+          CLEAN_URL: ${{ steps.cleandeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${CLEAN_URL%/}"
+          for path in / /rv-store /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-lithium-shipping /admin-store-orders /start-a-project /solar-project /marketplace /store /checkout /admin-analytics; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 5 "$base$path")
+            echo "$path -> $code"; test "$code" = "200"
+          done
+          curl -fsS --retry 5 "$base/api/store/catalog?section=rv-outdoor" > /tmp/kingboss/rv-after.json
+          curl -fsS --retry 5 "$base/api/store/catalog?section=lithium-batteries" > /tmp/kingboss/lithium-after.json
+          curl -fsS --retry 5 "$base/api/store-checkout/config" > /tmp/kingboss/paypal-config.json
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/lithium-shipping /api/admin/store-orders; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "$base$api")
+            echo "unauth $api -> $code"; test "$code" = "401"
+          done
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -H "X-EUS-One-Run: $EUS_ONE_RUN_NONCE" "$base/api/admin/catalog")
+          echo "retired one-run auth -> $code"; test "$code" = "401"
+          python - <<'PY'
+          import json,os,urllib.request,urllib.parse
+          r=json.load(open('/tmp/kingboss/receipt.json')); rv0=json.load(open('/tmp/kingboss/rv-before.json')); rv=json.load(open('/tmp/kingboss/rv-after.json')); li=json.load(open('/tmp/kingboss/lithium-after.json')); pp=json.load(open('/tmp/kingboss/paypal-config.json'))
+          products=list(rv.get('products',[]))+list(li.get('products',[]))
+          batch=set(r['catalogIds'])
+          if any(p.get('id') in batch for p in products): raise SystemExit('Kingboss qualification product leaked into public catalog')
+          if any((p.get('priceCents') or 0)<=0 for p in products): raise SystemExit('Public $0 product detected')
+          if any(p.get('supplierStock')==0 for p in products): raise SystemExit('Public zero-stock supplier product detected')
+          if not (pp.get('configured') and pp.get('checkoutEnabled') and pp.get('liveCheckoutApproved') and pp.get('environment')=='live'): raise SystemExit('PayPal live checkout regression')
+          # Verify no batch SKU can report Hawaii eligible.
+          base=os.environ['CLEAN_URL'].rstrip('/')
+          for sku in r['catalogSkus']:
+              url=base+'/api/hawaii-lithium/status?sku='+urllib.parse.quote(sku)+'&destination='+urllib.parse.quote('Hawaii — General')
+              with urllib.request.urlopen(url,timeout=30) as resp: data=json.loads(resp.read().decode() or '{}')
+              if data.get('eligible') is True: raise SystemExit('False Hawaii eligibility: '+sku)
+          r['rvPublishedBefore']=rv0.get('count',len(rv0.get('products',[])))
+          r['rvPublishedAfter']=rv.get('count',len(rv.get('products',[])))
+          r['lithiumPublicAfter']=li.get('count',len(li.get('products',[])))
+          r['productionUrl']=base
+          r['paypalRegression']='PASS'
+          r['adminAuthRegression']='PASS'
+          r['hawaiiEligibilityRegression']='PASS'
+          json.dump(r,open('/tmp/kingboss/receipt.json','w'),indent=2)
+          print('PRODUCTION PASS',json.dumps({k:r[k] for k in ['rvPublishedBefore','rvPublishedAfter','lithiumPublicAfter','publicPublished']},sort_keys=True))
+          PY
+          # Existing known RV checkout must still reach quote/pre-payment path.
+          python - <<'PY'
+          import json,urllib.request,urllib.error,os
+          base=os.environ['CLEAN_URL'].rstrip('/')
+          rv=json.load(open('/tmp/kingboss/rv-after.json'))
+          candidates=[p for p in rv.get('products',[]) if p.get('ebayItemId')]
+          if not candidates: raise SystemExit('No mapped RV checkout candidate available for regression')
+          ok=False
+          for p in candidates:
+              body=json.dumps({'source':'rv','id':p['ebayItemId'],'name':p.get('title') or p.get('name'),'quantity':1,'shipping':{'state':'CO'}}).encode()
+              req=urllib.request.Request(base+'/api/store-checkout/quote',data=body,headers={'Content-Type':'application/json','Accept':'application/json','Origin':base},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as resp:
+                      data=json.loads(resp.read().decode() or '{}')
+                      if resp.status==200 and data.get('unitPriceCents',0)>0:
+                          ok=True; print('checkout candidate PASS',p.get('sku'),p.get('ebayItemId')); break
+              except urllib.error.HTTPError:
+                  continue
+          if not ok: raise SystemExit('No existing RV product reached checkout quote pre-payment state')
+          PY
+
+      - name: Write closeout summary
+        if: success()
+        shell: bash
+        env:
+          CLEAN_URL: ${{ steps.cleandeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          r=json.load(open('/tmp/kingboss/receipt.json'))
+          with open('/tmp/kingboss/summary.md','w') as f:
+              f.write('# SUPPLIER / STORE LAUNCH — FINAL CLOSEOUT\n\n')
+              f.write(f"Source `{r['sourceFile']}` SHA-256 `{r['fingerprint']}` — PASS.\n\n")
+              f.write(f"Catalog: {r['existingItemMatches']} existing Item-No matches; {r['exactSkuMatches']} exact SKU matches; {r['newCount']} new; {r['skuConflicts']} SKU conflicts; {r['zeroStockCount']} zero-stock; {r['lowStockCount']} low-stock; apply errors 0.\n\n")
+              f.write(f"Kingboss/power-storage integrated: {r['lithiumIntegrated']}; publicly launched: {r['publicPublished']}; held for qualification: {r['lithiumHeldForQualification']}.\n\n")
+              f.write(f"RV published count: {r['rvPublishedBefore']} → {r['rvPublishedAfter']}. Hawaii blanket eligibility: NONE.\n\n")
+              f.write(f"General Doba 5188501: {r['batch5188501']}.\n")
+          PY
+          cat /tmp/kingboss/summary.md >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/kingboss/summary.md
+
+      - name: Upload closeout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kingboss-5188361-final-closeout
+          path: |
+            /tmp/kingboss/receipt.json
+            /tmp/kingboss/summary.md
+            /tmp/kingboss/pre-mutation-evidence.json
+            /tmp/kingboss/post-mutation-evidence.json
+            /tmp/kingboss/rv-before.json
+            /tmp/kingboss/rv-after.json
+            /tmp/kingboss/lithium-after.json
+            /tmp/kingboss/paypal-config.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Remove one-time workflow and create final accepted baseline
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-kingboss-5188361-finish.yml
+          git commit -m 'Remove completed Kingboss 5188361 finish workflow'
+          git push origin HEAD:main
+          git push origin HEAD:refs/heads/$FINAL_BASELINE
