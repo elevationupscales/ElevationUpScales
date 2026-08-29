@@ -18,13 +18,13 @@
 <div>
 <p class="eyebrow">Elevation UpScales, Inc. · Commerce Operations</p>
 <h1>Inventory</h1>
-<p class="admin-subhead">Build and maintain one operational inventory list with live stock visibility and change history.</p>
+<p class="admin-subhead">Track physical Elevation stock separately from supplier-managed availability, current supplier cost, and source freshness.</p>
 </div>
 <div class="admin-header-actions">
 <div class="inventory-live" id="inventory-live" hidden><span class="inventory-live-dot" aria-hidden="true"></span><strong id="inventory-live-label">Live</strong><small id="inventory-last-sync">Not synced yet</small></div>
 <button class="button button-primary" id="inventory-add" type="button" hidden>+ Add Item</button>
 <button class="button button-outline" id="inventory-refresh" type="button" hidden>Refresh</button>
-<a class="button button-outline" href="/admin-catalog">Catalog Manager</a>
+<a class="button button-outline" href="/admin-catalog">Products & Listings</a>
 <a class="button button-outline" href="/admin-listings.html">Mission Control</a>
 <a class="button button-outline" href="/store">View Store</a>
 <button class="button button-outline" id="inventory-logout" type="button" hidden>Log Out</button>
@@ -87,7 +87,7 @@
 
 <section class="admin-workspace inventory-workspace">
 <div class="admin-section-head inventory-list-head">
-<div><p class="eyebrow">Working Inventory</p><h2>Products & Stock</h2><p class="admin-muted">Updates from this page appear in other open Inventory sessions automatically. Server state is rechecked every few seconds while this page is visible.</p></div>
+<div><p class="eyebrow">Source & Stock State</p><h2>Products & Stock</h2><p class="admin-muted">Updates from this page appear in other open Inventory sessions automatically. Server state is rechecked every few seconds while this page is visible.</p></div>
 <div class="admin-table-tools inventory-tools">
 <label class="admin-search">Search<input id="inventory-search" type="search" placeholder="SKU, product, supplier, category"></label>
 <label>Supplier<select id="inventory-filter-supplier"><option value="all">All suppliers</option><option value="doba">Doba</option><option value="fourthwall">Fourthwall</option><option value="self-stock">Self Stock</option><option value="other">Other</option></select></label>

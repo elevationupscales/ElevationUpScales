@@ -13,7 +13,8 @@
     "/store-orders-admin-server.js",
     "/catalog-admin-server.js",
     "/catalog-admin-runtime.js",
-    "/hawaii-lithium-runtime.js"
+    "/hawaii-lithium-runtime.js",
+    "/sync-admin-runtime.js"
   ],
   "exclude": []
 }

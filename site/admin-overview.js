@@ -20,6 +20,8 @@
     const orderState=D().orderActions(orders);
     const catalog=snapshot.catalog.ok?snapshot.catalog.data:{};
     const catalogState=D().catalogActions(catalog);
+    const syncState=snapshot.sync.ok?(snapshot.sync.data||{}):{};
+    const syncCounts=syncState.counts||{};
     const projects=snapshot.opportunities.ok?(snapshot.opportunities.data.projects||[]):[];
     const leadState=D().leadActions(projects);
     const revenue=D().computeRevenue(orders);
@@ -44,7 +46,10 @@
       action("New leads",snapshot.opportunities.ok?leadState.new:"N/A","Active project leads still in NEW status.","/admin-listings#leads",""),
       action("Unassigned leads",snapshot.opportunities.ok?leadState.unassigned:"N/A","Active leads with no assigned representative.","/admin-listings#leads",leadState.unassigned?"is-warning":""),
       action("Leads missing next action",snapshot.opportunities.ok?leadState.noNext:"N/A","Active records parked without a meaningful next step.","/admin-listings#leads",leadState.noNext?"is-warning":""),
-      action("Products needing review",snapshot.catalog.ok?catalogState.review:"N/A","Catalog hold, shipping, or review-state product exceptions.","/admin-catalog",""),
+      action("Products ready to publish",snapshot.sync.ok?syncCounts.ready:"N/A","Products that pass current server-side listing readiness gates.","/admin-catalog",syncCounts.ready?"is-warning":""),
+      action("Products needing review",snapshot.sync.ok?syncCounts.review:(snapshot.catalog.ok?catalogState.review:"N/A"),"Actionable product identity, cost, stock, shipping, margin, HOLD, or mapping blockers.","/admin-catalog",syncCounts.review?"is-warning":""),
+      action("Listings out of sync",snapshot.sync.ok?syncCounts.outOfSync:"N/A","Channel/source relationships needing review, recheck, or configuration.","/admin-channels",syncCounts.outOfSync?"is-warning":""),
+      action("Sync errors / stale",snapshot.sync.ok?((syncCounts.syncError||0)+(syncCounts.stale||0)):"N/A","Automation errors and supplier/source observations needing a fresh check.","/admin-system",(syncCounts.syncError||syncCounts.stale)?"is-urgent":""),
       action("Hawaii reservations",reservations===null?"N/A":reservations,"Open reservation records needing operating awareness.","/admin-lithium-shipping",reservations?"is-warning":""),
       action("Supplier rechecks",supplierRechecks===null?"N/A":supplierRechecks,"Lithium products whose supplier availability needs a fresh check.","/admin-lithium-shipping",supplierRechecks?"is-warning":""),
       action("Shipping blockers",shippingBlocked===null?"N/A":shippingBlocked,"Product or batch shipping controls that are not ready.","/admin-lithium-shipping",shippingBlocked?"is-urgent":""),

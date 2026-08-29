@@ -22,9 +22,9 @@
       ["Leads","/admin-listings#leads","leads"]
     ]],
     ["Commerce",[
-      ["Products / Import Center","/admin-catalog","products"],
+      ["Products & Listings","/admin-catalog","products"],
       ["Inventory","/admin-inventory","inventory"],
-      ["Channels / Stores","/admin-channels","channels"]
+      ["Channels & Sync","/admin-channels","channels"]
     ]],
     ["Shipping",[
       ["Shipping & Logistics","/admin-lithium-shipping","shipping"]
@@ -34,7 +34,7 @@
     ]],
     ["Insights & System",[
       ["Analytics","/admin-analytics","analytics"],
-      ["System / QA","/admin-listings#system","system"]
+      ["System / QA","/admin-system","system"]
     ]]
   ];
   function currentKey(){
@@ -47,15 +47,16 @@
     if(p.includes("admin-inventory"))return"inventory";
     if(p.includes("admin-channels"))return"channels";
     if(p.includes("admin-analytics"))return"analytics";
+    if(p.includes("admin-system"))return"system";
     if(p.includes("admin-listings")){if(h==="marketplace"||h==="marketplace-follow-up")return"marketplace";if(h==="system")return"system";return"leads";}
     return"";
   }
   function ensureCss(){
     if(!document.querySelector('link[data-eus-command-center-css]')){
-      const link=document.createElement("link");link.rel="stylesheet";link.href="/admin-command-center.css?v=4.3.5";link.dataset.eusCommandCenterCss="1";document.head.append(link);
+      const link=document.createElement("link");link.rel="stylesheet";link.href="/admin-command-center.css?v=4.3.7";link.dataset.eusCommandCenterCss="1";document.head.append(link);
     }
     if(!document.querySelector('link[data-eus-command-center-pass1-css]')){
-      const pass=document.createElement("link");pass.rel="stylesheet";pass.href="/admin-command-center-pass1.css?v=4.3.5";pass.dataset.eusCommandCenterPass1Css="1";document.head.append(pass);
+      const pass=document.createElement("link");pass.rel="stylesheet";pass.href="/admin-command-center-pass1.css?v=4.3.7";pass.dataset.eusCommandCenterPass1Css="1";document.head.append(pass);
     }
   }
   function installShell(){
@@ -82,10 +83,11 @@
   const getOperations=()=>api("/api/admin/operations");
   const getAnalytics=()=>api("/api/admin/market-analytics");
   const getLithium=()=>api("/api/admin/lithium-shipping");
+  const getSync=()=>api("/api/admin/sync");
   async function settle(name,fn){try{return{name,ok:true,data:await fn()};}catch(error){return{name,ok:false,status:error.status||0,error:error.message};}}
   async function loadAll(){
     const results=await Promise.all([
-      settle("orders",getOrders),settle("catalog",getCatalog),settle("inventory",getInventory),settle("opportunities",getOpportunities),settle("operations",getOperations),settle("analytics",getAnalytics),settle("lithium",getLithium)
+      settle("orders",getOrders),settle("catalog",getCatalog),settle("inventory",getInventory),settle("opportunities",getOpportunities),settle("operations",getOperations),settle("analytics",getAnalytics),settle("lithium",getLithium),settle("sync",getSync)
     ]);
     return Object.fromEntries(results.map((r)=>[r.name,r]));
   }
@@ -115,7 +117,7 @@
     return{
       total:products.length,
       published:products.filter(p=>p.publishStatus==="published").length,
-      review:products.filter(p=>p.publishStatus==="hold"||p.shippingStatus!=="verified"||Boolean(p.reviewState)).length,
+      review:products.filter(p=>p.publishStatus==="hold"||Boolean(p.reviewState)).length,
       drafts:products.filter(p=>p.publishStatus==="draft").length,
       noPrice:products.filter(p=>!(Number(p.priceCents)>0)).length,
       noImage:products.filter(p=>!text(p.primaryImage)&&!(Array.isArray(p.images)&&p.images.length)).length
@@ -148,7 +150,7 @@
     }catch(_){ }
   }
 
-  window.EUSAdminData={api,loadAll,getOrders,getCatalog,getInventory,getOpportunities,getOperations,getAnalytics,getLithium,orderActions,leadActions,catalogActions,computeRevenue,money,valueOrNA,text};
+  window.EUSAdminData={api,loadAll,getOrders,getCatalog,getInventory,getOpportunities,getOperations,getAnalytics,getLithium,getSync,orderActions,leadActions,catalogActions,computeRevenue,money,valueOrNA,text};
   const boot=()=>{installShell();enhanceOrders();};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
