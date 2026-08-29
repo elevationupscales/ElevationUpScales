@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#070707">
+<title>Admin Command Center | Elevation UpScales, Inc.</title>
+<link rel="stylesheet" href="/styles.css?v=3.5.0">
+<link rel="stylesheet" href="/admin-command-center.css?v=4.3.4" data-eus-command-center-css>
+<script defer src="/admin-command-center.js?v=4.3.4"></script>
+<script defer src="/admin-overview.js?v=4.3.4"></script>
+</head>
+<body class="admin-framework-page">
+<main class="eus-admin-page">
+<section class="eus-admin-auth" id="eus-admin-auth">
+  <span class="eus-admin-kicker">Elevation UpScales, Inc.</span>
+  <h2>Admin Command Center</h2>
+  <p>One protected entry point for orders, products, shipping, leads, Marketplace operations and business analytics.</p>
+  <form id="eus-admin-login-form" action="/api/admin/login" method="post">
+    <label>Email<input name="email" type="email" autocomplete="username" required placeholder="elevationupscales@gmail.com"></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="eus-admin-button eus-admin-button--primary" type="submit">Sign In</button>
+  </form>
+  <p class="eus-admin-statusline" id="eus-admin-login-status" role="status"></p>
+</section>
+<section id="eus-admin-overview" hidden>
+<header class="eus-admin-page__head">
+  <div><span class="eus-admin-kicker">Operator Overview</span><h1>Admin Command Center</h1><p>Action-first control center for selling, fulfillment, lead follow-up and first-party business performance.</p></div>
+  <div class="eus-admin-actions"><button class="eus-admin-button" id="eus-admin-refresh" type="button">Refresh</button><a class="eus-admin-button" href="/">Public Site</a><button class="eus-admin-button" id="eus-admin-logout" type="button">Log Out</button></div>
+</header>
+<p class="eus-admin-statusline" id="eus-overview-status" aria-live="polite">Loading current operations…</p>
+
+<section>
+  <span class="eus-admin-kicker">Needs Action</span>
+  <div class="eus-action-board" id="eus-action-board"><div class="eus-empty">Loading operational exceptions…</div></div>
+</section>
+
+<section class="eus-section">
+  <div class="eus-section__head"><div><span class="eus-admin-kicker">Business Pulse</span><h2>Sales, leads and fulfillment</h2><p>Stored first-party data only. Unknown information is shown as N/A rather than zero.</p></div><a class="eus-admin-button" href="/admin-analytics">Open Analytics</a></div>
+  <div class="eus-metric-grid" id="eus-overview-metrics"></div>
+</section>
+
+<section class="eus-section">
+  <div class="eus-section__head"><div><span class="eus-admin-kicker">Sell</span><h2>Store operations</h2><p>Add products, control availability, fulfill orders and manage shipping from one operating path.</p></div></div>
+  <div class="eus-work-grid">
+    <a class="eus-work-card" href="/admin-catalog"><strong>Add / Import Products</strong><span>Doba, eBay, Fourthwall, CSV/TSV, pasted tables, URLs and manual products.</span></a>
+    <a class="eus-work-card" href="/admin-store-orders"><strong>Orders & Fulfillment</strong><span>Supplier purchase, tracking, shipping issues, refunds and completion.</span></a>
+    <a class="eus-work-card" href="/admin-inventory"><strong>Inventory</strong><span>Physical stock and supplier-managed availability remain separate.</span></a>
+    <a class="eus-work-card" href="/admin-channels"><strong>Channels / Stores</strong><span>Website, eBay, TikTok Shop, Fourthwall and Doba product relationships.</span></a>
+    <a class="eus-work-card" href="/admin-lithium-shipping"><strong>Shipping & Hawaii Lithium</strong><span>Exact-SKU qualification, route evidence, reservations and freight batches.</span></a>
+    <a class="eus-work-card" href="/admin-listings#marketplace"><strong>Marketplace Listings</strong><span>Independent seller listings remain separate from Elevation Store inventory.</span></a>
+  </div>
+</section>
+
+<section class="eus-section">
+  <div class="eus-section__head"><div><span class="eus-admin-kicker">Lead Control</span><h2>Lead path health</h2><p>Active customer opportunities should always have an owner and a meaningful next action.</p></div><a class="eus-admin-button" href="/admin-listings#leads">Open Lead Queue</a></div>
+  <div class="eus-metric-grid" id="eus-lead-health"></div>
+</section>
+
+<section class="eus-section">
+  <div class="eus-section__head"><div><span class="eus-admin-kicker">Recent Orders</span><h2>Latest commerce activity</h2></div><a class="eus-admin-button" href="/admin-store-orders">All Orders</a></div>
+  <div class="eus-admin-table-wrap"><table class="eus-admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Store</th><th>Total</th><th>Fulfillment</th></tr></thead><tbody id="eus-recent-orders"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+</section>
+</section>
+</main>
+</body>
+</html>
