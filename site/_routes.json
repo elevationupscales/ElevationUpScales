@@ -14,7 +14,8 @@
     "/catalog-admin-server.js",
     "/catalog-admin-runtime.js",
     "/hawaii-lithium-runtime.js",
-    "/sync-admin-runtime.js"
+    "/sync-admin-runtime.js",
+    "/doba-csv-sync-runtime.js"
   ],
   "exclude": []
 }

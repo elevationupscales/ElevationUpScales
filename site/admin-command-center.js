@@ -84,10 +84,11 @@
   const getAnalytics=()=>api("/api/admin/market-analytics");
   const getLithium=()=>api("/api/admin/lithium-shipping");
   const getSync=()=>api("/api/admin/sync");
+  const getDoba=()=>api("/api/admin/doba-csv-sync");
   async function settle(name,fn){try{return{name,ok:true,data:await fn()};}catch(error){return{name,ok:false,status:error.status||0,error:error.message};}}
   async function loadAll(){
     const results=await Promise.all([
-      settle("orders",getOrders),settle("catalog",getCatalog),settle("inventory",getInventory),settle("opportunities",getOpportunities),settle("operations",getOperations),settle("analytics",getAnalytics),settle("lithium",getLithium),settle("sync",getSync)
+      settle("orders",getOrders),settle("catalog",getCatalog),settle("inventory",getInventory),settle("opportunities",getOpportunities),settle("operations",getOperations),settle("analytics",getAnalytics),settle("lithium",getLithium),settle("sync",getSync),settle("doba",getDoba)
     ]);
     return Object.fromEntries(results.map((r)=>[r.name,r]));
   }
@@ -150,7 +151,7 @@
     }catch(_){ }
   }
 
-  window.EUSAdminData={api,loadAll,getOrders,getCatalog,getInventory,getOpportunities,getOperations,getAnalytics,getLithium,getSync,orderActions,leadActions,catalogActions,computeRevenue,money,valueOrNA,text};
+  window.EUSAdminData={api,loadAll,getOrders,getCatalog,getInventory,getOpportunities,getOperations,getAnalytics,getLithium,getSync,getDoba,orderActions,leadActions,catalogActions,computeRevenue,money,valueOrNA,text};
   const boot=()=>{installShell();enhanceOrders();};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
