@@ -1,6 +1,6 @@
 (() => {
   const $ = (id) => document.getElementById(id);
-  const POLL_MS = 3000;
+  const POLL_MS = 15000;
   const loginPanel = $('inventory-login-panel');
   const loginForm = $('inventory-login-form');
   const loginStatus = $('inventory-login-status');
@@ -41,7 +41,7 @@
   const toCents = (value) => Math.max(0, Math.round((Number(value) || 0) * 100));
   const fromCents = (value) => ((Number(value) || 0) / 100).toFixed(2);
   const intValue = (id) => Math.max(0, Math.round(Number($(id).value) || 0));
-  const supplierName = (value) => ({ doba: 'Doba', fourthwall: 'Fourthwall', 'self-stock': 'Self Stock', other: 'Other' }[value] || value || 'Other');
+  const supplierName = (value) => ({ doba: 'Doba', fourthwall: 'Fourthwall', printful: 'Printful', spreadconnect: 'Spreadconnect', 'self-stock': 'Self Stock', other: 'Other' }[value] || value || 'Other');
   const modeName = (value) => ({ tracked: 'Tracked Stock', supplier_managed: 'Supplier Managed', dropship: 'Dropship', pod: 'Print on Demand' }[value] || value || 'Unknown');
 
   async function api(url, options = {}) {
@@ -250,7 +250,7 @@
     $('inventory-sku').value = item.sku || '';
     $('inventory-name').value = item.name || '';
     $('inventory-category').value = item.category || '';
-    $('inventory-supplier').value = ['doba', 'fourthwall', 'self-stock', 'other'].includes(item.supplier) ? item.supplier : 'other';
+    $('inventory-supplier').value = ['doba', 'fourthwall', 'printful', 'spreadconnect', 'self-stock', 'other'].includes(item.supplier) ? item.supplier : 'other';
     $('inventory-mode').value = item.fulfillmentMode || 'tracked';
     $('inventory-status').value = item.status || 'active';
     $('inventory-supplier-id').value = item.supplierProductId || '';
