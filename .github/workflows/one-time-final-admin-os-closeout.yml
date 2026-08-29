@@ -1,0 +1,127 @@
+name: One-Time Final Admin OS Closeout
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: final-admin-os-closeout
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: ${{ contains(github.event.head_commit.message, '[admin-os-closeout]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Verify production routes and final Admin surfaces
+        env:
+          BASE: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-system; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 10 --max-time 40 -o /tmp/page.html -w '%{http_code}' "$BASE$route" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$BASE/admin-catalog" -o /tmp/admin-catalog.html
+          grep -q 'Products & Listings' /tmp/admin-catalog.html
+          curl -sS -L --fail "$BASE/admin-channels" -o /tmp/admin-channels.html
+          grep -q 'Channels & Sync' /tmp/admin-channels.html
+          curl -sS -L --fail "$BASE/admin-system" -o /tmp/admin-system.html
+          grep -q 'System / QA' /tmp/admin-system.html
+          curl -sS -L --fail "$BASE/admin-lithium-shipping" -o /tmp/admin-shipping.html
+          grep -q 'Shipping & Logistics' /tmp/admin-shipping.html
+          curl -sS -L --fail "$BASE/rv-store.js" -o /tmp/rv-store.js
+          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
+      - name: Verify protected sync boundaries
+        env:
+          BASE: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/admin-sync.json -w '%{http_code}' "$BASE/api/admin/sync" || true)
+          echo "admin_sync_unauthenticated=$code"
+          test "$code" = "401"
+          code=$(curl -sS -o /tmp/scheduled.json -w '%{http_code}' -X POST "$BASE/api/sync/run" -H 'Content-Type: application/json' --data '{"target":"all","runId":"closeout-unauthorized"}' || true)
+          echo "scheduled_sync_unsigned=$code"
+          test "$code" = "401"
+          code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$BASE/sync-admin-runtime.js" || true)
+          echo "sync_runtime_public=$code"
+          test "$code" = "404"
+      - name: Verify live commerce regressions
+        env:
+          BASE: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          curl -sS --fail "$BASE/api/store-checkout/config" -o /tmp/config.json
+          node - <<'NODE'
+          const fs=require('fs');const c=JSON.parse(fs.readFileSync('/tmp/config.json','utf8'));
+          if(c.environment!=='live'||c.credentialsConfigured!==true||c.checkoutEnabled!==true||c.liveCheckoutApproved!==true) throw new Error('PayPal live checkout regression');
+          console.log('paypal_live=PASS');
+          NODE
+          allowed=$(curl -sS -o /tmp/allowed.json -w '%{http_code}' -X POST "$BASE/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/rv-store' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631001484","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631001484","name":"Vevor Portable 5 Gallon Fuel Container"}' || true)
+          echo "rv_allowed=$allowed"
+          test "$allowed" = "200"
+          held=$(curl -sS -o /tmp/held.json -w '%{http_code}' -X POST "$BASE/api/store-checkout/quote" -H 'Origin: https://elevationupscales.com' -H 'Referer: https://elevationupscales.com/rv-store' -H 'Content-Type: application/json' --data '{"source":"rv","id":"168631058246","quantity":1,"ebayUrl":"https://www.ebay.com/itm/168631058246","name":"Quick Set Brown Pop-Up Gazebo"}' || true)
+          echo "rv_held=$held"
+          test "$held" = "409"
+          curl -sS --fail "$BASE/api/store-catalog?section=rv-outdoor" -o /tmp/catalog.json
+          curl -sS --fail "$BASE/api/marketplace/listings" -o /tmp/market.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('/tmp/catalog.json','utf8'));
+          const m=JSON.parse(fs.readFileSync('/tmp/market.json','utf8'));
+          if(!Array.isArray(c.products)||c.products.length<8) throw new Error(`RV catalog count ${c.products?.length}`);
+          const mc=Number(m.count ?? m.listings?.length ?? 0);if(mc<1)throw new Error('Marketplace has no published listings');
+          console.log('rv_catalog='+c.products.length);console.log('marketplace='+mc);
+          NODE
+      - name: Record listing recovery accounting
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          legacy=Path('site/rv-ebay-catalog.js').read_text(encoding='utf-8')
+          catalog=Path('site/catalog-admin-runtime.js').read_text(encoding='utf-8')
+          legacy_ids=[]
+          for item in re.findall(r'\["(\d{12})"',legacy):
+              if item not in legacy_ids: legacy_ids.append(item)
+          block=catalog.split('const KNOWN_SEED = [',1)[1].split('];',1)[0]
+          seed={}
+          for line in block.splitlines():
+              ids=re.findall(r'"(\d{12})"',line)
+              if ids: seed[ids[0]]='hold' if '"hold"' in line else 'published' if '"published"' in line else 'other'
+          legacy_set=set(legacy_ids); seed_set=set(seed); matched=legacy_set&seed_set
+          master_live={i for i,v in seed.items() if v=='published'}; master_hold={i for i,v in seed.items() if v=='hold'}
+          result={'legacy_candidates':len(legacy_set),'master_total':len(seed_set),'master_published':len(master_live),'master_hold':len(master_hold),'exact_matched':len(matched),'matched_live':len(matched&master_live),'matched_hold':len(matched&master_hold),'current_only':len(seed_set-legacy_set),'unresolved_legacy':len(legacy_set-seed_set),'staged':0,'published_by_recovery':0}
+          assert result=={'legacy_candidates':49,'master_total':11,'master_published':8,'master_hold':3,'exact_matched':10,'matched_live':7,'matched_hold':3,'current_only':1,'unresolved_legacy':39,'staged':0,'published_by_recovery':0},result
+          Path('/tmp/recovery.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
+          PY
+      - name: Check optional scheduler configuration
+        env:
+          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
+          BASE: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          if [[ -z "${SYNC_JOB_TOKEN:-}" ]]; then
+            echo 'scheduler_state=NOT_CONFIGURED'
+            exit 0
+          fi
+          code=$(curl -sS -o /tmp/signed.json -w '%{http_code}' -X POST "$BASE/api/sync/run" -H "X-EUS-Sync-Token: $SYNC_JOB_TOKEN" -H 'Content-Type: application/json' --data "{\"target\":\"all\",\"runId\":\"closeout-${GITHUB_RUN_ID}\"}" || true)
+          echo "scheduler_signed_sync=$code"
+          test "$code" = "200"
+      - name: Receipt
+        run: |
+          echo '### Final Admin Operating System Production Closeout — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment: https://7553811a.elevationupscales.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo "Repository source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Final Admin routes and sync security: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal / RV allowed+held / Catalog / Marketplace: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Recovery accounting:' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/recovery.json >> "$GITHUB_STEP_SUMMARY"
