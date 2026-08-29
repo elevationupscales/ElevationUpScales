@@ -21,7 +21,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .github/phase2-payload/p2chunk-00 .github/phase2-payload/p2chunk-01 .github/phase2-payload/p2chunk-02 .github/phase2-payload/p2chunk-03 .github/phase2-payload/p2chunk-04 .github/phase2-payload/p2chunk-05 > /tmp/phase2.b64
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('.github/workflows/one-time-hawaii-lithium-phase2-closeout.yml').read_text()
+          start = text.index('H4sIA')
+          match = re.match(r'[A-Za-z0-9+/=]+', text[start:])
+          if not match or len(match.group(0)) < 9000:
+              raise SystemExit('Original payload does not contain a complete first chunk')
+          Path('/tmp/p2chunk-00').write_text(match.group(0)[:9000])
+          PY
+          echo 'b7c763ed87577e9bea04a23a75b5ea8cd5c7f7e7a61c0e84a44dbcbe7cb33a93  /tmp/p2chunk-00' | sha256sum -c -
+          echo '20b9bb5e55775d15d73e3b31012fe846a2068e8a65d2be6351fae0fa784af347  .github/phase2-payload/p2chunk-01' | sha256sum -c -
+          echo 'f7bfd22078c99050fb979f9d4678795255734cbba1f7ee79edba96fc53e93939  .github/phase2-payload/p2chunk-02' | sha256sum -c -
+          echo '5f804f82e3e031ed4610041a4174d6830ac854ed0c4e94cc79d7fbfdaabbd123  .github/phase2-payload/p2chunk-03' | sha256sum -c -
+          echo 'ea86ef79736cba0fee73f1120f18a6202fec56c3a7a6a56ffe81e69703f4c4f0  .github/phase2-payload/p2chunk-04' | sha256sum -c -
+          echo '1cf1d855f2ace7c15905c5a2fc4df03e4db0a2f3581f11400ea51afcbd634962  .github/phase2-payload/p2chunk-05' | sha256sum -c -
+          cat /tmp/p2chunk-00 .github/phase2-payload/p2chunk-01 .github/phase2-payload/p2chunk-02 .github/phase2-payload/p2chunk-03 .github/phase2-payload/p2chunk-04 .github/phase2-payload/p2chunk-05 > /tmp/phase2.b64
           echo 'f900aef6d39db5797a6c9aa9654e79a1ebd990b2458d058af5f9ceca590eccf7  /tmp/phase2.b64' | sha256sum -c -
           base64 -d /tmp/phase2.b64 > /tmp/phase2.tgz
           echo '6b072d7c75e59c8379d721c46cd3c6d9d91eb3964539f49427ab68e1caa045e4  /tmp/phase2.tgz' | sha256sum -c -
