@@ -5,11 +5,11 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
   deployments: write
 
 jobs:
-  verify-and-close-commerce-launch:
+  verify-commerce-launch:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     environment: production
@@ -35,7 +35,7 @@ jobs:
           grep -q 'printful' site/admin-catalog.html
           grep -q 'spreadconnect' site/admin-inventory.html
 
-      - name: Redeploy authoritative clean production source
+      - name: Deploy authoritative clean production source
         id: deploy
         uses: cloudflare/wrangler-action@v4
         with:
@@ -91,10 +91,8 @@ jobs:
             'cat-834cf68a-e6f4-4c8c-a5c6-0c5683da5d9f','cat-8356190a-6519-4a10-818d-fca3c2de6957','cat-fee00faa-8fb9-47f6-b9ae-ce6a6b215e1e','cat-849b6f78-ed09-4798-97f8-37e0945f1eca',
             'cat-1ac4dd10-e7f5-4816-8a96-b5055c61c534','cat-b99c2b06-2dfe-4241-9bff-62825d874d07'
           }
-          missing=published-ids
-          leaked=review&ids
-          assert not missing,('published products missing',missing)
-          assert not leaked,('review products leaked public',leaked)
+          assert not (published-ids),('published products missing',published-ids)
+          assert not (review&ids),('review products leaked public',review&ids)
           categories={r.get('category') for r in rows}
           assert {'Tools & Workshop','Solar & Off-Grid','RV Essentials & Water','Automotive, ATV & Towing','Travel & Organization'}.issubset(categories),categories
           for r in rows:
@@ -128,94 +126,3 @@ jobs:
           test "$blocked_code" = "409"
           test "$zero_code" = "409"
           curl -sS -L "${base}/rv-store.js" | grep -q 'rv-category-rail'
-
-      - name: Create final production receipt and close workflow
-        shell: bash
-        env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
-        run: |
-          set -euo pipefail
-          mkdir -p coordination/handoffs/commerce
-          python - <<'PY'
-          from pathlib import Path
-          import os
-          deployment=os.environ['DEPLOYMENT_URL']
-          text=f'''# Elevation UpScales Commerce Launch — Final Production Receipt
-
-**Date:** 2026-08-29  
-**Disposition:** PASS / PRODUCTION VERIFIED  
-**Owner authorization:** Granted in Deployment Manager chat
-
-## Source and deployment
-- Doba source SHA-256: `f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7eb`
-- Stage 0 run: `33238177644` — PASS
-- Commerce application preview run: `33239206514` — PASS
-- Destination-hardening preview run: `33239366178` — PASS
-- Production foundation run: `33239280674` — PASS
-- Atomic reconciliation run: `33239617246` — data transaction PASS; superseded closeout verification completed here
-- Verification-only closeout predecessor run: `33239691708` — all production checks PASS; receipt shell quoting failed only
-- Final clean production deployment: `{deployment}`
-
-## Doba finalization
-- Existing Item-No records reconciled to current Doba supplier SKU: **10**
-- New Doba products priced/categorized: **22**
-- New products published after readiness gate: **12**
-- New products retained Draft/HOLD: **10**
-- Historical HOLD products preserved: **3/3**
-- Stage 0 supplier-cost validation: **10/10**
-- Snapshot mode remains **Partial**; missing movie-screen record was not changed by Stage 0.
-
-## Publishing rules enforced
-Published new Doba products required positive stock above the low-stock review band, exact current supplier SKU, primary image, explicit shipping scope/method/cost data, positive retail price, at least $5 direct contribution, at least 20% direct contribution margin, and Catalog-backed server checkout.
-
-The 10 retained records remain non-public because of low/zero stock, unresolved variant-family presentation, or assortment review.
-
-## Checkout verification
-- Colorado/lower-48 quote for a published Catalog-backed Doba product: **PASS / 200**
-- Hawaii quote for the same lower-48-only product: **BLOCKED / 409**
-- Zero-stock Doba product quote: **BLOCKED / 409**
-- Browser-provided price is not authoritative; server Catalog/source values remain authoritative.
-
-## Admin / commerce UX
-- Product thumbnails: deployed
-- Store/category/provider filtering: deployed
-- RV Store category rail: deployed
-- Small lazy-loaded thumbnails and responsive/mobile controls: deployed
-- Inventory polling reduced from 3 seconds to 15 seconds
-
-## Apparel provider model
-- Fourthwall read/reconcile adapter: **DEPLOYED**
-- Fourthwall current connection state: **Not Configured**
-- Printful adapter state: **Not Configured**
-- Spreadconnect adapter state: **Not Configured**
-- No provider is represented as Connected without credentials plus a successful server-side reconciliation.
-
-## Security / regression
-- Provider Admin API requires Admin authentication
-- Provider/Doba/server runtime modules return 404 directly
-- Temporary one-run Commerce finalizer is non-operational after cleanup
-- Store, RV Store, checkout, Marketplace, Start a Project, Solar, Lithium/Hawaii and core Admin routes returned HTTP 200 in final regression
-
-## Deferred review products
-- 4 solar/camping-light variants: customer-facing variant distinction required
-- 3 MPPT variants: two zero-stock; one low-stock/review
-- 1 low-stock travel/organization product
-- 1 zero-stock propane water heater
-- 1 Other/Review distillation product awaiting assortment decision
-
-## Rollback
-Create `baseline-2026-08-29-commerce-launch-apparel-providers` from the final post-receipt `main` commit after this workflow self-removes.
-'''
-          Path('coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md').write_text(text,encoding='utf-8')
-          PY
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add coordination/handoffs/commerce/Elevation_UpScales_Commerce_Launch_FINAL_PRODUCTION_RECEIPT_2026-08-29.md
-          git rm .github/workflows/one-time-commerce-launch-finalize.yml
-          git commit -m 'Close Commerce Launch production release'
-          git push origin HEAD:main
-          echo '### Commerce Launch final closeout' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Final verification: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Doba: 10 reconciled / 22 priced / 12 published / 10 review / 3 historical HOLDs preserved' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Provider states: Fourthwall Not Configured; Printful Not Configured; Spreadconnect Not Configured' >> "$GITHUB_STEP_SUMMARY"
-          echo "- Production: ${DEPLOYMENT_URL}" >> "$GITHUB_STEP_SUMMARY"
