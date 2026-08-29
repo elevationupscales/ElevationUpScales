@@ -1,0 +1,136 @@
+name: One-Time Admin Portal Organization Pass 1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/one-time-admin-portal-pass1.yml
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: one-time-admin-portal-pass1
+  cancel-in-progress: false
+
+jobs:
+  build-verify-deploy:
+    name: Admin portal visual organization pass 1
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Record parent
+        id: parent
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Apply pass 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/admin-portal-pass1.py
+
+      - name: Validate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/admin-command-center.js
+          node --check site/_worker.js
+          git diff --check
+          test -s site/admin-command-center-pass1.css
+          grep -q 'Daily Operations' site/admin-command-center.js
+          grep -q 'Lithium / Hawaii Logistics' site/admin-command-center.js
+          grep -q 'admin-command-center-pass1.css?v=4.3.5' site/admin-command-center.js
+          grep -q 'admin-command-center.js?v=4.3.5' site/_worker.js
+          grep -q 'Organization & Visual Pass 1' site/admin-command-center-pass1.css
+          grep -q 'Products / Import Center' site/admin-command-center.js
+          grep -q 'Marketplace Operations' site/admin-command-center.js
+
+      - name: Commit pass 1 application source
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add site/admin-command-center.js site/admin-command-center-pass1.css site/_worker.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy Admin Portal organization and visual pass 1"
+            git push origin HEAD:main
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy isolated preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=github-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke preview
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_URL%/}"
+          for route in /admin /admin-listings.html /admin-catalog /admin-inventory.html /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-channels / /store /marketplace /start-a-project /solar-project /checkout; do
+            code=$(curl --silent --show-error --location --retry 6 --retry-all-errors --retry-delay 2 --output /tmp/eus-preview.html --write-out '%{http_code}' "${base}${route}")
+            echo "${route} -> ${code}"
+            test "$code" = "200"
+          done
+          curl --silent --show-error --location "${base}/admin-command-center.js?v=4.3.5" | grep -q 'Daily Operations'
+          curl --silent --show-error --location "${base}/admin-command-center-pass1.css?v=4.3.5" | grep -q 'Organization & Visual Pass 1'
+
+      - name: Deploy pass 1 to production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.production.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          smoke() {
+            local base="${1%/}"
+            for route in /admin /admin-listings.html /admin-catalog /admin-inventory.html /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-channels / /store /marketplace /start-a-project /solar-project /checkout; do
+              code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-prod.html --write-out '%{http_code}' "${base}${route}" || true)
+              echo "${base}${route} -> ${code}"
+              [[ "$code" == "200" ]] || return 1
+            done
+          }
+          deployment="${DEPLOYMENT_URL%/}"
+          if ! smoke "$deployment"; then
+            sleep 8
+            smoke "$PRODUCTION_URL"
+          fi
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${PRODUCTION_URL}/admin-command-center.js?v=4.3.5" | grep -q 'Daily Operations'
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${PRODUCTION_URL}/admin-command-center-pass1.css?v=4.3.5" | grep -q 'Organization & Visual Pass 1'
+
+      - name: Record summary
+        shell: bash
+        run: |
+          {
+            echo '### Admin Portal Organization & Visual Pass 1'
+            echo "Parent: ${{ steps.parent.outputs.sha }}"
+            echo "Application SHA: ${{ steps.commit.outputs.sha }}"
+            echo "Preview: ${{ steps.preview.outputs.deployment-url }}"
+            echo "Production: ${{ steps.production.outputs.deployment-url }}"
+            echo 'Result: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"
