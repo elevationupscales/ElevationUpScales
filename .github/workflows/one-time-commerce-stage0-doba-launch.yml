@@ -59,28 +59,40 @@ jobs:
           assert len(rows)==int(os.environ['EXPECTED_SOURCE_ROWS'])
           PY
 
-      - name: Add one-run signed Commerce Sync authorization locally
+      - name: Generate one-run executor nonce
+        shell: bash
+        run: |
+          set -euo pipefail
+          token=$(python - <<'PY'
+          import secrets
+          print(secrets.token_urlsafe(48))
+          PY
+          )
+          echo "::add-mask::$token"
+          echo "STAGE0_TOKEN=$token" >> "$GITHUB_ENV"
+
+      - name: Add one-run authorization and audit action locally
         shell: bash
         run: |
           set -euo pipefail
           cp site/doba-csv-sync-runtime.js /tmp/doba/doba-csv-sync-runtime.clean.js
           python - <<'PY'
           from pathlib import Path
-          p=Path('site/doba-csv-sync-runtime.js')
-          s=p.read_text(encoding='utf-8')
+          import os
+          token=os.environ['STAGE0_TOKEN']
+          p=Path('site/doba-csv-sync-runtime.js'); s=p.read_text(encoding='utf-8')
           old='async function requireAdmin(request,env){const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
-          new='async function requireAdmin(request,env){const trusted=clean(request.headers.get("X-EUS-Sync-Token"),500),expectedSync=clean(env?.SYNC_JOB_TOKEN,500);if(trusted&&expectedSync&&timingSafe(trusted,expectedSync))return{session:{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
+          new=f'async function requireAdmin(request,env){{const trusted=clean(request.headers.get("X-EUS-Stage0-Token"),500),expectedSync="{token}";if(trusted&&timingSafe(trusted,expectedSync))return{{session:{{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}}}};const token=cookie(request,"eus_admin_session"),secret=clean(env?.ADMIN_SESSION_SECRET,500),adminEmail=clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase();'
           if old not in s: raise SystemExit('requireAdmin patch marker missing')
           s=s.replace(old,new,1)
           old2='const raw=await body(request),action=clean(raw.action,40).toLowerCase();try{if(action==="preview")'
           audit='''const raw=await body(request),action=clean(raw.action,40).toLowerCase();try{if(action==="stage0_audit"){const holdItems=["D0102HPBE86","D0102HGKRVV","D0102HHVH7A"];const holds=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE i.supplier_product_id IN (?,?,?) ORDER BY i.supplier_product_id`).bind(...holdItems).all();const movie=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier_product_id,i.cost_cents,i.price_cents,i.status,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE lower(i.name) LIKE '%movie%' OR (lower(i.name) LIKE '%screen%' AND lower(i.name) NOT LIKE '%screen door%') ORDER BY i.id`).all();let runProducts=[];const auditRunId=clean(raw.runId,120);if(auditRunId){const rp=await db.prepare(`SELECT r.row_index,r.item_no,r.supplier_sku,r.classification,r.blocker,r.applied_state,i.id,i.sku,i.name,i.category,i.cost_cents,i.price_cents,i.status,m.supplier_stock,m.store_section,m.publish_status,m.review_state,m.primary_image FROM eus_doba_csv_rows r LEFT JOIN eus_inventory_items i ON i.id=r.catalog_product_id LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE r.run_id=? ORDER BY r.row_index`).bind(auditRunId).all();runProducts=rp.results||[];}return json({ok:true,holds:holds.results||[],movie:movie.results||[],runProducts});}if(action==="preview")'''
           if old2 not in s: raise SystemExit('handler patch marker missing')
-          s=s.replace(old2,audit,1)
-          p.write_text(s,encoding='utf-8')
+          s=s.replace(old2,audit,1); p.write_text(s,encoding='utf-8')
           PY
           node --check site/doba-csv-sync-runtime.js
 
-      - name: Deploy temporary signed Stage 0 executor to production worker
+      - name: Deploy temporary Stage 0 executor
         id: executor
         uses: cloudflare/wrangler-action@v4
         with:
@@ -89,16 +101,13 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Preview, enforce acceptance, then Apply through Doba API
+      - name: Preview, enforce acceptance, then Apply
         shell: bash
         env:
           EXECUTOR_URL: ${{ steps.executor.outputs.deployment-url }}
-          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
         run: |
           set -euo pipefail
-          test -n "${SYNC_JOB_TOKEN:-}"
-          base="${EXECUTOR_URL%/}"
-          test -n "$base"
+          base="${EXECUTOR_URL%/}"; test -n "$base"; test -n "${STAGE0_TOKEN:-}"
           python - <<'PY'
           import json, os
           csv_text=open('/tmp/doba/source.csv',encoding='utf-8').read()
@@ -107,7 +116,7 @@ jobs:
           PY
           call_api(){
             local request_file="$1" output_file="$2"
-            code=$(curl --silent --show-error --location --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 90 -H 'Content-Type: application/json' -H "X-EUS-Sync-Token: ${SYNC_JOB_TOKEN}" --data-binary "@${request_file}" --output "$output_file" --write-out '%{http_code}' "${base}/api/admin/doba-csv-sync" || true)
+            code=$(curl --silent --show-error --location --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 90 -H 'Content-Type: application/json' -H "X-EUS-Stage0-Token: ${STAGE0_TOKEN}" --data-binary "@${request_file}" --output "$output_file" --write-out '%{http_code}' "${base}/api/admin/doba-csv-sync" || true)
             echo "Doba API ${request_file} -> ${code}"
             test "$code" = "200"
           }
@@ -123,34 +132,20 @@ jobs:
           call_api /tmp/doba/preview-request.json /tmp/doba/preview.json
           python - <<'PY'
           import json, os, sys
-          p=json.load(open('/tmp/doba/preview.json'))
-          d=p.get('run') if p.get('alreadyApplied') else p
-          run=d.get('run') if isinstance(d,dict) else None
+          p=json.load(open('/tmp/doba/preview.json')); d=p.get('run') if p.get('alreadyApplied') else p; run=d.get('run') if isinstance(d,dict) else None
           if not run: raise SystemExit(f'STOP: Preview response missing run: {p}')
-          checks={
-            'fileFingerprint':os.environ['EXPECTED_SOURCE_SHA256'],
-            'scope':'partial','rowCount':int(os.environ['EXPECTED_SOURCE_ROWS']),
-            'itemMatchCount':int(os.environ['EXPECTED_ITEM_MATCHES']),
-            'newCount':int(os.environ['EXPECTED_NEW']),
-            'zeroStockCount':int(os.environ['EXPECTED_ZERO_STOCK']),
-            'lowStockCount':int(os.environ['EXPECTED_LOW_STOCK']),
-            'costReferenceCount':int(os.environ['EXPECTED_COST_REFS']),
-            'costReferencePassCount':int(os.environ['EXPECTED_COST_PASS']),
-          }
+          checks={'fileFingerprint':os.environ['EXPECTED_SOURCE_SHA256'],'scope':'partial','rowCount':32,'itemMatchCount':10,'newCount':22,'zeroStockCount':3,'lowStockCount':3,'costReferenceCount':10,'costReferencePassCount':10}
           failures=[f"{k}: expected {v}, got {run.get(k)}" for k,v in checks.items() if run.get(k)!=v]
           json.dump({'raw':p,'run':run,'failures':failures},open('/tmp/doba/preview-evidence.json','w'),indent=2)
           print('PREVIEW',json.dumps(run,sort_keys=True))
           if failures:
-              print('DOBA_PREVIEW_HOLD', '; '.join(failures), file=sys.stderr)
-              raise SystemExit(42)
+              print('DOBA_PREVIEW_HOLD', '; '.join(failures), file=sys.stderr); raise SystemExit(42)
           json.dump({'action':'apply','runId':run['id']},open('/tmp/doba/apply-request.json','w'))
           PY
           call_api /tmp/doba/apply-request.json /tmp/doba/apply.json
           python - <<'PY'
           import json
-          a=json.load(open('/tmp/doba/apply.json'))
-          run=a.get('run') or {}
-          receipt=run.get('receipt') or {}
+          a=json.load(open('/tmp/doba/apply.json')); run=a.get('run') or {}; receipt=run.get('receipt') or {}
           print('APPLY',json.dumps({'status':run.get('status'),'receipt':receipt},sort_keys=True))
           if run.get('status')!='APPLIED': raise SystemExit(f"Apply status is {run.get('status')}")
           if int(receipt.get('errors',0))!=0: raise SystemExit(f"Apply returned errors: {receipt}")
@@ -159,19 +154,17 @@ jobs:
           PY
           call_api /tmp/doba/audit-after-request.json /tmp/doba/audit-after.json
           python - <<'PY'
-          import json
+          import json, os
           before=json.load(open('/tmp/doba/audit-before.json')); after=json.load(open('/tmp/doba/audit-after.json')); apply=json.load(open('/tmp/doba/apply.json')); preview=json.load(open('/tmp/doba/preview-evidence.json'))
           if len(after.get('holds',[]))!=3: raise SystemExit('Prior HOLD count changed during Apply')
           for r in after['holds']:
               if str(r.get('publish_status','')).lower()!='hold': raise SystemExit(f"Prior HOLD {r.get('supplier_product_id')} was cleared")
-          def stable(rows):
-              return sorted(rows,key=lambda r:r.get('id',''))
+          stable=lambda rows:sorted(rows,key=lambda r:r.get('id',''))
           if stable(before.get('movie',[]))!=stable(after.get('movie',[])): raise SystemExit('Movie-screen record changed during Partial Apply')
-          run_products=after.get('runProducts',[])
-          new=[r for r in run_products if str(r.get('classification','')).startswith('NEW /')]
+          run_products=after.get('runProducts',[]); new=[r for r in run_products if str(r.get('classification','')).startswith('NEW /')]
           if len(new)!=22: raise SystemExit(f"Expected 22 new run products, found {len(new)}")
           if any(str(r.get('publish_status','')).lower()!='draft' for r in new): raise SystemExit('A new Doba product was not left Draft/Review')
-          result={'disposition':'PASS','sourceFile':__import__('os').environ['SOURCE_FILENAME'],'fingerprint':__import__('os').environ['EXPECTED_SOURCE_SHA256'],'preview':preview['run'],'apply':apply['run'].get('receipt',{}),'holdsBefore':before['holds'],'holdsAfter':after['holds'],'movieBefore':before['movie'],'movieAfter':after['movie'],'runProducts':run_products,'newProducts':new}
+          result={'disposition':'PASS','sourceFile':os.environ['SOURCE_FILENAME'],'fingerprint':os.environ['EXPECTED_SOURCE_SHA256'],'preview':preview['run'],'apply':apply['run'].get('receipt',{}),'holdsBefore':before['holds'],'holdsAfter':after['holds'],'movieBefore':before['movie'],'movieAfter':after['movie'],'runProducts':run_products,'newProducts':new}
           json.dump(result,open('/tmp/doba/stage0.json','w'),indent=2)
           PY
 
@@ -193,17 +186,16 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify trusted executor is gone
+      - name: Verify one-run executor is gone
         if: ${{ always() }}
         shell: bash
         env:
           CLEAN_URL: ${{ steps.clean.outputs.deployment-url }}
-          SYNC_JOB_TOKEN: ${{ secrets.SYNC_JOB_TOKEN }}
         run: |
           set -euo pipefail
           base="${CLEAN_URL%/}"
-          code=$(curl --silent --output /tmp/doba/clean-auth.json --write-out '%{http_code}' -H 'Content-Type: application/json' -H "X-EUS-Sync-Token: ${SYNC_JOB_TOKEN}" --data '{"action":"stage0_audit"}' "${base}/api/admin/doba-csv-sync" || true)
-          echo "clean Doba API with sync token -> $code"
+          code=$(curl --silent --output /tmp/doba/clean-auth.json --write-out '%{http_code}' -H 'Content-Type: application/json' -H "X-EUS-Stage0-Token: ${STAGE0_TOKEN}" --data '{"action":"stage0_audit"}' "${base}/api/admin/doba-csv-sync" || true)
+          echo "clean Doba API with one-run token -> $code"
           test "$code" = "401"
 
       - name: Record Stage 0 receipt
@@ -218,11 +210,10 @@ jobs:
               f.write('### Commerce Launch — Stage 0 Doba Apply\n')
               f.write(f"- File: `{p['sourceFile']}`\n- SHA-256: `{p['fingerprint']}`\n- Scope: `{run['scope']}`\n")
               f.write(f"- Preview: {run['rowCount']} rows / {run['itemMatchCount']} matches / {run['newCount']} new / {run['zeroStockCount']} zero / {run['lowStockCount']} low / {run['costReferencePassCount']}/{run['costReferenceCount']} cost checks\n")
-              f.write(f"- Apply: {run.get('status')} → updated {receipt.get('updated',0)}, staged {receipt.get('staged',0)}, review {receipt.get('review',0)}, errors {receipt.get('errors',0)}, holds {receipt.get('holds',0)}\n")
+              f.write(f"- Apply: updated {receipt.get('updated',0)}, staged {receipt.get('staged',0)}, review {receipt.get('review',0)}, errors {receipt.get('errors',0)}, holds {receipt.get('holds',0)}\n")
               f.write(f"- Prior HOLD regression: PASS ({len(p['holdsAfter'])}/3 remain HOLD)\n- Movie-screen Partial Snapshot regression: PASS ({len(p['movieAfter'])} record(s) unchanged)\n- New Draft/Review records: {len(p['newProducts'])}\n")
           PY
-          cat /tmp/doba/summary.md >> "$GITHUB_STEP_SUMMARY"
-          cat /tmp/doba/summary.md
+          cat /tmp/doba/summary.md >> "$GITHUB_STEP_SUMMARY"; cat /tmp/doba/summary.md
 
       - name: Upload Stage 0 evidence
         if: ${{ always() }}
