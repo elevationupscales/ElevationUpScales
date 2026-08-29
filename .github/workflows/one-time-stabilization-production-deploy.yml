@@ -1,0 +1,128 @@
+name: One-Time Elevation 4.3 Stabilization Production Deploy
+
+on:
+  push:
+    branches:
+      - stabilization/elevation-4-3-production-deploy
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  deploy-verify:
+    if: github.event.head_commit.message == 'Run controlled stabilization production deploy'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Lock exact accepted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "caef99ac7e438c562f9f0e307d08c43e5ef2311e"
+          node --check site/_worker.js
+          node --check site/store-checkout-server.js
+          node --check site/commerce-schema-migrations.js
+          ! grep -q 'appendRuntimeLoader' site/_worker.js
+          ! grep -q 'CREATE TABLE IF NOT EXISTS eus_store_orders' site/store-checkout-server.js
+
+      - name: Deploy accepted source to production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production routes and boundaries
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /store /rv-store /checkout /marketplace /start-a-project /solar-project /solar-services /home-services /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-system /admin-leads; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "${base}${route}" || true)
+            echo "$route -> $code"
+            test "$code" = "200"
+          done
+          test "$(curl -sS -o /tmp/catalog.json -w '%{http_code}' "${base}/api/store-catalog?section=rv-outdoor" || true)" = "200"
+          python -c 'import json; d=json.load(open("/tmp/catalog.json")); rows=d.get("products",d if isinstance(d,list) else []); assert len(rows)>=12, len(rows); print("public_catalog_products=",len(rows))'
+          test "$(curl -sS -o /tmp/admin.json -w '%{http_code}' "${base}/api/admin/sync" || true)" = "401"
+          test "$(curl -sS -o /tmp/sched.json -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data '{"target":"all","runId":"stabilization-prod-unauthorized"}' "${base}/api/sync/run" || true)" = "401"
+          test "$(curl -sS -o /tmp/lithiumadmin.json -w '%{http_code}' "${base}/api/admin/lithium-shipping" || true)" = "401"
+          for runtime in /worker-core.js /store-checkout-server.js /sync-admin-runtime.js /apparel-provider-runtime.js /commerce-schema-migrations.js; do
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "${base}${runtime}" || true)
+            echo "$runtime -> $code"
+            test "$code" = "404"
+          done
+
+      - name: Verify production checkout behavior
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"; origin="$base"
+          q(){ curl -sS -o "$2" -w '%{http_code}' -H "Origin: $origin" -H 'Content-Type: application/json' --data "$1" "${base}/api/store-checkout/quote" || true; }
+          rv='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"CO"}}'
+          hi='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"HI"}}'
+          zero='{"source":"rv","id":"cat-b99c2b06-2dfe-4241-9bff-62825d874d07","quantity":1,"shipping":{"state":"CO"}}'
+          apparel='{"source":"apparel","id":"elevation-upscales-true-grit-trucker-hat","quantity":1}'
+          test "$(q "$rv" /tmp/rv.json)" = "200"
+          test "$(q "$hi" /tmp/hi.json)" = "409"
+          test "$(q "$zero" /tmp/zero.json)" = "409"
+          test "$(q "$apparel" /tmp/apparel.json)" = "200"
+          test "$(q '{"source":"bogus","id":"x","quantity":1}' /tmp/source.json)" = "400"
+          test "$(q '{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":99,"shipping":{"state":"CO"}}' /tmp/qty.json)" = "400"
+          test "$(curl -sS -o /tmp/missing.json -w '%{http_code}' -H 'Content-Type: application/json' --data "$rv" "${base}/api/store-checkout/quote" || true)" = "403"
+          test "$(curl -sS -o /tmp/foreign.json -w '%{http_code}' -H 'Origin: https://example.com' -H 'Content-Type: application/json' --data "$rv" "${base}/api/store-checkout/quote" || true)" = "403"
+          bad_email='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"customer":{"email":"bad"},"shipping":{"fullName":"Test User","address1":"1 Main St","city":"Denver","state":"CO","postalCode":"80202","countryCode":"US"}}'
+          bad_address='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"customer":{"email":"test@example.com"},"shipping":{"fullName":"Test User","address1":"1 Main St","city":"Denver","state":"COLORADO","postalCode":"x","countryCode":"US"}}'
+          test "$(curl -sS -o /tmp/bademail.json -w '%{http_code}' -H "Origin: $origin" -H 'Content-Type: application/json' --data "$bad_email" "${base}/api/store-checkout/orders" || true)" = "400"
+          test "$(curl -sS -o /tmp/badaddress.json -w '%{http_code}' -H "Origin: $origin" -H 'Content-Type: application/json' --data "$bad_address" "${base}/api/store-checkout/orders" || true)" = "400"
+          test "$(curl -sS -o /tmp/config.json -w '%{http_code}' "${base}/api/store-checkout/config" || true)" = "200"
+          python -c 'import json; d=json.load(open("/tmp/config.json")); assert d.get("configured") is True; assert d.get("credentialsConfigured") is True; assert d.get("checkoutEnabled") is True; assert d.get("liveCheckoutApproved") is True; assert d.get("environment")=="live"; print("paypal_production=live-enabled")'
+
+      - name: Verify customer-facing invariants and custom domain
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -sS -L "${base}/store" -o /tmp/store.html
+          curl -sS -L "${base}/rv-store" -o /tmp/rvstore.html
+          curl -sS -L "${base}/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          test "$(grep -o 'store-checkout-routing.js' /tmp/store.html | wc -l)" = "1"
+          test "$(grep -o 'rv-checkout-routing.js' /tmp/rvstore.html | wc -l)" = "1"
+          grep -q '208-813-4998' /tmp/store.html
+          grep -q '208-813-4998' /tmp/rvstore.html
+          grep -qi 'Coming Soon' /tmp/hawaii.html
+          ! grep -Eqi 'guaranteed Hawaii|automatic.*Hawaii' /tmp/hawaii.html
+          for route in / /store /rv-store /checkout /start-a-project /solar-project /lithium-batteries /hawaii-lithium-batteries; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/domain -w '%{http_code}' "https://elevationupscales.com${route}" || true)
+            echo "domain ${route} -> ${code}"
+            test "$code" = "200"
+          done
+
+      - name: Record deployment summary and retire workflow
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.3 stabilization production — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Source: caef99ac7e438c562f9f0e307d08c43e5ef2311e' >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${DEPLOYMENT_URL}" >> "$GITHUB_STEP_SUMMARY"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-stabilization-production-deploy.yml
+          git commit -m 'Retire stabilization production deploy workflow'
+          git push origin HEAD:stabilization/elevation-4-3-production-deploy
