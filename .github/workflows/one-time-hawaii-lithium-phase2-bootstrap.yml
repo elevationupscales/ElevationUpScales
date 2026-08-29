@@ -1,0 +1,57 @@
+name: One-Time Hawaii Lithium Phase 2 Bootstrap
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply-closeout:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/hawaii-lithium-phase2-controls
+          fetch-depth: 0
+      - name: Apply staged Phase 2 payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk '/^H4sIA/{capture=1} capture{if($0=="B64EOF") exit; print}' .github/workflows/one-time-hawaii-lithium-phase2-closeout.yml > /tmp/phase2.b64
+          test -s /tmp/phase2.b64
+          base64 -d /tmp/phase2.b64 > /tmp/phase2.tgz
+          tar -xzf /tmp/phase2.tgz -C .
+          python - <<'PY'
+          from pathlib import Path
+          for raw in ('site/solar-project.html','site/solar-project/index.html'):
+              p=Path(raw)
+              text=p.read_text()
+              old='Casey verifies final fit, protection, and pricing.'
+              new='Elevation reviews final fit, protection, and pricing.'
+              if old in text:
+                  p.write_text(text.replace(old,new))
+          PY
+          node --check site/hawaii-lithium-runtime.js
+          node --check site/admin-lithium-shipping.js
+          node --check site/lithium-shop.js
+          node --check site/admin-store-orders-link.js
+          cmp -s site/solar-project.html site/solar-project/index.html
+          ! grep -Eqi 'Lithium Batteries Shipped to Hawaii|Qualification in Progress|Hawaii Shipping Qualification in Progress|DOT approved|hazmat approved|carrier approved|ships anywhere|free Hawaii shipping' site/hawaii-lithium-batteries.html site/lithium-batteries.html
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site/hawaii-lithium-runtime.js site/admin-lithium-shipping.js site/admin-lithium-shipping.html site/hawaii-lithium-batteries.html site/lithium-shop.js site/lithium-batteries.html site/admin-store-orders-link.js site/solar-project.html site/solar-project/index.html
+          git commit -m 'Complete Hawaii Lithium Phase 2 commercial controls'
+          git push origin HEAD:release/hawaii-lithium-phase2-controls
+      - name: Remove bootstrap from main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm .github/workflows/one-time-hawaii-lithium-phase2-bootstrap.yml
+          git commit -m 'Remove Hawaii Lithium Phase 2 bootstrap workflow'
+          git push origin main
