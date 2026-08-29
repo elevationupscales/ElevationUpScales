@@ -52,13 +52,12 @@ jobs:
           grep -q 'Hawaii Lithium Program' site/hawaii-lithium-batteries.html
           grep -q 'Secure checkout' site/checkout/index.html
           git diff --check
-      - name: Commit permanent integration
+      - name: Commit permanent site integration
         run: |
           set -euo pipefail
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
-          git add -A
-          git reset .github/workflows/one-time-final-admin-os-preview.yml scripts/apply_final_admin_operating_system.py scripts/final_admin_gate_followup.py || true
+          git add site
           if ! git diff --cached --quiet; then
             git commit -m 'Integrate final Admin operating system and sync foundation [admin-os-patched]'
             git push origin HEAD:release/admin-operating-system-sync-final
