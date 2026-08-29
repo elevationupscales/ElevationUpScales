@@ -4,6 +4,7 @@ import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
 import { handleCatalogAdminApi, handleCatalogPublicApi } from "./catalog-admin-runtime.js";
 import { handleHawaiiLithiumAdminApi, handleHawaiiLithiumPublicApi } from "./hawaii-lithium-runtime.js";
 import { handleSyncAdminApi, handleSyncScheduledApi } from "./sync-admin-runtime.js";
+import { handleDobaCsvSyncAdminApi } from "./doba-csv-sync-runtime.js";
 
 // Protected production invariants continue to execute inside worker-core.js.
 // 3.11.30-store-navigation-repair
@@ -229,7 +230,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js", "/catalog-admin-runtime.js", "/hawaii-lithium-runtime.js", "/sync-admin-runtime.js"].includes(url.pathname)) {
+    if (["/worker-core.js", "/store-checkout-server.js", "/store-orders-admin-server.js", "/catalog-admin-server.js", "/catalog-admin-runtime.js", "/hawaii-lithium-runtime.js", "/sync-admin-runtime.js", "/doba-csv-sync-runtime.js"].includes(url.pathname)) {
       return new Response("Not found", {
         status: 404,
         headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
@@ -288,6 +289,10 @@ export default {
 
     if (url.pathname === "/api/admin/sync" || url.pathname.startsWith("/api/admin/sync/")) {
       return handleSyncAdminApi(request, env, url.pathname);
+    }
+
+    if (url.pathname === "/api/admin/doba-csv-sync") {
+      return handleDobaCsvSyncAdminApi(request, env, url.pathname);
     }
 
     if (url.pathname === "/api/sync/run") {
