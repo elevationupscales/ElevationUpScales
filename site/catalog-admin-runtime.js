@@ -1,7 +1,7 @@
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const PUBLISH_STATES = new Set(["draft", "published", "paused", "archived", "hold"]);
 const SHIPPING_STATES = new Set(["unverified", "verified", "quote_required", "hold"]);
-const SOURCES = new Set(["doba", "ebay", "fourthwall", "other"]);
+const SOURCES = new Set(["doba", "ebay", "tiktok", "fourthwall", "other"]);
 const FULFILLMENT = new Set(["tracked", "supplier_managed", "dropship", "pod"]);
 const STORE_SECTIONS = new Set(["rv-outdoor", "lithium-batteries", "apparel", "other"]);
 const JSON_HEADERS = Object.freeze({"Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer"});
@@ -121,7 +121,7 @@ function normalizeRecord(raw = {}, sourceHint = "other") {
     supplierCostCents: int(raw.supplierCostCents ?? raw.costCents, 0), priceCents: int(raw.priceCents, 0), supplierStock: nullableInt(raw.supplierStock ?? raw.inventory),
     fulfillmentMode, shippingStatus, shippingCents: shippingStatus === "verified" ? nullableInt(raw.shippingCents) : null, primaryImage, images: images.slice(0,10),
     sourceUrl: clean(raw.sourceUrl || raw.url, 700), ebayItemId: clean(raw.ebayItemId, 30), fourthwallProductId: clean(raw.fourthwallProductId, 180),
-    salesChannels: list(raw.salesChannels?.length ? raw.salesChannels : (sourceType === "ebay" ? ["ebay"] : ["website"]), 12, 80), storeSection, publishStatus,
+    salesChannels: list(raw.salesChannels?.length ? raw.salesChannels : (sourceType === "ebay" ? ["ebay"] : sourceType === "tiktok" ? ["tiktok"] : ["website"]), 12, 80), storeSection, publishStatus,
     status: publishStatus === "archived" ? "archived" : publishStatus === "published" ? "active" : "paused", internalNotes: clean(raw.internalNotes || raw.notes, 4000),
     reviewState: clean(raw.reviewState, 160), quantityOnHand: fulfillmentMode === "tracked" ? int(raw.quantityOnHand,0) : 0, quantityReserved: fulfillmentMode === "tracked" ? int(raw.quantityReserved,0) : 0,
     reorderPoint: fulfillmentMode === "tracked" ? int(raw.reorderPoint,0) : 0,

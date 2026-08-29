@@ -43,6 +43,10 @@ const ADMIN_ORDERS_LOADER = `
 })();
 `;
 
+const ADMIN_COMMAND_CENTER_LOADER = `
+<script src="/admin-command-center.js?v=4.3.4"></script>
+`;
+
 const CHECKOUT_CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://www.paypal.com https://www.paypalobjects.com https://static.cloudflareinsights.com",
@@ -69,6 +73,16 @@ async function appendRuntimeLoader(response, loader) {
     statusText: response.statusText,
     headers,
   });
+}
+
+
+async function appendHtmlLoader(response, loader) {
+  if (!response || !response.ok) return response;
+  const type = String(response.headers.get("Content-Type") || "");
+  if (!/text\/html/i.test(type)) return response;
+  const headers = new Headers(response.headers);
+  headers.delete("Content-Length"); headers.set("Cache-Control", "no-store");
+  return new Response(`${await response.text()}\n${loader}`, { status: response.status, statusText: response.statusText, headers });
 }
 
 function checkoutResponse(response) {
@@ -285,6 +299,8 @@ export default {
 
     const response = await coreWorker.fetch(request, env, ctx);
     if (url.pathname === "/checkout" || url.pathname === "/checkout/") return checkoutResponse(response);
+    const adminHtml = url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname.startsWith("/admin-") || url.pathname === "/admin.html";
+    if (adminHtml) return appendHtmlLoader(response, ADMIN_COMMAND_CENTER_LOADER);
     return response;
   },
 };

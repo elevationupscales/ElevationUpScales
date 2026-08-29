@@ -111,7 +111,7 @@
         supplierCostCents:moneyToCents(costRaw), priceCents:moneyToCents(priceRaw), supplierStock:numberValue(inventoryRaw),
         fulfillmentMode:source==="doba"?"dropship":source==="fourthwall"?"pod":"supplier_managed", shippingStatus:"unverified", shippingCents:shippingRaw?moneyToCents(shippingRaw):null,
         primaryImage:image, sourceUrl:url || (source==="ebay"&&ebay?`https://www.ebay.com/itm/${text(ebay)}`:""), ebayItemId:ebay, fourthwallProductId:fourthwall,
-        salesChannels:source==="ebay"?["ebay"]:source==="fourthwall"?["website","fourthwall"]:["website"], storeSection:source==="fourthwall"?"apparel":"rv-outdoor", publishStatus:"draft"
+        salesChannels:source==="ebay"?["ebay"]:source==="tiktok"?["tiktok"]:source==="fourthwall"?["website","fourthwall"]:["website"], storeSection:source==="fourthwall"?"apparel":"rv-outdoor", publishStatus:"draft"
       };
     });
   }

@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id),D=()=>window.EUSAdminData;let products=[];
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clean=v=>String(v??"").trim();
-function channels(p){const set=new Set((Array.isArray(p.salesChannels)?p.salesChannels:clean(p.salesChannels).split(/[,;|]/)).map(x=>clean(x).toLowerCase()).filter(Boolean));if(p.publishStatus==="published")set.add("website");if(clean(p.ebayItemId))set.add("ebay");if(clean(p.fourthwallProductId)||p.sourceType==="fourthwall")set.add("fourthwall");if(p.sourceType==="doba"||p.supplier==="doba")set.add("doba");return set;}
+function channels(p){const set=new Set((Array.isArray(p.salesChannels)?p.salesChannels:clean(p.salesChannels).split(/[,;|]/)).map(x=>clean(x).toLowerCase()).filter(Boolean));if(p.publishStatus==="published")set.add("website");if(clean(p.ebayItemId))set.add("ebay");if(clean(p.fourthwallProductId)||p.sourceType==="fourthwall")set.add("fourthwall");if(p.sourceType==="doba"||p.supplier==="doba")set.add("doba");if(p.sourceType==="tiktok")set.add("tiktok");return set;}
 function has(p,key){return channels(p).has(key)||key==="tiktok"&&[...channels(p)].some(x=>x.includes("tiktok"));}
 function counts(){return{website:products.filter(p=>has(p,"website")).length,ebay:products.filter(p=>has(p,"ebay")).length,tiktok:products.filter(p=>has(p,"tiktok")).length,fourthwall:products.filter(p=>has(p,"fourthwall")).length,doba:products.filter(p=>has(p,"doba")).length};}
 function card(name,count,note,url,mode){return `<a class="eus-action-card" href="${url}"><span>${esc(name)}</span><strong>${count}</strong><small>${esc(note)} · ${esc(mode)}</small></a>`;}
