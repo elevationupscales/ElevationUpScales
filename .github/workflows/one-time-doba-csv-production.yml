@@ -1,0 +1,127 @@
+name: One-Time Doba CSV Sync Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  deploy-doba-csv-sync-production:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current production source
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor e1e09a5f1bbbfc51726f565e2d1e8b51208951d1 HEAD
+          for f in site/doba-csv-sync-runtime.js site/doba-csv-sync.js site/admin-channels.html site/admin-channels.js site/sync-admin-runtime.js site/admin-command-center.js site/admin-overview.js site/_worker.js site/_routes.json; do test -f "$f"; done
+          node --check site/doba-csv-sync-runtime.js
+          node --check site/doba-csv-sync.js
+          node --check site/admin-channels.js
+          node --check site/sync-admin-runtime.js
+          node --check site/admin-command-center.js
+          node --check site/admin-overview.js
+          node --check site/_worker.js
+          grep -q 'Doba — CSV Sync' site/admin-channels.html
+          grep -q 'Partial Snapshot — default' site/admin-channels.html
+          grep -q 'Preview Diff' site/admin-channels.html
+          grep -q 'Dropshipping Price ÷ 1.25' site/admin-channels.html
+          grep -q 'DEFAULT_PROFILE_NAME = "Doba Download Center — 25% Markup"' site/doba-csv-sync-runtime.js
+          grep -q 'REVIEW — SUPPLIER SKU CHANGED' site/doba-csv-sync-runtime.js
+          grep -q 'NEW / DRAFT' site/doba-csv-sync-runtime.js
+          grep -q 'alreadyApplied' site/doba-csv-sync-runtime.js
+          grep -q 'doba:{configured:true,mode:"csv",label:"Doba — CSV Sync"}' site/sync-admin-runtime.js
+          ! grep -q 'DOBA_FEED_URL' site/sync-admin-runtime.js
+          ! grep -q 'DOBA_APP_KEY' site/sync-admin-runtime.js
+          grep -q 'doba-csv-sync-runtime.js' site/_routes.json
+          grep -q 'handleDobaCsvSyncAdminApi' site/_worker.js
+
+      - name: Deploy Doba CSV Sync to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          verify_base(){
+            local base="${1%/}" route code channels ui api_code runtime_code hawaii
+            for route in /admin /admin-channels /admin-catalog /admin-inventory /admin-store-orders /admin-lithium-shipping /admin-analytics /store /marketplace /checkout /start-a-project /solar-project /hawaii-lithium-batteries /doba-csv-sync.js; do
+              code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-doba-prod --write-out '%{http_code}' "${base}${route}" || true)
+              echo "${base}${route} -> ${code:-curl-error}"
+              test "$code" = "200"
+            done
+            channels=$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/admin-channels")
+            ui=$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/doba-csv-sync.js")
+            hawaii=$(curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/hawaii-lithium-batteries")
+            printf '%s' "$channels" | grep -q 'Doba — CSV Sync'
+            printf '%s' "$channels" | grep -q 'Partial Snapshot — default'
+            printf '%s' "$channels" | grep -q 'Preview Diff'
+            printf '%s' "$ui" | grep -q '32-row audit baseline'
+            printf '%s' "$ui" | grep -q 'No Catalog or Inventory product fields have been mutated yet'
+            ! printf '%s' "$hawaii" | grep -q 'Lithium Batteries Shipped to Hawaii'
+            ! printf '%s' "$hawaii" | grep -q 'Free Hawaii Shipping'
+            api_code=$(curl --silent --output /tmp/doba-api --write-out '%{http_code}' "${base}/api/admin/doba-csv-sync" || true)
+            echo "Doba Admin API -> ${api_code}"
+            test "$api_code" = "401"
+            runtime_code=$(curl --silent --output /tmp/doba-runtime --write-out '%{http_code}' "${base}/doba-csv-sync-runtime.js" || true)
+            echo "Doba internal runtime -> ${runtime_code}"
+            test "$runtime_code" = "404"
+            for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping /api/admin/sync; do
+              code=$(curl --silent --output /tmp/protected --write-out '%{http_code}' "${base}${api}" || true)
+              echo "protected ${api} -> ${code}"
+              test "$code" = "401"
+            done
+          }
+          if ! verify_base "$DEPLOYMENT_URL"; then
+            echo 'Deployment hostname not fully ready; verifying production alias.'
+            sleep 8
+            verify_base "$PRODUCTION_URL"
+          fi
+
+      - name: Record production receipt
+        shell: bash
+        run: |
+          {
+            echo '### Doba CSV Sync — Production'
+            echo 'Decision: DEC-006 — Doba CSV Sync is the official Doba source refresh'
+            echo 'Preview-verified application: 0226aea3abf9c0f8a02aaa35dc7661562e08dd5e'
+            echo "Production source: $(git rev-parse HEAD)"
+            echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}"
+            echo 'Doba API/feed prerequisite removed: PASS'
+            echo 'Partial Snapshot default / Preview Diff / Apply boundary: PASS'
+            echo 'Internal runtime route protection: PASS'
+            echo 'Unauthenticated protected APIs: PASS'
+            echo 'Public Store / Marketplace / Checkout / Solar / Hawaii regressions: PASS'
+            echo 'Raw 32-row sample Apply: NOT PERFORMED — raw CSV was not provided to deployment; first owner upload remains preview-first.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove one-time production workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-doba-csv-production.yml
+          git commit -m 'Remove completed Doba CSV production workflow'
+          git push origin HEAD:main
