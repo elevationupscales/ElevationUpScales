@@ -6,18 +6,18 @@
 
 **Authority:** Newest accepted production state + explicit owner/management decisions control. Do not revive superseded plans because an older chat or handoff contains them.
 
-**Last coordination reset:** 2026-08-28
+**Last status update:** 2026-08-28 — supplier-cost / logistics production repair completed.
 
 ---
 
 ## Worker Start Protocol
 
 1. Read this file.
-2. Confirm the current authoritative SHA before touching code.
-3. Read the controlling handoff named in the relevant workstream.
+2. Confirm the current repository `main` SHA and the current accepted production application SHA.
+3. Read the controlling handoff/decision for the relevant workstream.
 4. Confirm scope boundaries and parked work.
 5. Work only inside the approved scope.
-6. Use preview/staging before production when the controlling handoff requires it.
+6. Use preview/staging before production when required.
 
 ## Worker Finish Protocol
 
@@ -45,48 +45,48 @@ Update this status file or provide an exact status block for Master Coordination
 
 **State:** ACTIVE / CONTROLLED RELEASES
 
-**Current authoritative application baseline before coordination-only commits:** `893877b4d2d36d6c7de66837ea1b784e2486f5cf`
+**Current accepted production application SHA:** `0c4d4c5131aeb68f6afcd2967973ebababbfa0fa`
 
-**Coordination commits after that baseline do not by themselves authorize a production application promotion.** Workers must confirm the current repository SHA and the current accepted production SHA separately before deployment.
+**Production deployment for latest application repair:** `https://22b7f943.elevationupscales.pages.dev`
 
-**Release rule:** small controlled patch → preview → verify → management gate when required → production → verify → baseline → stop.
+**Latest verified preview:** `https://259ff273.elevationupscales.pages.dev`
+
+**Verification run:** GitHub Actions `33232283625` — PASS.
+
+**Release rule:** small controlled patch → preview → verify → production → verify → baseline → stop. Management gates still apply when a controlling handoff explicitly requires one.
 
 **Do not:** stack unrelated fixes, reopen completed repairs, or mix Portal code into Website.
-
-**Next action:** Hawaii Lithium Phase 2 closeout preview/build under its controlling handoff.
 
 ---
 
 ## Hawaii Lithium Program
 
-**State:** PHASE 2 BUILD AUTHORIZED / PRODUCTION PROMOTION HOLD
+**State:** PHASE 2 PRODUCTION / COST + LOGISTICS HARDENED / COMMERCIAL PILOT ACTIVE
 
-**Foundation:** Phase 1 CLOSED; Phase 1.2 integrated.
+**Foundation:** Phase 1 CLOSED; Phase 1.2 integrated; Phase 2 controls deployed to production before this latest repair.
 
-**Authoritative application parent:** `893877b4d2d36d6c7de66837ea1b784e2486f5cf` or accepted application descendant. Coordination-only commits do not change the production gate.
+**Latest production hardening:** supplier-cost truth and logistics economics repair at application SHA `0c4d4c5131aeb68f6afcd2967973ebababbfa0fa`.
 
-**Controlling handoff:** `Elevation_UpScales_Hawaii_Lithium_Phase2_FINAL_CLOSEOUT_DEPLOYMENT_INSTRUCTIONS_2026-08-28.md`
+**Current controls include:**
+- exact Catalog/SKU/supplier identity
+- manufacturer/model and origin fields
+- supplier inventory confirmation/recheck states
+- UN 38.3/document/packaging review controls
+- server-side route approval blockers
+- reservation aging/contact/reconfirmation
+- batch-line compatibility checks
+- READY TO COMMIT / BOOKED no-go gates
+- landed direct-cost / gross-contribution fields
+- demand quality separation
+- conservative public Hawaii status language
+- supplier cost > $0 requirement before a route can become APPROVED
+- non-zero Hawaii freight quote/ocean freight requirement before route approval
+- batch commitment blocked when Catalog or route supplier cost is missing/zero
+- batch economics return incomplete/null rather than artificial profit when cost/freight data is missing
 
-**Supporting management overlay:** current Business Plan Manager 20 consolidated Hawaii Lithium Phase 2 handoff.
+**Business objective:** prove a repeatable, financially sensible, customer-safe exact-SKU Hawaii lithium lane with real delivered costs and customer outcome.
 
-**Business objective:** prove a repeatable, financially sensible, customer-safe exact-SKU Hawaii lithium lane.
-
-**Current scope:**
-- exact SKU / origin controls
-- supplier inventory truth
-- evidence / route gates
-- reservation aging and reconfirmation
-- batch compatibility / no-go controls
-- landed direct cost / gross contribution
-- clean public copy and factual education
-- Mission Control action summaries only
-- Solar Builder regression / minor company-language cleanup only
-
-**Production:** HOLD until the pre-production verification receipt is accepted by Master Coordination / management.
-
-**Parked:** full Admin overhaul, Seller overhaul, Fulfillment overhaul, broad Analytics overhaul, full Solar Builder commerce engine.
-
-**Next action:** Deployment builds remaining closeout scope → preview → complete pre-production receipt → STOP for management review.
+**Next action:** operate the pilot and prove one exact-SKU lane. Do not broaden Hawaii claims merely because the software is complete.
 
 ---
 
@@ -104,21 +104,26 @@ Update this status file or provide an exact status block for Master Coordination
 
 ## Inventory / Catalog Operations
 
-**State:** OPERATIONAL UI / DATA-QUALITY FOLLOW-UP REQUIRED
+**State:** PASS / SUPPLIER-COST TRUTH HARDENED
 
-**Owner-view audit evidence — 2026-08-28:** Inventory page shows 11 total records, with the current Active filter displaying 8 active Doba dropship records. All 8 active displayed items are supplier-managed/dropship, so physical `On Hand`, `Reserved`, and `Available` totals of 0 are expected and should not be interpreted as the supplier having zero stock.
+**Owner-view baseline:** 11 total Inventory records; current Active filter previously showed 8 active Doba dropship records. Supplier-managed/dropship products correctly keep physical `On Hand`, `Reserved`, and `Available` separate from supplier availability.
 
-**Important distinction:** Inventory `On Hand` represents Elevation-physically-tracked stock. Supplier-managed availability is a separate concept and must not be inferred from the physical stock counters.
+**2026-08-28 production repair:** known Doba records with stored `cost_cents <= 0` now receive an idempotent backfill from the last-known 2026-08-28 supplier snapshot. Existing non-zero costs are never overwritten by this repair.
 
-**Open data-quality issue:** the 8 displayed Doba rows currently show `Unit Cost $0.00`. This does not match prior supplier cost snapshots for these products and must be reconciled from current supplier/source records before cost, landed-cost, margin, or Hawaii batch economics rely on Inventory cost data.
+**Important freshness rule:** backfilled values are last-known supplier costs, not a promise of current Doba pricing. Recheck supplier price and inventory before supplier purchase/commitment.
 
-**Inventory Cost summary:** the top `Inventory Cost` metric is defined as physically available tracked units × unit cost. Because the visible items are supplier-managed, `$0.00` for this summary is structurally expected even after supplier unit-cost fields are corrected. If management needs supplier-managed catalog cost exposure, add a separate metric rather than changing the meaning of physical inventory value.
+**Prevention:**
+- an active Doba Inventory item can no longer be created/edited with a zero supplier cost;
+- a Doba Catalog import/upsert cannot remain `published` with missing/zero supplier cost — it is forced to HOLD/review;
+- Catalog upserts preserve an existing supplier cost when an update payload omits cost;
+- the Inventory summary label is now `Physical Inventory Cost`, meaning tracked available units × unit cost;
+- supplier-managed items are not converted into fake physical stock.
 
-**Audit trail:** owner view currently shows `No inventory changes yet.` Treat as informational until verified whether the existing records were seeded/imported outside the Inventory mutation event path. Do not call it a production defect without confirming the backend event history.
+**Auditability:** cost backfill records a Catalog event and attempts an Inventory event using actor `system-cost-reconcile` and a note that supplier cost must be rechecked before purchase.
 
-**Next action:** reconcile current Doba supplier costs for the 8 active records, preserve supplier-managed mode, and verify that Catalog/Hawaii landed-cost calculations do not consume zero/missing supplier cost as if it were a real cost.
+**Production verification:** RV public Catalog remained healthy with 8 published RV/Outdoor products after the cost backfill trigger.
 
-**Do not:** convert supplier-managed dropship items into fake physical stock merely to make On Hand/Available counters nonzero.
+**Next action:** normal operations. Recheck supplier cost/stock at purchase time; do not treat stored supplier cost as permanently current.
 
 ---
 
@@ -130,8 +135,6 @@ Update this status file or provide an exact status block for Master Coordination
 
 **Do not:** present Marketplace seller inventory as Elevation-owned retail stock.
 
-**Next action:** no broad rebuild unless explicitly authorized.
-
 ---
 
 ## Solar Builder
@@ -140,23 +143,23 @@ Update this status file or provide an exact status block for Master Coordination
 
 **Current role:** education, system planning, and lead generation.
 
-**Near-term rule:** regression-test and preserve current calculations/caveats. Use stable Catalog IDs/SKUs for future-facing hooks only when needed.
+**Near-term rule:** preserve current calculations/caveats. Use stable Catalog IDs/SKUs for future-facing hooks only when needed.
 
 **Future direction:** education + system planning + compatible Elevation products + quote/cart/pro review.
 
-**Do not:** rebuild the Builder or create a separate product database during Hawaii Phase 2 closeout.
+**Do not:** create a separate product database.
 
 ---
 
 ## Mission Control / Admin
 
-**State:** OPERATIONAL / BROAD OVERHAUL PARKED
+**State:** PHASE 3 COMMAND CENTER DEPLOYED / FURTHER BROAD EXPANSION CONTROLLED
 
-**Role:** action-required summaries, leads, operations, commerce/admin visibility.
+**Current role:** action-required summaries, leads, commerce/admin visibility, seller/fulfillment/analytics coordination.
 
-**Hawaii rule:** Mission Control shows actionable Hawaii summaries only; detailed lithium records stay in Lithium Shipping Matrix / Hawaii Shipping Batches.
+**Hawaii rule:** Mission Control shows actionable Hawaii summaries; detailed lithium records remain in Lithium Shipping Matrix / Hawaii Shipping Batches.
 
-**Do not:** begin full Admin/Seller/Fulfillment/Analytics overhaul without explicit authorization.
+**Do not:** start additional broad Admin/Seller/Fulfillment/Analytics redesign work unless explicitly authorized as a new phase.
 
 ---
 
@@ -174,7 +177,7 @@ Update this status file or provide an exact status block for Master Coordination
 
 **Current strategic posture:** protect working infrastructure, consolidate systems, prioritize revenue, improve fulfillment, reduce workload, track actual results, and scale only where demand proves the opportunity.
 
-**Hawaii commercialization rule:** software completion does not prove the market. The commercial proof is a completed exact-SKU lane with actual delivered cost, customer outcome, transit time, operating burden, and gross contribution reconciled after delivery.
+**Hawaii commercialization rule:** software completion does not prove the market. Commercial proof is a completed exact-SKU lane with actual delivered cost, customer outcome, transit time, operating burden, and gross contribution reconciled after delivery.
 
 ---
 
@@ -186,10 +189,11 @@ Update this status file or provide an exact status block for Master Coordination
 - Public copy must not expose internal workflow/deployment language.
 - Planned capability must not be represented as already operational.
 - Exact-SKU shipping eligibility must never be generalized to an entire battery class or all Hawaii destinations.
-- Production promotion requires the gate defined by the controlling handoff.
 - Supplier-managed inventory must not be represented as physically on hand.
-- Missing/zero supplier cost must not be interpreted as free inventory or zero landed cost.
-- When a task is complete, produce evidence and stop; do not automatically continue into adjacent parked work.
+- Missing/zero supplier cost must never be interpreted as free inventory, zero landed cost, or valid margin.
+- Last-known supplier cost is not a current supplier quote; recheck before ordering.
+- Hawaii route approval requires real supplier cost plus real Hawaii freight economics and required compliance/provider controls.
+- When a task is complete, produce evidence and stop; do not automatically continue into adjacent work.
 
 ---
 
