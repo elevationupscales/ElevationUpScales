@@ -1,0 +1,115 @@
+name: One-Time Hawaii Lithium Phase 2 Production
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  deploy-phase2-production:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current production source
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify Phase 2 source and regression boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor d9a27e250a8ad0f3c77e04c334f07728d07b2d32 HEAD
+          test -f site/hawaii-lithium-runtime.js
+          test -f site/admin-lithium-shipping.html
+          test -f site/admin-lithium-shipping.js
+          test -f site/hawaii-lithium-batteries.html
+          test -f site/lithium-batteries.html
+          node --check site/hawaii-lithium-runtime.js
+          node --check site/admin-lithium-shipping.js
+          node --check site/lithium-shop.js
+          node --check site/admin-store-orders-link.js
+          grep -q 'Phase 2 commercial-control rule' site/admin-lithium-shipping.html
+          grep -q 'Exact-SKU qualification' site/admin-lithium-shipping.html
+          grep -q 'Coming Soon' site/hawaii-lithium-batteries.html
+          ! grep -Eqi 'Lithium Batteries Shipped to Hawaii|Qualification in Progress|Hawaii Shipping Qualification in Progress|DOT approved|hazmat approved|carrier approved|ships anywhere|free Hawaii shipping' site/hawaii-lithium-batteries.html site/lithium-batteries.html
+          for f in site/solar-project.html site/solar-project/index.html; do
+            grep -q 'Elevation reviews final fit, protection, and pricing.' "$f"
+            ! grep -q 'Casey verifies final fit, protection, and pricing.' "$f"
+          done
+          test -f site/store.html
+          test -f site/rv-store.html
+          test -f site/start-a-project.html
+          test -f site/marketplace.html
+          test -f site/_worker.js
+
+      - name: Deploy Phase 2 to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production routes and Phase 2 copy
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          deployment_base="${DEPLOYMENT_URL%/}"
+          production_base="${PRODUCTION_URL%/}"
+
+          smoke() {
+            local base="$1"
+            for route in / /store /rv-store /start-a-project /marketplace /solar-project /lithium-batteries /hawaii-lithium-batteries /admin-lithium-shipping; do
+              code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
+              echo "${base}${route} -> ${code:-curl-error}"
+              test "$code" = "200"
+            done
+            hawaii="$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 "${base}/hawaii-lithium-batteries")"
+            lithium="$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 "${base}/lithium-batteries")"
+            admin="$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 "${base}/admin-lithium-shipping")"
+            printf '%s' "$admin" | grep -q 'Phase 2 commercial-control rule'
+            printf '%s' "$hawaii" | grep -q 'COMING SOON'
+            if printf '%s\n%s' "$hawaii" "$lithium" | grep -Eqi 'Lithium Batteries Shipped to Hawaii|Qualification in Progress|Hawaii Shipping Qualification in Progress|DOT approved|hazmat approved|carrier approved|ships anywhere|free Hawaii shipping'; then
+              echo 'Blocked public Hawaii claim detected.'
+              return 1
+            fi
+          }
+
+          if ! smoke "$deployment_base"; then
+            echo 'Deployment-specific hostname not fully ready; checking production alias.'
+            sleep 8
+            smoke "$production_base"
+          fi
+
+      - name: Record Phase 2 production receipt
+        shell: bash
+        run: |
+          {
+            echo '### Hawaii Lithium Phase 2 production'
+            echo "Source: $(git rev-parse HEAD)"
+            echo 'Production verification: PASS'
+            echo 'Exact-SKU/compliance/route/batch controls: present'
+            echo 'Public-copy gate: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove one-time production workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-phase2-production.yml
+          git commit -m 'Remove completed Phase 2 production workflow'
+          git push origin HEAD:main
