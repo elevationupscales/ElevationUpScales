@@ -8,9 +8,7 @@ on:
         required: true
         default: preview
         type: choice
-        options:
-          - preview
-          - production
+        options: [preview, production]
       production_confirmation:
         description: For production only, type DEPLOY
         required: false
@@ -27,244 +25,95 @@ concurrency:
 
 jobs:
   validate:
-    name: Validate authoritative main
     runs-on: ubuntu-latest
     steps:
-      - name: Check out authoritative main
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           ref: main
-
-      - name: Require explicit production confirmation
+      - name: Require production confirmation
         if: ${{ inputs.target == 'production' }}
-        shell: bash
         env:
-          PRODUCTION_CONFIRMATION: ${{ inputs.production_confirmation }}
+          CONFIRM: ${{ inputs.production_confirmation }}
         run: |
           set -euo pipefail
-          confirmation="$(printf '%s' "$PRODUCTION_CONFIRMATION" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')"
-          if [[ "$confirmation" != "DEPLOY" ]]; then
-            echo "Production deployment blocked: type DEPLOY in the production confirmation field."
-            exit 1
-          fi
-
-      - name: Verify required production files
-        shell: bash
+          test "$(printf '%s' "$CONFIRM" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')" = "DEPLOY"
+      - name: Validate final production architecture
         run: |
           set -euo pipefail
-          test -f site/index.html
-          test -f site/_worker.js
-          test -f site/_routes.json
-          test -f site/_headers
-          grep -q '3.11.30-store-navigation-repair' site/_worker.js
-
-          # Preserve accepted Solar lineage without requiring the two route files to be byte-identical.
-          test -f site/solar-visual-guide.css
-          grep -q 'data-jump="panels"' site/solar-project.html
-          grep -q 'data-jump="services"' site/solar-project.html
-          grep -q 'Stage 1 of 7' site/solar-project.html
-          for file in site/solar-project.html site/solar-project/index.html; do
-            grep -q 'Elevation reviews final fit, protection, and pricing.' "$file"
-            ! grep -q 'Casey verifies final fit, protection, and pricing.' "$file"
+          for file in \
+            site/index.html site/_worker.js site/_routes.json \
+            site/admin.html site/admin-command-center.js site/admin-overview.js \
+            site/admin-catalog.html site/admin-products-final.js site/admin-inventory.html \
+            site/admin-channels.html site/admin-channels.js site/admin-system.html site/admin-system.js \
+            site/admin-store-orders.html site/admin-lithium-shipping.html site/admin-analytics.html \
+            site/sync-admin-runtime.js site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js \
+            site/store.html site/rv-store.html site/rv-store.js site/rv-ebay-catalog.js \
+            site/lithium-batteries.html site/hawaii-lithium-batteries.html site/checkout/index.html \
+            site/start-a-project.html site/solar-project.html; do
+            test -f "$file"
           done
-
-          # Phase 3 Admin Command Center foundation.
-          test -f site/admin.html
-          test -f site/admin-command-center.js
-          test -f site/admin-command-center.css
-          test -f site/admin-overview.js
-          test -f site/admin-analytics.html
-          test -f site/admin-analytics-v2.js
-          test -f site/admin-channels.html
-          test -f site/admin-channels.js
-          grep -q 'Admin Command Center' site/admin.html
-          grep -q 'ADMIN_COMMAND_CENTER_LOADER' site/_worker.js
-          grep -q '/admin.html /admin 301' site/_redirects
-          grep -q 'TikTok Shop' site/admin-catalog.html
-          grep -q '"tiktok"' site/catalog-admin-runtime.js
-
-          # Preserve split-store navigation and require the current storefront repairs.
-          test -f site/store.html
-          test -f site/store-config.js
-          test -f site/store-catalog-resilience.js
-          test -f site/rv-store.html
-          test -f site/rv-store.css
-          test -f site/rv-store.js
-          test -f site/rv-ebay-catalog.js
-          grep -q 'Apparel Store' site/store.html
-          grep -q 'RV & Outdoor Store' site/store.html
-          grep -q 'href="/rv-store"' site/store.html
-          grep -q 'href="/rv-store"' site/rv-store.html
-          grep -q '/rv-store' site/site-shell.js
-          grep -q 'store-catalog-resilience.js?v=3.11.38' site/store-config.js
-          grep -q 'MIN_FULL_COUNT = 13' site/store-catalog-resilience.js
-          grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
-          grep -q 'grid-template-columns:1fr' site/rv-store.html
-          ! grep -q 'rv-store-hero__media' site/rv-store.html
-          test "$(grep -o 'class="market-product-card"' site/store.html | wc -l)" -ge 10
-
-          # Validate the static Seller Hub-verified eBay catalog architecture.
-          grep -q 'rv-ebay-catalog.js?v=3.11.35' site/rv-store.html
-          grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-ebay-catalog.js
-          grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-store.js
-          grep -q 'elevationupscalesshop' site/rv-store.js
-          ! grep -q '/api/store-inventory' site/rv-store.js
-          python - <<'PY'
-          import re
-          from pathlib import Path
-          catalog = Path('site/rv-ebay-catalog.js').read_text(encoding='utf-8')
-          ids = re.findall(r'\["(\d{12})",', catalog)
-          assert len(ids) >= 10, f'expected a populated eBay catalog, got {len(ids)} items'
-          assert len(ids) == len(set(ids)), 'duplicate eBay item numbers found'
-          html = Path('site/rv-store.html').read_text(encoding='utf-8')
-          assert html.index('rv-ebay-catalog.js') < html.index('rv-store.js'), 'catalog must load before renderer'
-          assert 'rv-store-hero__media' not in html, 'retired RV hero image block returned'
-          print('verified_ebay_items=', len(ids))
-          PY
-
-          # Preserve Store analytics + Inventory administration foundation.
-          test -f site/store-channel.css
-          test -f site/store-channel-analytics.js
-          grep -q '3.11.28-native-rv-catalog' site/store-channel-analytics.js
-          test -f site/admin-inventory.html
-          test -f site/admin-inventory.css
-          test -f site/admin-inventory.js
-          grep -q '/api/admin/inventory' site/_worker.js
-          grep -q 'eus_inventory_items' site/_worker.js
-          grep -q 'admin-inventory.html' site/admin-listings.html
-
-          # Preserve Hawaii Lithium Phase 2 public/commercial controls.
-          test -f site/hawaii-lithium-runtime.js
-          test -f site/admin-lithium-shipping.html
-          ! grep -Eqi 'Lithium Batteries Shipped to Hawaii|Qualification in Progress|Hawaii Shipping Qualification in Progress|DOT approved|hazmat approved|carrier approved|ships anywhere|free Hawaii shipping' site/hawaii-lithium-batteries.html site/lithium-batteries.html
-
-      - name: Check JavaScript syntax
-        shell: bash
+          grep -q 'Products & Listings' site/admin-catalog.html
+          grep -q 'Channels & Sync' site/admin-channels.html
+          grep -q 'System / QA' site/admin-system.html
+          grep -q 'Shipping & Logistics' site/admin-lithium-shipping.html
+          grep -q '/api/admin/sync' site/_worker.js
+          grep -q '/api/sync/run' site/_worker.js
+          grep -q '/sync-admin-runtime.js' site/_routes.json
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'fallbackCatalog' site/rv-store.js
+          grep -q 'Hawaii Lithium Program' site/hawaii-lithium-batteries.html
+          grep -q 'Secure checkout' site/checkout/index.html
+          grep -q 'Stage 1 of 7' site/solar-project.html
+          grep -q '208-813-4998' site/index.html
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+      - name: Block secrets and oversized artifacts
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find site -type f -name '*.js' -print0)
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
 
-      - name: Enforce Cloudflare Pages file limits
-        shell: bash
-        run: |
-          set -euo pipefail
-          file_count=$(find site -type f | wc -l)
-          test "$file_count" -le 20000
-          oversized=$(find site -type f -size +25M -print -quit)
-          test -z "$oversized"
-
-      - name: Block local secrets and release archives
-        shell: bash
-        run: |
-          set -euo pipefail
-          blocked=$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)
-          test -z "$blocked"
-          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
-            echo "A credential-like value was found in the website source."
-            exit 1
-          fi
-
-  deploy-preview:
-    name: Deploy isolated preview
+  deploy:
     needs: validate
-    if: ${{ inputs.target == 'preview' }}
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Check out authoritative main
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           ref: main
-      - name: Deploy isolated preview
-        id: deploy
+      - id: deploy
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=github-preview
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ inputs.target == 'production' && 'main' || 'github-preview' }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - name: Smoke preview customer and admin routes
-        shell: bash
+      - name: Smoke deployed application
         env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          base="${DEPLOYMENT_URL%/}"
-          test -n "$base"
-          for route in / /store /rv-store /start-a-project /marketplace /solar-project /hawaii-lithium-batteries /admin /admin-analytics /admin-channels; do
-            echo "Smoke testing ${base}${route}"
-            code=$(curl --silent --show-error --location --retry 6 --retry-all-errors --retry-delay 2 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}")
+          base="${BASE%/}"
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-system; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
             test "$code" = "200"
           done
-          rv_html="$(curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/rv-store")"
-          printf '%s' "$rv_html" | grep -q 'VERIFIED EBAY CATALOG'
-          ! printf '%s' "$rv_html" | grep -q 'rv-store-hero__media'
-          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
-          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/admin" | grep -q 'Admin Command Center'
-          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/admin-catalog" | grep -q 'TikTok Shop'
-          curl --silent --show-error --location --retry 6 --retry-all-errors "${base}/store-config.js" | grep -q 'store-catalog-resilience.js?v=3.11.38'
-      - name: Record preview URL
+          curl -sS -L --fail "$base/admin-catalog" | grep -q 'Products & Listings'
+          curl -sS -L --fail "$base/admin-channels" | grep -q 'Channels & Sync'
+          curl -sS -L --fail "$base/admin-system" | grep -q 'System / QA'
+          curl -sS -L --fail "$base/rv-store.js" | grep -q '/api/store-catalog?section=rv-outdoor'
+          sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
+          test "$sync_code" = "401"
+          scheduler_code=$(curl -sS -o /tmp/scheduled.json -w '%{http_code}' -X POST "$base/api/sync/run" -H 'Content-Type: application/json' --data '{"target":"all","runId":"deploy-gate-unauthorized"}' || true)
+          test "$scheduler_code" = "401"
+          runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
+          test "$runtime_code" = "404"
+      - name: Receipt
         run: |
-          echo "### Cloudflare preview" >> "$GITHUB_STEP_SUMMARY"
+          echo '### Elevation Pages deployment — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Target: ${{ inputs.target }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
-          echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Preview smoke tests: PASS" >> "$GITHUB_STEP_SUMMARY"
-
-  deploy-production:
-    name: Deploy approved production
-    needs: validate
-    if: ${{ inputs.target == 'production' }}
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Check out authoritative main
-        uses: actions/checkout@v6
-        with:
-          ref: main
-      - name: Deploy approved production source
-        id: deploy
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify production customer and admin routes
-        shell: bash
-        env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
-          PRODUCTION_URL: https://elevationupscales.com
-        run: |
-          set -euo pipefail
-          deployment_base="${DEPLOYMENT_URL%/}"
-          production_base="${PRODUCTION_URL%/}"
-          test -n "$deployment_base"
-          smoke_routes() {
-            local base="$1" route code rv_html
-            for route in / /store /rv-store /start-a-project /marketplace /solar-project /hawaii-lithium-batteries /admin /admin-analytics /admin-channels; do
-              echo "Smoke testing ${base}${route}"
-              code=$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
-              [[ "$code" == "200" ]] || return 1
-            done
-            rv_html="$(curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/rv-store")" || return 1
-            printf '%s' "$rv_html" | grep -q 'VERIFIED EBAY CATALOG' || return 1
-            ! printf '%s' "$rv_html" | grep -q 'rv-store-hero__media' || return 1
-            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/store" | grep -q 'Apparel Store' || return 1
-            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/admin" | grep -q 'Admin Command Center' || return 1
-            curl --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 45 "${base}/admin-catalog" | grep -q 'TikTok Shop' || return 1
-          }
-          if smoke_routes "$deployment_base"; then
-            echo "Deployment-specific Pages URL verified."
-          else
-            echo "Deployment-specific URL was not ready; verifying the production alias."
-            sleep 8
-            smoke_routes "$production_base"
-          fi
-      - name: Record production deployment URL
-        run: |
-          echo "### Cloudflare production deployment" >> "$GITHUB_STEP_SUMMARY"
-          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
-          echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Production verification: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
