@@ -1,0 +1,86 @@
+name: One-Time Stabilization Preview Finalize
+
+on:
+  push:
+    branches:
+      - stabilization/elevation-4-3-2026-08-29
+
+permissions:
+  contents: write
+
+jobs:
+  finalize-preview:
+    if: github.event.head_commit.message == 'Finalize stabilization preview verification'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: stabilization/elevation-4-3-2026-08-29
+          fetch-depth: 0
+
+      - name: Confirm accepted candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 05500e0263a2788066d40a13b646e9cc6b9992c3 HEAD
+          git merge-base --is-ancestor 66163dfccc770388a6646dc6b01a608388ff7095 HEAD
+
+      - name: Verify preview checkout fail-closed and quote behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://stabilization-preview.elevationupscales.pages.dev"
+          origin="$base"
+          post_quote() { curl -sS -o "$2" -w '%{http_code}' -H "Origin: $origin" -H 'Content-Type: application/json' --data "$1" "${base}/api/store-checkout/quote" || true; }
+          rv='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"CO"}}'
+          hi='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"shipping":{"state":"HI"}}'
+          zero='{"source":"rv","id":"cat-b99c2b06-2dfe-4241-9bff-62825d874d07","quantity":1,"shipping":{"state":"CO"}}'
+          apparel='{"source":"apparel","id":"elevation-upscales-true-grit-trucker-hat","quantity":1}'
+          test "$(post_quote "$rv" /tmp/rv.json)" = "200"
+          test "$(post_quote "$hi" /tmp/hi.json)" = "409"
+          test "$(post_quote "$zero" /tmp/zero.json)" = "409"
+          test "$(post_quote "$apparel" /tmp/apparel.json)" = "200"
+          test "$(post_quote '{"source":"bogus","id":"x","quantity":1}' /tmp/source.json)" = "400"
+          test "$(post_quote '{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":99,"shipping":{"state":"CO"}}' /tmp/qty.json)" = "400"
+          test "$(curl -sS -o /tmp/missing.json -w '%{http_code}' -H 'Content-Type: application/json' --data "$rv" "${base}/api/store-checkout/quote" || true)" = "403"
+          test "$(curl -sS -o /tmp/foreign.json -w '%{http_code}' -H 'Origin: https://example.com' -H 'Content-Type: application/json' --data "$rv" "${base}/api/store-checkout/quote" || true)" = "403"
+          test "$(curl -sS -o /tmp/config.json -w '%{http_code}' "${base}/api/store-checkout/config" || true)" = "200"
+          python -c 'import json; d=json.load(open("/tmp/config.json")); assert d.get("credentialsConfigured") is True; assert d.get("checkoutEnabled") is False; assert d.get("liveCheckoutApproved") is False; assert d.get("environment")=="live"; print("preview_checkout=correctly-fail-closed")'
+          order='{"source":"rv","id":"cat-8449060f-d3fc-4dd0-ac94-141092454544","quantity":1,"customer":{"email":"test@example.com"},"shipping":{"fullName":"Test User","address1":"1 Main St","city":"Denver","state":"CO","postalCode":"80202","countryCode":"US"}}'
+          test "$(curl -sS -o /tmp/order.json -w '%{http_code}' -H "Origin: $origin" -H 'Content-Type: application/json' --data "$order" "${base}/api/store-checkout/orders" || true)" = "503"
+
+      - name: Verify storefront and Hawaii invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://stabilization-preview.elevationupscales.pages.dev"
+          curl -sS -L "${base}/store" -o /tmp/store.html
+          curl -sS -L "${base}/rv-store" -o /tmp/rvstore.html
+          curl -sS -L "${base}/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          test "$(grep -o 'store-checkout-routing.js' /tmp/store.html | wc -l)" = "1"
+          test "$(grep -o 'rv-checkout-routing.js' /tmp/rvstore.html | wc -l)" = "1"
+          grep -q '208-813-4998' /tmp/store.html
+          grep -q '208-813-4998' /tmp/rvstore.html
+          grep -qi 'Coming Soon' /tmp/hawaii.html
+          ! grep -Eqi 'guaranteed Hawaii|automatic.*Hawaii' /tmp/hawaii.html
+
+      - name: Confirm non-monetary unit regression remains available
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --experimental-default-type=module .github/test_stabilized_checkout.mjs
+
+      - name: Record preview summary and retire temporary tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.3 stabilization preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Parent: 66163dfccc770388a6646dc6b01a608388ff7095' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate source: 05500e0263a2788066d40a13b646e9cc6b9992c3' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preview deployment: https://2b28f595.elevationupscales.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preview checkout: fail-closed as intended; quote/security matrix PASS' >> "$GITHUB_STEP_SUMMARY"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/one-time-stabilization-candidate.yml .github/workflows/one-time-stabilization-checkout-diagnostic.yml .github/workflows/one-time-stabilization-preview-finalize.yml .github/stabilize_4_3.py .github/stabilize_4_3_followup.py .github/test_stabilized_checkout.mjs .github/stabilization-trigger.txt
+          git commit -m 'Close stabilization preview verification'
+          git push origin HEAD:stabilization/elevation-4-3-2026-08-29
