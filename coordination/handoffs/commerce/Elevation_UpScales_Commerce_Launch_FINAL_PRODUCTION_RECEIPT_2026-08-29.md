@@ -4,16 +4,18 @@
 **Disposition:** PASS / COMPLETE AND VERIFIED  
 **Owner authorization:** Full closeout greenlight  
 **Production site:** https://elevationupscales.com  
-**Final verified Pages deployment:** https://017f0ec7.elevationupscales.pages.dev  
-**Final verification workflow run:** `33239780628` — PASS  
+**Final verified Pages deployment:** https://a748a521.elevationupscales.pages.dev  
+**Final Commerce deployment ID:** `a748a521`  
+**Final copy-closeout workflow run:** `33239956560` — PASS  
 
-## Source lineage
+## Source / commit lineage
 
 - Continuation-handoff parent at intake: `fc85758431f4afba89484638af9e6db899b63604`
 - Accepted destination-hardened application ancestor: `95ce329e4b81f24162413663c6e16919c086d93b`
 - Atomic Commerce reconciliation source: `220c91d9bf24d4e9d0a0feb9980a90e5afa59afe`
-- Final verified production application source: `f378f7644c419a1f18ce7911c572b79593dee9be`
-- One-time verification workflow cleanup commit: `daaef8a7f0a541543fe65cd939d6a53d59f11314`
+- Full Commerce verification source: `f378f7644c419a1f18ce7911c572b79593dee9be`
+- Final production application commit after public-copy closeout: `b5ae239f3477e571cb28159c5b47fb863eb624c6`
+- One-time copy workflow cleanup commit: `b118c099b45dd753bafcca6c590c3c39c008d935`
 - This receipt commit is the final post-cleanup record commit; the final baseline points to the resulting accepted `main` state.
 
 ## Workflow / deployment evidence
@@ -23,10 +25,9 @@
 - Destination-hardening preview run: `33239366178` — PASS
 - Commerce production foundation run: `33239280674` — PASS
 - Atomic Doba/provider reconciliation run: `33239617246` — data transaction PASS
-- Verification-only predecessor run: `33239691708` — production checks PASS; receipt shell quoting failed only
-- Final verification-only run: `33239780628` — PASS
-- Final Pages deployment identifier: `017f0ec7`
-- Final Pages deployment URL: `https://017f0ec7.elevationupscales.pages.dev`
+- Full production verification run: `33239780628` — PASS
+- Public copy / PayPal / contact closeout run: `33239956560` — PASS
+- Final Pages deployment: `https://a748a521.elevationupscales.pages.dev`
 
 ## Doba final disposition
 
@@ -64,7 +65,7 @@ Source SHA-256: `f1c4ed36338ae5ac078e38a07175b994c9300f7af4473eef34fb3eea6211d7e
 - One propane water heater remains HOLD at zero supplier stock.
 - One Other / Review distillation product remains Draft pending assortment approval.
 
-## Pricing / margin rule
+## Pricing / readiness rule
 
 Published new Doba products required exact current supplier SKU, positive supplier cost, positive retail price, primary image, verified shipping state, stock above the low-stock review band, at least **$5 direct contribution**, and at least **20% direct contribution margin** after known supplier/shipping cost. The Doba profile cost derivation remains `Dropshipping Price ÷ 1.25`. Browser-provided price is not authoritative.
 
@@ -75,15 +76,15 @@ Published new Doba products required exact current supplier SKU, positive suppli
 - Store/category/provider filtering is deployed.
 - RV Store category browsing is deployed while preserving search/sort/list behavior.
 - Fourthwall provider read/reconcile adapter is deployed.
-- Fourthwall production state at closeout: **Not Configured**; no false Connected claim.
+- Fourthwall production provider state at closeout: **Not Configured**; no false Connected claim.
 - Printful state: **Not Configured**.
 - Spreadconnect state: **Not Configured**.
 - Small lazy-loaded thumbnails/responsive controls are deployed.
 - Inventory polling was reduced from approximately 3 seconds to 15 seconds rather than expanding high-frequency polling to provider APIs.
 
-## Final production verification
+## Full production verification
 
-All of the following returned HTTP 200 in the final run:
+Run `33239780628` verified HTTP 200 for:
 
 `/`, `/store`, `/rv-store`, `/checkout`, `/marketplace`, `/start-a-project`, `/solar-project`, `/solar-services`, `/home-services`, `/lithium-batteries`, `/hawaii-lithium-batteries`, `/admin`, `/admin-catalog`, `/admin-inventory`, `/admin-channels`, `/admin-store-orders`, `/admin-lithium-shipping`, `/admin-analytics`.
 
@@ -93,14 +94,14 @@ Security / server boundaries:
 - Direct `/apparel-provider-runtime.js`: **404**
 - Direct `/doba-csv-sync-runtime.js`: **404**
 - Direct `/store-checkout-server.js`: **404**
-- Retired temporary Commerce finalizer: **non-operational** (`405` on POST in final verification)
+- Retired temporary Commerce finalizer: **non-operational**
 
 Public catalog / readiness:
 
 - Public RV catalog products observed: **20**
 - All **12** newly approved published products present.
 - All **10** review/HOLD products absent from the public catalog.
-- Required categories present, including Tools & Workshop, Solar & Off-Grid, RV Essentials & Water, Automotive/ATV/Towing, and Travel & Organization.
+- Required categories present.
 - Published products verified with positive price, verified shipping state, and primary image.
 
 Checkout gates:
@@ -108,27 +109,43 @@ Checkout gates:
 - Published Catalog-backed product to Colorado: **200 / PASS**
 - Same lower-48-only product to Hawaii: **409 / BLOCKED AS REQUIRED**
 - Zero-stock Doba product: **409 / BLOCKED AS REQUIRED**
-- RV category rail present in deployed client code.
+
+## Final public-copy / PayPal / contact verification
+
+Run `33239956560` corrected and reverified the final customer-facing copy without changing Catalog data:
+
+- `/store`: **200**
+- `/rv-store`: **200**
+- `/solar-project`: **200**
+- `/hawaii-lithium-batteries`: **200**
+- Apparel navigation now uses **Hawaii Lithium Program** and **Coming soon · request shipping availability**.
+- Solar Builder no longer exposes the approved-for-removal customer-facing terms `Mission Control`, `Solar Lead`, or `server storage` in the checked public surfaces.
+- Negative scan on the touched public commerce/Solar/Hawaii pages passed for the approved implementation-language list.
+- `208-813-4998` was present on the deployed Store and Hawaii pages.
+- `/api/store-checkout/config`: **200** with `configured=true`, `credentialsConfigured=true`, `checkoutEnabled=true`, `liveCheckoutApproved=true`, `environment=live`.
+- No PayPal secret credential was exposed in the closeout record.
 
 ## Regression disposition
 
 - Hawaii Lithium: PASS; conservative exact-SKU/destination posture preserved.
-- Apparel storefront: PASS route; existing storefront preserved.
+- Apparel storefront: PASS.
 - RV Store: PASS.
+- PayPal live checkout controls: PASS.
 - Marketplace: PASS and remains separate from Catalog ownership.
 - Start a Project: PASS.
-- Solar routes: PASS.
+- Solar routes and public copy: PASS.
 - Admin authentication boundary: PASS.
 - Doba Stage 0 safeguards / Partial Snapshot / existing HOLDs: PASS.
+- 208 contact routing presence: PASS.
 
-## Known non-blocking states
+## Known non-blocking operating states
 
-The 10 Draft/HOLD Doba records remain intentionally non-public for documented readiness reasons. Fourthwall, Printful, and Spreadconnect are truthfully shown as Not Configured until real credentials plus successful server-side reconciliation exist. These are controlled operating states, not failed deployment items.
+The 10 Draft/HOLD Doba records remain intentionally non-public for documented readiness reasons. Fourthwall, Printful, and Spreadconnect are truthfully represented as Not Configured until real credentials plus successful server-side reconciliation exist. These are controlled operating states, not failed deployment items.
 
 ## Rollback / baseline
 
 - Application rollback point: `95ce329e4b81f24162413663c6e16919c086d93b`.
 - Final accepted restore baseline: `baseline-2026-08-29-commerce-launch-apparel-providers`.
-- Doba mutation history remains recorded in the Catalog/Doba audit records; application-code rollback alone does not erase audited Catalog data mutations.
+- Doba mutation history remains recorded in Catalog/Doba audit records; application-code rollback alone does not erase audited Catalog data mutations.
 
 **FINAL STATUS: PASS — COMPLETE AND VERIFIED**
