@@ -44,7 +44,7 @@ const ADMIN_ORDERS_LOADER = `
 `;
 
 const ADMIN_COMMAND_CENTER_LOADER = `
-<script src="/admin-command-center.js?v=4.3.4"></script>
+<script src="/admin-command-center.js?v=4.3.5"></script>
 `;
 
 const CHECKOUT_CSP = [

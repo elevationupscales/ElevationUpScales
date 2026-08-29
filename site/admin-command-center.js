@@ -16,19 +16,23 @@
   };
 
   const NAV=[
-    ["Operate",[
+    ["Daily Operations",[
       ["Overview","/admin","overview"],
-      ["Orders & Fulfillment","/admin-store-orders","orders"],
-      ["Shipping & Logistics","/admin-lithium-shipping","shipping"],
-      ["Leads","/admin-listings#leads","leads"]
+      ["Leads","/admin-listings#leads","leads"],
+      ["Orders & Fulfillment","/admin-store-orders","orders"]
     ]],
-    ["Sell",[
+    ["Commerce",[
       ["Products / Import Center","/admin-catalog","products"],
       ["Inventory","/admin-inventory","inventory"],
-      ["Channels / Stores","/admin-channels","channels"],
-      ["Marketplace","/admin-listings#marketplace","marketplace"]
+      ["Channels / Stores","/admin-channels","channels"]
     ]],
-    ["Measure",[
+    ["Shipping",[
+      ["Lithium / Hawaii Logistics","/admin-lithium-shipping","shipping"]
+    ]],
+    ["Marketplace",[
+      ["Marketplace Operations","/admin-listings#marketplace","marketplace"]
+    ]],
+    ["Insights & System",[
       ["Analytics","/admin-analytics","analytics"],
       ["System / QA","/admin-listings#system","system"]
     ]]
@@ -47,8 +51,12 @@
     return"";
   }
   function ensureCss(){
-    if(document.querySelector('link[data-eus-command-center-css]'))return;
-    const link=document.createElement("link");link.rel="stylesheet";link.href="/admin-command-center.css?v=4.3.4";link.dataset.eusCommandCenterCss="1";document.head.append(link);
+    if(!document.querySelector('link[data-eus-command-center-css]')){
+      const link=document.createElement("link");link.rel="stylesheet";link.href="/admin-command-center.css?v=4.3.5";link.dataset.eusCommandCenterCss="1";document.head.append(link);
+    }
+    if(!document.querySelector('link[data-eus-command-center-pass1-css]')){
+      const pass=document.createElement("link");pass.rel="stylesheet";pass.href="/admin-command-center-pass1.css?v=4.3.5";pass.dataset.eusCommandCenterPass1Css="1";document.head.append(pass);
+    }
   }
   function installShell(){
     if(document.querySelector(".eus-admin-app"))return;
@@ -58,7 +66,7 @@
     const app=document.createElement("div");app.className="eus-admin-app";
     const rail=document.createElement("aside");rail.className="eus-admin-rail";rail.setAttribute("aria-label","Elevation Admin navigation");
     const active=currentKey();
-    rail.innerHTML=`<a class="eus-admin-rail__brand" href="/admin"><img src="/assets/logo-mark.webp" alt=""><span><strong>Elevation Admin</strong><small>Commerce · Leads · Fulfillment</small></span></a>${NAV.map(([label,items])=>`<section class="eus-admin-nav-group"><strong>${label}</strong>${items.map(([name,url,key])=>`<a href="${url}"${key===active?' class="is-active" aria-current="page"':''}>${name}</a>`).join("")}</section>`).join("")}<div class="eus-admin-rail__foot">Elevation UpScales, Inc.<br><a href="/">Open public website</a></div>`;
+    rail.innerHTML=`<a class="eus-admin-rail__brand" href="/admin"><img src="/assets/logo-mark.webp" alt=""><span><strong>Elevation Admin</strong><small>Operations · Commerce · Leads</small></span></a>${NAV.map(([label,items])=>`<section class="eus-admin-nav-group"><strong>${label}</strong>${items.map(([name,url,key])=>`<a href="${url}"${key===active?' class="is-active" aria-current="page"':''}>${name}</a>`).join("")}</section>`).join("")}<div class="eus-admin-rail__foot">Elevation UpScales, Inc.<br><a href="/">Open public website</a></div>`;
     const mobile=document.createElement("div");mobile.className="eus-admin-mobile-bar";mobile.innerHTML='<button type="button" data-eus-admin-menu aria-label="Open admin navigation">☰</button><strong>Elevation Admin</strong><a class="eus-admin-button" href="/admin">Overview</a>';
     const holder=document.createElement("div");holder.className="eus-admin-main";
     main.parentNode.insertBefore(app,main);app.append(rail,holder);holder.append(mobile,main);
