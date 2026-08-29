@@ -101,10 +101,14 @@ jobs:
             echo "$route=$code"
             test "$code" = "200"
           done
-          curl -sS -L --fail "$base/admin-catalog" | grep -q 'Products & Listings'
-          curl -sS -L --fail "$base/admin-channels" | grep -q 'Channels & Sync'
-          curl -sS -L --fail "$base/admin-system" | grep -q 'System / QA'
-          curl -sS -L --fail "$base/rv-store.js" | grep -q '/api/store-catalog?section=rv-outdoor'
+          curl -sS -L --fail "$base/admin-catalog" -o /tmp/admin-catalog.html
+          grep -q 'Products & Listings' /tmp/admin-catalog.html
+          curl -sS -L --fail "$base/admin-channels" -o /tmp/admin-channels.html
+          grep -q 'Channels & Sync' /tmp/admin-channels.html
+          curl -sS -L --fail "$base/admin-system" -o /tmp/admin-system.html
+          grep -q 'System / QA' /tmp/admin-system.html
+          curl -sS -L --fail "$base/rv-store.js" -o /tmp/rv-store.js
+          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
           sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
           test "$sync_code" = "401"
           scheduler_code=$(curl -sS -o /tmp/scheduled.json -w '%{http_code}' -X POST "$base/api/sync/run" -H 'Content-Type: application/json' --data '{"target":"all","runId":"deploy-gate-unauthorized"}' || true)
