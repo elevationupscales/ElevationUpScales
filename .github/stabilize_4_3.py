@@ -234,7 +234,7 @@ for runtime in ["site/sync-admin-runtime.js", "site/apparel-provider-runtime.js"
     if not text.startswith('import { ensureCommerceSchema } from "./commerce-schema-migrations.js";'):
         text = 'import { ensureCommerceSchema } from "./commerce-schema-migrations.js";\n' + text
     text, count = re.subn(
-        r"async function ensureSchema\(env\)\{.*?return db;\}",
+        r"async function ensureSchema\(env\)\{.*?return db;\s*\}",
         "async function ensureSchema(env){return ensureCommerceSchema(env);}",
         text,
         count=1,
