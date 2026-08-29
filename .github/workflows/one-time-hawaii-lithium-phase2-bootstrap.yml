@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          awk '/^H4sIA/{capture=1} capture{if($0=="B64EOF") exit; print}' .github/workflows/one-time-hawaii-lithium-phase2-closeout.yml > /tmp/phase2.b64
+          awk '/^H4sIA/{capture=1} capture{if($0 ~ /^[[:space:]]*B64EOF[[:space:]]*$/) exit; print}' .github/workflows/one-time-hawaii-lithium-phase2-closeout.yml > /tmp/phase2.b64
           test -s /tmp/phase2.b64
           base64 -d /tmp/phase2.b64 > /tmp/phase2.tgz
           tar -xzf /tmp/phase2.tgz -C .
@@ -47,6 +47,7 @@ jobs:
           git commit -m 'Complete Hawaii Lithium Phase 2 commercial controls'
           git push origin HEAD:release/hawaii-lithium-phase2-controls
       - name: Remove bootstrap from main
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
