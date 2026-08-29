@@ -18,8 +18,8 @@
   const NAV=[
     ["Daily Operations",[
       ["Overview","/admin","overview"],
-      ["Leads","/admin-listings#leads","leads"],
-      ["Orders & Fulfillment","/admin-store-orders","orders"]
+      ["Orders & Fulfillment","/admin-store-orders","orders"],
+      ["Leads","/admin-listings#leads","leads"]
     ]],
     ["Commerce",[
       ["Products / Import Center","/admin-catalog","products"],
@@ -27,7 +27,7 @@
       ["Channels / Stores","/admin-channels","channels"]
     ]],
     ["Shipping",[
-      ["Lithium / Hawaii Logistics","/admin-lithium-shipping","shipping"]
+      ["Shipping & Logistics","/admin-lithium-shipping","shipping"]
     ]],
     ["Marketplace",[
       ["Marketplace Operations","/admin-listings#marketplace","marketplace"]

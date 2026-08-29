@@ -26,8 +26,16 @@
     const ops=snapshot.operations.ok?(snapshot.operations.data||{}):{};
     const signals=ops.signals||{};
     const lithium=snapshot.lithium.ok?(snapshot.lithium.data||{}):{};
-    const reservations=Array.isArray(lithium.reservations)?lithium.reservations.length:(Number.isFinite(Number(lithium.summary?.reservations))?Number(lithium.summary.reservations):null);
-    const batches=Array.isArray(lithium.batches)?lithium.batches.filter(b=>!["COMPLETE","CANCELLED"].includes(String(b.status||"").toUpperCase())).length:(Number.isFinite(Number(lithium.summary?.openBatches))?Number(lithium.summary.openBatches):null);
+    const hawaiiRequests=Array.isArray(lithium.requests)?lithium.requests:[];
+    const hawaiiRecords=Array.isArray(lithium.records)?lithium.records:[];
+    const hawaiiBatches=Array.isArray(lithium.batches)?lithium.batches:[];
+    const hawaiiBatchMetrics=Array.isArray(lithium.metrics?.batchMetrics)?lithium.metrics.batchMetrics:[];
+    const reservations=snapshot.lithium.ok?hawaiiRequests.filter(r=>!["CLOSED","CANCELLED"].includes(String(r.state||"").toUpperCase())).length:null;
+    const supplierRechecks=snapshot.lithium.ok?hawaiiRecords.filter(r=>r.inventoryRecheckRequired||["UNKNOWN","RECHECK REQUIRED","SUPPLIER ERROR"].includes(String(r.supplierStockState||"").toUpperCase())).length:null;
+    const blockedBatchLines=hawaiiBatchMetrics.reduce((n,m)=>n+(Number(m.blockedOrders)||0),0);
+    const shippingBlocked=snapshot.lithium.ok?hawaiiRecords.filter(r=>r.hold||String(r.reviewState||"").toUpperCase()!=="INTERNAL REQUIREMENTS SATISFIED").length+blockedBatchLines:null;
+    const confirmations=snapshot.lithium.ok?hawaiiBatchMetrics.reduce((n,m)=>n+(Number(m.pendingCustomerConfirmations)||0),0):null;
+    const batches=snapshot.lithium.ok?hawaiiBatches.filter(b=>!["COMPLETE","CANCELLED"].includes(String(b.status||"").toUpperCase())).length:null;
 
     const actions=[
       action("Purchase from supplier",snapshot.orders.ok?orderState.supplier:"N/A","Paid orders still needing supplier fulfillment.","/admin-store-orders","is-warning"),
@@ -36,8 +44,12 @@
       action("New leads",snapshot.opportunities.ok?leadState.new:"N/A","Active project leads still in NEW status.","/admin-listings#leads",""),
       action("Unassigned leads",snapshot.opportunities.ok?leadState.unassigned:"N/A","Active leads with no assigned representative.","/admin-listings#leads",leadState.unassigned?"is-warning":""),
       action("Leads missing next action",snapshot.opportunities.ok?leadState.noNext:"N/A","Active records parked without a meaningful next step.","/admin-listings#leads",leadState.noNext?"is-warning":""),
-      action("Products needing review",snapshot.catalog.ok?catalogState.review:"N/A","Shipping, hold or review-state product exceptions.","/admin-catalog",""),
-      action("Hawaii reservations / batches",reservations===null&&batches===null?"N/A":`${reservations??0} / ${batches??0}`,"Reservations / active freight batches requiring operating awareness.","/admin-lithium-shipping","")
+      action("Products needing review",snapshot.catalog.ok?catalogState.review:"N/A","Catalog hold, shipping, or review-state product exceptions.","/admin-catalog",""),
+      action("Hawaii reservations",reservations===null?"N/A":reservations,"Open reservation records needing operating awareness.","/admin-lithium-shipping",reservations?"is-warning":""),
+      action("Supplier rechecks",supplierRechecks===null?"N/A":supplierRechecks,"Lithium products whose supplier availability needs a fresh check.","/admin-lithium-shipping",supplierRechecks?"is-warning":""),
+      action("Shipping blockers",shippingBlocked===null?"N/A":shippingBlocked,"Product or batch shipping controls that are not ready.","/admin-lithium-shipping",shippingBlocked?"is-urgent":""),
+      action("Customer confirmations",confirmations===null?"N/A":confirmations,"Hawaii batch lines waiting on current customer approval.","/admin-lithium-shipping",confirmations?"is-warning":""),
+      action("Open Hawaii batches",batches===null?"N/A":batches,"Active planning, quote, review, booking, or transit batches.","/admin-lithium-shipping","")
     ];
     $("eus-action-board").innerHTML=actions.join("");
 
