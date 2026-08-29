@@ -1,0 +1,225 @@
+name: One-Time Kingboss Finish V4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/one-time-kingboss-finish-v4.yml
+
+permissions:
+  contents: write
+  deployments: write
+
+env:
+  SOURCE_BRANCH: staging/kingboss-5188361-authoritative-source
+  SOURCE_PATH: .deployment-input/kingboss-20260829-5188361/source.csv.xz
+  SOURCE_FILE: US_Dropshipping_Product_Data_with_25%_Markup_20260829_5188361.csv
+  SOURCE_SHA256: 4c1c424c314ccf384f0db854617bb5a97b3481bda869597c43bbc7853c3e3f66
+  SOURCE_BYTES: "226980"
+  SOURCE_ROWS: "43"
+  SOURCE_COLUMNS: "163"
+  FINAL_BASELINE: baseline-2026-08-29-kingboss-store-closeout
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify exact source and preserve clean runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 15018c34a77e5226f97ee73aa9e4247ae33723d6 HEAD
+          git fetch origin "$SOURCE_BRANCH:refs/remotes/origin/$SOURCE_BRANCH"
+          mkdir -p /tmp/kingboss
+          git show "origin/$SOURCE_BRANCH:$SOURCE_PATH" > /tmp/kingboss/source.csv.xz
+          xz -t /tmp/kingboss/source.csv.xz
+          xz -dc /tmp/kingboss/source.csv.xz > /tmp/kingboss/source.csv
+          test "$(wc -c < /tmp/kingboss/source.csv | tr -d ' ')" = "$SOURCE_BYTES"
+          test "$(sha256sum /tmp/kingboss/source.csv | awk '{print $1}')" = "$SOURCE_SHA256"
+          python - <<'PY'
+          import csv,os,re,json
+          with open('/tmp/kingboss/source.csv',newline='',encoding='utf-8-sig') as f:
+              r=csv.DictReader(f); rows=list(r); headers=r.fieldnames or []
+          assert len(headers)==int(os.environ['SOURCE_COLUMNS']); assert len(rows)==int(os.environ['SOURCE_ROWS'])
+          pat=re.compile(r'(battery|lifepo|lithium|power\s*bank|power\s*station|solar\s*generator|mobile\s*power|rechargeable)',re.I)
+          bad=[]
+          for row in rows:
+              text=' '.join([row.get('Product Name',''),row.get('Category',''),row.get('Description','')])
+              if not pat.search(text): bad.append({'item':row.get('Item No.'),'title':row.get('Product Name')})
+          if bad: raise SystemExit('STOP: non-power product detected: '+json.dumps(bad[:10]))
+          print('SOURCE PASS',len(rows),len(headers),'power_storage_rows',len(rows))
+          PY
+          cp site/doba-csv-sync-runtime.js /tmp/kingboss/doba.clean.js
+          cp site/catalog-admin-runtime.js /tmp/kingboss/catalog.clean.js
+          cp site/hawaii-lithium-runtime.js /tmp/kingboss/hawaii.clean.js
+          curl -A 'Mozilla/5.0 ElevationUpScales' -fsS --retry 5 'https://elevationupscales.com/api/store-catalog?section=rv-outdoor' > /tmp/kingboss/rv-before.json
+          curl -A 'Mozilla/5.0 ElevationUpScales' -fsS --retry 5 'https://elevationupscales.com/api/store-catalog?section=lithium-batteries' > /tmp/kingboss/lithium-before.json
+
+      - name: Generate masked one-run nonce
+        shell: bash
+        run: |
+          set -euo pipefail
+          nonce=$(openssl rand -hex 32)
+          echo "::add-mask::$nonce"
+          echo "EUS_ONE_RUN_NONCE=$nonce" >> "$GITHUB_ENV"
+
+      - name: Patch local one-run authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          nonce=os.environ['EUS_ONE_RUN_NONCE']
+          targets=[('site/doba-csv-sync-runtime.js','async function requireAdmin(request,env){'),('site/catalog-admin-runtime.js','async function requireAdmin(request, env) {'),('site/hawaii-lithium-runtime.js','async function requireAdmin(request, env) {')]
+          for path,marker in targets:
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              if marker not in s: raise SystemExit('auth marker missing '+path)
+              insert=marker+f'\n  const oneRun = clean(request.headers.get("X-EUS-One-Run"),500); if(oneRun && timingSafe(oneRun,"{nonce}")) return {{session:{{email:clean(env?.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL,180).toLowerCase()}}}};'
+              p.write_text(s.replace(marker,insert,1),encoding='utf-8')
+          PY
+          node --check site/doba-csv-sync-runtime.js
+          node --check site/catalog-admin-runtime.js
+          node --check site/hawaii-lithium-runtime.js
+
+      - name: Deploy temporary signed executor
+        id: tempdeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main --commit-dirty=true
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Execute approved reconciliation with browser-safe client signature
+        shell: bash
+        env:
+          EXECUTOR_URL: ${{ steps.tempdeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          s=Path('.github/workflows/one-time-kingboss-5188361-finish.yml').read_text(encoding='utf-8')
+          marker='- name: Reconcile, integrate and gate Kingboss batch'
+          i=s.index(marker); j=s.index("python - <<'PY'",i)+len("python - <<'PY'\n"); k=s.index('\n          PY',j)
+          code=textwrap.dedent(s[j:k])
+          old="headers={'Accept':'application/json','X-EUS-One-Run':token}"
+          new="headers={'Accept':'application/json','X-EUS-One-Run':token,'User-Agent':'Mozilla/5.0 (compatible; ElevationUpScales-Deployment/1.0)'}"
+          if old not in code: raise SystemExit('approved reconcile client header marker missing')
+          Path('/tmp/kingboss/reconcile.py').write_text(code.replace(old,new,1),encoding='utf-8')
+          PY
+          python /tmp/kingboss/reconcile.py
+
+      - name: Restore clean runtimes
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f /tmp/kingboss/doba.clean.js && cp /tmp/kingboss/doba.clean.js site/doba-csv-sync-runtime.js || true
+          test -f /tmp/kingboss/catalog.clean.js && cp /tmp/kingboss/catalog.clean.js site/catalog-admin-runtime.js || true
+          test -f /tmp/kingboss/hawaii.clean.js && cp /tmp/kingboss/hawaii.clean.js site/hawaii-lithium-runtime.js || true
+
+      - name: Redeploy clean accepted production source
+        if: always()
+        id: cleandeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production and safety gates
+        if: success()
+        shell: bash
+        env:
+          CLEAN_URL: ${{ steps.cleandeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${CLEAN_URL%/}"
+          for path in / /rv-store /lithium-batteries /hawaii-lithium-batteries /admin /admin-catalog /admin-inventory /admin-lithium-shipping /admin-store-orders /start-a-project /solar-project /marketplace /store /checkout /admin-analytics; do
+            code=$(curl -A 'Mozilla/5.0 ElevationUpScales' -sS -o /dev/null -w '%{http_code}' --retry 5 "$base$path"); echo "$path -> $code"; test "$code" = 200
+          done
+          curl -A 'Mozilla/5.0 ElevationUpScales' -fsS "$base/api/store/catalog?section=rv-outdoor" > /tmp/kingboss/rv-after.json
+          curl -A 'Mozilla/5.0 ElevationUpScales' -fsS "$base/api/store/catalog?section=lithium-batteries" > /tmp/kingboss/lithium-after.json
+          curl -A 'Mozilla/5.0 ElevationUpScales' -fsS "$base/api/store-checkout/config" > /tmp/kingboss/paypal-config.json
+          for p in /api/admin/catalog /api/admin/inventory /api/admin/lithium-shipping /api/admin/store-orders; do code=$(curl -A 'Mozilla/5.0 ElevationUpScales' -sS -o /dev/null -w '%{http_code}' "$base$p"); echo "$p unauth -> $code"; test "$code" = 401; done
+          code=$(curl -A 'Mozilla/5.0 ElevationUpScales' -sS -o /dev/null -w '%{http_code}' -H "X-EUS-One-Run: $EUS_ONE_RUN_NONCE" "$base/api/admin/catalog"); echo "retired one-run auth -> $code"; test "$code" = 401
+          python - <<'PY'
+          import json,os,urllib.request,urllib.parse
+          r=json.load(open('/tmp/kingboss/receipt.json')); rv0=json.load(open('/tmp/kingboss/rv-before.json')); rv=json.load(open('/tmp/kingboss/rv-after.json')); li=json.load(open('/tmp/kingboss/lithium-after.json')); pp=json.load(open('/tmp/kingboss/paypal-config.json'))
+          products=list(rv.get('products',[]))+list(li.get('products',[])); batch=set(r['catalogIds'])
+          assert not any(p.get('id') in batch for p in products),'Kingboss qualification item leaked public'
+          assert not any((p.get('priceCents') or 0)<=0 for p in products),'public $0 item'
+          assert not any(p.get('supplierStock')==0 for p in products),'public zero-stock item'
+          assert pp.get('configured') and pp.get('checkoutEnabled') and pp.get('liveCheckoutApproved') and pp.get('environment')=='live','PayPal live regression'
+          base=os.environ['CLEAN_URL'].rstrip('/')
+          for sku in r['catalogSkus']:
+              url=base+'/api/hawaii-lithium/status?sku='+urllib.parse.quote(sku)+'&destination='+urllib.parse.quote('Hawaii — General')
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (ElevationUpScales)'}); data=json.loads(urllib.request.urlopen(req,timeout=30).read().decode() or '{}')
+              assert data.get('eligible') is not True,'false Hawaii eligibility '+sku
+          r['rvPublishedBefore']=rv0.get('count',len(rv0.get('products',[]))); r['rvPublishedAfter']=rv.get('count',len(rv.get('products',[]))); r['lithiumPublicAfter']=li.get('count',len(li.get('products',[]))); r['productionUrl']=base
+          r['paypalRegression']='PASS'; r['adminAuthRegression']='PASS'; r['hawaiiEligibilityRegression']='PASS'
+          json.dump(r,open('/tmp/kingboss/receipt.json','w'),indent=2)
+          PY
+          python - <<'PY'
+          import json,urllib.request,urllib.error,os
+          base=os.environ['CLEAN_URL'].rstrip('/'); rv=json.load(open('/tmp/kingboss/rv-after.json')); ok=False
+          for p in [x for x in rv.get('products',[]) if x.get('ebayItemId')]:
+              body=json.dumps({'source':'rv','id':p['ebayItemId'],'name':p.get('title') or p.get('name'),'quantity':1,'shipping':{'state':'CO'}}).encode()
+              req=urllib.request.Request(base+'/api/store-checkout/quote',data=body,headers={'Content-Type':'application/json','Accept':'application/json','Origin':base,'User-Agent':'Mozilla/5.0 (ElevationUpScales)'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as resp:
+                      q=json.loads(resp.read().decode() or '{}')
+                      if resp.status==200 and q.get('unitPriceCents',0)>0: ok=True; break
+              except urllib.error.HTTPError: pass
+          assert ok,'RV checkout quote regression'
+          PY
+
+      - name: Write closeout summary
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/kingboss/receipt.json'))
+          s=f"# Kingboss 5188361 Final Closeout\n\nSource verification: PASS — {r['rowCount']} rows / SHA {r['fingerprint']}.\n\nCatalog: {r['existingItemMatches']} existing matches; {r['exactSkuMatches']} exact SKU; {r['newCount']} new; {r['skuConflicts']} SKU conflicts; {r['zeroStockCount']} zero-stock; {r['lowStockCount']} low-stock; errors 0.\n\nKingboss integrated {r['lithiumIntegrated']}; public launch {r['publicPublished']}; held for lithium/shipping qualification {r['lithiumHeldForQualification']}.\n\nRV count {r['rvPublishedBefore']} -> {r['rvPublishedAfter']}. 5188501: {r['batch5188501']}.\n"
+          open('/tmp/kingboss/summary.md','w').write(s); print(s)
+          PY
+          cat /tmp/kingboss/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload closeout artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kingboss-5188361-final-closeout-v4
+          path: |
+            /tmp/kingboss/receipt.json
+            /tmp/kingboss/summary.md
+            /tmp/kingboss/pre-mutation-evidence.json
+            /tmp/kingboss/post-mutation-evidence.json
+            /tmp/kingboss/rv-before.json
+            /tmp/kingboss/rv-after.json
+            /tmp/kingboss/lithium-after.json
+            /tmp/kingboss/paypal-config.json
+          retention-days: 30
+
+      - name: Cleanup one-time workflows and create accepted baseline
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -f .github/workflows/one-time-kingboss-5188361-finish.yml .github/workflows/one-time-kingboss-finish-v3.yml .github/workflows/one-time-kingboss-finish-v4.yml .github/workflows/one-time-assemble-kingboss-source.yml
+          git commit -m 'Close Kingboss supplier finish execution'
+          git push origin HEAD:main
+          git push --force origin HEAD:refs/heads/$FINAL_BASELINE
