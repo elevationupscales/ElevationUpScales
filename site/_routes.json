@@ -12,7 +12,8 @@
     "/store-checkout-server.js",
     "/store-orders-admin-server.js",
     "/catalog-admin-server.js",
-    "/catalog-admin-runtime.js"
+    "/catalog-admin-runtime.js",
+    "/hawaii-lithium-runtime.js"
   ],
   "exclude": []
 }
