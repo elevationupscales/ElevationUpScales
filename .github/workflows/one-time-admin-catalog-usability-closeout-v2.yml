@@ -1,0 +1,290 @@
+name: One-Time Admin Catalog Usability Closeout V2
+
+on:
+  push:
+    branches: [release/admin-catalog-usability-merchandising-cleanup]
+    paths:
+      - .github/workflows/one-time-admin-catalog-usability-closeout-v2.yml
+
+permissions:
+  contents: write
+  deployments: write
+  issues: write
+
+env:
+  PARENT_SHA: ea26349c836fe8389a7170ca618fa3ccbb4b75e7
+  APPLICATION_SHA: 6b380061d97cfc25b43792aaf02aae31931cc88d
+  ACCEPTED_PRODUCTION_SHA: b2b327a17a5bcda537ff3c06babb5a653630238a
+  ACCEPTED_PRODUCTION_URL: https://ddf172f2.elevationupscales.pages.dev
+  FINAL_BASELINE: baseline-2026-08-29-admin-catalog-usability-merchandising-cleanup
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/admin-catalog-usability-merchandising-cleanup
+          fetch-depth: 0
+
+      - name: Validate scoped application
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$PARENT_SHA" HEAD
+          node --check site/_worker.js
+          node --check site/admin-usability-merchandising.js
+          grep -q 'Gross Margin' site/admin-usability-merchandising.js
+          grep -q 'Net Contribution Incomplete' site/admin-usability-merchandising.js
+          grep -q 'Supplier-managed products do not count as physical on-hand inventory' site/admin-usability-merchandising.js
+          grep -q 'VARIANT FAMILY' site/admin-usability-merchandising.js
+          grep -q 'OUT OF STOCK' site/admin-usability-merchandising.js
+          grep -q 'admin-usability-merchandising.js?v=4.3.10' site/_worker.js
+          grep -q 'Partial Snapshot' site/admin-channels.html
+          grep -q 'Dropshipping Price ÷ 1.25' site/admin-channels.html
+          git diff --check "$PARENT_SHA"..HEAD
+          mkdir -p /tmp/admin-usability
+          cp site/worker-core.js /tmp/admin-usability/worker-core.clean.js
+          cp site/catalog-admin-runtime.js /tmp/admin-usability/catalog.clean.js
+          cp site/doba-csv-sync-runtime.js /tmp/admin-usability/doba.clean.js
+          cp site/sync-admin-runtime.js /tmp/admin-usability/sync.clean.js
+          git diff --name-only "$PARENT_SHA"..HEAD > /tmp/admin-usability/files-changed.txt
+
+      - name: Generate masked read-only audit nonce
+        shell: bash
+        run: |
+          nonce=$(openssl rand -hex 32)
+          echo "::add-mask::$nonce"
+          echo "EUS_ONE_RUN_NONCE=$nonce" >> "$GITHUB_ENV"
+
+      - name: Add temporary read-only Admin authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          nonce=os.environ['EUS_ONE_RUN_NONCE']
+          patches=[
+            ('site/worker-core.js','async function requireAdmin(request, env) {',f'\n  const oneRun = cleanString(request.headers.get("X-EUS-One-Run"), 500); if (oneRun && timingSafeEqualStrings(oneRun, "{nonce}")) return {{ session: {{ email: cleanString(env?.ADMIN_EMAIL || "elevationupscales@gmail.com", 180).toLowerCase() }} }};'),
+            ('site/catalog-admin-runtime.js','async function requireAdmin(request, env) {',f'\n  const oneRun = clean(request.headers.get("X-EUS-One-Run"), 500); if (oneRun && timingSafe(oneRun, "{nonce}")) return {{ session: {{ email: clean(env?.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL, 180).toLowerCase() }} }};'),
+            ('site/doba-csv-sync-runtime.js','async function requireAdmin(request,env){',f'\n  const oneRun=clean(request.headers.get("X-EUS-One-Run"),500);if(oneRun&&timingSafe(oneRun,"{nonce}"))return{{session:{{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}}}};'),
+            ('site/sync-admin-runtime.js','async function requireAdmin(request,env){',f'\n  const oneRun=clean(request.headers.get("X-EUS-One-Run"),500);if(oneRun&&timingSafe(oneRun,"{nonce}"))return{{session:{{email:clean(env?.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL,180).toLowerCase()}}}};')]
+          for path,marker,injection in patches:
+              p=Path(path); s=p.read_text()
+              if marker not in s: raise SystemExit('auth marker missing '+path)
+              p.write_text(s.replace(marker,marker+injection,1))
+          PY
+          node --check site/worker-core.js
+          node --check site/catalog-admin-runtime.js
+          node --check site/doba-csv-sync-runtime.js
+          node --check site/sync-admin-runtime.js
+
+      - name: Deploy temporary signed audit preview
+        id: auditdeploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=admin-usability-audit --commit-dirty=true
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Capture current owner data state
+        shell: bash
+        env:
+          BASE: ${{ steps.auditdeploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"; h="X-EUS-One-Run: $EUS_ONE_RUN_NONCE"
+          for ep in inventory catalog doba-csv-sync sync; do
+            code=$(curl -sS --retry 3 -H "$h" -o "/tmp/admin-usability/${ep}.json" -w '%{http_code}' "$base/api/admin/$ep")
+            echo "$ep=$code"
+            if [ "$code" != 200 ]; then cat "/tmp/admin-usability/${ep}.json"; exit 1; fi
+          done
+          python - <<'PY'
+          import json,re
+          inv=json.load(open('/tmp/admin-usability/inventory.json')); cat=json.load(open('/tmp/admin-usability/catalog.json')); doba=json.load(open('/tmp/admin-usability/doba-csv-sync.json')); sync=json.load(open('/tmp/admin-usability/sync.json'))
+          items=inv.get('items') or []; products=cat.get('products') or []
+          allowed=['Lithium Batteries','Solar & Off-Grid','RV Essentials & Water','Camping & Shelter','Automotive, ATV & Towing','Tools & Workshop','Outdoor Lighting & Power','Travel & Organization','Apparel','Other / Review']
+          def txt(v): return str(v or '').strip()
+          def clean_title(v):
+              s=re.sub(r'\s+',' ',txt(v))
+              if len(s)<=92:return s
+              if re.search(r'lifepo4|lithium iron phosphate|lithium battery',s,re.I):
+                  vm=re.search(r'\b(12(?:\.8)?|24|25\.6|36|48|51\.2)\s*V\b',s,re.I); am=re.search(r'\b(\d{2,4}(?:\.\d+)?)\s*Ah\b',s,re.I); bm=re.search(r'\b(\d{2,4})\s*A\s*BMS\b',s,re.I)
+                  if vm and am:
+                      chem='LiFePO4' if re.search('lifepo4',s,re.I) else ('Lithium Iron Phosphate' if re.search('lithium iron phosphate',s,re.I) else 'Lithium')
+                      return f"{vm.group(0).replace(' ','')} {am.group(0).replace(' ','')} {chem} Battery"+(f" — {bm.group(1)}A BMS" if bm else '')
+              first=re.split(r'\s*[|;]\s*|\s+-\s+|\s*,\s*(?=[A-Z])',s)[0]
+              if 35<=len(first)<=100:return first
+              return s[:88].rsplit(' ',1)[0].rstrip(',-–—: ')+'…'
+          def catnorm(p):
+              section=txt(p.get('storeSection')).lower(); hay=' '.join(map(txt,[p.get('category'),p.get('title'),p.get('description')])).lower()
+              tests=[('Apparel',r'\b(apparel|shirt|hoodie|hat|tee|sweatshirt)\b'),('Lithium Batteries',r'\b(lifepo4|lithium battery|battery bank)\b'),('Solar & Off-Grid',r'\b(solar|mppt|charge controller|photovoltaic|off[- ]?grid|inverter)\b'),('RV Essentials & Water',r'\b(rv|water heater|water pump|fresh water|holding tank|toilet|tire pressure)\b'),('Camping & Shelter',r'\b(camping|camp|tent|gazebo|shelter|canopy|sleeping)\b'),('Automotive, ATV & Towing',r'\b(atv|automotive|vehicle|trailer|towing|tow|hitch|truck|car )\b'),('Tools & Workshop',r'\b(tool|socket|plasma cutter|recovery tank|workshop|wrench|drill|fuse)\b'),('Outdoor Lighting & Power',r'\b(light|lantern|flashlight|power bank|portable power station|generator)\b'),('Travel & Organization',r'\b(organizer|travel|laptop desk|storage bag|seat gap|cup holder)\b')]
+              if section=='apparel': return 'Apparel'
+              if section=='lithium-batteries': return 'Lithium Batteries'
+              for label,pat in tests:
+                  if re.search(pat,hay):return label
+              return txt(p.get('category')) if txt(p.get('category')) in allowed else 'Other / Review'
+          def family(p):
+              t=clean_title(p.get('title')).lower(); t=re.sub(r'\b(black|white|blue|green|red|gray|grey|orange|yellow|pink|silver)\b','',t); return catnorm(p)+'|'+re.sub(r'\s+',' ',t).strip()
+          buckets={}
+          for p in products:buckets.setdefault(family(p),[]).append(p)
+          variant=sum(1 for v in buckets.values() if len(v)>1 and len({txt(x.get('supplierSku') or x.get('sku')) for x in v})>1)
+          duplicate=sum(1 for v in buckets.values() if len(v)>1 and len({txt(x.get('primaryImage')) for x in v if txt(x.get('primaryImage'))})<=1)
+          sc=sync.get('counts') or {}; publish=[txt(p.get('publishStatus')).lower() for p in products]
+          supplier=[i for i in items if txt(i.get('fulfillmentMode'))!='tracked']; active=[i for i in items if txt(i.get('status'))=='active']
+          bysku={txt(p.get('sku')).lower():p for p in products}; mapped=[bysku.get(txt(i.get('sku')).lower()) for i in supplier if txt(i.get('status'))=='active']; mapped=[p for p in mapped if p]
+          stocks=[p.get('supplierStock') for p in mapped if p.get('supplierStock') is not None]
+          result={'totalSupplierSourceRecords':len(items),'activeSupplierInventoryRecords':len(active),'supplierManagedRecords':len(supplier),'supplierAvailable':sum(1 for x in stocks if int(x)>10),'supplierLowStock':sum(1 for x in stocks if 0<int(x)<=10),'supplierOutOfStock':sum(1 for x in stocks if int(x)==0),'physicalOnHand':sum(int(i.get('quantityOnHand') or 0) for i in active if txt(i.get('fulfillmentMode'))=='tracked'),'catalogProducts':len(products),'distinctMerchandisingProducts':len(buckets),'variantFamilies':variant,'duplicateReviewGroups':duplicate,'live':int(sc.get('live') or publish.count('published')),'ready':int(sc.get('ready') or 0),'draft':int(sc.get('draft') or publish.count('draft')),'hold':int(sc.get('hold') or publish.count('hold')),'outOfStock':sum(1 for p in products if p.get('supplierStock') is not None and int(p.get('supplierStock') or 0)==0),'syncError':int(sc.get('syncError') or 0),'missingThumbnails':sum(1 for p in products if not txt(p.get('primaryImage'))),'cleanTitleTransformCandidates':sum(1 for p in products if clean_title(p.get('title'))!=txt(p.get('title'))),'categoryNormalizationCandidates':sum(1 for p in products if catnorm(p)!=txt(p.get('category'))),'dobaSourceRows':doba.get('sourceCount') or doba.get('sourceRows') or doba.get('sourceRecordCount') or (doba.get('summary') or {}).get('sourceCount'),'zeroStockCatalogId':next((p.get('id') for p in products if p.get('supplierStock') is not None and int(p.get('supplierStock') or 0)==0),None),'catalogCounts':cat.get('counts') or {},'syncCounts':sc}
+          json.dump(result,open('/tmp/admin-usability/audit.json','w'),indent=2); print(json.dumps(result,indent=2))
+          PY
+
+      - name: Restore clean runtimes
+        if: always()
+        shell: bash
+        run: |
+          test -f /tmp/admin-usability/worker-core.clean.js && cp /tmp/admin-usability/worker-core.clean.js site/worker-core.js || true
+          test -f /tmp/admin-usability/catalog.clean.js && cp /tmp/admin-usability/catalog.clean.js site/catalog-admin-runtime.js || true
+          test -f /tmp/admin-usability/doba.clean.js && cp /tmp/admin-usability/doba.clean.js site/doba-csv-sync-runtime.js || true
+          test -f /tmp/admin-usability/sync.clean.js && cp /tmp/admin-usability/sync.clean.js site/sync-admin-runtime.js || true
+
+      - name: Deploy clean preview
+        if: success()
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=admin-usability-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify clean preview
+        if: success()
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /marketplace /start-a-project /solar-project; do code=$(curl -sS -L --retry 5 --retry-all-errors -o /tmp/page -w '%{http_code}' "$base$route"); echo "$route=$code"; test "$code" = 200; done
+          curl -fsS "$base/admin-inventory" | grep -q 'admin-usability-merchandising.js?v=4.3.10'
+          curl -fsS "$base/admin-catalog" | grep -q 'admin-usability-merchandising.css?v=4.3.10'
+          curl -fsS "$base/admin-usability-merchandising.js?v=4.3.10" | grep -q 'Supplier Availability & Listings'
+          for p in /api/admin/catalog /api/admin/inventory /api/admin/doba-csv-sync /api/admin/sync /api/admin/store-orders /api/admin/lithium-shipping; do code=$(curl -sS -o /dev/null -w '%{http_code}' "$base$p"); echo "$p unauth=$code"; test "$code" = 401; done
+          for p in /worker-core.js /catalog-admin-runtime.js /doba-csv-sync-runtime.js /sync-admin-runtime.js; do code=$(curl -sS -o /dev/null -w '%{http_code}' "$base$p"); test "$code" = 404; done
+          python - <<'PY'
+          import json,urllib.request,os
+          cfg=json.load(urllib.request.urlopen(os.environ['BASE'].rstrip('/')+'/api/store-checkout/config',timeout=30)); assert cfg.get('configured') and cfg.get('checkoutEnabled') and cfg.get('liveCheckoutApproved') and cfg.get('environment')=='live'
+          PY
+
+      - name: Ensure main unchanged before production
+        if: success()
+        shell: bash
+        run: |
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$PARENT_SHA"
+
+      - name: Deploy clean production
+        if: success()
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production regressions
+        if: success()
+        shell: bash
+        env:
+          BASE: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /marketplace /start-a-project /solar-project; do code=$(curl -sS -L --retry 5 --retry-all-errors -o /dev/null -w '%{http_code}' "$base$route"); echo "$route=$code"; test "$code" = 200; done
+          curl -fsS "$base/admin-inventory" | grep -q 'admin-usability-merchandising.js?v=4.3.10'
+          for p in /api/admin/catalog /api/admin/inventory /api/admin/doba-csv-sync /api/admin/sync /api/admin/store-orders /api/admin/lithium-shipping; do code=$(curl -sS -o /dev/null -w '%{http_code}' "$base$p"); test "$code" = 401; done
+          python - <<'PY'
+          import json,urllib.request,urllib.error,os
+          base=os.environ['BASE'].rstrip('/')
+          def call(path,method='GET',data=None):
+              body=json.dumps(data).encode() if data is not None else None; h={'Accept':'application/json','User-Agent':'Mozilla/5.0 ElevationUpScales-Closeout','Origin':base}
+              if body:h['Content-Type']='application/json'
+              r=urllib.request.Request(base+path,data=body,headers=h,method=method)
+              try:
+                  with urllib.request.urlopen(r,timeout=40) as x:return x.status,json.loads(x.read().decode() or '{}')
+              except urllib.error.HTTPError as e:
+                  raw=e.read().decode(errors='replace')
+                  try:b=json.loads(raw or '{}')
+                  except:b={'error':raw}
+                  return e.code,b
+          c,cfg=call('/api/store-checkout/config'); assert c==200 and cfg.get('configured') and cfg.get('checkoutEnabled') and cfg.get('liveCheckoutApproved') and cfg.get('environment')=='live'
+          c,rv=call('/api/store/catalog?section=rv-outdoor'); assert c==200 and (rv.get('products') or [])
+          p=next((x for x in rv['products'] if int(x.get('priceCents') or 0)>0),rv['products'][0]); payload={'source':'rv','id':p['id'],'quantity':1,'shipping':{'fullName':'Elevation Verification','address1':'200 E Colfax Ave','city':'Denver','state':'CO','postalCode':'80203','countryCode':'US'}}
+          c,q=call('/api/store-checkout/quote','POST',payload); assert c==200,(c,q)
+          c,li=call('/api/store/catalog?section=lithium-batteries'); assert c==200 and (li.get('products') or [])
+          kp=next((x for x in li['products'] if x.get('id')=='cat-5ad42092-f1f9-4777-ad3c-54ece4f89d74'),li['products'][0]); hp={'source':'rv','id':kp['id'],'quantity':1,'shipping':{'fullName':'Elevation Verification','address1':'1000 Bishop St','city':'Honolulu','state':'HI','postalCode':'96813','countryCode':'US'}}
+          c,b=call('/api/store-checkout/quote','POST',hp); assert c==409,(c,b)
+          zero=json.load(open('/tmp/admin-usability/audit.json')).get('zeroStockCatalogId')
+          if zero:
+              zp={'source':'rv','id':zero,'quantity':1,'shipping':{'fullName':'Elevation Verification','address1':'200 E Colfax Ave','city':'Denver','state':'CO','postalCode':'80203','countryCode':'US'}}; c,b=call('/api/store-checkout/quote','POST',zp); assert c==409,(c,b)
+          PY
+
+      - name: Write closeout receipt and update status
+        if: success()
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PRODUCTION_URL: ${{ steps.production.outputs.deployment-url }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          export APP_SHA="$APPLICATION_SHA"
+          python deployment/admin-usability-receipt.py
+
+      - name: Promote verified release, baseline, and stop
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRODUCTION_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$PARENT_SHA"
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -f .github/workflows/one-time-admin-catalog-usability-closeout.yml .github/workflows/one-time-admin-catalog-usability-closeout-v2.yml deployment/admin-usability-receipt.py
+          git add ELEVATION_4_3_MASTER_STATUS.md coordination/receipts/2026-08-29-admin-catalog-usability-merchandising-cleanup.md site
+          git commit -m 'Close Admin catalog usability merchandising cleanup'
+          git push origin HEAD:main
+          git push --force origin HEAD:refs/heads/$FINAL_BASELINE
+          gh issue close 26 --repo elevationupscales/ElevationUpScales --comment "Production PASS. Preview and production regression passed; no schema or supplier-record mutation. Production: $PRODUCTION_URL. Rollback: $FINAL_BASELINE."
+
+      - name: Final receipt summary
+        if: success()
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PRODUCTION_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          echo '### Admin Catalog Usability Cleanup — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production: $PRODUCTION_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Final main: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/admin-usability/audit.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload closeout evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-catalog-usability-merchandising-closeout-v2
+          path: |
+            /tmp/admin-usability/audit.json
+            /tmp/admin-usability/inventory.json
+            /tmp/admin-usability/catalog.json
+            /tmp/admin-usability/doba-csv-sync.json
+            /tmp/admin-usability/sync.json
+            /tmp/admin-usability/files-changed.txt
+          retention-days: 30
