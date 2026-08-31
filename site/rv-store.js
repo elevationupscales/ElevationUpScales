@@ -55,6 +55,17 @@
     return "Outdoor Gear";
   }
 
+  function publicCatalogProduct(product) {
+    if (!product) return false;
+    const publishStatus = String(product.publishStatus || "").toLowerCase();
+    if (publishStatus && publishStatus !== "published") return false;
+    if (!(Number(product.priceCents) > 0)) return false;
+    const stock = Number(product.supplierStock);
+    if (Number.isFinite(stock) && stock <= 0) return false;
+    if (String(product.shippingStatus || "unverified").toLowerCase() === "unverified") return false;
+    return true;
+  }
+
   function normalizeCatalogProduct(product, index) {
     const ebayItemId = String(product?.ebayItemId || "").trim();
     const sourceUrl = String(product?.sourceUrl || "").trim();
@@ -226,7 +237,7 @@
     try {
       const response = await fetch("/api/store-catalog?section=rv-outdoor", { cache: "no-store", headers: { Accept: "application/json" } });
       const data = await response.json().catch(() => ({}));
-      const products = Array.isArray(data?.products) ? data.products.map(normalizeCatalogProduct).filter((item) => item.name) : [];
+      const products = Array.isArray(data?.products) ? data.products.filter(publicCatalogProduct).map(normalizeCatalogProduct).filter((item) => item.name) : [];
       if (!response.ok || !products.length) throw new Error(data?.error || "No products returned");
       state.items = products;
       state.source = "catalog";
