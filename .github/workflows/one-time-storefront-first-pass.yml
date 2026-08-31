@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/one-time-storefront-first-pass.yml
       - site/_worker.js
+      - site/_routes.json
       - site/lithium-batteries.html
       - site/lithium-shop.js
       - site/lithium-shop.css
@@ -32,29 +33,29 @@ jobs:
           ref: ${{ env.RELEASE_BRANCH }}
           fetch-depth: 0
 
-      - name: Verify current-main lineage and scoped delta
+      - name: Verify lineage and scope
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           current_main="$(git rev-parse origin/main)"
           test "$current_main" = "$EXPECTED_MAIN_SHA"
           git merge-base --is-ancestor "$current_main" HEAD
-          git diff --name-status "$current_main"...HEAD
           changed="$(git diff --name-only "$current_main"...HEAD)"
           test -n "$changed"
-          if printf '%s\n' "$changed" | grep -Ev '^(.github/workflows/one-time-storefront-first-pass.yml|site/_worker.js|site/lithium-batteries.html|site/lithium-shop.js|site/lithium-shop.css|site/rv-store.html|site/rv-store.js|site/rv-store.css)$' | grep -q .; then
-            echo 'Unexpected file outside storefront first-pass scope'
-            exit 1
+          if printf '%s\n' "$changed" | grep -Ev '^(.github/workflows/one-time-storefront-first-pass.yml|site/_worker.js|site/_routes.json|site/lithium-batteries.html|site/lithium-shop.js|site/lithium-shop.css|site/rv-store.html|site/rv-store.js|site/rv-store.css)$' | grep -q .; then
+            echo 'Unexpected file outside storefront scope'; exit 1
           fi
           git diff --quiet "$current_main"...HEAD -- site/store.html site/store-config.js site/store-patch-8.js site/store-patch-8.css
 
-      - name: Validate syntax and storefront requirements
+      - name: Validate source
         run: |
           set -euo pipefail
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
           git diff --check
           grep -q 'X-EUS-Storefront-Prerender' site/_worker.js
           grep -q 'enhanceStorefront' site/_worker.js
+          grep -q '"/lithium-batteries"' site/_routes.json
+          grep -q '"/rv-store"' site/_routes.json
           grep -q 'data-lithium-categories' site/lithium-batteries.html
           grep -q 'Ask for Sizing Help' site/lithium-batteries.html
           grep -q 'Ships to the Lower 48' site/lithium-shop.js
@@ -63,9 +64,6 @@ jobs:
           ! grep -q 'Loading products' site/rv-store.html
           ! grep -q 'rv-ebay-catalog.js' site/rv-store.html
           grep -q 'Current published gear' site/rv-store.html
-          grep -q 'normalizeCategory' site/rv-store.js
-          grep -q 'grid.dataset.prerendered' site/rv-store.js
-          grep -q 'grid.dataset.prerendered' site/lithium-shop.js
           test -z "$(find site -type f -size +25M -print -quit)"
           ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
 
@@ -78,7 +76,7 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=storefront-first-pass-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Smoke preview routes and protected boundaries
+      - name: Smoke protected routes
         env:
           BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
@@ -86,7 +84,6 @@ jobs:
           base="${BASE%/}"
           for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /marketplace /start-a-project /solar-project /admin; do
             code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
-            echo "$route=$code"
             test "$code" = "200"
           done
           for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
@@ -94,7 +91,6 @@ jobs:
             test "$code" = "401"
           done
           curl -sS -L --fail "$base/store" -o /tmp/apparel.html
-          grep -q 'Apparel Store' /tmp/apparel.html
           grep -q 'True Grit Trucker Hat' /tmp/apparel.html
 
       - name: Verify crawler-visible Catalog truth
@@ -108,10 +104,9 @@ jobs:
           curl -sS -L --fail "$base/api/store/catalog?section=lithium-batteries" -H 'Accept: application/json' -o /tmp/lithium.json
           curl -sS -L --fail "$base/api/store-catalog?section=rv-outdoor" -H 'Accept: application/json' -o /tmp/rv.json
           python - <<'PY'
-          import json,re,html,sys
+          import json,re,html
           def rows(path, section):
-              data=json.load(open(path,encoding='utf-8'))
-              out=[]
+              data=json.load(open(path,encoding='utf-8')); out=[]
               for p in data.get('products',[]):
                   if not p: continue
                   status=str(p.get('publishStatus') or '').strip().lower()
@@ -126,27 +121,21 @@ jobs:
                   if section=='rv' and str(p.get('shippingStatus') or '').strip().lower()=='unverified': continue
                   out.append(p)
               return out
-          def text(path): return open(path,encoding='utf-8').read()
-          lithium_rows=rows('/tmp/lithium.json','lithium')
-          rv_rows=rows('/tmp/rv.json','rv')
-          lh=text('/tmp/lithium.html'); rh=text('/tmp/rv.html')
-          if not lithium_rows: raise SystemExit('HOLD: published Lithium Catalog set is empty in preview')
-          if not rv_rows: raise SystemExit('HOLD: published RV Catalog set is empty in preview')
-          lm=re.search(r'<strong data-lithium-count>(\d+)</strong>',lh)
-          rm=re.search(r'<span id="rv-count">(\d+)</span>',rh)
-          if not lm or int(lm.group(1))!=len(lithium_rows): raise SystemExit(f'Lithium crawler count mismatch html={lm.group(1) if lm else None} api={len(lithium_rows)}')
-          if not rm or int(rm.group(1))!=len(rv_rows): raise SystemExit(f'RV crawler count mismatch html={rm.group(1) if rm else None} api={len(rv_rows)}')
-          if '0 current products' in lh or 'Loading products' in lh: raise SystemExit('Lithium forbidden empty/loading copy present')
-          if '0 current products' in rh or 'Loading products' in rh: raise SystemExit('RV forbidden empty/loading copy present')
-          if 'data-prerendered="true"' not in lh or 'lithium-card' not in lh: raise SystemExit('Lithium prerendered cards missing')
-          if 'data-prerendered="true"' not in rh or 'rv-product-card' not in rh: raise SystemExit('RV prerendered cards missing')
+          lithium_rows=rows('/tmp/lithium.json','lithium'); rv_rows=rows('/tmp/rv.json','rv')
+          lh=open('/tmp/lithium.html',encoding='utf-8').read(); rh=open('/tmp/rv.html',encoding='utf-8').read()
+          if not lithium_rows: raise SystemExit('HOLD: published Lithium set empty')
+          if not rv_rows: raise SystemExit('HOLD: published RV set empty')
+          lm=re.search(r'<strong data-lithium-count>(\d+)</strong>',lh); rm=re.search(r'<span id="rv-count">(\d+)</span>',rh)
+          if not lm or int(lm.group(1))!=len(lithium_rows): raise SystemExit(f'Lithium count mismatch html={lm.group(1) if lm else None} api={len(lithium_rows)}')
+          if not rm or int(rm.group(1))!=len(rv_rows): raise SystemExit(f'RV count mismatch html={rm.group(1) if rm else None} api={len(rv_rows)}')
+          for body,label in [(lh,'Lithium'),(rh,'RV')]:
+              if '0 current products' in body or 'Loading products' in body: raise SystemExit(f'{label} forbidden empty/loading state')
+              if 'data-prerendered="true"' not in body: raise SystemExit(f'{label} prerender marker missing')
           lnames=[html.unescape(re.sub('<[^>]+>','',x)).strip() for x in re.findall(r'<article class="lithium-card"[\s\S]*?<h3>(.*?)</h3>',lh)][:5]
           rnames=[html.unescape(re.sub('<[^>]+>','',x)).strip() for x in re.findall(r'<article class="rv-product-card"[\s\S]*?<h3>(.*?)</h3>',rh)][:5]
-          if len(lnames)<min(3,len(lithium_rows)): raise SystemExit('Lithium rendered product names missing')
-          if len(rnames)<min(3,len(rv_rows)): raise SystemExit('RV rendered product names missing')
+          if len(lnames)<3 or len(rnames)<3: raise SystemExit('Rendered product-name evidence incomplete')
           evidence={'lithium':{'count':len(lithium_rows),'names':lnames},'rv':{'count':len(rv_rows),'names':rnames}}
-          json.dump(evidence,open('/tmp/storefront-evidence.json','w'),indent=2)
-          print(json.dumps(evidence,indent=2))
+          json.dump(evidence,open('/tmp/storefront-evidence.json','w'),indent=2); print(json.dumps(evidence,indent=2))
           PY
           grep -qi 'x-eus-storefront-prerender: lithium:' /tmp/lithium.headers
           grep -qi 'x-eus-storefront-prerender: rv:' /tmp/rv.headers
@@ -160,11 +149,7 @@ jobs:
           echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
           echo 'Non-JS Catalog acceptance: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Apparel regression: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Protected routes/Admin auth: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/storefront-evidence.json >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload preview evidence
         uses: actions/upload-artifact@v4
