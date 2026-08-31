@@ -59,20 +59,28 @@
     return { title, subtitle, specs, category, rawTitle: raw };
   }
 
+  function lower48Shipping(product) {
+    const shippingStatus = String(product?.shippingStatus || "unverified").toLowerCase();
+    if (shippingStatus === "verified") return { label: "Ships to the Lower 48", className: "is-approved" };
+    if (shippingStatus === "quote_required") return { label: "Shipping quote required", className: "is-quote" };
+    return { label: "Check shipping availability", className: "is-researching" };
+  }
+
   function card(product) {
     const sku = String(product.sku || product.id || "").trim();
     const id = String(product.id || "").trim();
     const view = viewFor(product);
+    const shipping = lower48Shipping(product);
     const checkoutUrl = `/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(view.rawTitle || view.title)}`;
-    const defaultShipping = hawaiiMode ? "Hawaii availability by request" : "Ships to the Lower 48";
-    return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}">
+    const defaultShipping = hawaiiMode ? { label: "Hawaii availability by request", className: "is-researching" } : shipping;
+    return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}" data-shipping-status="${esc(String(product.shippingStatus || "unverified"))}">
       <div class="lithium-card__image"><img src="${esc(product.primaryImage || "/assets/logo.webp")}" alt="${esc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>
       <div class="lithium-card__body">
         <p class="lithium-card__category">${esc(view.category)}</p>
         <h3>${esc(view.title)}</h3>
         ${view.subtitle ? `<p class="lithium-card__subtitle">${esc(view.subtitle)}</p>` : ""}
         ${view.specs ? `<p class="lithium-card__spec-line">${esc(view.specs)}</p>` : ""}
-        <div class="lithium-card__shipping is-researching" data-hawaii-status>${esc(defaultShipping)}</div>
+        <div class="lithium-card__shipping ${defaultShipping.className}" data-hawaii-status>${esc(defaultShipping.label)}</div>
         <div class="lithium-card__footer"><strong>${money.format(Number(product.priceCents || 0) / 100)}</strong><a class="button button-primary" href="${esc(checkoutUrl)}">Buy Now</a></div>
         ${hawaiiMode ? `<a class="lithium-reserve-link" href="#hawaii-request" data-reserve-product="${esc(view.rawTitle || view.title)}">Request Hawaii Availability →</a>` : ""}
       </div>
@@ -120,8 +128,9 @@
     const badge = cardEl.querySelector("[data-hawaii-status]");
     if (!sku || !badge) return;
     if (!hawaiiMode) {
-      badge.className = "lithium-card__shipping is-researching";
-      badge.textContent = "Ships to the Lower 48";
+      const shipping = lower48Shipping({ shippingStatus: cardEl.dataset.shippingStatus || "unverified" });
+      badge.className = `lithium-card__shipping ${shipping.className}`;
+      badge.textContent = shipping.label;
       return;
     }
     try {
