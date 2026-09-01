@@ -1,0 +1,148 @@
+name: One-Time Elevation 4.4 Homepage Funnel Final Preview
+
+on:
+  push:
+    branches: [deploy/4.4-homepage-elevation-funnel-preview-2026-08-31]
+    paths:
+      - .github/workflows/one-time-44-homepage-funnel-final-preview.yml
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  EXPECTED_MAIN_SHA: 539d71546f1a4ed1c8e43f2efbcf2188b3a5063b
+  CANDIDATE_SHA: baa988e380a2c429f7cec8a3fb868207b181d7c8
+  CANONICAL_BASE: https://elevationupscales.com
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 0
+      - name: Verify exact candidate and scope
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          changed="$(git -C candidate diff --name-only "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA")"
+          printf '%s\n' "$changed"
+          test "$changed" = $'site/home-elevation-funnel.css\nsite/index.html'
+          git -C candidate diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          grep -q 'What are you here to do?' candidate/site/index.html
+          grep -q 'BUILT OFF-GRID' candidate/site/index.html
+          grep -q '208-813-4998' candidate/site/index.html
+          ! grep -qi 'noindex' candidate/site/index.html
+          ! grep -qi 'HOMEPAGE CONCEPT PREVIEW' candidate/site/index.html
+          ! grep -qi 'Mission Control' candidate/site/index.html
+      - name: Deploy exact candidate to isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=preview-homepage-funnel-44-final
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify HTTP, protected systems and homepage content
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_BASE%/}"
+          for route in / /start-a-project /home-services /rv-services /solar-services /solar-project /lithium-batteries /rv-store /store /hawaii-lithium-batteries /marketplace /work-with-us /privacy /checkout /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route"); echo "$route=$code"; test "$code" = 200
+          done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
+            code=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base$api" || true); echo "$api=$code"; test "$code" = 401
+          done
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          for text in 'What are you here to do?' 'BUILT OFF-GRID' 'Shop Lithium' 'Shop RV &amp; Outdoor' 'Build a Solar System' 'Start a Project' 'Explore Services' 'Browse Marketplace' 'Hawaii Lithium Program — Coming Soon' '208-813-4998' 'Work With Us' 'Privacy'; do grep -q "$text" /tmp/home.html; done
+          grep -q 'rel="canonical" href="https://elevationupscales.com/"' /tmp/home.html
+          ! grep -qi 'noindex' /tmp/home.html
+          ! grep -qi 'HOMEPAGE CONCEPT PREVIEW' /tmp/home.html
+          ! grep -qi 'Mission Control' /tmp/home.html
+          ! grep -qi 'Admin architecture' /tmp/home.html
+          ! grep -qi 'server/database' /tmp/home.html
+          curl -sS -L --fail "${CANONICAL_BASE%/}/api/store-checkout/config" -o /tmp/checkout.json
+          python - <<'PY'
+          import json
+          co=json.load(open('/tmp/checkout.json'))
+          assert co.get('configured') is True
+          assert co.get('credentialsConfigured') is True
+          assert co.get('checkoutEnabled') is True
+          assert co.get('liveCheckoutApproved') is True
+          assert co.get('environment') == 'live'
+          print('productionCheckout=live-approved')
+          PY
+      - name: Install Chromium QA
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run desktop and mobile homepage interaction QA
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          cat > homepage-funnel-final-qa.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const expected=[
+            ['/lithium-batteries','Shop Lithium'],
+            ['/rv-store','Shop RV & Outdoor'],
+            ['/solar-project?source=home-elevation-funnel','Build a Solar System'],
+            ['/start-a-project','Start a Project'],
+            ['#services','Explore Services'],
+            ['/marketplace','Browse Marketplace']
+          ];
+          const browser=await chromium.launch({headless:true});
+          const evidence=[];
+          for(const [vp,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const page=await browser.newPage({viewport});
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+            await page.locator('#home-route-title').waitFor({state:'visible'});
+            if(errors.length) throw new Error(`${vp}:pageerror:${errors.join(';')}`);
+            if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2)) throw new Error(`${vp}:overflow`);
+            const routes=page.locator('.hc-route');
+            if(await routes.count()!==6) throw new Error(`${vp}:route-count`);
+            for(let i=0;i<expected.length;i++){
+              const a=routes.nth(i); const href=await a.getAttribute('href'); const text=(await a.innerText()).replace(/\s+/g,' ').trim();
+              if(href!==expected[i][0]) throw new Error(`${vp}:route-${i}:href:${href}`);
+              if(!text.includes(expected[i][1])) throw new Error(`${vp}:route-${i}:text:${text}`);
+            }
+            const phone=page.locator('a[href="tel:+12088134998"]'); if(await phone.count()<1) throw new Error(`${vp}:phone`);
+            const services=page.locator('#services'); if(await services.count()!==1) throw new Error(`${vp}:services-anchor`);
+            if(vp==='mobile'){
+              const toggle=page.locator('.eus-menu-toggle');
+              if(await toggle.isVisible()){
+                await toggle.click();
+                if(await toggle.getAttribute('aria-expanded')!=='true') throw new Error('mobile:menu-open');
+              }
+            }
+            for(const [href] of expected.filter(([h])=>h.startsWith('/'))){
+              const url=new URL(href,base); const r=await page.request.get(url.toString()); if(!r.ok()) throw new Error(`${vp}:route-http:${href}:${r.status()}`);
+            }
+            evidence.push({vp,routes:6,overflow:false,pageErrors:0,phone:true});
+            await page.close();
+          }
+          await browser.close();
+          console.log(JSON.stringify({evidence},null,2));
+          NODE
+          node homepage-funnel-final-qa.mjs
+      - name: Record PASS
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Elevation 4.4 Homepage Funnel — FINAL PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Elevation Funnel routes + Built Off-Grid identity: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Desktop/mobile navigation + overflow + route checks: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production checkout live-approved; Admin 401 boundaries: PASS' >> "$GITHUB_STEP_SUMMARY"
