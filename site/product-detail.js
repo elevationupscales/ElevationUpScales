@@ -35,6 +35,7 @@
 
   function clean(value, max = 500) { return String(value ?? "").trim().slice(0, max); }
   function token(raw, re, format = (match) => match[0]) { const match = raw.match(re); return match ? format(match) : ""; }
+
   function criticalDetails(value) {
     const raw = plainText(value, 1200); const found = [];
     const patterns = [
@@ -43,7 +44,10 @@
       /\b\d{2,4}-Piece\b/i,
       /\b\d+(?:\.\d+)?\s*(?:ft|feet)\b/i
     ];
-    for (const re of patterns) { const match = raw.match(re); if (match && !found.some((item) => item.toLowerCase() === match[0].toLowerCase())) found.push(match[0].replace(/\*/g, "×")); }
+    for (const re of patterns) {
+      const match = raw.match(re);
+      if (match && !found.some((item) => item.toLowerCase() === match[0].toLowerCase())) found.push(match[0].replace(/\*/g, "×"));
+    }
     return found.slice(0, 2);
   }
 
@@ -53,12 +57,12 @@
     const forMatch = raw.match(/^(.{12,}?)\s+for\s+(.+)$/i);
     if (forMatch) {
       const before = forMatch[1].trim();
-      const missing = criticalDetails(raw).filter((detail) => !before.toLowerCase().includes(detail.toLowerCase()));
+      const missing = criticalDetails(raw).filter((value) => !before.toLowerCase().includes(value.toLowerCase()));
       title = [before, ...missing].join(" — ");
     }
     if (title.length > max) {
       const clauses = title.split(/,\s*/); let built = "";
-      for (const clause of clauses) { const candidate = built ? `${built}, ${clause}` : clause; if (candidate.length > max) break; built = candidate; }
+      for (const clause of clauses) { const next = built ? `${built}, ${clause}` : clause; if (next.length > max) break; built = next; }
       title = built || title.slice(0, max).replace(/\s+\S*$/, "").trim();
     }
     return title || "Elevation store product";
@@ -90,8 +94,10 @@
     const twoPack = /\b(?:2[- ]?pack|two[- ]pack|dual)\b/i.test(raw);
     let title;
     if (/battery box/.test(lower)) title = `RV Battery Box${dimensions ? ` — ${dimensions}` : ""}`;
-    else if (/power bank/.test(lower)) { const capacity = mah || wh || kwh; title = `${/solar/.test(lower) ? "Portable Solar Power Bank" : "Portable Power Bank"}${capacity ? ` — ${capacity}` : ""}`; }
-    else {
+    else if (/power bank/.test(lower)) {
+      const capacity = mah || wh || kwh;
+      title = `${/solar/.test(lower) ? "Portable Solar Power Bank" : "Portable Power Bank"}${capacity ? ` — ${capacity}` : ""}`;
+    } else {
       const parts = [voltage, ah, heated ? "Heated" : "", chemistry].filter(Boolean);
       if (parts.length >= 2) title = `${twoPack ? "2-Pack " : ""}${parts.join(" ")} Battery`;
       else title = raw.replace(/^(?:VEVOR|KINGBOSS)\s+/i, "").replace(/^Lithium Battery[:,]?\s*/i, "").split(/[,;|]/)[0].trim().slice(0, 82) || "Lithium Battery";
@@ -123,13 +129,25 @@
     return true;
   }
 
-  function checkoutUrl(product) {
+  function elevationCheckoutUrl(product) {
     const id = clean(product?.id || product?.sku, 160);
     const rawName = plainText(product?.title || product?.name || displayTitle(product), 300);
     let url = `/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(rawName)}`;
     const ebay = clean(product?.ebayItemId, 20);
     if (sectionFor(product) === "rv" && /^\d{12}$/.test(ebay)) url += `&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebay}`)}`;
     return url;
+  }
+
+  function purchaseUrl(product) {
+    if (sectionFor(product) === "lithium") return elevationCheckoutUrl(product);
+    const supplier = clean(product?.supplier || product?.sourceType, 40).toLowerCase();
+    const publishStatus = clean(product?.publishStatus, 30).toLowerCase();
+    const shippingStatus = clean(product?.shippingStatus, 30).toLowerCase();
+    if (supplier === "doba" && publishStatus === "published" && shippingStatus === "verified" && Number(product?.priceCents) > 0) return elevationCheckoutUrl(product);
+    const ebay = clean(product?.ebayItemId, 20);
+    if (/^\d{12}$/.test(ebay)) return `https://www.ebay.com/itm/${ebay}`;
+    const sourceUrl = clean(product?.sourceUrl, 1200);
+    return /^https?:\/\//i.test(sourceUrl) ? sourceUrl : "";
   }
 
   function productImages(product) {
@@ -171,8 +189,7 @@
       addSpec(specs, "Flow", token(raw, /\b\d+(?:\.\d+)?\s*GPM\b/i));
       addSpec(specs, "Capacity", token(raw, /\b\d+(?:\.\d+)?\s*(?:Gallon|Gallons|Gal|L|Liter|Liters)\b/i));
       addSpec(specs, "Package quantity", token(raw, /\b\d{1,4}\s*(?:Piece|Pieces|Pc|Pcs|Pairs|Pack)\b/i));
-      const material = token(raw, /\b(?:stainless steel|carbon steel|alloy steel|steel|aluminum|aluminium|plastic|polypropylene|polyester|canvas)\b/i);
-      addSpec(specs, "Material", material);
+      addSpec(specs, "Material", token(raw, /\b(?:stainless steel|carbon steel|alloy steel|steel|aluminum|aluminium|plastic|polypropylene|polyester|canvas)\b/i));
       const application = raw.match(/\bfor\s+([^,.;]{3,80})/i)?.[1]?.trim() || "";
       if (application && !/^\d/.test(application)) addSpec(specs, "Application", application);
     }
@@ -181,7 +198,12 @@
 
   function setStoreLinks(product) {
     const href = storeUrl(product);
-    document.querySelectorAll("[data-back-store]").forEach((link) => { link.href = href; link.textContent = link.classList.contains("product-back") ? `← Back to ${sectionFor(product) === "lithium" ? "Lithium Shop" : "RV & Outdoor Store"}` : link.textContent.includes("View Store") ? "View Store →" : "Back to Store"; });
+    document.querySelectorAll("[data-back-store]").forEach((link) => {
+      link.href = href;
+      if (link.classList.contains("product-back")) link.textContent = `← Back to ${sectionFor(product) === "lithium" ? "Lithium Shop" : "RV & Outdoor Store"}`;
+      else if (link.textContent.includes("View Store")) link.textContent = "View Store →";
+      else link.textContent = "Back to Store";
+    });
   }
 
   function renderGallery(product) {
@@ -193,7 +215,7 @@
       mainImage.src = src; mainImage.alt = displayTitle(product);
       [...thumbs.querySelectorAll("button")].forEach((button, index) => button.classList.toggle("is-active", index === galleryIndex));
     };
-    mainImage.addEventListener("error", () => { if (mainImage.src !== new URL(fallbackImage, location.href).href) mainImage.src = fallbackImage; }, { once: false });
+    mainImage.addEventListener("error", () => { if (mainImage.src !== new URL(fallbackImage, location.href).href) mainImage.src = fallbackImage; });
     thumbs.replaceChildren(...galleryImages.map((src, index) => {
       const button = document.createElement("button"); button.type = "button"; button.setAttribute("aria-label", `Show image ${index + 1}`);
       const image = document.createElement("img"); image.src = src; image.alt = ""; image.loading = index ? "lazy" : "eager"; image.decoding = "async"; image.referrerPolicy = "no-referrer";
@@ -205,7 +227,12 @@
     next.onclick = () => { galleryIndex = (galleryIndex + 1) % galleryImages.length; update(); };
     let touchX = null;
     mainImage.addEventListener("touchstart", (event) => { touchX = event.changedTouches?.[0]?.clientX ?? null; }, { passive: true });
-    mainImage.addEventListener("touchend", (event) => { if (touchX === null || !multiple) return; const delta = (event.changedTouches?.[0]?.clientX ?? touchX) - touchX; touchX = null; if (Math.abs(delta) < 45) return; if (delta < 0) next.click(); else prev.click(); }, { passive: true });
+    mainImage.addEventListener("touchend", (event) => {
+      if (touchX === null || !multiple) return;
+      const delta = (event.changedTouches?.[0]?.clientX ?? touchX) - touchX; touchX = null;
+      if (Math.abs(delta) < 45) return;
+      if (delta < 0) next.click(); else prev.click();
+    }, { passive: true });
     update();
   }
 
@@ -221,7 +248,8 @@
   }
 
   function updateMetadata(product) {
-    const title = displayTitle(product); const description = plainText(product?.description, 180) || `${displayCategory(product)} from Elevation UpScales.`;
+    const title = displayTitle(product);
+    const description = plainText(product?.description, 180) || `${displayCategory(product)} from Elevation UpScales.`;
     document.title = `${title} | Elevation UpScales`;
     document.querySelector('meta[name="description"]')?.setAttribute("content", description);
     document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
@@ -243,10 +271,21 @@
   function renderProduct(product) {
     const live = isLiveProduct(product); const title = displayTitle(product); const shipping = shippingPresentation(product);
     setStoreLinks(product); updateMetadata(product);
-    if (!live) { status.hidden = true; unavailable.hidden = false; detail.hidden = true; buyNow.removeAttribute("href"); return; }
+    if (!live) {
+      status.hidden = true; unavailable.hidden = false; detail.hidden = true;
+      buyNow.hidden = true; buyNow.removeAttribute("href");
+      return;
+    }
     categoryEl.textContent = displayCategory(product); titleEl.textContent = title; priceEl.textContent = money.format(Number(product.priceCents) / 100);
     shippingEl.textContent = shipping.label; shippingEl.className = `product-shipping ${shipping.className}`;
-    buyNow.href = checkoutUrl(product); buyNow.setAttribute("aria-label", `Buy ${title}`);
+    const purchase = purchaseUrl(product);
+    if (purchase) {
+      buyNow.hidden = false; buyNow.href = purchase; buyNow.setAttribute("aria-label", `Buy ${title}`);
+      if (/^https?:\/\//i.test(purchase)) { buyNow.target = "_blank"; buyNow.rel = "noopener"; }
+      else { buyNow.removeAttribute("target"); buyNow.removeAttribute("rel"); }
+    } else {
+      buyNow.hidden = true; buyNow.removeAttribute("href");
+    }
     renderGallery(product); renderSpecs(product);
     const description = plainText(product?.description, 7000);
     descriptionEl.textContent = description; descriptionSection.hidden = !description;
@@ -269,7 +308,9 @@
       const body = document.createElement("div"); body.className = "related-card__body";
       const category = document.createElement("p"); category.className = "eyebrow"; category.textContent = displayCategory(product);
       const heading = document.createElement("h3"); const link = document.createElement("a"); link.href = detailUrl(product); link.textContent = displayTitle(product); heading.append(link);
-      const meta = document.createElement("div"); meta.className = "related-card__meta"; const price = document.createElement("strong"); price.textContent = money.format(Number(product.priceCents) / 100); const ship = document.createElement("span"); ship.textContent = shippingPresentation(product).label; meta.append(price, ship);
+      const meta = document.createElement("div"); meta.className = "related-card__meta";
+      const price = document.createElement("strong"); price.textContent = money.format(Number(product.priceCents) / 100);
+      const ship = document.createElement("span"); ship.textContent = shippingPresentation(product).label; meta.append(price, ship);
       body.append(category, heading, meta); article.append(imageLink, body); return article;
     }));
     relatedSection.hidden = !related.length;
