@@ -13,7 +13,6 @@
 /home-services.html /home-services 301
 /rv-services.html /rv-services 301
 /solar-services.html /solar-services 301
-/solar-project.html /solar-project 301
 /privacy.html /privacy 301
 /store.html /store 301
 /marketplace.html /marketplace 301
@@ -32,6 +31,8 @@
 /other-ways-we-can-help/ /other-ways-we-can-help 301
 /work-with-us/ /work-with-us 301
 /solar-project/ /solar-project 301
+/product.html /product 301
+/product/ /product 308
 /home-project /start-a-project?type=home&source=legacy-route 302
 /home-project/ /start-a-project?type=home&source=legacy-route 302
 /home-project.html /start-a-project?type=home&source=legacy-route 302
