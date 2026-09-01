@@ -1,0 +1,34 @@
+name: One-Time Elevation 4.4 Labor Day RV Checkout Diagnostic
+
+on:
+  push:
+    branches: [diagnostic/4.4-labor-day-rv-checkout-2026-08-31]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    env:
+      PREVIEW_BASE: https://6843c9ab.elevationupscales.pages.dev
+    steps:
+      - uses: actions/checkout@v6
+      - name: Inspect shopper-visible RV checkout responses
+        run: |
+          cat > diag.mjs <<'NODE'
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const cat=await (await fetch(base+'/api/store-catalog?section=rv-outdoor')).json();
+          const live=p=>String(p.publishStatus||'').toLowerCase()==='published'&&Number(p.priceCents)>0&&!(Number.isFinite(Number(p.supplierStock))&&Number(p.supplierStock)<=0)&&String(p.shippingStatus||'').toLowerCase()!=='hold'&&String(p.shippingStatus||'').toLowerCase()!=='unverified';
+          const rows=(cat.products||[]).filter(live);
+          const shipping={fullName:'QA Test',address1:'1 Test St',city:'Denver',state:'CO',postalCode:'80202',countryCode:'US'};
+          const out=[];
+          for(const p of rows){
+            const call=async couponCode=>{const r=await fetch(base+'/api/store-checkout/quote',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({source:'rv',id:p.id,quantity:1,couponCode,shipping})});return {status:r.status,body:await r.json().catch(()=>({}))};};
+            const plain=await call('');
+            const coupon=await call('LABORDAY25');
+            out.push({id:p.id,title:p.title,priceCents:p.priceCents,shippingStatus:p.shippingStatus,supplierStock:p.supplierStock,promo:p.promotion,plain:{status:plain.status,error:plain.body.error,ok:plain.body.ok,source:plain.body.source,unitPriceCents:plain.body.unitPriceCents,shippingCents:plain.body.shippingCents},coupon:{status:coupon.status,error:coupon.body.error,ok:coupon.body.ok,unitPriceCents:coupon.body.unitPriceCents,discountCents:coupon.body.discountCents}});
+          }
+          console.log(JSON.stringify({rawCount:(cat.products||[]).length,visibleCount:rows.length,rows:out},null,2));
+          NODE
+          node diag.mjs
