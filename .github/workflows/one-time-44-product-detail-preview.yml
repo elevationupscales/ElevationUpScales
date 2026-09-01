@@ -13,6 +13,7 @@ permissions:
 env:
   EXPECTED_MAIN_SHA: 539d71546f1a4ed1c8e43f2efbcf2188b3a5063b
   CANDIDATE_SHA: a722e54f365307407a6c3fe99bafed2ac4a65303
+  CANONICAL_BASE: https://elevationupscales.com
 
 jobs:
   preview:
@@ -42,6 +43,7 @@ jobs:
           if printf '%s\n' "$changed" | grep -Ev '^(site/_headers|site/_redirects|site/lithium-batteries.html|site/lithium-shop.css|site/lithium-shop.js|site/product.html|site/product-detail.css|site/product-detail.js|site/rv-store.css|site/rv-store.html|site/rv-store.js)$' | grep -q .; then
             echo 'Unexpected file outside Product Detail candidate scope'; exit 1
           fi
+          git -C candidate diff --quiet "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- site/checkout.html site/store-checkout-server.js site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js site/store.html site/marketplace.html site/start-a-project.html site/solar-project.html site/admin.html
           node --check candidate/site/product-detail.js
           node --check candidate/site/lithium-shop.js
           node --check candidate/site/rv-store.js
@@ -79,7 +81,7 @@ jobs:
           done
           curl -sS -L --fail "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
           curl -sS -L --fail "$base/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
-          curl -sS -L --fail "$base/api/store-checkout/config" -o /tmp/checkout.json
+          curl -sS -L --fail "${CANONICAL_BASE%/}/api/store-checkout/config" -o /tmp/checkout.json
           python - <<'PY'
           import json
           li=json.load(open('/tmp/lithium.json')); rv=json.load(open('/tmp/rv.json')); co=json.load(open('/tmp/checkout.json'))
@@ -89,7 +91,7 @@ jobs:
           assert co.get('checkoutEnabled') is True
           assert co.get('liveCheckoutApproved') is True
           assert co.get('environment') == 'live'
-          print(json.dumps({'lithiumApi':len(li['products']),'rvApi':len(rv['products']),'checkout':'live-approved'},indent=2))
+          print(json.dumps({'previewLithiumApi':len(li['products']),'previewRvApi':len(rv['products']),'productionCheckout':'live-approved'},indent=2))
           PY
 
       - name: Install browser QA runtime
@@ -180,6 +182,6 @@ jobs:
           echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
           echo 'Desktop/mobile product detail QA: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Checkout configuration: live-approved / architecture unchanged' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production checkout: live-approved; candidate checkout files unchanged' >> "$GITHUB_STEP_SUMMARY"
           echo 'Hawaii request-page boundary: PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'Admin unauthenticated boundaries: PASS' >> "$GITHUB_STEP_SUMMARY"
