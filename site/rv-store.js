@@ -21,272 +21,50 @@
   const track = (type, value, details = {}) => window.EUSIntent?.track?.(type, value, { source: "RV & Outdoor Store", section: "rv_shop", ...details });
   const textOnly = (value) => String(value ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
-  function compactTitle(value, max=78) {
-    let title = textOnly(value)
-      .replace(/^(?:VEVOR|KINGBOSS)\s+/i, "")
-      .replace(/^(?:In Stock|Premium|Super Bright|High-Performance|Comprehensive)\s+/i, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    const forMatch = title.match(/^(.{18,}?)\s+for\s+(.+)$/i);
-    if (forMatch) title = forMatch[1].trim();
-    if (title.length > max) {
-      const cut = title.slice(0, max + 1).replace(/\s+\S*$/, "");
-      title = (cut || title.slice(0, max)).trim();
-    }
-    return title || "Elevation store product";
+  function criticalDetails(value) {
+    const raw=textOnly(value); const found=[];
+    const patterns=[/\b\d+(?:\.\d+)?\s*(?:x|×|\*)\s*\d+(?:\.\d+)?(?:\s*(?:x|×|\*)\s*\d+(?:\.\d+)?)?\s*(?:in(?:ch(?:es)?)?|"|cm|mm)?\b/i,/\b\d+(?:\.\d+)?\s*(?:GPM|PSI|Gallon|Gal|LBS|LB|W|Watt|V|Volt|A|Amp|L|Liter|Piece|Pieces|Pc|Pcs)\b/i,/\b\d{2,4}-Piece\b/i,/\b\d+(?:\.\d+)?\s*(?:ft|feet)\b/i];
+    for(const re of patterns){const m=raw.match(re);if(m&&!found.some(x=>x.toLowerCase()===m[0].toLowerCase()))found.push(m[0].replace(/\*/g,"×"));}
+    return found.slice(0,2);
   }
 
-  function useCase(value) {
-    const match = textOnly(value).match(/\s+for\s+(.+)$/i);
-    if (!match) return "";
-    const part = match[1].replace(/\s*[,.].*$/, "").trim();
-    return part ? `For ${part.slice(0, 88)}` : "";
+  function compactTitle(value, max=96) {
+    const raw=textOnly(value).replace(/^(?:VEVOR|KINGBOSS)\s+/i, "").replace(/^(?:In Stock|Premium|Super Bright|High-Performance|Comprehensive)\s+/i, "").trim();
+    let title=raw;
+    const forMatch=raw.match(/^(.{12,}?)\s+for\s+(.+)$/i);
+    if(forMatch){const before=forMatch[1].trim();const missing=criticalDetails(raw).filter(d=>!before.toLowerCase().includes(d.toLowerCase()));title=[before,...missing].join(" — ");}
+    if(title.length>max){const clauses=title.split(/,\s*/);let built="";for(const clause of clauses){const next=built?`${built}, ${clause}`:clause;if(next.length>max)break;built=next;}title=built||title.slice(0,max).replace(/\s+\S*$/,"").trim();}
+    return title||"Elevation store product";
   }
+
+  function useCase(value) {const raw=textOnly(value);const match=raw.match(/\s+for\s+(.+)$/i);if(!match)return"";const part=match[1].replace(/\s*[,.].*$/,"").trim();if(!part||/^\d/.test(part))return"";return `For ${part.slice(0,88)}`;}
 
   function normalizeCategory(rawCategory, title) {
     const value = `${rawCategory || ""} ${title || ""}`.toLowerCase();
     if (/spotlight|camping light|outdoor light|led light/.test(value)) return "Outdoor Lighting & Power";
     if (/solar|off[- ]grid|charge controller|panel connector|solar cable/.test(value)) return "Solar & Off-Grid";
     if (/tent|sleeping|gazebo|greenhouse|cooler|camping/.test(value)) return "Camping & Shelter";
-    if (/fuel|car jack|automotive|motorcycle|atv|tow/.test(value)) return "Automotive, ATV & Towing";
-    if (/tool|wrench|ladder|mechanic/.test(value)) return "Tools & Workshop";
-    if (/organizer|storage|travel|cup holder|shoe dryer/.test(value)) return "Travel & Organization";
-    if (/rv|water pump|water heater|fuse|diesel heater|deadbolt|mattress|marine/.test(value)) return "RV Essentials & Water";
+    if (/fuel|car jack|automotive|motorcycle|atv|tow|trailer/.test(value)) return "Automotive, ATV & Towing";
+    if (/tool|wrench|ladder|mechanic|fuse|plasma cutter|refrigerant/.test(value)) return "Tools & Workshop";
+    if (/organizer|storage|travel|cup holder|shoe dryer|laptop stand/.test(value)) return "Travel & Organization";
+    if (/rv|water pump|water heater|diesel heater|deadbolt|mattress|marine|tpms/.test(value)) return "RV Essentials & Water";
     return "Outdoor Gear";
   }
 
-  function publicCatalogProduct(product) {
-    if (!product) return false;
-    const publishStatus = String(product.publishStatus || "").toLowerCase();
-    if (publishStatus && publishStatus !== "published") return false;
-    if (!(Number(product.priceCents) > 0)) return false;
-    const stock = Number(product.supplierStock);
-    if (Number.isFinite(stock) && stock <= 0) return false;
-    if (String(product.shippingStatus || "unverified").toLowerCase() === "unverified") return false;
-    return true;
-  }
+  function publicCatalogProduct(product) {if(!product)return false;const publishStatus=String(product.publishStatus||"").toLowerCase();if(publishStatus&&publishStatus!=="published")return false;if(!(Number(product.priceCents)>0))return false;const stock=Number(product.supplierStock);if(Number.isFinite(stock)&&stock<=0)return false;if(String(product.shippingStatus||"unverified").toLowerCase()==="unverified")return false;return true;}
 
-  function normalizeCatalogProduct(product, index) {
-    const ebayItemId = String(product?.ebayItemId || "").trim();
-    const sourceUrl = String(product?.sourceUrl || "").trim();
-    const externalUrl = /^\d{12}$/.test(ebayItemId) ? `https://www.ebay.com/itm/${ebayItemId}` : (/^https?:\/\//i.test(sourceUrl) ? sourceUrl : "");
-    const catalogId = String(product?.id || product?.sku || `catalog-${index}`);
-    const supplier = String(product?.supplier || product?.sourceType || "Elevation").toLowerCase();
-    const publishStatus = String(product?.publishStatus || "").toLowerCase();
-    const shippingStatus = String(product?.shippingStatus || "unverified").toLowerCase();
-    const directCatalog = supplier === "doba" && publishStatus === "published" && shippingStatus === "verified" && Number(product?.priceCents || 0) > 0;
-    const rawName = String(product?.title || product?.name || "RV & Outdoor item").trim();
-    const directUrl = directCatalog ? `/checkout/?source=rv&id=${encodeURIComponent(catalogId)}&name=${encodeURIComponent(rawName)}${ebayItemId?`&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebayItemId}`)}`:""}` : externalUrl;
-    return {
-      id: catalogId,
-      itemNumber: ebayItemId,
-      sku: String(product?.sku || ""),
-      name: compactTitle(rawName),
-      sourceName: rawName,
-      subtitle: useCase(rawName),
-      category: normalizeCategory(product?.category, rawName),
-      priceCents: Number(product?.priceCents || 0),
-      imageUrl: String(product?.primaryImage || product?.images?.[0] || ""),
-      buyUrl: directUrl,
-      supplier,
-      shippingStatus,
-      fulfillmentMode: String(product?.fulfillmentMode || "supplier_managed"),
-      order: index,
-      catalogSource: "elevation-catalog"
-    };
-  }
+  function normalizeCatalogProduct(product,index){const ebayItemId=String(product?.ebayItemId||"").trim();const sourceUrl=String(product?.sourceUrl||"").trim();const externalUrl=/^\d{12}$/.test(ebayItemId)?`https://www.ebay.com/itm/${ebayItemId}`:(/^https?:\/\//i.test(sourceUrl)?sourceUrl:"");const catalogId=String(product?.id||product?.sku||`catalog-${index}`);const supplier=String(product?.supplier||product?.sourceType||"Elevation").toLowerCase();const publishStatus=String(product?.publishStatus||"").toLowerCase();const shippingStatus=String(product?.shippingStatus||"unverified").toLowerCase();const directCatalog=supplier==="doba"&&publishStatus==="published"&&shippingStatus==="verified"&&Number(product?.priceCents||0)>0;const rawName=String(product?.title||product?.name||"RV & Outdoor item").trim();const directUrl=directCatalog?`/checkout/?source=rv&id=${encodeURIComponent(catalogId)}&name=${encodeURIComponent(rawName)}${ebayItemId?`&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebayItemId}`)}`:""}`:externalUrl;return{id:catalogId,itemNumber:ebayItemId,sku:String(product?.sku||""),name:compactTitle(rawName),sourceName:rawName,subtitle:useCase(rawName),category:normalizeCategory(product?.category,rawName),priceCents:Number(product?.priceCents||0),imageUrl:String(product?.primaryImage||product?.images?.[0]||""),buyUrl:directUrl,supplier,shippingStatus,fulfillmentMode:String(product?.fulfillmentMode||"supplier_managed"),order:index,catalogSource:"elevation-catalog"};}
 
-  function syncList() {
-    const selected = state.items.filter((item) => shopping.has(item.id));
-    listPanel.hidden = selected.length === 0;
-    listCount.textContent = String(selected.length);
-    listItems.replaceChildren(...selected.map((item) => { const chip = document.createElement("span"); chip.textContent = item.name; return chip; }));
-    document.querySelectorAll("[data-list-item]").forEach((button) => {
-      const on = shopping.has(button.dataset.listItem);
-      button.textContent = on ? "✓ On Shopping List" : "+ Shopping List";
-      button.setAttribute("aria-pressed", String(on));
-    });
-  }
-
-  function productImage(item) {
-    if (!item.imageUrl) {
-      const placeholder = document.createElement("div");
-      placeholder.className = "rv-product-image-fallback";
-      placeholder.textContent = "Product image unavailable";
-      return placeholder;
-    }
-    const image = document.createElement("img");
-    image.className = "rv-product-image";
-    image.src = item.imageUrl;
-    image.alt = item.name;
-    image.loading = "lazy";
-    image.decoding = "async";
-    image.referrerPolicy = "no-referrer";
-    image.addEventListener("error", () => {
-      const placeholder = document.createElement("div");
-      placeholder.className = "rv-product-image-fallback";
-      placeholder.textContent = "Product image unavailable";
-      image.replaceWith(placeholder);
-    }, { once: true });
-    return image;
-  }
-
-  function availabilityLabel(item) {
-    if (item.shippingStatus === "verified") return "Ships to the Lower 48";
-    if (item.shippingStatus === "quote_required") return "Shipping quote required";
-    return "Check shipping availability";
-  }
-
-  function card(item) {
-    const article = document.createElement("article");
-    article.className = "rv-product-card";
-    const media = document.createElement("div");
-    media.className = "rv-product-media";
-    media.append(productImage(item));
-    const copy = document.createElement("div");
-    copy.className = "rv-product-copy";
-    const category = document.createElement("p");
-    category.className = "eyebrow";
-    category.textContent = item.category || "RV & Outdoor";
-    const title = document.createElement("h3");
-    title.textContent = item.name;
-    copy.append(category, title);
-    if (item.subtitle) {
-      const subtitle = document.createElement("p");
-      subtitle.className = "rv-product-subtitle";
-      subtitle.textContent = item.subtitle;
-      copy.append(subtitle);
-    }
-    const meta = document.createElement("div");
-    meta.className = "rv-product-meta";
-    const price = document.createElement("span");
-    price.className = "rv-product-price";
-    price.textContent = money(item.priceCents);
-    const stock = document.createElement("span");
-    stock.className = "rv-product-stock";
-    stock.textContent = availabilityLabel(item);
-    meta.append(price, stock);
-    const actions = document.createElement("div");
-    actions.className = "rv-product-actions";
-    const listButton = document.createElement("button");
-    listButton.type = "button";
-    listButton.dataset.listItem = item.id;
-    listButton.textContent = "+ Shopping List";
-    actions.append(listButton);
-    if (item.buyUrl) {
-      const buy = document.createElement("a");
-      buy.href = item.buyUrl;
-      if (!item.buyUrl.startsWith("/")) { buy.target = "_blank"; buy.rel = "noopener"; }
-      buy.textContent = "Buy Now";
-      buy.setAttribute("aria-label", `Buy ${item.name}`);
-      buy.addEventListener("click", () => track("store_destination_click", item.catalogSource === "elevation-catalog" ? "catalog_product" : "alternate_product_path", { product: item.name, itemNumber: item.itemNumber, destination: item.buyUrl }));
-      actions.append(buy);
-    }
-    copy.append(meta, actions);
-    article.append(media, copy);
-    return article;
-  }
-
-  function visible() {
-    const q = state.query.trim().toLowerCase();
-    const rows = state.items.filter((item) => (state.category === "all" || item.category === state.category) && (!q || `${item.name} ${item.sourceName} ${item.category} ${item.sku} ${item.itemNumber}`.toLowerCase().includes(q)));
-    rows.sort((a, b) => state.sort === "name" ? a.name.localeCompare(b.name) : state.sort === "price-low" ? (a.priceCents || 0) - (b.priceCents || 0) : state.sort === "price-high" ? (b.priceCents || 0) - (a.priceCents || 0) : Number(a.order || 0) - Number(b.order || 0));
-    return rows;
-  }
-
-  function renderCategoryRail() {
-    let rail = document.querySelector("#rv-category-rail");
-    const categories = [...new Set(state.items.map(item => item.category).filter(Boolean))];
-    const preferred = ["RV Essentials & Water","Solar & Off-Grid","Camping & Shelter","Automotive, ATV & Towing","Tools & Workshop","Outdoor Lighting & Power","Travel & Organization","Outdoor Gear"];
-    const shown = preferred.filter(cat => categories.includes(cat));
-    if (!shown.length) { rail?.remove(); state.category="all"; return; }
-    if (!rail) {
-      rail=document.createElement("div");
-      rail.id="rv-category-rail";
-      rail.className="rv-category-rail";
-      rail.setAttribute("aria-label","Filter products by category");
-      document.querySelector(".marketplace-summary")?.before(rail);
-    }
-    const active = categories.includes(state.category) ? state.category : "all";
-    state.category=active;
-    rail.replaceChildren(...[["All Gear","all"],...shown.map(x=>[x,x])].map(([label,value])=>{
-      const button=document.createElement("button");
-      button.type="button";
-      button.textContent=label;
-      button.dataset.category=value;
-      button.classList.toggle("is-active",value===active);
-      button.setAttribute("aria-pressed",String(value===active));
-      return button;
-    }));
-  }
-
-  function render() {
-    renderCategoryRail();
-    const rows = visible();
-    grid.replaceChildren(...rows.map(card));
-    grid.dataset.prerendered = "false";
-    count.textContent = String(rows.length);
-    empty.hidden = rows.length !== 0;
-    grid.hidden = rows.length === 0;
-    if (state.source === "catalog") status.textContent = `${state.items.length} products available now`;
-    else if (state.source === "empty") status.textContent = "Current products are temporarily unavailable.";
-    syncList();
-  }
-
-  async function loadElevationCatalog() {
-    try {
-      const response = await fetch("/api/store-catalog?section=rv-outdoor", { cache: "no-store", headers: { Accept: "application/json" } });
-      const data = await response.json().catch(() => ({}));
-      const products = Array.isArray(data?.products) ? data.products.filter(publicCatalogProduct).map(normalizeCatalogProduct).filter((item) => item.name) : [];
-      if (!response.ok || !products.length) throw new Error(data?.error || "No products returned");
-      state.items = products;
-      state.source = "catalog";
-      render();
-      track("store_catalog_loaded", "elevation_catalog", { catalogCount: products.length });
-    } catch (error) {
-      console.warn("RV store product feed unavailable:", error);
-      if (grid.dataset.prerendered === "true" && grid.children.length) {
-        status.textContent = "Current published products shown";
-        return;
-      }
-      state.source = "empty";
-      render();
-    }
-  }
-
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-list-item]");
-    if (button) {
-      const id = button.dataset.listItem;
-      const item = state.items.find((row) => row.id === id);
-      if (shopping.has(id)) shopping.delete(id); else shopping.add(id);
-      saveList(); syncList();
-      track("store_product_click", "shopping_list", { product: item?.name || id, destination: "shopping_list" });
-      return;
-    }
-    const categoryButton=event.target.closest("#rv-category-rail [data-category]");
-    if (!categoryButton) return;
-    state.category=categoryButton.dataset.category||"all";
-    const url=new URL(location.href);
-    if(state.category==="all")url.searchParams.delete("category");else url.searchParams.set("category",state.category);
-    history.replaceState({},"",url);
-    render();
-  });
-  document.querySelector("#shopping-list-clear")?.addEventListener("click", () => { shopping.clear(); saveList(); syncList(); });
-  document.querySelector("#shopping-list-copy")?.addEventListener("click", async () => {
-    const names = state.items.filter((item) => shopping.has(item.id)).map((item) => `• ${item.name}`).join("\n");
-    if (!names) return;
-    try {
-      await navigator.clipboard.writeText(`Elevation UpScales RV & Outdoor Shopping List\n${names}`);
-      const copyButton = document.querySelector("#shopping-list-copy");
-      copyButton.textContent = "Copied";
-      setTimeout(() => { copyButton.textContent = "Copy List"; }, 1400);
-    } catch (_) {}
-  });
-  search?.addEventListener("input", debounce(() => { state.query = search.value; render(); }));
-  sort?.addEventListener("change", () => { state.sort = sort.value; render(); });
-  const initialCategory=new URLSearchParams(location.search).get("category");
-  if(initialCategory) state.category=initialCategory;
-  track("store_open", "rv_store", { section: "rv_shop", prerendered: grid.dataset.prerendered === "true" });
-  loadElevationCatalog();
+  function syncList(){const selected=state.items.filter(item=>shopping.has(item.id));listPanel.hidden=selected.length===0;listCount.textContent=String(selected.length);listItems.replaceChildren(...selected.map(item=>{const chip=document.createElement("span");chip.textContent=item.name;return chip;}));document.querySelectorAll("[data-list-item]").forEach(button=>{const on=shopping.has(button.dataset.listItem);button.textContent=on?"✓ On Shopping List":"+ Shopping List";button.setAttribute("aria-pressed",String(on));});}
+  function productImage(item){if(!item.imageUrl){const placeholder=document.createElement("div");placeholder.className="rv-product-image-fallback";placeholder.textContent="Product image unavailable";return placeholder;}const image=document.createElement("img");image.className="rv-product-image";image.src=item.imageUrl;image.alt=item.name;image.loading="lazy";image.decoding="async";image.referrerPolicy="no-referrer";image.addEventListener("error",()=>{const placeholder=document.createElement("div");placeholder.className="rv-product-image-fallback";placeholder.textContent="Product image unavailable";image.replaceWith(placeholder);},{once:true});return image;}
+  function availabilityLabel(item){if(item.shippingStatus==="verified")return"Ships to the Lower 48";if(item.shippingStatus==="quote_required")return"Shipping quote required";return"Check shipping availability";}
+  function card(item){const article=document.createElement("article");article.className="rv-product-card";const media=document.createElement("div");media.className="rv-product-media";media.append(productImage(item));const copy=document.createElement("div");copy.className="rv-product-copy";const category=document.createElement("p");category.className="eyebrow";category.textContent=item.category||"RV & Outdoor";const title=document.createElement("h3");title.textContent=item.name;copy.append(category,title);if(item.subtitle){const subtitle=document.createElement("p");subtitle.className="rv-product-subtitle";subtitle.textContent=item.subtitle;copy.append(subtitle);}const meta=document.createElement("div");meta.className="rv-product-meta";const price=document.createElement("span");price.className="rv-product-price";price.textContent=money(item.priceCents);const stock=document.createElement("span");stock.className="rv-product-stock";stock.textContent=availabilityLabel(item);meta.append(price,stock);const actions=document.createElement("div");actions.className="rv-product-actions";const listButton=document.createElement("button");listButton.type="button";listButton.dataset.listItem=item.id;listButton.textContent="+ Shopping List";actions.append(listButton);if(item.buyUrl){const buy=document.createElement("a");buy.href=item.buyUrl;if(!item.buyUrl.startsWith("/")){buy.target="_blank";buy.rel="noopener";}buy.textContent="Buy Now";buy.setAttribute("aria-label",`Buy ${item.name}`);buy.addEventListener("click",()=>track("store_destination_click",item.catalogSource==="elevation-catalog"?"catalog_product":"alternate_product_path",{product:item.name,itemNumber:item.itemNumber,destination:item.buyUrl}));actions.append(buy);}copy.append(meta,actions);article.append(media,copy);return article;}
+  function visible(){const q=state.query.trim().toLowerCase();const rows=state.items.filter(item=>(state.category==="all"||item.category===state.category)&&(!q||`${item.name} ${item.sourceName} ${item.category} ${item.sku} ${item.itemNumber}`.toLowerCase().includes(q)));rows.sort((a,b)=>state.sort==="name"?a.name.localeCompare(b.name):state.sort==="price-low"?(a.priceCents||0)-(b.priceCents||0):state.sort==="price-high"?(b.priceCents||0)-(a.priceCents||0):Number(a.order||0)-Number(b.order||0));return rows;}
+  function renderCategoryRail(){let rail=document.querySelector("#rv-category-rail");const categories=[...new Set(state.items.map(item=>item.category).filter(Boolean))];const preferred=["RV Essentials & Water","Solar & Off-Grid","Camping & Shelter","Automotive, ATV & Towing","Tools & Workshop","Outdoor Lighting & Power","Travel & Organization","Outdoor Gear"];const shown=preferred.filter(cat=>categories.includes(cat));if(!shown.length){rail?.remove();state.category="all";return;}if(!rail){rail=document.createElement("div");rail.id="rv-category-rail";rail.className="rv-category-rail";rail.setAttribute("aria-label","Filter products by category");document.querySelector(".marketplace-summary")?.before(rail);}const active=categories.includes(state.category)?state.category:"all";state.category=active;rail.replaceChildren(...[["All Gear","all"],...shown.map(x=>[x,x])].map(([label,value])=>{const button=document.createElement("button");button.type="button";button.textContent=label;button.dataset.category=value;button.classList.toggle("is-active",value===active);button.setAttribute("aria-pressed",String(value===active));return button;}));}
+  function render(){renderCategoryRail();const rows=visible();grid.replaceChildren(...rows.map(card));grid.dataset.prerendered="false";count.textContent=String(rows.length);empty.hidden=rows.length!==0;grid.hidden=rows.length===0;if(state.source==="catalog")status.textContent=`${state.items.length} products available now`;else if(state.source==="empty")status.textContent="Current products are temporarily unavailable.";syncList();}
+  async function loadElevationCatalog(){try{const response=await fetch("/api/store-catalog?section=rv-outdoor",{cache:"no-store",headers:{Accept:"application/json"}});const data=await response.json().catch(()=>({}));const products=Array.isArray(data?.products)?data.products.filter(publicCatalogProduct).map(normalizeCatalogProduct).filter(item=>item.name):[];if(!response.ok||!products.length)throw new Error(data?.error||"No products returned");state.items=products;state.source="catalog";render();track("store_catalog_loaded","elevation_catalog",{catalogCount:products.length});}catch(error){console.warn("RV store product feed unavailable:",error);if(grid.dataset.prerendered==="true"&&grid.children.length){status.textContent="Current published products shown";return;}state.source="empty";render();}}
+  document.addEventListener("click",event=>{const button=event.target.closest("[data-list-item]");if(button){const id=button.dataset.listItem;const item=state.items.find(row=>row.id===id);if(shopping.has(id))shopping.delete(id);else shopping.add(id);saveList();syncList();track("store_product_click","shopping_list",{product:item?.name||id,destination:"shopping_list"});return;}const categoryButton=event.target.closest("#rv-category-rail [data-category]");if(!categoryButton)return;state.category=categoryButton.dataset.category||"all";const url=new URL(location.href);if(state.category==="all")url.searchParams.delete("category");else url.searchParams.set("category",state.category);history.replaceState({},"",url);render();});
+  document.querySelector("#shopping-list-clear")?.addEventListener("click",()=>{shopping.clear();saveList();syncList();});
+  document.querySelector("#shopping-list-copy")?.addEventListener("click",async()=>{const names=state.items.filter(item=>shopping.has(item.id)).map(item=>`• ${item.name}`).join("\n");if(!names)return;try{await navigator.clipboard.writeText(`Elevation UpScales RV & Outdoor Shopping List\n${names}`);const copyButton=document.querySelector("#shopping-list-copy");copyButton.textContent="Copied";setTimeout(()=>{copyButton.textContent="Copy List";},1400);}catch(_){}});
+  search?.addEventListener("input",debounce(()=>{state.query=search.value;render();}));sort?.addEventListener("change",()=>{state.sort=sort.value;render();});const initialCategory=new URLSearchParams(location.search).get("category");if(initialCategory)state.category=initialCategory;track("store_open","rv_store",{section:"rv_shop",prerendered:grid.dataset.prerendered==="true"});loadElevationCatalog();
 })();
