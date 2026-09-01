@@ -91,17 +91,18 @@
     const id = String(product.id || "").trim();
     const view = viewFor(product);
     const shipping = lower48Shipping(product);
+    const detailUrl = `/product?id=${encodeURIComponent(id)}&store=lithium`;
     const checkoutUrl = `/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(view.rawTitle || view.title)}`;
     const defaultShipping = hawaiiMode ? { label: "Hawaii availability by request", className: "is-researching" } : shipping;
     return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}" data-shipping-status="${esc(String(product.shippingStatus || "unverified"))}">
-      <div class="lithium-card__image"><img src="${esc(product.primaryImage || "/assets/logo.webp")}" alt="${esc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>
+      <div class="lithium-card__image"><a class="lithium-card__detail-link" href="${esc(detailUrl)}" aria-label="View ${esc(view.title)} details"><img src="${esc(product.primaryImage || "/assets/logo.webp")}" alt="${esc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a></div>
       <div class="lithium-card__body">
         <p class="lithium-card__category">${esc(view.category)}</p>
-        <h3>${esc(view.title)}</h3>
+        <h3><a class="lithium-card__title-link" href="${esc(detailUrl)}">${esc(view.title)}</a></h3>
         ${view.subtitle ? `<p class="lithium-card__subtitle">${esc(view.subtitle)}</p>` : ""}
         ${view.specs ? `<p class="lithium-card__spec-line">${esc(view.specs)}</p>` : ""}
         <div class="lithium-card__shipping ${defaultShipping.className}" data-hawaii-status>${esc(defaultShipping.label)}</div>
-        <div class="lithium-card__footer"><strong>${money.format(Number(product.priceCents || 0) / 100)}</strong><a class="button button-primary" href="${esc(checkoutUrl)}">Buy Now</a></div>
+        <div class="lithium-card__footer"><strong>${money.format(Number(product.priceCents || 0) / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" href="${esc(checkoutUrl)}">Buy Now</a></div></div>
         ${hawaiiMode ? `<a class="lithium-reserve-link" href="#hawaii-request" data-reserve-product="${esc(view.rawTitle || view.title)}">Request Hawaii Availability →</a>` : ""}
       </div>
     </article>`;
