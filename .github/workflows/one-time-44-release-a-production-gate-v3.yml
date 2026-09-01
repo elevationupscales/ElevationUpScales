@@ -1,0 +1,183 @@
+name: One-Time Elevation 4.4 Release A Production Gate v3
+
+on:
+  push:
+    branches: [deploy/4.4-release-a-production-gate-2026-08-31]
+    paths:
+      - .github/workflows/one-time-44-release-a-production-gate-v3.yml
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  EXPECTED_MAIN_SHA: 1809f257c7af31ef51f34673226d5adfcdf9b929
+  CANDIDATE_SHA: 964494bcd2608ed14192e2ed001f1ea611f05aae
+  CANONICAL_BASE: https://elevationupscales.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out gate branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check out rollback source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.EXPECTED_MAIN_SHA }}
+          path: rollback
+
+      - name: Verify approved candidate and current main
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git cat-file -e "$CANDIDATE_SHA^{commit}"
+          git merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          changed="$(git diff --name-only "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA")"
+          printf '%s\n' "$changed"
+          test -n "$changed"
+          if printf '%s\n' "$changed" | grep -Ev '^(coordination/handoffs/2026-08-31-elevation-44-storefront-final-polish-preview-receipt.md|site/_worker.js|site/lithium-batteries.html|site/lithium-shop.js|site/lithium-shop.css|site/rv-store.html|site/rv-store.js)$' | grep -q .; then
+            echo 'Unexpected file outside approved Release A scope'; exit 1
+          fi
+          git diff --quiet "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- site/index.html site/store.html site/checkout.html site/catalog-admin-runtime.js site/store-checkout-server.js site/hawaii-lithium-runtime.js site/marketplace.html site/start-a-project.html site/solar-project.html
+          git checkout "$CANDIDATE_SHA" -- site
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          grep -q 'data-lithium-search' site/lithium-batteries.html
+          grep -q 'data-lithium-sort' site/lithium-batteries.html
+          grep -q 'capacityWh' site/lithium-shop.js
+          grep -q 'criticalDetails' site/rv-store.js
+
+      - name: Deploy exact approved candidate to production Pages
+        id: production_deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify exact deployment URL
+        id: deployment_verify
+        continue-on-error: true
+        env:
+          DEPLOYED_BASE: ${{ steps.production_deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYED_BASE%/}"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /marketplace /start-a-project /solar-project /admin; do
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"; test "$code" = "200"
+          done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
+            code=$(curl -sS --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/admin.json -w '%{http_code}' "$base$api" || true)
+            echo "$api=$code"; test "$code" = "401"
+          done
+          curl -sS -L --fail "$base/lithium-batteries" -o /tmp/deploy-lithium.html
+          curl -sS -L --fail "$base/rv-store" -o /tmp/deploy-rv.html
+          grep -q 'data-lithium-search' /tmp/deploy-lithium.html
+          grep -q 'data-lithium-sort' /tmp/deploy-lithium.html
+          grep -q 'data-prerendered="true"' /tmp/deploy-lithium.html
+          grep -q 'data-prerendered="true"' /tmp/deploy-rv.html
+          grep -q '19 products available now' /tmp/deploy-rv.html
+          grep -q 'elevation-lithium-social-card.webp' /tmp/deploy-lithium.html
+          grep -q 'hero-galaxy-rv.webp' /tmp/deploy-rv.html
+
+      - name: Verify canonical propagation and commerce health
+        id: canonical_verify
+        if: steps.deployment_verify.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          base="${CANONICAL_BASE%/}"
+          found=0
+          for i in $(seq 1 20); do
+            stamp="${CANDIDATE_SHA}-${i}"
+            curl -sS -L --retry 4 --retry-all-errors --retry-delay 1 -H 'Cache-Control: no-cache' "$base/lithium-batteries?release=$stamp" -o /tmp/lithium.html || true
+            curl -sS -L --retry 4 --retry-all-errors --retry-delay 1 -H 'Cache-Control: no-cache' "$base/rv-store?release=$stamp" -o /tmp/rv.html || true
+            if grep -q 'data-lithium-search' /tmp/lithium.html && grep -q 'data-lithium-sort' /tmp/lithium.html && grep -q 'data-prerendered="true"' /tmp/lithium.html && grep -q 'data-prerendered="true"' /tmp/rv.html; then
+              found=1; break
+            fi
+            sleep 3
+          done
+          test "$found" = "1"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /marketplace /start-a-project /solar-project /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -H 'Cache-Control: no-cache' -o /tmp/page.html -w '%{http_code}' "$base$route?release=$CANDIDATE_SHA")
+            echo "$route=$code"; test "$code" = "200"
+          done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
+            code=$(curl -sS --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/admin.json -w '%{http_code}' "$base$api" || true)
+            echo "$api=$code"; test "$code" = "401"
+          done
+          curl -sS -L --fail "$base/api/store/catalog?section=lithium-batteries" -H 'Accept: application/json' -o /tmp/lithium.json
+          curl -sS -L --fail "$base/api/store-catalog?section=rv-outdoor" -H 'Accept: application/json' -o /tmp/rv.json
+          curl -sS -L --fail "$base/api/store-checkout/config" -o /tmp/checkout.json
+          python - <<'PY'
+          import json,re,html
+          checkout=json.load(open('/tmp/checkout.json'))
+          assert checkout.get('configured') is True, checkout
+          assert checkout.get('credentialsConfigured') is True, checkout
+          assert checkout.get('checkoutEnabled') is True, checkout
+          assert checkout.get('liveCheckoutApproved') is True, checkout
+          assert checkout.get('environment') == 'live', checkout
+          def rows(path, section):
+              data=json.load(open(path,encoding='utf-8')); out=[]
+              for p in data.get('products',[]):
+                  status=str(p.get('publishStatus') or '').strip().lower()
+                  if status and status!='published': continue
+                  try: price=float(p.get('priceCents') or 0)
+                  except: price=0
+                  if price<=0: continue
+                  stock=p.get('supplierStock')
+                  try:
+                      if stock is not None and float(stock)<=0: continue
+                  except: pass
+                  if section=='rv' and str(p.get('shippingStatus') or '').strip().lower()=='unverified': continue
+                  out.append(p)
+              return out
+          lithium_rows=rows('/tmp/lithium.json','lithium'); rv_rows=rows('/tmp/rv.json','rv')
+          lh=open('/tmp/lithium.html',encoding='utf-8').read(); rh=open('/tmp/rv.html',encoding='utf-8').read()
+          lm=re.search(r'<strong data-lithium-count>(\d+)</strong>',lh); rm=re.search(r'<span id="rv-count">(\d+)</span>',rh)
+          assert lm and int(lm.group(1))==len(lithium_rows),(lm.group(1) if lm else None,len(lithium_rows))
+          assert rm and int(rm.group(1))==len(rv_rows),(rm.group(1) if rm else None,len(rv_rows))
+          assert lithium_rows and rv_rows
+          assert 'Loading products' not in lh and 'Loading products' not in rh
+          names=[html.unescape(re.sub('<[^>]+>','',x)).strip() for x in re.findall(r'<article class="lithium-card"[\s\S]*?<h3>(.*?)</h3>',lh)]
+          assert len(names)==len(lithium_rows)
+          assert len(set(names))>=min(5,len(names))
+          evidence={'lithiumCount':len(lithium_rows),'lithiumUniqueTitles':len(set(names)),'rvCount':len(rv_rows),'checkout':'live-approved'}
+          json.dump(evidence,open('/tmp/release-a-production-evidence.json','w'),indent=2)
+          print(json.dumps(evidence,indent=2))
+          PY
+
+      - name: Roll back if deployment or canonical verification failed
+        if: steps.deployment_verify.outcome == 'failure' || steps.canonical_verify.outcome == 'failure'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy rollback/site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail after rollback
+        if: steps.deployment_verify.outcome == 'failure' || steps.canonical_verify.outcome == 'failure'
+        run: |
+          echo 'Release A failed production verification and was rolled back.'
+          exit 1
+
+      - name: Record production PASS
+        if: steps.deployment_verify.outcome == 'success' && steps.canonical_verify.outcome == 'success'
+        run: |
+          echo '### Elevation 4.4 Release A — PRODUCTION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Approved candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Previous main / rollback: $EXPECTED_MAIN_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment URL: ${{ steps.production_deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Exact deployment verification: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical propagation: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Live checkout / Admin auth / Catalog parity: PASS' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/release-a-production-evidence.json >> "$GITHUB_STEP_SUMMARY"
