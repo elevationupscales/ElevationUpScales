@@ -12,7 +12,7 @@ permissions:
 
 env:
   EXPECTED_MAIN_SHA: 539d71546f1a4ed1c8e43f2efbcf2188b3a5063b
-  CANDIDATE_SHA: 00e75258d9c73190c6b56ab7e01833a188e319e1
+  CANDIDATE_SHA: f651f9dc3253ff4b5f01f2fe3de412be4e6f7010
   CANONICAL_BASE: https://elevationupscales.com
 
 jobs:
