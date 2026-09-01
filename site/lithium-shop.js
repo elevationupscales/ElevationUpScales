@@ -5,11 +5,15 @@
   if (!grid) return;
 
   const hawaiiMode = document.body.dataset.lithiumMode === "hawaii";
+  const search = document.querySelector("[data-lithium-search]");
+  const sort = document.querySelector("[data-lithium-sort]");
+  const results = document.querySelector("[data-lithium-results]");
   const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
-  const state = { products: [], category: "all" };
-
+  const state = { products: [], category: "all", query: "", sort: "featured" };
+  const debounce = (fn, ms=150) => { let timer=0; return (...args) => { clearTimeout(timer); timer=setTimeout(() => fn(...args), ms); }; };
   const textOnly = (value) => String(value ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const token = (raw, re, format = (x) => x) => { const m=raw.match(re); return m ? format(m) : ""; };
 
   function publicProducts(rows) {
     return rows.filter((product) => {
@@ -26,37 +30,53 @@
   function viewFor(product) {
     const raw = textOnly(product.title || product.name || "Lithium battery");
     const lower = raw.toLowerCase();
-    let title = "Lithium Battery";
-    if (/battery box/.test(lower)) title = "RV Battery Box";
-    else if (/power bank/.test(lower)) title = /fast.?charge/.test(lower) ? "Fast-Charge Power Bank" : "Portable Solar Power Bank";
-    else if (/48v|36v|24v/.test(lower)) title = "High-Voltage Solar Storage Battery";
-    else if (/dual|2[- ]pack|two /.test(lower)) title = "Dual Lithium Battery Set";
-    else if (/marine/.test(lower)) title = "RV & Marine Lithium Battery";
-    else if (/solar|off[- ]grid/.test(lower)) title = "RV & Solar Lithium Battery";
-
-    const voltage = raw.match(/\b(12|24|36|48)V\b/i)?.[0]?.toUpperCase();
-    const ah = raw.match(/\b(\d{2,4})Ah\b/i)?.[0];
-    const kwh = raw.match(/\b\d+(?:\.\d+)?\s*kWh\b/i)?.[0]?.replace(/\s+/g, "");
-    const wh = raw.match(/\b\d{3,5}\s*Wh\b/i)?.[0]?.replace(/\s+/g, "");
+    const voltage = token(raw, /\b(12|24|36|48)V\b/i, (m) => `${m[1]}V`);
+    const ah = token(raw, /\b(\d{2,4})\s*Ah\b/i, (m) => `${m[1]}Ah`);
+    const kwh = token(raw, /\b(\d+(?:\.\d+)?)\s*kWh\b/i, (m) => `${m[1]}kWh`);
+    const wh = token(raw, /\b(\d{3,5})\s*Wh\b/i, (m) => `${m[1]}Wh`);
+    const mah = token(raw, /\b(\d{4,7})\s*mAh\b/i, (m) => `${m[1]}mAh`);
+    const bms = token(raw, /\b(\d{2,3})A\s*BMS\b/i, (m) => `${m[1]}A BMS`);
+    const dimensions = token(raw, /\b(\d+(?:\.\d+)?\s*(?:x|×|\*)\s*\d+(?:\.\d+)?(?:\s*(?:x|×|\*)\s*\d+(?:\.\d+)?)?\s*(?:in(?:ch(?:es)?)?|"|cm|mm)?)\b/i, (m) => m[1].replace(/\*/g,"×").replace(/\s+/g," "));
     const chemistry = /LiFePO4/i.test(raw) ? "LiFePO4" : "";
-    const specs = [voltage, ah, kwh || wh, chemistry].filter(Boolean).join(" · ");
+    const heated = /\b(?:heated|self[- ]heating|self heating)\b/i.test(raw);
+    const bluetooth = /\bBluetooth\b/i.test(raw);
+    const twoPack = /\b(?:2[- ]?pack|two[- ]pack|dual)\b/i.test(raw);
 
+    let title;
+    if (/battery box/.test(lower)) {
+      title = `RV Battery Box${dimensions ? ` — ${dimensions}` : ""}`;
+    } else if (/power bank/.test(lower)) {
+      const cap = mah || wh || kwh;
+      title = `${/solar/.test(lower) ? "Portable Solar Power Bank" : "Portable Power Bank"}${cap ? ` — ${cap}` : ""}`;
+    } else {
+      const parts = [voltage, ah, heated ? "Heated" : "", chemistry].filter(Boolean);
+      if (parts.length >= 2) title = `${twoPack ? "2-Pack " : ""}${parts.join(" ")} Battery`;
+      else {
+        const cleaned = raw.replace(/^(?:VEVOR|KINGBOSS)\s+/i, "").replace(/^Lithium Battery[:,]?\s*/i, "").trim();
+        title = cleaned.split(/[,;|]/)[0].trim().slice(0, 82) || "Lithium Battery";
+      }
+    }
+
+    const specParts = [kwh || wh, bms, bluetooth ? "Bluetooth" : "", heated && !/Heated/.test(title) ? "Heated" : ""].filter(Boolean);
+    const specs = specParts.join(" · ");
     let subtitle = "";
     if (/rv/.test(lower) && /solar|off[- ]grid/.test(lower)) subtitle = "For RV, solar & off-grid systems";
     else if (/solar|off[- ]grid/.test(lower)) subtitle = "For solar & off-grid storage";
-    else if (/rv|marine/.test(lower)) subtitle = "For RV & mobile power";
+    else if (/rv|marine|trolling/.test(lower)) subtitle = "For RV & mobile power";
+    else if (/backup/.test(lower)) subtitle = "For backup power";
 
-    const category = /battery box/.test(lower)
-      ? "Battery Accessories"
-      : /power bank/.test(lower)
-        ? "Portable Power"
-        : /48v|36v|24v/.test(lower)
-          ? "Higher Voltage / Storage"
-          : /solar|off[- ]grid/.test(lower)
-            ? "Solar & Off-Grid"
-            : "12V Lithium";
+    const category = /battery box/.test(lower) ? "Battery Accessories"
+      : /power bank/.test(lower) ? "Portable Power"
+      : /48v|36v|24v/.test(lower) ? "Higher Voltage / Storage"
+      : /solar|off[- ]grid/.test(lower) ? "Solar & Off-Grid" : "12V Lithium";
 
-    return { title, subtitle, specs, category, rawTitle: raw };
+    let capacityWh = 0;
+    if (kwh) capacityWh = Number.parseFloat(kwh) * 1000;
+    else if (wh) capacityWh = Number.parseFloat(wh);
+    else if (voltage && ah) capacityWh = Number.parseFloat(voltage) * Number.parseFloat(ah);
+    else if (mah) capacityWh = Number.parseFloat(mah) / 1000;
+
+    return { title, subtitle, specs, category, rawTitle: raw, voltage, ah, capacityWh };
   }
 
   function lower48Shipping(product) {
@@ -104,22 +124,36 @@
     }));
   }
 
+  function visibleProducts(active) {
+    const q = state.query.trim().toLowerCase();
+    const visible = active.filter((product) => {
+      const view = viewFor(product);
+      const haystack = `${view.title} ${view.subtitle} ${view.specs} ${view.category} ${view.rawTitle}`.toLowerCase();
+      return (state.category === "all" || view.category === state.category) && (!q || haystack.includes(q));
+    });
+    if (state.sort === "price-low") visible.sort((a,b) => Number(a.priceCents||0)-Number(b.priceCents||0));
+    else if (state.sort === "price-high") visible.sort((a,b) => Number(b.priceCents||0)-Number(a.priceCents||0));
+    else if (state.sort === "capacity") visible.sort((a,b) => viewFor(b).capacityWh-viewFor(a).capacityWh);
+    return visible;
+  }
+
   function render(products) {
     const active = publicProducts(products);
     state.products = active;
     renderCategories(active);
-    const visible = state.category === "all" ? active : active.filter((product) => viewFor(product).category === state.category);
+    const visible = visibleProducts(active);
     if (visible.length) {
       grid.innerHTML = visible.map(card).join("");
       grid.dataset.prerendered = "false";
     } else if (active.length) {
-      grid.innerHTML = `<section class="lithium-empty-state" role="status"><h3>No batteries match this category.</h3><p>Choose another battery category to continue browsing.</p></section>`;
+      grid.innerHTML = `<section class="lithium-empty-state" role="status"><h3>No batteries match your search.</h3><p>Try another voltage, capacity, use case or category.</p></section>`;
     } else {
       const reserveHref = hawaiiMode ? "#hawaii-request" : "/hawaii-lithium-batteries#hawaii-request";
       grid.innerHTML = `<section class="lithium-empty-state" role="status"><h3>Current battery inventory is temporarily unavailable.</h3><p>Please check back shortly or request help choosing a battery.</p><div class="lithium-actions"><a class="button button-primary" href="${reserveHref}">Request Availability</a><a class="button button-outline" href="/start-a-project?type=solar">Ask for Sizing Help</a></div></section>`;
     }
     const count = document.querySelector("[data-lithium-count]");
     if (count) count.textContent = String(active.length);
+    if (results) results.textContent = visible.length === active.length ? `${active.length} shown` : `${visible.length} of ${active.length} shown`;
     document.querySelectorAll("[data-hawaii-sku]").forEach(syncStatus);
   }
 
@@ -138,14 +172,11 @@
       const data = await response.json().catch(() => ({}));
       badge.className = "lithium-card__shipping";
       if (response.ok && data.status === "HAWAII SHIPPING AVAILABLE" && data.eligible === true) {
-        badge.classList.add("is-approved");
-        badge.textContent = "Hawaii Shipping Available";
+        badge.classList.add("is-approved"); badge.textContent = "Hawaii Shipping Available";
       } else if (response.ok && data.status === "HAWAII SHIPPING QUOTE REQUIRED") {
-        badge.classList.add("is-quote");
-        badge.textContent = "Hawaii Shipping Quote Required";
+        badge.classList.add("is-quote"); badge.textContent = "Hawaii Shipping Quote Required";
       } else {
-        badge.classList.add("is-researching");
-        badge.textContent = "Hawaii availability by request";
+        badge.classList.add("is-researching"); badge.textContent = "Hawaii availability by request";
       }
     } catch (_) {
       badge.className = "lithium-card__shipping is-researching";
@@ -170,19 +201,14 @@
 
   document.addEventListener("click", (event) => {
     const categoryButton = event.target.closest("[data-lithium-category]");
-    if (categoryButton) {
-      state.category = categoryButton.dataset.lithiumCategory || "all";
-      render(state.products);
-      return;
-    }
+    if (categoryButton) { state.category = categoryButton.dataset.lithiumCategory || "all"; render(state.products); return; }
     const link = event.target.closest("[data-reserve-product]");
     if (!link) return;
     const input = document.querySelector("[name='productInterest']");
-    if (input) {
-      input.value = link.dataset.reserveProduct || "";
-      setTimeout(() => input.focus(), 150);
-    }
+    if (input) { input.value = link.dataset.reserveProduct || ""; setTimeout(() => input.focus(), 150); }
   });
+  search?.addEventListener("input", debounce(() => { state.query = search.value; render(state.products); }));
+  sort?.addEventListener("change", () => { state.sort = sort.value; render(state.products); });
 
   load();
 })();
