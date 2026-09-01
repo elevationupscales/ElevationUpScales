@@ -1,0 +1,45 @@
+name: One-Time Elevation 4.4 Labor Day Pricing Compliance QA Fix
+
+on:
+  push:
+    branches: [ops/4.4-labor-day-pricing-compliance-qa-fix-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: deploy/4.4-labor-day-pricing-compliance-preview-2026-08-31
+          fetch-depth: 0
+      - name: Correct RV browser selector only
+        run: |
+          set -euo pipefail
+          workflow=.github/workflows/one-time-44-labor-day-pricing-compliance-preview.yml
+          grep -q "'#rv-grid'" "$workflow"
+          grep -q 'id="rv-product-grid"' site/rv-store.html
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/one-time-44-labor-day-pricing-compliance-preview.yml')
+          s=p.read_text()
+          old="source==='lithium'?'[data-lithium-grid]':'#rv-grid'"
+          new="source==='lithium'?'[data-lithium-grid]':'#rv-product-grid'"
+          if s.count(old)!=1: raise SystemExit(f'expected exactly one RV selector match, found {s.count(old)}')
+          s=s.replace(old,new,1)
+          anchor="          ! grep -q 'Promotion list basis' candidate/site/admin-promotion.js\n"
+          assertion="          grep -q 'id=\"rv-product-grid\"' candidate/site/rv-store.html\n"
+          if anchor not in s: raise SystemExit('selector audit insertion anchor missing')
+          s=s.replace(anchor,anchor+assertion,1)
+          p.write_text(s)
+          PY
+          git diff --check
+          git diff -- .github/workflows/one-time-44-labor-day-pricing-compliance-preview.yml
+          test "$(git diff --name-only)" = ".github/workflows/one-time-44-labor-day-pricing-compliance-preview.yml"
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add "$workflow"
+          git commit -m 'Fix RV selector in pricing compliance preview gate'
+          git push origin HEAD:deploy/4.4-labor-day-pricing-compliance-preview-2026-08-31
