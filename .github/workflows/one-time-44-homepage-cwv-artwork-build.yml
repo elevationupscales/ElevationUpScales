@@ -1,0 +1,103 @@
+name: One-Time Elevation 4.4 Homepage CWV Artwork Build
+
+on:
+  push:
+    branches: [ops/4.4-homepage-cwv-artwork-build-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/4.4-homepage-human-finish-2026-08-31
+          fetch-depth: 0
+      - name: Apply homepage artwork and stability finish
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "8ba21b48559178a12ef8a8052fc69745ca66ba0e"
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('site/index.html')
+          s=p.read_text()
+          s=s.replace('<link rel="preload" as="image" href="/assets/elevation-lithium-social-card.webp">\n','',1)
+          s=s.replace('/home-elevation-funnel.css?v=4.4.3','/home-elevation-funnel.css?v=4.4.4',1)
+          s=s.replace('/labor-day-promo.css?v=4.4.0','/labor-day-promo.css?v=4.4.1',1)
+          s=s.replace('/labor-day-promo.js?v=4.4.0','/labor-day-promo.js?v=4.4.1',1)
+          anchor='</header>\n<main id="main">'
+          replacement='</header>\n<div class="eus-labor-day-banner-slot" data-home-promo-slot aria-live="polite" aria-label="Promotion status"></div>\n<main id="main">'
+          if anchor not in s: raise SystemExit('header/main anchor missing')
+          s=s.replace(anchor,replacement,1)
+          replacements={
+            "--route-image:url('/assets/hero-galaxy-rv.webp')":"--route-image:url('/assets/rv-interior-before-after.webp')",
+            "--route-image:url('/assets/hero-galaxy-fifth-wheel-9-1-4.webp')":"--route-image:url('/assets/solar/builder-v2/rv-solar-install-field-mobile.webp')",
+            "--route-image:url('/assets/home-services-hero-bathroom.webp')":"--route-image:url('/assets/home-gallery-thumbs/01_finished_modern_bathroom.webp')",
+            "--route-image:url('/assets/marketplace/marketplace-hero-desktop.webp')":"--route-image:url('/assets/marketplace/marketplace-premium-hero-desktop.webp')",
+            "style=\"--story-image:url('/assets/hero-galaxy-rv.webp')\" role=\"img\" aria-label=\"RV in an outdoor setting\"></div>":"><img class=\"hc-media-img\" src=\"/assets/solar/builder-v2/rv-solar-install-field-desktop.webp\" alt=\"RV solar installation in an outdoor setting\" width=\"1600\" height=\"900\" loading=\"lazy\" decoding=\"async\"></div>",
+            "style=\"--tile-image:url('/assets/hero-galaxy-rv.webp')\"":"",
+            "style=\"--story-image:url('/assets/marketplace/marketplace-hero-desktop.webp')\"":""
+          }
+          for old,new in replacements.items():
+            if old not in s: raise SystemExit(f'missing index pattern: {old[:70]}')
+            s=s.replace(old,new,1)
+          old='<a class="hc-shop-tile" href="/rv-store" ><span>RV &amp; Outdoor Store</span>'
+          new='<a class="hc-shop-tile" href="/rv-store"><img class="hc-media-img" src="/assets/rv-interior-before-after.webp" alt="RV interior project before and after" width="1200" height="675" loading="lazy" decoding="async"><span>RV &amp; Outdoor Store</span>'
+          if old not in s: raise SystemExit('rv shop tile pattern missing')
+          s=s.replace(old,new,1)
+          old='<a class="hc-story-media hc-story-media--marketplace" href="/marketplace"  aria-label="Browse Elevation Marketplace listings"><span>Browse Marketplace <span aria-hidden="true">→</span></span></a>'
+          new='<a class="hc-story-media hc-story-media--marketplace" href="/marketplace" aria-label="Browse Elevation Marketplace listings"><img class="hc-media-img" src="/assets/marketplace/marketplace-premium-hero-desktop.webp" alt="" width="1200" height="675" loading="lazy" decoding="async"><span>Browse Marketplace <span aria-hidden="true">→</span></span></a>'
+          if old not in s: raise SystemExit('marketplace story pattern missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/home-elevation-funnel.css')
+          s=p.read_text()
+          s += '''\n/* 4.4.4 customer-experience stability and artwork finish */\nbody.home-concept.hc-funnel #main{min-height:0!important}\nbody.home-concept.hc-funnel .hc-hero{display:block!important;height:auto!important;min-height:0!important;padding:0!important}\nbody.home-concept.hc-funnel .hc-hero>.container{height:auto!important;min-height:0!important}\nbody.home-concept.hc-funnel .hc-hero-copy{min-height:0!important;padding:22px 0 24px!important}\nbody.home-concept.hc-funnel .hc-route-grid{margin-top:14px}\nbody.home-concept.hc-funnel .hc-route{min-height:116px;contain:layout paint;background-color:#111}\nbody.home-concept.hc-funnel .hc-route:before{background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.91)),var(--route-image,none) center/cover no-repeat}\n.hc-story-media,.hc-shop-tile{position:relative;background:#111}\n.hc-story-media:before,.hc-shop-tile:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.72));z-index:-1}\n.hc-media-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-2}\n.hc-story-media,.hc-shop-tile{isolation:isolate}\n.home-concept .hc-section img{max-width:100%;height:auto}\n@media(max-width:680px){body.home-concept.hc-funnel .hc-hero-copy{padding:18px 0 20px!important}body.home-concept.hc-funnel .hc-route{min-height:104px;padding:13px}body.home-concept.hc-funnel .hc-route-grid{margin-top:12px}}\n'''
+          p.write_text(s)
+
+          p=Path('site/labor-day-promo.js')
+          s=p.read_text()
+          old='''      if(!response.ok||promo.active!==true)return;\n      const banner=document.createElement("section");'''
+          new='''      const slot=document.querySelector("[data-home-promo-slot]");\n      if(!response.ok||promo.active!==true){if(slot){slot.hidden=true;slot.setAttribute("aria-hidden","true");}return;}\n      const banner=document.createElement("section");'''
+          if old not in s: raise SystemExit('promotion active-state pattern missing')
+          s=s.replace(old,new,1)
+          old='''      const header=document.querySelector("header");\n      if(header)header.insertAdjacentElement("afterend",banner);else document.body.prepend(banner);'''
+          new='''      if(slot){slot.hidden=false;slot.removeAttribute("aria-hidden");slot.replaceChildren(banner);slot.dataset.promoReady="true";}else{const header=document.querySelector("header");if(header)header.insertAdjacentElement("afterend",banner);else document.body.prepend(banner);}'''
+          if old not in s: raise SystemExit('promotion insertion pattern missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/labor-day-promo.css')
+          s=p.read_text()
+          s += '''\n.eus-labor-day-banner-slot{display:block;min-height:0}\n.home-concept .eus-labor-day-banner-slot{min-height:64px;background:linear-gradient(90deg,#17130b,#090909);contain:layout paint}\n.home-concept .eus-labor-day-banner-slot[hidden]{display:none}\n.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner{min-height:64px}\n.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:64px}\n@media(max-width:760px){.home-concept .eus-labor-day-banner-slot,.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner{min-height:88px}.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:88px}}\n'''
+          p.write_text(s)
+          PY
+      - name: Validate homepage stability scope
+        run: |
+          set -euo pipefail
+          node --check site/labor-day-promo.js
+          git diff --check
+          changed=$(git diff --name-only 8ba21b48559178a12ef8a8052fc69745ca66ba0e -- site | sort)
+          printf '%s\n' "$changed"
+          test "$changed" = $'site/home-elevation-funnel.css\nsite/index.html\nsite/labor-day-promo.css\nsite/labor-day-promo.js'
+          ! grep -q 'rel="preload" as="image" href="/assets/elevation-lithium-social-card.webp"' site/index.html
+          grep -q 'data-home-promo-slot' site/index.html
+          grep -q 'rv-solar-install-field-mobile.webp' site/index.html
+          grep -q 'home-gallery-thumbs/01_finished_modern_bathroom.webp' site/index.html
+          grep -q 'marketplace-premium-hero-desktop.webp' site/index.html
+          grep -q 'hc-media-img' site/index.html
+          grep -q 'promoReady' site/labor-day-promo.js
+          grep -q 'min-height:64px' site/labor-day-promo.css
+          for protected in site/store-checkout-server.js site/promotion-runtime.js site/catalog-admin-runtime.js site/doba-csv-sync-runtime.js site/hawaii-lithium-runtime.js site/marketplace.html site/solar-project.html site/product-detail.js; do git diff --quiet 8ba21b48559178a12ef8a8052fc69745ca66ba0e -- "$protected"; done
+      - name: Commit homepage stability finish
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/index.html site/home-elevation-funnel.css site/labor-day-promo.js site/labor-day-promo.css
+          git commit -m 'Finish homepage artwork and layout stability'
+          git push origin HEAD:release/4.4-homepage-human-finish-2026-08-31
