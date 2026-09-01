@@ -1,0 +1,162 @@
+name: One-Time Elevation 4.4 Homepage Human Finish Preview
+
+on:
+  push:
+    branches: [deploy/4.4-homepage-human-finish-preview-2026-08-31]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_MAIN_SHA: 310bafaeeef50fe2db09d53756e096b3c936611d
+      CANDIDATE_SHA: f1121e4d8cb1cb8ab6ce8158773728756291ed16
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with: {fetch-depth: 0}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 0
+
+      - name: Verify exact homepage-only scope and Labor Day preservation
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          git -C candidate diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          changed=$(git -C candidate diff --name-only "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA")
+          echo "$changed"
+          test "$(echo "$changed" | wc -l)" -eq 2
+          echo "$changed" | grep -qx 'site/index.html'
+          echo "$changed" | grep -qx 'site/home-elevation-funnel.css'
+          grep -q 'What are you here to do?' candidate/site/index.html
+          grep -q 'Start a Project' candidate/site/index.html
+          grep -q 'Build a Solar System' candidate/site/index.html
+          grep -q '208-813-4998' candidate/site/index.html
+          grep -q 'labor-day-promo.js' candidate/site/index.html
+          grep -q 'labor-day-promo.css' candidate/site/index.html
+          grep -q 'font-family:Arial,Helvetica,sans-serif' candidate/site/home-elevation-funnel.css
+          grep -q 'hc-route--primary' candidate/site/index.html
+          grep -q 'hc-route--tool' candidate/site/index.html
+          grep -q 'hc-route--marketplace' candidate/site/index.html
+          for phrase in 'complete lifestyle ecosystem' 'next-generation solutions' 'transformative experiences' 'seamless integrated platform' 'curated journey' 'innovative lifestyle solutions'; do
+            ! grep -qi "$phrase" candidate/site/index.html
+          done
+          for p in site/_worker.js site/promotion-runtime.js site/store-checkout-server.js site/store-checkout.js site/lithium-shop.js site/rv-store.js site/product-detail.js site/marketplace.html site/hawaii-lithium-runtime.js site/solar-project.html site/start-a-project.html; do
+            git -C candidate diff --quiet "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- "$p"
+          done
+
+      - id: deploy
+        name: Deploy exact homepage candidate to preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=elevationupscales --branch=homepage-human-finish-preview-2026-08-31
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify preview routes and production isolation
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_BASE%/}"
+          for route in / /start-a-project /home-services /rv-services /solar-services /solar-project /lithium-batteries /rv-store /store /marketplace /make-a-listing /hawaii-lithium-batteries /work-with-us /privacy; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = 200
+          done
+          curl -sS -L --fail "$base/" -o /tmp/preview-home
+          grep -q 'Need work done, planning solar, or shopping for gear?' /tmp/preview-home
+          grep -q 'Built from real work.' /tmp/preview-home
+          grep -q 'Projects come first.' /tmp/preview-home
+          ! grep -q 'Independent listings stay separate from Elevation retail' /tmp/preview-home
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS -L --fail "$CANONICAL_BASE/" -o /tmp/prod-home
+          ! grep -q 'Need work done, planning solar, or shopping for gear?' /tmp/prod-home
+          grep -q 'labor-day-promo.js' /tmp/prod-home
+          curl -sS --fail "$CANONICAL_BASE/api/store/promotion" -o /tmp/p.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/p.json'))
+          assert p['active'] is True
+          assert p['couponCode']=='LABORDAY25'
+          assert p['batteryShippingCents']==2799
+          PY
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Desktop mobile typography usability and human-read regression
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          cat > browser.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          const evidence=[];
+          for(const [vp,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const page=await browser.newPage({viewport});
+            const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+            await page.locator('#home-route-title').waitFor({state:'visible'});
+            const title=String(await page.locator('#home-route-title').innerText()).trim();
+            if(title!=='What are you here to do?')throw new Error(`${vp}:hero-title`);
+            const routes=page.locator('.hc-route');
+            if(await routes.count()!==6)throw new Error(`${vp}:route-count`);
+            const start=page.locator('.hc-route--primary');
+            const solar=page.locator('.hc-route--tool');
+            const market=page.locator('.hc-route--marketplace');
+            if(await start.count()!==1||await solar.count()!==1||await market.count()!==1)throw new Error(`${vp}:route-hierarchy`);
+            const heroStyle=await page.locator('#home-route-title').evaluate(el=>{const s=getComputedStyle(el);return{family:s.fontFamily,size:parseFloat(s.fontSize),weight:s.fontWeight,lineHeight:s.lineHeight}});
+            if(/Impact|Haettenschweiler/i.test(heroStyle.family))throw new Error(`${vp}:impact-heading`);
+            if(vp==='desktop'&&heroStyle.size>86)throw new Error(`${vp}:hero-too-large:${heroStyle.size}`);
+            if(vp==='mobile'&&heroStyle.size>58)throw new Error(`${vp}:hero-too-large:${heroStyle.size}`);
+            const firstBox=await routes.first().boundingBox();
+            if(!firstBox||firstBox.height<44||firstBox.width<44)throw new Error(`${vp}:route-target`);
+            if(vp==='desktop'&&firstBox.y>520)throw new Error(`${vp}:routes-too-low:${firstBox.y}`);
+            if(vp==='mobile'&&firstBox.y>500)throw new Error(`${vp}:routes-too-low:${firstBox.y}`);
+            if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error(`${vp}:overflow`);
+            const body=String(await page.locator('body').innerText());
+            for(const required of ['Built from real work.','Shop what you need.','Need help with the project?','Projects come first.','Looking for a used RV, vehicle or gear?','Where we work.','What do you need next?','208-813-4998'])if(!body.includes(required))throw new Error(`${vp}:missing-copy:${required}`);
+            for(const banned of ['complete lifestyle ecosystem','next-generation solutions','transformative experiences','seamless integrated platform','curated journey','innovative lifestyle solutions','Independent listings stay separate from Elevation retail','same inventory system'])if(body.toLowerCase().includes(banned.toLowerCase()))throw new Error(`${vp}:banned-copy:${banned}`);
+            const interactive=page.locator('.hc-route,.hc-shop-tile,.hc-card-links a,.hc-actions .button,.hc-quick-links a');
+            const count=await interactive.count();
+            for(let i=0;i<count;i++){const el=interactive.nth(i);if(!(await el.isVisible()))continue;const b=await el.boundingBox();if(!b||b.height<40||b.width<40)throw new Error(`${vp}:small-target:${i}:${b?.width}x${b?.height}`);}
+            await start.focus();
+            const outline=await start.evaluate(el=>getComputedStyle(el).outlineStyle);
+            if(outline==='none')throw new Error(`${vp}:focus-not-visible`);
+            for(const href of ['/start-a-project','/solar-project?source=home-elevation-funnel','/lithium-batteries','/rv-store','/marketplace'])if(!await page.locator(`a[href="${href}"]`).count())throw new Error(`${vp}:missing-route:${href}`);
+            if(errors.length)throw new Error(`${vp}:page-errors:${errors.join(';')}`);
+            evidence.push({vp,heroFont:heroStyle,firstRouteY:firstBox.y,routeCards:6,interactiveTargets:count,overflow:false,pageErrors:0});
+            await page.close();
+          }
+          await browser.close();
+          console.log(JSON.stringify(evidence,null,2));
+          NODE
+          node browser.mjs
+
+      - name: Final lineage and Labor Day isolation
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/cfg.json
+          curl -sS --fail "$CANONICAL_BASE/api/store/promotion" -o /tmp/p.json
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/cfg.json'));p=json.load(open('/tmp/p.json'))
+          assert c.get('configured') is True and c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          assert p.get('active') is True and p.get('couponCode')=='LABORDAY25' and p.get('batteryShippingCents')==2799
+          PY
+          echo 'Homepage human finish preview PASS; production unchanged.'
