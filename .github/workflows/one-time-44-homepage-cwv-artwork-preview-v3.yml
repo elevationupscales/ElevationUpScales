@@ -1,0 +1,134 @@
+name: One-Time Elevation 4.4 Homepage CWV Artwork Preview v3
+
+on:
+  push:
+    branches: [deploy/4.4-homepage-cwv-artwork-preview-v3-2026-08-31]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_MAIN_SHA: 310bafaeeef50fe2db09d53756e096b3c936611d
+      CANDIDATE_SHA: fbb10c69e59bc0ab50cc7f2631ca15d6adcd5971
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with: {fetch-depth: 0}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 0
+
+      - name: Verify lineage and exact application scope
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          git -C candidate diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          changed=$(git -C candidate diff --name-only "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- site | sort)
+          test "$changed" = $'site/checkout/index.html\nsite/home-elevation-funnel.css\nsite/index.html\nsite/labor-day-promo.css\nsite/labor-day-promo.js\nsite/lithium-batteries.html\nsite/product.html\nsite/rv-store.html\nsite/store.html'
+          for p in site/checkout/index.html site/lithium-batteries.html site/product.html site/rv-store.html site/store.html; do
+            git -C candidate diff "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- "$p" | grep -q 'labor-day-promo'
+            test "$(git -C candidate diff --numstat "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- "$p" | awk '{print $1+$2}')" -le 4
+          done
+          for p in site/_worker.js site/promotion-runtime.js site/store-checkout-server.js site/store-checkout.js site/catalog-admin-runtime.js site/doba-csv-sync-runtime.js site/hawaii-lithium-runtime.js site/lithium-shop.js site/rv-store.js site/product-detail.js site/marketplace.html site/solar-project.html site/start-a-project.html; do git -C candidate diff --quiet "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- "$p"; done
+          node --check candidate/site/labor-day-promo.js
+          grep -q 'function ensureSlot' candidate/site/labor-day-promo.js
+          grep -q 'home-elevation-funnel.css?v=4.4.4' candidate/site/index.html
+          grep -q 'labor-day-promo.js?v=4.4.2' candidate/site/index.html
+          for art in elevation-lithium-social-card.webp rv-interior-before-after.webp rv-solar-install-field-mobile.webp hero-tile-project.webp 01_finished_modern_bathroom.webp marketplace-premium-hero-desktop.webp; do grep -q "$art" candidate/site/index.html; done
+
+      - id: deploy
+        name: Deploy exact final candidate to isolated preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=elevationupscales --branch=homepage-cwv-artwork-preview-v3-2026-08-31
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify critical routes auth and production isolation
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_BASE%/}"
+          for route in / /home-services /rv-services /solar-services /solar-project /lithium-batteries /rv-store /store /marketplace /start-a-project /product /checkout /admin /work-with-us /privacy /hawaii-lithium-batteries; do code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/x -w '%{http_code}' "$base$route"); echo "$route=$code"; test "$code" = 200; done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping /api/admin/promotion; do code=$(curl -sS -o /tmp/a -w '%{http_code}' "$base$api" || true); test "$code" = 401; done
+          curl -sS --fail "$base/api/store/promotion" -o /tmp/promo
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/promo')); assert p['active'] is True and p['couponCode']=='LABORDAY25' and p['couponPercent']==25 and p['batteryShippingCents']==2799 and p['apparelEligible'] is False
+          PY
+          git fetch origin main --no-tags --prune; test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/cfg
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/cfg')); assert c.get('configured') is True and c.get('credentialsConfigured') is True and c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          PY
+
+      - name: Install Playwright library
+        run: npm install --no-save playwright@1.55.0
+
+      - name: Desktop and mobile CWV usability regression
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || true)
+          test -n "$CHROME"; export CHROME
+          cat > browser.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          import assert from 'node:assert/strict';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox']});
+          const evidence=[];
+          async function newPage(viewport){
+            const p=await browser.newPage({viewport});
+            await p.addInitScript(()=>{
+              window.__v={cls:0,lcp:0,lcpTag:'',lcpUrl:'',shifts:[]};
+              try{new PerformanceObserver(list=>{for(const e of list.getEntries()){if(!e.hadRecentInput){window.__v.cls+=e.value;window.__v.shifts.push({v:e.value,sources:(e.sources||[]).map(s=>s.node?.id||s.node?.className||s.node?.tagName||'')});}}}).observe({type:'layout-shift',buffered:true});}catch{}
+              try{new PerformanceObserver(list=>{for(const e of list.getEntries()){window.__v.lcp=e.startTime;window.__v.lcpTag=e.element?.tagName||'';window.__v.lcpUrl=e.url||'';}}).observe({type:'largest-contentful-paint',buffered:true});}catch{}
+            });
+            return p;
+          }
+          for(const [name,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const home=await newPage(viewport);const he=[];home.on('pageerror',e=>he.push(String(e)));await home.goto(base+'/',{waitUntil:'domcontentloaded',timeout:30000});await home.waitForSelector('.eus-labor-day-banner');await home.waitForSelector('#home-route-title');await home.waitForTimeout(1800);
+            const layout=await home.evaluate(()=>{const b=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return{top:r.top,bottom:r.bottom,width:r.width,height:r.height}};return{slot:b('[data-home-promo-slot]'),banner:b('.eus-labor-day-banner'),main:b('#main'),grid:b('.hc-route-grid'),legacy:b('.eus-home-capabilities')}});
+            assert.ok(layout.slot&&layout.banner&&layout.main&&layout.grid);assert.ok(Math.abs(layout.slot.height-layout.banner.height)<8);assert.ok(layout.main.top<(name==='desktop'?260:320));if(layout.legacy)assert.equal(layout.legacy.height,0);
+            const routes=home.locator('.hc-route');assert.equal(await routes.count(),6);const first=await routes.first().boundingBox();assert.ok(first);assert.ok(first.y<(name==='desktop'?500:540));const inView=await routes.evaluateAll((els,h)=>els.filter(el=>{const r=el.getBoundingClientRect();return r.top<h&&r.bottom>0}).length,viewport.height);assert.ok(inView>=(name==='desktop'?3:2));const arts=await routes.evaluateAll(els=>els.map(el=>getComputedStyle(el,'::before').backgroundImage));assert.equal(new Set(arts).size,6);assert.equal(await home.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2),false);assert.equal(he.length,0,he.join(';'));const hv=await home.evaluate(()=>window.__v);assert.ok(hv.cls<=0.10,`${name} home CLS ${hv.cls} ${JSON.stringify(hv.shifts)}`);assert.ok(hv.lcp>0);evidence.push({route:'/',name,vitals:hv,firstRouteY:first.y,inView});await home.close();
+
+            for(const route of ['/home-services','/solar-services','/lithium-batteries','/rv-store']){
+              const p=await newPage(viewport);const pe=[];p.on('pageerror',e=>pe.push(String(e)));await p.goto(base+route,{waitUntil:'domcontentloaded',timeout:30000});await p.waitForTimeout(1800);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2),false,`${route} overflow`);assert.equal(pe.length,0,pe.join(';'));
+              if(route==='/lithium-batteries'||route==='/rv-store'){
+                await p.waitForSelector('.eus-labor-day-banner');const slot=await p.locator('[data-promo-slot]').boundingBox();const banner=await p.locator('.eus-labor-day-banner').boundingBox();assert.ok(slot&&banner,`${route} promo slot missing`);assert.ok(Math.abs(slot.height-banner.height)<8,`${route} promo reserve mismatch`);
+              }
+              if(route==='/solar-services'){const src=await p.locator('.solar-hero-media img').evaluate(e=>e.currentSrc);assert.match(src,name==='mobile'?/solar-hero-mobile\.webp/:/solar-hero-desktop\.webp/);}
+              if(route==='/home-services')assert.ok(await p.locator('link[rel="preload"][href*="home-services-hero-bathroom.webp"]').count());
+              if(route==='/lithium-batteries'){assert.ok(await p.locator('section.hawaii-info').count());assert.ok(await p.locator('[data-lithium-grid]').count());}
+              if(route==='/rv-store')assert.ok(await p.locator('#rv-product-grid').count());
+              const v=await p.evaluate(()=>window.__v);assert.ok(v.cls<=0.12,`${route} ${name} CLS ${v.cls} ${JSON.stringify(v.shifts)}`);assert.ok(v.lcp>0,`${route} ${name} missing LCP`);evidence.push({route,name,vitals:v});await p.close();
+            }
+          }
+          await browser.close();console.log(JSON.stringify(evidence,null,2));
+          NODE
+          node browser.mjs
+
+      - name: Final storefront and canonical regression
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune; test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          base="${PREVIEW_BASE%/}"
+          curl -sS -L --fail "$base/lithium-batteries" -o /tmp/li; grep -q 'data-prerendered="true"' /tmp/li
+          curl -sS -L --fail "$base/rv-store" -o /tmp/rv; grep -q 'data-prerendered="true"' /tmp/rv
+          for route in /marketplace /solar-project /start-a-project /checkout /product; do test "$(curl -sS -L -o /tmp/x -w '%{http_code}' "$base$route")" = 200; done
+          curl -sS --fail "$CANONICAL_BASE/api/store/promotion" -o /tmp/p;curl -sS --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/c
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/p'));c=json.load(open('/tmp/c'));assert p['active'] is True and p['couponCode']=='LABORDAY25' and p['batteryShippingCents']==2799 and p['apparelEligible'] is False;assert c.get('configured') is True and c.get('credentialsConfigured') is True and c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          PY
+          echo 'HOMEPAGE CWV ARTWORK PREVIEW v3 PASS — production unchanged.'
