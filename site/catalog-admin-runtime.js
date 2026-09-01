@@ -1,3 +1,4 @@
+import { getPromotionConfig, pricingForProduct } from "./promotion-runtime.js";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const PUBLISH_STATES = new Set(["draft", "published", "paused", "archived", "hold"]);
 const SHIPPING_STATES = new Set(["unverified", "verified", "quote_required", "hold"]);
@@ -331,13 +332,17 @@ export async function handleCatalogPublicApi(request, env, pathname) {
   const where = allowedSection ? "WHERE m.publish_status='published' AND m.store_section=?" : "WHERE m.publish_status='published'";
   const query = `SELECT i.*,m.source_type,m.description,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.images_json,m.ebay_item_id,m.fourthwall_product_id,m.store_section,m.publish_status,m.review_state,m.created_by,m.updated_by AS catalog_updated_by,m.created_at AS catalog_created_at,m.updated_at AS catalog_updated_at FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id ${where} ORDER BY m.updated_at DESC LIMIT 200`;
   const result = allowedSection ? await db.prepare(query).bind(allowedSection).all() : await db.prepare(query).all();
-  const products = (result.results || []).map(catalogRow).map((p) => ({
-    id: p.id, sku: p.sku, title: p.title, description: p.description, category: p.category,
-    supplier: p.supplier, sourceType: p.sourceType, fulfillmentMode: p.fulfillmentMode,
-    priceCents: p.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,
-    shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,
-    sourceUrl: p.sourceUrl, ebayItemId: p.ebayItemId, salesChannels: p.salesChannels,
-    storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt
-  }));
+  const promotionConfig = await getPromotionConfig(env);
+  const products = (result.results || []).map(catalogRow).map((p) => {
+    const priced = pricingForProduct(p, promotionConfig);
+    return {
+      id: p.id, sku: p.sku, title: p.title, description: p.description, category: p.category,
+      supplier: p.supplier, sourceType: p.sourceType, fulfillmentMode: p.fulfillmentMode,
+      priceCents: priced.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,
+      shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,
+      sourceUrl: p.sourceUrl, ebayItemId: p.ebayItemId, salesChannels: p.salesChannels,
+      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: priced.promotion
+    };
+  });
   return json({ products, count: products.length, section: allowedSection || "all" }, 200, { "Cache-Control": "public, max-age=30, s-maxage=60" });
 }

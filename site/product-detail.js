@@ -132,7 +132,8 @@
   function elevationCheckoutUrl(product) {
     const id = clean(product?.id || product?.sku, 160);
     const rawName = plainText(product?.title || product?.name || displayTitle(product), 300);
-    let url = `/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(rawName)}`;
+    const checkoutSource = sectionFor(product) === "lithium" ? "lithium" : "rv";
+    let url = `/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id)}&name=${encodeURIComponent(rawName)}`;
     const ebay = clean(product?.ebayItemId, 20);
     if (sectionFor(product) === "rv" && /^\d{12}$/.test(ebay)) url += `&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebay}`)}`;
     return url;

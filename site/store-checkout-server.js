@@ -1,4 +1,5 @@
 import { ensureCommerceSchema } from "./commerce-schema-migrations.js";
+import { getPromotionConfig, pricingForProduct, applyCoupon, isActualLithiumBattery, batteryUnitsPerCatalogUnit, publicPromotion } from "./promotion-runtime.js";
 const PAYPAL_SANDBOX_ORIGIN = "https://api-m.sandbox.paypal.com";
 const PAYPAL_LIVE_ORIGIN = "https://api-m.paypal.com";
 const FOURTHWALL_ORIGIN = "https://elevationupscales-shop.fourthwall.com";
@@ -202,27 +203,30 @@ async function catalogRvEntry(env, id) {
   const wanted = clean(id, 140);
   if (!db || typeof db.prepare !== "function" || !wanted) return null;
   try {
-    const row = await db.prepare(`SELECT i.id,i.name,i.sku,i.supplier_product_id,i.price_cents,i.source_url,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.publish_status,m.review_state,s.spu_no,s.supplier_sku AS source_supplier_sku,s.supplier_stock AS source_stock,s.ship_to,s.shipping_method,s.estimated_shipping_cents,s.shipping_limitations,s.source_state
+    const row = await db.prepare(`SELECT i.id,i.name,i.sku,i.category,i.cost_cents,i.supplier_product_id,i.price_cents,i.source_url,m.description,m.store_section,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.publish_status,m.review_state,s.spu_no,s.supplier_sku AS source_supplier_sku,s.supplier_stock AS source_stock,s.ship_to,s.shipping_method,s.estimated_shipping_cents,s.shipping_limitations,s.source_state
       FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id
       LEFT JOIN eus_doba_source_state s ON lower(s.item_no)=lower(i.supplier_product_id) AND lower(s.supplier_sku)=lower(m.supplier_sku)
       WHERE (i.id=? OR lower(i.supplier_product_id)=lower(?)) AND i.supplier='doba' LIMIT 1`).bind(wanted,wanted).first();
     if (!row || clean(row.publish_status,30) !== "published" || clean(row.shipping_status,30) !== "verified") return null;
-    const priceCents = Number.parseInt(String(row.price_cents ?? ""),10);
     const stock = row.source_stock ?? row.supplier_stock;
-    const shippingCents = row.shipping_cents ?? row.estimated_shipping_cents;
     const exactSku = clean(row.supplier_sku,180);
     const sourceSku = clean(row.source_supplier_sku,180);
     if (!exactSku || !sourceSku || exactSku.toLowerCase() !== sourceSku.toLowerCase()) return null;
-    if (!Number.isInteger(priceCents) || priceCents < 1 || Number(stock) <= 0) return null;
-    if (!Number.isInteger(Number(shippingCents)) || Number(shippingCents) < 0) return null;
-    if (/stale|missing|error/i.test(clean(row.source_state,80))) return null;
+    if (Number(stock) <= 0 || /stale|missing|error/i.test(clean(row.source_state,80))) return null;
+    const rawShipping = row.shipping_cents ?? row.estimated_shipping_cents;
+    const shippingCents = Number.isInteger(Number(rawShipping)) && Number(rawShipping) >= 0 ? Number(rawShipping) : null;
     const shipTo = clean(row.ship_to,300);
     const blockedStates = /excluding[^a-z]*(ak|alaska).*?(hi|hawaii)|excluding[^a-z]*(hi|hawaii).*?(ak|alaska)/i.test(shipTo) ? ["AK","HI"] : [];
+    const productIdentity = {id:row.id,sku:clean(row.sku,120),title:clean(row.name,500),description:clean(row.description,3000),category:clean(row.category,180),supplier:"doba",sourceType:"doba",supplierSku:exactSku,supplierCostCents:Number(row.cost_cents||0),priceCents:Number(row.price_cents||0),storeSection:clean(row.store_section,60)};
+    const config = await getPromotionConfig(env);
+    const priced = pricingForProduct(productIdentity, config);
+    if (!Number.isInteger(Number(priced.priceCents)) || Number(priced.priceCents) < 1) return null;
     return {
       catalogProductId: row.id, name: clean(row.name,240), imageUrl: clean(row.primary_image,1200),
-      priceCents, shippingCents: Number(shippingCents), shippingVerified: true,
+      priceCents: Number(priced.priceCents), storedPriceCents:Number(row.price_cents||0), shippingCents, shippingVerified: true,
       itemNo: clean(row.supplier_product_id,120), skuId: exactSku, spuNo: clean(row.spu_no,120),
       blockedStates, shipTo, shippingMethod: clean(row.shipping_method,180), sourceUrl: clean(row.source_url,1000),
+      storeSection:clean(row.store_section,60), productIdentity, promotion:priced.promotion
     };
   } catch (error) {
     console.error(JSON.stringify({event:"catalog_rv_entry_error",message:clean(error?.message,240)}));
@@ -312,6 +316,7 @@ async function fetchFourthwallProductExact(reference) {
 }
 
 async function quoteApparel(raw, env) {
+  if (clean(raw?.couponCode,120)) return { ok:false,status:409,error:"Labor Day coupon is not eligible for Apparel" };
   const reference = await catalogApparelReference(env, raw?.id);
   const product = await fetchFourthwallProductExact(reference);
   if (!product) return { ok: false, status: 404, error: "Product unavailable" };
@@ -373,77 +378,45 @@ async function quoteApparel(raw, env) {
 
 async function quoteRv(raw, env) {
   const id = clean(raw?.id, 120);
-  const entry = rvMapEntry(env, id) || await catalogRvEntry(env, id);
-  if (!entry) {
-    return {
-      ok: false,
-      fallback: "ebay",
-      status: 409,
-      error: "Doba shipping is not mapped for this item",
-      ebayUrl: /^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(clean(raw?.ebayUrl, 300)) ? clean(raw.ebayUrl, 300) : "",
-    };
-  }
-
-  if (entry.shippingVerified !== true) {
-  return {
-    ok: false,
-    fallback: "ebay",
-    status: 409,
-    error: "Doba shipping is not verified for this item",
-    ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),
-  };
-}
-
+  const source = clean(raw?.source,20).toLowerCase() === "lithium" ? "lithium" : "rv";
+  const catalogEntry = await catalogRvEntry(env, id);
+  const entry = source === "lithium" ? catalogEntry : (catalogEntry || rvMapEntry(env, id));
+  if (!entry) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:/^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(clean(raw?.ebayUrl,300))?clean(raw.ebayUrl,300):""}:{}),error:source==="lithium"?"Lithium Catalog identity or verified shipping is unavailable":"Doba shipping is not mapped for this item"};
+  if (entry.shippingVerified !== true) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"Doba shipping is not verified for this item"};
+  if (entry.storeSection && ((source==="lithium"&&entry.storeSection!=="lithium-batteries")||(source==="rv"&&entry.storeSection!=="rv-outdoor"))) return {ok:false,status:409,error:"Catalog store identity does not match checkout source"};
   const destinationState = clean(raw?.shipping?.state, 2).toUpperCase();
   const blockedStates = Array.isArray(entry.blockedStates) ? entry.blockedStates.map((value) => clean(value, 2).toUpperCase()) : [];
-  if (destinationState && blockedStates.includes(destinationState)) {
-    return {
-      ok: false, fallback: "ebay", status: 409,
-      error: "This Doba item is not available for the selected shipping state",
-      ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),
-    };
-  }
-
+  const product = entry.productIdentity || {title:entry.name||raw?.name,category:"",supplier:"doba",supplierCostCents:0,priceCents:entry.priceCents,storeSection:source==="lithium"?"lithium-batteries":"rv-outdoor"};
+  const config = await getPromotionConfig(env);
+  const priced = pricingForProduct(product, config);
+  const actualBattery = source==="lithium" && isActualLithiumBattery(product);
+  if (actualBattery && destinationState==="AK") return {ok:false,status:409,error:"Standard lithium battery checkout is not available to Alaska"};
+  if (actualBattery && destinationState==="HI") return {ok:false,status:409,error:"Hawaii lithium battery shipping requires the Hawaii Lithium Program and a separate shipping quote"};
+  if (destinationState && blockedStates.includes(destinationState)) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};
   const qty = quantity(raw?.quantity);
-  const unitPriceCents = Number.parseInt(String(entry.priceCents ?? ""), 10);
-  const shippingCents = Number.parseInt(String(entry.shippingCents ?? ""), 10);
-  if (!Number.isInteger(unitPriceCents) || unitPriceCents < 1 || !Number.isInteger(shippingCents) || shippingCents < 0) {
-    return {
-      ok: false,
-      fallback: "ebay",
-      status: 409,
-      error: "Doba shipping is not available for this item",
-      ebayUrl: clean(entry.ebayUrl || raw?.ebayUrl, 300),
-    };
-  }
-
+  const unitPriceCents = Number.parseInt(String(priced.priceCents ?? entry.priceCents ?? ""),10);
+  if (!Number.isInteger(unitPriceCents) || unitPriceCents < 1) return {ok:false,status:409,error:"Current Catalog price is unavailable for this item"};
+  const listMerchandiseCents = unitPriceCents * qty;
+  const coupon = applyCoupon({couponCode:raw?.couponCode,listMerchandiseCents,eligible:Boolean(priced.promotion?.couponEligible),config});
+  if (!coupon.ok) return coupon;
+  const batteryUnitsPerItem = actualBattery ? batteryUnitsPerCatalogUnit(product) : 0;
+  const shippingPerCatalogItem = actualBattery ? config.batteryShippingCents * batteryUnitsPerItem : Number.parseInt(String(entry.shippingCents ?? ""),10);
+  if (!Number.isInteger(shippingPerCatalogItem) || shippingPerCatalogItem < 0) return {ok:false,status:409,error:"Doba shipping is not available for this item"};
+  const shippingCents = shippingPerCatalogItem * qty;
   return {
-    ok: true,
-    source: "rv",
-    id,
-    productName: clean(entry.name || raw?.name, 240) || "RV & Outdoor item",
-    productImage: clean(entry.imageUrl || entry.image, 1200),
-    quantity: qty,
-    unitPriceCents,
-    merchandiseCents: unitPriceCents * qty,
-    shippingCents: shippingCents * qty,
-    totalCents: (unitPriceCents + shippingCents) * qty,
-    variantId: "",
-    variantName: "",
-    variants: [],
-    physical: true,
-    doba: {
-      itemNo: clean(entry.itemNo, 120),
-      skuId: clean(entry.skuId, 120),
-      spuNo: clean(entry.spuNo, 120),
-    },
+    ok:true,source,id,productName:clean(entry.name||raw?.name,240)||(source==="lithium"?"Lithium item":"RV & Outdoor item"),productImage:clean(entry.imageUrl||entry.image,1200),quantity:qty,
+    unitPriceCents,listMerchandiseCents,discountCents:coupon.discountCents,merchandiseCents:coupon.merchandiseCents,shippingCents,totalCents:coupon.merchandiseCents+shippingCents,
+    couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,
+    variantId:"",variantName:"",variants:[],physical:true,
+    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?config.batteryShippingCents:0},
+    doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };
 }
 
 async function quoteStoreItem(raw, env) {
   const source = clean(raw?.source, 20).toLowerCase();
   if (source === "apparel") return quoteApparel(raw, env);
-  if (source === "rv") return quoteRv(raw, env);
+  if (source === "rv" || source === "lithium") return quoteRv(raw, env);
   return { ok: false, status: 400, error: "Invalid store source" };
 }
 
@@ -512,6 +485,20 @@ function storeReference() {
   return `EUS-STORE-${day}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 }
 
+function buildPayPalPurchaseUnit(quote, reference, address) {
+  const listMerchandiseCents = Number.isInteger(quote.listMerchandiseCents) ? quote.listMerchandiseCents : quote.merchandiseCents;
+  const breakdown = {
+    item_total:{currency_code:DEFAULT_CURRENCY,value:centsToValue(listMerchandiseCents)},
+    shipping:{currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.shippingCents)},
+  };
+  if (Number(quote.discountCents)>0) breakdown.discount={currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.discountCents)};
+  const purchaseUnit={reference_id:reference,custom_id:reference,description:clean(`${quote.productName}${quote.variantName?` — ${quote.variantName}`:""}`,127),amount:{currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.totalCents),breakdown},items:[{name:clean(quote.productName,127),quantity:String(quote.quantity),unit_amount:{currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.unitPriceCents)},...(quote.variantName?{description:clean(quote.variantName,127)}:{}),category:quote.physical?"PHYSICAL_GOODS":"DIGITAL_GOODS"}]};
+  if (quote.physical) purchaseUnit.shipping={name:{full_name:address.fullName},address:{address_line_1:address.address1,...(address.address2?{address_line_2:address.address2}:{}),admin_area_2:address.city,admin_area_1:address.state,postal_code:address.postalCode,country_code:address.countryCode}};
+  return purchaseUnit;
+}
+
+export const __storeCheckoutTest = { buildPayPalPurchaseUnit };
+
 async function createStoreOrder(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
@@ -519,7 +506,7 @@ async function createStoreOrder(request, env) {
 
   const raw = await request.json().catch(() => ({}));
   const source = clean(raw?.source, 20).toLowerCase();
-  if (!["apparel", "rv"].includes(source)) return json({ error: "Invalid store source" }, 400);
+  if (!["apparel", "rv", "lithium"].includes(source)) return json({ error: "Invalid store source" }, 400);
   if (!validQuantity(raw?.quantity)) return json({ error: "Quantity must be from 1 to 10" }, 400);
   const customer = normalizeCustomer(raw?.customer);
   if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
@@ -535,40 +522,7 @@ async function createStoreOrder(request, env) {
   }
 
   const reference = storeReference();
-  const purchaseUnit = {
-    reference_id: reference,
-    custom_id: reference,
-    description: clean(`${quote.productName}${quote.variantName ? ` — ${quote.variantName}` : ""}`, 127),
-    amount: {
-      currency_code: DEFAULT_CURRENCY,
-      value: centsToValue(quote.totalCents),
-      breakdown: {
-        item_total: { currency_code: DEFAULT_CURRENCY, value: centsToValue(quote.merchandiseCents) },
-        shipping: { currency_code: DEFAULT_CURRENCY, value: centsToValue(quote.shippingCents) },
-      },
-    },
-    items: [{
-      name: clean(quote.productName, 127),
-      quantity: String(quote.quantity),
-      unit_amount: { currency_code: DEFAULT_CURRENCY, value: centsToValue(quote.unitPriceCents) },
-      ...(quote.variantName ? { description: clean(quote.variantName, 127) } : {}),
-      category: quote.physical ? "PHYSICAL_GOODS" : "DIGITAL_GOODS",
-    }],
-  };
-
-  if (quote.physical) {
-    purchaseUnit.shipping = {
-      name: { full_name: address.fullName },
-      address: {
-        address_line_1: address.address1,
-        ...(address.address2 ? { address_line_2: address.address2 } : {}),
-        admin_area_2: address.city,
-        admin_area_1: address.state,
-        postal_code: address.postalCode,
-        country_code: address.countryCode,
-      },
-    };
-  }
+  const purchaseUnit = buildPayPalPurchaseUnit(quote, reference, address);
 
   const requestBody = {
     intent: "CAPTURE",
@@ -614,7 +568,7 @@ async function createStoreOrder(request, env) {
       quote.totalCents,
       JSON.stringify(customer),
       JSON.stringify(address),
-      JSON.stringify(quote.doba || {}),
+      JSON.stringify({...quote.doba,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
       clean(body.id, 80),
       "",
       "created",
@@ -696,6 +650,7 @@ export async function handleStoreCheckoutApi(request, env, pathname) {
       currency: DEFAULT_CURRENCY,
       apparelMarkupPercent: 20,
       apparelShippingPerItem: "7.00",
+      promotion: publicPromotion(await getPromotionConfig(env)),
     });
     return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
   }
@@ -704,7 +659,7 @@ export async function handleStoreCheckoutApi(request, env, pathname) {
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
       const raw = await request.json().catch(() => ({}));
     const source = clean(raw?.source, 20).toLowerCase();
-    if (!["apparel", "rv"].includes(source)) return json({ error: "Invalid store source" }, 400);
+    if (!["apparel", "rv", "lithium"].includes(source)) return json({ error: "Invalid store source" }, 400);
     if (!validQuantity(raw?.quantity)) return json({ error: "Quantity must be from 1 to 10" }, 400);
     const quote = await quoteStoreItem(raw, env);
     return json(quote, quote.ok ? 200 : (quote.status || 400));

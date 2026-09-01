@@ -15,7 +15,12 @@
   const variantRow = document.querySelector("#checkout-variant-row");
   const variantEl = document.querySelector("#checkout-variant");
   const variantOptionsEl = document.querySelector("#checkout-variant-options");
+  const listMerchandiseEl = document.querySelector("#checkout-list-merchandise");
   const merchandiseEl = document.querySelector("#checkout-merchandise");
+  const discountRow = document.querySelector("#checkout-discount-row");
+  const discountEl = document.querySelector("#checkout-discount");
+  const couponCodeEl = document.querySelector("#checkout-coupon");
+  const couponStatusEl = document.querySelector("#checkout-coupon-status");
   const shippingEl = document.querySelector("#checkout-shipping");
   const totalEl = document.querySelector("#checkout-total");
   const statusEl = document.querySelector("#checkout-status");
@@ -74,7 +79,8 @@
     name: rvName,
     quantity: Number.parseInt(quantityEl.value || "1", 10) || 1,
     variantId: variantEl?.value || "",
-    ...(source === "rv" ? { shipping: shipping() } : {}),
+    couponCode: couponCodeEl?.value.trim() || "",
+    ...(["rv","lithium"].includes(source) ? { shipping: shipping() } : {}),
   });
 
   const formReady = () => {
@@ -156,7 +162,10 @@
     const productName = next.productName || rvName || "Store item";
     productEl.textContent = productName;
     unitPriceEl.textContent = money(next.unitPriceCents);
+    if (listMerchandiseEl) listMerchandiseEl.textContent = money(next.listMerchandiseCents ?? next.merchandiseCents);
     merchandiseEl.textContent = money(next.merchandiseCents);
+    if (discountRow && discountEl) { discountRow.hidden = !(Number(next.discountCents) > 0); discountEl.textContent = Number(next.discountCents) > 0 ? `-${money(next.discountCents)}` : money(0); }
+    if (couponStatusEl) couponStatusEl.textContent = next.couponCode ? `${next.couponCode} applied — shipping is not discounted.` : (next.promotion?.active ? `Labor Day coupon available for eligible merchandise.` : "");
     shippingEl.textContent = money(next.shippingCents);
     totalEl.textContent = money(next.totalCents);
     setProductImage(next.productImage, productName);
@@ -305,14 +314,16 @@
   };
 
   quantityEl.addEventListener("change", refreshQuote);
-  if (source === "rv") {
+  document.querySelector("#checkout-apply-coupon")?.addEventListener("click", refreshQuote);
+  couponCodeEl?.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); refreshQuote(); } });
+  if (["rv","lithium"].includes(source)) {
     for (const selector of ["#checkout-address1", "#checkout-city", "#checkout-state", "#checkout-postal"]) {
       document.querySelector(selector)?.addEventListener("change", refreshQuote);
     }
   }
 
   async function init() {
-    if (!["apparel", "rv"].includes(source) || !id) {
+    if (!["apparel", "rv", "lithium"].includes(source) || !id) {
       setStatus("Checkout item is unavailable.", "error");
       return;
     }

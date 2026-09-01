@@ -9,6 +9,8 @@ const JSON_HEADERS = Object.freeze({
 const REQUIRED_HEADERS = ["SPU NO","Item No.","SKU Code","URL","Product Name","Dropshipping Price (US$)","Inventory Qty"];
 const DEFAULT_PROFILE_ID = "doba-download-center-25";
 const DEFAULT_PROFILE_NAME = "Doba Download Center — 25% Markup";
+const LABOR_DAY_PROFILE_ID = "doba-download-center-45";
+const LABOR_DAY_PROFILE_NAME = "Doba Download Center — 45% Markup Export";
 const clean=(value,max=1000)=>String(value??"").trim().slice(0,max);
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{...JSON_HEADERS,...headers}});
 const now=()=>new Date().toISOString();
@@ -93,6 +95,7 @@ async function ensureSchema(env){const db=env?.MARKETPLACE_DB;if(!db||typeof db.
   )`).run();
   await db.prepare("CREATE INDEX IF NOT EXISTS idx_eus_doba_events_created ON eus_doba_csv_events(created_at DESC)").run();
   const stamp=now();await db.prepare(`INSERT OR IGNORE INTO eus_doba_csv_profiles(id,name,source_label,markup_percent,default_scope,created_at,updated_at,updated_by) VALUES(?,?,?,?,?,?,?,?)`).bind(DEFAULT_PROFILE_ID,DEFAULT_PROFILE_NAME,"Doba Download Center",25,"partial",stamp,stamp,"system").run();
+  await db.prepare(`INSERT OR IGNORE INTO eus_doba_csv_profiles(id,name,source_label,markup_percent,default_scope,created_at,updated_at,updated_by) VALUES(?,?,?,?,?,?,?,?)`).bind(LABOR_DAY_PROFILE_ID,LABOR_DAY_PROFILE_NAME,"Doba Download Center",45,"partial",stamp,stamp,"master-2.0-approved").run();
   return db;
 }
 async function catalogRows(db){const result=await db.prepare(`SELECT i.id,i.sku,i.name,i.category,i.supplier,i.fulfillment_mode,i.supplier_product_id,i.source_url,i.sales_channels_json,i.cost_cents,i.price_cents,i.quantity_on_hand,i.quantity_reserved,i.status,i.notes,i.version,i.updated_at,
