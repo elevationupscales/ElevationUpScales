@@ -1,0 +1,142 @@
+name: One-Time Elevation 4.4 Product Detail Production
+
+on:
+  push:
+    branches:
+      - deploy/4.4-product-detail-production-2026-08-31
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_MAIN_SHA: f651f9dc3253ff4b5f01f2fe3de412be4e6f7010
+      ROLLBACK_SHA: 539d71546f1a4ed1c8e43f2efbcf2188b3a5063b
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.EXPECTED_MAIN_SHA }}
+          path: candidate
+          fetch-depth: 0
+
+      - name: Verify exact production candidate and protected scope
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$ROLLBACK_SHA" "$EXPECTED_MAIN_SHA"
+          changed="$(git -C candidate diff --name-only "$ROLLBACK_SHA"..."$EXPECTED_MAIN_SHA")"
+          printf '%s\n' "$changed"
+          if printf '%s\n' "$changed" | grep -Ev '^(site/_headers|site/_redirects|site/_worker.js|site/lithium-batteries.html|site/lithium-shop.css|site/lithium-shop.js|site/product.html|site/product-detail.css|site/product-detail.js|site/rv-store.css|site/rv-store.html|site/rv-store.js)$' | grep -q .; then exit 1; fi
+          git -C candidate diff --quiet "$ROLLBACK_SHA"..."$EXPECTED_MAIN_SHA" -- site/checkout.html site/checkout/index.html site/store-checkout-server.js site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js site/store.html site/marketplace.html site/start-a-project.html site/solar-project.html site/admin.html
+          node --check candidate/site/_worker.js
+          node --check candidate/site/product-detail.js
+          node --check candidate/site/lithium-shop.js
+          node --check candidate/site/rv-store.js
+          git -C candidate diff --check "$ROLLBACK_SHA" "$EXPECTED_MAIN_SHA" -- site
+
+      - id: deploy
+        name: Deploy exact Candidate 1 to production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify canonical HTTP, security, checkout and crawler parity
+        env:
+          DEPLOYMENT_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          for base in "${DEPLOYMENT_BASE%/}" "${CANONICAL_BASE%/}"; do
+            for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /product /checkout /marketplace /start-a-project /solar-project /admin; do
+              code=$(curl -sS -L --retry 12 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route"); echo "$base$route=$code"; test "$code" = 200
+            done
+            for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping; do
+              code=$(curl -sS --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/admin -w '%{http_code}' "$base$api" || true); echo "$base$api=$code"; test "$code" = 401
+            done
+            curl -sS -L --retry 12 --retry-all-errors --retry-delay 2 --fail "$base/lithium-batteries" -o /tmp/li.html
+            curl -sS -L --retry 12 --retry-all-errors --retry-delay 2 --fail "$base/rv-store" -o /tmp/rv.html
+            grep -q 'data-prerendered="true"' /tmp/li.html
+            grep -q 'data-prerendered="true"' /tmp/rv.html
+            grep -q 'href="/product?id=' /tmp/li.html
+            grep -q 'href="/product?id=' /tmp/rv.html
+          done
+          curl -sS -L --fail "${CANONICAL_BASE%/}/api/store/catalog?section=lithium-batteries" -o /tmp/li.json
+          curl -sS -L --fail "${CANONICAL_BASE%/}/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
+          curl -sS -L --fail "${CANONICAL_BASE%/}/api/store-checkout/config" -o /tmp/checkout.json
+          python - <<'PY'
+          import json,re
+          li=json.load(open('/tmp/li.json')); rv=json.load(open('/tmp/rv.json')); co=json.load(open('/tmp/checkout.json'))
+          def live(p,rv=False):
+              pub=str(p.get('publishStatus') or '').lower()=='published'
+              price=float(p.get('priceCents') or 0)>0
+              stock=p.get('supplierStock')
+              try: stocked=float(stock)>0
+              except (TypeError,ValueError): stocked=True
+              ship=str(p.get('shippingStatus') or '').lower()
+              return pub and price and stocked and ship!='hold' and (not rv or ship!='unverified')
+          li_expected=[p for p in li.get('products',[]) if live(p)]
+          rv_expected=[p for p in rv.get('products',[]) if live(p,True)]
+          lh=open('/tmp/li.html').read(); rh=open('/tmp/rv.html').read()
+          lm=re.search(r'<strong data-lithium-count>(\d+)</strong>',lh); rm=re.search(r'<span id="rv-count">(\d+)</span>',rh)
+          assert lm and rm
+          assert int(lm.group(1))==len(li_expected), (lm.group(1),len(li_expected))
+          assert int(rm.group(1))==len(rv_expected), (rm.group(1),len(rv_expected))
+          assert co.get('configured') is True and co.get('credentialsConfigured') is True and co.get('checkoutEnabled') is True and co.get('liveCheckoutApproved') is True and co.get('environment')=='live'
+          print(json.dumps({'lithium':len(li_expected),'rv':len(rv_expected),'checkout':'live-approved'},indent=2))
+          PY
+
+      - name: Install Chromium QA
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run canonical desktop/mobile product-detail regression
+        run: |
+          cat > candidate1-prod-qa.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.CANONICAL_BASE.replace(/\/$/,'');
+          const get=async p=>{const r=await fetch(base+p);if(!r.ok)throw new Error(`${p}:${r.status}`);return r.json();};
+          const live=(p,rv=false)=>String(p.publishStatus||'').toLowerCase()==='published'&&Number(p.priceCents)>0&&!(Number.isFinite(Number(p.supplierStock))&&Number(p.supplierStock)<=0)&&String(p.shippingStatus||'').toLowerCase()!=='hold'&&(!rv||String(p.shippingStatus||'').toLowerCase()!=='unverified');
+          const li=(await get('/api/store/catalog?section=lithium-batteries')).products.filter(p=>live(p));
+          const rv=(await get('/api/store-catalog?section=rv-outdoor')).products.filter(p=>live(p,true));
+          const title=p=>String(p.title||p.name||''); const imgs=p=>[p.primaryImage,...(Array.isArray(p.images)?p.images:[])].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i);
+          const pick=(rows,re,used=[])=>rows.find(p=>re.test(title(p))&&!used.includes(p))||rows.find(p=>!used.includes(p)); const tests=[]; const add=(label,p,store)=>{if(p&&!tests.some(x=>x.p===p))tests.push({label,p,store});};
+          add('Lithium 12V',pick(li,/\b12V\b.*\b(?:100|200|300|400)Ah\b|\b(?:100|200|300|400)Ah\b.*\b12V\b/i),'lithium');
+          add('Lithium high-capacity',pick(li,/\b(?:24|36|48)V\b|\b(?:200|300|400|460)Ah\b/i,tests.map(x=>x.p)),'lithium');
+          add('Lithium portable',pick(li,/power bank|portable/i,tests.map(x=>x.p)),'lithium');
+          add('Lithium multi-image',li.find(p=>imgs(p).length>1),'lithium');
+          add('RV water/electrical',pick(rv,/water|pump|heater|electrical|solar|charge|volt/i),'rv');
+          add('RV camping/shelter',pick(rv,/tent|camping|gazebo|greenhouse|cooler/i,tests.map(x=>x.p)),'rv');
+          add('RV automotive/tool',pick(rv,/jack|tool|wrench|automotive|fuel|spotlight/i,tests.map(x=>x.p)),'rv');
+          add('RV multi-image',rv.find(p=>imgs(p).length>1),'rv');
+          const browser=await chromium.launch({headless:true}); const evidence=[];
+          for(const [vp,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const page=await browser.newPage({viewport}); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            for(const t of tests){const id=String(t.p.id||t.p.sku);await page.goto(`${base}/product?id=${encodeURIComponent(id)}&store=${t.store}`,{waitUntil:'domcontentloaded'});await page.locator('[data-product-detail]').waitFor({state:'visible'});if(errors.length)throw new Error(`${vp}:${t.label}:${errors.join(';')}`);const shown=(await page.locator('[data-product-title]').innerText()).trim();if(!shown)throw new Error(`${vp}:${t.label}:title`);const price=await page.locator('[data-product-price]').innerText();if(!price.includes('$'))throw new Error(`${vp}:${t.label}:price`);const ship=(await page.locator('[data-product-shipping]').innerText()).trim();if(!['Ships to the Lower 48','Shipping quote required','Check shipping availability'].includes(ship))throw new Error(`${vp}:${t.label}:shipping:${ship}`);if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error(`${vp}:${t.label}:overflow`);const buy=page.locator('[data-buy-now]');if(await buy.isVisible()){const href=await buy.getAttribute('href');if(!href||(!href.includes(id)&&!href.includes(encodeURIComponent(id))))throw new Error(`${vp}:${t.label}:catalog-id`);}if(imgs(t.p).length>1&&await page.locator('[data-gallery-next]').isVisible()){const before=await page.locator('[data-product-image]').getAttribute('src');await page.locator('[data-gallery-next]').click();const after=await page.locator('[data-product-image]').getAttribute('src');if(before===after)throw new Error(`${vp}:${t.label}:gallery`);}evidence.push({vp,label:t.label,id,images:imgs(t.p).length,ship,buy:await buy.isVisible()});}
+            await page.goto(`${base}/product?id=invalid-${vp}&store=rv`,{waitUntil:'domcontentloaded'});await page.locator('[data-product-unavailable]').waitFor({state:'visible'});if(await page.locator('[data-buy-now]').isVisible())throw new Error(`${vp}:invalid-buyable`);await page.close();
+          }
+          const hawaii=await browser.newPage({viewport:{width:390,height:844}});await hawaii.goto(base+'/hawaii-lithium-batteries',{waitUntil:'domcontentloaded'});await hawaii.locator('[data-hawaii-request-form]').waitFor({state:'attached'});if(await hawaii.locator('.lithium-card a[href^="/product?id="]').count())throw new Error('Hawaii detail links exposed');await hawaii.close();
+          const market=await browser.newPage();await market.goto(base+'/marketplace',{waitUntil:'domcontentloaded'});if(!(await market.locator('body').innerText()).toLowerCase().includes('marketplace'))throw new Error('Marketplace separation');await market.close();
+          await browser.close();console.log(JSON.stringify({tests:tests.map(t=>t.label),evidence},null,2));
+          NODE
+          node candidate1-prod-qa.mjs
+
+      - name: Record Candidate 1 production PASS
+        env:
+          DEPLOYMENT_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Elevation 4.4 Candidate 1 — PRODUCTION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $EXPECTED_MAIN_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: $DEPLOYMENT_BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical desktop/mobile, Catalog ID, gallery, invalid-product, PayPal, Hawaii, Marketplace, Admin and crawler/API parity: PASS' >> "$GITHUB_STEP_SUMMARY"
