@@ -1,0 +1,36 @@
+name: Fix One-Time Labor Day Implementation Workflow
+
+on:
+  push:
+    branches: [build/4.4-labor-day-implementation-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: build/4.4-labor-day-implementation-2026-08-31
+      - name: Make regex replacements literal
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/one-time-44-labor-day-implementation.yml')
+          s=p.read_text()
+          old='out,n=re.subn(pattern,repl,s,count=1,flags=flags)'
+          new='out,n=re.subn(pattern,lambda _m: repl,s,count=1,flags=flags)'
+          if old not in s:
+              print('Replacement helper already fixed; no change required.')
+              raise SystemExit(0)
+          p.write_text(s.replace(old,new,1))
+          PY
+          if git diff --quiet; then exit 0; fi
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add .github/workflows/one-time-44-labor-day-implementation.yml
+          git commit -m 'Fix literal regex replacement in Labor Day builder'
+          git push origin HEAD:build/4.4-labor-day-implementation-2026-08-31
