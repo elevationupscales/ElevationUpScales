@@ -1,0 +1,75 @@
+name: One-Time Elevation 4.4 Promo Slot Sitewide Build
+
+on:
+  push:
+    branches: [ops/4.4-promo-slot-sitewide-build-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/4.4-homepage-human-finish-2026-08-31
+          fetch-depth: 0
+      - name: Reserve Labor Day banner before fetch on all promo pages
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "2ed841549558cd7c4d1bbaaa063c429c93e2fdad"
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('site/labor-day-promo.js')
+          s=p.read_text()
+          old='''  async function load(){\n    try{\n      const response=await fetch("/api/store/promotion",{headers:{Accept:"application/json"},cache:"no-store"});\n      const promo=await response.json().catch(()=>({}));\n      const slot=document.querySelector("[data-home-promo-slot]");'''
+          new='''  function ensureSlot(){\n    const existing=document.querySelector("[data-home-promo-slot],[data-promo-slot]");\n    if(existing)return existing;\n    const slot=document.createElement("div");\n    slot.className="eus-labor-day-banner-slot";\n    slot.setAttribute("data-promo-slot","");\n    slot.setAttribute("aria-live","polite");\n    slot.setAttribute("aria-label","Promotion status");\n    const header=document.querySelector("header");\n    if(header)header.insertAdjacentElement("afterend",slot);else document.body.prepend(slot);\n    return slot;\n  }\n  async function load(){\n    const slot=ensureSlot();\n    try{\n      const response=await fetch("/api/store/promotion",{headers:{Accept:"application/json"},cache:"no-store"});\n      const promo=await response.json().catch(()=>({}));'''
+          if old not in s: raise SystemExit('promo slot insertion pattern missing')
+          s=s.replace(old,new,1)
+          old='''      if(slot){slot.hidden=false;slot.removeAttribute("aria-hidden");slot.replaceChildren(banner);slot.dataset.promoReady="true";}else{const header=document.querySelector("header");if(header)header.insertAdjacentElement("afterend",banner);else document.body.prepend(banner);}\n    }catch(_){}'''
+          new='''      slot.hidden=false;slot.removeAttribute("aria-hidden");slot.replaceChildren(banner);slot.dataset.promoReady="true";\n    }catch(_){if(slot){slot.hidden=true;slot.setAttribute("aria-hidden","true");}}'''
+          if old not in s: raise SystemExit('promo slot replacement pattern missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/labor-day-promo.css')
+          s=p.read_text()
+          old='''.eus-labor-day-banner-slot{display:block;min-height:0}\n.home-concept .eus-labor-day-banner-slot{min-height:64px;background:linear-gradient(90deg,#17130b,#090909);contain:layout paint}\n.home-concept .eus-labor-day-banner-slot[hidden]{display:none}\n.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner{min-height:64px}\n.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:64px}\n@media(max-width:760px){.home-concept .eus-labor-day-banner-slot,.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner{min-height:88px}.home-concept .eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:88px}}'''
+          new='''.eus-labor-day-banner-slot{display:block;min-height:64px;background:linear-gradient(90deg,#17130b,#090909);contain:layout paint}\n.eus-labor-day-banner-slot[hidden]{display:none}\n.eus-labor-day-banner-slot .eus-labor-day-banner{min-height:64px}\n.eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:64px}\n@media(max-width:760px){.eus-labor-day-banner-slot,.eus-labor-day-banner-slot .eus-labor-day-banner{min-height:88px}.eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:88px}}'''
+          if old not in s: raise SystemExit('promo css slot pattern missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          changed=[]
+          for html in Path('site').rglob('*.html'):
+            t=html.read_text()
+            n=t.replace('/labor-day-promo.css?v=4.4.0','/labor-day-promo.css?v=4.4.2').replace('/labor-day-promo.css?v=4.4.1','/labor-day-promo.css?v=4.4.2').replace('/labor-day-promo.js?v=4.4.0','/labor-day-promo.js?v=4.4.2').replace('/labor-day-promo.js?v=4.4.1','/labor-day-promo.js?v=4.4.2')
+            if n!=t:
+              html.write_text(n)
+              changed.append(str(html))
+          print('version-bumped HTML files:')
+          print('\n'.join(changed))
+          if not changed: raise SystemExit('no promo HTML references updated')
+          PY
+      - name: Validate sitewide promo-slot change
+        run: |
+          set -euo pipefail
+          node --check site/labor-day-promo.js
+          git diff --check
+          grep -q 'function ensureSlot' site/labor-day-promo.js
+          grep -q 'data-promo-slot' site/labor-day-promo.js
+          grep -q '^\.eus-labor-day-banner-slot{display:block;min-height:64px' site/labor-day-promo.css
+          ! grep -R --include='*.html' -q 'labor-day-promo.js?v=4.4.0\|labor-day-promo.js?v=4.4.1\|labor-day-promo.css?v=4.4.0\|labor-day-promo.css?v=4.4.1' site
+          grep -R --include='*.html' -q 'labor-day-promo.js?v=4.4.2' site
+          for p in site/promotion-runtime.js site/store-checkout-server.js site/store-checkout.js site/catalog-admin-runtime.js site/doba-csv-sync-runtime.js site/hawaii-lithium-runtime.js site/lithium-shop.js site/rv-store.js site/product-detail.js site/marketplace.html site/solar-project.html site/start-a-project.html; do git diff --quiet 2ed841549558cd7c4d1bbaaa063c429c93e2fdad -- "$p"; done
+          git diff --name-only 2ed841549558cd7c4d1bbaaa063c429c93e2fdad -- site
+      - name: Commit sitewide promo-slot stability fix
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/labor-day-promo.js site/labor-day-promo.css site/*.html site/*/*.html || true
+          git commit -m 'Reserve Labor Day banner space before promotion fetch'
+          git push origin HEAD:release/4.4-homepage-human-finish-2026-08-31
