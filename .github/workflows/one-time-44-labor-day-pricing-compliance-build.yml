@@ -1,0 +1,96 @@
+name: One-Time Elevation 4.4 Labor Day Pricing Compliance Build
+
+on:
+  push:
+    branches: [ops/4.4-labor-day-pricing-compliance-build-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/4.4-labor-day-pricing-compliance-2026-08-31
+          fetch-depth: 0
+      - name: Apply accepted pricing compliance override
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 310bafaeeef50fe2db09d53756e096b3c936611d HEAD
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('site/promotion-runtime.js')
+          s=p.read_text()
+          start=s.index('export function pricingForProduct(product,config){')
+          end=s.index('export function applyCoupon', start)
+          replacement='''export function pricingForProduct(product,config){const original=Math.max(0,int(product?.priceCents??product?.price_cents,0));if(!config?.available)return{priceCents:original,promotion:{active:false,eligible:false,couponEligible:false,reason:"promotion configuration unavailable"}};const cost=Math.max(0,int(product?.supplierCostCents??product?.costCents??product?.cost_cents,0));const section=sectionOf(product),supplier=supplierOf(product);const baseEligible=supplier==="doba"&&config.eligibleSections.includes(section)&&cost>0&&original>0;const floor=baseEligible?roundMarkup(cost,config.everydayMarkupPercent):0;if(!config.active){const list=baseEligible?floor:original;return{priceCents:list,promotion:{active:false,eligible:baseEligible,couponEligible:false,couponCode:"",couponPercent:0,pricingMode:baseEligible?"everyday":"existing",markupPercent:baseEligible?config.everydayMarkupPercent:null,regularPriceCents:original,listPriceCents:list,minimumPostCouponPriceCents:floor,couponPriceCents:list,shippingDiscounted:false,apparelEligible:false,reason:baseEligible?"":cost<=0?"verified supplier cost required":original<=0?"regular Catalog price required":"product/provider excluded"}};}const discountOne=baseEligible?Math.round(original*config.couponPercent/100):0;const couponPrice=baseEligible?original-discountOne:original;const couponEligible=Boolean(baseEligible&&couponPrice>=floor);return{priceCents:original,promotion:{active:true,eligible:baseEligible,couponEligible,couponCode:couponEligible?config.couponCode:"",couponPercent:couponEligible?config.couponPercent:0,pricingMode:baseEligible?"regular_price_coupon":"existing",markupPercent:null,regularPriceCents:original,listPriceCents:original,minimumPostCouponPriceCents:floor,couponPriceCents:couponEligible?couponPrice:original,shippingDiscounted:false,apparelEligible:false,reason:couponEligible?"":cost<=0?"verified supplier cost required":original<=0?"regular Catalog price required":!baseEligible?"product/provider excluded":"regular price does not support approved post-coupon margin floor"}};}\n'''
+          s=s[:start]+replacement+s[end:]
+          old='headline:config?.active?"Labor Day Sale — 25% Off":""'
+          new='headline:config?.active?"Labor Day Sale — 25% Off Eligible Elevation Merchandise":""'
+          if old not in s: raise SystemExit('public promotion headline pattern missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/admin-promotion.js')
+          s=p.read_text()
+          start=s.index('  function render(p){')
+          end=s.index('  async function load()', start)
+          replacement='''  function render(p){$("promo-auth").hidden=true;$("promo-dashboard").hidden=false;$("promo-status").textContent=p.active?"Labor Day promotion is ACTIVE. Genuine stored regular prices remain unchanged; LABORDAY25 is limited to products that preserve the approved post-coupon margin floor.":"Labor Day promotion is DISABLED; eligible supplier-backed products use the 35% everyday pricing basis.";$("promo-enable").disabled=Boolean(p.active);$("promo-disable").disabled=!p.active;const coupon=Number(p.couponPercent)||25;const floorMarkup=Number(p.everydayMarkupPercent)||35;const minMultiplier=(1+floorMarkup/100)/(1-coupon/100);$("promo-metrics").innerHTML=[['State',p.active?'ACTIVE':'DISABLED'],['Coupon',`${p.couponCode} · ${coupon}% off eligible merchandise`],['Active sale price basis','Stored genuine Catalog regular price'],['Post-coupon margin floor',`${floorMarkup}% over verified supplier cost`],['Minimum qualifying regular price',`Cost × ${minMultiplier.toFixed(2)}`],['Battery shipping',`${money(p.batteryShippingCents)} per actual battery`]].map(([a,b])=>`<article class="eus-metric"><span>${esc(a)}</span><strong>${esc(b)}</strong></article>`).join("");$("promo-scope").innerHTML=(p.eligibleSections||[]).map(x=>`<div>${esc(x)}</div>`).join("")||"None";$("promo-exclusions").innerHTML=(p.exclusions||[]).map(x=>`<div>${esc(x)}</div>`).join("")||"None";$("promo-disclosure").innerHTML=`<strong>Customer disclosure:</strong> ${esc(p.public?.disclosure||"")}`;}\n'''
+          s=s[:start]+replacement+s[end:]
+          p.write_text(s)
+
+          p=Path('site/admin-promotion.html')
+          s=p.read_text()
+          replacements={
+            '/admin-promotion.js?v=4.4.0':'/admin-promotion.js?v=4.4.1',
+            'Labor Day pricing is calculated from verified supplier cost while supplier truth remains unchanged.':'Labor Day uses genuine stored regular prices. Coupon eligibility is limited by the approved post-coupon margin floor while supplier cost truth remains unchanged.',
+            'One configuration controls list-price basis, coupon eligibility and deactivation. Historical orders are not rewritten.':'LABORDAY25 applies only when 25% off the genuine regular price still leaves at least the approved 35% markup over verified supplier cost. Historical orders are not rewritten.',
+            '<p>Marketplace and provider-controlled Apparel remain outside this promotion.</p>':'<p>Eligible Elevation-owned Doba merchandise must satisfy: regular price × 0.75 ≥ verified supplier cost × 1.35. Marketplace and provider-controlled Apparel remain outside this promotion.</p>'
+          }
+          for old,new in replacements.items():
+            if old not in s: raise SystemExit(f'admin promotion copy pattern missing: {old[:50]}')
+            s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Validate compliance candidate
+        run: |
+          set -euo pipefail
+          node --check site/promotion-runtime.js
+          node --check site/admin-promotion.js
+          git diff --check
+          grep -q 'regular_price_coupon' site/promotion-runtime.js
+          grep -q 'minimumPostCouponPriceCents' site/promotion-runtime.js
+          grep -q '25% Off Eligible Elevation Merchandise' site/promotion-runtime.js
+          grep -q 'regular price × 0.75' site/admin-promotion.html
+          ! grep -q "Promotion list basis" site/admin-promotion.js
+          for protected in site/store-checkout-server.js site/catalog-admin-runtime.js site/doba-csv-sync.js site/hawaii-lithium-runtime.js site/marketplace.html site/solar-project.html site/start-a-project.html site/product-detail.js; do git diff --quiet 310bafaeeef50fe2db09d53756e096b3c936611d -- "$protected"; done
+          node --input-type=module <<'NODE'
+          import {pricingForProduct,applyCoupon} from './site/promotion-runtime.js';
+          const config={available:true,active:true,couponCode:'LABORDAY25',couponPercent:25,everydayMarkupPercent:35,promoMarkupPercent:60,batteryShippingCents:2799,eligibleSections:['lithium-batteries','rv-outdoor']};
+          const p=(price,cost)=>pricingForProduct({priceCents:price,supplierCostCents:cost,supplier:'doba',storeSection:'rv-outdoor'},config);
+          const qualify=p(18000,10000);
+          if(qualify.priceCents!==18000||!qualify.promotion.couponEligible||qualify.promotion.couponPriceCents!==13500||qualify.promotion.minimumPostCouponPriceCents!==13500) throw new Error('qualifying regular-price rule failed');
+          const fail=p(13500,10000);
+          if(fail.priceCents!==13500||fail.promotion.couponEligible||fail.promotion.couponPriceCents!==13500) throw new Error('ineligible regular-price rule failed');
+          const edge=p(17999,10000);
+          if(edge.promotion.couponEligible) throw new Error('below-threshold item qualified');
+          const coupon=applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:18000,eligible:qualify.promotion.couponEligible,config});
+          if(!coupon.ok||coupon.discountCents!==4500||coupon.merchandiseCents!==13500) throw new Error('coupon math failed');
+          const rejected=applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:13500,eligible:fail.promotion.couponEligible,config});
+          if(rejected.ok||rejected.status!==409) throw new Error('margin-floor coupon rejection failed');
+          const inactive={...config,active:false};
+          const everyday=pricingForProduct({priceCents:18000,supplierCostCents:10000,supplier:'doba',storeSection:'rv-outdoor'},inactive);
+          if(everyday.priceCents!==13500||everyday.promotion.couponEligible) throw new Error('everyday deactivation basis failed');
+          console.log('pricing compliance unit matrix PASS');
+          NODE
+      - name: Commit compliance candidate to release branch
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/promotion-runtime.js site/admin-promotion.js site/admin-promotion.html
+          git commit -m 'Apply Labor Day regular-price coupon compliance rule'
+          git push origin HEAD:release/4.4-labor-day-pricing-compliance-2026-08-31
