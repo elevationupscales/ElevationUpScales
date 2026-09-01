@@ -1,0 +1,54 @@
+name: One-Time Elevation 4.4 Product Detail Prerender Patch
+
+on:
+  push:
+    branches: [ops/4.4-product-detail-prerender-patch-2026-08-31]
+    paths:
+      - .github/workflows/one-time-44-product-detail-prerender-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact Candidate 1 branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/4.4-product-detail-listing-2026-08-31
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify candidate head and patch only prerender card functions
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "a722e54f365307407a6c3fe99bafed2ac4a65303"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          start=s.index('function lithiumCard(product){')
+          mid=s.index('\nfunction rvCard(product,index){', start)
+          end=s.index('\nfunction lithiumCategories(products){', mid)
+          lithium='''function lithiumCard(product){const id=clean(product?.id||product?.sku,140);const sku=clean(product?.sku||product?.id,160);const view=lithiumView(product);const image=clean(product?.primaryImage||product?.images?.[0]||"/assets/logo.webp",1000);const detail=`/product?id=${encodeURIComponent(id)}&store=lithium`;const checkout=`/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(clean(product?.title||view.title,240))}`;const shipping=shippingPresentation(product);return `<article class="lithium-card" data-product-id="${htmlEsc(id)}" data-hawaii-sku="${htmlEsc(sku)}" data-shipping-status="${htmlEsc(clean(product?.shippingStatus,30))}"><div class="lithium-card__image"><a class="lithium-card__detail-link" href="${htmlEsc(detail)}" aria-label="View ${htmlEsc(view.title)} details"><img src="${htmlEsc(image)}" alt="${htmlEsc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a></div><div class="lithium-card__body"><p class="lithium-card__category">${htmlEsc(view.category)}</p><h3><a class="lithium-card__title-link" href="${htmlEsc(detail)}">${htmlEsc(view.title)}</a></h3>${view.subtitle?`<p class="lithium-card__subtitle">${htmlEsc(view.subtitle)}</p>`:""}${view.specs?`<p class="lithium-card__spec-line">${htmlEsc(view.specs)}</p>`:""}<div class="lithium-card__shipping ${shipping.className}" data-hawaii-status>${htmlEsc(shipping.label)}</div><div class="lithium-card__footer"><strong>${htmlEsc(money(product?.priceCents))}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${htmlEsc(detail)}">View Details</a><a class="button button-primary" href="${htmlEsc(checkout)}">Buy Now</a></div></div></div></article>`;}'''
+          rv='''function rvCard(product,index){const raw=clean(product?.title||product?.name||"RV & Outdoor item",300);const title=compactTitle(raw);const subtitle=useCase(raw);const category=rvCategory(product?.category,raw);const id=clean(product?.id||product?.sku||`catalog-${index}`,140);const detail=`/product?id=${encodeURIComponent(id)}&store=rv`;const image=clean(product?.primaryImage||product?.images?.[0]||"",1000);const supplier=clean(product?.supplier||product?.sourceType,30).toLowerCase();const ebay=clean(product?.ebayItemId,20);const sourceUrl=clean(product?.sourceUrl,1000);const direct=supplier==="doba"&&clean(product?.publishStatus,30).toLowerCase()==="published"&&clean(product?.shippingStatus,30).toLowerCase()==="verified"&&Number(product?.priceCents)>0;const buy=direct?`/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(raw)}${/^\\d{12}$/.test(ebay)?`&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebay}`)}`:""}`:(/^\\d{12}$/.test(ebay)?`https://www.ebay.com/itm/${ebay}`:(/^https?:\\/\\//i.test(sourceUrl)?sourceUrl:""));const ship=clean(product?.shippingStatus,30).toLowerCase()==="verified"?"Ships to the Lower 48":clean(product?.shippingStatus,30).toLowerCase()==="quote_required"?"Shipping quote required":"Check shipping availability";return `<article class="rv-product-card" data-product-id="${htmlEsc(id)}"><a class="rv-product-media rv-product-detail-link" href="${htmlEsc(detail)}" aria-label="View ${htmlEsc(title)} details">${image?`<img class="rv-product-image" src="${htmlEsc(image)}" alt="${htmlEsc(title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<div class="rv-product-image-fallback">Product image unavailable</div>`}</a><div class="rv-product-copy"><p class="eyebrow">${htmlEsc(category)}</p><h3><a class="rv-product-title-link" href="${htmlEsc(detail)}">${htmlEsc(title)}</a></h3>${subtitle?`<p class="rv-product-subtitle">${htmlEsc(subtitle)}</p>`:""}<div class="rv-product-meta"><span class="rv-product-price">${htmlEsc(money(product?.priceCents))}</span><span class="rv-product-stock">${htmlEsc(ship)}</span></div><div class="rv-product-actions rv-product-actions--prerender"><a href="${htmlEsc(detail)}">View Details</a>${buy?`<a href="${htmlEsc(buy)}">Buy Now</a>`:""}</div></div></article>`;}'''
+          s=s[:start]+lithium+'\n'+rv+s[end:]
+          p.write_text(s)
+          PY
+          node --check site/_worker.js
+          git diff --check -- site/_worker.js
+          git diff --stat
+          test "$(git diff --name-only)" = "site/_worker.js"
+          grep -q 'store=lithium' site/_worker.js
+          grep -q 'store=rv' site/_worker.js
+
+      - name: Commit exact prerender parity patch
+        run: |
+          set -euo pipefail
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add site/_worker.js
+          git commit -m "Add product detail links to storefront prerender cards"
+          git push origin HEAD:release/4.4-product-detail-listing-2026-08-31
+          echo "Candidate head: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
