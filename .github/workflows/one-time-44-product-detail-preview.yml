@@ -103,7 +103,7 @@ jobs:
         env:
           PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          cat > /tmp/product-detail-qa.mjs <<'NODE'
+          cat > product-detail-qa.mjs <<'NODE'
           import { chromium } from 'playwright';
           const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
           const get=async path=>{const r=await fetch(base+path); if(!r.ok) throw new Error(`${path} ${r.status}`); return r.json();};
@@ -172,7 +172,7 @@ jobs:
           await browser.close();
           console.log(JSON.stringify({tested:tests.map(x=>x.label),evidence},null,2));
           NODE
-          node /tmp/product-detail-qa.mjs
+          node product-detail-qa.mjs
 
       - name: Record preview PASS
         env:
