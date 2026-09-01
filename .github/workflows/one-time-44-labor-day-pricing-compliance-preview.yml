@@ -1,0 +1,165 @@
+name: One-Time Elevation 4.4 Labor Day Pricing Compliance Preview
+
+on:
+  push:
+    branches: [deploy/4.4-labor-day-pricing-compliance-preview-2026-08-31]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_MAIN_SHA: 310bafaeeef50fe2db09d53756e096b3c936611d
+      CANDIDATE_SHA: 9b89b7796809b143c93ec55827357143c799d041
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with: {fetch-depth: 0}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 0
+
+      - name: Verify lineage, scope and syntax
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          git -C candidate diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          changed=$(git -C candidate diff --name-only "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site | sort)
+          printf '%s\n' "$changed"
+          test "$changed" = $'site/admin-promotion.html\nsite/admin-promotion.js\nsite/promotion-runtime.js'
+          for f in promotion-runtime.js admin-promotion.js store-checkout-server.js catalog-admin-runtime.js product-detail.js lithium-shop.js rv-store.js _worker.js doba-csv-sync-runtime.js; do node --check "candidate/site/$f"; done
+          grep -q 'regular_price_coupon' candidate/site/promotion-runtime.js
+          grep -q 'minimumPostCouponPriceCents' candidate/site/promotion-runtime.js
+          grep -q '25% Off Eligible Elevation Merchandise' candidate/site/promotion-runtime.js
+          grep -q 'regular price × 0.75' candidate/site/admin-promotion.html
+          ! grep -q 'Promotion list basis' candidate/site/admin-promotion.js
+          for p in site/store-checkout-server.js site/catalog-admin-runtime.js site/doba-csv-sync-runtime.js site/hawaii-lithium-runtime.js site/marketplace.html site/solar-project.html site/start-a-project.html site/product-detail.js site/lithium-shop.js site/rv-store.js; do git -C candidate diff --quiet "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- "$p"; done
+
+      - name: Pricing compliance unit matrix
+        run: |
+          cat > unit.mjs <<'NODE'
+          import assert from 'node:assert/strict';
+          import {pricingForProduct,applyCoupon,PROMOTION_APPROVED_DEFAULTS,isActualLithiumBattery,batteryUnitsPerCatalogUnit} from './candidate/site/promotion-runtime.js';
+          const active={available:true,active:true,...PROMOTION_APPROVED_DEFAULTS};
+          const inactive={...active,active:false};
+          const item=(price,cost,section='rv-outdoor')=>({priceCents:price,supplierCostCents:cost,supplier:'doba',storeSection:section,title:'QA'});
+          const q=pricingForProduct(item(18000,10000),active);
+          assert.equal(q.priceCents,18000); assert.equal(q.promotion.regularPriceCents,18000); assert.equal(q.promotion.minimumPostCouponPriceCents,13500); assert.equal(q.promotion.couponPriceCents,13500); assert.equal(q.promotion.couponEligible,true); assert.equal(q.promotion.markupPercent,null);
+          const bad=pricingForProduct(item(13500,10000),active); assert.equal(bad.priceCents,13500); assert.equal(bad.promotion.couponEligible,false); assert.match(bad.promotion.reason,/margin floor/);
+          const edge=pricingForProduct(item(17999,10000),active); assert.equal(edge.promotion.couponEligible,false);
+          const c=applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:q.priceCents,eligible:q.promotion.couponEligible,config:active}); assert.equal(c.discountCents,4500); assert.equal(c.merchandiseCents,13500);
+          assert.equal(applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:bad.priceCents,eligible:bad.promotion.couponEligible,config:active}).status,409);
+          assert.equal(applyCoupon({couponCode:'LABORDAY25,LABORDAY25',listMerchandiseCents:q.priceCents,eligible:true,config:active}).status,400);
+          const everyday=pricingForProduct(item(18000,10000),inactive); assert.equal(everyday.priceCents,13500); assert.equal(everyday.promotion.couponEligible,false);
+          const battery=item(18000,10000,'lithium-batteries'); battery.title='2 Pack 12V 100Ah LiFePO4 Battery'; assert.equal(isActualLithiumBattery(battery),true); assert.equal(batteryUnitsPerCatalogUnit(battery),2);
+          console.log(JSON.stringify({qualifying:q.promotion,ineligible:bad.promotion,everyday:everyday.priceCents},null,2));
+          NODE
+          node unit.mjs
+
+      - id: deploy
+        name: Deploy exact candidate to compliance preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=elevationupscales --branch=labor-day-pricing-compliance-preview-2026-08-31
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Routes, auth, PayPal and production isolation
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_BASE%/}"
+          for route in / /lithium-batteries /rv-store /product /checkout /store /hawaii-lithium-batteries /marketplace /start-a-project /solar-project /admin /admin-promotion; do code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route"); echo "$route=$code"; test "$code" = 200; done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping /api/admin/promotion; do code=$(curl -sS -o /tmp/a -w '%{http_code}' "$base$api" || true); echo "$api=$code"; test "$code" = 401; done
+          curl -sS --fail "$base/api/store/promotion" -o /tmp/promo.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/promo.json'))
+          assert p['active'] is True and p['couponCode']=='LABORDAY25' and p['couponPercent']==25 and p['batteryShippingCents']==2799 and p['apparelEligible'] is False
+          assert '25% off eligible Elevation merchandise' in p['disclosure']
+          assert 'Eligible Elevation Merchandise' in p['headline']
+          PY
+          git fetch origin main --no-tags --prune; test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS -L --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/cfg
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/cfg')); assert c.get('configured') is True; assert c.get('credentialsConfigured') is True; assert c.get('checkoutEnabled') is True; assert c.get('liveCheckoutApproved') is True; assert c.get('environment')=='live'
+          PY
+
+      - name: Same-origin catalog and checkout compliance matrix
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          cat > runtime.mjs <<'NODE'
+          import assert from 'node:assert/strict';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const get=async p=>{const r=await fetch(base+p);const b=await r.json();if(!r.ok)throw new Error(`${p}:${r.status}`);return b;};
+          const post=async body=>{const r=await fetch(base+'/api/store-checkout/quote',{method:'POST',headers:{'content-type':'application/json','accept':'application/json','origin':base},body:JSON.stringify(body)});return{status:r.status,body:await r.json().catch(()=>({}))};};
+          const visible=(p,rv=false)=>String(p.publishStatus||'').toLowerCase()==='published'&&Number(p.priceCents)>0&&!(Number.isFinite(Number(p.supplierStock))&&Number(p.supplierStock)<=0)&&String(p.shippingStatus||'').toLowerCase()!=='hold'&&(!rv||String(p.shippingStatus||'').toLowerCase()!=='unverified');
+          const liRaw=(await get('/api/store/catalog?section=lithium-batteries')).products, rvRaw=(await get('/api/store-catalog?section=rv-outdoor')).products;
+          const li=liRaw.filter(p=>visible(p)), rv=rvRaw.filter(p=>visible(p,true));
+          const all=[...li,...rv];
+          let qualifying=0, marginIneligible=0;
+          for(const p of all){const promo=p.promotion||{}; if(promo.eligible){assert.equal(p.priceCents,promo.regularPriceCents); assert.equal(promo.listPriceCents,promo.regularPriceCents); if(promo.couponEligible){qualifying++; assert.equal(promo.couponPriceCents,promo.regularPriceCents-Math.round(promo.regularPriceCents*.25)); assert.ok(promo.couponPriceCents>=promo.minimumPostCouponPriceCents);} else if(/margin floor/.test(String(promo.reason||''))){marginIneligible++; assert.equal(promo.couponPriceCents,promo.regularPriceCents);}}
+          }
+          assert.ok(qualifying>0,'No coupon-eligible merchandise exists under compliance rule');
+          const lh=await (await fetch(base+'/lithium-batteries')).text(), rh=await (await fetch(base+'/rv-store')).text();
+          const lm=lh.match(/<strong data-lithium-count>(\d+)<\/strong>/), rm=rh.match(/<span id="rv-count">(\d+)<\/span>/); assert.ok(lm&&rm); assert.equal(+lm[1],li.length); assert.equal(+rm[1],rv.length); assert.ok(lh.includes('data-prerendered="true"')&&rh.includes('data-prerendered="true"'));
+          const shipping={fullName:'QA Test',address1:'1 Test St',city:'Denver',state:'CO',postalCode:'80202',countryCode:'US'};
+          const qualified=all.find(p=>p.promotion?.couponEligible); assert.ok(qualified);
+          const source=li.includes(qualified)?'lithium':'rv';
+          const quote=await post({source,id:qualified.id,quantity:1,couponCode:'LABORDAY25',shipping}); assert.equal(quote.status,200); assert.equal(quote.body.unitPriceCents,qualified.priceCents); assert.equal(quote.body.discountCents,Math.round(quote.body.listMerchandiseCents*.25)); assert.equal(quote.body.totalCents,quote.body.merchandiseCents+quote.body.shippingCents);
+          const manip=await post({source,id:qualified.id,quantity:1,couponCode:'LABORDAY25',priceCents:1,totalCents:1,name:'MANIPULATED',shipping}); assert.equal(manip.status,200); assert.equal(manip.body.unitPriceCents,quote.body.unitPriceCents); assert.equal(manip.body.totalCents,quote.body.totalCents); assert.notEqual(manip.body.productName,'MANIPULATED');
+          const stack=await post({source,id:qualified.id,quantity:1,couponCode:'LABORDAY25,LABORDAY25',shipping}); assert.equal(stack.status,400);
+          const apparel=await post({source:'apparel',id:'qa-exclusion',quantity:1,couponCode:'LABORDAY25'}); assert.equal(apparel.status,409);
+          const bad=all.find(p=>/margin floor/.test(String(p.promotion?.reason||''))); if(bad){const badSource=li.includes(bad)?'lithium':'rv'; const r=await post({source:badSource,id:bad.id,quantity:1,couponCode:'LABORDAY25',shipping}); assert.equal(r.status,409); assert.match(String(r.body.error),/not eligible/i);}
+          const battery=li.find(p=>p.promotion?.eligible); assert.ok(battery,'No lithium product available for shipping regression');
+          const noCoupon=await post({source:'lithium',id:battery.id,quantity:1,shipping}); if(noCoupon.status===200&&noCoupon.body.battery?.actualBattery){const units=noCoupon.body.battery.batteryUnitsPerItem; assert.equal(noCoupon.body.shippingCents,2799*units); for(const quantity of [2,3]){const q=await post({source:'lithium',id:battery.id,quantity,shipping}); assert.equal(q.status,200); assert.equal(q.body.shippingCents,2799*units*quantity);} const ak=await post({source:'lithium',id:battery.id,quantity:1,shipping:{...shipping,state:'AK'}}); const hi=await post({source:'lithium',id:battery.id,quantity:1,shipping:{...shipping,state:'HI'}}); assert.equal(ak.status,409); assert.match(String(ak.body.error),/Alaska/i); assert.equal(hi.status,409); assert.match(String(hi.body.error),/Hawaii Lithium Program|separate shipping quote/i);}
+          console.log(JSON.stringify({catalog:{lithiumRaw:liRaw.length,lithiumVisible:li.length,rvRaw:rvRaw.length,rvVisible:rv.length},qualifying,marginIneligible,qualified:{id:qualified.id,source,list:quote.body.listMerchandiseCents,discount:quote.body.discountCents,total:quote.body.totalCents}},null,2));
+          NODE
+          node runtime.mjs
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Desktop and mobile customer-path regression
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          cat > browser.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          import assert from 'node:assert/strict';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const catalogs=[...(await (await fetch(base+'/api/store/catalog?section=lithium-batteries')).json()).products,...(await (await fetch(base+'/api/store-catalog?section=rv-outdoor')).json()).products];
+          const q=catalogs.find(p=>p.promotion?.couponEligible); assert.ok(q,'No coupon-eligible product for browser test');
+          const source=String(q.storeSection||q.store_section)==='lithium-batteries'?'lithium':'rv';
+          const browser=await chromium.launch({headless:true});
+          for(const viewport of [{width:1440,height:900,name:'desktop'},{width:390,height:844,name:'mobile'}]){
+            const page=await browser.newPage({viewport:{width:viewport.width,height:viewport.height}}); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(base+'/',{waitUntil:'domcontentloaded'}); await page.waitForSelector('.eus-labor-day-banner'); const banner=(await page.locator('.eus-labor-day-banner').innerText()).replace(/\s+/g,' '); assert.match(banner,/25% Off Eligible Elevation Merchandise/i); assert.ok(!/sitewide/i.test(banner)); assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth),false);
+            await page.goto(base+(source==='lithium'?'/lithium-batteries':'/rv-store'),{waitUntil:'domcontentloaded'}); await page.waitForSelector(source==='lithium'?'[data-lithium-grid]':'#rv-grid'); assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth),false);
+            await page.goto(base+`/product?id=${encodeURIComponent(q.id)}&store=${source}`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('[data-product-detail]'); assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth),false);
+            await page.goto(base+`/checkout/?source=${source}&id=${encodeURIComponent(q.id)}`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#checkout-name'); await page.fill('#checkout-name','QA Test'); await page.fill('#checkout-email','qa@example.com'); await page.fill('#checkout-address1','1 Test St'); await page.fill('#checkout-city','Denver'); await page.selectOption('#checkout-state','CO'); await page.fill('#checkout-postal','80202'); await page.fill('#checkout-coupon','LABORDAY25'); const resp=page.waitForResponse(r=>r.url().includes('/api/store-checkout/quote')&&r.request().method()==='POST'); await page.click('#checkout-apply-coupon'); const r=await resp; assert.equal(r.status(),200); await page.waitForFunction(()=>/LABORDAY25 applied/i.test(document.querySelector('#checkout-coupon-status')?.textContent||'')); assert.equal(await page.locator('#checkout-discount-row').isVisible(),true); assert.match(await page.locator('#checkout-coupon-status').innerText(),/shipping is not discounted/i); assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth),false); assert.equal(errors.length,0,`${viewport.name} page errors: ${errors.join('; ')}`); await page.close();
+          }
+          await browser.close();
+          NODE
+          node browser.mjs
+
+      - name: Final production isolation and canonical PayPal recheck
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS -L --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/cfg2
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/cfg2')); assert c.get('configured') is True and c.get('credentialsConfigured') is True and c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          PY
