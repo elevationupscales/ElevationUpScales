@@ -1,0 +1,122 @@
+name: One-Time Elevation 4.4 RV Store CLS Final Fix
+on:
+  push:
+    branches: [fix/4.4-rv-store-mobile-cls-final-2026-09-01]
+permissions:
+  contents: write
+  deployments: write
+jobs:
+  repair-and-preview:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply RV Store CLS reservation fix') }}
+    runs-on: ubuntu-24.04
+    env:
+      BASE_SHA: fbb10c69e59bc0ab50cc7f2631ca15d6adcd5971
+      EXPECTED_MAIN_SHA: 310bafaeeef50fe2db09d53756e096b3c936611d
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Verify lineage and isolate repair branch
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          changed=$(git diff --name-only "$BASE_SHA"...HEAD | grep -v '^.github/workflows/one-time-44-rv-store-cls-final-fix.yml$' || true)
+          test -z "$changed"
+      - name: Reserve RV promotion and category layout before paint
+        id: patch
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          h=Path('site/rv-store.html')
+          s=h.read_text()
+          old='</div></header><main>'
+          new='</div></header><div class="eus-labor-day-banner-slot" data-promo-slot aria-live="polite" aria-label="Promotion status"></div><main>'
+          assert old in s and new not in s
+          s=s.replace(old,new,1)
+          old2='<div class="marketplace-summary">'
+          new2='<div id="rv-category-rail" class="rv-category-rail" aria-label="Filter products by category" aria-live="polite"></div><div class="marketplace-summary">'
+          assert old2 in s and 'id="rv-category-rail"' not in s
+          s=s.replace(old2,new2,1)
+          s=s.replace('rv-store.css?v=4.4.3','rv-store.css?v=4.4.4',1)
+          h.write_text(s)
+          c=Path('site/rv-store.css')
+          css=c.read_text()
+          old3='.rv-category-rail{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;margin:0 0 14px;scrollbar-width:thin}'
+          new3='.rv-category-rail{display:flex;gap:8px;overflow-x:auto;min-height:36px;padding:4px 2px 12px;margin:0 0 14px;scrollbar-width:thin}'
+          assert old3 in css
+          c.write_text(css.replace(old3,new3,1))
+          PY
+          git diff --check
+          test "$(git diff --name-only | sort)" = $'site/rv-store.css\nsite/rv-store.html'
+          grep -q 'eus-labor-day-banner-slot" data-promo-slot' site/rv-store.html
+          grep -q 'id="rv-category-rail" class="rv-category-rail"' site/rv-store.html
+          grep -q 'min-height:36px' site/rv-store.css
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/rv-store.html site/rv-store.css
+          git commit -m 'Apply RV Store CLS reservation fix'
+          git push origin HEAD:fix/4.4-rv-store-mobile-cls-final-2026-09-01
+          echo "app_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Deploy exact repaired candidate to preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=rv-store-cls-final-preview-2026-09-01
+      - name: Verify routes auth and production isolation
+        run: |
+          set -euo pipefail
+          base="${{ steps.deploy.outputs.deployment-url }}"
+          for route in / /rv-store /lithium-batteries /product /checkout /home-services /solar-services /marketplace /start-a-project /solar-project /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/x -w '%{http_code}' "$base$route")
+            test "$code" = 200
+          done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping /api/admin/promotion; do
+            code=$(curl -sS -o /tmp/a -w '%{http_code}' "$base$api" || true)
+            test "$code" = 401
+          done
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/cfg
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/cfg'))
+          assert c.get('configured') is True and c.get('credentialsConfigured') is True and c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          PY
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+      - name: Install Playwright library
+        run: npm install --no-save playwright@1.55.0
+      - name: Complete desktop mobile CWV regression
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || true)
+          test -n "$CHROME"; export CHROME
+          cat > /tmp/cwv.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          import assert from 'node:assert/strict';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox']});
+          const evidence=[];
+          async function pageFor(viewport){const p=await browser.newPage({viewport});await p.addInitScript(()=>{window.__v={cls:0,lcp:0,shifts:[]};try{new PerformanceObserver(list=>{for(const e of list.getEntries())if(!e.hadRecentInput){window.__v.cls+=e.value;window.__v.shifts.push({v:e.value,sources:(e.sources||[]).map(s=>s.node?.id||s.node?.className||s.node?.tagName||'')});}}).observe({type:'layout-shift',buffered:true});}catch{}try{new PerformanceObserver(list=>{for(const e of list.getEntries())window.__v.lcp=e.startTime;}).observe({type:'largest-contentful-paint',buffered:true});}catch{}});return p;}
+          for(const [name,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            for(const route of ['/','/rv-store','/lithium-batteries','/home-services','/solar-services']){
+              const p=await pageFor(viewport);const errors=[];p.on('pageerror',e=>errors.push(String(e)));await p.goto(base+route,{waitUntil:'domcontentloaded',timeout:30000});await p.waitForTimeout(2200);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2),false,`${route} overflow`);assert.equal(errors.length,0,`${route} errors ${errors.join(';')}`);if(route==='/rv-store'){await p.waitForSelector('#rv-product-grid');await p.waitForSelector('#rv-category-rail');await p.waitForSelector('.eus-labor-day-banner');const slot=await p.locator('[data-promo-slot]').boundingBox(),banner=await p.locator('.eus-labor-day-banner').boundingBox(),rail=await p.locator('#rv-category-rail').boundingBox();assert.ok(slot&&banner&&rail);assert.ok(Math.abs(slot.height-banner.height)<8);assert.ok(rail.height>=52);}
+              const v=await p.evaluate(()=>window.__v);const limit=route==='/'?.10:.12;assert.ok(v.cls<=limit,`${route} ${name} CLS ${v.cls} ${JSON.stringify(v.shifts)}`);assert.ok(v.lcp>0,`${route} ${name} missing LCP`);evidence.push({route,name,cls:v.cls,lcp:v.lcp,shifts:v.shifts});await p.close();
+            }
+          }
+          console.log(JSON.stringify(evidence,null,2));await browser.close();
+          NODE
+          node /tmp/cwv.mjs
+      - name: Final isolation check
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          echo "RV STORE CLS REPAIR PREVIEW PASS app=${{ steps.patch.outputs.app_sha }}"
