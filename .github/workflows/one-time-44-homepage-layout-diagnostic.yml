@@ -1,0 +1,42 @@
+name: One-Time Homepage Vertical Layout Diagnostic
+on:
+  push:
+    branches: [diagnostic/4.4-homepage-vertical-layout-2026-08-31]
+permissions:
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Playwright library only
+        run: npm install --no-save playwright@1.55.0
+      - name: Measure rendered vertical layout
+        env:
+          PREVIEW_BASE: https://a8438475.elevationupscales.pages.dev
+        run: |
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
+          echo "CHROME=$CHROME"
+          test -n "$CHROME"
+          export CHROME
+          cat > measure.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox']});
+          for(const [vp,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const page=await browser.newPage({viewport});
+            await page.goto(process.env.PREVIEW_BASE+'/',{waitUntil:'domcontentloaded'});
+            await page.locator('#home-route-title').waitFor();
+            await page.waitForTimeout(1200);
+            const data=await page.evaluate(()=>{
+              const q=(sel)=>{const e=document.querySelector(sel);if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{sel,x:r.x,y:r.y,w:r.width,h:r.height,top:r.top,bottom:r.bottom,display:s.display,position:s.position,minHeight:s.minHeight,padTop:s.paddingTop,padBottom:s.paddingBottom,marginTop:s.marginTop,marginBottom:s.marginBottom,fontSize:s.fontSize,lineHeight:s.lineHeight,textTransform:s.textTransform}};
+              return {
+                body:q('body'),header:q('.eus-header'),headerInner:q('.eus-header__inner'),banner:q('.eus-labor-day-banner'),bannerInner:q('.eus-labor-day-banner__inner'),main:q('main'),hero:q('.hc-hero'),container:q('.hc-hero>.container'),copy:q('.hc-hero-copy'),eyebrow:q('.hc-hero .hc-eyebrow'),h1:q('#home-route-title'),support:q('.hc-hero-copy>p:not(.hc-eyebrow)'),grid:q('.hc-route-grid'),firstRoute:q('.hc-route'),
+                scrollY:window.scrollY,innerHeight:window.innerHeight,docHeight:document.documentElement.scrollHeight
+              };
+            });
+            console.log(vp,JSON.stringify(data,null,2));
+            await page.close();
+          }
+          await browser.close();
+          NODE
+          node measure.mjs
