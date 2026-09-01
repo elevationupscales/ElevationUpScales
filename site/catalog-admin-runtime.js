@@ -344,5 +344,5 @@ export async function handleCatalogPublicApi(request, env, pathname) {
       storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: priced.promotion
     };
   });
-  return json({ products, count: products.length, section: allowedSection || "all" }, 200, { "Cache-Control": "public, max-age=30, s-maxage=60" });
+  return json({ products, count: products.length, section: allowedSection || "all" }, 200, { "Cache-Control": "no-store" });
 }
