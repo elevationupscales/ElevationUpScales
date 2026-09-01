@@ -1,0 +1,51 @@
+name: One-Time Elevation 4.4 Labor Day Candidate Hardening
+
+on:
+  push:
+    branches: [fix/4.4-labor-day-candidate-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/4.4-labor-day-candidate-2026-08-31
+          fetch-depth: 0
+      - name: Apply narrow hardening changes
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 8fce7e8421d03cb74e4fce951ba2badbd8f9f13b HEAD
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('site/catalog-admin-runtime.js')
+          s=p.read_text()
+          old='return json({ products, count: products.length, section: allowedSection || "all" }, 200, { "Cache-Control": "public, max-age=30, s-maxage=60" });'
+          new='return json({ products, count: products.length, section: allowedSection || "all" }, 200, { "Cache-Control": "no-store" });'
+          if old not in s: raise SystemExit('catalog cache pattern missing')
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('site/promotion-runtime.js')
+          s=p.read_text()
+          old='export function isActualLithiumBattery(product){if(sectionOf(product)!=="lithium-batteries")return false;const text=[product?.title,product?.name,product?.category,product?.description,product?.sku,product?.supplierSku].map(x=>clean(x,3000).toLowerCase()).join(" ");if(/battery\\s*(?:box|case|tray|holder)|power\\s*bank|power\\s*station|charger|charging\\s*cable|\\bcable\\b|adapter|connector|terminal|monitor|meter|accessor/.test(text))return false;return /\\blifepo4\\b|\\blithium(?:[- ]ion| iron phosphate)?\\b[^.]{0,100}\\bbatter(?:y|ies)\\b|\\bbatter(?:y|ies)\\b[^.]{0,100}\\b(?:12|24|36|48)\\s*v\\b|\\b\\d{2,4}\\s*ah\\b[^.]{0,100}\\bbatter(?:y|ies)\\b/.test(text);}'
+          new='export function isActualLithiumBattery(product){if(sectionOf(product)!=="lithium-batteries")return false;const primary=[product?.title,product?.name,product?.category,product?.sku,product?.supplierSku].map(x=>clean(x,1200).toLowerCase()).join(" ");const description=clean(product?.description,3000).toLowerCase();const excluded=/battery\\s*(?:box|case|tray|holder)|power\\s*bank|power\\s*station|charger|charging\\s*cable|\\bcable\\b|adapter|connector|terminal|monitor|meter|accessor/;if(excluded.test(primary))return false;const positive=/\\blifepo4\\b|\\blithium(?:[- ]ion| iron phosphate)?\\b[^.]{0,100}\\bbatter(?:y|ies)\\b|\\bbatter(?:y|ies)\\b[^.]{0,100}\\b(?:12|24|36|48)\\s*v\\b|\\b\\d{2,4}\\s*ah\\b[^.]{0,100}\\bbatter(?:y|ies)\\b/;if(positive.test(primary))return true;return !excluded.test(description.slice(0,500))&&positive.test(description);}'
+          if old not in s: raise SystemExit('battery identity pattern missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Validate and promote hardening to release branch
+        run: |
+          set -euo pipefail
+          node --check site/catalog-admin-runtime.js
+          node --check site/promotion-runtime.js
+          grep -q '"Cache-Control": "no-store"' site/catalog-admin-runtime.js
+          git diff --check
+          for protected in site/marketplace.html site/solar-project.html site/start-a-project.html site/hawaii-lithium-runtime.js site/apparel-provider-runtime.js; do git diff --quiet 8fce7e8421d03cb74e4fce951ba2badbd8f9f13b -- "$protected"; done
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/catalog-admin-runtime.js site/promotion-runtime.js
+          git commit -m 'Harden promotion cache and battery identity classification'
+          git push origin HEAD:release/4.4-labor-day-pricing-coupon-2026-08-31
