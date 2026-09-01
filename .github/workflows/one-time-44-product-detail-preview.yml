@@ -49,7 +49,7 @@ jobs:
           grep -q 'data-product-detail' candidate/site/product.html
           grep -q '/product?id=' candidate/site/lithium-shop.js
           grep -q '/product?id=' candidate/site/rv-store.js
-          grep -q 'data-lithium-mode === "hawaii"' candidate/site/lithium-shop.js
+          grep -q 'dataset.lithiumMode === "hawaii"' candidate/site/lithium-shop.js
           grep -q 'purchaseUrl' candidate/site/product-detail.js
           ! grep -qi 'supplier cost\|internal notes\|review state\|hold reason' candidate/site/product.html
 
@@ -126,8 +126,8 @@ jobs:
           const browser=await chromium.launch({headless:true});
           const evidence=[];
           async function checkViewport(name,viewport){
-            const page=await browser.newPage({viewport}); const errors=[];
-            page.on('pageerror',e=>errors.push(String(e)));
+            const page=await browser.newPage({viewport});
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
             await page.goto(base+(name==='mobile'?'/lithium-batteries':'/rv-store'),{waitUntil:'networkidle'});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2)) throw new Error(`${name} storefront horizontal overflow`);
             const cardLink=page.locator('a[href^="/product?id="]').first(); await cardLink.waitFor({state:'visible'});
@@ -135,10 +135,8 @@ jobs:
               const id=String(t.p.id||t.p.sku); const url=`${base}/product?id=${encodeURIComponent(id)}&store=${t.store}`;
               await page.goto(url,{waitUntil:'networkidle'});
               await page.locator('[data-product-detail]').waitFor({state:'visible'});
-              const shown=await page.locator('[data-product-title]').innerText();
-              if(!shown.trim()) throw new Error(`${name} ${t.label}: missing title`);
-              const price=await page.locator('[data-product-price]').innerText();
-              if(!/\$/.test(price)) throw new Error(`${name} ${t.label}: missing price`);
+              const shown=await page.locator('[data-product-title]').innerText(); if(!shown.trim()) throw new Error(`${name} ${t.label}: missing title`);
+              const price=await page.locator('[data-product-price]').innerText(); if(!/\$/.test(price)) throw new Error(`${name} ${t.label}: missing price`);
               const ship=(await page.locator('[data-product-shipping]').innerText()).trim();
               if(!['Ships to the Lower 48','Shipping quote required','Check shipping availability'].includes(ship)) throw new Error(`${name} ${t.label}: bad shipping state ${ship}`);
               const body=(await page.locator('body').innerText()).toLowerCase();
@@ -150,12 +148,12 @@ jobs:
                 const direct=t.store==='lithium'||(String(t.p.supplier||t.p.sourceType||'').toLowerCase()==='doba'&&String(t.p.shippingStatus||'').toLowerCase()==='verified');
                 if(direct&&!href.includes(encodeURIComponent(id))&&!href.includes(id)) throw new Error(`${name} ${t.label}: Buy Now missing Catalog id`);
               }
-              const count=imgs(t.p).length;
-              const next=page.locator('[data-gallery-next]');
-              if(count>1&&await next.isVisible()){
+              const imageCount=imgs(t.p).length; const next=page.locator('[data-gallery-next]');
+              if(imageCount>1&&await next.isVisible()){
                 const before=await page.locator('[data-product-image]').getAttribute('src'); await next.click(); const after=await page.locator('[data-product-image]').getAttribute('src'); if(before===after) throw new Error(`${name} ${t.label}: gallery did not advance`);
               }
-              evidence.push({viewport:name,label:t.label,id,images:count,shipping:ship,buyVisible:await buy.isVisible()});
+              if(errors.length) throw new Error(`${name} ${t.label}: page error ${errors.join('; ')}`);
+              evidence.push({viewport:name,label:t.label,id,images:imageCount,shipping:ship,buyVisible:await buy.isVisible()});
             }
             await page.goto(`${base}/product?id=does-not-exist-${name}&store=rv`,{waitUntil:'networkidle'});
             await page.locator('[data-product-unavailable]').waitFor({state:'visible'});
