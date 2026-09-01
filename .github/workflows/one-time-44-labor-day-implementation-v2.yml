@@ -1,0 +1,61 @@
+name: One-Time Elevation 4.4 Labor Day Implementation v2
+
+on:
+  push:
+    branches: [build/4.4-labor-day-implementation-2026-08-31]
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release candidate
+        uses: actions/checkout@v6
+        with:
+          ref: release/4.4-labor-day-pricing-coupon-2026-08-31
+          path: candidate
+          fetch-depth: 0
+      - name: Checkout implementation tooling
+        uses: actions/checkout@v6
+        with:
+          ref: build/4.4-labor-day-implementation-2026-08-31
+          path: tooling
+          fetch-depth: 1
+      - name: Verify accepted lineage and source controls
+        run: |
+          set -euo pipefail
+          git -C candidate merge-base --is-ancestor ff75885cb437b05a390601245359518fea033d08 HEAD
+          test -f candidate/site/promotion-runtime.js
+          test -f tooling/scripts/apply-labor-day-patch.py
+      - name: Apply integration patch
+        run: |
+          set -euo pipefail
+          cd candidate
+          python ../tooling/scripts/apply-labor-day-patch.py
+      - name: Static and protected-system validation
+        run: |
+          set -euo pipefail
+          cd candidate
+          for f in site/promotion-runtime.js site/store-checkout-server.js site/store-checkout.js site/product-detail.js site/lithium-shop.js site/_worker.js site/doba-csv-sync-runtime.js site/admin-promotion.js site/labor-day-promo.js; do node --check "$f"; done
+          grep -q 'source=lithium' site/lithium-shop.js
+          grep -q 'Request Shipping Availability' site/lithium-shop.js
+          grep -q 'source === "lithium" ? catalogEntry' site/store-checkout-server.js
+          grep -q 'doba-download-center-45' site/doba-csv-sync-runtime.js
+          grep -q 'LABORDAY25' site/promotion-runtime.js
+          grep -q 'batteryShippingCents:2799' site/promotion-runtime.js
+          grep -q 'handlePromotionAdminApi' site/_worker.js
+          grep -q 'breakdown.discount' site/store-checkout-server.js
+          for protected in site/marketplace.html site/solar-project.html site/start-a-project.html site/hawaii-lithium-runtime.js site/apparel-provider-runtime.js; do git diff --quiet ff75885cb437b05a390601245359518fea033d08 -- "$protected"; done
+          git diff --check
+      - name: Commit implementation to release candidate
+        run: |
+          set -euo pipefail
+          cd candidate
+          if git diff --quiet; then echo 'No implementation diff found'; exit 1; fi
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site
+          git commit -m 'Implement Labor Day pricing coupon and battery shipping controls'
+          git push origin HEAD:release/4.4-labor-day-pricing-coupon-2026-08-31
