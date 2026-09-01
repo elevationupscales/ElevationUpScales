@@ -1,0 +1,248 @@
+name: One-Time Elevation 4.4 Labor Day Full Preview Gate
+
+on:
+  push:
+    branches: [deploy/4.4-labor-day-preview-2026-08-31]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_MAIN_SHA: ff75885cb437b05a390601245359518fea033d08
+      CANDIDATE_SHA: a125d6995986bbf118a085cf0d1ee3cbd3fc2eb6
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 0
+
+      - name: Verify production lineage, release scope and static protections
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          git -C candidate diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          for p in site/marketplace.html site/solar-project.html site/start-a-project.html site/hawaii-lithium-runtime.js site/apparel-provider-runtime.js; do
+            git -C candidate diff --quiet "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- "$p"
+          done
+          for f in promotion-runtime.js store-checkout-server.js store-checkout.js product-detail.js lithium-shop.js _worker.js doba-csv-sync-runtime.js admin-promotion.js labor-day-promo.js catalog-admin-runtime.js; do node --check "candidate/site/$f"; done
+          grep -q 'LABORDAY25' candidate/site/promotion-runtime.js
+          grep -q 'batteryShippingCents:2799' candidate/site/promotion-runtime.js
+          grep -q 'doba-download-center-45' candidate/site/doba-csv-sync-runtime.js
+          grep -q 'Export Price ÷ 1.45' candidate/site/admin-channels.html
+          grep -q '"Cache-Control": "no-store"' candidate/site/catalog-admin-runtime.js
+          grep -q '/api/admin/promotion' candidate/site/_worker.js
+          grep -q 'source=lithium' candidate/site/lithium-shop.js
+          grep -q 'Request Shipping Availability' candidate/site/lithium-shop.js
+          grep -q 'breakdown.discount' candidate/site/store-checkout-server.js
+          grep -q 'labor-day-promo.js' candidate/site/index.html
+          ! grep -q 'labor-day-promo.js' candidate/site/marketplace.html
+
+      - name: Unit-test pricing, coupon, battery and PayPal calculations
+        run: |
+          cat > pricing-unit.mjs <<'NODE'
+          import assert from 'node:assert/strict';
+          import {roundMarkup,pricingForProduct,applyCoupon,isActualLithiumBattery,batteryUnitsPerCatalogUnit,PROMOTION_APPROVED_DEFAULTS} from './candidate/site/promotion-runtime.js';
+          import {__storeCheckoutTest} from './candidate/site/store-checkout-server.js';
+          const active={available:true,active:true,...PROMOTION_APPROVED_DEFAULTS};
+          const inactive={...active,active:false};
+          const costs=[499,2499,10000,79999];
+          const evidence=[];
+          for(const cost of costs){
+            const product={supplier:'doba',storeSection:'rv-outdoor',supplierCostCents:cost,priceCents:1,title:'Eligible RV item'};
+            const priced=pricingForProduct(product,active);
+            assert.equal(priced.priceCents,Math.round(cost*1.60));
+            const coupon=applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:priced.priceCents,eligible:true,config:active});
+            assert.equal(coupon.ok,true);
+            assert.equal(coupon.discountCents,Math.round(priced.priceCents*.25));
+            assert.ok(Math.abs(coupon.merchandiseCents-Math.round(cost*1.20))<=1);
+            const everyday=pricingForProduct(product,inactive);
+            assert.equal(everyday.priceCents,Math.round(cost*1.35));
+            evidence.push({cost,list:priced.priceCents,afterCoupon:coupon.merchandiseCents,everyday:everyday.priceCents});
+          }
+          assert.equal(Math.round(14500/1.45),10000);
+          assert.equal(roundMarkup(Math.round(14500/1.45),60),16000);
+          assert.equal(applyCoupon({couponCode:'BADCODE',listMerchandiseCents:16000,eligible:true,config:active}).status,400);
+          assert.equal(applyCoupon({couponCode:'LABORDAY25,LABORDAY25',listMerchandiseCents:16000,eligible:true,config:active}).status,400);
+          assert.equal(applyCoupon({couponCode:['LABORDAY25','LABORDAY25'],listMerchandiseCents:16000,eligible:true,config:active}).status,400);
+          assert.equal(applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:16000,eligible:false,config:active}).status,409);
+          assert.equal(applyCoupon({couponCode:'LABORDAY25',listMerchandiseCents:16000,eligible:true,config:inactive}).status,409);
+          const battery=(title)=>({supplier:'doba',storeSection:'lithium-batteries',title,category:'LiFePO4 batteries',supplierCostCents:10000,priceCents:16000});
+          assert.equal(isActualLithiumBattery(battery('12V 100Ah LiFePO4 Battery')),true);
+          assert.equal(batteryUnitsPerCatalogUnit(battery('12V 100Ah LiFePO4 Battery')),1);
+          assert.equal(batteryUnitsPerCatalogUnit(battery('2 Pack 12V 100Ah LiFePO4 Battery')),2);
+          assert.equal(batteryUnitsPerCatalogUnit(battery('3 Pack 12V 100Ah LiFePO4 Battery')),3);
+          assert.equal(isActualLithiumBattery(battery('RV Battery Box Case for 12V Battery')),false);
+          assert.equal(isActualLithiumBattery(battery('Portable Lithium Power Bank 1000Wh')),false);
+          assert.equal(isActualLithiumBattery(battery('Battery Charging Cable Accessory')),false);
+          const quote={productName:'Test Battery',variantName:'',quantity:1,unitPriceCents:16000,listMerchandiseCents:16000,discountCents:4000,merchandiseCents:12000,shippingCents:2799,totalCents:14799,physical:true};
+          const address={fullName:'QA Test',address1:'1 Test St',address2:'',city:'Denver',state:'CO',postalCode:'80202',countryCode:'US'};
+          const pu=__storeCheckoutTest.buildPayPalPurchaseUnit(quote,'EUS-QA-TEST',address);
+          assert.equal(pu.items[0].unit_amount.value,'160.00');
+          assert.equal(pu.amount.breakdown.item_total.value,'160.00');
+          assert.equal(pu.amount.breakdown.discount.value,'40.00');
+          assert.equal(pu.amount.breakdown.shipping.value,'27.99');
+          assert.equal(pu.amount.value,'147.99');
+          console.log(JSON.stringify({pricingEvidence:evidence,doba45:{export:14500,recoveredCost:10000,promoList:16000},paypal:pu.amount},null,2));
+          NODE
+          node pricing-unit.mjs
+
+      - id: deploy
+        name: Deploy exact candidate to Cloudflare preview branch
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=elevationupscales --branch=labor-day-preview-2026-08-31
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify preview routes, promotion API, checkout and production isolation
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_BASE%/}"
+          for route in / /lithium-batteries /rv-store /product /checkout /store /hawaii-lithium-batteries /marketplace /start-a-project /solar-project /admin /admin-promotion; do
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route"); echo "$route=$code"; test "$code" = 200
+          done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping /api/admin/promotion; do
+            code=$(curl -sS --retry 5 --retry-all-errors --retry-delay 2 -o /tmp/admin -w '%{http_code}' "$base$api" || true); echo "$api=$code"; test "$code" = 401
+          done
+          curl -sS --fail "$base/api/store/promotion" -o /tmp/promo.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/promo.json'))
+          assert p['active'] is True, p
+          assert p['couponCode']=='LABORDAY25', p
+          assert p['couponPercent']==25, p
+          assert p['batteryShippingCents']==2799, p
+          assert p['apparelEligible'] is False, p
+          assert 'Shipping' in p['disclosure'] and 'Marketplace' in p['disclosure'] and 'Apparel' in p['disclosure']
+          print('previewPromotion=active-approved')
+          PY
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS -L --fail "$CANONICAL_BASE/" -o /tmp/canonical-home.html
+          ! grep -q 'labor-day-promo.js' /tmp/canonical-home.html
+          curl -sS -L --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/prod-checkout.json
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/prod-checkout.json'))
+          assert c.get('configured') is True
+          assert c.get('credentialsConfigured') is True
+          assert c.get('checkoutEnabled') is True
+          assert c.get('liveCheckoutApproved') is True
+          assert c.get('environment')=='live'
+          print('canonicalProduction=unchanged-live-paypal')
+          PY
+
+      - name: Runtime-test Catalog parity, coupons, battery shipping, AK/HI and client manipulation
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          cat > runtime-qa.mjs <<'NODE'
+          import assert from 'node:assert/strict';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const get=async p=>{const r=await fetch(base+p);const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(`${p}:${r.status}:${JSON.stringify(b)}`);return b;};
+          const post=async body=>{const r=await fetch(base+'/api/store-checkout/quote',{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify(body)});return {status:r.status,body:await r.json().catch(()=>({}))};};
+          const li=(await get('/api/store/catalog?section=lithium-batteries')).products;
+          const rv=(await get('/api/store-catalog?section=rv-outdoor')).products;
+          assert.ok(li.length>0&&rv.length>0);
+          for(const p of [...li,...rv].filter(p=>p.promotion?.couponEligible)){
+            assert.equal(p.promotion.active,true);
+            assert.equal(p.promotion.markupPercent,60);
+            assert.equal(p.priceCents,p.promotion.listPriceCents);
+            assert.equal(p.promotion.couponPriceCents,p.priceCents-Math.round(p.priceCents*.25));
+          }
+          const liHtml=await (await fetch(base+'/lithium-batteries')).text();
+          const rvHtml=await (await fetch(base+'/rv-store')).text();
+          const lm=liHtml.match(/<strong data-lithium-count>(\d+)<\/strong>/),rm=rvHtml.match(/<span id="rv-count">(\d+)<\/span>/);
+          assert.ok(lm&&rm);assert.equal(Number(lm[1]),li.length);assert.equal(Number(rm[1]),rv.length);assert.ok(liHtml.includes('data-prerendered="true"'));assert.ok(rvHtml.includes('data-prerendered="true"'));
+          const shipping={fullName:'QA Test',address1:'1 Test St',city:'Denver',state:'CO',postalCode:'80202',countryCode:'US'};
+          async function findQuote(rows,source,predicate=()=>true){
+            for(const p of rows.filter(x=>x.promotion?.couponEligible)){
+              const q=await post({source,id:p.id,quantity:1,couponCode:'LABORDAY25',shipping});
+              if(q.status===200&&q.body.ok&&predicate(q.body,p))return {p,q:q.body};
+            }
+            throw new Error(`No checkout-qualified ${source} promotion sample found`);
+          }
+          const rvs=await findQuote(rv,'rv');
+          assert.equal(rvs.q.unitPriceCents,rvs.p.priceCents);assert.equal(rvs.q.discountCents,Math.round(rvs.q.listMerchandiseCents*.25));assert.equal(rvs.q.merchandiseCents,rvs.q.listMerchandiseCents-rvs.q.discountCents);assert.equal(rvs.q.totalCents,rvs.q.merchandiseCents+rvs.q.shippingCents);
+          const noCoupon=await post({source:'rv',id:rvs.p.id,quantity:1,shipping});assert.equal(noCoupon.status,200);assert.equal(noCoupon.body.shippingCents,rvs.q.shippingCents);assert.equal(noCoupon.body.listMerchandiseCents,rvs.q.listMerchandiseCents);assert.equal(noCoupon.body.discountCents,0);
+          const bad=await post({source:'rv',id:rvs.p.id,quantity:1,couponCode:'NOTREAL',shipping});assert.equal(bad.status,400);
+          const stack=await post({source:'rv',id:rvs.p.id,quantity:1,couponCode:'LABORDAY25,LABORDAY25',shipping});assert.equal(stack.status,400);assert.match(String(stack.body.error),/stack/i);
+          const manipulated=await post({source:'rv',id:rvs.p.id,quantity:1,couponCode:'LABORDAY25',priceCents:1,totalCents:1,name:'MANIPULATED',shipping});assert.equal(manipulated.status,200);assert.equal(manipulated.body.unitPriceCents,rvs.q.unitPriceCents);assert.equal(manipulated.body.totalCents,rvs.q.totalCents);assert.notEqual(manipulated.body.productName,'MANIPULATED');
+          const apparel=await post({source:'apparel',id:'qa-provider-exclusion',quantity:1,couponCode:'LABORDAY25'});assert.equal(apparel.status,409);assert.match(String(apparel.body.error),/Apparel/);
+          const bats=await findQuote(li,'lithium',(q)=>q.battery?.actualBattery===true&&q.battery?.batteryUnitsPerItem>=1);
+          const units=bats.q.battery.batteryUnitsPerItem;assert.equal(bats.q.shippingCents,2799*units);
+          const qtyEvidence=[];
+          for(const quantity of [1,2,3]){const q=await post({source:'lithium',id:bats.p.id,quantity,couponCode:'LABORDAY25',shipping});assert.equal(q.status,200);assert.equal(q.body.shippingCents,2799*units*quantity);assert.equal(q.body.discountCents,Math.round(q.body.listMerchandiseCents*.25));assert.equal(q.body.totalCents,q.body.merchandiseCents+q.body.shippingCents);qtyEvidence.push({quantity,unitsPerCatalogItem:units,shippingCents:q.body.shippingCents,totalCents:q.body.totalCents});}
+          const ak=await post({source:'lithium',id:bats.p.id,quantity:1,couponCode:'LABORDAY25',shipping:{...shipping,state:'AK'}});assert.equal(ak.status,409);assert.match(String(ak.body.error),/Alaska/i);
+          const hi=await post({source:'lithium',id:bats.p.id,quantity:1,couponCode:'LABORDAY25',shipping:{...shipping,state:'HI'}});assert.equal(hi.status,409);assert.match(String(hi.body.error),/Hawaii Lithium Program|separate shipping quote/i);
+          const lithiumManip=await post({source:'lithium',id:bats.p.id,quantity:1,couponCode:'LABORDAY25',priceCents:1,shipping});assert.equal(lithiumManip.status,200);assert.equal(lithiumManip.body.unitPriceCents,bats.p.priceCents);
+          console.log(JSON.stringify({catalog:{lithium:li.length,rv:rv.length},rvSample:{id:rvs.p.id,list:rvs.q.listMerchandiseCents,discount:rvs.q.discountCents,shipping:rvs.q.shippingCents,total:rvs.q.totalCents},batterySample:{id:bats.p.id,units,qtyEvidence},alaska:ak.body.error,hawaii:hi.body.error,apparel:apparel.body.error},null,2));
+          NODE
+          node runtime-qa.mjs
+
+      - name: Install Chromium QA
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Browser-test storefronts, Funnel, product detail, checkout, Hawaii and Marketplace
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          cat > browser-qa.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const get=async p=>{const r=await fetch(base+p);if(!r.ok)throw new Error(`${p}:${r.status}`);return r.json();};
+          const li=(await get('/api/store/catalog?section=lithium-batteries')).products;
+          const rv=(await get('/api/store-catalog?section=rv-outdoor')).products;
+          const imgs=p=>[p.primaryImage,...(Array.isArray(p.images)?p.images:[])].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i);
+          const liProduct=li.find(p=>p.promotion?.couponEligible&&imgs(p).length>1)||li.find(p=>p.promotion?.couponEligible)||li[0];
+          const rvProduct=rv.find(p=>p.promotion?.couponEligible&&imgs(p).length>1)||rv.find(p=>p.promotion?.couponEligible)||rv[0];
+          if(!liProduct||!rvProduct)throw new Error('product samples unavailable');
+          const browser=await chromium.launch({headless:true});
+          const evidence=[];
+          for(const [vp,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const page=await browser.newPage({viewport});const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+            const routes=['/','/lithium-batteries','/rv-store',`/product?id=${encodeURIComponent(liProduct.id)}&store=lithium`,`/product?id=${encodeURIComponent(rvProduct.id)}&store=rv`,`/checkout/?source=lithium&id=${encodeURIComponent(liProduct.id)}`,'/store','/hawaii-lithium-batteries','/marketplace'];
+            for(const route of routes){await page.goto(base+route,{waitUntil:'domcontentloaded'});await page.waitForTimeout(500);if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error(`${vp}:${route}:overflow`);}
+            await page.goto(base+'/',{waitUntil:'domcontentloaded'});await page.locator('.eus-labor-day-banner').waitFor({state:'visible'});if(await page.locator('.hc-route').count()!==6)throw new Error(`${vp}:funnel-route-count`);if(!((await page.locator('.eus-labor-day-banner').innerText()).includes('LABORDAY25')))throw new Error(`${vp}:promo-code-banner`);
+            for(const [store,p] of [['lithium',liProduct],['rv',rvProduct]]){await page.goto(`${base}/product?id=${encodeURIComponent(p.id)}&store=${store}`,{waitUntil:'domcontentloaded'});await page.locator('[data-product-detail]').waitFor({state:'visible'});const buy=page.locator('[data-buy-now]');if(await buy.isVisible()){const href=await buy.getAttribute('href');if(store==='lithium'&&!String(href).includes('source=lithium'))throw new Error(`${vp}:lithium-checkout-source`);}if(imgs(p).length>1&&await page.locator('[data-gallery-next]').isVisible()){const before=await page.locator('[data-product-image]').getAttribute('src');await page.locator('[data-gallery-next]').click();const after=await page.locator('[data-product-image]').getAttribute('src');if(before===after)throw new Error(`${vp}:${store}:gallery`);}}
+            await page.goto(`${base}/checkout/?source=lithium&id=${encodeURIComponent(liProduct.id)}`,{waitUntil:'domcontentloaded'});await page.locator('#checkout-coupon').waitFor({state:'visible'});await page.locator('#checkout-coupon').fill('LABORDAY25');await page.locator('#checkout-apply-coupon').click();await page.locator('#checkout-discount-row').waitFor({state:'visible',timeout:10000});if(!((await page.locator('#checkout-coupon-status').innerText()).includes('shipping is not discounted')))throw new Error(`${vp}:coupon-disclosure`);
+            await page.goto(base+'/store',{waitUntil:'domcontentloaded'});await page.locator('.eus-labor-day-banner').waitFor({state:'visible'});if(!((await page.locator('.eus-labor-day-banner').innerText()).includes('Apparel')))throw new Error(`${vp}:apparel-exclusion-banner`);
+            await page.goto(base+'/marketplace',{waitUntil:'domcontentloaded'});if(await page.locator('.eus-labor-day-banner').count())throw new Error(`${vp}:marketplace-promo-leak`);
+            await page.goto(base+'/hawaii-lithium-batteries',{waitUntil:'domcontentloaded'});await page.locator('[data-hawaii-request-form]').waitFor({state:'attached'});if(await page.locator('a[href*="source=lithium"]').count())throw new Error(`${vp}:hawaii-standard-checkout`);const htxt=(await page.locator('body').innerText()).toLowerCase();if(!htxt.includes('coming soon')&&!htxt.includes('shipping quote required'))throw new Error(`${vp}:hawaii-conservative-copy`);
+            if(errors.length)throw new Error(`${vp}:page-errors:${errors.join(';')}`);
+            evidence.push({vp,overflow:false,pageErrors:0,funnelRoutes:6,lithiumId:liProduct.id,rvId:rvProduct.id});await page.close();
+          }
+          await browser.close();console.log(JSON.stringify(evidence,null,2));
+          NODE
+          node browser-qa.mjs
+
+      - name: Final production isolation and preview PASS
+        env:
+          PREVIEW_BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS -L --fail "$CANONICAL_BASE/" -o /tmp/final-prod-home.html
+          ! grep -q 'labor-day-promo.js' /tmp/final-prod-home.html
+          echo '### Elevation 4.4 Labor Day — PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pricing, 45% Doba recovery rule, coupon, no-stacking, battery shipping, AK/HI blocks, PayPal breakdown, storefront/product-detail/checkout, Marketplace separation, and desktop/mobile QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Production remained: $EXPECTED_MAIN_SHA" >> "$GITHUB_STEP_SUMMARY"
