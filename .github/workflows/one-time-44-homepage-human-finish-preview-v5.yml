@@ -1,0 +1,204 @@
+name: One-Time Elevation 4.4 Homepage Human Finish Preview v5 Final
+
+on:
+  push:
+    branches: [deploy/4.4-homepage-human-finish-preview-v5-2026-08-31]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_MAIN_SHA: 310bafaeeef50fe2db09d53756e096b3c936611d
+      CANDIDATE_SHA: 8ba21b48559178a12ef8a8052fc69745ca66ba0e
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - uses: actions/checkout@v6
+        with: {fetch-depth: 0}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 0
+
+      - name: Verify lineage exact two-file scope copy and protected systems
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          git -C candidate merge-base --is-ancestor "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA"
+          git -C candidate diff --check "$EXPECTED_MAIN_SHA" "$CANDIDATE_SHA" -- site
+          changed=$(git -C candidate diff --name-only "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA")
+          echo "$changed"
+          test "$(echo "$changed" | wc -l)" -eq 2
+          echo "$changed" | grep -qx 'site/index.html'
+          echo "$changed" | grep -qx 'site/home-elevation-funnel.css'
+          for p in site/_worker.js site/promotion-runtime.js site/store-checkout-server.js site/store-checkout.js site/lithium-shop.js site/rv-store.js site/product-detail.js site/marketplace.html site/hawaii-lithium-runtime.js site/solar-project.html site/start-a-project.html site/apparel-provider-runtime.js site/doba-csv-sync-runtime.js; do
+            git -C candidate diff --quiet "$EXPECTED_MAIN_SHA"..."$CANDIDATE_SHA" -- "$p"
+          done
+          grep -q 'home-elevation-funnel.css?v=4.4.3' candidate/site/index.html
+          grep -q 'labor-day-promo.js?v=4.4.0' candidate/site/index.html
+          grep -q 'labor-day-promo.css?v=4.4.0' candidate/site/index.html
+          grep -q 'body.home-concept>section.eus-home-capabilities{display:none!important}' candidate/site/home-elevation-funnel.css
+          grep -q 'text-transform:none' candidate/site/home-elevation-funnel.css
+          for s in 'What are you here to do?' 'Need work done, planning solar, or shopping for gear?' 'Built from real work.' 'Shop what you need.' 'Need help with the project?' 'Projects come first.' 'Looking for a used RV, vehicle or gear?' 'Where we work.' 'What do you need next?' '208-813-4998'; do grep -q "$s" candidate/site/index.html; done
+          for phrase in 'complete lifestyle ecosystem' 'next-generation solutions' 'transformative experiences' 'seamless integrated platform' 'curated journey' 'innovative lifestyle solutions' 'same inventory system' 'Independent listings stay separate from Elevation retail'; do ! grep -qi "$phrase" candidate/site/index.html; done
+
+      - id: deploy
+        name: Deploy exact final candidate to preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy candidate/site --project-name=elevationupscales --branch=homepage-human-finish-preview-v5-2026-08-31
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify all customer routes preview APIs and production isolation
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_BASE%/}"
+          for route in / /start-a-project /home-services /rv-services /solar-services /solar-project /lithium-batteries /rv-store /store /marketplace /make-a-listing /hawaii-lithium-batteries /work-with-us /privacy /product /checkout /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/x -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = 200
+          done
+          for api in /api/admin/catalog /api/admin/inventory /api/admin/store-orders /api/admin/lithium-shipping /api/admin/promotion; do
+            code=$(curl -sS -o /tmp/x -w '%{http_code}' "$base$api" || true)
+            echo "$api=$code"
+            test "$code" = 401
+          done
+          curl -sS -L --fail "$base/" -o /tmp/ph
+          grep -q 'home-elevation-funnel.css?v=4.4.3' /tmp/ph
+          grep -q 'Need work done, planning solar, or shopping for gear?' /tmp/ph
+          grep -q 'labor-day-promo.js?v=4.4.0' /tmp/ph
+          curl -sS --fail "$base/api/store/promotion" -o /tmp/preview-p.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/preview-p.json'))
+          assert p['active'] is True
+          assert p['couponCode']=='LABORDAY25'
+          assert p['couponPercent']==25
+          assert p['batteryShippingCents']==2799
+          assert p['apparelEligible'] is False
+          PY
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          curl -sS -L --fail "$CANONICAL_BASE/" -o /tmp/prod
+          ! grep -q 'home-elevation-funnel.css?v=4.4.3' /tmp/prod
+          grep -q 'labor-day-promo.js?v=4.4.0' /tmp/prod
+          curl -sS --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/c.json
+          curl -sS --fail "$CANONICAL_BASE/api/store/promotion" -o /tmp/p.json
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/c.json'));p=json.load(open('/tmp/p.json'))
+          assert c.get('configured') is True and c.get('credentialsConfigured') is True
+          assert c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          assert p.get('active') is True and p.get('couponCode')=='LABORDAY25' and p.get('couponPercent')==25 and p.get('batteryShippingCents')==2799
+          PY
+
+      - name: Install Playwright library
+        run: npm install --no-save playwright@1.55.0
+
+      - name: Full desktop and mobile customer-facing acceptance
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || true)
+          test -n "$CHROME"
+          export CHROME
+          cat > browser.mjs <<'NODE'
+          import {chromium} from 'playwright';
+          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
+          const norm=v=>String(v??'').replace(/\s+/g,' ').trim();
+          const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox']});
+          const evidence=[];
+          const required=['Built from real work.','Shop what you need.','Need help with the project?','Projects come first.','Looking for a used RV, vehicle or gear?','Where we work.','What do you need next?','208-813-4998'];
+          const banned=['complete lifestyle ecosystem','next-generation solutions','transformative experiences','seamless integrated platform','curated journey','innovative lifestyle solutions','Independent listings stay separate from Elevation retail','same inventory system'];
+          for(const [vp,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
+            const page=await browser.newPage({viewport});
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:30000});
+            const title=page.locator('#home-route-title'); await title.waitFor({state:'visible',timeout:10000});
+            await page.waitForTimeout(1000);
+            const heroText=norm(await title.innerText());
+            if(heroText!=='What are you here to do?')throw new Error(`${vp}:hero-visible-case:${heroText}`);
+            const layout=await page.evaluate(()=>{
+              const box=sel=>{const e=document.querySelector(sel);if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{top:r.top,bottom:r.bottom,width:r.width,height:r.height,display:s.display,visibility:s.visibility}};
+              return{header:box('.eus-header'),promo:box('.eus-labor-day-banner'),legacy:box('.eus-home-capabilities'),main:box('main'),hero:box('.hc-hero'),grid:box('.hc-route-grid')};
+            });
+            if(!layout.legacy||layout.legacy.display!=='none'||layout.legacy.height!==0)throw new Error(`${vp}:legacy-capabilities-visible:${JSON.stringify(layout.legacy)}`);
+            const expectedMainMax=vp==='desktop'?250:300;
+            if(!layout.main||layout.main.top>expectedMainMax)throw new Error(`${vp}:main-too-low:${layout.main?.top}`);
+            const styles=await page.evaluate(()=>{
+              const pick=sel=>{const el=document.querySelector(sel),s=getComputedStyle(el);return{family:s.fontFamily,size:parseFloat(s.fontSize),weight:s.fontWeight,transform:s.textTransform,line:s.lineHeight,color:s.color}};
+              return{h1:pick('#home-route-title'),h2:pick('.hc-story-copy h2'),h3:pick('.hc-card h3')};
+            });
+            for(const [tag,s] of Object.entries(styles)){
+              if(/Impact|Haettenschweiler/i.test(s.family))throw new Error(`${vp}:${tag}:impact:${s.family}`);
+              if(s.transform!=='none')throw new Error(`${vp}:${tag}:transform:${s.transform}`);
+            }
+            if(vp==='desktop'&&styles.h1.size>74)throw new Error(`${vp}:hero-too-large:${styles.h1.size}`);
+            if(vp==='mobile'&&styles.h1.size>52)throw new Error(`${vp}:hero-too-large:${styles.h1.size}`);
+            const routes=page.locator('.hc-route'); if((await routes.count())!==6)throw new Error(`${vp}:route-count`);
+            const start=page.locator('.hc-route--primary'),solar=page.locator('.hc-route--tool'),market=page.locator('.hc-route--marketplace');
+            if((await start.count())!==1||(await solar.count())!==1||(await market.count())!==1)throw new Error(`${vp}:route-hierarchy`);
+            const firstBox=await routes.first().boundingBox(); if(!firstBox)throw new Error(`${vp}:route-hidden`);
+            if(firstBox.height<44||firstBox.width<44)throw new Error(`${vp}:route-small:${firstBox.width}x${firstBox.height}`);
+            if(vp==='desktop'&&firstBox.y>520)throw new Error(`${vp}:routes-too-low:${firstBox.y}`);
+            if(vp==='mobile'&&firstBox.y>540)throw new Error(`${vp}:routes-too-low:${firstBox.y}`);
+            const withinInitial=await routes.evaluateAll((els,h)=>els.filter(el=>{const r=el.getBoundingClientRect();return r.top<h&&r.bottom>0}).length,viewport.height);
+            if(vp==='desktop'&&withinInitial<3)throw new Error(`${vp}:too-few-routes-in-view:${withinInitial}`);
+            if(vp==='mobile'&&withinInitial<2)throw new Error(`${vp}:too-few-routes-in-view:${withinInitial}`);
+            if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error(`${vp}:overflow`);
+            const body=norm(await page.locator('body').innerText());
+            for(const text of required)if(!body.includes(text))throw new Error(`${vp}:missing-copy:${text}`);
+            for(const text of banned)if(body.toLowerCase().includes(text.toLowerCase()))throw new Error(`${vp}:banned-copy:${text}`);
+            if(body.includes('What We Do')&&body.includes('Tile & Showers')&&body.includes('Roof & Leak Inspections'))throw new Error(`${vp}:duplicate-capabilities-copy-visible`);
+            const paras=page.locator('main p:not(.hc-eyebrow)');
+            for(let i=0;i<await paras.count();i++){const t=norm(await paras.nth(i).innerText());if(t.length>300)throw new Error(`${vp}:overlong:${i}:${t.length}`);}
+            const targets=page.locator('.hc-route,.hc-shop-tile,.hc-card-links a,.hc-actions .button,.hc-quick-links a,.hc-story-media--marketplace');
+            const targetCount=await targets.count();
+            for(let i=0;i<targetCount;i++){
+              const el=targets.nth(i); if(!(await el.isVisible()))continue;
+              const b=await el.boundingBox(); if(!b||b.height<40||b.width<40)throw new Error(`${vp}:small-target:${i}:${b?.width}x${b?.height}`);
+            }
+            await start.focus();
+            const focus=await start.evaluate(el=>{const s=getComputedStyle(el);return{style:s.outlineStyle,width:s.outlineWidth,color:s.outlineColor}});
+            if(focus.style==='none'||parseFloat(focus.width)<2)throw new Error(`${vp}:focus:${JSON.stringify(focus)}`);
+            const links=['/start-a-project','/solar-project?source=home-elevation-funnel','/lithium-batteries','/rv-store','/marketplace'];
+            for(const href of links)if(!(await page.locator(`a[href="${href}"]`).count()))throw new Error(`${vp}:missing-route:${href}`);
+            if(errors.length)throw new Error(`${vp}:page-errors:${errors.join(';')}`);
+            evidence.push({vp,heroText,layout,typography:styles,firstRouteY:firstBox.y,routesInInitialViewport:withinInitial,routeCards:6,interactiveTargets:targetCount,focus,overflow:false,pageErrors:0});
+            await page.close();
+          }
+          await browser.close();
+          console.log(JSON.stringify(evidence,null,2));
+          NODE
+          node browser.mjs
+
+      - name: Final protected commerce storefront and lineage regression
+        env: {PREVIEW_BASE: '${{ steps.deploy.outputs.deployment-url }}'}
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          base="${PREVIEW_BASE%/}"
+          curl -sS -L --fail "$base/lithium-batteries" -o /tmp/li
+          curl -sS -L --fail "$base/rv-store" -o /tmp/rv
+          grep -q 'data-prerendered="true"' /tmp/li
+          grep -q 'data-prerendered="true"' /tmp/rv
+          code=$(curl -sS -L -o /tmp/m -w '%{http_code}' "$base/marketplace"); test "$code" = 200
+          code=$(curl -sS -L -o /tmp/s -w '%{http_code}' "$base/solar-project"); test "$code" = 200
+          code=$(curl -sS -L -o /tmp/pj -w '%{http_code}' "$base/start-a-project"); test "$code" = 200
+          curl -sS --fail "$CANONICAL_BASE/api/store/promotion" -o /tmp/p.json
+          curl -sS --fail "$CANONICAL_BASE/api/store-checkout/config" -o /tmp/c.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/p.json'));c=json.load(open('/tmp/c.json'))
+          assert p['active'] is True and p['couponCode']=='LABORDAY25' and p['couponPercent']==25 and p['batteryShippingCents']==2799 and p['apparelEligible'] is False
+          assert c.get('configured') is True and c.get('credentialsConfigured') is True and c.get('checkoutEnabled') is True and c.get('liveCheckoutApproved') is True and c.get('environment')=='live'
+          PY
+          echo 'FINAL HOMEPAGE HUMAN FINISH PREVIEW PASS — production unchanged.'
