@@ -6,6 +6,7 @@
   const id = String(params.get("id") || "").trim();
   const ebayUrl = String(params.get("ebay") || "").trim();
   const rvName = String(params.get("name") || "").trim();
+  const destinationHint = String(params.get("state") || "").trim().toUpperCase();
 
   const productEl = document.querySelector("#checkout-product");
   const productImageEl = document.querySelector("#checkout-product-image");
@@ -28,6 +29,13 @@
   const form = document.querySelector("#checkout-form");
   const successEl = document.querySelector("#checkout-success");
   const successReferenceEl = document.querySelector("#checkout-success-reference");
+  const retailerEl = document.querySelector("#checkout-lithium-retailer");
+  const shippingLabelEl = document.querySelector("#checkout-shipping-label");
+  const hawaiiPanel = document.querySelector("#checkout-hawaii-freight");
+  const hawaiiMath = document.querySelector("#checkout-hawaii-math");
+  const hawaiiReserve = document.querySelector("#checkout-hawaii-reserve");
+  const contactShippingLabel = document.querySelector("#checkout-contact-shipping-label");
+  const shippingFields = document.querySelector("#checkout-shipping-fields");
 
   let quote = null;
   let paypalButtons = null;
@@ -166,8 +174,20 @@
     merchandiseEl.textContent = money(next.merchandiseCents);
     if (discountRow && discountEl) { discountRow.hidden = !(Number(next.discountCents) > 0); discountEl.textContent = Number(next.discountCents) > 0 ? `-${money(next.discountCents)}` : money(0); }
     if (couponStatusEl) couponStatusEl.textContent = next.couponCode ? `${next.couponCode} applied — shipping is not discounted.` : (next.promotion?.active ? `Labor Day coupon available for eligible merchandise.` : "");
+    const isHawaii = Boolean(next.hawaii);
     shippingEl.textContent = money(next.shippingCents);
+    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Hawaii Consolidated Freight" : "Shipping";
     totalEl.textContent = money(next.totalCents);
+    if (retailerEl) retailerEl.hidden = source !== "lithium";
+    if (hawaiiPanel) hawaiiPanel.hidden = !isHawaii;
+    if (contactShippingLabel) contactShippingLabel.hidden = isHawaii;
+    if (shippingFields) shippingFields.hidden = isHawaii;
+    if (isHawaii) {
+      const batteryCount = Number(next.battery?.batteryUnitsPerItem || 1) * Number(next.quantity || 1);
+      if (hawaiiMath) hawaiiMath.textContent = `${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} × $99 = ${money(next.shippingCents)} Hawaii freight. Merchandise ${money(next.merchandiseCents)} + freight ${money(next.shippingCents)} = ${money(next.totalCents)} total before any applicable tax.`;
+      if (hawaiiReserve) hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request";
+      paypalEl.hidden = true;
+    }
     setProductImage(next.productImage, productName);
 
     const variants = Array.isArray(next.variants) ? next.variants : [];
@@ -200,7 +220,8 @@
     if (Array.isArray(body.variants) && body.variants.length && !body.variantId && variantEl.value) {
       return requestQuote();
     }
-    setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");
+    if (body.hawaii) setStatus("Hawaii consolidated-freight terms loaded. Reserve the order for freight coordination before payment.", "ready");
+    else setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");
     return body;
   }
 
@@ -329,8 +350,10 @@
     }
 
     try {
+      if (source === "lithium" && destinationHint === "HI") document.querySelector("#checkout-state").value = "HI";
       await requestQuote();
       if (!quote) return;
+      if (quote.hawaii) return;
       if (await loadPayPal()) {
         setStatus("Secure PayPal checkout ready.", "ready");
         await renderPayPal();

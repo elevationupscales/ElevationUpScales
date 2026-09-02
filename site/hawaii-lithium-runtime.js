@@ -13,6 +13,8 @@ const CUSTOMER_APPROVAL_STATES = new Set(["NOT REQUESTED","PENDING","APPROVED","
 const ALLOCATION_METHODS = new Set(["equal","per-unit","weight","volume","manual"]);
 const ISLANDS = new Set(["Oahu","Maui","Kauai","Hawaii Island / Big Island","Hawaii — General","Other / Confirm"]);
 const USES = new Set(["RV","Solar / Off-Grid","Home Backup","Marine","Van / Mobile Power","Other"]);
+const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900;
+const HAWAII_PREFERRED_CONSOLIDATION_UNITS = 3;
 const JSON_HEADERS = Object.freeze({"Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer"});
 
 const clean = (value, max = 500) => String(value ?? "").trim().slice(0, max);
@@ -316,21 +318,26 @@ async function publicStatus(request, env) {
   if(request.method!=="GET"&&request.method!=="HEAD")return json({error:"Method not allowed"},405,{Allow:"GET, HEAD"});
   const db=await ensureSchema(env); const url=new URL(request.url); const sku=clean(url.searchParams.get("sku"),180); const productId=clean(url.searchParams.get("productId"),120);
   const destination=clean(url.searchParams.get("island")||url.searchParams.get("destination"),80);
-  const unresolved={status:"SHIPPING OPTIONS BEING CONFIRMED",badge:"CHECKING HAWAII SHIPPING",eligible:false};
+  const commonBase={customerFreightPerBatteryCents:HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,preferredConsolidationUnits:HAWAII_PREFERRED_CONSOLIDATION_UNITS,warehousePickupOnly:true,consolidationDisclosure:"Orders of fewer than three compatible batteries may wait while Elevation combines compatible Hawaii orders. Three compatible batteries is the current preferred shipment target.",timingDisclosure:"Estimated shipment and pickup timing is not guaranteed."};
+  const unresolved={status:"SHIPPING OPTIONS BEING CONFIRMED",badge:"CHECKING HAWAII SHIPPING",eligible:false,...commonBase,consolidationStatus:"Awaiting consolidation / route review",estimatedPickupTiming:"Confirmed after consolidation and carrier scheduling"};
   if(!sku&&!productId)return json(unresolved);
   const record=productId?await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE catalog_product_id=? LIMIT 1").bind(productId).first():await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE sku=? COLLATE NOCASE LIMIT 1").bind(sku).first();
   if(!record||record.hold||record.review_state!=="INTERNAL REQUIREMENTS SATISFIED")return json(unresolved);
   let dest=null;
-  if(destination && ISLANDS.has(destination) && destination!=="Other / Confirm") {
-    dest=await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination IN (?, 'Hawaii — General') ORDER BY CASE WHEN destination=? THEN 0 ELSE 1 END LIMIT 1").bind(record.id,destination,destination).first();
-  } else {
-    dest=await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination='Hawaii — General' LIMIT 1").bind(record.id).first();
-  }
+  if(destination && ISLANDS.has(destination) && destination!=="Other / Confirm") dest=await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination IN (?, 'Hawaii — General') ORDER BY CASE WHEN destination=? THEN 0 ELSE 1 END LIMIT 1").bind(record.id,destination,destination).first();
+  else dest=await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination='Hawaii — General' LIMIT 1").bind(record.id).first();
+  let batch=null;
+  try { batch=await db.prepare(`SELECT b.status,b.terminal,b.estimated_departure_window,b.estimated_arrival_window FROM eus_hawaii_batch_orders bo JOIN eus_hawaii_shipping_batches b ON b.batch_id=bo.batch_id WHERE bo.sku=? COLLATE NOCASE AND bo.hold=0 AND b.status NOT IN ('COMPLETE','CANCELLED','HOLD') ORDER BY b.updated_at DESC LIMIT 1`).bind(record.sku).first(); } catch (_) {}
+  const batchState=upper(batch?.status||"");
+  const consolidationStatus=({"BUILDING":"Awaiting Consolidation","NEEDS VOLUME":"Awaiting Consolidation","QUOTE NEEDED":"Awaiting Consolidation","QUOTE RECEIVED":"Awaiting Consolidation","DOCS REVIEW":"Awaiting Consolidation","READY TO COMMIT":"Batch Ready","CUSTOMER CONFIRMATION":"Batch Ready","BOOKED":"Freight Scheduled","IN TRANSIT":"In Transit","ARRIVED":"Ready for Hawaii Pickup","DELIVERING":"Ready for Hawaii Pickup"})[batchState]||"Awaiting Consolidation";
+  const estimatedPickupTiming=clean(batch?.estimated_arrival_window,180)||"Confirmed after consolidation, carrier scheduling and Hawaii terminal availability";
+  const origin=clean(dest?.origin_location,180); const terminal=clean(batch?.terminal,180); const route=(origin&&terminal)?`${origin} → ${terminal}`:"";
+  const common={...commonBase,consolidationStatus,estimatedPickupTiming,...(route?{route}:{})};
   const state=dest?.eligibility_state||"NOT CHECKED";
-  if(state==="APPROVED")return json({status:"HAWAII SHIPPING AVAILABLE",badge:"HAWAII SHIPPING AVAILABLE",eligible:true,destination:dest.destination});
-  if(["QUOTE REQUIRED","CARRIER QUOTE NEEDED","QUOTE RECEIVED"].includes(state))return json({status:"HAWAII SHIPPING QUOTE REQUIRED",badge:"HAWAII SHIPPING QUOTE REQUIRED",eligible:false,destination:dest?.destination||destination||"Hawaii — General"});
-  if(state==="NOT ELIGIBLE"||state==="HOLD")return json({status:"CURRENTLY UNAVAILABLE FOR HAWAII",badge:"CURRENTLY UNAVAILABLE FOR HAWAII",eligible:false,destination:dest?.destination||destination||"Hawaii — General"});
-  return json({...unresolved,destination:dest?.destination||destination||"Hawaii — General"});
+  if(state==="APPROVED")return json({status:"HAWAII SHIPPING AVAILABLE",badge:"HAWAII SHIPPING AVAILABLE",eligible:true,destination:dest.destination,...common});
+  if(["QUOTE REQUIRED","CARRIER QUOTE NEEDED","QUOTE RECEIVED"].includes(state))return json({status:"HAWAII SHIPPING QUOTE REQUIRED",badge:"HAWAII SHIPPING QUOTE REQUIRED",eligible:false,destination:dest?.destination||destination||"Hawaii — General",...common});
+  if(state==="NOT ELIGIBLE"||state==="HOLD")return json({status:"CURRENTLY UNAVAILABLE FOR HAWAII",badge:"CURRENTLY UNAVAILABLE FOR HAWAII",eligible:false,destination:dest?.destination||destination||"Hawaii — General",...common});
+  return json({...unresolved,destination:dest?.destination||destination||"Hawaii — General",...common});
 }
 
 function quoteExpired(value) { const t=dateOnly(value); return t!==null && t < Date.now()-86400000; }

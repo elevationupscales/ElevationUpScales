@@ -7,6 +7,8 @@ const DEFAULT_CURRENCY = "USD";
 const APPAREL_MARKUP = 1.20;
 const APPAREL_SHIPPING_CENTS = 700;
 const MAX_QTY = 10;
+const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900;
+const HAWAII_PREFERRED_CONSOLIDATION_UNITS = 3;
 
 const JSON_HEADERS = Object.freeze({
   "Cache-Control": "no-store",
@@ -391,8 +393,7 @@ async function quoteRv(raw, env) {
   const priced = pricingForProduct(product, config);
   const actualBattery = source==="lithium" && isActualLithiumBattery(product);
   if (actualBattery && destinationState==="AK") return {ok:false,status:409,error:"Standard lithium battery checkout is not available to Alaska"};
-  if (actualBattery && destinationState==="HI") return {ok:false,status:409,error:"Hawaii lithium battery shipping requires the Hawaii Lithium Program and a separate shipping quote"};
-  if (destinationState && blockedStates.includes(destinationState)) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};
+  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};
   const qty = quantity(raw?.quantity);
   const unitPriceCents = Number.parseInt(String(priced.priceCents ?? entry.priceCents ?? ""),10);
   if (!Number.isInteger(unitPriceCents) || unitPriceCents < 1) return {ok:false,status:409,error:"Current Catalog price is unavailable for this item"};
@@ -400,7 +401,8 @@ async function quoteRv(raw, env) {
   const coupon = applyCoupon({couponCode:raw?.couponCode,listMerchandiseCents,eligible:Boolean(priced.promotion?.couponEligible),config});
   if (!coupon.ok) return coupon;
   const batteryUnitsPerItem = actualBattery ? batteryUnitsPerCatalogUnit(product) : 0;
-  const shippingPerCatalogItem = actualBattery ? config.batteryShippingCents * batteryUnitsPerItem : Number.parseInt(String(entry.shippingCents ?? ""),10);
+  const hawaiiFreight = actualBattery && destinationState === "HI";
+  const shippingPerCatalogItem = hawaiiFreight ? HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY * batteryUnitsPerItem : (actualBattery ? config.batteryShippingCents * batteryUnitsPerItem : Number.parseInt(String(entry.shippingCents ?? ""),10));
   if (!Number.isInteger(shippingPerCatalogItem) || shippingPerCatalogItem < 0) return {ok:false,status:409,error:"Doba shipping is not available for this item"};
   const shippingCents = shippingPerCatalogItem * qty;
   return {
@@ -408,7 +410,8 @@ async function quoteRv(raw, env) {
     unitPriceCents,listMerchandiseCents,discountCents:coupon.discountCents,merchandiseCents:coupon.merchandiseCents,shippingCents,totalCents:coupon.merchandiseCents+shippingCents,
     couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,
     variantId:"",variantName:"",variants:[],physical:true,
-    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?config.batteryShippingCents:0},
+    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?(hawaiiFreight?HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY:config.batteryShippingCents):0},
+    ...(hawaiiFreight?{hawaii:{customerFreightPerBatteryCents:HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,preferredConsolidationUnits:HAWAII_PREFERRED_CONSOLIDATION_UNITS,warehousePickupOnly:true,requiresReservation:true,consolidationStatus:qty*batteryUnitsPerItem>=HAWAII_PREFERRED_CONSOLIDATION_UNITS?"Batch quantity target reached — final logistics gates still apply":"Awaiting compatible consolidation",timing:"Estimated shipment / pickup timing — not guaranteed",requestUrl:`/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(clean(entry.name||raw?.name,240))}&qty=${qty}#hawaii-request`}}:{}),
     doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };
 }
@@ -512,6 +515,7 @@ async function createStoreOrder(request, env) {
   if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
   const quote = await quoteStoreItem(raw, env);
   if (!quote.ok) return json(quote, quote.status || 400);
+  if (quote.hawaii?.requiresReservation) return json({error:"Hawaii lithium orders use consolidated freight reservation before payment and carrier tender.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   const address = normalizeAddress(raw?.shipping);
   if (quote.physical && !validAddress(address)) return json({ error: "A valid U.S. shipping address is required" }, 400);
   let db;

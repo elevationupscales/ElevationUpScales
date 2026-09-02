@@ -22,6 +22,8 @@
   const specsEl = document.querySelector("[data-product-specs]");
   const relatedSection = document.querySelector("[data-related-section]");
   const relatedHost = document.querySelector("[data-related-products]");
+  const lithiumRetailer = document.querySelector("[data-lithium-retailer]");
+  const lithiumFreightLink = document.querySelector("[data-lithium-freight-link]");
   const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   const fallbackImage = "/assets/logo.webp";
   let galleryImages = [];
@@ -277,6 +279,9 @@
       buyNow.hidden = true; buyNow.removeAttribute("href");
       return;
     }
+    const lithiumProduct = sectionFor(product) === "lithium";
+    if (lithiumRetailer) lithiumRetailer.hidden = !lithiumProduct;
+    if (lithiumFreightLink) lithiumFreightLink.hidden = !lithiumProduct;
     categoryEl.textContent = displayCategory(product); titleEl.textContent = title; priceEl.textContent = money.format(Number(product.priceCents) / 100);
     shippingEl.textContent = shipping.label; shippingEl.className = `product-shipping ${shipping.className}`;
     const purchase = purchaseUrl(product);

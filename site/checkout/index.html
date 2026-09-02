@@ -8,9 +8,9 @@
   <title>Checkout | Elevation UpScales, Inc.</title>
   <link rel="icon" href="/assets/favicon.png" type="image/png">
   <link rel="stylesheet" href="/site-shell.css?v=3.11.30">
-  <link rel="stylesheet" href="/store-checkout.css?v=3.11.42b">
+  <link rel="stylesheet" href="/store-checkout.css?v=4.4.0">
   <script defer src="/site-shell.js?v=3.11.46"></script>
-  <script defer src="/store-checkout.js?v=3.11.42b"></script>
+  <script defer src="/store-checkout.js?v=4.4.0"></script>
   <script defer src="/store-variant-image-enhancer.js?v=3.11.43"></script>
 <link rel="stylesheet" href="/labor-day-promo.css?v=4.4.2">
 <script defer src="/labor-day-promo.js?v=4.4.2"></script>
@@ -32,6 +32,7 @@
       <div>
         <p class="eus-checkout-eyebrow">Elevation UpScales Store</p>
         <h1>Secure Checkout</h1>
+        <p id="checkout-lithium-retailer" class="eus-checkout-retailer" hidden>Elevation UpScales, Inc. · <strong>Licensed Lithium Battery Retailer</strong></p>
       </div>
       <div class="eus-checkout-trust" aria-label="Checkout security">
         <strong>PayPal</strong>
@@ -80,8 +81,8 @@
           <div class="eus-checkout-coupon-row"><label class="eus-checkout-field-wide"><span>Coupon code</span><input id="checkout-coupon" name="coupon" autocomplete="off" maxlength="40" placeholder="LABORDAY25"></label><button id="checkout-apply-coupon" class="eus-checkout-coupon-button" type="button">Apply</button></div>
           <p id="checkout-coupon-status" class="eus-checkout-coupon-status">25% off eligible Elevation merchandise. Shipping is excluded.</p>
 
-          <div class="eus-checkout-section-label">Contact & shipping</div>
-          <div class="eus-checkout-fields">
+          <div id="checkout-contact-shipping-label" class="eus-checkout-section-label">Contact &amp; shipping</div>
+          <div id="checkout-shipping-fields" class="eus-checkout-fields">
             <label class="eus-checkout-field-wide">
               <span>Full name</span>
               <input id="checkout-name" name="fullName" autocomplete="name" required>
@@ -129,9 +130,11 @@
           <div><dt>Merchandise list</dt><dd id="checkout-list-merchandise">—</dd></div>
           <div id="checkout-discount-row" hidden><dt>Coupon</dt><dd id="checkout-discount">—</dd></div>
           <div><dt>Merchandise after coupon</dt><dd id="checkout-merchandise">—</dd></div>
-          <div><dt>Shipping</dt><dd id="checkout-shipping">—</dd></div>
+          <div><dt id="checkout-shipping-label">Shipping</dt><dd id="checkout-shipping">—</dd></div>
           <div class="eus-checkout-total-row"><dt>Total</dt><dd id="checkout-total">—</dd></div>
         </dl>
+
+        <section id="checkout-hawaii-freight" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">HAWAII LITHIUM SHIPPING &amp; FREIGHT</p><h3>Warehouse Pickup Only</h3><p><strong>Hawaii Consolidated Freight — $99 per actual battery.</strong></p><p id="checkout-hawaii-math"></p><p>Orders of fewer than three compatible batteries may be held while Elevation combines them with other Hawaii battery orders. Three compatible batteries is the current preferred shipment target.</p><p><strong>Estimated Shipment / Pickup Timing — Not Guaranteed.</strong> Timing depends on consolidation, supplier inventory, documentation, packaging, carrier scheduling, mainland receiving, ocean freight and Hawaii terminal availability.</p><a id="checkout-hawaii-reserve" class="eus-checkout-hawaii-cta" href="/hawaii-lithium-batteries#hawaii-request">Request / Reserve Hawaii Freight</a></section>
 
         <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>
         <div id="checkout-paypal" class="eus-checkout-paypal" hidden></div>
@@ -144,5 +147,6 @@
       </section>
     </div>
   </main>
+  <footer class="eus-checkout-legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer>
 </body>
 </html>
