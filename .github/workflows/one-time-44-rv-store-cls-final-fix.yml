@@ -69,7 +69,7 @@ jobs:
           set -euo pipefail
           CHROME=$(command -v google-chrome || command -v google-chrome-stable || true)
           test -n "$CHROME"; export CHROME
-          cat > /tmp/cwv.mjs <<'NODE'
+          cat > cwv.mjs <<'NODE'
           import {chromium} from 'playwright';
           import assert from 'node:assert/strict';
           const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
@@ -113,7 +113,8 @@ jobs:
           console.log(JSON.stringify(evidence,null,2));
           await browser.close();
           NODE
-          node /tmp/cwv.mjs
+          node cwv.mjs
+          rm -f cwv.mjs
       - name: Final isolation check
         run: |
           set -euo pipefail
