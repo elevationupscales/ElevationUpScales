@@ -1,4 +1,4 @@
-name: One-Time Lithium Retail Hawaii Verification Correction
+name: One-Time Lithium Retail Hawaii Final Verification
 on:
   push:
     branches:
@@ -21,7 +21,7 @@ jobs:
           ref: 8267d94a6b27ea950c2ef3869598ae3c83189dee
           fetch-depth: 0
 
-      - name: Confirm candidate and production baseline
+      - name: Confirm exact candidate and production baseline
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$APP_SHA"
@@ -29,13 +29,16 @@ jobs:
           test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
           test "$(git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA" | wc -l)" -eq 15
 
-      - name: Restore verifier into repository root
-        run: git show "$VERIFY_SOURCE_SHA:scripts/one-time-lithium-hawaii-verify.mjs" > lithium-hawaii-verify.mjs
+      - name: Restore corrected verifier in repository root
+        run: |
+          set -euo pipefail
+          git show "$VERIFY_SOURCE_SHA:scripts/one-time-lithium-hawaii-verify.mjs" > lithium-hawaii-verify.mjs
+          python3 -c "from pathlib import Path; p=Path('lithium-hawaii-verify.mjs'); p.write_text(p.read_text().replace('.innerText()', '.textContent()'))"
 
       - name: Install browser verifier
         run: npm install --no-save playwright@1.55.0
 
-      - name: Rerun targeted verification once
+      - name: Run final targeted verification
         run: |
           set -euo pipefail
           export CHROME="$(command -v google-chrome || command -v google-chrome-stable || true)"
