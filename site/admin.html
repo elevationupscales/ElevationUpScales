@@ -5,18 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#070707">
-<title>Admin Command Center | Elevation UpScales, Inc.</title>
+<title>Operations Interface 2.0 | Elevation UpScales, Inc.</title>
 <link rel="stylesheet" href="/styles.css?v=3.5.0">
 <link rel="stylesheet" href="/admin-command-center.css?v=4.3.4" data-eus-command-center-css>
-<script defer src="/admin-command-center.js?v=4.3.4"></script>
-<script defer src="/admin-overview.js?v=4.3.4"></script>
+<link rel="stylesheet" href="/admin-operations-2.css?v=2.0.0">
+<script defer src="/admin-command-center.js?v=2.0.0"></script>
+<script defer src="/admin-overview.js?v=2.0.0"></script>
 </head>
-<body class="admin-framework-page">
+<body class="admin-framework-page operations-interface-2-page">
 <main class="eus-admin-page">
 <section class="eus-admin-auth" id="eus-admin-auth">
   <span class="eus-admin-kicker">Elevation UpScales, Inc.</span>
-  <h2>Admin Command Center</h2>
-  <p>One protected entry point for orders, products, shipping, leads, Marketplace operations and business analytics.</p>
+  <h2>Operations Interface 2.0</h2>
+  <p>Protected owner view for current business state, priorities and operating actions.</p>
   <form id="eus-admin-login-form" action="/api/admin/login" method="post">
     <label>Email<input name="email" type="email" autocomplete="username" required placeholder="elevationupscales@gmail.com"></label>
     <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
@@ -24,45 +25,98 @@
   </form>
   <p class="eus-admin-statusline" id="eus-admin-login-status" role="status"></p>
 </section>
+
 <section id="eus-admin-overview" hidden>
-<header class="eus-admin-page__head">
-  <div><span class="eus-admin-kicker">Operator Overview</span><h1>Admin Command Center</h1><p>Action-first control center for selling, fulfillment, lead follow-up and first-party business performance.</p></div>
-  <div class="eus-admin-actions"><button class="eus-admin-button" id="eus-admin-refresh" type="button">Refresh</button><a class="eus-admin-button" href="/">Public Site</a><button class="eus-admin-button" id="eus-admin-logout" type="button">Log Out</button></div>
+<header class="eus-admin-page__head eus-ops-head">
+  <div>
+    <span class="eus-admin-kicker">Owner Operations</span>
+    <h1>Operations Interface 2.0</h1>
+    <p>See the situation, identify the priority, then go straight to the action.</p>
+  </div>
+  <div class="eus-admin-actions">
+    <button class="eus-admin-button" id="eus-admin-refresh" type="button">Refresh</button>
+    <a class="eus-admin-button" href="/admin-analytics">Analytics</a>
+    <button class="eus-admin-button" id="eus-admin-logout" type="button">Log Out</button>
+  </div>
 </header>
 <p class="eus-admin-statusline" id="eus-overview-status" aria-live="polite">Loading current operations…</p>
 
-<section>
-  <span class="eus-admin-kicker">Needs Action</span>
-  <div class="eus-action-board" id="eus-action-board"><div class="eus-empty">Loading operational exceptions…</div></div>
-</section>
-
-<section class="eus-section">
-  <div class="eus-section__head"><div><span class="eus-admin-kicker">Business Pulse</span><h2>Sales, leads and fulfillment</h2><p>Stored first-party data only. Unknown information is shown as N/A rather than zero.</p></div><a class="eus-admin-button" href="/admin-analytics">Open Analytics</a></div>
-  <div class="eus-metric-grid" id="eus-overview-metrics"></div>
-</section>
-
-<section class="eus-section">
-  <div class="eus-section__head"><div><span class="eus-admin-kicker">Sell</span><h2>Store operations</h2><p>Add products, control availability, fulfill orders and manage shipping from one operating path.</p></div></div>
-  <div class="eus-work-grid">
-    <a class="eus-work-card" href="/admin-promotion"><strong>Pricing & Promotions</strong><span>Labor Day pricing, coupon state, eligibility, exclusions and clean deactivation.</span></a>
-    <a class="eus-work-card" href="/admin-catalog"><strong>Products & Listings</strong><span>Doba, eBay, Fourthwall, CSV/TSV, pasted tables, URLs and manual products.</span></a>
-    <a class="eus-work-card" href="/admin-store-orders"><strong>Orders & Fulfillment</strong><span>Supplier purchase, tracking, shipping issues, refunds and completion.</span></a>
-    <a class="eus-work-card" href="/admin-inventory"><strong>Inventory</strong><span>Physical stock and supplier-managed availability remain separate.</span></a>
-    <a class="eus-work-card" href="/admin-channels"><strong>Channels & Sync</strong><span>Website, eBay, TikTok Shop, Fourthwall and Doba product relationships.</span></a>
-    <a class="eus-work-card" href="/admin-lithium-shipping"><strong>Shipping & Logistics</strong><span>Hawaii reservations, route evidence, freight batches, blockers and advanced lithium controls.</span></a>
-    <a class="eus-work-card" href="/admin-listings#marketplace"><strong>Marketplace Listings</strong><span>Independent seller listings remain separate from Elevation Store inventory.</span></a>
+<section class="eus-ops-stage eus-ops-stage--situation" aria-labelledby="ops-situation-title">
+  <div class="eus-ops-stage__head">
+    <div><span class="eus-ops-step">01 · Situation</span><h2 id="ops-situation-title">What is the business state?</h2></div>
+    <p>Current first-party operating data. Unknown values stay N/A.</p>
+  </div>
+  <div class="eus-ops-situation-grid" id="eus-situation-grid" aria-live="polite">
+    <article class="eus-ops-situation-card"><span>Orders</span><strong>—</strong><small>Loading fulfillment state</small></article>
+    <article class="eus-ops-situation-card"><span>Revenue</span><strong>—</strong><small>Loading stored orders</small></article>
+    <article class="eus-ops-situation-card"><span>Leads</span><strong>—</strong><small>Loading active opportunities</small></article>
+    <article class="eus-ops-situation-card"><span>Catalog</span><strong>—</strong><small>Loading product state</small></article>
+    <article class="eus-ops-situation-card"><span>Channels</span><strong>—</strong><small>Loading sync state</small></article>
+    <article class="eus-ops-situation-card"><span>Shipping</span><strong>—</strong><small>Loading Hawaii / lithium state</small></article>
+    <article class="eus-ops-situation-card"><span>Marketplace</span><strong>—</strong><small>Loading listing state</small></article>
+    <article class="eus-ops-situation-card"><span>Website</span><strong>—</strong><small>Loading stored health signal</small></article>
+    <article class="eus-ops-situation-card"><span>Promotion</span><strong>—</strong><small>Loading current promotion state</small></article>
   </div>
 </section>
 
+<section class="eus-ops-stage eus-ops-stage--priority" aria-labelledby="ops-priority-title">
+  <div class="eus-ops-stage__head">
+    <div><span class="eus-ops-step">02 · Priority</span><h2 id="ops-priority-title">What needs attention now?</h2></div>
+    <p>Exception-driven queue built from existing order, lead, catalog, sync and shipping records.</p>
+  </div>
+  <div class="eus-ops-priority-summary" id="eus-priority-summary"><strong>—</strong><span>Loading actionable exceptions…</span></div>
+  <div class="eus-action-board eus-ops-priority-board" id="eus-action-board"><div class="eus-empty">Loading operational exceptions…</div></div>
+</section>
+
+<section class="eus-ops-stage eus-ops-stage--action" aria-labelledby="ops-action-title">
+  <div class="eus-ops-stage__head">
+    <div><span class="eus-ops-step">03 · Action</span><h2 id="ops-action-title">Where do you need to work?</h2></div>
+    <p>Open the existing operating surface. No duplicate records or replacement workflows.</p>
+  </div>
+  <div class="eus-ops-action-grid">
+    <a class="eus-ops-action-link is-primary" href="/admin-store-orders"><span>Fulfillment</span><strong>Orders &amp; Fulfillment</strong><small>Supplier purchase, tracking, holds, refunds and completion.</small></a>
+    <a class="eus-ops-action-link" href="/admin-catalog"><span>Commerce</span><strong>Catalog &amp; Products</strong><small>Publishing readiness, supplier truth, cost, price and product review.</small></a>
+    <a class="eus-ops-action-link" href="/admin-inventory"><span>Commerce</span><strong>Inventory</strong><small>Tracked stock, reserved units, low stock and supplier-managed records.</small></a>
+    <a class="eus-ops-action-link" href="/admin-channels"><span>Commerce</span><strong>Channels &amp; Sync</strong><small>Doba, eBay, TikTok Shop, Fourthwall and website relationships.</small></a>
+    <a class="eus-ops-action-link" href="/admin-lithium-shipping"><span>Logistics</span><strong>Shipping &amp; Hawaii</strong><small>Reservations, supplier rechecks, blockers, confirmations and batches.</small></a>
+    <a class="eus-ops-action-link is-primary" href="/admin-listings#leads"><span>Customer</span><strong>Leads</strong><small>Assignments, next actions, follow-up and project opportunity state.</small></a>
+    <a class="eus-ops-action-link" href="/admin-listings#marketplace"><span>Marketplace</span><strong>Marketplace Operations</strong><small>Listing review, activity, seller records and submission issues.</small></a>
+    <a class="eus-ops-action-link" href="/admin-promotion"><span>Commerce</span><strong>Promotions</strong><small>Open the existing protected promotion controls.</small></a>
+    <a class="eus-ops-action-link" href="/admin-listings#solar"><span>Program</span><strong>Solar</strong><small>Builder funnel, stored solar leads, follow-up and completed builds.</small></a>
+    <a class="eus-ops-action-link" href="/admin-system"><span>System</span><strong>Website / QA</strong><small>Stored website, backend, lead-core and notification health signals.</small></a>
+    <a class="eus-ops-action-link" href="/admin-listings#leads"><span>Field Ops</span><strong>Technician Portal Handoffs</strong><small>See won projects already in Portal and records ready for handoff.</small></a>
+    <a class="eus-ops-action-link" href="/admin-analytics"><span>Performance</span><strong>Analytics</strong><small>First-party business activity and market signals.</small></a>
+  </div>
+</section>
+
+<section class="eus-ops-secondary-grid" aria-label="Operating detail">
+  <section class="eus-section eus-ops-programs">
+    <div class="eus-section__head"><div><span class="eus-admin-kicker">Program Status</span><h2>Customer, Marketplace, Solar &amp; Portal</h2><p>Compact status from existing opportunity and operations records.</p></div></div>
+    <div class="eus-ops-program-grid" id="eus-program-status">
+      <article><span>Marketplace</span><strong>—</strong><small>Loading…</small></article>
+      <article><span>Solar</span><strong>—</strong><small>Loading…</small></article>
+      <article><span>Technician Portal</span><strong>—</strong><small>Loading handoff state…</small></article>
+      <article><span>Lead Core</span><strong>—</strong><small>Loading…</small></article>
+    </div>
+  </section>
+
+  <section class="eus-section eus-ops-business-pulse">
+    <div class="eus-section__head"><div><span class="eus-admin-kicker">Business Activity</span><h2>Revenue, inventory &amp; lead pulse</h2><p>Only values supported by stored first-party data are shown.</p></div><a class="eus-admin-button" href="/admin-analytics">Open Analytics</a></div>
+    <div class="eus-metric-grid" id="eus-overview-metrics"></div>
+  </section>
+</section>
+
 <section class="eus-section">
-  <div class="eus-section__head"><div><span class="eus-admin-kicker">Lead Control</span><h2>Lead path health</h2><p>Active customer opportunities should always have an owner and a meaningful next action.</p></div><a class="eus-admin-button" href="/admin-listings#leads">Open Lead Queue</a></div>
+  <div class="eus-section__head"><div><span class="eus-admin-kicker">Lead Control</span><h2>Lead path health</h2><p>Active opportunities should have an owner and a meaningful next action.</p></div><a class="eus-admin-button" href="/admin-listings#leads">Open Lead Queue</a></div>
   <div class="eus-metric-grid" id="eus-lead-health"></div>
 </section>
 
 <section class="eus-section">
-  <div class="eus-section__head"><div><span class="eus-admin-kicker">Recent Orders</span><h2>Latest commerce activity</h2></div><a class="eus-admin-button" href="/admin-store-orders">All Orders</a></div>
+  <div class="eus-section__head"><div><span class="eus-admin-kicker">Recent Orders</span><h2>Latest commerce activity</h2><p>Stored order records, newest first.</p></div><a class="eus-admin-button" href="/admin-store-orders">All Orders</a></div>
   <div class="eus-admin-table-wrap"><table class="eus-admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Store</th><th>Total</th><th>Fulfillment</th></tr></thead><tbody id="eus-recent-orders"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
 </section>
+
+<p class="eus-ops-data-note" id="eus-ops-data-note">Operations Interface 2.0 reuses current Admin APIs and business records; it does not create a second operations database.</p>
 </section>
 </main>
 </body>
