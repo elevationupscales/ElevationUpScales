@@ -1,217 +1,35 @@
-name: One-Time Lithium Retail + Hawaii Logistics Final
+name: One-Time Lithium Retail Hawaii Final
 on:
   push:
-    branches: [release/lithium-retail-hawaii-logistics-2026-09-02]
+    branches:
+      - release/lithium-retail-hawaii-logistics-2026-09-02
 permissions:
   contents: write
   deployments: write
 jobs:
-  implement-verify-deploy:
+  closeout:
     runs-on: ubuntu-24.04
     env:
       BASE_MAIN_SHA: c05b245bfa2af8e759507e8d78995f2819600936
       RELEASE_BRANCH: release/lithium-retail-hawaii-logistics-2026-09-02
-      WORKFLOW_PATH: .github/workflows/one-time-lithium-retail-hawaii-final.yml
     steps:
-      - name: Checkout current release branch
+      - name: Checkout release branch
         uses: actions/checkout@v6
         with:
           ref: release/lithium-retail-hawaii-logistics-2026-09-02
           fetch-depth: 0
 
-      - name: Verify accepted production baseline
+      - name: Verify production baseline
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
 
-      - name: Implement approved lithium retail and Hawaii logistics scope
+      - name: Build exact application candidate
         run: |
           set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-          import re
-
-          def read(path): return Path(path).read_text()
-          def write(path, text): Path(path).write_text(text)
-          def replace_once(text, old, new, label):
-              if old not in text:
-                  raise SystemExit(f"missing replacement target: {label}")
-              return text.replace(old, new, 1)
-
-          # Lithium storefront identity + integrated shipping language.
-          p='site/lithium-batteries.html'; s=read(p)
-          s=s.replace('<strong>Hawaii Lithium Program</strong><small>Coming soon · request shipping availability</small>','<strong>Lithium Shipping &amp; Freight</strong><small>Hawaii consolidated freight · Alaska quote options</small>')
-          s=replace_once(s,'<p class="eyebrow">ELEVATION UPSCALES · LITHIUM BATTERY SHOP</p>','<p class="eyebrow">ELEVATION UPSCALES · LITHIUM BATTERY SHOP</p><p class="lithium-retailer-badge"><strong>LICENSED LITHIUM BATTERY RETAILER</strong></p>','lithium retailer hero')
-          s=s.replace('Prices and availability can change. Shipping depends on the exact product and destination. Hawaii availability is handled separately through the Hawaii Lithium Program.','Prices and availability can change. Shipping depends on the exact product and destination. <a href="/hawaii-lithium-batteries">Shipping to Alaska or Hawaii? See lithium shipping &amp; freight options.</a>')
-          s=s.replace('<p class="eyebrow">HAWAII LITHIUM PROGRAM · COMING SOON</p><h2>Need a battery shipped to Hawaii?</h2><p>Request the exact battery and destination. Elevation will confirm availability, route and shipping cost before any Hawaii order moves forward.</p><a class="button button-outline" href="/hawaii-lithium-batteries">Request Hawaii Availability →</a>','<p class="eyebrow">LITHIUM SHIPPING &amp; FREIGHT</p><h2>Shipping to Alaska or Hawaii?</h2><p>Hawaii lithium batteries use consolidated freight at <strong>$99 per actual battery</strong> with warehouse or freight-terminal pickup. Alaska routing remains quote required where exact service and pricing have not been verified.</p><a class="button button-outline" href="/hawaii-lithium-batteries">View Shipping &amp; Freight Options →</a>')
-          s=s.replace('<a href="/privacy">Privacy</a>','<a href="/privacy">Privacy</a><a href="/terms">Terms</a>')
-          write(p,s)
-
-          # Hawaii customer page: active integrated freight program, no duplicate store.
-          p='site/hawaii-lithium-batteries.html'; s=read(p)
-          s=s.replace('<title>Hawaii Lithium Shipping — Coming Soon | Elevation UpScales</title>','<title>Hawaii Lithium Shipping &amp; Freight | Elevation UpScales</title>')
-          s=s.replace('Reserve a lithium battery or request Hawaii shipping availability through the Elevation UpScales Hawaii Lithium Program.','View current Elevation lithium inventory and request Hawaii consolidated freight at $99 per actual battery with warehouse pickup.')
-          s=s.replace('<strong>Hawaii Lithium Program</strong><small>Coming soon · reservations and shipping availability</small>','<strong>Lithium Shipping &amp; Freight</strong><small>Hawaii consolidated freight · warehouse pickup</small>')
-          s=re.sub(r'<section class="hawaii-program-hero">.*?</section>', '''<section class="hawaii-program-hero"><div class="container"><p class="eyebrow">ELEVATION UPSCALES, INC.</p><p class="hawaii-license"><strong>LICENSED LITHIUM BATTERY RETAILER</strong></p><h1>Hawaii Lithium Shipping &amp; Freight</h1><p class="hawaii-program-hero__copy">Shop the same Elevation Lithium Store inventory and use our consolidated Hawaii freight path for eligible large lithium batteries. Merchandise and freight stay separate, and every shipment remains subject to exact product, documentation, packaging, gross-weight, carrier-acceptance and scheduling checks.</p><div class="lithium-actions"><a class="button button-primary" href="#hawaii-products">View Hawaii Battery Inventory</a><a class="button button-outline" href="#hawaii-request">Request / Reserve</a><a class="text-link-inline" href="#how-it-works">How the Freight Process Works →</a></div><div class="hawaii-batch-banner"><p class="eyebrow">HAWAII CONSOLIDATED FREIGHT</p><h3>$99 per actual battery · Warehouse / Freight-Terminal Pickup Only</h3><p>1 battery = $99 freight · 2 batteries = $198 · 3 batteries = $297. Three compatible batteries is the current preferred consolidated-shipment target, but customers may request one, two or three. Orders of fewer than three compatible batteries may wait while Elevation combines compatible Hawaii orders.</p><p><strong>Estimated Shipment / Pickup Timing — Not Guaranteed.</strong> Final movement depends on exact battery compatibility, required documentation, packaging, actual packed gross weight, carrier acceptance and freight scheduling.</p></div></div></section>''',s,count=1,flags=re.S)
-          s=s.replace('<p class="eyebrow">HOW IT WORKS</p><h2>Building a dependable Hawaii shipping process.</h2><p>Elevation reviews each exact battery and destination before presenting a supported Hawaii shipping option. Our company process tracks product identity, available documentation, packaging information, supplier origin, freight-provider requirements, destination handling, and current pricing.</p>','<p class="eyebrow">EXPANDING ACCESS TO OFF-GRID POWER IN HAWAII</p><h2>One Lithium Store. One coordinated Hawaii freight path.</h2><p>Large lithium batteries require specialized transportation that ordinary parcel networks often cannot provide to Hawaii. Elevation coordinates exact SKU verification, supplier availability, required SDS/MSDS and UN38.3 information where applicable, packaging and gross-weight review, mainland receiving, consolidation, freight booking, Hawaii terminal coordination and pickup notification.</p>')
-          s=s.replace('<strong>1 · Request or Reserve</strong><p>Tell us which battery you need, your island, ZIP code, quantity, and intended use.</p>','<strong>1 · Choose / Request</strong><p>Select a current Catalog battery, quantity and Hawaii destination. The merchandise price remains separate from Hawaii freight.</p>')
-          s=s.replace('<strong>2 · We Confirm the Product &amp; Route</strong><p>We review the exact battery, supplier availability, destination, freight option, documentation, and current shipping cost.</p>','<strong>2 · Elevation Verifies the Freight File</strong><p>We confirm the exact product, supplier availability, documentation, packaging, packed weight, route and carrier acceptance before tender.</p>')
-          s=s.replace('<strong>3 · Join a Hawaii Shipment</strong><p>Compatible reservations can be grouped into an upcoming Hawaii freight shipment. We confirm timing and your final shipping amount before the order moves forward.</p>','<strong>3 · Consolidate &amp; Pick Up</strong><p>Compatible reservations are grouped toward a preferred three-battery shipment. After Hawaii arrival, customers receive terminal or warehouse release and pickup instructions.</p>')
-          s=s.replace('<p class="eyebrow">EARLY ACCESS</p><h2>Request Hawaii availability.</h2><p>Reserve interest in a battery now and help us prioritize which battery sizes and islands should move first. This is an availability request, not a guaranteed order, and submitting it does not charge you.</p><p class="hawaii-request-disclosure">For routes still being established, Elevation may keep your request as an unpaid reservation until the exact product, supplier availability, route, shipping cost, and expected timing are ready for your confirmation.</p>','<p class="eyebrow">HAWAII FREIGHT REQUEST / RESERVATION</p><h2>Reserve a battery for Hawaii freight review.</h2><p>This request uses the existing Elevation Lithium Store and Hawaii logistics records. It does not create a separate Hawaii product or inventory record, and submitting it does not charge you.</p><p class="hawaii-request-disclosure"><strong>Hawaii lithium batteries move through consolidated freight.</strong> Orders of fewer than three compatible batteries may be held while Elevation combines them with other Hawaii battery orders. Three compatible batteries is the current preferred shipment target.</p>')
-          s=s.replace('Submitting this form reserves your place for review. It does not charge you, guarantee availability, guarantee a ship date, or establish a final shipping price.','Submitting this form reserves your place for freight review. It does not charge you or guarantee a ship or pickup date. Hawaii consolidated freight is currently $99 per actual battery; extraordinary route changes are disclosed before any additional charge or shipment tender.')
-          s=s.replace('Reserve for Next Hawaii Shipment</button>','Request / Reserve Hawaii Freight</button>')
-          s=s.replace('<p class="eyebrow">HAWAII BATTERY OPTIONS</p><h2>Lithium Batteries for Hawaii</h2>','<p class="eyebrow">LIVE ELEVATION LITHIUM CATALOG</p><h2>Current Battery Inventory for Hawaii Requests</h2>')
-          s=s.replace('Prices and availability may change. Hawaii shipping depends on the exact battery and destination. Elevation will confirm the applicable shipping option before an order moves forward.','These cards use the existing Elevation Lithium Catalog. Inventory is not duplicated for Hawaii. Hawaii freight is $99 per actual battery; warehouse pickup only. Current route, consolidation and timing details appear where existing logistics records support them.')
-          s=s.replace('<a href="/privacy">Privacy</a>','<a href="/privacy">Privacy</a><a href="/terms">Terms</a>')
-          s=s.replace('hawaii-lithium-program.css?v=4.3.2','hawaii-lithium-program.css?v=4.4.0').replace('lithium-shop.js?v=4.3.3','lithium-shop.js?v=4.4.4').replace('hawaii-lithium-program.js?v=4.3.2','hawaii-lithium-program.js?v=4.4.0')
-          write(p,s)
-
-          # Hawaii card presentation on the existing Catalog renderer.
-          p='site/lithium-shop.js'; s=read(p)
-          s=replace_once(s,'    const defaultShipping = hawaiiMode ? { label: "Hawaii availability by request", className: "is-researching" } : shipping;','    const defaultShipping = hawaiiMode ? { label: "Hawaii freight review", className: "is-researching" } : shipping;\n    const inventory = Number.isFinite(Number(product.supplierStock)) ? `${Math.max(0, Number(product.supplierStock))} available` : "Supplier-managed availability";','hawaii inventory label')
-          s=replace_once(s,'    const actionMarkup = hawaiiMode\n      ? `<a class="button button-primary" href="#hawaii-request">Request Shipping Availability</a>`\n      : `<div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" href="${esc(checkoutUrl)}">Buy Now</a></div>`;','    const actionMarkup = hawaiiMode\n      ? `<div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" href="${esc(checkoutUrl + "&state=HI")}">Review Hawaii Freight</a></div>`\n      : `<div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" href="${esc(checkoutUrl)}">Buy Now</a></div>`;','hawaii card actions')
-          s=replace_once(s,'        <div class="lithium-card__footer"><strong>${money.format(Number(product.priceCents || 0) / 100)}</strong>${actionMarkup}</div>\n        ${hawaiiMode ? `<a class="lithium-reserve-link" href="#hawaii-request" data-reserve-product="${esc(view.rawTitle || view.title)}">Request Hawaii Availability →</a>` : ""}','        <div class="lithium-card__footer"><strong>${money.format(Number(product.priceCents || 0) / 100)}</strong>${actionMarkup}</div>\n        ${hawaiiMode ? `<div class="hawaii-card-facts"><p><strong>Inventory</strong><span>${esc(inventory)}</span></p><p><strong>Hawaii Freight</strong><span>$99 per actual battery</span></p><p><strong>Preferred Shipment</strong><span>3 compatible batteries</span></p><p data-hawaii-batch><strong>Current Batch / Consolidation Status</strong><span>Checking current freight record…</span></p><p data-hawaii-timing><strong>Estimated Pickup Timing — Not Guaranteed</strong><span>Confirmed during freight coordination</span></p><p data-hawaii-route hidden><strong>Current Freight Route</strong><span></span></p><p><strong>Delivery Method</strong><span>Warehouse / freight-terminal pickup only</span></p></div><a class="lithium-reserve-link" href="#hawaii-request" data-reserve-product="${esc(view.rawTitle || view.title)}">Request / Reserve →</a>` : ""}','hawaii card facts')
-          sync_new='''  async function syncStatus(cardEl) {
-    const sku = String(cardEl.dataset.hawaiiSku || "").trim();
-    const badge = cardEl.querySelector("[data-hawaii-status]");
-    if (!sku || !badge) return;
-    if (!hawaiiMode) {
-      const shipping = lower48Shipping({ shippingStatus: cardEl.dataset.shippingStatus || "unverified" });
-      badge.className = `lithium-card__shipping ${shipping.className}`;
-      badge.textContent = shipping.label;
-      return;
-    }
-    const batchEl = cardEl.querySelector("[data-hawaii-batch] span");
-    const timingEl = cardEl.querySelector("[data-hawaii-timing] span");
-    const routeRow = cardEl.querySelector("[data-hawaii-route]");
-    const routeEl = routeRow?.querySelector("span");
-    try {
-      const response = await fetch(`/api/hawaii-lithium/status?sku=${encodeURIComponent(sku)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
-      const data = await response.json().catch(() => ({}));
-      badge.className = "lithium-card__shipping";
-      if (response.ok && data.status === "HAWAII SHIPPING AVAILABLE" && data.eligible === true) {
-        badge.classList.add("is-approved"); badge.textContent = "Hawaii Shipping Available";
-      } else if (response.ok && data.status === "HAWAII SHIPPING QUOTE REQUIRED") {
-        badge.classList.add("is-quote"); badge.textContent = "Hawaii Freight Review Required";
-      } else if (response.ok && data.status === "CURRENTLY UNAVAILABLE FOR HAWAII") {
-        badge.classList.add("is-researching"); badge.textContent = "Currently unavailable for Hawaii";
-      } else {
-        badge.classList.add("is-researching"); badge.textContent = "Hawaii freight review";
-      }
-      if (batchEl) batchEl.textContent = data.consolidationStatus || "Awaiting consolidation / route review";
-      if (timingEl) timingEl.textContent = data.estimatedPickupTiming || "Confirmed after consolidation and carrier scheduling";
-      if (routeRow && routeEl && data.route) { routeEl.textContent = data.route; routeRow.hidden = false; }
-    } catch (_) {
-      badge.className = "lithium-card__shipping is-researching";
-      badge.textContent = "Hawaii freight review";
-      if (batchEl) batchEl.textContent = "Current freight record unavailable";
-    }
-  }
-'''
-          s=re.sub(r'  async function syncStatus\(cardEl\) \{.*?\n  \}\n\n  async function load\(\)',sync_new+'\n  async function load()',s,count=1,flags=re.S)
-          write(p,s)
-
-          # Enrich existing Hawaii public status API without exposing internal costs.
-          p='site/hawaii-lithium-runtime.js'; s=read(p)
-          s=replace_once(s,'const USES = new Set(["RV","Solar / Off-Grid","Home Backup","Marine","Van / Mobile Power","Other"]);','const USES = new Set(["RV","Solar / Off-Grid","Home Backup","Marine","Van / Mobile Power","Other"]);\nconst HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900;\nconst HAWAII_PREFERRED_CONSOLIDATION_UNITS = 3;','hawaii public constants')
-          public_status='''async function publicStatus(request, env) {
-  if(request.method!=="GET"&&request.method!=="HEAD")return json({error:"Method not allowed"},405,{Allow:"GET, HEAD"});
-  const db=await ensureSchema(env); const url=new URL(request.url); const sku=clean(url.searchParams.get("sku"),180); const productId=clean(url.searchParams.get("productId"),120);
-  const destination=clean(url.searchParams.get("island")||url.searchParams.get("destination"),80);
-  const commonBase={customerFreightPerBatteryCents:HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,preferredConsolidationUnits:HAWAII_PREFERRED_CONSOLIDATION_UNITS,warehousePickupOnly:true,consolidationDisclosure:"Orders of fewer than three compatible batteries may wait while Elevation combines compatible Hawaii orders. Three compatible batteries is the current preferred shipment target.",timingDisclosure:"Estimated shipment and pickup timing is not guaranteed."};
-  const unresolved={status:"SHIPPING OPTIONS BEING CONFIRMED",badge:"CHECKING HAWAII SHIPPING",eligible:false,...commonBase,consolidationStatus:"Awaiting consolidation / route review",estimatedPickupTiming:"Confirmed after consolidation and carrier scheduling"};
-  if(!sku&&!productId)return json(unresolved);
-  const record=productId?await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE catalog_product_id=? LIMIT 1").bind(productId).first():await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE sku=? COLLATE NOCASE LIMIT 1").bind(sku).first();
-  if(!record||record.hold||record.review_state!=="INTERNAL REQUIREMENTS SATISFIED")return json(unresolved);
-  let dest=null;
-  if(destination && ISLANDS.has(destination) && destination!=="Other / Confirm") {
-    dest=await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination IN (?, 'Hawaii — General') ORDER BY CASE WHEN destination=? THEN 0 ELSE 1 END LIMIT 1").bind(record.id,destination,destination).first();
-  } else {
-    dest=await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination='Hawaii — General' LIMIT 1").bind(record.id).first();
-  }
-  const batch=await db.prepare(`SELECT b.status,b.terminal,b.estimated_departure_window,b.estimated_arrival_window
-    FROM eus_hawaii_batch_orders bo JOIN eus_hawaii_shipping_batches b ON b.batch_id=bo.batch_id
-    WHERE bo.sku=? COLLATE NOCASE AND bo.hold=0 AND b.status NOT IN ('COMPLETE','CANCELLED','HOLD')
-    ORDER BY b.updated_at DESC LIMIT 1`).bind(record.sku).first().catch(()=>null);
-  const batchState=upper(batch?.status||"");
-  const consolidationStatus=({"BUILDING":"Awaiting Consolidation","NEEDS VOLUME":"Awaiting Consolidation","QUOTE NEEDED":"Awaiting Consolidation","QUOTE RECEIVED":"Awaiting Consolidation","DOCS REVIEW":"Awaiting Consolidation","READY TO COMMIT":"Batch Ready","CUSTOMER CONFIRMATION":"Batch Ready","BOOKED":"Freight Scheduled","IN TRANSIT":"In Transit","ARRIVED":"Ready for Hawaii Pickup","DELIVERING":"Ready for Hawaii Pickup"})[batchState]||"Awaiting Consolidation";
-  const estimatedPickupTiming=clean(batch?.estimated_arrival_window,180)||"Confirmed after consolidation, carrier scheduling and Hawaii terminal availability";
-  const origin=clean(dest?.origin_location,180); const terminal=clean(batch?.terminal,180); const route=(origin&&terminal)?`${origin} → ${terminal}`:"";
-  const common={...commonBase,consolidationStatus,estimatedPickupTiming,...(route?{route}:{})};
-  const state=dest?.eligibility_state||"NOT CHECKED";
-  if(state==="APPROVED")return json({status:"HAWAII SHIPPING AVAILABLE",badge:"HAWAII SHIPPING AVAILABLE",eligible:true,destination:dest.destination,...common});
-  if(["QUOTE REQUIRED","CARRIER QUOTE NEEDED","QUOTE RECEIVED"].includes(state))return json({status:"HAWAII SHIPPING QUOTE REQUIRED",badge:"HAWAII SHIPPING QUOTE REQUIRED",eligible:false,destination:dest?.destination||destination||"Hawaii — General",...common});
-  if(state==="NOT ELIGIBLE"||state==="HOLD")return json({status:"CURRENTLY UNAVAILABLE FOR HAWAII",badge:"CURRENTLY UNAVAILABLE FOR HAWAII",eligible:false,destination:dest?.destination||destination||"Hawaii — General",...common});
-  return json({...unresolved,destination:dest?.destination||destination||"Hawaii — General",...common});
-}
-'''
-          s=re.sub(r'async function publicStatus\(request, env\) \{.*?\n\}\n\nfunction quoteExpired',public_status+'\nfunction quoteExpired',s,count=1,flags=re.S)
-          write(p,s)
-
-          # Server-authoritative Hawaii freight quote. Lower-48 path remains unchanged.
-          p='site/store-checkout-server.js'; s=read(p)
-          s=replace_once(s,'const MAX_QTY = 10;','const MAX_QTY = 10;\nconst HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900;\nconst HAWAII_PREFERRED_CONSOLIDATION_UNITS = 3;','checkout hawaii constants')
-          s=s.replace('  if (actualBattery && destinationState==="HI") return {ok:false,status:409,error:"Hawaii lithium battery shipping requires the Hawaii Lithium Program and a separate shipping quote"};\n','')
-          s=s.replace('  if (destinationState && blockedStates.includes(destinationState)) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};','  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};')
-          s=replace_once(s,'  const batteryUnitsPerItem = actualBattery ? batteryUnitsPerCatalogUnit(product) : 0;\n  const shippingPerCatalogItem = actualBattery ? config.batteryShippingCents * batteryUnitsPerItem : Number.parseInt(String(entry.shippingCents ?? ""),10);','  const batteryUnitsPerItem = actualBattery ? batteryUnitsPerCatalogUnit(product) : 0;\n  const hawaiiFreight = actualBattery && destinationState === "HI";\n  const shippingPerCatalogItem = hawaiiFreight ? HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY * batteryUnitsPerItem : (actualBattery ? config.batteryShippingCents * batteryUnitsPerItem : Number.parseInt(String(entry.shippingCents ?? ""),10));','hawaii shipping math')
-          s=replace_once(s,'    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?config.batteryShippingCents:0},\n    doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}','    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?(hawaiiFreight?HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY:config.batteryShippingCents):0},\n    ...(hawaiiFreight?{hawaii:{customerFreightPerBatteryCents:HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,preferredConsolidationUnits:HAWAII_PREFERRED_CONSOLIDATION_UNITS,warehousePickupOnly:true,requiresReservation:true,consolidationStatus:qty*batteryUnitsPerItem>=HAWAII_PREFERRED_CONSOLIDATION_UNITS?"Batch quantity target reached — final logistics gates still apply":"Awaiting compatible consolidation",timing:"Estimated shipment / pickup timing — not guaranteed",requestUrl:`/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(clean(entry.name||raw?.name,240))}&qty=${qty}#hawaii-request`}}:{}),\n    doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}','hawaii quote payload')
-          s=replace_once(s,'  const quote = await quoteStoreItem(raw, env);\n  if (!quote.ok) return json(quote, quote.status || 400);\n  const address = normalizeAddress(raw?.shipping);','  const quote = await quoteStoreItem(raw, env);\n  if (!quote.ok) return json(quote, quote.status || 400);\n  if (quote.hawaii?.requiresReservation) return json({error:"Hawaii lithium orders use consolidated freight reservation before payment and carrier tender.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);\n  const address = normalizeAddress(raw?.shipping);','block paypal for hawaii reservation')
-          write(p,s)
-
-          # Checkout presentation: Hawaii quote, no residential-delivery implication, no PayPal capture before freight reservation.
-          p='site/checkout/index.html'; s=read(p)
-          s=s.replace('/store-checkout.css?v=3.11.42b','/store-checkout.css?v=4.4.0').replace('/store-checkout.js?v=3.11.42b','/store-checkout.js?v=4.4.0')
-          s=replace_once(s,'        <h1>Secure Checkout</h1>','        <h1>Secure Checkout</h1>\n        <p id="checkout-lithium-retailer" class="eus-checkout-retailer" hidden>Elevation UpScales, Inc. · <strong>Licensed Lithium Battery Retailer</strong></p>','checkout retailer trust')
-          s=s.replace('<div class="eus-checkout-section-label">Contact & shipping</div>','<div id="checkout-contact-shipping-label" class="eus-checkout-section-label">Contact &amp; shipping</div>')
-          s=s.replace('<div class="eus-checkout-fields">','<div id="checkout-shipping-fields" class="eus-checkout-fields">',1)
-          s=s.replace('<div><dt>Shipping</dt><dd id="checkout-shipping">—</dd></div>','<div><dt id="checkout-shipping-label">Shipping</dt><dd id="checkout-shipping">—</dd></div>')
-          s=replace_once(s,'        <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>','        <section id="checkout-hawaii-freight" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">HAWAII LITHIUM SHIPPING &amp; FREIGHT</p><h3>Warehouse Pickup Only</h3><p><strong>Hawaii Consolidated Freight — $99 per actual battery.</strong></p><p id="checkout-hawaii-math"></p><p>Orders of fewer than three compatible batteries may be held while Elevation combines them with other Hawaii battery orders. Three compatible batteries is the current preferred shipment target.</p><p><strong>Estimated Shipment / Pickup Timing — Not Guaranteed.</strong> Timing depends on consolidation, supplier inventory, documentation, packaging, carrier scheduling, mainland receiving, ocean freight and Hawaii terminal availability.</p><a id="checkout-hawaii-reserve" class="eus-checkout-hawaii-cta" href="/hawaii-lithium-batteries#hawaii-request">Request / Reserve Hawaii Freight</a></section>\n\n        <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>','checkout hawaii panel')
-          s=s.replace('</main>\n</body>','</main>\n  <footer class="eus-checkout-legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer>\n</body>')
-          write(p,s)
-
-          p='site/store-checkout.js'; s=read(p)
-          s=replace_once(s,'  const rvName = String(params.get("name") || "").trim();','  const rvName = String(params.get("name") || "").trim();\n  const destinationHint = String(params.get("state") || "").trim().toUpperCase();','checkout destination hint')
-          s=replace_once(s,'  const successReferenceEl = document.querySelector("#checkout-success-reference");','  const successReferenceEl = document.querySelector("#checkout-success-reference");\n  const retailerEl = document.querySelector("#checkout-lithium-retailer");\n  const shippingLabelEl = document.querySelector("#checkout-shipping-label");\n  const hawaiiPanel = document.querySelector("#checkout-hawaii-freight");\n  const hawaiiMath = document.querySelector("#checkout-hawaii-math");\n  const hawaiiReserve = document.querySelector("#checkout-hawaii-reserve");\n  const contactShippingLabel = document.querySelector("#checkout-contact-shipping-label");\n  const shippingFields = document.querySelector("#checkout-shipping-fields");','checkout hawaii dom')
-          s=replace_once(s,'    shippingEl.textContent = money(next.shippingCents);\n    totalEl.textContent = money(next.totalCents);','    const isHawaii = Boolean(next.hawaii);\n    shippingEl.textContent = money(next.shippingCents);\n    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Hawaii Consolidated Freight" : "Shipping";\n    totalEl.textContent = money(next.totalCents);\n    if (retailerEl) retailerEl.hidden = source !== "lithium";\n    if (hawaiiPanel) hawaiiPanel.hidden = !isHawaii;\n    if (contactShippingLabel) contactShippingLabel.hidden = isHawaii;\n    if (shippingFields) shippingFields.hidden = isHawaii;\n    if (isHawaii) {\n      const batteryCount = Number(next.battery?.batteryUnitsPerItem || 1) * Number(next.quantity || 1);\n      if (hawaiiMath) hawaiiMath.textContent = `${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} × $99 = ${money(next.shippingCents)} Hawaii freight. Merchandise ${money(next.merchandiseCents)} + freight ${money(next.shippingCents)} = ${money(next.totalCents)} total before any applicable tax.`;\n      if (hawaiiReserve) hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request";\n      paypalEl.hidden = true;\n    }','checkout render hawaii')
-          s=replace_once(s,'    setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");','    if (body.hawaii) setStatus("Hawaii consolidated-freight terms loaded. Reserve the order for freight coordination before payment.", "ready");\n    else setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");','checkout hawaii status')
-          s=replace_once(s,'    try {\n      await requestQuote();\n      if (!quote) return;\n      if (await loadPayPal()) {','    try {\n      if (source === "lithium" && destinationHint === "HI") document.querySelector("#checkout-state").value = "HI";\n      await requestQuote();\n      if (!quote) return;\n      if (quote.hawaii) return;\n      if (await loadPayPal()) {','checkout skip paypal hawaii')
-          write(p,s)
-
-          # Lithium product detail trust line and shipping/freight route.
-          p='site/product.html'; s=read(p)
-          s=s.replace('<strong>Hawaii Lithium Program</strong><small>Coming soon · request shipping availability</small>','<strong>Lithium Shipping &amp; Freight</strong><small>Hawaii consolidated freight · Alaska quote options</small>')
-          s=s.replace('/product-detail.css?v=4.4.0','/product-detail.css?v=4.4.1').replace('/product-detail.js?v=4.4.0','/product-detail.js?v=4.4.1')
-          s=replace_once(s,'<p class="product-shipping" data-product-shipping></p>','<p class="product-shipping" data-product-shipping></p><p class="product-retailer-trust" data-lithium-retailer hidden><strong>LICENSED LITHIUM BATTERY RETAILER</strong></p><a class="product-freight-link" data-lithium-freight-link href="/hawaii-lithium-batteries" hidden>Shipping to Alaska or Hawaii? View shipping &amp; freight options →</a>','product lithium retailer')
-          s=s.replace('<a href="/privacy">Privacy</a>','<a href="/privacy">Privacy</a><a href="/terms">Terms</a>')
-          write(p,s)
-
-          p='site/product-detail.js'; s=read(p)
-          s=replace_once(s,'  const relatedHost = document.querySelector("[data-related-products]");','  const relatedHost = document.querySelector("[data-related-products]");\n  const lithiumRetailer = document.querySelector("[data-lithium-retailer]");\n  const lithiumFreightLink = document.querySelector("[data-lithium-freight-link]");','product detail dom')
-          s=replace_once(s,'    categoryEl.textContent = displayCategory(product); titleEl.textContent = title; priceEl.textContent = money.format(Number(product.priceCents) / 100);','    const lithiumProduct = sectionFor(product) === "lithium";\n    if (lithiumRetailer) lithiumRetailer.hidden = !lithiumProduct;\n    if (lithiumFreightLink) lithiumFreightLink.hidden = !lithiumProduct;\n    categoryEl.textContent = displayCategory(product); titleEl.textContent = title; priceEl.textContent = money.format(Number(product.priceCents) / 100);','product retailer reveal')
-          write(p,s)
-
-          # Request page prefill from the Hawaii checkout route.
-          p='site/hawaii-lithium-program.js'; s=read(p)
-          s=replace_once(s,'  const submit = form.querySelector("button[type=\'submit\']");','  const submit = form.querySelector("button[type=\'submit\']");\n  const params = new URLSearchParams(location.search);\n  const requestedProduct = String(params.get("product") || "").trim();\n  const requestedQty = Math.max(1, Math.min(100, Number.parseInt(params.get("qty") || "1", 10) || 1));\n  if (requestedProduct) form.querySelector("[name=\'productInterest\']").value = requestedProduct;\n  if (requestedQty) form.querySelector("[name=\'quantity\']").value = String(requestedQty);','hawaii request prefill')
-          s=s.replace('Saving your Hawaii availability request…','Saving your Hawaii freight request…')
-          s=s.replace('Request received. Reference ${body.requestId}. No payment was collected. Elevation will review product fit and Hawaii shipping options before any order is confirmed.','Request received. Reference ${body.requestId}. No payment was collected. Elevation will review the exact battery, consolidation, documentation, packaging and freight path before shipment is confirmed.')
-          write(p,s)
-
-          # Narrow presentation styles only.
-          with open('site/hawaii-lithium-program.css','a') as f:
-              f.write('\n.hawaii-license,.lithium-retailer-badge{display:inline-flex;margin:.3rem 0 .7rem;padding:.45rem .7rem;border:1px solid rgba(240,182,45,.62);border-radius:999px;color:#f0b62d;background:rgba(240,182,45,.08);letter-spacing:.04em}.hawaii-card-facts{display:grid;gap:7px;margin:12px 0;padding:12px;border:1px solid #303030;border-radius:10px;background:#0a0a0a}.hawaii-card-facts p{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.2fr);gap:8px;margin:0;font-size:.82rem;color:#c9c4b9}.hawaii-card-facts strong{color:#fff}.hawaii-card-facts span{text-align:right}.hawaii-request-disclosure strong{color:#f0b62d}@media(max-width:600px){.hawaii-card-facts p{grid-template-columns:1fr}.hawaii-card-facts span{text-align:left}}\n')
-          with open('site/store-checkout.css','a') as f:
-              f.write('\n.eus-checkout-retailer{margin:.45rem 0 0;color:#f0b62d;font-size:.86rem;letter-spacing:.02em}.eus-checkout-hawaii{margin:16px 0;padding:16px;border:1px solid rgba(240,182,45,.5);border-radius:12px;background:rgba(240,182,45,.07);color:#ddd}.eus-checkout-hawaii h3{margin:.15rem 0 .55rem;color:#fff}.eus-checkout-hawaii p{margin:.45rem 0;line-height:1.5}.eus-checkout-hawaii-cta{display:inline-flex;margin-top:.65rem;padding:.75rem 1rem;border-radius:8px;background:#f0b62d;color:#090909;font-weight:900;text-decoration:none}.eus-checkout-legal{display:flex;justify-content:center;gap:18px;padding:18px 12px 28px}.eus-checkout-legal a{color:#c9c4b9}\n')
-          with open('site/product-detail.css','a') as f:
-              f.write('\n.product-retailer-trust{display:inline-flex;margin:.2rem 0 .65rem;padding:.42rem .65rem;border:1px solid rgba(240,182,45,.55);border-radius:999px;color:#f0b62d;font-size:.82rem;letter-spacing:.04em}.product-freight-link{display:inline-block;margin:0 0 .8rem;color:#f0b62d;font-weight:800;text-decoration:none}.product-freight-link:hover{text-decoration:underline}\n')
-
-          # Public business Terms / disclosures page and legal link from Privacy.
-          terms='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070707"><meta name="description" content="Elevation UpScales, Inc. business terms and retail disclosures."><link rel="canonical" href="https://elevationupscales.com/terms"><link rel="icon" href="/assets/favicon.png" type="image/png"><title>Terms &amp; Business Disclosures | Elevation UpScales</title><link rel="stylesheet" href="/styles.css?v=3.0.3"><link rel="stylesheet" href="/site-shell.css?v=3.11.30"><link rel="stylesheet" href="/mobile-audit.css?v=3.0.3"><script defer src="/site-shell.js?v=3.11.46"></script></head><body class="home-page project-page"><a class="skip-link" href="#main">Skip to content</a><header class="eus-header"><div class="container eus-header__inner"><a class="eus-brand" href="/" aria-label="Elevation UpScales home"><img alt="Elevation UpScales bull and polar bear emblem" height="80" src="/assets/logo-mark.webp" width="128"><span class="eus-wordmark"><strong>ELEVATION</strong><span class="eus-wordmark__sub">UPSCALES</span><small class="eus-wordmark__tagline">Elevate the Experience</small></span></a><a class="button button-outline" href="/">Back Home</a></div></header><main id="main"><section class="service-page-hero"><div class="container"><p class="eyebrow">TERMS &amp; BUSINESS DISCLOSURES</p><h1>Elevation UpScales, Inc.</h1><p>Business identity, retail, shipping and customer-order disclosures for Elevation UpScales.</p></div></section><section class="section"><div class="container privacy-content"><h2>Business identity</h2><p>Elevation UpScales, Inc. is a Colorado corporation and holds a Colorado sales-tax license. The sales-tax license is separate from trade-specific, contractor, carrier, manufacturer or transportation qualifications.</p><h2>Licensed Lithium Battery Retailer</h2><p><strong>Licensed Lithium Battery Retailer.</strong> Elevation UpScales, Inc. is a Colorado corporation and licensed retail business offering lithium batteries and related RV, solar, and off-grid power products through its retail operations. The term “Licensed Lithium Battery Retailer” describes Elevation UpScales, Inc.’s licensed retail status and the product category it offers for sale. Manufacturer authorization, carrier approval, hazardous-materials qualifications, and transportation certifications are separate statuses and are represented only when specifically applicable.</p><h2>Product, inventory and pricing</h2><p>Published product availability, supplier inventory, prices and shipping options can change. Elevation uses its current Catalog and supplier information when presenting products and rechecks applicable order values during checkout or freight review. Internal supplier cost is not a customer-facing price.</p><h2>Lithium shipping</h2><p>Lower-48 shipping for actual lithium batteries is currently $27.99 per actual battery where standard lithium checkout is supported. Alaska service and pricing remain quote required where exact routing has not been verified.</p><p>Hawaii lithium batteries use consolidated freight. The current customer freight price is $99 per actual battery, separate from merchandise. Orders of fewer than three compatible batteries may wait while Elevation combines compatible Hawaii orders. Three compatible batteries is the current preferred shipment target, not a guaranteed departure trigger.</p><p>Hawaii lithium fulfillment is warehouse or freight-terminal pickup only. Residential lithium delivery is not currently offered through this program. Shipment and pickup timing is estimated and not guaranteed; timing can change because of consolidation, supplier inventory, exact battery documentation, packaging, actual packed gross weight, carrier scheduling, mainland receiving, ocean freight and Hawaii terminal availability.</p><h2>Transportation roles</h2><p>Elevation may coordinate exact product/SKU verification, supplier availability, SDS/MSDS and UN38.3 documentation where required, packed dimensions and gross weight, freight documentation, mainland receiving, consolidation, freight booking, Hawaii movement, terminal coordination and customer pickup notification. Elevation does not represent itself as a regulator, testing laboratory, battery manufacturer or freight carrier unless a separate status is specifically stated.</p><h2>Extraordinary route changes</h2><p>If an extraordinary carrier or route change creates a materially different customer requirement before shipment, Elevation will disclose that situation before collecting an additional charge or tendering the shipment. Additional freight charges are not silently added.</p><h2>Contact</h2><p>Questions may be sent to <a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a> or <a href="tel:+12088134998">208-813-4998</a>.</p><p><strong>Last updated:</strong> September 2, 2026</p></div></section></main><footer class="site-footer"><div class="container footer-grid"><div class="footer-brand"><img alt="" height="80" src="/assets/logo.webp" width="80"><div><strong>Elevation UpScales, Inc.</strong><p>Home Services • RV Services • Solar &amp; Off-Grid • Elevation Stores • Marketplace</p></div></div><div class="footer-contact"><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div></footer></body></html>'''
-          write('site/terms.html',terms)
-          p='site/privacy.html'; s=read(p); s=s.replace('<a href="/privacy">Privacy</a>','<a href="/privacy">Privacy</a><a href="/terms">Terms</a>'); write(p,s)
-          PY
-
+          cp scripts/one-time-lithium-hawaii-verify.mjs /tmp/lithium-hawaii-verify.mjs
+          python3 scripts/one-time-lithium-hawaii-implement.py
           node --check site/lithium-shop.js
           node --check site/hawaii-lithium-program.js
           node --check site/hawaii-lithium-runtime.js
@@ -219,48 +37,32 @@ jobs:
           node --check site/store-checkout-server.js
           node --check site/product-detail.js
           git diff --check
-
-          expected='site/checkout/index.html
-          site/hawaii-lithium-batteries.html
-          site/hawaii-lithium-program.css
-          site/hawaii-lithium-program.js
-          site/hawaii-lithium-runtime.js
-          site/lithium-batteries.html
-          site/lithium-shop.js
-          site/privacy.html
-          site/product-detail.css
-          site/product-detail.js
-          site/product.html
-          site/store-checkout-server.js
-          site/store-checkout.css
-          site/store-checkout.js
-          site/terms.html'
-          printf '%s\n' "$expected" | sed 's/^ *//' | sort > /tmp/expected-files
-          git diff --name-only | sort > /tmp/actual-files
-          diff -u /tmp/expected-files /tmp/actual-files
-          ! git diff | grep -E '^\+.*CREATE TABLE'
-          ! git diff --name-only | grep -E '(^|/)(index\.html|marketplace\.html|solar-project\.html|start-a-project\.html)$'
-
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
           git add site
-          git rm "$WORKFLOW_PATH"
+          git rm scripts/one-time-lithium-hawaii-implement.py
+          git rm scripts/one-time-lithium-hawaii-verify.mjs
+          git rm .github/workflows/one-time-lithium-retail-hawaii-final.yml
           git commit -m "Implement licensed lithium retail and Hawaii consolidated freight"
           git push origin HEAD:"$RELEASE_BRANCH"
           echo "APP_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Reverify application scope and production isolation
+      - name: Verify application scope
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
           test "$(git rev-parse HEAD)" = "$APP_SHA"
-          mapfile -t files < <(git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA")
-          printf '%s\n' "${files[@]}"
-          test "${#files[@]}" -eq 15
+          git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA" | sort > /tmp/changed
+          cat /tmp/changed
+          test "$(wc -l < /tmp/changed)" -eq 15
+          grep -qx 'site/terms.html' /tmp/changed
+          grep -qx 'site/store-checkout-server.js' /tmp/changed
+          grep -qx 'site/hawaii-lithium-runtime.js' /tmp/changed
+          ! grep -E '^site/(index|marketplace|solar-project|start-a-project|admin)' /tmp/changed
           ! git diff "$BASE_MAIN_SHA".."$APP_SHA" | grep -E '^\+.*CREATE TABLE'
 
-      - name: Deploy exact candidate to targeted preview
+      - name: Deploy exact candidate to preview
         id: preview
         uses: cloudflare/wrangler-action@v4
         with:
@@ -271,97 +73,23 @@ jobs:
       - name: Install targeted browser verifier
         run: npm install --no-save playwright@1.55.0
 
-      - name: Targeted lithium and Hawaii verification
+      - name: Run targeted verification
         env:
           PREVIEW_BASE: ${{ steps.preview.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          CHROME=$(command -v google-chrome || command -v google-chrome-stable || true)
+          export CHROME="$(command -v google-chrome || command -v google-chrome-stable || true)"
           test -n "$CHROME"
-          export CHROME
-          cat > verify.mjs <<'NODE'
-          import { chromium } from 'playwright';
-          import assert from 'node:assert/strict';
-          const base=process.env.PREVIEW_BASE.replace(/\/$/,'');
-          const headers={Accept:'application/json'};
-          const catalogResponse=await fetch(base+'/api/store/catalog?section=lithium-batteries',{headers});
-          assert.equal(catalogResponse.ok,true,'Lithium Catalog unavailable');
-          const catalog=await catalogResponse.json();
-          assert.ok(Array.isArray(catalog.products)&&catalog.products.length>0,'No live lithium Catalog products');
-          let chosen=null, lower=null;
-          for(const p of catalog.products){
-            const r=await fetch(base+'/api/store-checkout/quote',{method:'POST',headers:{...headers,'Content-Type':'application/json','Origin':base},body:JSON.stringify({source:'lithium',id:p.id,quantity:1,shipping:{state:'CO'}})});
-            const q=await r.json().catch(()=>({}));
-            if(r.ok&&q?.battery?.actualBattery&&q?.battery?.batteryUnitsPerItem===1){chosen=p;lower=q;break;}
-          }
-          assert.ok(chosen,'No one-battery live lithium SKU available for targeted verification');
-          assert.equal(lower.battery.shippingPerBatteryCents,2799,'Lower-48 per-battery shipping changed');
-          assert.equal(lower.shippingCents,2799,'Lower-48 one-battery shipping changed');
-          for(const [qty,expected] of [[1,9900],[2,19800],[3,29700]]){
-            const r=await fetch(base+'/api/store-checkout/quote',{method:'POST',headers:{...headers,'Content-Type':'application/json','Origin':base},body:JSON.stringify({source:'lithium',id:chosen.id,quantity:qty,shipping:{state:'HI'}})});
-            const q=await r.json().catch(()=>({}));
-            assert.equal(r.ok,true,`Hawaii quote ${qty} failed: ${q.error||''}`);
-            assert.equal(q.shippingCents,expected,`Hawaii freight math qty ${qty}`);
-            assert.equal(q.hawaii.customerFreightPerBatteryCents,9900);
-            assert.equal(q.hawaii.preferredConsolidationUnits,3);
-            assert.equal(q.hawaii.warehousePickupOnly,true);
-            assert.equal(q.hawaii.requiresReservation,true);
-            assert.equal(q.totalCents,q.merchandiseCents+expected);
-          }
-          const create=await fetch(base+'/api/store-checkout/orders',{method:'POST',headers:{...headers,'Content-Type':'application/json','Origin':base},body:JSON.stringify({source:'lithium',id:chosen.id,quantity:1,customer:{email:'targeted-check@example.com'},shipping:{fullName:'Targeted Check',address1:'1 Aloha St',city:'Honolulu',state:'HI',postalCode:'96815',countryCode:'US'}})});
-          const createBody=await create.json().catch(()=>({}));
-          assert.equal(create.status,409,'Hawaii freight should reserve before PayPal capture');
-          assert.equal(createBody.hawaiiFreight,true);
-          assert.ok(String(createBody.requestUrl||'').includes('/hawaii-lithium-batteries'));
+          node /tmp/lithium-hawaii-verify.mjs
 
-          const terms=await (await fetch(base+'/terms')).text();
-          assert.ok(terms.includes('Licensed Lithium Battery Retailer'));
-          assert.ok(terms.includes('Colorado sales-tax license'));
-          assert.ok(terms.includes('$99 per actual battery'));
-          assert.ok(terms.includes('$27.99 per actual battery'));
-
-          const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox']});
-          for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
-            const page=await browser.newPage({viewport});
-            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
-            await page.goto(base+'/lithium-batteries',{waitUntil:'domcontentloaded',timeout:30000}); await page.waitForTimeout(1600);
-            assert.equal(errors.length,0,errors.join('; '));
-            assert.ok((await page.locator('body').innerText()).includes('LICENSED LITHIUM BATTERY RETAILER'));
-            assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2),false,'Lithium horizontal overflow');
-            await page.goto(base+'/hawaii-lithium-batteries',{waitUntil:'domcontentloaded',timeout:30000}); await page.waitForTimeout(2200);
-            const hiText=await page.locator('body').innerText();
-            for(const text of ['Hawaii Lithium Shipping & Freight','$99 per actual battery','Warehouse / Freight-Terminal Pickup Only','Estimated Shipment / Pickup Timing — Not Guaranteed','Three compatible batteries']) assert.ok(hiText.includes(text),`Hawaii page missing ${text}`);
-            assert.ok(await page.locator('[data-lithium-grid] .lithium-card').count()>0,'Hawaii Catalog cards missing');
-            assert.ok((await page.locator('[data-lithium-grid] .lithium-card').first().innerText()).includes('Hawaii Freight'));
-            assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2),false,'Hawaii horizontal overflow');
-            const productUrl=base+`/product?id=${encodeURIComponent(chosen.id)}&store=lithium`;
-            await page.goto(productUrl,{waitUntil:'domcontentloaded',timeout:30000}); await page.waitForTimeout(1600);
-            assert.equal(await page.locator('[data-lithium-retailer]').isVisible(),true,'Lithium retailer trust missing on product detail');
-            assert.equal(await page.locator('[data-lithium-freight-link]').isVisible(),true,'Lithium freight link missing on product detail');
-            await page.goto(base+`/checkout/?source=lithium&id=${encodeURIComponent(chosen.id)}&name=${encodeURIComponent(chosen.title||chosen.name||'Lithium Battery')}&state=HI`,{waitUntil:'domcontentloaded',timeout:30000}); await page.waitForTimeout(2200);
-            assert.equal(await page.locator('#checkout-hawaii-freight').isVisible(),true,'Hawaii checkout freight panel missing');
-            const checkoutText=await page.locator('.eus-checkout-card').innerText();
-            assert.ok(checkoutText.includes('Hawaii Consolidated Freight'));
-            assert.ok(checkoutText.includes('$99.00'));
-            assert.ok(checkoutText.includes('Warehouse Pickup Only'));
-            assert.equal(await page.locator('#checkout-paypal').isVisible(),false,'PayPal should not bypass Hawaii freight reservation');
-            assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2),false,'Checkout horizontal overflow');
-            await page.close();
-          }
-          await browser.close();
-          console.log('LITHIUM_HAWAII_TARGETED_VERIFICATION_PASS',chosen.id,catalog.products.length);
-          NODE
-          node verify.mjs
-          rm -f verify.mjs
-
-      - name: Reverify current main before production promotion
+      - name: Reverify main before production
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
           test "$(git rev-parse HEAD)" = "$APP_SHA"
 
-      - name: Deploy exact verified candidate to production
+      - name: Deploy verified candidate to production
         id: production
         uses: cloudflare/wrangler-action@v4
         with:
@@ -369,7 +97,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy site --project-name=elevationupscales --branch=main
 
-      - name: Record successful exact deployment
+      - name: Record deployment
         run: |
           echo "APPLICATION_SHA=$APP_SHA"
           echo "PREVIEW_URL=${{ steps.preview.outputs.deployment-url }}"
