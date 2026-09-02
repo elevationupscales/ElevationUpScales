@@ -42,12 +42,19 @@
 /rv-project.html /start-a-project?type=rv&source=legacy-route 302
 /make-a-listing.html /make-a-listing 301
 /list-a-vehicle.html /list-a-vehicle 301
+/list-a-vehicle/ /list-a-vehicle 301
 /vehicles /marketplace#vehicles 302
 /vehicles/ /marketplace#vehicles 302
 /vehicles.html /marketplace#vehicles 302
 /list-a-motorcycle.html /list-a-motorcycle 301
+/list-a-motorcycle/ /list-a-motorcycle 301
 /list-a-boat.html /list-a-boat 301
+/list-a-boat/ /list-a-boat 301
 /list-a-bicycle.html /list-a-bicycle 301
+/list-a-bicycle/ /list-a-bicycle 301
+/list-an-rv/ /list-an-rv 301
+/list-used-gear.html /list-used-gear 301
+/list-used-gear/ /list-used-gear 301
 
 /sell /make-a-listing 301
 /sell-a-vehicle /make-a-listing 301
@@ -62,6 +69,7 @@
 /technician.html /technician 301
 
 /report-an-issue.html /report-an-issue 301
+/report-an-issue/ /report-an-issue 301
 /outdoor-store /rv-store 301
 /rv-outdoor-store /rv-store 301
 /shop/rv /rv-store 301

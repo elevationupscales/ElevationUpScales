@@ -188,7 +188,7 @@
       ["/store", "Apparel Store", "Hats, apparel, artwork, stickers, and official Elevation releases"],
       ["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],
       ["/lithium-batteries", "Lithium Battery Shop", "LiFePO4 batteries for RV, solar, van, and off-grid power"],
-      ["/hawaii-lithium-batteries", "Hawaii Lithium Program", "Coming soon · reservations and Hawaii shipping availability"],
+      ["/hawaii-lithium-batteries", "Lithium Shipping & Freight", "Hawaii consolidated freight · warehouse pickup"],
       ["/collector", "Collector Series", "Explore the four-card collection and Golden Ticket"],
     ];
     for (const [href, title, description] of shopLinks) {
