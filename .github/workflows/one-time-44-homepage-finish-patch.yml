@@ -1,0 +1,169 @@
+name: One-Time Elevation 4.4 Homepage Finish Patch
+on:
+  push:
+    branches: [release/homepage-finish-patch-2026-09-02]
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-24.04
+    env:
+      BASE_MAIN_SHA: f5415bf58de82e5247f3e8f3646b107d4bf11436
+      APP_SHA: 049d52d1f09fe9a830be25b9553fdfd4b026d1cb
+    steps:
+      - name: Checkout exact homepage application candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 049d52d1f09fe9a830be25b9553fdfd4b026d1cb
+          fetch-depth: 0
+
+      - name: Verify exact scope and production lineage
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
+          test "$(git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA" | wc -l)" -eq 1
+          test "$(git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA")" = "site/index.html"
+          grep -q 'What are you here to do?' site/index.html
+          grep -q 'Built from hands-on experience.' site/index.html
+          grep -q '>PROJECT WORK<' site/index.html
+          ! grep -q '>REAL WORK<' site/index.html
+          grep -q "assets/hero-galaxy-rv.webp" site/index.html
+          grep -q "assets/solar/builder-v2/rv-solar-install-field-mobile.webp" site/index.html
+          grep -q "assets/hero-tile-project.webp" site/index.html
+          grep -q "assets/home-services-hero-bathroom.webp" site/index.html
+          grep -q "assets/marketplace/marketplace-premium-hero-desktop.webp" site/index.html
+          grep -q "assets/store/premium-hat.webp" site/index.html
+          grep -q "assets/gallery/01_kitchen_finished.webp" site/index.html
+          git diff --check "$BASE_MAIN_SHA".."$APP_SHA"
+
+      - name: Deploy exact candidate to targeted preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=homepage-finish-preview-2026-09-02
+
+      - name: Install targeted browser verifier
+        run: npm install --no-save playwright@1.55.0
+
+      - name: Verify homepage desktop and mobile
+        env:
+          PREVIEW_BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || true)
+          test -n "$CHROME"
+          export CHROME
+          cat > homepage-check.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import assert from 'node:assert/strict';
+
+          const base = process.env.PREVIEW_BASE.replace(/\/$/, '');
+          const browser = await chromium.launch({headless:true, executablePath:process.env.CHROME, args:['--no-sandbox']});
+          const results = [];
+
+          async function check(viewName, viewport) {
+            const page = await browser.newPage({viewport});
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            await page.addInitScript(() => {
+              window.__homepageCLS = 0;
+              try {
+                new PerformanceObserver(list => {
+                  for (const e of list.getEntries()) if (!e.hadRecentInput) window.__homepageCLS += e.value;
+                }).observe({type:'layout-shift', buffered:true});
+              } catch {}
+            });
+            await page.goto(base + '/', {waitUntil:'domcontentloaded', timeout:30000});
+            await page.waitForTimeout(2800);
+
+            assert.equal(errors.length, 0, `${viewName} page errors: ${errors.join('; ')}`);
+            assert.equal(await page.locator('.hc-route-grid .hc-route').count(), 6, `${viewName} six-route funnel changed`);
+            assert.equal(await page.locator('#home-route-title').innerText(), 'What are you here to do?');
+            assert.equal(await page.locator('.hc-story-copy').filter({hasText:'Built from hands-on experience.'}).count() > 0, true);
+            assert.equal(await page.getByText('PROJECT WORK', {exact:true}).count(), 1);
+            assert.equal(await page.getByText('REAL WORK', {exact:true}).count(), 0);
+            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2), false, `${viewName} horizontal overflow`);
+
+            const expectedRoutes = [
+              ['/lithium-batteries','elevation-lithium-social-card.webp'],
+              ['/rv-store','hero-galaxy-rv.webp'],
+              ['/solar-project?source=home-elevation-funnel','rv-solar-install-field-mobile.webp'],
+              ['/start-a-project','hero-tile-project.webp'],
+              ['#services','home-services-hero-bathroom.webp'],
+              ['/marketplace','marketplace-premium-hero-desktop.webp']
+            ];
+            const routes = page.locator('.hc-route-grid .hc-route');
+            for (let i=0;i<expectedRoutes.length;i++) {
+              const el = routes.nth(i);
+              assert.equal(await el.getAttribute('href'), expectedRoutes[i][0], `${viewName} route ${i+1} href`);
+              const style = await el.getAttribute('style') || '';
+              assert.ok(style.includes(expectedRoutes[i][1]), `${viewName} route ${i+1} image mapping`);
+              const box = await el.boundingBox();
+              assert.ok(box && box.width > 120 && box.height > 80, `${viewName} route ${i+1} unusable`);
+            }
+
+            const styleUrls = await page.evaluate(() => {
+              const els = [...document.querySelectorAll('.hc-route[style], .hc-shop-tile[style], .hc-proof-main[style]')];
+              return els.flatMap(el => [...(el.getAttribute('style') || '').matchAll(/url\(['\"]?([^'\")]+)['\"]?\)/g)].map(m => m[1]));
+            });
+            for (const u of styleUrls) {
+              const ok = await page.evaluate(async (src) => {
+                try { const r = await fetch(src, {cache:'no-store'}); return r.ok; } catch { return false; }
+              }, u);
+              assert.ok(ok, `${viewName} broken background ${u}`);
+            }
+
+            const imgs = page.locator('main img');
+            for (let i=0;i<await imgs.count();i++) {
+              const state = await imgs.nth(i).evaluate(img => ({src:img.currentSrc || img.src, complete:img.complete, w:img.naturalWidth, h:img.naturalHeight}));
+              assert.ok(state.complete && state.w > 0 && state.h > 0, `${viewName} broken image ${state.src}`);
+            }
+
+            const lithiumTiles = await page.locator("a[href='/lithium-batteries']").count();
+            assert.ok(lithiumTiles >= 2, `${viewName} lithium routes missing`);
+            assert.equal(await page.locator(".hc-shop-tile[href='/store']").getAttribute('style').then(v => (v||'').includes('premium-hat.webp')), true, `${viewName} apparel image`);
+            const rvShopImg = page.locator(".hc-shop-tile[href='/rv-store'] img");
+            assert.ok((await rvShopImg.getAttribute('src') || '').includes('hero-galaxy-fifth-wheel-9-1-4.webp'), `${viewName} RV shop image`);
+            const storyImg = page.locator('#about .hc-story-media img');
+            assert.ok((await storyImg.getAttribute('src') || '').includes('1975-winnebago-brave-features-layout.webp'), `${viewName} off-grid story image`);
+
+            const cls = await page.evaluate(() => window.__homepageCLS || 0);
+            assert.ok(cls <= 0.10, `${viewName} homepage CLS ${cls}`);
+            results.push({view:viewName, cls, width:viewport.width, height:viewport.height});
+            await page.close();
+          }
+
+          await check('desktop', {width:1440,height:900});
+          await check('mobile', {width:390,height:844});
+          console.log('HOMEPAGE_TARGETED_VERIFICATION_PASS ' + JSON.stringify(results));
+          await browser.close();
+          NODE
+          node homepage-check.mjs
+          rm -f homepage-check.mjs
+
+      - name: Reverify production lineage before promotion
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+
+      - name: Deploy exact homepage candidate to production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+
+      - name: Record deployment result
+        run: |
+          echo "APP_SHA=$APP_SHA"
+          echo "PREVIEW_URL=${{ steps.preview.outputs.deployment-url }}"
+          echo "PRODUCTION_URL=${{ steps.production.outputs.deployment-url }}"
+          echo "HOMEPAGE FINISH PATCH PRODUCTION DEPLOY PASS"
