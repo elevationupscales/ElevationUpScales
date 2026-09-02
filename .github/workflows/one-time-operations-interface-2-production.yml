@@ -1,0 +1,67 @@
+name: One-Time Operations Interface 2.0 Production
+on:
+  push:
+    branches: [deploy/operations-interface-2-production-2026-09-02]
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  deploy-production:
+    runs-on: ubuntu-24.04
+    env:
+      BASE_MAIN_SHA: 53157d29a65e0797e5f8d8656f5d9390e33d2c7f
+      APP_SHA: c5d941dc25faa975f4a23b91d772a5b5806177b5
+      CANONICAL_BASE: https://elevationupscales.com
+    steps:
+      - name: Checkout exact approved application candidate
+        uses: actions/checkout@v6
+        with:
+          ref: c5d941dc25faa975f4a23b91d772a5b5806177b5
+          fetch-depth: 0
+
+      - name: Reverify production lineage and exact scope
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
+          mapfile -t files < <(git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA")
+          test "${#files[@]}" -eq 4
+          printf '%s\n' "${files[@]}" | sort > /tmp/actual
+          printf '%s\n' site/admin-command-center.js site/admin-operations-2.css site/admin-overview.js site/admin.html | sort > /tmp/expected
+          diff -u /tmp/expected /tmp/actual
+          node --check site/admin-command-center.js
+          node --check site/admin-overview.js
+          git diff --check "$BASE_MAIN_SHA".."$APP_SHA"
+          ! git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA" | grep -E 'site/(index|checkout|product|rv-store|store|lithium-batteries|promotion-runtime|store-checkout|catalog-admin-runtime|hawaii-lithium-runtime)'
+
+      - name: Deploy exact candidate to Cloudflare Pages production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+
+      - name: Targeted canonical production smoke
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -sS -o /tmp/admin.html -w '%{http_code}' "$CANONICAL_BASE/admin")
+            if [ "$code" = "200" ] && grep -q 'Operations Interface 2.0' /tmp/admin.html; then break; fi
+            sleep 5
+          done
+          test "$code" = "200"
+          grep -q 'Operations Interface 2.0' /tmp/admin.html
+          for route in /admin-store-orders /admin-catalog /admin-inventory /admin-channels /admin-lithium-shipping /admin-listings /admin-promotion /admin-analytics /admin-system; do
+            test "$(curl -sS -o /dev/null -w '%{http_code}' "$CANONICAL_BASE$route")" = "200"
+          done
+          for api in /api/admin/session /api/admin/store-orders /api/admin/catalog /api/admin/inventory /api/admin/opportunities /api/admin/operations /api/admin/lithium-shipping /api/admin/sync /api/admin/doba-csv-sync /api/admin/promotion; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "$CANONICAL_BASE$api")
+            test "$code" = "401" -o "$code" = "403"
+          done
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
+          echo "APPLICATION_SHA=$APP_SHA"
+          echo "PRODUCTION_DEPLOYMENT_URL=${{ steps.production.outputs.deployment-url }}"
+          echo "OPERATIONS INTERFACE 2.0 PRODUCTION SMOKE PASS"
