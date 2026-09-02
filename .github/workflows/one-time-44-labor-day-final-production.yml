@@ -1,0 +1,30 @@
+name: One-Time Elevation 4.4 Labor Day Final Production
+on:
+  push:
+    branches: [deploy/4.4-labor-day-final-production-2026-09-02]
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  deploy-production:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: e58c957bde871ce93d9971039fab851b4ca82a23
+          fetch-depth: 0
+      - name: Verify exact approved application SHA
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "e58c957bde871ce93d9971039fab851b4ca82a23"
+      - name: Deploy approved application to production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+      - name: Record production deployment
+        run: |
+          echo "APP_SHA=e58c957bde871ce93d9971039fab851b4ca82a23"
+          echo "DEPLOYMENT_URL=${{ steps.deploy.outputs.deployment-url }}"
