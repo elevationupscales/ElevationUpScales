@@ -1,0 +1,64 @@
+name: One-Time Lithium Retail Hawaii Verification Correction
+on:
+  push:
+    branches:
+      - release/lithium-retail-hawaii-logistics-2026-09-02
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-24.04
+    env:
+      BASE_MAIN_SHA: c05b245bfa2af8e759507e8d78995f2819600936
+      APP_SHA: 8267d94a6b27ea950c2ef3869598ae3c83189dee
+      VERIFY_SOURCE_SHA: 0cbb9c454e95a1f8057cd2ff50ee4f7e0a324f24
+      PREVIEW_BASE: https://90fa678b.elevationupscales.pages.dev
+    steps:
+      - name: Checkout exact application candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 8267d94a6b27ea950c2ef3869598ae3c83189dee
+          fetch-depth: 0
+
+      - name: Confirm candidate and production baseline
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
+          test "$(git diff --name-only "$BASE_MAIN_SHA".."$APP_SHA" | wc -l)" -eq 15
+
+      - name: Restore verifier into repository root
+        run: git show "$VERIFY_SOURCE_SHA:scripts/one-time-lithium-hawaii-verify.mjs" > lithium-hawaii-verify.mjs
+
+      - name: Install browser verifier
+        run: npm install --no-save playwright@1.55.0
+
+      - name: Rerun targeted verification once
+        run: |
+          set -euo pipefail
+          export CHROME="$(command -v google-chrome || command -v google-chrome-stable || true)"
+          test -n "$CHROME"
+          node lithium-hawaii-verify.mjs
+
+      - name: Reverify main before production
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN_SHA"
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+
+      - name: Deploy exact verified candidate to production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+
+      - name: Record deployment
+        run: |
+          echo "APPLICATION_SHA=$APP_SHA"
+          echo "PRODUCTION_URL=${{ steps.production.outputs.deployment-url }}"
+          echo "LITHIUM RETAIL + HAWAII LOGISTICS PRODUCTION DEPLOY PASS"
