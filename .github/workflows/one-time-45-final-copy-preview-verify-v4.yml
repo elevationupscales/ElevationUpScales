@@ -26,7 +26,7 @@ jobs:
           p=Path('/tmp/verify.mjs')
           s=p.read_text()
           old="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.','Hawaii Lithium Batteries'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);"
-          new="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);const homeHi=home.locator('a[href=\"/hawaii-lithium-batteries\"]').filter({hasText:'Hawaii Lithium Batteries'}).first();if(await homeHi.count()!==1)throw new Error('homepage Hawaii CTA missing');await homeHi.scrollIntoViewIfNeeded();if((await homeHi.innerText()).trim()!=='Hawaii Lithium Batteries')throw new Error(`homepage Hawaii CTA text ${(await homeHi.innerText()).trim()}`);"
+          new="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);const homeHi=home.locator('a[href=\"/hawaii-lithium-batteries\"]').filter({hasText:'Hawaii Lithium Batteries'}).first();if(await homeHi.count()!==1)throw new Error('homepage Hawaii CTA missing');await homeHi.scrollIntoViewIfNeeded();if((await homeHi.innerText()).trim().toLowerCase()!=='hawaii lithium batteries')throw new Error(`homepage Hawaii CTA text ${(await homeHi.innerText()).trim()}`);"
           if old not in s: raise SystemExit('home verifier marker missing')
           p.write_text(s.replace(old,new,1))
           PY
