@@ -1,0 +1,67 @@
+name: One-Time Commerce Pricing 2.0 Wire
+
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-supplier-catalog-2-0-wire-2026-09-03
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/commerce-pricing-supplier-catalog-2-0-2026-09-03
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Wire runtime and Admin navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          worker=Path('site/_worker.js')
+          s=worker.read_text()
+          imp='import { handleShippingRulesPublicApi, handleShippingRulesAdminApi } from "./shipping-rules-runtime.js";\n'
+          add='import { handleCommercePricingAdminApi } from "./commerce-pricing-runtime.js";\n'
+          if add not in s:
+              if imp not in s: raise SystemExit('worker import anchor missing')
+              s=s.replace(imp,imp+add,1)
+          anchor='    if(url.pathname==="/api/admin/catalog"||url.pathname.startsWith("/api/admin/catalog/")) return handleCatalogAdminApi(request,env,url.pathname);\n'
+          route='    if(url.pathname==="/api/admin/commerce-pricing") return handleCommercePricingAdminApi(request,env);\n'
+          if route not in s:
+              if anchor not in s: raise SystemExit('worker route anchor missing')
+              s=s.replace(anchor,anchor+route,1)
+          worker.write_text(s)
+
+          page=Path('site/admin-catalog.html')
+          h=page.read_text()
+          anchor='<a class="button button-outline" href="/admin-inventory.html">Inventory</a>'
+          link='<a class="button button-outline" href="/admin-commerce-pricing.html">Pricing & Suppliers</a>'
+          if link not in h:
+              if anchor not in h: raise SystemExit('catalog nav anchor missing')
+              h=h.replace(anchor,anchor+link,1)
+          page.write_text(h)
+          PY
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+          node --check site/admin-commerce-pricing.js
+          grep -q '/api/admin/commerce-pricing' site/_worker.js
+          grep -q 'Pricing & Suppliers' site/admin-catalog.html
+          test "$(grep -c 'handleCommercePricingAdminApi' site/_worker.js)" -eq 2
+      - name: Commit clean application wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/_worker.js site/admin-catalog.html
+          if git diff --cached --quiet; then
+            echo 'No wiring changes required.'
+            exit 0
+          fi
+          git commit -m 'Wire Commerce Pricing 2.0 review surface'
+          git push origin HEAD:work/commerce-pricing-supplier-catalog-2-0-2026-09-03
