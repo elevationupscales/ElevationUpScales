@@ -1,0 +1,105 @@
+name: One-Time 4.5 Combined Performance Repair
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-performance-repair-2026-09-03
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: hotfix/4.5-combined-commerce-hawaii-audit-2026-09-03
+          fetch-depth: 0
+      - name: Confirm exact combined parent and apply targeted repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "9827aa9c2c55ffb54329dcff36fe109a04c94cff"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          # Server prerender: Hawaii must contain actual batteries only, and defer below-first-row product images.
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          old='return publicRows(data,isLithium?"lithium":"rv");'
+          new='return publicRows(data,section==="rv"?"rv":section);'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='if(section==="rv"&&clean(p.shippingStatus,30).toLowerCase()==="unverified")return false;return true;'
+          new='if(section==="rv"&&clean(p.shippingStatus,30).toLowerCase()==="unverified")return false;if(section==="hawaii"&&batteryUnitsPerCatalogUnit(p)<1)return false;return true;'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='function lithiumCard(product,hawaii=false){'
+          new='function lithiumCard(product,hawaii=false,index=0){'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='const image=clean(product?.primaryImage||product?.images?.[0]||"/assets/logo.webp",1000);'
+          new='const image=clean(product?.primaryImage||product?.images?.[0]||"/assets/logo.webp",1000);const deferImage=hawaii&&index>=4;const imageSrc=deferImage?"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==":image;const deferredAttrs=deferImage?` data-lithium-deferred-image data-src="${htmlEsc(image)}"`:"";'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='<img src="${htmlEsc(image)}" alt="${htmlEsc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+          new='<img src="${htmlEsc(imageSrc)}"${deferredAttrs} alt="${htmlEsc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='${products.map((p)=>lithiumCard(p,section==="hawaii")).join("")}'
+          new='${products.map((p,i)=>lithiumCard(p,section==="hawaii",i)).join("")}'
+          assert old in s
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # Client rerenders: preserve Hawaii actual-battery filtering and the same deferred image policy.
+          p=Path('site/lithium-shop.js')
+          s=p.read_text()
+          old='      if (Number.isFinite(stock) && stock <= 0) return false;\n      return true;'
+          new='      if (Number.isFinite(stock) && stock <= 0) return false;\n      if (hawaiiMode && batteryUnitsFor(product) < 1) return false;\n      return true;'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='  function card(product) {'
+          new='  const deferredPlaceholder = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";\n\n  function imageMarkup(src, alt, index) {\n    const deferred = hawaiiMode && index >= 4;\n    return `<img src="${esc(deferred ? deferredPlaceholder : src)}"${deferred ? ` data-lithium-deferred-image data-src="${esc(src)}"` : ""} alt="${esc(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;\n  }\n\n  function hydrateDeferredImages(root = document) {\n    const images = [...root.querySelectorAll("img[data-lithium-deferred-image][data-src]")];\n    if (!images.length) return;\n    const load = (img) => { const src = String(img.dataset.src || "").trim(); if (!src) return; img.src = src; delete img.dataset.src; img.removeAttribute("data-lithium-deferred-image"); };\n    if (!("IntersectionObserver" in window)) { images.forEach(load); return; }\n    const observer = new IntersectionObserver((entries) => { for (const entry of entries) { if (!entry.isIntersecting) continue; load(entry.target); observer.unobserve(entry.target); } }, { rootMargin: "120px 0px" });\n    images.forEach((img) => observer.observe(img));\n  }\n\n  function card(product, index = 0) {'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='<img src="${esc(product.primaryImage || "/assets/logo.webp")}" alt="${esc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+          new='${imageMarkup(product.primaryImage || "/assets/logo.webp", view.title, index)}'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='      grid.innerHTML = visible.map(card).join("");\n      grid.dataset.prerendered = "false";'
+          new='      grid.innerHTML = visible.map((product, index) => card(product, index)).join("");\n      grid.dataset.prerendered = "false";\n      hydrateDeferredImages(grid);'
+          assert old in s
+          s=s.replace(old,new,1)
+          old='    if (grid.dataset.prerendered === "true" && grid.children.length) {\n      if (hawaiiMode) syncHawaiiStatuses();\n      return;\n    }'
+          new='    if (grid.dataset.prerendered === "true" && grid.children.length) {\n      if (hawaiiMode) { hydrateDeferredImages(grid); syncHawaiiStatuses(); }\n      return;\n    }'
+          assert old in s
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          node --check site/_worker.js
+          node --check site/lithium-shop.js
+          git diff --check
+          grep -q 'section==="hawaii"&&batteryUnitsPerCatalogUnit(p)<1' site/_worker.js
+          grep -q 'data-lithium-deferred-image' site/_worker.js
+          grep -q 'hawaiiMode && batteryUnitsFor(product) < 1' site/lithium-shop.js
+          grep -q 'IntersectionObserver' site/lithium-shop.js
+          ! git diff --name-only | grep -vE '^site/(_worker\.js|lithium-shop\.js)$'
+      - name: Commit only the permanent repair to combined branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/_worker.js site/lithium-shop.js
+          git commit -m 'Filter Hawaii battery listings and defer product images'
+          git push origin HEAD:hotfix/4.5-combined-commerce-hawaii-audit-2026-09-03
+          echo "COMBINED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Verify release delta remains clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check 071b69ceddecaa51516ad01d762360a468c00925..HEAD
+          test -z "$(git diff --name-only 9827aa9c2c55ffb54329dcff36fe109a04c94cff..HEAD | grep -vE '^site/(_worker\.js|lithium-shop\.js)$' || true)"
+          echo "Combined application candidate: $COMBINED_SHA"
