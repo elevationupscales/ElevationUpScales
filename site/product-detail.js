@@ -136,8 +136,6 @@
     const rawName = plainText(product?.title || product?.name || displayTitle(product), 300);
     const checkoutSource = sectionFor(product) === "lithium" ? "lithium" : "rv";
     let url = `/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id)}&name=${encodeURIComponent(rawName)}`;
-    const ebay = clean(product?.ebayItemId, 20);
-    if (sectionFor(product) === "rv" && /^\d{12}$/.test(ebay)) url += `&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebay}`)}`;
     return url;
   }
 

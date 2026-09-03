@@ -1,4 +1,4 @@
-/* Elevation UpScales shared navigation 3.11.32 capability rail */
+/* Elevation UpScales shared navigation 4.5.2 commerce cleanup */
 (() => {
   "use strict";
 
@@ -171,14 +171,6 @@
   const header = document.querySelector(".eus-header");
   if (!header) return;
 
-  const homePath = location.pathname === "/" || location.pathname === "/index.html";
-  if (homePath && !document.querySelector('script[data-eus-home-capabilities]')) {
-    const capabilityScript = document.createElement("script");
-    capabilityScript.src = "/home-capabilities.js?v=3.11.43";
-    capabilityScript.defer = true;
-    capabilityScript.dataset.eusHomeCapabilities = "true";
-    document.head.appendChild(capabilityScript);
-  }
 
   const shopMenu = header.querySelector(".eus-menu--shop");
   const shopDropdown = shopMenu?.querySelector(".eus-dropdown");
@@ -188,7 +180,7 @@
       ["/store", "Apparel Store", "Hats, apparel, artwork, stickers, and official Elevation releases"],
       ["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],
       ["/lithium-batteries", "Lithium Battery Shop", "LiFePO4 batteries for RV, solar, van, and off-grid power"],
-      ["/hawaii-lithium-batteries", "Hawaii Lithium Shipping & Freight", "Hawaii consolidated freight · Alaska quote options"],
+      ["/hawaii-lithium-batteries", "Hawaii Lithium Batteries", "Honolulu pickup pricing · Hawaii battery availability"],
       ["/collector", "Collector Series", "Explore the four-card collection and Golden Ticket"],
     ];
     for (const [href, title, description] of shopLinks) {
