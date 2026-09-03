@@ -141,12 +141,16 @@ jobs:
           if(await a.page.locator('#services').count()===0) throw new Error('normal Services missing');
           const shop=await a.page.locator('#shop-elevation,[data-home-commerce]').count();
           if(shop===0) throw new Error('home commerce missing');
-          for(const sel of ['img[src*="homepage-option-2-lithium-solar.webp"]','img[src*="homepage-option-3-home-rv-lifestyle.webp"]']){
-            const el=a.page.locator(sel).first();
-            await el.scrollIntoViewIfNeeded(); await a.page.waitForTimeout(500);
-            const d=await el.evaluate(img=>({nw:img.naturalWidth,nh:img.naturalHeight,complete:img.complete}));
-            if(!d.complete || d.nw!==960 || d.nh!==540) throw new Error(sel+JSON.stringify(d));
-          }
+          const lithiumRoute=a.page.locator('a.hc-route[href="/lithium-batteries"]').first();
+          if(await lithiumRoute.count()!==1) throw new Error('lithium route visual missing');
+          const bg=await lithiumRoute.getAttribute('style');
+          if(!bg?.includes('homepage-option-2-lithium-solar.webp')) throw new Error('lithium route approved background not wired');
+          const bgDims=await a.page.evaluate(async()=>await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve({nw:img.naturalWidth,nh:img.naturalHeight});img.onerror=()=>reject(new Error('option2 load failed'));img.src='/assets/homepage-option-2-lithium-solar.webp';}));
+          if(bgDims.nw!==960 || bgDims.nh!==540) throw new Error('option2 dimensions '+JSON.stringify(bgDims));
+          const lifestyle=a.page.locator('img[src*="homepage-option-3-home-rv-lifestyle.webp"]').first();
+          await lifestyle.scrollIntoViewIfNeeded(); await a.page.waitForTimeout(500);
+          const d=await lifestyle.evaluate(img=>({nw:img.naturalWidth,nh:img.naturalHeight,complete:img.complete}));
+          if(!d.complete || d.nw!==960 || d.nh!==540) throw new Error('option3 '+JSON.stringify(d));
           await a.page.close();
           a=await audit('/hawaii-lithium-batteries');
           const order=await a.page.evaluate(()=>{
