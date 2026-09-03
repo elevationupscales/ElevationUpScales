@@ -8,9 +8,9 @@
   <title>Checkout | Elevation UpScales, Inc.</title>
   <link rel="icon" href="/assets/favicon.png" type="image/png">
   <link rel="stylesheet" href="/site-shell.css?v=3.11.30">
-  <link rel="stylesheet" href="/store-checkout.css?v=4.4.0">
+  <link rel="stylesheet" href="/store-checkout.css?v=4.5.3">
   <script defer src="/site-shell.js?v=3.11.46"></script>
-  <script defer src="/store-checkout.js?v=4.5.2"></script>
+  <script defer src="/store-checkout.js?v=4.5.3"></script>
   <script defer src="/store-variant-image-enhancer.js?v=3.11.43"></script>
 <link rel="stylesheet" href="/labor-day-promo.css?v=4.4.2">
 <script defer src="/labor-day-promo.js?v=4.4.2"></script>
@@ -127,14 +127,14 @@
         </form>
 
         <dl class="eus-checkout-summary">
-          <div><dt>Merchandise list</dt><dd id="checkout-list-merchandise">—</dd></div>
-          <div id="checkout-discount-row" hidden><dt>Coupon</dt><dd id="checkout-discount">—</dd></div>
-          <div><dt>Merchandise after coupon</dt><dd id="checkout-merchandise">—</dd></div>
-          <div><dt id="checkout-shipping-label">Shipping</dt><dd id="checkout-shipping">—</dd></div>
-          <div class="eus-checkout-total-row"><dt>Total</dt><dd id="checkout-total">—</dd></div>
+          <div id="checkout-list-merchandise-row"><dt>Merchandise list</dt><dd id="checkout-list-merchandise">—</dd></div>
+          <div id="checkout-discount-row" hidden><dt>Labor Day merchandise discount</dt><dd id="checkout-discount">—</dd></div>
+          <div id="checkout-merchandise-row"><dt id="checkout-merchandise-label">Merchandise after coupon</dt><dd id="checkout-merchandise">—</dd></div>
+          <div id="checkout-shipping-row"><dt id="checkout-shipping-label">Shipping</dt><dd id="checkout-shipping">—</dd></div>
+          <div class="eus-checkout-total-row"><dt id="checkout-total-label">Total</dt><dd id="checkout-total">—</dd></div>
         </dl>
 
-        <section id="checkout-hawaii-freight" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">HAWAII LITHIUM SHIPPING &amp; FREIGHT</p><h3 id="checkout-hawaii-state">Freight Review Required</h3><p id="checkout-hawaii-math"></p><p><strong>$99 per actual battery covers freight to the Honolulu warehouse / freight-terminal pickup location.</strong> Timing is estimated and not guaranteed.</p><p>Need delivery from the Honolulu pickup location to your home, business or another address? <strong>Additional delivery charges apply.</strong> Contact Elevation for a delivery quote: <a href="tel:+12088134998">208-813-4998</a> · <a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a>.</p><a id="checkout-hawaii-reserve" class="eus-checkout-hawaii-cta" href="/hawaii-lithium-batteries#hawaii-request">Reserve / Request Shipping Review</a></section>
+        <section id="checkout-hawaii-freight" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">HAWAII PICKUP PROGRAM</p><h3 id="checkout-hawaii-state">Freight Review Required</h3><p class="eus-checkout-hawaii-price"><strong>Hawaii Pickup Price:</strong> <span id="checkout-hawaii-pickup-price">—</span></p><p id="checkout-hawaii-math">Includes freight to our Honolulu warehouse / pickup location. Freight is not discounted.</p><p>Need delivery from our Honolulu pickup location to your home, business or another address? Contact Elevation for a delivery quote. Call/Text <a href="tel:+12088134998">208-813-4998</a>.</p><a id="checkout-hawaii-reserve" class="eus-checkout-hawaii-cta" href="/hawaii-lithium-batteries#hawaii-request">Reserve / Request Shipping Review</a></section>
 
         <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>
         <div id="checkout-paypal" class="eus-checkout-paypal" hidden></div>

@@ -431,6 +431,7 @@ async function quoteRv(raw, env) {
   if (actualBattery && destinationState === "AK") return {ok:false,status:409,error:"Freight Review Required for Alaska lithium shipping",shippingReviewRequired:true,shippingRule:ruleResult?.rule||null};
   const hawaiiFreight = actualBattery && destinationState === "HI";
   const hawaiiStatus = hawaiiFreight ? await resolveHawaiiCustomerStatus(env,{productId:id,sku:product?.sku||entry?.sku||"",destination:"Hawaii — General"}) : null;
+  const hawaiiPickupFreightCents = hawaiiFreight ? Number(ruleResult?.shippingCents||0) : 0;
   let shippingCents;
   if (hawaiiFreight) shippingCents = hawaiiStatus?.customerState === "shipping_available" ? Number(ruleResult?.shippingCents||0) : 0;
   else if (actualBattery) shippingCents = Number(ruleResult?.shippingCents||0);
@@ -452,7 +453,7 @@ async function quoteRv(raw, env) {
     couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,shippingRule,
     variantId:"",variantName:"",variants:[],physical:true,
     battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?Number(rule?.rateCents||0):0},
-    ...(hawaiiFreight?{hawaii:{customerState:hawaiiStatus?.customerState||"review_required",statusLabel:hawaiiStatus?.label||"Freight Review Required",customerFreightPerBatteryCents:Number(rule?.rateCents||9900),preferredConsolidationUnits:Number(rule?.preferredConsolidationQuantity||3),warehousePickupOnly:Boolean(rule?.pickupOnly??true),pickupLocationLabel:"Honolulu warehouse / freight-terminal pickup location",requiresReservation:(hawaiiStatus?.customerState||"review_required")!=="shipping_available",paymentAllowed:(hawaiiStatus?.customerState||"review_required")==="shipping_available",finalMileQuoteRequired:true,finalMileMessage:"Delivery beyond the Honolulu pickup location is an additional quoted service.",supportPhone:"208-813-4998",supportEmail:"casey@elevationupscales.com",timing:rule?.timingMessage||"Honolulu warehouse / freight-terminal pickup. Shipment timing is estimated and not guaranteed.",requestUrl}}:{}),
+    ...(hawaiiFreight?{hawaii:{customerState:hawaiiStatus?.customerState||"review_required",statusLabel:hawaiiStatus?.label||"Freight Review Required",customerFreightPerBatteryCents:Number(rule?.rateCents||9900),preferredConsolidationUnits:Number(rule?.preferredConsolidationQuantity||3),warehousePickupOnly:Boolean(rule?.pickupOnly??true),pickupLocationLabel:"Honolulu warehouse / freight-terminal pickup location",merchandiseAfterCouponCents:coupon.merchandiseCents,pickupFreightCents:hawaiiPickupFreightCents,pickupPriceCents:coupon.merchandiseCents+hawaiiPickupFreightCents,requiresReservation:(hawaiiStatus?.customerState||"review_required")!=="shipping_available",paymentAllowed:(hawaiiStatus?.customerState||"review_required")==="shipping_available",finalMileQuoteRequired:true,finalMileMessage:"Need delivery from our Honolulu pickup location to your home, business or another address? Contact Elevation for a delivery quote.",supportPhone:"208-813-4998",supportEmail:"casey@elevationupscales.com",timing:rule?.timingMessage||"Honolulu warehouse / freight-terminal pickup. Shipment timing is estimated and not guaranteed.",requestUrl}}:{}),
     doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };
 }

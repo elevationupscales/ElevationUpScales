@@ -4,6 +4,7 @@
   const params = new URLSearchParams(location.search);
   const requestedId = String(params.get("id") || "").trim();
   const hintedStore = String(params.get("store") || "").trim().toLowerCase();
+  const hawaiiProgram = String(params.get("program") || "").trim().toLowerCase() === "hawaii";
   const status = document.querySelector("[data-product-status]");
   const detail = document.querySelector("[data-product-detail]");
   const unavailable = document.querySelector("[data-product-unavailable]");
@@ -111,11 +112,12 @@
   function sectionFor(product) { return clean(product?.storeSection, 60).toLowerCase() === "lithium-batteries" ? "lithium" : "rv"; }
   function displayTitle(product) { return sectionFor(product) === "lithium" ? lithiumView(product).title : compactRvTitle(product?.title || product?.name || "RV & Outdoor item"); }
   function displayCategory(product) { return sectionFor(product) === "lithium" ? lithiumView(product).category : rvCategory(product?.category, product?.title || product?.name); }
-  function storeUrl(product) { return sectionFor(product) === "lithium" ? "/lithium-batteries" : "/rv-store"; }
-  function detailUrl(product) { return `/product?id=${encodeURIComponent(clean(product?.id || product?.sku, 160))}&store=${sectionFor(product)}`; }
+  function storeUrl(product) { return sectionFor(product) === "lithium" ? (hawaiiProgram ? "/hawaii-lithium-batteries" : "/lithium-batteries") : "/rv-store"; }
+  function detailUrl(product) { return `/product?id=${encodeURIComponent(clean(product?.id || product?.sku, 160))}&store=${sectionFor(product)}${hawaiiProgram && sectionFor(product) === "lithium" ? "&program=hawaii" : ""}`; }
 
   function shippingPresentation(product) {
     const shipping = clean(product?.shippingStatus, 30).toLowerCase();
+    if (hawaiiProgram && sectionFor(product) === "lithium") return { label: "Hawaii pickup program · eligibility confirmed before payment", className: "is-quote" };
     if (shipping === "verified") return { label: "Ships to the Lower 48", className: "is-approved" };
     if (shipping === "quote_required") return { label: "Shipping quote required", className: "is-quote" };
     return { label: "Check shipping availability", className: "is-researching" };
@@ -135,7 +137,7 @@
     const id = clean(product?.id || product?.sku, 160);
     const rawName = plainText(product?.title || product?.name || displayTitle(product), 300);
     const checkoutSource = sectionFor(product) === "lithium" ? "lithium" : "rv";
-    let url = `/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id)}&name=${encodeURIComponent(rawName)}`;
+    let url = `/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id)}&name=${encodeURIComponent(rawName)}${hawaiiProgram && checkoutSource === "lithium" ? "&state=HI" : ""}`;
     return url;
   }
 

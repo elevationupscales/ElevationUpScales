@@ -30,7 +30,11 @@
   const successReferenceEl = document.querySelector("#checkout-success-reference");
   const retailerEl = document.querySelector("#checkout-lithium-retailer");
   const shippingLabelEl = document.querySelector("#checkout-shipping-label");
+  const listMerchandiseRow = document.querySelector("#checkout-list-merchandise-row");
+  const merchandiseLabelEl = document.querySelector("#checkout-merchandise-label");
+  const totalLabelEl = document.querySelector("#checkout-total-label");
   const hawaiiPanel = document.querySelector("#checkout-hawaii-freight");
+  const hawaiiPickupPriceEl = document.querySelector("#checkout-hawaii-pickup-price");
   const hawaiiMath = document.querySelector("#checkout-hawaii-math");
   const hawaiiStateEl = document.querySelector("#checkout-hawaii-state");
   const hawaiiReserve = document.querySelector("#checkout-hawaii-reserve");
@@ -171,9 +175,14 @@
     if (discountRow && discountEl) { discountRow.hidden = !(Number(next.discountCents) > 0); discountEl.textContent = Number(next.discountCents) > 0 ? `-${money(next.discountCents)}` : money(0); }
     if (couponStatusEl) couponStatusEl.textContent = next.couponCode ? `${next.couponCode} applied — shipping is not discounted.` : (next.promotion?.active ? `Labor Day coupon available for eligible merchandise.` : "");
     const isHawaii = Boolean(next.hawaii);
-    shippingEl.textContent = money(next.shippingCents);
-    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Hawaii Freight — Honolulu Pickup" : "Shipping";
-    totalEl.textContent = money(next.totalCents);
+    const hawaiiPickupFreightCents = Number(next.hawaii?.pickupFreightCents ?? next.shippingCents ?? 0);
+    const hawaiiPickupPriceCents = Number(next.hawaii?.pickupPriceCents ?? next.totalCents ?? 0);
+    shippingEl.textContent = money(isHawaii ? hawaiiPickupFreightCents : next.shippingCents);
+    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Included Honolulu freight" : "Shipping";
+    if (merchandiseLabelEl) merchandiseLabelEl.textContent = isHawaii ? (Number(next.discountCents) > 0 ? "Battery after Labor Day discount" : "Battery") : "Merchandise after coupon";
+    if (listMerchandiseRow) listMerchandiseRow.hidden = isHawaii;
+    if (totalLabelEl) totalLabelEl.textContent = isHawaii ? "Hawaii Pickup Price" : "Total";
+    totalEl.textContent = money(isHawaii ? hawaiiPickupPriceCents : next.totalCents);
     if (retailerEl) retailerEl.hidden = source !== "lithium";
     if (hawaiiPanel) hawaiiPanel.hidden = !isHawaii;
     if (contactShippingLabel) { contactShippingLabel.hidden = false; contactShippingLabel.textContent = isHawaii ? "Contact & pickup" : "Contact & shipping"; }
@@ -184,12 +193,9 @@
       const freightRate = Number(next.hawaii?.customerFreightPerBatteryCents || next.shippingRule?.rateCents || 0);
       const customerState = String(next.hawaii?.customerState || "review_required");
       if (hawaiiStateEl) hawaiiStateEl.textContent = next.hawaii?.statusLabel || (customerState === "shipping_available" ? "Shipping Available" : customerState === "unavailable" ? "Currently Unavailable" : "Freight Review Required");
-      if (hawaiiMath) {
-        if (customerState === "shipping_available") hawaiiMath.textContent = `Battery ${money(next.unitPriceCents)} × ${next.quantity}. Honolulu pickup freight ${money(freightRate)} × ${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} = ${money(next.shippingCents)}. Order total ${money(next.totalCents)} before any applicable tax.`;
-        else if (customerState === "unavailable") hawaiiMath.textContent = "This exact battery is currently unavailable for the selected Hawaii freight path. No payment will be collected.";
-        else hawaiiMath.textContent = "Freight Review Required. Reserve or request shipping review before payment is treated as shipping-confirmed.";
-      }
-      if (shippingEl) shippingEl.textContent = customerState === "shipping_available" ? money(next.shippingCents) : (customerState === "unavailable" ? "Unavailable" : "Review required");
+      if (hawaiiPickupPriceEl) hawaiiPickupPriceEl.textContent = money(hawaiiPickupPriceCents);
+      if (hawaiiMath) hawaiiMath.textContent = `Includes ${money(hawaiiPickupFreightCents)} freight to our Honolulu warehouse / pickup location. Freight is not discounted. Quantity: ${next.quantity}.`;
+      if (shippingEl) shippingEl.textContent = money(hawaiiPickupFreightCents);
       if (hawaiiReserve) { hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request"; hawaiiReserve.hidden = customerState === "shipping_available"; hawaiiReserve.textContent = customerState === "unavailable" ? "Check Availability / Contact Elevation" : "Reserve / Request Shipping Review"; }
       paypalEl.hidden = customerState !== "shipping_available";
     }

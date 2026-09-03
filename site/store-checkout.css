@@ -4,3 +4,5 @@
 .eus-checkout-retailer{margin:.45rem 0 0;color:#f0b62d;font-size:.86rem;letter-spacing:.02em}.eus-checkout-hawaii{margin:16px 0;padding:16px;border:1px solid rgba(240,182,45,.5);border-radius:12px;background:rgba(240,182,45,.07);color:#ddd}.eus-checkout-hawaii h3{margin:.15rem 0 .55rem;color:#fff}.eus-checkout-hawaii p{margin:.45rem 0;line-height:1.5}.eus-checkout-hawaii-cta{display:inline-flex;margin-top:.65rem;padding:.75rem 1rem;border-radius:8px;background:#f0b62d;color:#090909;font-weight:900;text-decoration:none}.eus-checkout-legal{display:flex;justify-content:center;gap:18px;padding:18px 12px 28px}.eus-checkout-legal a{color:#c9c4b9}
 
 .eus-checkout-page [hidden]{display:none!important}
+
+.eus-checkout-hawaii-price{font-size:1.15rem;margin:.65rem 0}.eus-checkout-hawaii-price strong{color:#f0bd45}.eus-checkout-hawaii-price span{font-weight:800}

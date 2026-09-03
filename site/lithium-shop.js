@@ -79,6 +79,21 @@
     return { title, subtitle, specs, category, rawTitle: raw, voltage, ah, capacityWh };
   }
 
+  function batteryUnitsFor(product) {
+    const title = textOnly(product?.title || product?.name || "").toLowerCase();
+    const description = textOnly(product?.description || "").toLowerCase();
+    const category = textOnly(product?.category || "").toLowerCase();
+    const identity = `${title} ${String(product?.sku || "").toLowerCase()}`;
+    const excluded = /battery\s*(?:box|case|tray|holder)|power\s*bank|power\s*station|\bcharger\b|charging\s*cable|\bcable\b|adapter|connector|terminal|monitor|meter|accessor/;
+    const positive = /\blifepo4\b|\blithium(?:[- ]ion| iron phosphate)?\b[^.]{0,100}\bbatter(?:y|ies)\b|\bbatter(?:y|ies)\b[^.]{0,100}\b(?:12|24|36|48)\s*v\b|\b\d{2,4}\s*ah\b[^.]{0,100}\bbatter(?:y|ies)\b/;
+    if (excluded.test(identity)) return 0;
+    if (!positive.test(identity) && (excluded.test(description.slice(0,500)) || !positive.test(`${description} ${category}`))) return 0;
+    const pack = title.match(/\b([2-9])\s*[- ]?(?:pack|pcs?|pieces?)\b/); if (pack) return Math.min(10, Number(pack[1]) || 1);
+    const times = title.match(/\b([2-9])\s*[x×]\s*\d{2,4}\s*ah\b/); if (times) return Math.min(10, Number(times[1]) || 1);
+    if (/\bdual\b|\btwo[- ]pack\b/.test(title)) return 2;
+    return 1;
+  }
+
   function lower48Shipping(product) {
     const shippingStatus = String(product?.shippingStatus || "unverified").toLowerCase();
     if (shippingStatus === "verified") return { label: "Ships to the Lower 48", className: "is-approved" };
@@ -91,19 +106,23 @@
     const id = String(product.id || "").trim();
     const view = viewFor(product);
     const shipping = lower48Shipping(product);
-    const detailUrl = `/product?id=${encodeURIComponent(id)}&store=lithium`;
+    const detailUrl = `/product?id=${encodeURIComponent(id)}&store=lithium${hawaiiMode ? "&program=hawaii" : ""}`;
     const checkoutUrl = `/checkout/?source=lithium&id=${encodeURIComponent(id)}&name=${encodeURIComponent(view.rawTitle || view.title)}${hawaiiMode ? "&state=HI" : ""}`;
+    const reviewUrl = `/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(view.rawTitle || view.title)}&qty=1#hawaii-request`;
     const inventory = Number.isFinite(Number(product.supplierStock)) ? `${Math.max(0, Number(product.supplierStock))} available` : "Supplier-managed availability";
-    const status = hawaiiMode ? { label: "Freight Review Required", className: "is-quote" } : shipping;
-    return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}" data-shipping-status="${esc(String(product.shippingStatus || "unverified"))}">
+    const status = hawaiiMode ? { label: "Checking Hawaii Availability", className: "is-quote" } : shipping;
+    const batteryUnits = hawaiiMode ? batteryUnitsFor(product) : 0;
+    const merchandiseCents = Number(product.priceCents || 0);
+    const pickupPriceCents = merchandiseCents + (batteryUnits > 0 ? 9900 * batteryUnits : 0);
+    return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}" data-shipping-status="${esc(String(product.shippingStatus || "unverified"))}"${hawaiiMode ? ` data-hawaii-merchandise-cents="${merchandiseCents}" data-hawaii-battery-units="${batteryUnits}"` : ""}>
       <div class="lithium-card__image"><a class="lithium-card__detail-link" href="${esc(detailUrl)}" aria-label="View ${esc(view.title)} details"><img src="${esc(product.primaryImage || "/assets/logo.webp")}" alt="${esc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a></div>
       <div class="lithium-card__body">
         <p class="lithium-card__category">${esc(view.category)}</p>
         <h3><a class="lithium-card__title-link" href="${esc(detailUrl)}">${esc(view.title)}</a></h3>
         ${view.specs ? `<p class="lithium-card__spec-line">${esc(view.specs)}</p>` : ""}
         <div class="lithium-card__shipping ${status.className}" data-hawaii-status>${esc(status.label)}</div>
-        ${hawaiiMode ? `<div class="hawaii-card-simple"><p><strong>Availability</strong><span>${esc(inventory)}</span></p><p data-hawaii-rate><strong>Hawaii Freight</strong><span>Current rule loading…</span></p><p><strong>Fulfillment</strong><span>Warehouse / freight-terminal pickup</span></p></div>` : ""}
-        <div class="lithium-card__footer"><strong>${money.format(Number(product.priceCents || 0) / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" href="${esc(checkoutUrl)}">${hawaiiMode ? "Buy / Reserve" : "Buy Now"}</a></div></div>
+        ${hawaiiMode ? `<div class="hawaii-card-simple"><p><strong>Availability</strong><span>${esc(inventory)}</span></p><p><strong>Hawaii Pickup Price</strong><span data-hawaii-pickup-price>${batteryUnits > 0 ? money.format(pickupPriceCents / 100) : "Freight Review Required"}</span></p><p><strong>Included Freight</strong><span>To our Honolulu warehouse / pickup location</span></p><p><strong>Address Delivery</strong><span>Additional charge · quote required</span></p></div>` : ""}
+        <div class="lithium-card__footer"><strong>${hawaiiMode && batteryUnits > 0 ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" ${hawaiiMode ? `data-hawaii-action data-checkout-url="${esc(checkoutUrl)}" data-review-url="${esc(reviewUrl)}" href="${esc(reviewUrl)}"` : `href="${esc(checkoutUrl)}"`}>${hawaiiMode ? "Check Hawaii Availability" : "Buy Now"}</a></div></div>
       </div>
     </article>`;
   }
@@ -167,8 +186,19 @@
     else if (stateValue === "review_required") badge.classList.add("is-quote");
     else badge.classList.add("is-researching");
     badge.textContent = data?.label || (stateValue === "shipping_available" ? "Shipping Available" : stateValue === "unavailable" ? "Currently Unavailable" : "Freight Review Required");
-    const rateEl = cardEl.querySelector("[data-hawaii-rate] span");
-    if (rateEl) rateEl.textContent = `${money.format(Number(rateCents || 0) / 100)} per actual battery when shipping is approved`;
+    const merchandiseCents = Number(cardEl.dataset.hawaiiMerchandiseCents || 0);
+    const batteryUnits = Number(cardEl.dataset.hawaiiBatteryUnits || 0);
+    const pickupPrice = merchandiseCents + Math.max(0, Number(rateCents || 0)) * Math.max(0, batteryUnits);
+    const pickupEl = cardEl.querySelector("[data-hawaii-pickup-price]");
+    if (pickupEl) pickupEl.textContent = batteryUnits > 0 ? money.format(pickupPrice / 100) : "Freight Review Required";
+    const footerPrice = cardEl.querySelector(".lithium-card__footer > strong");
+    if (footerPrice && batteryUnits > 0) footerPrice.textContent = money.format(pickupPrice / 100);
+    const action = cardEl.querySelector("[data-hawaii-action]");
+    if (action) {
+      if (stateValue === "shipping_available" && batteryUnits > 0) { action.href = action.dataset.checkoutUrl || action.href; action.textContent = "Buy Now"; }
+      else if (stateValue === "unavailable") { action.href = action.dataset.reviewUrl || "/hawaii-lithium-batteries#hawaii-request"; action.textContent = "Check Availability / Contact Elevation"; }
+      else { action.href = action.dataset.reviewUrl || "/hawaii-lithium-batteries#hawaii-request"; action.textContent = "Request Shipping Review"; }
+    }
   }
 
   async function syncHawaiiStatuses() {
