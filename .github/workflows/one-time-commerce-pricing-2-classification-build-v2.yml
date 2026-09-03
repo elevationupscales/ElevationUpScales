@@ -1,0 +1,39 @@
+name: One-Time Commerce Pricing 2 Classification Build V2
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-2-classification-build-v2-2026-09-03
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/commerce-pricing-supplier-catalog-2-0-2026-09-03
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply deterministic classification patch
+        run: python3 <(git show origin/runner/commerce-pricing-2-classification-build-v2-2026-09-03:.github/scripts/apply_cp2_classification.py)
+        shell: bash
+      - name: Gate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/commerce-pricing-runtime.js
+          node --check site/admin-commerce-pricing.js
+          grep -q 'CATALOG PRICE DRIFT — LIVE PRICING PROTECTED' site/commerce-pricing-runtime.js
+          grep -q 'blockedProducts' site/commerce-pricing-runtime.js
+          grep -q 'pricing-count-drift' site/admin-commerce-pricing.html
+          grep -q 'value="blocked"' site/admin-commerce-pricing.html
+          test "$(git diff --name-only | sort)" = "$(printf '%s\n' site/admin-commerce-pricing.css site/admin-commerce-pricing.html site/admin-commerce-pricing.js site/commerce-pricing-runtime.js | sort)"
+      - name: Commit and push application changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/admin-commerce-pricing.css site/admin-commerce-pricing.html site/admin-commerce-pricing.js site/commerce-pricing-runtime.js
+          git commit -m 'Refine Pricing 2.0 review severity and price drift'
+          git push origin HEAD:work/commerce-pricing-supplier-catalog-2-0-2026-09-03
