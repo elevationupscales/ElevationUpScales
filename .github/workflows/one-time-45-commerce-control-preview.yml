@@ -1,0 +1,219 @@
+name: One-Time 4.5 Commerce Control Exact Preview
+
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths:
+      - .github/workflows/one-time-45-commerce-control-preview.yml
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact application candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 281aac9482b1c2791d4a7651e0eed8d982102723
+          fetch-depth: 0
+
+      - name: Enforce candidate lineage and source invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "281aac9482b1c2791d4a7651e0eed8d982102723"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "9ed1a64479f6c1949cfef7b6c40494c6ab9c934a"
+          git merge-base --is-ancestor 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a HEAD
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a...HEAD
+          grep -q '2799' site/shipping-rules-runtime.js
+          grep -q '9900' site/shipping-rules-runtime.js
+          grep -q 'alaska-lithium' site/shipping-rules-runtime.js
+          grep -q 'quoteRequired' site/shipping-rules-runtime.js
+          grep -q '/api/hawaii-lithium/statuses' site/lithium-shop.js
+          ! grep -q 'fetch(`/api/hawaii-lithium/status?sku=' site/lithium-shop.js
+          grep -q '/api/store/featured' site/home-commerce.js
+          ! grep -q '/api/store/catalog' site/home-commerce.js
+          ! grep -q '/api/store-catalog' site/home-commerce.js
+          grep -q 'data-home-commerce' site/index.html
+          grep -q 'UNDERSTAND ELEVATION' site/what-we-do.html
+          grep -q 'data-shipping-rules-admin' site/admin-lithium-shipping.html
+          grep -q 'shippingRule:quote.shippingRule' site/store-checkout-server.js
+          ! grep -q 'fallbackCatalog' site/rv-store.js
+
+      - name: Deploy exact candidate to isolated Cloudflare preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=commerce45preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify preview routes, catalogs and commerce controls
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          echo "COMMERCE45_PREVIEW=$base"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /marketplace /terms /admin /admin-catalog /admin-store-orders /admin-lithium-shipping /what-we-do; do
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 60 -o /tmp/route.html -w '%{http_code}' "$base$route" || true)
+            echo "ROUTE ${route}=${code}"
+            test "$code" = "200"
+          done
+
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/store/featured" -o /tmp/featured.json
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/shipping-rules" -o /tmp/rules.json
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/shipping-rules/resolve?state=HI&quantity=2&batteryUnits=1" -o /tmp/hi-rule.json
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/shipping-rules/resolve?state=AK&quantity=1&batteryUnits=1" -o /tmp/ak-rule.json
+          curl -fsSL --retry 10 --retry-all-errors "$base/api/hawaii-lithium/statuses" -o /tmp/hi-status.json
+          admin_code=$(curl -sS -o /tmp/admin-rules.json -w '%{http_code}' "$base/api/admin/shipping-rules")
+          echo "ADMIN_SHIPPING_RULES_UNAUTH=${admin_code}"
+          test "$admin_code" = "401"
+
+          node <<'NODE'
+          const fs=require('fs');
+          const lithium=JSON.parse(fs.readFileSync('/tmp/lithium.json','utf8')).products||[];
+          const rv=JSON.parse(fs.readFileSync('/tmp/rv.json','utf8')).products||[];
+          const featured=JSON.parse(fs.readFileSync('/tmp/featured.json','utf8'));
+          const rules=JSON.parse(fs.readFileSync('/tmp/rules.json','utf8')).rules||[];
+          const hi=JSON.parse(fs.readFileSync('/tmp/hi-rule.json','utf8'));
+          const ak=JSON.parse(fs.readFileSync('/tmp/ak-rule.json','utf8'));
+          const hs=JSON.parse(fs.readFileSync('/tmp/hi-status.json','utf8'));
+          console.log(`LITHIUM_COUNT=${lithium.length}`); if(lithium.length!==38) throw new Error(`Expected 38 Lithium products, got ${lithium.length}`);
+          console.log(`RV_COUNT=${rv.length}`); if(rv.length<1) throw new Error('RV Catalog empty');
+          if((featured.lithium||[]).length!==4||(featured.rv||[]).length!==4) throw new Error('Featured endpoint must return 4 Lithium + 4 RV products');
+          for(const item of [...featured.lithium,...featured.rv]) if(!(Number(item.priceCents)>0)||!item.image||!item.buyUrl||!item.detailUrl) throw new Error('Featured product missing purchase data');
+          const lower=rules.find(r=>r.region==='LOWER48'), hawaii=rules.find(r=>r.region==='HI'), alaska=rules.find(r=>r.region==='AK');
+          if(!lower?.enabled||lower.rateCents!==2799||lower.calculation!=='per_battery') throw new Error('Lower48 rule mismatch');
+          if(!hawaii?.enabled||hawaii.rateCents!==9900||hawaii.calculation!=='per_battery'||!hawaii.pickupOnly||hawaii.residentialAllowed||hawaii.preferredConsolidationQuantity!==3) throw new Error('Hawaii rule mismatch');
+          if(!alaska?.quoteRequired||alaska.rateCents!==0) throw new Error('Alaska review rule mismatch');
+          if(hi.status!=='shipping_available'||hi.shippingCents!==19800) throw new Error('Hawaii quantity resolution mismatch');
+          if(ak.status!=='review_required'||ak.shippingCents!==0) throw new Error('Alaska review resolution mismatch');
+          if(Number(hs.customerFreightPerBatteryCents)!==9900||!hs.pickupOnly||!hs.statuses||Object.keys(hs.statuses).length<1) throw new Error('Hawaii batched status payload mismatch');
+          fs.writeFileSync('/tmp/lithium-id',String(lithium.find(x=>Number(x.priceCents)>0)?.id||''));
+          console.log(`FEATURED_LITHIUM=4 FEATURED_RV=4`);
+          console.log(`SHIPPING_RULES=LOWER48:2799 HI:9900 AK:REVIEW`);
+          NODE
+
+          curl -fsSL --retry 10 --retry-all-errors "$base/lithium-batteries" -o /tmp/lithium.html
+          curl -fsSL --retry 10 --retry-all-errors "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          curl -fsSL --retry 10 --retry-all-errors "$base/rv-store" -o /tmp/rv.html
+          node <<'NODE'
+          const fs=require('fs');
+          for(const [name,path,expected] of [['lithium','/tmp/lithium.html',38],['hawaii','/tmp/hawaii.html',38]]){
+            const h=fs.readFileSync(path,'utf8'); const cards=(h.match(/class="lithium-card"/g)||[]).length;
+            console.log(`${name.toUpperCase()}_PRERENDER=${cards}`); if(!h.includes('data-prerendered="true"')||cards!==expected) throw new Error(`${name} prerender mismatch`);
+          }
+          const rv=fs.readFileSync('/tmp/rv.html','utf8'); const rvCards=(rv.match(/class="rv-product-card"/g)||[]).length;
+          console.log(`RV_PRERENDER=${rvCards}`); if(!rv.includes('data-prerendered="true"')||rvCards<1) throw new Error('RV prerender mismatch');
+          NODE
+
+      - name: Verify checkout shipping authority and payment boundaries
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          node <<'NODE'
+          const fs=require('fs');
+          const base=process.env.DEPLOYMENT_URL.replace(/\/$/,'');
+          const products=(JSON.parse(fs.readFileSync('/tmp/lithium.json','utf8')).products||[]).filter(x=>Number(x.priceCents)>0);
+          const origin=base;
+          async function post(path,body){const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','Origin':origin},body:JSON.stringify(body)});return {status:r.status,body:await r.json().catch(()=>({}))};}
+          let chosen=null,co=null;
+          for(const p of products){const q=await post('/api/store-checkout/quote',{source:'lithium',id:p.id,name:p.title,quantity:1,shipping:{state:'CO'}});if(q.status===200&&q.body?.battery?.actualBattery){chosen=p;co=q;break;}}
+          if(!chosen) throw new Error('No actual Lithium battery produced an authoritative Lower48 quote');
+          console.log(`CHECKOUT_SAMPLE=${chosen.id}`);
+          const units=Number(co.body.battery.batteryUnitsPerItem||1);
+          if(co.body.shippingCents!==2799*units) throw new Error(`Lower48 shipping mismatch: ${co.body.shippingCents} vs ${2799*units}`);
+          if(co.body.shippingRule?.rateCents!==2799) throw new Error('Lower48 quote missing Shipping Rule snapshot');
+          const co2=await post('/api/store-checkout/quote',{source:'lithium',id:chosen.id,name:chosen.title,quantity:2,shipping:{state:'CO'}});
+          if(co2.status!==200||co2.body.shippingCents!==2799*units*2) throw new Error('Lower48 quantity shipping mismatch');
+          const hi=await post('/api/store-checkout/quote',{source:'lithium',id:chosen.id,name:chosen.title,quantity:1,shipping:{state:'HI'}});
+          if(hi.status!==200||!hi.body.hawaii) throw new Error(`Hawaii quote missing: ${hi.status}`);
+          if(!['shipping_available','review_required','unavailable'].includes(hi.body.hawaii.customerState)) throw new Error('Invalid Hawaii customer state');
+          if(hi.body.hawaii.customerFreightPerBatteryCents!==9900) throw new Error('Hawaii quote not using current Shipping Rule');
+          const order=await post('/api/store-checkout/orders',{source:'lithium',id:chosen.id,name:chosen.title,quantity:1,customer:{email:'preview-check@example.com',name:'Preview Check'},shipping:{state:'HI'}});
+          if(order.status!==409||!order.body.hawaiiFreight) throw new Error(`Hawaii payment boundary failed: ${order.status}`);
+          const ak=await post('/api/store-checkout/quote',{source:'lithium',id:chosen.id,name:chosen.title,quantity:1,shipping:{state:'AK'}});
+          if(ak.status!==409||!String(ak.body.error||'').includes('Freight Review Required')) throw new Error('Alaska quote/review boundary failed');
+          console.log(`CHECKOUT_LOWER48=${co.body.shippingCents} CHECKOUT_HI_STATE=${hi.body.hawaii.customerState} CHECKOUT_AK=REVIEW`);
+          NODE
+
+      - name: Browser behavior and performance comparison
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/eus-browser && cd /tmp/eus-browser
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@latest >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > verify.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.DEPLOYMENT_URL.replace(/\/$/,'');
+          const routes=['/','/lithium-batteries','/hawaii-lithium-batteries','/rv-store'];
+          const browser=await chromium.launch({headless:true});
+          const metrics={};
+          for(const route of routes){
+            const context=await browser.newContext({viewport:{width:1280,height:900}}); const page=await context.newPage();
+            const requests=[],api=[]; page.on('request',r=>{requests.push(r.url());if(r.url().includes('/api/'))api.push(r.url());});
+            await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});
+            if(route==='/'){await page.locator('[data-home-commerce]').scrollIntoViewIfNeeded(); await page.waitForTimeout(1800);} else await page.waitForTimeout(1800);
+            const beforeIdle=requests.length; await page.waitForTimeout(2500); const idle=requests.length-beforeIdle;
+            const snap=await page.evaluate(()=>({dom:document.getElementsByTagName('*').length,images:document.images.length,scripts:document.scripts.length}));
+            metrics[route]={...snap,requests:requests.length,apiRequests:api.length,idleRequests:idle,api:api.map(u=>new URL(u).pathname)};
+            console.log('PERF_AFTER '+route+' '+JSON.stringify(metrics[route]));
+            if(idle!==0) throw new Error(`${route} produced idle request activity`);
+            if(route==='/'){
+              const li=await page.locator("[data-home-products='lithium'] .home-product-card").count(); const rv=await page.locator("[data-home-products='rv'] .home-product-card").count();
+              if(li!==4||rv!==4) throw new Error(`Homepage cards mismatch ${li}/${rv}`);
+              if(api.some(u=>u.includes('/api/store/catalog')||u.includes('/api/store-catalog'))) throw new Error('Homepage loaded full Catalog');
+              if(api.filter(u=>u.includes('/api/store/featured')).length!==1) throw new Error('Homepage featured request mismatch');
+            }
+            if(route==='/lithium-batteries'&&api.some(u=>u.includes('/api/store/catalog'))) throw new Error('Lithium duplicated full Catalog fetch on initial prerender');
+            if(route==='/rv-store'&&api.some(u=>u.includes('/api/store-catalog'))) throw new Error('RV duplicated full Catalog fetch on initial prerender');
+            if(route==='/hawaii-lithium-batteries'){
+              const singles=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/status').length;
+              const batches=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/statuses').length;
+              const catalogs=api.filter(u=>new URL(u).pathname==='/api/store/catalog').length;
+              if(singles!==0||batches>1||catalogs!==0) throw new Error(`Hawaii request pattern invalid singles=${singles} batches=${batches} catalogs=${catalogs}`);
+              if(metrics[route].apiRequests>=10) throw new Error(`Hawaii API request count still excessive: ${metrics[route].apiRequests}`);
+              if(metrics[route].dom>=1613) throw new Error(`Hawaii DOM did not improve: ${metrics[route].dom}`);
+            }
+            await context.close();
+          }
+          // Deferred hydration interactions must still work.
+          {const c=await browser.newContext();const p=await c.newPage();await p.goto(base+'/lithium-batteries',{waitUntil:'domcontentloaded'});await p.locator('[data-lithium-search]').fill('12V');await p.waitForTimeout(900);if(!p.url().startsWith(base))throw new Error('Lithium search navigation changed');await c.close();}
+          {const c=await browser.newContext();const p=await c.newPage();await p.goto(base+'/rv-store',{waitUntil:'domcontentloaded'});const search=p.locator('#rv-search');if(await search.count()){await search.fill('RV');await p.waitForTimeout(900);}await c.close();}
+          await browser.close();
+          NODE
+          node verify.mjs
+
+      - name: Preview receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Elevation 4.5 Commerce Control exact preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate: 281aac9482b1c2791d4a7651e0eed8d982102723' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Parent: 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Homepage mini-store: 4 Lithium + 4 RV PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Shipping Rules: Lower48 $27.99 / Hawaii $99 / Alaska review PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hawaii status batching / simplified customer state: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Checkout shipping authority/payment boundary: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Protected route regression: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment: NOT PERFORMED by this workflow' >> "$GITHUB_STEP_SUMMARY"
