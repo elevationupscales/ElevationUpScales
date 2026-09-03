@@ -340,6 +340,57 @@ async function publicStatus(request, env) {
   return json({...unresolved,destination:dest?.destination||destination||"Hawaii — General",...common});
 }
 
+
+function customerState(record, destinations = []) {
+  if (!record) return { customerState: "review_required", label: "Freight Review Required", eligible: false };
+  if (Number(record.hold)) return { customerState: "unavailable", label: "Currently Unavailable", eligible: false };
+  if (record.review_state !== "INTERNAL REQUIREMENTS SATISFIED") return { customerState: "review_required", label: "Freight Review Required", eligible: false };
+  const states = destinations.map((row) => upper(row.eligibility_state || ""));
+  if (states.includes("APPROVED")) return { customerState: "shipping_available", label: "Shipping Available", eligible: true };
+  if (states.some((value) => ["NOT ELIGIBLE", "HOLD"].includes(value))) return { customerState: "unavailable", label: "Currently Unavailable", eligible: false };
+  return { customerState: "review_required", label: "Freight Review Required", eligible: false };
+}
+
+export async function resolveHawaiiCustomerStatus(env, { sku = "", productId = "", destination = "Hawaii — General" } = {}) {
+  const db = await ensureSchema(env);
+  const exactSku = clean(sku, 180);
+  const exactProductId = clean(productId, 120);
+  const record = exactProductId
+    ? await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE catalog_product_id=? LIMIT 1").bind(exactProductId).first()
+    : exactSku
+      ? await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE sku=? COLLATE NOCASE LIMIT 1").bind(exactSku).first()
+      : null;
+  if (!record) return { ...customerState(null), sku: exactSku, productId: exactProductId };
+  const target = clean(destination, 80) || "Hawaii — General";
+  const rows = (await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE shipping_record_id=? AND destination IN (?, 'Hawaii — General') ORDER BY CASE WHEN destination=? THEN 0 ELSE 1 END")
+    .bind(record.id, target, target).all()).results || [];
+  return { ...customerState(record, rows), sku: record.sku, productId: record.catalog_product_id };
+}
+
+async function publicStatuses(request, env) {
+  if (request.method !== "GET" && request.method !== "HEAD") return json({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+  const db = await ensureSchema(env);
+  const records = (await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE active=1").all()).results || [];
+  const destinations = (await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE destination IN ('Hawaii — General','Oahu','Maui','Kauai','Hawaii Island / Big Island')").all()).results || [];
+  const byRecord = new Map();
+  for (const row of destinations) {
+    if (!byRecord.has(row.shipping_record_id)) byRecord.set(row.shipping_record_id, []);
+    byRecord.get(row.shipping_record_id).push(row);
+  }
+  const statuses = {};
+  for (const record of records) {
+    const value = { ...customerState(record, byRecord.get(record.id) || []), sku: record.sku, productId: record.catalog_product_id };
+    if (record.sku) statuses[String(record.sku).toLowerCase()] = value;
+    if (record.catalog_product_id) statuses[record.catalog_product_id] = value;
+  }
+  return json({
+    statuses,
+    customerFreightPerBatteryCents: HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,
+    preferredConsolidationUnits: HAWAII_PREFERRED_CONSOLIDATION_UNITS,
+    pickupOnly: true,
+  });
+}
+
 function quoteExpired(value) { const t=dateOnly(value); return t!==null && t < Date.now()-86400000; }
 function routeApprovalBlockers(record, raw, eligibility) {
   if(eligibility!=="APPROVED")return [];
@@ -508,5 +559,5 @@ async function updateBatchOrder(request,db,adminEmail,orderId){const raw=await r
     .bind(batchId,raw.batchSequence===undefined?e.batch_sequence:nullableInt(raw.batchSequence),raw.quantity===undefined?e.quantity:Math.max(1,int(raw.quantity,e.quantity)),clean(raw.destination??e.destination,120),raw.estimatedShippingShareCents===undefined?e.estimated_shipping_share_cents:nullableInt(raw.estimatedShippingShareCents),raw.finalShippingShareCents===undefined?e.final_shipping_share_cents:nullableInt(raw.finalShippingShareCents),approval,payment,fulfillment,method,allocated,approved?adminEmail:e.allocation_approved_by,approved?now():e.allocation_approved_at,raw.hold===undefined?e.hold:boolInt(raw.hold),clean(raw.notes??e.notes,3000),...values,clean(raw.providerReference??e.provider_reference,500),clean(raw.reviewRecheckAt??e.review_recheck_at,40),clean(raw.reviewer??adminEmail,180),clean(raw.blockerNotes??e.blocker_notes,2000),now(),adminEmail,orderId).run();
   const customerConfirmationAt=["APPROVED","ACCEPT DELAY"].includes(approval)?now():"";await db.prepare("UPDATE eus_hawaii_lithium_requests SET assigned_batch_id=?,estimated_shipping_share_cents=?,final_shipping_share_cents=?,customer_approval_state=?,payment_state=?,fulfillment_state=?,customer_confirmation_at=CASE WHEN ?!='' THEN ? ELSE customer_confirmation_at END,updated_at=?,updated_by=? WHERE id=?").bind(batchId,raw.estimatedShippingShareCents===undefined?e.estimated_shipping_share_cents:nullableInt(raw.estimatedShippingShareCents),raw.finalShippingShareCents===undefined?e.final_shipping_share_cents:nullableInt(raw.finalShippingShareCents),approval,payment,fulfillment,customerConfirmationAt,customerConfirmationAt,now(),adminEmail,e.request_id).run();await audit(db,"batch_order",orderId,"updated",adminEmail,{batchId,method,allocated,fulfillment,approval,compatibility:values});return json(await adminSnapshot(db,adminEmail));}
 
-export async function handleHawaiiLithiumPublicApi(request,env,pathname){try{if(pathname==="/api/hawaii-lithium/requests")return publicRequest(request,env);if(pathname==="/api/hawaii-lithium/status")return publicStatus(request,env);return json({error:"Not found"},404);}catch(error){console.error(JSON.stringify({event:"hawaii_lithium_public_error",path:pathname,message:clean(error?.message,300)}));return json({error:"Hawaii Lithium Program is temporarily unavailable"},503);}}
+export async function handleHawaiiLithiumPublicApi(request,env,pathname){try{if(pathname==="/api/hawaii-lithium/requests")return publicRequest(request,env);if(pathname==="/api/hawaii-lithium/statuses")return publicStatuses(request,env);if(pathname==="/api/hawaii-lithium/status")return publicStatus(request,env);return json({error:"Not found"},404);}catch(error){console.error(JSON.stringify({event:"hawaii_lithium_public_error",path:pathname,message:clean(error?.message,300)}));return json({error:"Hawaii Lithium Program is temporarily unavailable"},503);}}
 export async function handleHawaiiLithiumAdminApi(request,env,pathname){try{const auth=await requireAdmin(request,env);if(auth.response)return auth.response;if(!sameOrigin(request))return json({error:"Cross-origin request denied"},403);const db=await ensureSchema(env);const admin=auth.session.email;if(pathname==="/api/admin/lithium-shipping"&&request.method==="GET")return json(await adminSnapshot(db,admin));if(pathname==="/api/admin/lithium-shipping/records"&&request.method==="POST")return upsertShippingRecord(request,db,admin);if(pathname==="/api/admin/lithium-shipping/destinations"&&request.method==="POST")return upsertDestination(request,db,admin);let m=pathname.match(/^\/api\/admin\/lithium-shipping\/requests\/([^/]+)$/);if(m&&request.method==="PATCH")return updateRequest(request,db,admin,decodeURIComponent(m[1]));if(pathname==="/api/admin/lithium-shipping/batches"&&request.method==="POST")return createBatch(request,db,admin);m=pathname.match(/^\/api\/admin\/lithium-shipping\/batches\/([^/]+)$/);if(m&&request.method==="PATCH")return updateBatch(request,db,admin,decodeURIComponent(m[1]));m=pathname.match(/^\/api\/admin\/lithium-shipping\/batches\/([^/]+)\/orders$/);if(m&&request.method==="POST")return assignToBatch(request,db,admin,decodeURIComponent(m[1]));m=pathname.match(/^\/api\/admin\/lithium-shipping\/batch-orders\/([^/]+)$/);if(m&&request.method==="PATCH")return updateBatchOrder(request,db,admin,decodeURIComponent(m[1]));return json({error:"Not found"},404);}catch(error){console.error(JSON.stringify({event:"hawaii_lithium_admin_error",path:pathname,message:clean(error?.message,300)}));return json({error:clean(error?.message,240)||"Hawaii Lithium admin request failed"},500);}}

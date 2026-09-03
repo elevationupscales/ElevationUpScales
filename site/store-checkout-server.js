@@ -1,5 +1,7 @@
 import { ensureCommerceSchema } from "./commerce-schema-migrations.js";
 import { getPromotionConfig, pricingForProduct, applyCoupon, isActualLithiumBattery, batteryUnitsPerCatalogUnit, publicPromotion } from "./promotion-runtime.js";
+import { resolveShippingRule } from "./shipping-rules-runtime.js";
+import { resolveHawaiiCustomerStatus } from "./hawaii-lithium-runtime.js";
 const PAYPAL_SANDBOX_ORIGIN = "https://api-m.sandbox.paypal.com";
 const PAYPAL_LIVE_ORIGIN = "https://api-m.paypal.com";
 const FOURTHWALL_ORIGIN = "https://elevationupscales-shop.fourthwall.com";
@@ -416,8 +418,7 @@ async function quoteRv(raw, env) {
   const config = await getPromotionConfig(env);
   const priced = pricingForProduct(product, config);
   const actualBattery = source==="lithium" && isActualLithiumBattery(product);
-  if (actualBattery && destinationState==="AK") return {ok:false,status:409,error:"Standard lithium battery checkout is not available to Alaska"};
-  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...fallback,error:"This Doba item is not available for the selected shipping state"};
+  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && ["HI","AK"].includes(destinationState))) return {ok:false,status:409,...fallback,error:"This Doba item is not available for the selected shipping state"};
   const qty = quantity(raw?.quantity);
   const unitPriceCents = Number.parseInt(String(priced.priceCents ?? entry.priceCents ?? ""),10);
   if (!Number.isInteger(unitPriceCents) || unitPriceCents < 1) return {ok:false,status:409,error:"Current Catalog price is unavailable for this item"};
@@ -425,21 +426,36 @@ async function quoteRv(raw, env) {
   const coupon = applyCoupon({couponCode:raw?.couponCode,listMerchandiseCents,eligible:Boolean(priced.promotion?.couponEligible),config});
   if (!coupon.ok) return coupon;
   const batteryUnitsPerItem = actualBattery ? batteryUnitsPerCatalogUnit(product) : 0;
+  const ruleResult = actualBattery ? await resolveShippingRule(env,{destinationState,quantity:qty,batteryUnitsPerItem}) : null;
+  if (actualBattery && ruleResult?.status === "unavailable") return {ok:false,status:409,error:"Lithium shipping is currently unavailable for this destination",shippingRule:ruleResult.rule||null};
+  if (actualBattery && destinationState === "AK") return {ok:false,status:409,error:"Freight Review Required for Alaska lithium shipping",shippingReviewRequired:true,shippingRule:ruleResult?.rule||null};
   const hawaiiFreight = actualBattery && destinationState === "HI";
-  const shippingPerCatalogItem = hawaiiFreight ? HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY * batteryUnitsPerItem : (actualBattery ? config.batteryShippingCents * batteryUnitsPerItem : Number.parseInt(String(entry.shippingCents ?? ""),10));
-  if (!Number.isInteger(shippingPerCatalogItem) || shippingPerCatalogItem < 0) return {ok:false,status:409,error:"Doba shipping is not available for this item"};
-  const shippingCents = shippingPerCatalogItem * qty;
+  const hawaiiStatus = hawaiiFreight ? await resolveHawaiiCustomerStatus(env,{productId:id,sku:product?.sku||entry?.sku||"",destination:"Hawaii — General"}) : null;
+  let shippingCents;
+  if (hawaiiFreight) shippingCents = hawaiiStatus?.customerState === "shipping_available" ? Number(ruleResult?.shippingCents||0) : 0;
+  else if (actualBattery) shippingCents = Number(ruleResult?.shippingCents||0);
+  else {
+    const shippingPerCatalogItem = Number.parseInt(String(entry.shippingCents ?? ""),10);
+    if (!Number.isInteger(shippingPerCatalogItem) || shippingPerCatalogItem < 0) return {ok:false,status:409,error:"Doba shipping is not available for this item"};
+    shippingCents = shippingPerCatalogItem * qty;
+  }
+  const rule = ruleResult?.rule || null;
+  const shippingRule = rule ? {
+    id:rule.id,version:rule.version,region:rule.region,method:rule.method,calculation:rule.calculation,rateCents:rule.rateCents,
+    quoteRequired:rule.quoteRequired,pickupOnly:rule.pickupOnly,residentialAllowed:rule.residentialAllowed,
+    customerLabel:rule.customerLabel,timingMessage:rule.timingMessage,appliedShippingCents:shippingCents,resolvedAt:new Date().toISOString()
+  } : null;
+  const requestUrl = `/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(clean(entry.name||raw?.name,240))}&qty=${qty}#hawaii-request`;
   return {
     ok:true,source,id,productName:clean(entry.name||raw?.name,240)||(source==="lithium"?"Lithium item":"RV & Outdoor item"),productImage:clean(entry.imageUrl||entry.image,1200),quantity:qty,
     unitPriceCents,listMerchandiseCents,discountCents:coupon.discountCents,merchandiseCents:coupon.merchandiseCents,shippingCents,totalCents:coupon.merchandiseCents+shippingCents,
-    couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,
+    couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,shippingRule,
     variantId:"",variantName:"",variants:[],physical:true,
-    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?(hawaiiFreight?HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY:config.batteryShippingCents):0},
-    ...(hawaiiFreight?{hawaii:{customerFreightPerBatteryCents:HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,preferredConsolidationUnits:HAWAII_PREFERRED_CONSOLIDATION_UNITS,warehousePickupOnly:true,requiresReservation:true,consolidationStatus:qty*batteryUnitsPerItem>=HAWAII_PREFERRED_CONSOLIDATION_UNITS?"Batch quantity target reached — final logistics gates still apply":"Awaiting compatible consolidation",timing:"Estimated shipment / pickup timing — not guaranteed",requestUrl:`/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(clean(entry.name||raw?.name,240))}&qty=${qty}#hawaii-request`}}:{}),
+    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?Number(rule?.rateCents||0):0},
+    ...(hawaiiFreight?{hawaii:{customerState:hawaiiStatus?.customerState||"review_required",statusLabel:hawaiiStatus?.label||"Freight Review Required",customerFreightPerBatteryCents:Number(rule?.rateCents||9900),preferredConsolidationUnits:Number(rule?.preferredConsolidationQuantity||3),warehousePickupOnly:Boolean(rule?.pickupOnly??true),requiresReservation:true,paymentAllowed:false,timing:rule?.timingMessage||"Warehouse / freight-terminal pickup. Shipment timing is estimated and depends on freight coordination and product eligibility.",requestUrl}}:{}),
     doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };
 }
-
 async function quoteStoreItem(raw, env) {
   const source = clean(raw?.source, 20).toLowerCase();
   if (source === "apparel") return quoteApparel(raw, env);
@@ -596,7 +612,7 @@ async function createStoreOrder(request, env) {
       quote.totalCents,
       JSON.stringify(customer),
       JSON.stringify(address),
-      JSON.stringify({...quote.doba,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
+      JSON.stringify({...quote.doba,shippingRule:quote.shippingRule||{},promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
       clean(body.id, 80),
       "",
       "created",

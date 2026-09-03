@@ -18,7 +18,8 @@
     "/sync-admin-runtime.js",
     "/doba-csv-sync-runtime.js",
     "/apparel-provider-runtime.js",
-    "/commerce-schema-migrations.js"
+    "/commerce-schema-migrations.js",
+    "/shipping-rules-runtime.js"
   ],
   "exclude": []
 }

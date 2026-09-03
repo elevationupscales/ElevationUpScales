@@ -1,4 +1,4 @@
-export const COMMERCE_SCHEMA_VERSION = "2026.08.29.1";
+export const COMMERCE_SCHEMA_VERSION = "2026.09.02.1";
 
 const MIGRATIONS = [
   {
@@ -54,6 +54,29 @@ const MIGRATIONS = [
       `CREATE TABLE IF NOT EXISTS eus_provider_health (
         provider TEXT PRIMARY KEY,configured INTEGER NOT NULL DEFAULT 0,state TEXT NOT NULL DEFAULT 'Not Configured',last_attempt_at TEXT,last_success_at TEXT,last_error TEXT NOT NULL DEFAULT '',discovered_count INTEGER NOT NULL DEFAULT 0,matched_count INTEGER NOT NULL DEFAULT 0,review_count INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL
       )`,
+    ],
+  },
+  {
+    id: "2026-09-02-shipping-rules-v1",
+    description: "Server-authoritative shipping rules and audit trail",
+    statements: [
+      `CREATE TABLE IF NOT EXISTS eus_shipping_rules (
+        id TEXT PRIMARY KEY, region TEXT NOT NULL UNIQUE, enabled INTEGER NOT NULL DEFAULT 1,
+        method TEXT NOT NULL, calculation TEXT NOT NULL, rate_cents INTEGER NOT NULL DEFAULT 0,
+        quote_required INTEGER NOT NULL DEFAULT 0, pickup_only INTEGER NOT NULL DEFAULT 0,
+        residential_allowed INTEGER NOT NULL DEFAULT 1, min_quantity INTEGER NOT NULL DEFAULT 1,
+        max_quantity INTEGER, preferred_consolidation_quantity INTEGER,
+        customer_label TEXT NOT NULL DEFAULT '', timing_message TEXT NOT NULL DEFAULT '',
+        effective_start TEXT NOT NULL DEFAULT '', effective_end TEXT NOT NULL DEFAULT '',
+        internal_notes TEXT NOT NULL DEFAULT '', version INTEGER NOT NULL DEFAULT 1,
+        updated_at TEXT NOT NULL, updated_by TEXT NOT NULL DEFAULT ''
+      )`,
+      `CREATE TABLE IF NOT EXISTS eus_shipping_rule_events (
+        id TEXT PRIMARY KEY, rule_id TEXT NOT NULL, action TEXT NOT NULL,
+        before_json TEXT NOT NULL DEFAULT '{}', after_json TEXT NOT NULL DEFAULT '{}',
+        actor TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_eus_shipping_rule_events_created ON eus_shipping_rule_events(created_at DESC)`,
     ],
   },
 ];
