@@ -1,0 +1,140 @@
+name: One-Time 4.5 Final Commerce Environment V3
+
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths:
+      - .github/workflows/one-time-45-final-environment-v3.yml
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  environment:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout exact application candidate
+        uses: actions/checkout@v6
+        with:
+          ref: b16ea0e5f8587cc44f056557b144eb3d4b87be25
+          fetch-depth: 0
+
+      - name: Source lineage and invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "b16ea0e5f8587cc44f056557b144eb3d4b87be25"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "9ed1a64479f6c1949cfef7b6c40494c6ab9c934a"
+          git merge-base --is-ancestor 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a HEAD
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a...HEAD
+          grep -q '"/hawaii-lithium-batteries"' site/_routes.json
+          grep -q '/api/hawaii-lithium/statuses' site/lithium-shop.js
+          ! grep -q 'fetch(`/api/hawaii-lithium/status?sku=' site/lithium-shop.js
+          grep -q 'hawaii-address-delivery' site/shipping-rules-runtime.js
+          grep -q 'certaintyState' site/admin-shipping-rules.js
+          grep -q 'WHAT HAPPENS NEXT' site/checkout/index.html
+          grep -q 'UNDERSTAND ELEVATION' site/what-we-do.html
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('site/store-checkout-server.js').read_text()
+          start=s.index('async function createStoreOrder')
+          assert s.index('if (quote.hawaii?.customerState === "review_required")',start) < s.index('if (!paypalConfigured(env))',start)
+          PY
+          echo SOURCE_GATE=PASS
+
+      - name: Deploy exact candidate preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=commerce45finalv3
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Runtime routes catalogs shipping and prerender
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          echo "PREVIEW=$base"
+          for route in / /store /apparel-store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /what-we-do /start-a-project /solar-project /marketplace /terms /privacy /admin /admin-catalog /admin-store-orders /admin-lithium-shipping; do
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 60 -o /tmp/r -w '%{http_code}' "$base$route" || true); echo "ROUTE $route=$code"; test "$code" = 200
+          done
+          curl -fsSL "$base/api/store/catalog?section=lithium-batteries" -o /tmp/li.json
+          curl -fsSL "$base/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
+          curl -fsSL "$base/api/store/featured" -o /tmp/featured.json
+          curl -fsSL "$base/api/shipping-rules" -o /tmp/rules.json
+          curl -fsSL "$base/api/hawaii-lithium/statuses" -o /tmp/statuses.json
+          curl -fsSL "$base/api/shipping-rules/resolve?state=CO&quantity=2&batteryUnits=1" -o /tmp/co.json
+          curl -fsSL "$base/api/shipping-rules/resolve?state=HI&quantity=2&batteryUnits=1" -o /tmp/hi.json
+          curl -fsSL "$base/api/shipping-rules/resolve?state=AK&quantity=1&batteryUnits=1" -o /tmp/ak.json
+          test "$(curl -sS -o /tmp/admin-rules -w '%{http_code}' "$base/api/admin/shipping-rules")" = 401
+          BASE="$base" node <<'NODE'
+          const fs=require('fs');
+          const li=JSON.parse(fs.readFileSync('/tmp/li.json')).products||[],rv=JSON.parse(fs.readFileSync('/tmp/rv.json')).products||[],f=JSON.parse(fs.readFileSync('/tmp/featured.json')),rules=JSON.parse(fs.readFileSync('/tmp/rules.json')).rules||[],st=JSON.parse(fs.readFileSync('/tmp/statuses.json')),co=JSON.parse(fs.readFileSync('/tmp/co.json')),hi=JSON.parse(fs.readFileSync('/tmp/hi.json')),ak=JSON.parse(fs.readFileSync('/tmp/ak.json'));
+          if(li.length!==38)throw Error(`Lithium count ${li.length}`);if(rv.length<1)throw Error('RV empty');if((f.lithium||[]).length!==4||(f.rv||[]).length!==4)throw Error('Featured count');
+          for(const p of [...f.lithium,...f.rv])if(!(Number(p.priceCents)>0)||!p.image||!p.buyUrl||!p.detailUrl)throw Error('Featured product incomplete');
+          const lower=rules.find(x=>x.region==='LOWER48'),h=rules.find(x=>x.region==='HI'),d=rules.find(x=>x.region==='HI_DELIVERY'),a=rules.find(x=>x.region==='AK');
+          if(lower?.rateCents!==2799||lower?.calculation!=='per_battery'||!lower?.enabled)throw Error('Lower48 rule');
+          if(h?.rateCents!==9900||h?.calculation!=='per_battery'||!h?.pickupOnly||h?.residentialAllowed||h?.preferredConsolidationQuantity!==3)throw Error('HI rule');
+          if(!d?.quoteRequired||d?.rateCents!==0||d?.region!=='HI_DELIVERY')throw Error('HI delivery rule');
+          if(!a?.quoteRequired||a?.rateCents!==0)throw Error('AK rule');
+          if(co.status!=='shipping_available'||co.shippingCents!==5598)throw Error('CO resolver');if(hi.status!=='shipping_available'||hi.shippingCents!==19800)throw Error('HI resolver');if(ak.status!=='review_required'||ak.shippingCents!==0)throw Error('AK resolver');
+          const states={shipping_available:[],review_required:[],unavailable:[]};for(const p of li){const x=st.statuses?.[p.id]||st.statuses?.[String(p.sku||'').toLowerCase()];if(x&&states[x.customerState])states[x.customerState].push(p.id)}
+          console.log(`LITHIUM_COUNT=${li.length} RV_COUNT=${rv.length} FEATURED=4+4`);console.log('HAWAII_STATES='+JSON.stringify(Object.fromEntries(Object.entries(states).map(([k,v])=>[k,v.length]))));
+          fs.writeFileSync('/tmp/states.json',JSON.stringify(states));fs.writeFileSync('/tmp/counts.json',JSON.stringify({lithium:li.length,rv:rv.length,featuredLithium:4,featuredRv:4}));
+          NODE
+          curl -fsSL "$base/lithium-batteries" -o /tmp/li.html;curl -fsSL "$base/hawaii-lithium-batteries" -o /tmp/hi.html;curl -fsSL "$base/rv-store" -o /tmp/rv.html
+          node <<'NODE'
+          const fs=require('fs'),li=fs.readFileSync('/tmp/li.html','utf8'),hi=fs.readFileSync('/tmp/hi.html','utf8'),rv=fs.readFileSync('/tmp/rv.html','utf8');const a=(li.match(/class="lithium-card"/g)||[]).length,b=(hi.match(/class="lithium-card"/g)||[]).length,c=(rv.match(/class="rv-product-card"/g)||[]).length;console.log(`PRERENDER LI=${a} HI=${b} RV=${c}`);if(a!==38||b!==38||c<1||!li.includes('data-prerendered="true"')||!hi.includes('data-prerendered="true"')||!rv.includes('data-prerendered="true"'))throw Error('Prerender failure');if(!hi.includes('Honolulu warehouse / freight-terminal')||!hi.includes('Additional charge · quote required'))throw Error('HI wording');
+          NODE
+
+      - name: Checkout policy boundaries
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          BASE="${DEPLOYMENT_URL%/}" node <<'NODE'
+          (async()=>{const fs=require('fs'),base=process.env.BASE,products=(JSON.parse(fs.readFileSync('/tmp/li.json')).products||[]).filter(x=>Number(x.priceCents)>0),states=JSON.parse(fs.readFileSync('/tmp/states.json'));async function post(path,b){const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','Origin':base},body:JSON.stringify(b)});return{status:r.status,body:await r.json().catch(()=>({}))}}
+          let actual,lower;for(const p of products){const q=await post('/api/store-checkout/quote',{source:'lithium',id:p.id,name:p.title,quantity:1,shipping:{state:'CO'}});if(q.status===200&&q.body?.battery?.actualBattery){actual=p;lower=q;break}}if(!actual)throw Error('No actual battery');const units=Number(lower.body.battery.batteryUnitsPerItem||1);if(lower.body.shippingCents!==2799*units||lower.body.shippingRule?.rateCents!==2799)throw Error('Lower48 checkout');console.log(`LOWER48_CHECKOUT=${lower.body.shippingCents}`);
+          const reviewId=states.review_required[0];if(reviewId){const p=products.find(x=>x.id===reviewId),q=await post('/api/store-checkout/quote',{source:'lithium',id:p.id,name:p.title,quantity:1,shipping:{state:'HI'}});if(q.status!==200||q.body.hawaii?.customerState!=='review_required'||q.body.hawaii?.paymentAllowed!==false)throw Error('Review quote boundary');const o=await post('/api/store-checkout/orders',{source:'lithium',id:p.id,name:p.title,quantity:1,customer:{email:'commerce45-preview@elevationupscales.com'},shipping:{fullName:'Preview Review',state:'HI',countryCode:'US'}});if(o.status!==409||!o.body.hawaiiFreight)throw Error(`Review payment block ${o.status}`);console.log('HAWAII_REVIEW_PAYMENT_BLOCK=PASS')}
+          const unavailableId=states.unavailable[0];if(unavailableId){const p=products.find(x=>x.id===unavailableId),o=await post('/api/store-checkout/orders',{source:'lithium',id:p.id,name:p.title,quantity:1,customer:{email:'commerce45-preview@elevationupscales.com'},shipping:{fullName:'Preview Unavailable',state:'HI',countryCode:'US'}});if(o.status!==409||!o.body.hawaiiFreight)throw Error('Unavailable payment block')}
+          const availableId=states.shipping_available[0];if(availableId){const p=products.find(x=>x.id===availableId),q=await post('/api/store-checkout/quote',{source:'lithium',id:p.id,name:p.title,quantity:1,shipping:{state:'HI'}});if(q.status!==200||q.body.hawaii?.paymentAllowed!==true||q.body.hawaii?.requiresReservation!==false||q.body.hawaii?.pickupLocationLabel!=='Honolulu warehouse / freight-terminal pickup location'||!q.body.hawaii?.finalMileQuoteRequired)throw Error('Available HI quote');console.log('HAWAII_AVAILABLE_QUOTE=PASS')}else console.log('HAWAII_AVAILABLE_QUOTE=NOT_TESTABLE_NO_CURRENT_ELIGIBLE_SKU');
+          const ak=await post('/api/store-checkout/quote',{source:'lithium',id:actual.id,name:actual.title,quantity:1,shipping:{state:'AK'}});if(ak.status!==409||!String(ak.body.error||'').includes('Freight Review Required'))throw Error('AK boundary');console.log('AK_REVIEW=PASS')})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Browser and performance verification
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/browser && cd /tmp/browser;npm init -y >/dev/null 2>&1;npm install --no-save playwright@latest >/dev/null 2>&1;npx playwright install chromium >/dev/null 2>&1
+          cat > verify.mjs <<'NODE'
+          import fs from 'fs';import{chromium}from'playwright';const base=process.env.DEPLOYMENT_URL.replace(/\/$/,''),states=JSON.parse(fs.readFileSync('/tmp/states.json','utf8')),before={'/':{requests:28,apiRequests:1,dom:271},'/lithium-batteries':{requests:39,apiRequests:3,dom:765},'/hawaii-lithium-batteries':{requests:57,apiRequests:41,dom:1613},'/rv-store':{requests:42,apiRequests:3,dom:516}},browser=await chromium.launch({headless:true}),after={};for(const route of Object.keys(before)){const context=await browser.newContext({viewport:{width:1280,height:900}}),page=await context.newPage(),req=[],api=[];page.on('request',r=>{req.push(r.url());if(r.url().includes('/api/'))api.push(r.url())});await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});if(route==='/')await page.locator('[data-home-commerce]').scrollIntoViewIfNeeded();await page.waitForTimeout(1800);const n=req.length;await page.waitForTimeout(2500);const idle=req.length-n,snap=await page.evaluate(()=>({dom:document.getElementsByTagName('*').length,images:document.images.length,scripts:document.scripts.length}));after[route]={...snap,requests:req.length,apiRequests:api.length,idleRequests:idle,api:api.map(u=>new URL(u).pathname)};console.log('PERF_BEFORE '+route+' '+JSON.stringify(before[route]));console.log('PERF_AFTER '+route+' '+JSON.stringify(after[route]));if(idle!==0)throw Error(route+' idle requests');if(route==='/'){if(await page.locator("[data-home-products='lithium'] .home-product-card").count()!==4||await page.locator("[data-home-products='rv'] .home-product-card").count()!==4)throw Error('home mini-store');if(api.some(u=>u.includes('/api/store/catalog')||u.includes('/api/store-catalog')))throw Error('home full catalog')}if(route==='/lithium-batteries'&&api.some(u=>new URL(u).pathname==='/api/store/catalog'))throw Error('Lithium duplicate catalog');if(route==='/rv-store'&&api.some(u=>new URL(u).pathname==='/api/store-catalog'))throw Error('RV duplicate catalog');if(route==='/hawaii-lithium-batteries'){const singles=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/status').length,batches=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/statuses').length,catalogs=api.filter(u=>new URL(u).pathname==='/api/store/catalog').length;if(singles!==0||batches>1||catalogs!==0)throw Error(`HI pattern ${singles}/${batches}/${catalogs}`);if(after[route].requests>=57||after[route].apiRequests>=41)throw Error('HI performance did not improve');if(await page.locator('.lithium-card').count()!==38)throw Error('HI cards');const labels=await page.locator('[data-hawaii-status]').allTextContents();if(labels.some(v=>!['Shipping Available','Freight Review Required','Currently Unavailable'].includes(v.trim())))throw Error('HI labels')}await context.close()}
+          const id=states.review_required[0]||states.shipping_available[0]||states.unavailable[0];if(id){const context=await browser.newContext({viewport:{width:1100,height:900}}),page=await context.newPage();await page.goto(`${base}/checkout/?source=lithium&id=${encodeURIComponent(id)}&state=HI`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForTimeout(2200);if(!(await page.locator('#checkout-hawaii-freight').isVisible()))throw Error('HI checkout panel');const panel=await page.locator('#checkout-hawaii-freight').innerText();if(!panel.includes('Honolulu warehouse / freight-terminal pickup location')||!panel.includes('Additional delivery charges apply'))throw Error('HI checkout wording');if(!(await page.locator('#checkout-name').isVisible())||!(await page.locator('#checkout-email').isVisible()))throw Error('HI contact fields');if(await page.locator('#checkout-address1').isVisible())throw Error('HI street address visible');if(states.review_required.includes(id)&&await page.locator('#checkout-paypal').isVisible())throw Error('PayPal visible on review-required');await context.close()}await browser.close();fs.writeFileSync('/tmp/perf.json',JSON.stringify(after,null,2));
+          NODE
+          DEPLOYMENT_URL="${DEPLOYMENT_URL}" node verify.mjs
+
+      - name: Promotion protected regression and receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}";curl -fsSL "$base/api/store/promotion" -o /tmp/p.json
+          node <<'NODE'
+          const p=JSON.parse(require('fs').readFileSync('/tmp/p.json'));if(p.startAt!=='2026-09-03T06:00:00.000Z'||p.endAt!=='2026-09-08T06:00:00.000Z')throw Error('promotion times');const expected=Boolean(p.manualActive)&&Date.now()>=Date.parse(p.startAt)&&Date.now()<Date.parse(p.endAt);if(Boolean(p.active)!==expected)throw Error('promotion state');console.log(`PROMOTION=${p.windowState} ACTIVE=${p.active}`)
+          NODE
+          echo FINAL45_ENVIRONMENT=PASS
+          echo CANDIDATE=b16ea0e5f8587cc44f056557b144eb3d4b87be25
+          echo PARENT=9ed1a64479f6c1949cfef7b6c40494c6ab9c934a
+          echo PREVIEW=${DEPLOYMENT_URL}
+          cat /tmp/counts.json;cat /tmp/perf.json
