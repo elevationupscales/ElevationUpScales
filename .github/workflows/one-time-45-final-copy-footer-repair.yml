@@ -7,7 +7,7 @@ permissions:
   contents: write
 jobs:
   repair:
-    if: github.event.head_commit.message == 'Run final 4.5 copy and footer repair'
+    if: github.event.head_commit.message == 'Retry final 4.5 copy and footer repair'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -49,6 +49,11 @@ jobs:
               'Need immediate help? Call now. Or continue the intake so the project is saved for follow-up.'
           )
 
+          start_path = Path('site/start-a-project/index.html')
+          start_text = start_path.read_text()
+          start_text = start_text.replace('stored for management review', 'saved for follow-up')
+          start_path.write_text(start_text)
+
           retail_pages = [
               'site/index.html',
               'site/store.html',
@@ -75,7 +80,7 @@ jobs:
           assert 'Hawaii Lithium Batteries' in idx
           assert '/assets/homepage-option-2-lithium-solar.webp' in idx
           assert '/assets/homepage-option-3-home-rv-lifestyle.webp' in idx
-          for banned in ('underlying Project families', 'Intake Intent tells management', 'stored for management review'):
+          for banned in ('underlying Project families', 'Intake Intent tells management', 'management review'):
               assert banned not in start, banned
           for path in retail_pages:
               assert 'href="/terms"' in Path(path).read_text(), path
