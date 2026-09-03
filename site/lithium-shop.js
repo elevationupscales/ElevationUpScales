@@ -23,6 +23,7 @@
       if (!(Number(product.priceCents) > 0)) return false;
       const stock = Number(product.supplierStock);
       if (Number.isFinite(stock) && stock <= 0) return false;
+      if (hawaiiMode && batteryUnitsFor(product) < 1) return false;
       return true;
     });
   }
@@ -101,7 +102,23 @@
     return { label: "Check shipping availability", className: "is-researching" };
   }
 
-  function card(product) {
+  const deferredPlaceholder = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
+  function imageMarkup(src, alt, index) {
+    const deferred = hawaiiMode && index >= 4;
+    return `<img src="${esc(deferred ? deferredPlaceholder : src)}"${deferred ? ` data-lithium-deferred-image data-src="${esc(src)}"` : ""} alt="${esc(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
+  }
+
+  function hydrateDeferredImages(root = document) {
+    const images = [...root.querySelectorAll("img[data-lithium-deferred-image][data-src]")];
+    if (!images.length) return;
+    const load = (img) => { const src = String(img.dataset.src || "").trim(); if (!src) return; img.src = src; delete img.dataset.src; img.removeAttribute("data-lithium-deferred-image"); };
+    if (!("IntersectionObserver" in window)) { images.forEach(load); return; }
+    const observer = new IntersectionObserver((entries) => { for (const entry of entries) { if (!entry.isIntersecting) continue; load(entry.target); observer.unobserve(entry.target); } }, { rootMargin: "120px 0px" });
+    images.forEach((img) => observer.observe(img));
+  }
+
+  function card(product, index = 0) {
     const sku = String(product.sku || product.id || "").trim();
     const id = String(product.id || "").trim();
     const view = viewFor(product);
@@ -115,7 +132,7 @@
     const merchandiseCents = Number(product.priceCents || 0);
     const pickupPriceCents = merchandiseCents + (batteryUnits > 0 ? 9900 * batteryUnits : 0);
     return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}" data-shipping-status="${esc(String(product.shippingStatus || "unverified"))}"${hawaiiMode ? ` data-hawaii-merchandise-cents="${merchandiseCents}" data-hawaii-battery-units="${batteryUnits}"` : ""}>
-      <div class="lithium-card__image"><a class="lithium-card__detail-link" href="${esc(detailUrl)}" aria-label="View ${esc(view.title)} details"><img src="${esc(product.primaryImage || "/assets/logo.webp")}" alt="${esc(view.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a></div>
+      <div class="lithium-card__image"><a class="lithium-card__detail-link" href="${esc(detailUrl)}" aria-label="View ${esc(view.title)} details">${imageMarkup(product.primaryImage || "/assets/logo.webp", view.title, index)}</a></div>
       <div class="lithium-card__body">
         <p class="lithium-card__category">${esc(view.category)}</p>
         <h3><a class="lithium-card__title-link" href="${esc(detailUrl)}">${esc(view.title)}</a></h3>
@@ -163,8 +180,9 @@
     renderCategories(active);
     const visible = visibleProducts(active);
     if (visible.length) {
-      grid.innerHTML = visible.map(card).join("");
+      grid.innerHTML = visible.map((product, index) => card(product, index)).join("");
       grid.dataset.prerendered = "false";
+      hydrateDeferredImages(grid);
     } else if (active.length) {
       grid.innerHTML = `<section class="lithium-empty-state" role="status"><h3>No batteries match your search.</h3><p>Try another voltage, capacity, use case or category.</p></section>`;
     } else {
@@ -239,7 +257,7 @@
 
   function init() {
     if (grid.dataset.prerendered === "true" && grid.children.length) {
-      if (hawaiiMode) syncHawaiiStatuses();
+      if (hawaiiMode) { hydrateDeferredImages(grid); syncHawaiiStatuses(); }
       return;
     }
     hydrateAndRender();
