@@ -32,6 +32,7 @@
   const shippingLabelEl = document.querySelector("#checkout-shipping-label");
   const hawaiiPanel = document.querySelector("#checkout-hawaii-freight");
   const hawaiiMath = document.querySelector("#checkout-hawaii-math");
+  const hawaiiStateEl = document.querySelector("#checkout-hawaii-state");
   const hawaiiReserve = document.querySelector("#checkout-hawaii-reserve");
   const contactShippingLabel = document.querySelector("#checkout-contact-shipping-label");
   const shippingFields = document.querySelector("#checkout-shipping-fields");
@@ -182,7 +183,15 @@
     if (shippingFields) shippingFields.hidden = isHawaii;
     if (isHawaii) {
       const batteryCount = Number(next.battery?.batteryUnitsPerItem || 1) * Number(next.quantity || 1);
-      if (hawaiiMath) hawaiiMath.textContent = `${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} × $99 = ${money(next.shippingCents)} Hawaii freight. Merchandise ${money(next.merchandiseCents)} + freight ${money(next.shippingCents)} = ${money(next.totalCents)} total before any applicable tax.`;
+      const freightRate = Number(next.hawaii?.customerFreightPerBatteryCents || next.shippingRule?.rateCents || 0);
+      const customerState = String(next.hawaii?.customerState || "review_required");
+      if (hawaiiStateEl) hawaiiStateEl.textContent = next.hawaii?.statusLabel || (customerState === "shipping_available" ? "Shipping Available" : customerState === "unavailable" ? "Currently Unavailable" : "Freight Review Required");
+      if (hawaiiMath) {
+        if (customerState === "shipping_available") hawaiiMath.textContent = `Battery ${money(next.unitPriceCents)} × ${next.quantity}. Hawaii Freight ${money(freightRate)} × ${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} = ${money(next.shippingCents)}. Order total ${money(next.totalCents)} before any applicable tax.`;
+        else if (customerState === "unavailable") hawaiiMath.textContent = "This exact battery is currently unavailable for the selected Hawaii freight path. No payment will be collected.";
+        else hawaiiMath.textContent = "Freight Review Required. Reserve or request shipping review before payment is treated as shipping-confirmed.";
+      }
+      if (shippingEl) shippingEl.textContent = customerState === "shipping_available" ? money(next.shippingCents) : (customerState === "unavailable" ? "Unavailable" : "Review required");
       if (hawaiiReserve) hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request";
       paypalEl.hidden = true;
     }
@@ -218,7 +227,7 @@
     if (Array.isArray(body.variants) && body.variants.length && !body.variantId && variantEl.value) {
       return requestQuote();
     }
-    if (body.hawaii) setStatus("Hawaii consolidated-freight terms loaded. Reserve the order for freight coordination before payment.", "ready");
+    if (body.hawaii) { const stateValue=String(body.hawaii.customerState||"review_required"); setStatus(stateValue==="shipping_available" ? "Hawaii shipping rule loaded. Reserve the order for freight coordination before payment." : stateValue==="unavailable" ? "This battery is currently unavailable for the Hawaii freight path. No payment will be collected." : "Freight Review Required. Reserve / request shipping review before payment.", stateValue==="unavailable" ? "error" : "ready"); }
     else setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");
     return body;
   }

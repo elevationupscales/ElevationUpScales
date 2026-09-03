@@ -24,8 +24,10 @@
 <link rel="stylesheet" href="/site-shell.css?v=3.11.30">
 <link rel="stylesheet" href="/mobile-audit.css?v=3.0.4">
 <link rel="stylesheet" href="/home-elevation-funnel.css?v=4.4.4">
+<link rel="stylesheet" href="/home-commerce.css?v=4.5.0">
 <script defer src="/site-shell.js?v=3.11.46"></script>
 <script defer src="/script.js?v=3.11.36"></script>
+<script defer src="/home-commerce.js?v=4.5.0"></script>
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
@@ -84,6 +86,22 @@
     </div>
   </section>
 
+  <section class="home-commerce" data-home-commerce aria-labelledby="home-commerce-title">
+    <div class="container">
+      <div class="home-commerce__head">
+        <div><p class="hc-eyebrow">SHOP ELEVATION</p><h2 id="home-commerce-title">Current gear, ready from the front door.</h2><p>A small live selection from the Elevation Catalog. Open the full stores for every current product.</p></div>
+      </div>
+      <div class="home-commerce__group">
+        <div class="home-commerce__group-head"><h3>Lithium Batteries</h3><a class="button button-outline" href="/lithium-batteries">Shop All Lithium Batteries</a></div>
+        <div class="home-product-grid" data-home-products="lithium" aria-live="polite"><p class="home-commerce-empty">Loading current batteries…</p></div>
+      </div>
+      <div class="home-commerce__group">
+        <div class="home-commerce__group-head"><h3>RV &amp; Outdoor</h3><a class="button button-outline" href="/rv-store">Shop All RV &amp; Outdoor</a></div>
+        <div class="home-product-grid" data-home-products="rv" aria-live="polite"><p class="home-commerce-empty">Loading current gear…</p></div>
+      </div>
+    </div>
+  </section>
+
   <section class="hc-section hc-section--gold" id="about">
     <div class="container">
       <div class="hc-story">
@@ -93,7 +111,7 @@
           <p>Elevation comes from hands-on RV work, restoration, construction, solar planning and off-grid living. That experience shapes how we approach repairs, upgrades and power projects.</p>
           <div class="hc-actions">
             <a class="button button-gold" href="/solar-project">Build a Solar System</a>
-            <a class="button button-outline" href="#services">See Services</a>
+            <a class="button button-outline" href="/what-we-do">What We Do</a>
           </div>
         </div>
         <div class="hc-story-media"><img class="hc-media-img" src="/assets/rvs/1975-winnebago-brave-features-layout.webp" alt="Vintage Winnebago Brave layout and RV features" width="1600" height="900" loading="lazy" decoding="async"></div>

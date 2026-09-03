@@ -1,3 +1,4 @@
+import { resolveShippingRule } from "./shipping-rules-runtime.js";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const REQUEST_STATES = new Set(["NEW","REVIEWING","PRODUCT MATCHED","SHIPPING RESEARCH","QUOTE READY","CUSTOMER CONTACTED","CLOSED","HOLD","CANCELLED"]);
 const DOC_STATES = new Set(["UNKNOWN","REQUESTED","RECEIVED","VERIFIED","EXPIRED / RECHECK","RECHECK REQUIRED","NOT APPLICABLE"]);
@@ -370,6 +371,7 @@ export async function resolveHawaiiCustomerStatus(env, { sku = "", productId = "
 async function publicStatuses(request, env) {
   if (request.method !== "GET" && request.method !== "HEAD") return json({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
   const db = await ensureSchema(env);
+  const ruleResult = await resolveShippingRule(env, { destinationState: "HI", quantity: 1, batteryUnitsPerItem: 1 });
   const records = (await db.prepare("SELECT * FROM eus_lithium_shipping_records WHERE active=1").all()).results || [];
   const destinations = (await db.prepare("SELECT * FROM eus_lithium_destination_records WHERE destination IN ('Hawaii — General','Oahu','Maui','Kauai','Hawaii Island / Big Island')").all()).results || [];
   const byRecord = new Map();
@@ -383,11 +385,13 @@ async function publicStatuses(request, env) {
     if (record.sku) statuses[String(record.sku).toLowerCase()] = value;
     if (record.catalog_product_id) statuses[record.catalog_product_id] = value;
   }
+  const rule = ruleResult?.rule || null;
   return json({
     statuses,
-    customerFreightPerBatteryCents: HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY,
-    preferredConsolidationUnits: HAWAII_PREFERRED_CONSOLIDATION_UNITS,
-    pickupOnly: true,
+    customerFreightPerBatteryCents: Number(rule?.rateCents || HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY),
+    preferredConsolidationUnits: Number(rule?.preferredConsolidationQuantity || HAWAII_PREFERRED_CONSOLIDATION_UNITS),
+    pickupOnly: Boolean(rule?.pickupOnly ?? true),
+    shippingRule: rule ? { id: rule.id, version: rule.version, method: rule.method, rateCents: rule.rateCents, customerLabel: rule.customerLabel, timingMessage: rule.timingMessage } : null,
   });
 }
 
