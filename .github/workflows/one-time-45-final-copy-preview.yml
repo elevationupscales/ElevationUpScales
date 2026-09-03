@@ -1,0 +1,124 @@
+name: One-Time 4.5 Final Copy Commerce Preview
+
+on:
+  push:
+    branches:
+      - runner/4.5-final-copy-preview-2026-09-03
+
+permissions:
+  contents: read
+  deployments: write
+  actions: read
+
+concurrency:
+  group: elevation-45-final-copy-preview
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Preserve isolated verifier
+        run: cp .github/scripts/verify_45_final_copy_commerce.mjs /tmp/verify_45_final_copy_commerce.mjs
+
+      - name: Download authoritative Lithium cost evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/cost-audit
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 33784084029
+
+      - name: Freeze exact repaired candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin a36beddab204d27832a37427d4b143857f373f14 main
+          git checkout --detach a36beddab204d27832a37427d4b143857f373f14
+          test "$(git rev-parse HEAD)" = "a36beddab204d27832a37427d4b143857f373f14"
+          test "$(git rev-parse origin/main)" = "2cafb2274d1fbd7733068853554bef68fcf5c02d"
+          test "$(git merge-base HEAD 2cafb2274d1fbd7733068853554bef68fcf5c02d)" = "2cafb2274d1fbd7733068853554bef68fcf5c02d"
+
+      - name: Exact source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check 2cafb2274d1fbd7733068853554bef68fcf5c02d..HEAD
+          changed=$(git diff --name-only 2cafb2274d1fbd7733068853554bef68fcf5c02d..HEAD | sort)
+          printf '%s\n' "$changed"
+          test "$changed" = "$(printf '%s\n' site/index.html site/start-a-project/index.html site/store.html | sort)"
+          ! git diff --name-only 2cafb2274d1fbd7733068853554bef68fcf5c02d..HEAD | grep -q '^\.github/'
+          ! git diff --name-only 2cafb2274d1fbd7733068853554bef68fcf5c02d..HEAD | grep -Eq '(migration|commerce-schema-migrations)'
+          grep -q 'Shop Current Products' site/index.html
+          grep -q 'Featured products from our Lithium and RV & Outdoor stores.' site/index.html
+          grep -q 'Hawaii Lithium Batteries' site/index.html
+          grep -q 'href="/terms"' site/index.html
+          grep -q 'href="/terms"' site/store.html
+          ! grep -qi 'underlying Project families' site/start-a-project/index.html
+          ! grep -qi 'Intake Intent tells management' site/start-a-project/index.html
+          ! grep -qi 'management review' site/start-a-project/index.html
+          test "$(git hash-object site/assets/homepage-option-2-lithium-solar.webp)" = "a46c581bb612b43b6e876b6cf3183710af198673"
+          test "$(git hash-object site/assets/homepage-option-3-home-rv-lifestyle.webp)" = "04858f98e6eb344dc922e42916b4301ba8c29ddf"
+
+      - id: deploy
+        name: Deploy exact candidate to Cloudflare Pages preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=finalcopy45preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify preview routes and candidate markers
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /start-a-project /product /checkout /terms /privacy /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -fsS -L "$base/" -o /tmp/home.html
+          grep -q 'Shop Current Products' /tmp/home.html
+          grep -q 'Featured products from our Lithium and RV & Outdoor stores.' /tmp/home.html
+          grep -q 'Hawaii Lithium Batteries' /tmp/home.html
+          grep -q 'href="/terms"' /tmp/home.html
+          curl -fsS -L "$base/start-a-project" -o /tmp/start.html
+          ! grep -qi 'underlying Project families' /tmp/start.html
+          ! grep -qi 'Intake Intent tells management' /tmp/start.html
+          ! grep -qi 'management review' /tmp/start.html
+
+      - name: Full preview commerce smoke
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+          COST_AUDIT: /tmp/cost-audit/lithium-pricing-audit-sanitized.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw
+          cp /tmp/verify_45_final_copy_commerce.mjs /tmp/pw/test.mjs
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          node test.mjs | tee /tmp/final-copy-preview-verification.json
+
+      - name: Preview acceptance summary
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.5 Final Copy / Commerce Preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate SHA: a36beddab204d27832a37427d4b143857f373f14' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${DEPLOYMENT_URL}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Parent production app: 2cafb2274d1fbd7733068853554bef68fcf5c02d' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Database migration: none' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/final-copy-preview-verification.json >> "$GITHUB_STEP_SUMMARY"
