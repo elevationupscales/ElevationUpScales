@@ -1,0 +1,259 @@
+name: One-Time Commerce Pricing 2 Freeze 31 SKU
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-2-freeze-31-sku-2026-09-03
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  freeze:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: c846737c90f57b5ebc3c920b815880bd11100490
+          fetch-depth: 0
+      - name: Exact source gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "c846737c90f57b5ebc3c920b815880bd11100490"
+          git fetch origin main staging/kingboss-source-v2
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          git merge-base --is-ancestor 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf HEAD
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+      - name: Inject temporary token-protected audit endpoint
+        run: |
+          set -euo pipefail
+          token=$(openssl rand -hex 32)
+          echo "::add-mask::$token"
+          echo "QA_TOKEN=$token" >> "$GITHUB_ENV"
+          QA_TOKEN="$token" python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('site/commerce-pricing-runtime.js')
+          s=p.read_text()
+          if 'export async function buildCommercePricingAudit(env){' not in s:
+              s=s.replace('async function audit(env){','export async function buildCommercePricingAudit(env){',1)
+              s=s.replace('const result=await audit(env);','const result=await buildCommercePricingAudit(env);',1)
+          p.write_text(s)
+          w=Path('site/_worker.js')
+          s=w.read_text()
+          old='import { handleCommercePricingAdminApi } from "./commerce-pricing-runtime.js";'
+          new='import { handleCommercePricingAdminApi, buildCommercePricingAudit } from "./commerce-pricing-runtime.js";'
+          if old not in s:
+              raise SystemExit('pricing import marker missing')
+          s=s.replace(old,new,1)
+          anchor='    if(url.pathname==="/api/admin/commerce-pricing") return handleCommercePricingAdminApi(request,env);\n'
+          if anchor not in s:
+              raise SystemExit('pricing route anchor missing')
+          token=os.environ['QA_TOKEN']
+          block=f'''    if(url.pathname==="/api/qa/commerce-pricing-freeze") {{\n      if(request.headers.get("X-EUS-QA-Token")!=="{token}") return new Response("Not found",{{status:404,headers:{{"Cache-Control":"no-store"}}}});\n      try {{ const data=await buildCommercePricingAudit(env); return Response.json(data,{{headers:{{"Cache-Control":"no-store"}}}}); }} catch(error) {{ return Response.json({{error:String(error?.message||error)}},{{status:503}}); }}\n    }}\n'''
+          w.write_text(s.replace(anchor,anchor+block,1))
+          PY
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+      - name: Deploy temporary diagnostic preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=commerce-pricing-2-freeze-31-sku
+      - name: Freeze current audit and build reconciliation files
+        env:
+          BASE: https://commerce-pricing-2-freeze-31-sku.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 10 --retry-all-errors --retry-delay 2 -H "X-EUS-QA-Token: $QA_TOKEN" "${BASE%/}/api/qa/commerce-pricing-freeze" -o /tmp/audit.json
+          mkdir -p /tmp/kingboss_parts /tmp/reconciliation
+          while read -r path; do
+            [ -z "$path" ] && continue
+            git show "origin/staging/kingboss-source-v2:$path" >> /tmp/kingboss.b64
+          done < <(git ls-tree -r --name-only origin/staging/kingboss-source-v2 -- .deployment-input/kingboss-20260829-5188361/xz-b64 | sort)
+          base64 -d /tmp/kingboss.b64 | xz -dc > /tmp/kingboss.csv
+          python3 - <<'PY'
+          import csv, hashlib, json, os
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          AUDIT=Path('/tmp/audit.json')
+          OUT=Path('/tmp/reconciliation')
+          d=json.loads(AUDIT.read_text())
+          products=d.get('products') or []
+          drift=[]
+          for p in products:
+              advisories=[str(x) for x in (p.get('advisories') or [])]
+              if p.get('actualLithiumBattery') and any('CATALOG PRICE DRIFT' in x for x in advisories):
+                  drift.append(p)
+          assert len(drift)==31, f'expected 31 drifted lithium rows, got {len(drift)}'
+          assert (d.get('summary') or {}).get('missingAuthoritativeCost')==0
+          assert (d.get('summary') or {}).get('sourceCostMismatch')==0
+          assert (d.get('summary') or {}).get('promoFloorFailures')==0
+
+          historical={}
+          with open('/tmp/kingboss.csv',newline='',encoding='utf-8-sig') as f:
+              for r in csv.DictReader(f):
+                  item=(r.get('Item No.') or '').strip().lower()
+                  sku=(r.get('SKU Code') or '').strip().lower()
+                  if item and sku:
+                      historical[(item,sku)]={
+                          'supplier':(r.get('Supplier') or '').strip(),
+                          'brand':(r.get('Brand') or '').strip(),
+                      }
+
+          def cents(v):
+              try: return int(v or 0)
+              except: return 0
+          def money(v): return f'${cents(v)/100:.2f}'
+          rows=[]
+          counts={'KEEP':0,'UPDATE':0,'EXCLUDE FROM PROMO':0,'REVIEW REQUIRED':0}
+          for p in sorted(drift,key=lambda x:(str(x.get('sku') or ''),str(x.get('title') or ''))):
+              src=p.get('sourceSnapshot') or {}
+              item=(src.get('itemNo') or p.get('supplierProductId') or '').strip()
+              supplier_sku=(src.get('supplierSku') or p.get('supplierSku') or '').strip()
+              hist=historical.get((item.lower(),supplier_sku.lower()),{})
+              upstream=(src.get('upstreamSupplier') or '').strip()
+              upstream_evidence='current_source_snapshot' if upstream else ''
+              if not upstream and hist.get('supplier'):
+                  upstream=hist['supplier']
+                  upstream_evidence='historical_exact_doba_export'
+              brand=(src.get('brand') or '').strip()
+              brand_evidence='current_source_snapshot' if brand else ''
+              if not brand and hist.get('brand'):
+                  brand=hist['brand']
+                  brand_evidence='historical_exact_doba_export'
+              blockers=[str(x) for x in (p.get('blockers') or [])]
+              reviews=[str(x) for x in (p.get('reviews') or [])]
+              nonpromo_blockers=[x for x in blockers if 'PROMO BELOW PROTECTED FLOOR' not in x]
+              promo=p.get('promotion') or {}
+              current=cents(p.get('catalogPriceCents'))
+              recommended=cents(p.get('effectiveListPriceCents'))
+              promo_price=cents(promo.get('couponPriceCents'))
+              promo_floor=cents(promo.get('protectedPromoFloorCents'))
+              normal_floor=cents(promo.get('protectedNormalFloorCents'))
+              promo_fail=bool(promo.get('couponEligible') and promo_floor and promo_price<promo_floor) or any('PROMO BELOW PROTECTED FLOOR' in x for x in blockers)
+              if nonpromo_blockers or reviews:
+                  action='REVIEW REQUIRED'
+                  reasons=nonpromo_blockers+reviews
+                  reason='Operational review wins over price reconciliation: '+ '; '.join(reasons) + '. No automatic retail change proposed.'
+              elif promo_fail:
+                  action='EXCLUDE FROM PROMO'
+                  reason=f'Promotion result {money(promo_price)} is below protected promo floor {money(promo_floor)}. Keep Catalog retail unchanged until promotion eligibility is reviewed.'
+              elif current!=recommended:
+                  action='UPDATE'
+                  reason=f'Stored Catalog retail {money(current)} differs from protected effective list {money(recommended)}. Authoritative cost is present and source/floor checks pass; reconcile stored retail to {money(recommended)} after human approval.'
+              else:
+                  action='KEEP'
+                  reason='Stored Catalog retail already matches the protected effective list and current cost/floor checks pass.'
+              counts[action]+=1
+              margin=p.get('merchandiseMargin') or {}
+              floor_result='FAIL' if promo_fail else ('PASS' if (not normal_floor or recommended>=normal_floor) else 'REVIEW')
+              row={
+                  'catalog_sku':p.get('sku') or '',
+                  'title':p.get('title') or '',
+                  'doba_item_no':item,
+                  'doba_supplier_sku':supplier_sku,
+                  'provider':p.get('supplier') or p.get('sourceType') or '',
+                  'upstream_supplier':upstream or 'UNKNOWN',
+                  'upstream_supplier_evidence':upstream_evidence or 'not_present_in_frozen_sources',
+                  'brand':brand or 'UNKNOWN',
+                  'brand_evidence':brand_evidence or 'not_present_in_frozen_sources',
+                  'authoritative_cost_cents':cents(p.get('authoritativeCostCents')),
+                  'authoritative_cost':money(p.get('authoritativeCostCents')),
+                  'cost_evidence':p.get('costEvidence') or '',
+                  'current_catalog_retail_cents':current,
+                  'current_catalog_retail':money(current),
+                  'recommended_retail_cents':recommended,
+                  'recommended_retail':money(recommended),
+                  'promotion_active':bool(promo.get('active')),
+                  'promotion_code':promo.get('couponCode') or '',
+                  'promotion_eligible':bool(promo.get('couponEligible')),
+                  'promotion_price_cents':promo_price,
+                  'promotion_price':money(promo_price),
+                  'protected_normal_floor_cents':normal_floor,
+                  'protected_normal_floor':money(normal_floor),
+                  'protected_promo_floor_cents':promo_floor,
+                  'protected_promo_floor':money(promo_floor),
+                  'list_margin_percent':margin.get('listGrossPercent'),
+                  'promo_margin_percent':margin.get('promoGrossPercent'),
+                  'floor_result':floor_result,
+                  'publication_state':p.get('publishStatus') or '',
+                  'severity':p.get('severity') or '',
+                  'action':action,
+                  'reason':reason,
+                  'blockers':' | '.join(blockers),
+                  'reviews':' | '.join(reviews),
+                  'advisories':' | '.join(str(x) for x in (p.get('advisories') or [])),
+                  'catalog_review_state':p.get('reviewState') or '',
+                  'source_state':src.get('state') or '',
+                  'source_last_observed_at':src.get('lastObservedAt') or '',
+              }
+              rows.append(row)
+
+          fields=list(rows[0].keys())
+          csv_path=OUT/'ELEVATION_COMMERCE_PRICING_2_31_SKU_RECONCILIATION_PREVIEW_2026-09-03.csv'
+          with csv_path.open('w',newline='',encoding='utf-8') as f:
+              w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(rows)
+          json_path=OUT/'ELEVATION_COMMERCE_PRICING_2_31_SKU_RECONCILIATION_PREVIEW_2026-09-03.json'
+          snapshot={
+              'mode':'READ ONLY / HUMAN REVIEW REQUIRED',
+              'applicationSha':'c846737c90f57b5ebc3c920b815880bd11100490',
+              'productionApplicationSha':'31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf',
+              'generatedAt':d.get('generatedAt'),
+              'auditSummary':d.get('summary'),
+              'promotion':d.get('promotion'),
+              'shippingInputs':d.get('shippingInputs'),
+              'actionCounts':counts,
+              'rows':rows,
+          }
+          json_path.write_text(json.dumps(snapshot,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+          md_path=OUT/'ELEVATION_COMMERCE_PRICING_2_31_SKU_RECONCILIATION_PREVIEW_2026-09-03.md'
+          lines=[
+              '# Elevation Commerce Pricing & Supplier Catalog 2.0 — 31-SKU Reconciliation Preview',
+              '',
+              '**Mode:** READ ONLY / HUMAN REVIEW REQUIRED',
+              '',
+              f'Application SHA: `c846737c90f57b5ebc3c920b815880bd11100490`',
+              f'Production application SHA: `31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf`',
+              f'Frozen audit generated: `{d.get("generatedAt")}`',
+              '',
+              'No Catalog price, publication, shipping, supplier import, or PayPal mutation was performed.',
+              '',
+              '## Action counts',
+              '',
+          ]
+          for k in ['KEEP','UPDATE','EXCLUDE FROM PROMO','REVIEW REQUIRED']:
+              lines.append(f'- **{k}:** {counts[k]}')
+          lines += ['', '## Frozen shipping inputs', '', '- Lower 48 Lithium remains $27.99 per actual battery.', '- Hawaii remains $99.00 per actual battery to Honolulu pickup.', '- Alaska remains review/quote required.', '', '## 31-SKU preview', '', '| Catalog SKU | Doba Item | Upstream Supplier | Cost | Current Retail | Recommended | Promo Result | Floor | Publish | Action |', '|---|---|---|---:|---:|---:|---:|---|---|---|']
+          for r in rows:
+              promo_result=(r['promotion_price'] if r['promotion_eligible'] else 'Not eligible')
+              lines.append(f"| {r['catalog_sku']} | {r['doba_item_no']} | {r['upstream_supplier']} | {r['authoritative_cost']} | {r['current_catalog_retail']} | {r['recommended_retail']} | {promo_result} | {r['floor_result']} | {r['publication_state']} | {r['action']} |")
+          lines += ['', 'Exact reasons, margin percentages, supplier/brand evidence, blockers, reviews and advisories are preserved in the CSV and JSON files.', '']
+          md_path.write_text('\n'.join(lines),encoding='utf-8')
+
+          manifest={
+              'createdAt':datetime.now(timezone.utc).isoformat(),
+              'applicationSha':'c846737c90f57b5ebc3c920b815880bd11100490',
+              'productionApplicationSha':'31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf',
+              'rowCount':len(rows),
+              'actionCounts':counts,
+              'files':{}
+          }
+          for path in [csv_path,json_path,md_path]:
+              manifest['files'][path.name]={'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size}
+          (OUT/'MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps({'rowCount':len(rows),'actionCounts':counts,'fileHashes':manifest['files']},indent=2))
+          PY
+      - name: Upload frozen reconciliation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-pricing-2-31-sku-reconciliation-preview
+          path: /tmp/reconciliation/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Summary
+        run: |
+          echo '### Commerce Pricing 2.0 — 31-SKU frozen reconciliation preview PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Source SHA: `c846737c90f57b5ebc3c920b815880bd11100490`' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No Catalog, pricing, publication, shipping, supplier import, or payment mutation.' >> "$GITHUB_STEP_SUMMARY"
