@@ -1,0 +1,53 @@
+name: One-Time 4.5 Commerce Control Perf Baseline
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths: [.github/workflows/one-time-45-commerce-control-perf-baseline.yml]
+permissions:
+  contents: read
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a
+      - name: Measure production baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/eus-perf && cd /tmp/eus-perf
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@latest >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > measure.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const routes=['/','/lithium-batteries','/hawaii-lithium-batteries','/rv-store'];
+          const browser=await chromium.launch({headless:true});
+          for (const route of routes) {
+            const context=await browser.newContext(); const page=await context.newPage();
+            const requests=[]; const api=[]; const failures=[];
+            page.on('request',r=>{requests.push(r.url()); if(r.url().includes('/api/'))api.push(r.url());});
+            page.on('requestfailed',r=>failures.push(r.url()));
+            await page.addInitScript(()=>{window.__eusLongTasks=[];try{new PerformanceObserver(list=>window.__eusLongTasks.push(...list.getEntries().map(e=>e.duration))).observe({entryTypes:['longtask']});}catch(_){}});
+            const start=Date.now();
+            let navError=''; try{await page.goto('https://elevationupscales.com'+route,{waitUntil:'domcontentloaded',timeout:30000});}catch(e){navError=e.message;}
+            await page.waitForTimeout(8000);
+            const beforeIdle=requests.length; await page.waitForTimeout(5000); const idleRequests=requests.length-beforeIdle;
+            const snap=await page.evaluate(()=>({dom:document.getElementsByTagName('*').length,images:document.images.length,decoded:[...document.images].filter(i=>i.complete&&i.naturalWidth>0).length,scripts:document.scripts.length,resources:performance.getEntriesByType('resource').length,heap:performance.memory?.usedJSHeapSize||null,longTasks:(window.__eusLongTasks||[]).length,longTaskMs:Math.round((window.__eusLongTasks||[]).reduce((a,b)=>a+b,0))}));
+            const apiCounts={}; for(const u of api){try{const p=new URL(u).pathname;apiCounts[p]=(apiCounts[p]||0)+1;}catch(_){}}
+            console.log('PERF '+route+' '+JSON.stringify({...snap,elapsedMs:Date.now()-start,requests:requests.length,apiRequests:api.length,idleRequests,failedRequests:failures.length,apiCounts,navError}));
+            await context.close();
+          }
+          await browser.close();
+          NODE
+          node measure.mjs
+          python - <<'PY'
+          import json, urllib.request
+          urls={'lithium':'https://elevationupscales.com/api/store/catalog?section=lithium-batteries','rv':'https://elevationupscales.com/api/store-catalog?section=rv-outdoor'}
+          for name,url in urls.items():
+            with urllib.request.urlopen(url,timeout=30) as r:d=json.load(r)
+            p=d.get('products') or []
+            print('CATALOG_COUNT',name,len(p))
+            for x in p[:4]: print('SAMPLE',name,x.get('id'),x.get('sku'),x.get('title') or x.get('name'),x.get('priceCents'),x.get('shippingStatus'),x.get('supplierStock'))
+          PY
