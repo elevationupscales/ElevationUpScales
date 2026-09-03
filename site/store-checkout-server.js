@@ -544,8 +544,6 @@ export const __storeCheckoutTest = { buildPayPalPurchaseUnit };
 
 async function createStoreOrder(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
-  if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
-  if (!liveCheckoutAllowed(env)) return json({ error: "Live checkout is locked pending launch approval" }, 503);
 
   const raw = await request.json().catch(() => ({}));
   const source = clean(raw?.source, 20).toLowerCase();
@@ -557,6 +555,8 @@ async function createStoreOrder(request, env) {
   if (!quote.ok) return json(quote, quote.status || 400);
   if (quote.hawaii?.customerState === "review_required") return json({error:"Freight Review Required. Elevation will verify the battery and Hawaii freight path and contact you with the next step.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   if (quote.hawaii?.customerState === "unavailable") return json({error:"Currently Unavailable for Hawaii Shipping",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
+  if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
+  if (!liveCheckoutAllowed(env)) return json({ error: "Live checkout is locked pending launch approval" }, 503);
   const address = normalizeAddress(raw?.shipping);
   const hawaiiPickup = quote.hawaii?.customerState === "shipping_available" && quote.hawaii?.warehousePickupOnly;
   if (quote.physical && !hawaiiPickup && !validAddress(address)) return json({ error: "A valid U.S. shipping address is required" }, 400);
