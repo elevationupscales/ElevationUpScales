@@ -1,0 +1,91 @@
+name: One-Time 4.5 Final Repair Preview Verify V4
+
+on:
+  push:
+    branches:
+      - runner/4.5-final-copy-preview-verify-v4-2026-09-03
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Prepare corrected isolated verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/runner/4.5-final-copy-preview-v2-2026-09-03:.github/scripts/verify_45_final_copy_commerce_v2.mjs > /tmp/verify.mjs
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/verify.mjs')
+          s=p.read_text()
+          old="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.','Hawaii Lithium Batteries'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);"
+          new="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);const homeHi=home.locator('a[href=\"/hawaii-lithium-batteries\"]').filter({hasText:'Hawaii Lithium Batteries'}).first();if(await homeHi.count()!==1)throw new Error('homepage Hawaii CTA missing');await homeHi.scrollIntoViewIfNeeded();if((await homeHi.innerText()).trim()!=='Hawaii Lithium Batteries')throw new Error(`homepage Hawaii CTA text ${(await homeHi.innerText()).trim()}`);"
+          if old not in s: raise SystemExit('home verifier marker missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check /tmp/verify.mjs
+      - name: Download authoritative Lithium cost evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/cost-audit
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 33784084029
+      - name: Confirm exact preview candidate unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf main
+          git cat-file -e 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf^{commit}
+          test "$(git rev-parse origin/main)" = "2cafb2274d1fbd7733068853554bef68fcf5c02d"
+          changed=$(git diff --name-only 2cafb2274d1fbd7733068853554bef68fcf5c02d..31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf | sort)
+          test "$changed" = "$(printf '%s\n' site/index.html site/start-a-project.html site/start-a-project/index.html site/store.html | sort)"
+      - name: Verify preview candidate markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://d5b77d72.elevationupscales.pages.dev'
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /start-a-project /product /checkout /terms /privacy /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -fsS -L "$base/" -o /tmp/home.html
+          curl -fsS -L "$base/start-a-project" -o /tmp/start.html
+          python - <<'PY'
+          from html import unescape
+          h=unescape(open('/tmp/home.html').read())
+          s=unescape(open('/tmp/start.html').read()).lower()
+          for x in ('Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.','Hawaii Lithium Batteries'):
+              assert x in h,x
+          for x in ('underlying project families','intake intent tells management','management review'):
+              assert x not in s,x
+          assert 'href="/terms"' in h
+          PY
+      - name: Full exact preview commerce smoke
+        env:
+          BASE: https://d5b77d72.elevationupscales.pages.dev
+          COST_AUDIT: /tmp/cost-audit/lithium-pricing-audit-sanitized.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw && cp /tmp/verify.mjs /tmp/pw/test.mjs && cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          node test.mjs | tee /tmp/verification.json
+      - name: Verification summary
+        shell: bash
+        run: |
+          echo '### Elevation 4.5 Final Repair Preview Verification — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Application candidate: 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preview: https://d5b77d72.elevationupscales.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Database migration: none' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/verification.json >> "$GITHUB_STEP_SUMMARY"
