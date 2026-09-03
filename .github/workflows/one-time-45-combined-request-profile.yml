@@ -1,0 +1,45 @@
+name: One-Time 4.5 Combined Request Profile
+
+on:
+  push:
+    branches:
+      - diagnostic/4.5-combined-request-profile-2026-09-03
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Profile existing exact preview without failing release
+        env:
+          BASE: https://d2d8a458.elevationupscales.pages.dev
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw && cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          cat > profile.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:1000}});
+          const rows=[];
+          page.on('request',req=>rows.push({type:req.resourceType(),url:req.url()}));
+          const r=await page.goto(base+'/hawaii-lithium-batteries',{waitUntil:'domcontentloaded',timeout:60000});
+          if(!r?.ok()) throw new Error(`HTTP ${r?.status()}`);
+          await page.waitForSelector('.lithium-card',{timeout:30000});
+          await page.waitForTimeout(2600);
+          const cards=await page.locator('.lithium-card').count();
+          const actual=await page.locator('.lithium-card[data-hawaii-battery-units]:not([data-hawaii-battery-units="0"])').count();
+          const zero=await page.locator('.lithium-card[data-hawaii-battery-units="0"]').count();
+          const visibleImages=await page.locator('.lithium-card img').evaluateAll(imgs=>imgs.map(i=>({src:i.currentSrc||i.src,complete:i.complete,w:i.naturalWidth,h:i.naturalHeight,rect:i.getBoundingClientRect().toJSON()})).filter(x=>x.complete&&x.w>0));
+          const grouped={}; for(const x of rows) grouped[x.type]=(grouped[x.type]||0)+1;
+          console.log(JSON.stringify({total:rows.length,grouped,cards,actualBatteryCards:actual,nonBatteryCards:zero,decodedProductImages:visibleImages.length,requests:rows},null,2));
+          await browser.close();
+          JS
+          node profile.mjs
