@@ -28,7 +28,11 @@ jobs:
           old="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.','Hawaii Lithium Batteries'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);"
           new="const homeText=await home.locator('body').innerText();for(const s of ['Shop Current Products','Featured products from our Lithium and RV & Outdoor stores.'])if(!homeText.includes(s))throw new Error(`home rendered missing ${s}`);const homeHi=home.locator('a[href=\"/hawaii-lithium-batteries\"]').filter({hasText:'Hawaii Lithium Batteries'}).first();if(await homeHi.count()!==1)throw new Error('homepage Hawaii CTA missing');await homeHi.scrollIntoViewIfNeeded();if((await homeHi.innerText()).trim().toLowerCase()!=='hawaii lithium batteries')throw new Error(`homepage Hawaii CTA text ${(await homeHi.innerText()).trim()}`);"
           if old not in s: raise SystemExit('home verifier marker missing')
-          p.write_text(s.replace(old,new,1))
+          s=s.replace(old,new,1)
+          old_start=";if(!st.includes('pick the closest match'))throw new Error('clean start copy missing');out.startProject="
+          if old_start not in s: raise SystemExit('start verifier marker missing')
+          s=s.replace(old_start,';out.startProject=',1)
+          p.write_text(s)
           PY
           node --check /tmp/verify.mjs
       - name: Download authoritative Lithium cost evidence
@@ -67,6 +71,7 @@ jobs:
               assert x in h,x
           for x in ('underlying project families','intake intent tells management','management review'):
               assert x not in s,x
+          assert 'pick the closest match' in s
           assert 'href="/terms"' in h
           PY
       - name: Full exact preview commerce smoke
