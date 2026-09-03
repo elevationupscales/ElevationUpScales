@@ -356,7 +356,17 @@
     }
 
     try {
-      if (source === "lithium" && destinationHint === "HI") document.querySelector("#checkout-state").value = "HI";
+      if (source === "lithium" && destinationHint === "HI") {
+        document.querySelector("#checkout-state").value = "HI";
+        if (hawaiiPanel) hawaiiPanel.hidden = false;
+        if (hawaiiStateEl) hawaiiStateEl.textContent = "Checking Hawaii Shipping";
+        if (hawaiiMath) hawaiiMath.textContent = "Checking this exact battery's current Hawaii freight eligibility…";
+        if (hawaiiReserve) hawaiiReserve.hidden = true;
+        if (contactShippingLabel) { contactShippingLabel.hidden = false; contactShippingLabel.textContent = "Contact & pickup"; }
+        if (shippingFields) shippingFields.hidden = false;
+        addressFields.forEach((field) => { field.hidden = true; });
+        paypalEl.hidden = true;
+      }
       await requestQuote();
       if (!quote) return;
       if (quote.hawaii && quote.hawaii.customerState !== "shipping_available") return;
