@@ -1,0 +1,195 @@
+name: One-Time 4.5 Production Reconciliation Candidate
+
+on:
+  push:
+    branches: [repair/4.5-production-reconciliation-2026-09-02]
+    paths:
+      - .github/workflows/one-time-45-production-reconciliation-candidate.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: repair/4.5-production-reconciliation-2026-09-02
+          fetch-depth: 0
+
+      - name: Confirm protected starting lineage
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor cc5f59fa8d7374d41d51ec56a0e91e20198cb612 HEAD
+          test "${GITHUB_REF_NAME}" = "repair/4.5-production-reconciliation-2026-09-02"
+
+      - name: Apply narrow production reconciliation repairs
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p=Path(path)
+              s=p.read_text()
+              if old not in s:
+                  raise SystemExit(f"{label}: expected pattern missing in {path}")
+              if s.count(old) != 1:
+                  raise SystemExit(f"{label}: expected exactly one match in {path}, found {s.count(old)}")
+              p.write_text(s.replace(old,new,1))
+
+          # 1. Shared Shop navigation: eliminate stale Hawaii Coming Soon runtime copy.
+          replace_once(
+              'site/site-shell.js',
+              '<strong>Hawaii Lithium Program</strong><small>Coming soon · reservations and Hawaii shipping availability</small>',
+              '<strong>Hawaii Lithium Shipping &amp; Freight</strong><small>Hawaii consolidated freight · Alaska quote options</small>',
+              'shared Hawaii navigation'
+          )
+
+          # 2. Labor Day campaign timing: reliability guard only. Pricing policy is unchanged.
+          p=Path('site/promotion-runtime.js')
+          s=p.read_text()
+          marker='const PROMOTION_ID="labor-day-2026";'
+          addition='''const PROMOTION_ID="labor-day-2026";\nconst PROMOTION_START_AT="2026-09-03T06:00:00.000Z"; // 2026-09-03 00:00 America/Denver\nconst PROMOTION_END_AT="2026-09-08T06:00:00.000Z"; // end of Labor Day 2026 in America/Denver'''
+          if s.count(marker)!=1: raise SystemExit('promotion id marker mismatch')
+          s=s.replace(marker,addition,1)
+          marker='const uid=(p)=>`${p}-${crypto.randomUUID()}`;'
+          addition='''const uid=(p)=>`${p}-${crypto.randomUUID()}`;\nfunction promotionWindow(now=Date.now()){const start=Date.parse(PROMOTION_START_AT),end=Date.parse(PROMOTION_END_AT);return{active:Number.isFinite(start)&&Number.isFinite(end)&&now>=start&&now<end,state:now<start?"scheduled":now>=end?"expired":"active"};}'''
+          if s.count(marker)!=1: raise SystemExit('promotion window insertion marker mismatch')
+          s=s.replace(marker,addition,1)
+          old='active:available&&Number(row?.active)===1,'
+          new='manualActive:available&&Number(row?.active)===1,active:available&&Number(row?.active)===1&&promotionWindow().active,startAt:PROMOTION_START_AT,endAt:PROMOTION_END_AT,windowState:promotionWindow().state,'
+          if s.count(old)!=1: raise SystemExit('promotion active normalization marker mismatch')
+          s=s.replace(old,new,1)
+          old='return{active:Boolean(config?.active),headline:'
+          new='return{active:Boolean(config?.active),manualActive:Boolean(config?.manualActive),startAt:config?.startAt||PROMOTION_START_AT,endAt:config?.endAt||PROMOTION_END_AT,windowState:config?.windowState||promotionWindow().state,headline:'
+          if s.count(old)!=1: raise SystemExit('public promotion marker mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # Make the protected admin surface distinguish scheduled/expired from manually disabled.
+          p=Path('site/admin-promotion.js')
+          s=p.read_text()
+          old='function render(p){$("promo-auth").hidden=true;$("promo-dashboard").hidden=false;$("promo-status").textContent=p.active?"Labor Day promotion is ACTIVE.":"Labor Day promotion is DISABLED; eligible products use the 35% everyday pricing basis.";$("promo-enable").disabled=Boolean(p.active);$("promo-disable").disabled=!p.active;$("promo-metrics").innerHTML=[[\'State\',p.active?\'ACTIVE\':\'DISABLED\'],[\'Coupon\',`${p.couponCode} · ${p.couponPercent}% off`],[\'Promotion list basis\',`${p.promoMarkupPercent}% markup`],[\'Everyday basis\',`${p.everydayMarkupPercent}% markup`],[\'Battery shipping\',`${money(p.batteryShippingCents)} per actual battery`]].map(([a,b])=>`<article class="eus-metric"><span>${esc(a)}</span><strong>${esc(b)}</strong></article>`).join("");'
+          new='function render(p){$("promo-auth").hidden=true;$("promo-dashboard").hidden=false;const manual=Boolean(p.manualActive??p.active),windowState=String(p.windowState||"");const state=p.active?"ACTIVE":manual&&windowState==="scheduled"?"SCHEDULED":manual&&windowState==="expired"?"EXPIRED · AUTO-OFF":"DISABLED";$("promo-status").textContent=p.active?"Labor Day promotion is ACTIVE.":state==="SCHEDULED"?`Labor Day promotion is enabled and scheduled to start automatically at ${new Date(p.startAt).toLocaleString()}.`:state.startsWith("EXPIRED")?"Labor Day promotion window has ended; promotional pricing and coupon use are automatically off.":"Labor Day promotion is DISABLED; eligible products use the 35% everyday pricing basis.";$("promo-enable").disabled=manual;$("promo-disable").disabled=!manual;$("promo-metrics").innerHTML=[[\'State\',state],[\'Campaign window\',`${new Date(p.startAt).toLocaleString()} → ${new Date(p.endAt).toLocaleString()}`],[\'Coupon\',`${p.couponCode} · ${p.couponPercent}% off`],[\'Promotion list basis\',`${p.promoMarkupPercent}% markup`],[\'Everyday basis\',`${p.everydayMarkupPercent}% markup`],[\'Battery shipping\',`${money(p.batteryShippingCents)} per actual battery`]].map(([a,b])=>`<article class="eus-metric"><span>${esc(a)}</span><strong>${esc(b)}</strong></article>`).join("");'
+          if s.count(old)!=1: raise SystemExit('admin promotion render marker mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # 3. RV checkout: remove browser-visible eBay fallback plumbing.
+          p=Path('site/rv-store.js')
+          s=p.read_text()
+          old='''    const params = new URLSearchParams({ source: "rv", id: String(product.id || ""), name: String(product.title || "") });\n    const fallback = ebayUrl(product);\n    if (fallback) params.set("ebay", fallback);\n    return `/checkout/?${params.toString()}`;'''
+          new='''    const params = new URLSearchParams({ source: "rv", id: String(product.id || ""), name: String(product.title || "") });\n    return `/checkout/?${params.toString()}`;'''
+          if s.count(old)!=1: raise SystemExit('rv-store direct checkout marker mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/rv-checkout-routing.js')
+          s=p.read_text()
+          old='''        const original = external.href;\n        link.href = `/checkout/?source=rv&id=${encodeURIComponent(match[1])}&ebay=${encodeURIComponent(original)}&name=${encodeURIComponent(name)}`;'''
+          new='''        link.href = `/checkout/?source=rv&id=${encodeURIComponent(match[1])}&name=${encodeURIComponent(name)}`;'''
+          if s.count(old)!=1: raise SystemExit('legacy RV checkout route marker mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          old='''const buy=direct?`/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(raw)}${/^\\d{12}$/.test(ebay)?`&ebay=${encodeURIComponent(`https://www.ebay.com/itm/${ebay}`)}`:""}`:(/^\\d{12}$/.test(ebay)?`https://www.ebay.com/itm/${ebay}`:(/^https?:\\/\\//i.test(sourceUrl)?sourceUrl:""));'''
+          new='''const buy=direct?`/checkout/?source=rv&id=${encodeURIComponent(id)}&name=${encodeURIComponent(raw)}`:(/^\\d{12}$/.test(ebay)?`https://www.ebay.com/itm/${ebay}`:(/^https?:\\/\\//i.test(sourceUrl)?sourceUrl:""));'''
+          if s.count(old)!=1: raise SystemExit('worker RV prerender checkout marker mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('site/store-checkout.js')
+          s=p.read_text()
+          for old,new,label in [
+              ('  const ebayUrl = String(params.get("ebay") || "").trim();\n','', 'checkout ebay query read'),
+              ('    ebayUrl,\n','', 'checkout ebay payload'),
+              ('    const fallback = String(body.ebayUrl || ebayUrl || "").trim();','    const fallback = String(body.ebayUrl || "").trim();', 'checkout fallback trust boundary'),
+          ]:
+              if s.count(old)!=1: raise SystemExit(f'{label}: marker mismatch')
+              s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # Resolve any external eBay fallback from authoritative server-side mappings only.
+          p=Path('site/store-checkout-server.js')
+          s=p.read_text()
+          marker='''function rvMapEntry(env, id) {\n  const map = readDobaMap(env);\n  const entry = map[clean(id, 120)];\n  return entry && typeof entry === "object" && !Array.isArray(entry) ? entry : null;\n}\n'''
+          addition=marker+'''\nfunction trustedEbayUrl(value) {\n  const raw = clean(value, 300);\n  return /^https:\\/\\/www\\.ebay\\.com\\/itm\\/\\d{12}$/i.test(raw) ? raw : "";\n}\nfunction ebayUrlFromItemId(value) {\n  const itemId = clean(value, 30);\n  return /^\\d{12}$/.test(itemId) ? `https://www.ebay.com/itm/${itemId}` : "";\n}\nasync function catalogRvFallbackUrl(env, id) {\n  const db = env?.MARKETPLACE_DB;\n  const wanted = clean(id, 140);\n  if (!db || typeof db.prepare !== "function" || !wanted) return "";\n  try {\n    const row = await db.prepare(`SELECT m.ebay_item_id FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE (i.id=? OR lower(i.supplier_product_id)=lower(?) OR m.ebay_item_id=?) AND i.supplier='doba' LIMIT 1`).bind(wanted,wanted,wanted).first();\n    return ebayUrlFromItemId(row?.ebay_item_id);\n  } catch (error) {\n    console.error(JSON.stringify({event:"rv_checkout_fallback_lookup_error",message:clean(error?.message,240)}));\n    return "";\n  }\n}\n'''
+          if s.count(marker)!=1: raise SystemExit('server RV map insertion marker mismatch')
+          s=s.replace(marker,addition,1)
+          old='''  const catalogEntry = await catalogRvEntry(env, id);\n  const entry = source === "lithium" ? catalogEntry : (catalogEntry || rvMapEntry(env, id));\n  if (!entry) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:/^https:\\/\\/www\\.ebay\\.com\\/itm\\/\\d{12}$/i.test(clean(raw?.ebayUrl,300))?clean(raw.ebayUrl,300):""}:{}),error:source==="lithium"?"Lithium Catalog identity or verified shipping is unavailable":"Doba shipping is not mapped for this item"};\n  if (entry.shippingVerified !== true) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"Doba shipping is not verified for this item"};'''
+          new='''  const catalogEntry = await catalogRvEntry(env, id);\n  const mappedEntry = source === "rv" ? rvMapEntry(env, id) : null;\n  const entry = source === "lithium" ? catalogEntry : (catalogEntry || mappedEntry);\n  const serverFallbackUrl = source === "rv" ? (trustedEbayUrl(mappedEntry?.ebayUrl) || ebayUrlFromItemId(mappedEntry?.ebayItemId) || await catalogRvFallbackUrl(env, id)) : "";\n  const fallback = serverFallbackUrl ? {fallback:"ebay",ebayUrl:serverFallbackUrl} : {};\n  if (!entry) return {ok:false,status:409,...fallback,error:source==="lithium"?"Lithium Catalog identity or verified shipping is unavailable":"Doba shipping is not mapped for this item"};\n  if (entry.shippingVerified !== true) return {ok:false,status:409,...fallback,error:"Doba shipping is not verified for this item"};'''
+          if s.count(old)!=1: raise SystemExit('server RV quote fallback block mismatch')
+          s=s.replace(old,new,1)
+          old='''  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};'''
+          new='''  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...fallback,error:"This Doba item is not available for the selected shipping state"};'''
+          if s.count(old)!=1: raise SystemExit('server blocked-state fallback marker mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+
+      - name: Validate candidate source
+        run: |
+          set -euo pipefail
+          node --check site/site-shell.js
+          node --check site/promotion-runtime.js
+          node --check site/admin-promotion.js
+          node --check site/rv-store.js
+          node --check site/rv-checkout-routing.js
+          node --check site/_worker.js
+          node --check site/store-checkout.js
+          node --check site/store-checkout-server.js
+          git diff --check
+
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/site-shell.js
+          ! grep -q 'Coming soon · reservations and Hawaii shipping availability' site/site-shell.js
+
+          grep -q 'PROMOTION_START_AT="2026-09-03T06:00:00.000Z"' site/promotion-runtime.js
+          grep -q 'PROMOTION_END_AT="2026-09-08T06:00:00.000Z"' site/promotion-runtime.js
+          grep -q 'manualActive:' site/promotion-runtime.js
+          grep -q 'windowState:' site/promotion-runtime.js
+
+          ! grep -q 'params.set("ebay"' site/rv-store.js
+          ! grep -q '&ebay=' site/rv-checkout-routing.js
+          ! grep -q '&ebay=' site/_worker.js
+          ! grep -q 'params.get("ebay")' site/store-checkout.js
+          ! grep -q 'raw?.ebayUrl\|raw.ebayUrl' site/store-checkout-server.js
+          grep -q 'catalogRvFallbackUrl' site/store-checkout-server.js
+          grep -q 'm.ebay_item_id' site/store-checkout-server.js
+
+          python - <<'PY'
+          from datetime import datetime, timezone
+          start=datetime.fromisoformat('2026-09-03T06:00:00+00:00')
+          end=datetime.fromisoformat('2026-09-08T06:00:00+00:00')
+          assert start < end
+          assert (end-start).total_seconds() == 5*24*60*60
+          print('promotion_window_hours=',(end-start).total_seconds()/3600)
+          PY
+
+      - name: Ensure protected architecture was not touched
+        run: |
+          set -euo pipefail
+          for protected in \
+            site/start-a-project.html \
+            site/solar-project.html \
+            site/hawaii-lithium-runtime.js \
+            site/hawaii-lithium-batteries.html \
+            site/lithium-shop.js \
+            site/lithium-batteries.html \
+            site/catalog-admin-runtime.js \
+            site/marketplace.html; do
+            git diff --quiet cc5f59fa8d7374d41d51ec56a0e91e20198cb612 -- "$protected"
+          done
+
+      - name: Commit candidate and retire one-time runner
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-time-45-production-reconciliation-candidate.yml
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/site-shell.js site/promotion-runtime.js site/admin-promotion.js site/rv-store.js site/rv-checkout-routing.js site/_worker.js site/store-checkout.js site/store-checkout-server.js .github/workflows/one-time-45-production-reconciliation-candidate.yml
+          git commit -m 'Repair production navigation promotion timing and RV fallback'
+          git push origin HEAD:repair/4.5-production-reconciliation-2026-09-02
