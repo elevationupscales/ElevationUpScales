@@ -1,0 +1,173 @@
+name: One-Time Commerce Pricing 2.0 Preview
+
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-supplier-catalog-2-0-preview-2026-09-03
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview-and-measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 0ca23957e4d5de945fba9cd3e3899f28cd84b965
+          fetch-depth: 0
+      - name: Exact source and protected-baseline gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf
+          test "$(git rev-parse HEAD)" = "0ca23957e4d5de945fba9cd3e3899f28cd84b965"
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          git merge-base --is-ancestor 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf HEAD
+          changed=$(git diff --name-only 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf..HEAD | sort)
+          expected=$(printf '%s\n' site/_worker.js site/admin-catalog.html site/admin-commerce-pricing.css site/admin-commerce-pricing.html site/admin-commerce-pricing.js site/commerce-pricing-runtime.js | sort)
+          test "$changed" = "$expected"
+          test ! -e site/commerce-schema-migrations-2.js
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+          node --check site/admin-commerce-pricing.js
+          grep -q 'Method not allowed — Pricing & Supplier Catalog 2.0 is read-only in this build' site/commerce-pricing-runtime.js
+          grep -q '/api/admin/commerce-pricing' site/_worker.js
+      - id: preview
+        name: Deploy exact isolated preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=commerce-pricing-2-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Exact preview route and auth proof
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /admin-commerce-pricing.html /admin-catalog.html /lithium-batteries /hawaii-lithium-batteries /checkout /terms /privacy; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          code=$(curl -sS -o /tmp/admin-api.json -w '%{http_code}' "$base/api/admin/commerce-pricing")
+          echo "unauthenticated pricing API=$code"
+          test "$code" = "401"
+          grep -q 'Commerce Pricing & Supplier Catalog 2.0' <(curl -fsSL "$base/admin-commerce-pricing.html")
+      - name: Prepare temporary bound-data diagnostic only
+        shell: bash
+        run: |
+          set -euo pipefail
+          token=$(openssl rand -hex 24)
+          echo "::add-mask::$token"
+          echo "QA_TOKEN=$token" >> "$GITHUB_ENV"
+          QA_TOKEN="$token" python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('site/commerce-pricing-runtime.js')
+          s=p.read_text()
+          old='async function audit(env){'
+          new='export async function buildCommercePricingAudit(env){'
+          if old not in s: raise SystemExit('audit function marker missing')
+          s=s.replace(old,new,1)
+          old='const result=await audit(env);'
+          new='const result=await buildCommercePricingAudit(env);'
+          if old not in s: raise SystemExit('audit call marker missing')
+          p.write_text(s.replace(old,new,1))
+
+          w=Path('site/_worker.js')
+          s=w.read_text()
+          old='import { handleCommercePricingAdminApi } from "./commerce-pricing-runtime.js";'
+          new='import { handleCommercePricingAdminApi, buildCommercePricingAudit } from "./commerce-pricing-runtime.js";'
+          if old not in s: raise SystemExit('pricing import marker missing')
+          s=s.replace(old,new,1)
+          anchor='    if(url.pathname==="/api/admin/commerce-pricing") return handleCommercePricingAdminApi(request,env);\n'
+          token=os.environ['QA_TOKEN']
+          qa=f'''    if(url.pathname==="/api/qa/commerce-pricing") {{\n      if(request.headers.get("X-EUS-QA-Token")!=="{token}") return new Response("Not found",{{status:404,headers:{{"Cache-Control":"no-store"}}}});\n      try {{ const data=await buildCommercePricingAudit(env); return Response.json(data,{{headers:{{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}}}}); }}\n      catch(error) {{ return Response.json({{error:String(error?.message||error)}},{{status:503,headers:{{"Cache-Control":"no-store"}}}}); }}\n    }}\n'''
+          if anchor not in s: raise SystemExit('pricing route marker missing')
+          w.write_text(s.replace(anchor,anchor+qa,1))
+          PY
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+      - id: diagnostic
+        name: Deploy temporary bound-data diagnostic preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=commerce-pricing-2-diagnostic
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Measure real Catalog, supplier and pricing state
+        env:
+          BASE: ${{ steps.diagnostic.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsS --retry 8 --retry-all-errors --retry-delay 2 -H "X-EUS-QA-Token: $QA_TOKEN" "$base/api/qa/commerce-pricing" -o /tmp/commerce-pricing-audit.json
+          python3 - <<'PY'
+          import json, os
+          p='/tmp/commerce-pricing-audit.json'
+          d=json.load(open(p))
+          s=d.get('summary') or {}
+          ship=d.get('shippingInputs') or {}
+          assert d.get('mode')=='READ ONLY', d.get('mode')
+          assert int(s.get('catalogProducts') or 0)>0, s
+          assert int(s.get('actualLithium') or 0)>0, s
+          assert int((ship.get('LOWER48') or {}).get('rateCents') or 0)==2799, ship
+          assert int((ship.get('HI') or {}).get('rateCents') or 0)==9900, ship
+          assert bool((ship.get('AK') or {}).get('quoteRequired')) is True, ship
+          products=d.get('products') or []
+          sanitized={
+            'generatedAt':d.get('generatedAt'),
+            'elapsedMs':d.get('elapsedMs'),
+            'responseBytes':os.path.getsize(p),
+            'summary':s,
+            'promotion':d.get('promotion'),
+            'shippingInputs':ship,
+            'flaggedProducts':[
+              {
+                'id':x.get('id'),'sku':x.get('sku'),'title':x.get('title'),'supplier':x.get('supplier'),'storeSection':x.get('storeSection'),
+                'authoritativeCostCents':x.get('authoritativeCostCents'),'costEvidence':x.get('costEvidence'),'catalogPriceCents':x.get('catalogPriceCents'),
+                'effectiveListPriceCents':x.get('effectiveListPriceCents'),'couponPriceCents':(x.get('promotion') or {}).get('couponPriceCents'),
+                'flags':x.get('flags'),'sourceState':(x.get('sourceSnapshot') or {}).get('state'),'sourceObservedAt':(x.get('sourceSnapshot') or {}).get('lastObservedAt')
+              } for x in products if x.get('flags')
+            ]
+          }
+          json.dump(sanitized,open('/tmp/commerce-pricing-audit-sanitized.json','w'),indent=2)
+          print(json.dumps({'elapsedMs':d.get('elapsedMs'),'responseBytes':os.path.getsize(p),'summary':s,'promotion':d.get('promotion'),'shipping':{k:ship.get(k) for k in ('LOWER48','HI','AK')}},indent=2))
+          print('FLAGGED_COUNT',len(sanitized['flaggedProducts']))
+          PY
+      - name: Upload measurement artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-pricing-2-measurement
+          path: /tmp/commerce-pricing-audit-sanitized.json
+          if-no-files-found: error
+      - name: Measurement summary
+        shell: bash
+        run: |
+          echo '### Commerce Pricing & Supplier Catalog 2.0 — Read-Only Measurement' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Exact application candidate: `0ca23957e4d5de945fba9cd3e3899f28cd84b965`' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No Catalog rows, prices, publish states, shipping rules or payment behavior were mutated.' >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d=json.load(open('/tmp/commerce-pricing-audit-sanitized.json'))
+          s=d['summary']
+          print(f"- Catalog products: **{s.get('catalogProducts')}**")
+          print(f"- Published: **{s.get('published')}**")
+          print(f"- Actual Lithium batteries: **{s.get('actualLithium')}**")
+          print(f"- Doba source records: **{s.get('dobaSourceRecords')}**")
+          print(f"- Doba source matched: **{s.get('dobaSourceMatched')}**")
+          print(f"- Missing authoritative costs: **{s.get('missingAuthoritativeCost')}**")
+          print(f"- Source cost mismatches: **{s.get('sourceCostMismatch')}**")
+          print(f"- Stored below protected Lithium floor: **{s.get('storedBelowProtectedFloor')}**")
+          print(f"- Promotion-floor failures: **{s.get('promoFloorFailures')}**")
+          print(f"- Needs review: **{s.get('needsReview')}**")
+          print(f"- Audit runtime: **{d.get('elapsedMs')} ms**")
+          print(f"- Diagnostic response size: **{d.get('responseBytes')} bytes**")
+          PY
