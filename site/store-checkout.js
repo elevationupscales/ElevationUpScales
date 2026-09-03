@@ -4,7 +4,6 @@
   const params = new URLSearchParams(location.search);
   const source = String(params.get("source") || "").trim().toLowerCase();
   const id = String(params.get("id") || "").trim();
-  const ebayUrl = String(params.get("ebay") || "").trim();
   const rvName = String(params.get("name") || "").trim();
   const destinationHint = String(params.get("state") || "").trim().toUpperCase();
 
@@ -83,7 +82,6 @@
   const payload = () => ({
     source,
     id,
-    ebayUrl,
     name: rvName,
     quantity: Number.parseInt(quantityEl.value || "1", 10) || 1,
     variantId: variantEl?.value || "",
@@ -105,7 +103,7 @@
   };
 
   const fallbackUrl = (body = {}) => {
-    const fallback = String(body.ebayUrl || ebayUrl || "").trim();
+    const fallback = String(body.ebayUrl || "").trim();
     return /^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(fallback) ? fallback : "";
   };
 

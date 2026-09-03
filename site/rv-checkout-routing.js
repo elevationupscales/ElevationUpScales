@@ -21,8 +21,7 @@
         const match = external.hostname === "www.ebay.com" ? external.pathname.match(/^\/itm\/(\d{12})/i) : null;
         if (!match || !DIRECT_CHECKOUT_IDS.has(match[1])) return;
         const name = String(card.querySelector("h3")?.textContent || "").trim();
-        const original = external.href;
-        link.href = `/checkout/?source=rv&id=${encodeURIComponent(match[1])}&ebay=${encodeURIComponent(original)}&name=${encodeURIComponent(name)}`;
+        link.href = `/checkout/?source=rv&id=${encodeURIComponent(match[1])}&name=${encodeURIComponent(name)}`;
         link.removeAttribute("target");
         link.removeAttribute("rel");
         link.dataset.eusCheckoutRoute = "true";

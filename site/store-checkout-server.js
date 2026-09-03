@@ -200,6 +200,27 @@ function rvMapEntry(env, id) {
   return entry && typeof entry === "object" && !Array.isArray(entry) ? entry : null;
 }
 
+function trustedEbayUrl(value) {
+  const raw = clean(value, 300);
+  return /^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(raw) ? raw : "";
+}
+function ebayUrlFromItemId(value) {
+  const itemId = clean(value, 30);
+  return /^\d{12}$/.test(itemId) ? `https://www.ebay.com/itm/${itemId}` : "";
+}
+async function catalogRvFallbackUrl(env, id) {
+  const db = env?.MARKETPLACE_DB;
+  const wanted = clean(id, 140);
+  if (!db || typeof db.prepare !== "function" || !wanted) return "";
+  try {
+    const row = await db.prepare(`SELECT m.ebay_item_id FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE (i.id=? OR lower(i.supplier_product_id)=lower(?) OR m.ebay_item_id=?) AND i.supplier='doba' LIMIT 1`).bind(wanted,wanted,wanted).first();
+    return ebayUrlFromItemId(row?.ebay_item_id);
+  } catch (error) {
+    console.error(JSON.stringify({event:"rv_checkout_fallback_lookup_error",message:clean(error?.message,240)}));
+    return "";
+  }
+}
+
 async function catalogRvEntry(env, id) {
   const db = env?.MARKETPLACE_DB;
   const wanted = clean(id, 140);
@@ -382,9 +403,12 @@ async function quoteRv(raw, env) {
   const id = clean(raw?.id, 120);
   const source = clean(raw?.source,20).toLowerCase() === "lithium" ? "lithium" : "rv";
   const catalogEntry = await catalogRvEntry(env, id);
-  const entry = source === "lithium" ? catalogEntry : (catalogEntry || rvMapEntry(env, id));
-  if (!entry) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:/^https:\/\/www\.ebay\.com\/itm\/\d{12}$/i.test(clean(raw?.ebayUrl,300))?clean(raw.ebayUrl,300):""}:{}),error:source==="lithium"?"Lithium Catalog identity or verified shipping is unavailable":"Doba shipping is not mapped for this item"};
-  if (entry.shippingVerified !== true) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"Doba shipping is not verified for this item"};
+  const mappedEntry = source === "rv" ? rvMapEntry(env, id) : null;
+  const entry = source === "lithium" ? catalogEntry : (catalogEntry || mappedEntry);
+  const serverFallbackUrl = source === "rv" ? (trustedEbayUrl(mappedEntry?.ebayUrl) || ebayUrlFromItemId(mappedEntry?.ebayItemId) || await catalogRvFallbackUrl(env, id)) : "";
+  const fallback = serverFallbackUrl ? {fallback:"ebay",ebayUrl:serverFallbackUrl} : {};
+  if (!entry) return {ok:false,status:409,...fallback,error:source==="lithium"?"Lithium Catalog identity or verified shipping is unavailable":"Doba shipping is not mapped for this item"};
+  if (entry.shippingVerified !== true) return {ok:false,status:409,...fallback,error:"Doba shipping is not verified for this item"};
   if (entry.storeSection && ((source==="lithium"&&entry.storeSection!=="lithium-batteries")||(source==="rv"&&entry.storeSection!=="rv-outdoor"))) return {ok:false,status:409,error:"Catalog store identity does not match checkout source"};
   const destinationState = clean(raw?.shipping?.state, 2).toUpperCase();
   const blockedStates = Array.isArray(entry.blockedStates) ? entry.blockedStates.map((value) => clean(value, 2).toUpperCase()) : [];
@@ -393,7 +417,7 @@ async function quoteRv(raw, env) {
   const priced = pricingForProduct(product, config);
   const actualBattery = source==="lithium" && isActualLithiumBattery(product);
   if (actualBattery && destinationState==="AK") return {ok:false,status:409,error:"Standard lithium battery checkout is not available to Alaska"};
-  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...(source==="rv"?{fallback:"ebay",ebayUrl:clean(entry.ebayUrl||raw?.ebayUrl,300)}:{}),error:"This Doba item is not available for the selected shipping state"};
+  if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && destinationState==="HI")) return {ok:false,status:409,...fallback,error:"This Doba item is not available for the selected shipping state"};
   const qty = quantity(raw?.quantity);
   const unitPriceCents = Number.parseInt(String(priced.priceCents ?? entry.priceCents ?? ""),10);
   if (!Number.isInteger(unitPriceCents) || unitPriceCents < 1) return {ok:false,status:409,error:"Current Catalog price is unavailable for this item"};
