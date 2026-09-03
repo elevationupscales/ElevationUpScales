@@ -1,0 +1,106 @@
+name: One-Time 4.5 Commerce Control Inspect
+
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths: [.github/workflows/one-time-45-commerce-control-inspect.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a
+          fetch-depth: 0
+
+      - name: Source architecture inspection
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== HAWAII ENDPOINTS/FETCHES ==='
+          grep -nE 'fetch\(|setInterval|setTimeout|handleHawaii|/api/|shipping|reservation|checkout|status' site/hawaii-lithium-runtime.js | head -n 260 || true
+          echo '=== HAWAII PAGE RUNTIME ==='
+          grep -nE 'fetch\(|setInterval|setTimeout|/api/|shipping|reservation|checkout|status|card' site/hawaii-lithium-program.js site/hawaii-lithium-batteries.html | head -n 260 || true
+          echo '=== LITHIUM RUNTIME ==='
+          grep -nE 'fetch\(|setInterval|setTimeout|/api/|shipping|checkout|card' site/lithium-shop.js | head -n 220 || true
+          echo '=== RV RUNTIME ==='
+          grep -nE 'fetch\(|setInterval|setTimeout|/api/|checkout|card' site/rv-store.js | head -n 220 || true
+          echo '=== CHECKOUT SERVER ==='
+          grep -nE 'lithium|hawaii|shipping|quote|order|priceCents|total|reservation' site/store-checkout-server.js | head -n 300 || true
+          echo '=== COMMERCE MIGRATIONS ==='
+          cat site/commerce-schema-migrations.js
+          echo '=== WORKER ROUTES ==='
+          grep -nE 'handleHawaii|handleCatalog|handleStoreCheckout|pathname|/api/' site/_worker.js | tail -n 220 || true
+          echo '=== ADMIN SHIPPING ==='
+          grep -nE 'fetch\(|/api/|shipping|route|matrix|rule|audit' site/admin-lithium-shipping.js site/admin-shipping-pass2.js | head -n 300 || true
+          echo '=== HOME STRUCTURE ==='
+          grep -nE '<main|hero|home-|section|script src|Shop|What We Do' site/index.html | head -n 260 || true
+          echo '=== HOME RUNTIME ==='
+          grep -nE 'fetch\(|setInterval|setTimeout|MutationObserver|IntersectionObserver|catalog|gallery' site/home-*.js site/site-shell.js | head -n 320 || true
+
+      - name: Browser performance baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/eus-perf && cd /tmp/eus-perf
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@latest >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > measure.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const routes=['/','/lithium-batteries','/hawaii-lithium-batteries','/rv-store'];
+          const browser=await chromium.launch({headless:true});
+          for (const route of routes) {
+            const context=await browser.newContext();
+            const page=await context.newPage();
+            const requests=[];
+            const api=[];
+            let idleRequests=0;
+            page.on('request',req=>{requests.push(req.url()); if(req.url().includes('/api/')) api.push(req.url());});
+            await page.addInitScript(() => {
+              window.__eusLongTasks=[];
+              try { new PerformanceObserver((list)=>window.__eusLongTasks.push(...list.getEntries().map(e=>e.duration))).observe({entryTypes:['longtask']}); } catch(_) {}
+            });
+            const started=Date.now();
+            await page.goto('https://elevationupscales.com'+route,{waitUntil:'networkidle',timeout:90000});
+            await page.waitForTimeout(2500);
+            const loadedMs=Date.now()-started;
+            const snap=await page.evaluate(() => ({
+              dom:document.getElementsByTagName('*').length,
+              images:document.images.length,
+              decoded:[...document.images].filter(i=>i.complete&&i.naturalWidth>0).length,
+              scripts:document.scripts.length,
+              resources:performance.getEntriesByType('resource').length,
+              heap:performance.memory?.usedJSHeapSize||null,
+              longTasks:(window.__eusLongTasks||[]).length,
+              longTaskMs:(window.__eusLongTasks||[]).reduce((a,b)=>a+b,0),
+            }));
+            const before=requests.length;
+            await page.waitForTimeout(5000);
+            idleRequests=requests.length-before;
+            const apiCounts={}; for(const u of api){const x=new URL(u); const k=x.pathname; apiCounts[k]=(apiCounts[k]||0)+1;}
+            console.log('PERF '+route+' '+JSON.stringify({...snap,loadedMs,requests:requests.length,apiRequests:api.length,idleRequests,apiCounts}));
+            await context.close();
+          }
+          await browser.close();
+          NODE
+          node measure.mjs
+
+      - name: Public commerce counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.request
+          for section in ('lithium-batteries','rv-outdoor'):
+            url='https://elevationupscales.com/api/store/catalog?section='+section if section=='lithium-batteries' else 'https://elevationupscales.com/api/store-catalog?section='+section
+            with urllib.request.urlopen(url, timeout=30) as r:
+              d=json.load(r)
+            p=d.get('products') or []
+            print(f'CATALOG_COUNT {section}={len(p)}')
+            for x in p[:4]: print('SAMPLE', section, x.get('id'), x.get('title') or x.get('name'), x.get('priceCents'), x.get('shippingStatus'), x.get('supplierStock'))
+          PY
