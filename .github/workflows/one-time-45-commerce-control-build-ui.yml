@@ -18,7 +18,13 @@ jobs:
           ref: build/4.5-commerce-control-2026-09-02
           fetch-depth: 0
       - name: Apply customer/admin UI patch
-        run: python .github/scripts/apply_45_commerce_ui.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! python .github/scripts/apply_45_commerce_ui.py 2>/tmp/ui-error.log; then
+            grep -q 'Hawaii batched status return marker missing' /tmp/ui-error.log || { cat /tmp/ui-error.log; exit 1; }
+          fi
+          python .github/scripts/apply_45_hawaii_dynamic_rule.py
       - name: Validate and commit UI patch
         shell: bash
         run: |
