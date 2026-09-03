@@ -1,0 +1,138 @@
+name: One-Time 4.5 Combined Final Preview V2
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-final-preview-v2-2026-09-03
+
+permissions:
+  contents: read
+  actions: read
+  deployments: write
+
+jobs:
+  final-preview-v2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Freeze exact combined candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/scripts/combined_preview_browser_v2.mjs /tmp/combined_preview_browser_v2.mjs
+          git fetch origin 2cafb2274d1fbd7733068853554bef68fcf5c02d
+          git checkout --detach 2cafb2274d1fbd7733068853554bef68fcf5c02d
+          test "$(git rev-parse HEAD)" = "2cafb2274d1fbd7733068853554bef68fcf5c02d"
+          test "$(git merge-base HEAD 071b69ceddecaa51516ad01d762360a468c00925)" = "071b69ceddecaa51516ad01d762360a468c00925"
+      - name: Exact source and scope gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in site/promotion-runtime.js site/_worker.js site/lithium-shop.js site/product-detail.js site/store-checkout-server.js site/store-checkout.js; do node --check "$f"; done
+          git diff --check 071b69ceddecaa51516ad01d762360a468c00925..HEAD
+          test "$(git hash-object site/assets/homepage-option-2-lithium-solar.webp)" = "a46c581bb612b43b6e876b6cf3183710af198673"
+          test "$(git hash-object site/assets/homepage-option-3-home-rv-lifestyle.webp)" = "04858f98e6eb344dc922e42916b4301ba8c29ddf"
+          file site/assets/homepage-option-2-lithium-solar.webp site/assets/homepage-option-3-home-rv-lifestyle.webp | grep -c 'Web/P image' | grep -q '^2$'
+          grep -q 'lithium-protected-floor' site/promotion-runtime.js
+          grep -q 'section==="hawaii"&&batteryUnitsPerCatalogUnit(p)<1' site/_worker.js
+          grep -q 'data-lithium-deferred-image' site/_worker.js
+          grep -q 'hawaiiMode && batteryUnitsFor(product) < 1' site/lithium-shop.js
+          grep -q 'IntersectionObserver' site/lithium-shop.js
+          grep -q 'Hawaii Pickup Price' site/checkout/index.html
+          grep -q 'WHAT HAPPENS NEXT' site/checkout/index.html
+          grep -q '208-813-4998' site/checkout/index.html
+          grep -q 'Need delivery from our Honolulu pickup location' site/checkout/index.html
+          grep -q '25% off eligible Elevation merchandise. Shipping is excluded.' site/checkout/index.html
+          ! git diff --name-only 071b69ceddecaa51516ad01d762360a468c00925..HEAD | grep -q '^\.github/'
+      - name: Download authoritative Lithium cost audit evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/cost-audit
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 33784084029
+      - name: Validate authoritative cost evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,glob
+          files=glob.glob('/tmp/cost-audit/*.json')
+          assert files, 'cost audit artifact missing'
+          d=json.load(open(files[0]))
+          s=d.get('summary') or {}
+          print(json.dumps(s,indent=2))
+          assert int(s.get('count') or 0)==38,s
+          assert int(s.get('missingCost') or 0)==0,s
+          assert int(s.get('costSourceMismatch') or 0)==0,s
+          PY
+      - id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=combined-hotfix-final-preview-v2
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Route, Catalog, Hawaii and legal runtime proof
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          ua='Mozilla/5.0 ElevationPreview/4.5-v2'
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /product /start-a-project /solar-project /marketplace /terms /privacy /admin /admin-catalog /admin-store-orders /admin-lithium-shipping; do
+            code=$(curl -A "$ua" -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -A "$ua" -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/catalog.json
+          curl -A "$ua" -fsS "$base/api/store/featured" -o /tmp/featured.json
+          curl -A "$ua" -fsS "$base/api/hawaii-lithium/statuses" -o /tmp/statuses.json
+          curl -A "$ua" -fsS "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          curl -A "$ua" -fsS "$base/terms" -o /tmp/terms.html
+          curl -A "$ua" -fsS "$base/privacy" -o /tmp/privacy.html
+          curl -A "$ua" -fsS "$base/sitemap.xml" -o /tmp/sitemap.xml
+          python3 - <<'PY'
+          import json
+          c=json.load(open('/tmp/catalog.json')); f=json.load(open('/tmp/featured.json')); h=json.load(open('/tmp/statuses.json'))
+          products=[p for p in c.get('products',[]) if int(p.get('priceCents') or 0)>0]
+          assert len(products)==38,len(products)
+          assert len(f.get('lithium',[]))==4,f
+          assert len(f.get('rv',[]))==4,f
+          assert int(h.get('customerFreightPerBatteryCents') or 0)==9900,h
+          assert h.get('pickupOnly') is True,h
+          print(json.dumps({'lithium':len(products),'featuredLithium':4,'featuredRv':4,'hawaiiFreight':9900},indent=2))
+          PY
+          grep -q 'Hawaii Pickup Price' /tmp/hawaii.html
+          grep -q 'data-hawaii-battery-units' /tmp/hawaii.html
+          ! grep -q 'data-hawaii-battery-units="0"' /tmp/hawaii.html
+          grep -qi 'Honolulu' /tmp/terms.html
+          grep -qi 'commerce\|order\|payment' /tmp/privacy.html
+          grep -q '<loc>https://elevationupscales.com/hawaii-lithium-batteries</loc>' /tmp/sitemap.xml
+      - name: Browser, mobile, image decode, checkout and performance proof
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw
+          cp /tmp/combined_preview_browser_v2.mjs /tmp/pw/test.mjs
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          node test.mjs | tee /tmp/browser-v2.json
+      - name: Exact preview acceptance summary
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.5 Combined Hotfix Preview V2 — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Application SHA: 2cafb2274d1fbd7733068853554bef68fcf5c02d' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${BASE}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production unchanged: 071b69ceddecaa51516ad01d762360a468c00925' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/browser-v2.json >> "$GITHUB_STEP_SUMMARY"
