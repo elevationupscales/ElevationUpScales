@@ -1,0 +1,49 @@
+name: One-Time KINGBOSS Historical Package Inspection
+on:
+  push:
+    branches:
+      - runner/kingboss-historical-package-inspection-2026-09-03
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Decode and list historical package without importing
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=.deployment-input/kingboss-20260829-5188361/xz-b64
+          test -d "$dir"
+          cat "$dir"/*.part > /tmp/kingboss.b64
+          base64 -d /tmp/kingboss.b64 > /tmp/kingboss.xz
+          file /tmp/kingboss.xz
+          xz -dc /tmp/kingboss.xz > /tmp/kingboss.payload
+          file /tmp/kingboss.payload
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, tarfile, zipfile, json, os
+          p=Path('/tmp/kingboss.payload')
+          result={'payloadBytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'type':'unknown','entries':[]}
+          if tarfile.is_tarfile(p):
+              result['type']='tar'
+              with tarfile.open(p) as t:
+                  for m in t.getmembers():
+                      result['entries'].append({'name':m.name,'size':m.size,'type':'dir' if m.isdir() else 'file'})
+          elif zipfile.is_zipfile(p):
+              result['type']='zip'
+              with zipfile.ZipFile(p) as z:
+                  for m in z.infolist():
+                      result['entries'].append({'name':m.filename,'size':m.file_size,'type':'dir' if m.is_dir() else 'file'})
+          else:
+              text=p.read_text(errors='replace')
+              result['preview']=text[:2000]
+          json.dump(result,open('/tmp/kingboss-package-inventory.json','w'),indent=2)
+          print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kingboss-historical-package-inventory
+          path: /tmp/kingboss-package-inventory.json
+          if-no-files-found: error
