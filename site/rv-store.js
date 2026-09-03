@@ -1,3 +1,4 @@
+// Deployment compatibility: fallbackCatalog was superseded by the current prerendered catalog fallback path.
 (() => {
   "use strict";
 
