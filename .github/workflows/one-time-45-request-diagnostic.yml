@@ -1,0 +1,41 @@
+name: One-Time 4.5 Hawaii Request Diagnostic
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-request-diagnostic-2026-09-03
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Trace immutable preview requests
+        env:
+          BASE: https://d2d8a458.elevationupscales.pages.dev
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw && cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          cat > test.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:1000}});
+          const req=[];
+          page.on('request',r=>req.push({url:r.url(),type:r.resourceType()}));
+          const response=await page.goto(base+'/hawaii-lithium-batteries',{waitUntil:'domcontentloaded',timeout:60000});
+          if(!response?.ok()) throw new Error(`HTTP ${response?.status()}`);
+          await page.waitForTimeout(2600);
+          const byType={};for(const x of req)byType[x.type]=(byType[x.type]||0)+1;
+          const api=req.filter(x=>x.url.includes('/api/'));
+          console.log(JSON.stringify({count:req.length,byType,api,requests:req},null,2));
+          await browser.close();
+          JS
+          node test.mjs
