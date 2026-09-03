@@ -1,0 +1,42 @@
+name: One-Time KINGBOSS Historical Supplier Summary
+on:
+  push:
+    branches:
+      - runner/kingboss-historical-supplier-summary-2026-09-03
+permissions:
+  contents: read
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Decode and summarize Doba supplier fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=.deployment-input/kingboss-20260829-5188361/xz-b64
+          cat "$dir"/*.part | base64 -d | xz -dc > /tmp/source.csv
+          python3 - <<'PY'
+          import csv,json,collections
+          with open('/tmp/source.csv',newline='',encoding='utf-8-sig') as f:
+              rows=list(csv.DictReader(f))
+          supplier=collections.Counter((r.get('Supplier') or '').strip() or '(blank)' for r in rows)
+          brand=collections.Counter((r.get('Brand') or '').strip() or '(blank)' for r in rows)
+          categories=collections.Counter((r.get('Category') or '').strip() or '(blank)' for r in rows)
+          result={
+            'rows':len(rows),
+            'supplierCounts':dict(supplier.most_common(20)),
+            'brandCounts':dict(brand.most_common(20)),
+            'categoryCounts':dict(categories.most_common(20)),
+            'uniqueItemNos':len({(r.get('Item No.') or '').strip() for r in rows if (r.get('Item No.') or '').strip()}),
+            'uniqueSkuCodes':len({(r.get('SKU Code') or '').strip() for r in rows if (r.get('SKU Code') or '').strip()}),
+            'zeroStock':sum(1 for r in rows if int(float((r.get('Inventory Qty') or '0').strip() or 0))<=0),
+          }
+          json.dump(result,open('/tmp/summary.json','w'),indent=2)
+          print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kingboss-historical-supplier-summary
+          path: /tmp/summary.json
+          if-no-files-found: error
