@@ -1,0 +1,80 @@
+name: One-Time 4.5 Final Proof After CSS
+on:
+  push:
+    branches:
+      - build/4.5-commerce-control-2026-09-02
+    paths:
+      - .github/workflows/one-time-45-final-proof-after-css.yml
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 5ddb4e369f19017471bd8439044cd02ecee64806
+          fetch-depth: 0
+      - name: Exact clean release gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "5ddb4e369f19017471bd8439044cd02ecee64806"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "9ed1a64479f6c1949cfef7b6c40494c6ab9c934a"
+          git merge-base --is-ancestor 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a HEAD
+          test -z "$(find .github/workflows -maxdepth 1 -type f -name 'one-time-45-*' -print -quit)"
+          if test -d .github/scripts; then test -z "$(find .github/scripts -maxdepth 1 -type f \( -name 'apply_45_*' -o -name 'repair_45_*' \) -print -quit)"; fi
+          while IFS= read -r -d '' f; do node --check "$f"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a...HEAD
+          grep -q '.eus-checkout-page \[hidden\]{display:none!important}' site/store-checkout.css
+          echo RELEASE_TREE=PASS
+      - name: Deploy exact final preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=commerce45finalproof
+      - name: Runtime, checkout and promotion proof
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"; echo PREVIEW_URL=$base
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /what-we-do /start-a-project /solar-project /marketplace /terms /privacy; do code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 90 -o /tmp/r -w '%{http_code}' "$base$route" || true); echo "$route=$code"; test "$code" = 200; done
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/store/catalog?section=lithium-batteries" -o /tmp/li.json
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/store/featured" -o /tmp/f.json
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/shipping-rules" -o /tmp/rules.json
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/hawaii-lithium/statuses" -o /tmp/status.json
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/store/promotion" -o /tmp/promo.json
+          curl -fsSL --retry 8 --retry-all-errors "$base/lithium-batteries" -o /tmp/l.html
+          curl -fsSL --retry 8 --retry-all-errors "$base/hawaii-lithium-batteries" -o /tmp/h.html
+          curl -fsSL --retry 8 --retry-all-errors "$base/rv-store" -o /tmp/r.html
+          node <<'NODE'
+          const fs=require('fs'),li=JSON.parse(fs.readFileSync('/tmp/li.json')).products||[],rv=JSON.parse(fs.readFileSync('/tmp/rv.json')).products||[],f=JSON.parse(fs.readFileSync('/tmp/f.json')),rules=JSON.parse(fs.readFileSync('/tmp/rules.json')).rules||[],st=JSON.parse(fs.readFileSync('/tmp/status.json')),p=JSON.parse(fs.readFileSync('/tmp/promo.json')),lh=fs.readFileSync('/tmp/l.html','utf8'),hh=fs.readFileSync('/tmp/h.html','utf8'),rh=fs.readFileSync('/tmp/r.html','utf8');
+          if(li.length!==38||rv.length!==20||(f.lithium||[]).length!==4||(f.rv||[]).length!==4)throw Error('catalog/featured');
+          const l=rules.find(x=>x.region==='LOWER48'),h=rules.find(x=>x.region==='HI'),d=rules.find(x=>x.region==='HI_DELIVERY'),a=rules.find(x=>x.region==='AK');if(l?.rateCents!==2799||h?.rateCents!==9900||!h?.pickupOnly||h?.residentialAllowed||h?.preferredConsolidationQuantity!==3||!d?.quoteRequired||d?.rateCents!==0||!a?.quoteRequired||a?.rateCents!==0)throw Error('shipping rules');
+          const prer={lithium:(lh.match(/class="lithium-card"/g)||[]).length,hawaii:(hh.match(/class="lithium-card"/g)||[]).length,rv:(rh.match(/class="rv-product-card"/g)||[]).length};if(prer.lithium!==38||prer.hawaii!==38||prer.rv<1||!hh.includes('data-prerendered="true"'))throw Error('prerender');
+          const states={shipping_available:0,review_required:0,unavailable:0};for(const x of li){const s=st.statuses?.[x.id]||st.statuses?.[String(x.sku||'').toLowerCase()];if(s&&s.customerState in states)states[s.customerState]++}
+          if(p.startAt!=='2026-09-03T06:00:00.000Z'||p.endAt!=='2026-09-08T06:00:00.000Z'||p.windowState!=='active'||p.batteryShippingCents!==2799)throw Error('promotion window');if(p.active&&p.couponPercent!==25)throw Error('promo percentage');
+          console.log('RUNTIME='+JSON.stringify({lithium:li.length,rv:rv.length,featured:'4+4',prerender:prer,hawaiiStates:states,promotion:{active:p.active,manualActive:p.manualActive,windowState:p.windowState,couponPercent:p.couponPercent}}));
+          NODE
+          node <<'NODE'
+          (async()=>{const base=process.env.BASE.replace(/\/$/,''),id='cat-01e78438-5fb8-4e0d-aaab-ffbe86f5cf77';async function post(path,b){const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json','Origin':base},body:JSON.stringify(b)});return{status:r.status,body:await r.json().catch(()=>({}))}}const co=await post('/api/store-checkout/quote',{source:'lithium',id,quantity:1,shipping:{state:'CO'}}),hi=await post('/api/store-checkout/quote',{source:'lithium',id,quantity:1,shipping:{state:'HI'}}),o=await post('/api/store-checkout/orders',{source:'lithium',id,quantity:1,customer:{email:'commerce45-preview@elevationupscales.com'},shipping:{fullName:'Preview',state:'HI',countryCode:'US'}});if(co.status!==200||co.body?.battery?.actualBattery!==true||co.body.shippingCents!==2799||co.body.shippingRule?.rateCents!==2799||hi.status!==200||hi.body.hawaii?.customerState!=='review_required'||hi.body.hawaii?.paymentAllowed!==false||hi.body.shippingCents!==0||o.status!==409||!o.body.hawaiiFreight)throw Error('checkout');console.log('CHECKOUT=PASS')})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Browser and performance proof
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw;cd /tmp/pw;npm init -y >/dev/null 2>&1;npm install --no-save playwright@latest >/dev/null 2>&1;npx playwright install chromium >/dev/null 2>&1
+          cat > verify.mjs <<'NODE'
+          import{chromium}from'playwright';const base=process.env.BASE.replace(/\/$/,''),browser=await chromium.launch({headless:true});
+          const ctx1=await browser.newContext({viewport:{width:1280,height:900}}),hp=await ctx1.newPage(),req=[],api=[];hp.on('request',r=>{req.push(r.url());if(r.url().includes('/api/'))api.push(r.url())});await hp.goto(base+'/hawaii-lithium-batteries',{waitUntil:'domcontentloaded',timeout:60000});await hp.waitForTimeout(4300);const metrics={requests:req.length,apiRequests:api.length,dom:await hp.evaluate(()=>document.getElementsByTagName('*').length)};const singles=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/status').length,batches=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/statuses').length,catalogs=api.filter(u=>new URL(u).pathname==='/api/store/catalog').length;if(singles!==0||batches>1||catalogs!==0||req.length>=57||api.length>=41||await hp.locator('.lithium-card').count()!==38)throw Error('Hawaii performance');await ctx1.close();
+          const id='cat-01e78438-5fb8-4e0d-aaab-ffbe86f5cf77',ctx=await browser.newContext({viewport:{width:1100,height:900}}),page=await ctx.newPage();const start=Date.now();await page.goto(`${base}/checkout/?source=lithium&id=${id}&state=HI`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForFunction(()=>document.querySelector('#checkout-hawaii-state')?.textContent?.includes('Checking Hawaii Shipping'),null,{timeout:3000});const readyMs=Date.now()-start;if(!(await page.locator('#checkout-hawaii-freight').isVisible())||await page.locator('#checkout-address1').isVisible()||await page.locator('#checkout-paypal').isVisible())throw Error('immediate HI UI');await page.waitForFunction(()=>document.querySelector('#checkout-hawaii-state')?.textContent?.includes('Freight Review Required'),null,{timeout:15000});const text=await page.locator('#checkout-hawaii-freight').innerText();if(!text.includes('Honolulu warehouse / freight-terminal pickup location')||!text.includes('Additional delivery charges apply')||await page.locator('#checkout-address1').isVisible()||await page.locator('#checkout-paypal').isVisible()||!(await page.locator('#checkout-hawaii-reserve').isVisible()))throw Error('final HI UI');console.log('BROWSER='+JSON.stringify({immediateStateMs:readyMs,hawaiiPerformance:metrics}));await ctx.close();await browser.close();
+          NODE
+          BASE="$BASE" node verify.mjs
+          echo FINAL_PREVIEW=PASS
+          echo APPLICATION_SHA=5ddb4e369f19017471bd8439044cd02ecee64806
