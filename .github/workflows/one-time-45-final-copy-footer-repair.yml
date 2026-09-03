@@ -7,7 +7,7 @@ permissions:
   contents: write
 jobs:
   repair:
-    if: github.event.head_commit.message == 'Retry final 4.5 copy and footer repair'
+    if: github.event.head_commit.message == 'Finalize 4.5 copy and footer repair runner'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -28,50 +28,24 @@ jobs:
                   raise SystemExit(f'missing expected text in {path}: {old}')
               p.write_text(text.replace(old, new, 1))
 
-          replace_exact(
-              'site/index.html',
-              'Current gear, ready from the front door.',
-              'Shop Current Products'
-          )
-          replace_exact(
-              'site/index.html',
-              'A small live selection from the Elevation Catalog. Open the full stores for every current product.',
-              'Featured products from our Lithium and RV & Outdoor stores.'
-          )
-          replace_exact(
-              'site/start-a-project/index.html',
-              'Choose the closest match. Home, RV, and Solar remain the underlying Project families while Intake Intent tells management what kind of help brought you here.',
-              'Pick the closest match. We’ll narrow the details on the next step.'
-          )
-          replace_exact(
-              'site/start-a-project/index.html',
-              'You can call Elevation now or continue the structured intake so the project is stored for management review.',
-              'Need immediate help? Call now. Or continue the intake so the project is saved for follow-up.'
-          )
+          replace_exact('site/index.html','Current gear, ready from the front door.','Shop Current Products')
+          replace_exact('site/index.html','A small live selection from the Elevation Catalog. Open the full stores for every current product.','Featured products from our Lithium and RV & Outdoor stores.')
+          replace_exact('site/start-a-project/index.html','Choose the closest match. Home, RV, and Solar remain the underlying Project families while Intake Intent tells management what kind of help brought you here.','Pick the closest match. We’ll narrow the details on the next step.')
+          replace_exact('site/start-a-project/index.html','You can call Elevation now or continue the structured intake so the project is stored for management review.','Need immediate help? Call now. Or continue the intake so the project is saved for follow-up.')
 
           start_path = Path('site/start-a-project/index.html')
-          start_text = start_path.read_text()
-          start_text = start_text.replace('stored for management review', 'saved for follow-up')
+          start_text = start_path.read_text().replace('stored for management review','saved for follow-up')
           start_path.write_text(start_text)
 
-          retail_pages = [
-              'site/index.html',
-              'site/store.html',
-              'site/rv-store.html',
-              'site/lithium-batteries.html',
-              'site/hawaii-lithium-batteries.html',
-              'site/product.html',
-              'site/checkout/index.html',
-          ]
+          retail_pages = ['site/index.html','site/store.html','site/rv-store.html','site/lithium-batteries.html','site/hawaii-lithium-batteries.html','site/product.html','site/checkout/index.html']
           for path in retail_pages:
               p = Path(path)
               text = p.read_text()
-              if 'href="/terms"' in text:
-                  continue
-              privacy = '<a href="/privacy">Privacy</a>'
-              if privacy not in text:
-                  raise SystemExit(f'no safe footer insertion point in {path}')
-              p.write_text(text.replace(privacy, privacy + '<a href="/terms">Terms</a>', 1))
+              if 'href="/terms"' not in text:
+                  privacy = '<a href="/privacy">Privacy</a>'
+                  if privacy not in text:
+                      raise SystemExit(f'no safe footer insertion point in {path}')
+                  p.write_text(text.replace(privacy, privacy + '<a href="/terms">Terms</a>', 1))
 
           idx = Path('site/index.html').read_text()
           start = Path('site/start-a-project/index.html').read_text()
@@ -80,7 +54,7 @@ jobs:
           assert 'Hawaii Lithium Batteries' in idx
           assert '/assets/homepage-option-2-lithium-solar.webp' in idx
           assert '/assets/homepage-option-3-home-rv-lifestyle.webp' in idx
-          for banned in ('underlying Project families', 'Intake Intent tells management', 'management review'):
+          for banned in ('underlying Project families','Intake Intent tells management','management review'):
               assert banned not in start, banned
           for path in retail_pages:
               assert 'href="/terms"' in Path(path).read_text(), path
@@ -92,13 +66,13 @@ jobs:
           git diff --check
           changed=$(git diff --name-only | sort)
           printf '%s\n' "$changed"
-          test "$changed" = "$(printf '%s\n' site/hawaii-lithium-batteries.html site/index.html site/lithium-batteries.html site/start-a-project/index.html | sort)"
+          test "$changed" = "$(printf '%s\n' site/index.html site/start-a-project/index.html site/store.html | sort)"
       - name: Commit repaired candidate
         shell: bash
         run: |
           set -euo pipefail
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
-          git add site/index.html site/start-a-project/index.html site/lithium-batteries.html site/hawaii-lithium-batteries.html
+          git add site/index.html site/start-a-project/index.html site/store.html
           git commit -m 'Finalize public copy and Terms footer access'
           git push origin HEAD:hotfix/4.5-final-copy-footer-verification-2026-09-03
