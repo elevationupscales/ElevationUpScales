@@ -132,13 +132,13 @@ jobs:
           grep -q 'MIN_FULL_COUNT = 13' site/store-catalog-resilience.js
           grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
 
-          # Current RV/eBay storefront architecture.
+          # Current Catalog-driven RV storefront architecture.
           test -f site/rv-store.html
           test -f site/rv-store.js
-          test -f site/rv-ebay-catalog.js
-          grep -q 'VERIFIED EBAY CATALOG' site/rv-store.html
-          grep -q 'window.EUS_VERIFIED_EBAY_CATALOG' site/rv-ebay-catalog.js
-          grep -q 'elevationupscalesshop' site/rv-store.js
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'elevation-catalog' site/rv-store.js
+          ! grep -q '&ebay=' site/rv-store.js
+          ! grep -q 'fallbackCatalog' site/rv-store.js
           ! grep -q 'rv-store-hero__media' site/rv-store.html
 
           # Inventory foundation remains protected and operationally separate.
