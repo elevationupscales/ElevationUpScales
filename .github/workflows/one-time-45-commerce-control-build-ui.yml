@@ -25,6 +25,7 @@ jobs:
             grep -q 'Hawaii batched status return marker missing' /tmp/ui-error.log || { cat /tmp/ui-error.log; exit 1; }
           fi
           python .github/scripts/apply_45_hawaii_dynamic_rule.py
+          python .github/scripts/apply_45_ui_postfix.py
       - name: Validate and commit UI patch
         shell: bash
         run: |
