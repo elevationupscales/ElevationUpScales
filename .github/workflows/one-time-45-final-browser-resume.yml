@@ -1,0 +1,93 @@
+name: One-Time 4.5 Final Browser Resume
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths: [.github/workflows/one-time-45-final-browser-resume.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 4e429ddbed40d9e200094520c6c694dec2afb938
+          fetch-depth: 0
+      - name: Confirm exact candidate and production parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "4e429ddbed40d9e200094520c6c694dec2afb938"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "9ed1a64479f6c1949cfef7b6c40494c6ab9c934a"
+          git merge-base --is-ancestor 9ed1a64479f6c1949cfef7b6c40494c6ab9c934a HEAD
+      - name: Browser performance and Hawaii customer flow
+        shell: bash
+        env:
+          PREVIEW: https://5b910e77.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/browser && cd /tmp/browser
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@latest >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > verify.mjs <<'NODE'
+          import fs from 'fs';import{chromium}from'playwright';
+          const base=process.env.PREVIEW.replace(/\/$/,'');
+          const before={'/':{requests:28,apiRequests:1,dom:271},'/lithium-batteries':{requests:39,apiRequests:3,dom:765},'/hawaii-lithium-batteries':{requests:57,apiRequests:41,dom:1613},'/rv-store':{requests:42,apiRequests:3,dom:516}};
+          const browser=await chromium.launch({headless:true});const after={};
+          for(const route of Object.keys(before)){
+            const ctx=await browser.newContext({viewport:{width:1280,height:900}}),page=await ctx.newPage(),req=[],api=[];
+            page.on('request',r=>{req.push(r.url());if(r.url().includes('/api/'))api.push(r.url())});
+            await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});if(route==='/')await page.locator('[data-home-commerce]').scrollIntoViewIfNeeded();
+            await page.waitForTimeout(1800);const n=req.length;await page.waitForTimeout(2500);const idle=req.length-n;
+            const snap=await page.evaluate(()=>({dom:document.getElementsByTagName('*').length,images:document.images.length,scripts:document.scripts.length}));
+            after[route]={...snap,requests:req.length,apiRequests:api.length,idleRequests:idle,api:api.map(u=>new URL(u).pathname)};
+            console.log('PERF_BEFORE '+route+' '+JSON.stringify(before[route]));console.log('PERF_AFTER '+route+' '+JSON.stringify(after[route]));
+            if(idle!==0)throw Error(route+' idle request activity');
+            if(route==='/'){
+              if(await page.locator("[data-home-products='lithium'] .home-product-card").count()!==4||await page.locator("[data-home-products='rv'] .home-product-card").count()!==4)throw Error('homepage mini-store count');
+              if(api.some(u=>u.includes('/api/store/catalog')||u.includes('/api/store-catalog')))throw Error('homepage full Catalog hydration');
+            }
+            if(route==='/lithium-batteries'&&api.some(u=>new URL(u).pathname==='/api/store/catalog'))throw Error('Lithium duplicate Catalog hydration');
+            if(route==='/rv-store'&&api.some(u=>new URL(u).pathname==='/api/store-catalog'))throw Error('RV duplicate Catalog hydration');
+            if(route==='/hawaii-lithium-batteries'){
+              const singles=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/status').length,batches=api.filter(u=>new URL(u).pathname==='/api/hawaii-lithium/statuses').length,catalogs=api.filter(u=>new URL(u).pathname==='/api/store/catalog').length;
+              if(singles!==0||batches>1||catalogs!==0)throw Error(`Hawaii request pattern ${singles}/${batches}/${catalogs}`);
+              if(after[route].requests>=57||after[route].apiRequests>=41)throw Error('Hawaii network load did not improve');
+              if(await page.locator('.lithium-card').count()!==38)throw Error('Hawaii card count');
+              const labels=await page.locator('[data-hawaii-status]').allTextContents();if(labels.some(v=>!['Shipping Available','Freight Review Required','Currently Unavailable'].includes(v.trim())))throw Error('unexpected Hawaii customer state');
+              const reviewLinks=page.locator("a[href*='#hawaii-request']");if(await reviewLinks.count()<1)throw Error('Hawaii review flow link missing');
+            }
+            await ctx.close();
+          }
+          const knownId='cat-01e78438-5fb8-4e0d-aaab-ffbe86f5cf77';
+          const ctx=await browser.newContext({viewport:{width:1100,height:900}}),page=await ctx.newPage();
+          await page.goto(`${base}/checkout/?source=lithium&id=${knownId}&state=HI`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForTimeout(2200);
+          if(!(await page.locator('#checkout-hawaii-freight').isVisible()))throw Error('known-battery Hawaii panel not visible');
+          const txt=await page.locator('#checkout-hawaii-freight').innerText();if(!txt.includes('Honolulu warehouse / freight-terminal pickup location')||!txt.includes('Additional delivery charges apply'))throw Error('Hawaii checkout pickup/delivery wording');
+          if(!(await page.locator('#checkout-name').isVisible())||!(await page.locator('#checkout-email').isVisible()))throw Error('Hawaii contact fields missing');
+          if(await page.locator('#checkout-address1').isVisible())throw Error('Hawaii street-address field visible');
+          if(await page.locator('#checkout-paypal').isVisible())throw Error('PayPal visible for review-required known battery');
+          if(!(await page.locator('#checkout-hawaii-reserve').isVisible()))throw Error('review CTA missing');
+          await ctx.close();await browser.close();
+          fs.writeFileSync('/tmp/perf.json',JSON.stringify(after,null,2));
+          NODE
+          PREVIEW="$PREVIEW" node verify.mjs
+      - name: Promotion controls and final exact preview receipt
+        shell: bash
+        env:
+          PREVIEW: https://5b910e77.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PREVIEW/api/store/promotion" -o /tmp/p.json
+          node <<'NODE'
+          const p=JSON.parse(require('fs').readFileSync('/tmp/p.json','utf8'));
+          if(p.startAt!=='2026-09-03T06:00:00.000Z'||p.endAt!=='2026-09-08T06:00:00.000Z')throw Error('promotion schedule changed');
+          const expected=Boolean(p.manualActive)&&Date.now()>=Date.parse(p.startAt)&&Date.now()<Date.parse(p.endAt);if(Boolean(p.active)!==expected)throw Error(`promotion state active=${p.active} expected=${expected}`);
+          console.log(`PROMOTION_WINDOW=${p.windowState} ACTIVE=${p.active}`);
+          NODE
+          echo FINAL45_PREVIEW=PASS
+          echo CANDIDATE=4e429ddbed40d9e200094520c6c694dec2afb938
+          echo PREVIEW=$PREVIEW
+          cat /tmp/perf.json
