@@ -70,7 +70,7 @@ try {
   if(Number(qco.shippingCents)!==2799) throw new Error(`Lower48 shipping ${qco.shippingCents}`);
   if(Number(qhi.hawaii?.customerFreightPerBatteryCents)!==9900) throw new Error(`HI freight ${qhi.hawaii?.customerFreightPerBatteryCents}`);
   if(qhi.promotion?.shippingDiscounted!==false) throw new Error('Freight discount flag wrong');
-  if(Number(qhi.hawaii?.pickupPriceCents)!==Number(qhi.merchandiseCents)+Number(qhi.shippingCents)) throw new Error('HI pickup total mismatch');
+  if(Number(qhi.hawaii?.pickupPriceCents)!==Number(qhi.merchandiseCents)+Number(qhi.hawaii?.pickupFreightCents)) throw new Error('HI displayed pickup total mismatch');
   if(Number(qco.merchandiseCents)<Math.ceil(Number(battery.supplierCostCents||battery.costCents||0)*1.20) && Number(battery.supplierCostCents||battery.costCents||0)>0) throw new Error('promo floor failed known battery');
 
   const checkout=await browser.newPage({viewport:{width:1280,height:900}});
