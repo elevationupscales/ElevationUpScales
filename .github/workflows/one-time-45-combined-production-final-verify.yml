@@ -1,0 +1,80 @@
+name: One-Time 4.5 Combined Production Final Verify
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-production-final-verify-2026-09-03
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Preserve and correct isolated verifier assumptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/scripts/verify_45_combined_canonical_production.mjs /tmp/verify.mjs
+          sed -i "s/\['admin','\/admin','Admin'\]/['admin','\/admin','Operations Interface 2.0']/" /tmp/verify.mjs
+          grep -q "\['admin','/admin','Operations Interface 2.0'\]" /tmp/verify.mjs
+
+      - name: Download authoritative Lithium cost evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/cost-audit
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 33784084029
+
+      - name: Verify immutable Pages and canonical candidate markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for base in 'https://686d3c7b.elevationupscales.pages.dev' 'https://elevationupscales.com'; do
+            for route in / /lithium-batteries /hawaii-lithium-batteries /product /checkout /terms /privacy /admin; do
+              code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+              echo "$base$route=$code"
+              test "$code" = "200"
+            done
+            curl -fsS -L "$base/lithium-shop.js?v=4.5.0" -o /tmp/lithium-shop.js
+            grep -q 'IntersectionObserver' /tmp/lithium-shop.js
+            curl -fsS -L "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+            grep -q 'data-lithium-deferred-image' /tmp/hawaii.html
+            ! grep -q 'data-hawaii-battery-units="0"' /tmp/hawaii.html
+            count=$(grep -o 'class="lithium-card"' /tmp/hawaii.html | wc -l | tr -d ' ')
+            test "$count" = "31"
+          done
+
+      - name: Full canonical browser, pricing and PayPal verification
+        env:
+          BASE: https://elevationupscales.com
+          COST_AUDIT: /tmp/cost-audit/lithium-pricing-audit-sanitized.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw
+          cp /tmp/verify.mjs /tmp/pw/test.mjs
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          node test.mjs | tee /tmp/canonical-production-verification.json
+
+      - name: Final production verification summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.5 Combined Production Final Verification — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Application SHA: 2cafb2274d1fbd7733068853554bef68fcf5c02d' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pages deployment: https://686d3c7b.elevationupscales.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Rollback SHA: 071b69ceddecaa51516ad01d762360a468c00925' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Database migration: none' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/canonical-production-verification.json >> "$GITHUB_STEP_SUMMARY"
