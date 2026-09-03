@@ -1,0 +1,40 @@
+name: One-Time Commerce Pricing 2 Upstream Supplier Build
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-2-upstream-supplier-build-2026-09-03
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/commerce-pricing-supplier-catalog-2-0-2026-09-03
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply deterministic supplier metadata patch
+        shell: bash
+        run: python3 <(git show origin/runner/commerce-pricing-2-upstream-supplier-build-2026-09-03:.github/scripts/apply_cp2_upstream_supplier.py)
+      - name: Gate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/doba-csv-sync-runtime.js
+          node --check site/commerce-pricing-runtime.js
+          node --check site/admin-commerce-pricing.js
+          grep -q 'upstreamSupplier:cellBy(record,map,"Supplier"' site/doba-csv-sync-runtime.js
+          grep -q 'upstreamSupplier:row.upstreamSupplier' site/doba-csv-sync-runtime.js
+          grep -q 'source.upstreamSupplier' site/commerce-pricing-runtime.js
+          grep -q 'source_json,source_state' site/commerce-pricing-runtime.js
+          test "$(git diff --name-only | sort)" = "$(printf '%s\n' site/admin-commerce-pricing.js site/commerce-pricing-runtime.js site/doba-csv-sync-runtime.js | sort)"
+      - name: Commit and push application changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/admin-commerce-pricing.js site/commerce-pricing-runtime.js site/doba-csv-sync-runtime.js
+          git commit -m 'Preserve upstream supplier identity in Doba source metadata'
+          git push origin HEAD:work/commerce-pricing-supplier-catalog-2-0-2026-09-03
