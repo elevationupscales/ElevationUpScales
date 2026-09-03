@@ -97,18 +97,16 @@ jobs:
                   for k in ('products','items','results','catalog'):
                       if isinstance(x.get(k),list): return len(x[k])
               raise AssertionError(type(x))
-          lithium=get('/api/store-catalog?section=lithium')
-          try: rv=get('/api/store-catalog?section=rv-outdoor')
-          except Exception: rv=get('/api/store-catalog?section=rv')
+          lithium=get('/api/store/catalog?section=lithium-batteries')
+          rv=get('/api/store-catalog?section=rv-outdoor')
           featured=get('/api/store/featured')
           lc=count_payload(lithium); rc=count_payload(rv)
           assert lc==38, lc
           assert rc>=20, rc
-          if isinstance(featured,dict):
-              li=featured.get('lithium') or featured.get('lithiumProducts') or []
-              rvi=featured.get('rv') or featured.get('rvOutdoor') or featured.get('rvProducts') or []
-              assert len(li)==4, len(li)
-              assert len(rvi)==4, len(rvi)
+          li=featured.get('lithium') or featured.get('lithiumProducts') or []
+          rvi=featured.get('rv') or featured.get('rvOutdoor') or featured.get('rvProducts') or []
+          assert len(li)==4, len(li)
+          assert len(rvi)==4, len(rvi)
           print(f'LITHIUM_COUNT={lc}')
           print(f'RV_COUNT={rc}')
           print('FEATURED=4+4')
