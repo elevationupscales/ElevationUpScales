@@ -1,0 +1,57 @@
+name: One-Time 4.5 Static Hawaii Navigation Repair
+
+on:
+  push:
+    branches: [repair/4.5-production-reconciliation-2026-09-02]
+    paths: [.github/workflows/one-time-45-static-hawaii-nav-repair.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: repair/4.5-production-reconciliation-2026-09-02
+          fetch-depth: 0
+      - name: Repair static Store and RV Store Hawaii navigation
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "cc5f59fa8d7374d41d51ec56a0e91e20198cb612"
+          python - <<'PY'
+          from pathlib import Path
+          old='<a href="/hawaii-lithium-batteries"><span><strong>Hawaii Lithium Program</strong><small>Coming soon · request shipping availability</small></span></a>'
+          new='<a href="/hawaii-lithium-batteries"><span><strong>Hawaii Lithium Shipping &amp; Freight</strong><small>Hawaii consolidated freight · Alaska quote options</small></span></a>'
+          for name in ['site/store.html','site/rv-store.html']:
+              p=Path(name); s=p.read_text()
+              if s.count(old)!=1: raise SystemExit(f'{name}: expected stale dropdown count=1, got {s.count(old)}')
+              p.write_text(s.replace(old,new,1))
+          p=Path('site/rv-store.html'); s=p.read_text()
+          old2='<a href="/hawaii-lithium-batteries">Hawaii Lithium Program</a>'
+          new2='<a href="/hawaii-lithium-batteries">Hawaii Lithium Shipping &amp; Freight</a>'
+          if s.count(old2)!=1: raise SystemExit(f'RV category nav stale count={s.count(old2)}')
+          p.write_text(s.replace(old2,new2,1))
+          PY
+      - name: Validate customer-facing static repair
+        run: |
+          set -euo pipefail
+          git diff --check
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/store.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/rv-store.html
+          ! grep -q 'Hawaii Lithium Program' site/store.html
+          ! grep -q 'Hawaii Lithium Program' site/rv-store.html
+          ! grep -q 'Coming soon · request shipping availability' site/store.html
+          ! grep -q 'Coming soon · request shipping availability' site/rv-store.html
+          # Protected retail/product architecture remains untouched by this static nav patch.
+          git diff --quiet HEAD -- site/lithium-batteries.html site/hawaii-lithium-batteries.html site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js site/start-a-project.html site/solar-project.html
+      - name: Commit static repair
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/store.html site/rv-store.html
+          git commit -m 'Align static store Hawaii freight navigation'
+          git push origin HEAD:repair/4.5-production-reconciliation-2026-09-02
