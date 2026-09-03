@@ -1,0 +1,53 @@
+name: Elevation 4.5 Hotfix 2 Build
+on:
+  push:
+    branches:
+      - hotfix/4.5-hotfix2-audit-cleanup-2026-09-03
+permissions:
+  contents: write
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hotfix/4.5-hotfix2-audit-cleanup-2026-09-03
+          fetch-depth: 0
+      - name: Apply targeted hotfix
+        run: python .github/scripts/hotfix2_apply.py
+      - name: Validate source
+        run: |
+          node --check site/site-shell.js
+          node --check site/product-detail.js
+          node --check site/hawaii-lithium-program.js
+          node --check site/lithium-shop.js
+          node --check site/home-commerce.js
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse('site/sitemap.xml')
+          print('sitemap XML PASS')
+          PY
+          git diff --check
+          test -f site/assets/homepage-option-2-lithium-solar.webp
+          test -f site/assets/homepage-option-3-home-rv-lifestyle.webp
+          test "$(stat -c%s site/assets/homepage-option-2-lithium-solar.webp)" -lt 100000
+          test "$(stat -c%s site/assets/homepage-option-3-home-rv-lifestyle.webp)" -lt 100000
+          ! grep -q 'home-capabilities.js' site/site-shell.js
+          grep -q 'Hawaii Lithium Batteries' site/site-shell.js
+          grep -q 'Honolulu pickup pricing' site/site-shell.js
+          ! grep -q 'Residential lithium delivery is not currently offered' site/terms.html
+          grep -q 'PayPal order or transaction identifiers' site/privacy.html
+          ! grep -q '&ebay=' site/product-detail.js
+      - name: Commit application candidate
+        run: |
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site
+          if git diff --cached --quiet; then
+            echo 'No application changes produced' >&2
+            exit 1
+          fi
+          git commit -m 'Build Elevation 4.5 Hotfix 2 audit cleanup candidate'
+          git push origin HEAD:hotfix/4.5-hotfix2-audit-cleanup-2026-09-03
+          echo "CANDIDATE_SHA=$(git rev-parse HEAD)"
