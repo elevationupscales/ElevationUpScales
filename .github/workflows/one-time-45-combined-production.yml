@@ -1,0 +1,136 @@
+name: One-Time 4.5 Combined Exact Production
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-production-2026-09-03
+
+permissions:
+  contents: read
+  deployments: write
+  actions: read
+
+concurrency:
+  group: elevation-45-combined-exact-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Preserve isolated verifier
+        run: cp .github/scripts/verify_45_combined_canonical_production.mjs /tmp/verify_45_combined_canonical_production.mjs
+
+      - name: Download authoritative Lithium cost evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/cost-audit
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 33784084029
+
+      - name: Freeze exact approved application SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin 2cafb2274d1fbd7733068853554bef68fcf5c02d main
+          git checkout --detach 2cafb2274d1fbd7733068853554bef68fcf5c02d
+          test "$(git rev-parse HEAD)" = "2cafb2274d1fbd7733068853554bef68fcf5c02d"
+          test "$(git rev-parse origin/main)" = "071b69ceddecaa51516ad01d762360a468c00925"
+          test "$(git merge-base HEAD 071b69ceddecaa51516ad01d762360a468c00925)" = "071b69ceddecaa51516ad01d762360a468c00925"
+
+      - name: Exact production source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check 071b69ceddecaa51516ad01d762360a468c00925..HEAD
+          ! git diff --name-only 071b69ceddecaa51516ad01d762360a468c00925..HEAD | grep -q '^\.github/'
+          ! git diff --name-only 071b69ceddecaa51516ad01d762360a468c00925..HEAD | grep -Eq '(migration|commerce-schema-migrations)'
+          for f in site/promotion-runtime.js site/_worker.js site/lithium-shop.js site/product-detail.js site/store-checkout-server.js site/store-checkout.js; do node --check "$f"; done
+          test "$(git hash-object site/assets/homepage-option-2-lithium-solar.webp)" = "a46c581bb612b43b6e876b6cf3183710af198673"
+          test "$(git hash-object site/assets/homepage-option-3-home-rv-lifestyle.webp)" = "04858f98e6eb344dc922e42916b4301ba8c29ddf"
+          grep -q 'lithium-protected-floor' site/promotion-runtime.js
+          grep -q 'section==="hawaii"&&batteryUnitsPerCatalogUnit(p)<1' site/_worker.js
+          grep -q 'data-lithium-deferred-image' site/_worker.js
+          grep -q 'hawaiiMode && batteryUnitsFor(product) < 1' site/lithium-shop.js
+          grep -q 'IntersectionObserver' site/lithium-shop.js
+          grep -q '25% off eligible Elevation merchandise. Shipping is excluded.' site/checkout/index.html
+          grep -q '208-813-4998' site/checkout/index.html
+
+      - id: deploy
+        name: Deploy exact SHA to Cloudflare Pages production branch
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify immutable Pages deployment
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /lithium-batteries /hawaii-lithium-batteries /product /checkout /terms /privacy /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -fsS --retry 8 --retry-all-errors --retry-delay 2 "$base/lithium-shop.js?v=4.5.0" | grep -q 'IntersectionObserver'
+
+      - name: Wait for canonical custom domain to serve approved candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://elevationupscales.com'
+          passed=0
+          for attempt in $(seq 1 24); do
+            if curl -fsS -L --retry 2 --retry-all-errors --retry-delay 1 "$base/lithium-shop.js?v=4.5.0" -o /tmp/canonical-lithium-shop.js \
+              && grep -q 'IntersectionObserver' /tmp/canonical-lithium-shop.js \
+              && curl -fsS -L "$base/hawaii-lithium-batteries" -o /tmp/canonical-hawaii.html \
+              && grep -q 'data-lithium-deferred-image' /tmp/canonical-hawaii.html \
+              && ! grep -q 'data-hawaii-battery-units="0"' /tmp/canonical-hawaii.html; then
+              passed=1
+              break
+            fi
+            sleep 5
+          done
+          test "$passed" = "1"
+          count=$(grep -o 'class="lithium-card"' /tmp/canonical-hawaii.html | wc -l | tr -d ' ')
+          echo "canonical Hawaii cards=$count"
+          test "$count" = "31"
+
+      - name: Canonical browser, pricing and PayPal verification
+        env:
+          BASE: https://elevationupscales.com
+          COST_AUDIT: /tmp/cost-audit/lithium-pricing-audit-sanitized.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw
+          cp /tmp/verify_45_combined_canonical_production.mjs /tmp/pw/test.mjs
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          node test.mjs | tee /tmp/canonical-production-verification.json
+
+      - name: Production acceptance summary
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.5 Combined Exact Production — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Application SHA: 2cafb2274d1fbd7733068853554bef68fcf5c02d' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pre-deployment rollback SHA: 071b69ceddecaa51516ad01d762360a468c00925' >> "$GITHUB_STEP_SUMMARY"
+          echo "Pages deployment: ${DEPLOYMENT_URL}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Database migration: none' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/canonical-production-verification.json >> "$GITHUB_STEP_SUMMARY"
