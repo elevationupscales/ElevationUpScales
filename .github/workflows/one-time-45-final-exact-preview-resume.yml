@@ -1,0 +1,177 @@
+name: One-Time 4.5 Final Exact Candidate Preview Resume
+
+on:
+  push:
+    branches: [repair/4.5-production-reconciliation-2026-09-02]
+    paths: [.github/workflows/one-time-45-final-exact-preview-resume.yml]
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  final-proof:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact approved candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 687f1b7d9f24a85f3ada83df06c52edde872d8b6
+          fetch-depth: 0
+
+      - name: Verify exact candidate and production parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "687f1b7d9f24a85f3ada83df06c52edde872d8b6"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "cc5f59fa8d7374d41d51ec56a0e91e20198cb612"
+          git merge-base --is-ancestor cc5f59fa8d7374d41d51ec56a0e91e20198cb612 HEAD
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check cc5f59fa8d7374d41d51ec56a0e91e20198cb612...HEAD
+
+      - name: Verify repaired customer-facing source invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'Hawaii Lithium Shipping & Freight' site/site-shell.js
+          ! grep -q 'Hawaii Lithium Program' site/site-shell.js
+          for file in site/store.html site/rv-store.html; do
+            grep -q 'Hawaii Lithium Shipping &amp; Freight' "$file"
+            ! grep -q 'Hawaii Lithium Program' "$file"
+            ! grep -qi 'Coming soon.*shipping availability' "$file"
+          done
+          grep -q 'Lithium Shipping &amp; Freight' site/lithium-batteries.html
+          grep -q '\$99 per actual battery' site/hawaii-lithium-batteries.html
+          grep -q 'Awaiting Consolidation' site/hawaii-lithium-batteries.html
+
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'elevation-catalog' site/rv-store.js
+          ! grep -q '&ebay=' site/rv-store.js
+          ! grep -q '&ebay=' site/_worker.js
+          ! grep -q 'params.get("ebay")' site/store-checkout.js
+          ! grep -q 'raw?.ebayUrl\|raw.ebayUrl' site/store-checkout-server.js
+          ! grep -q 'fallbackCatalog' site/rv-store.js
+          grep -q 'catalogRvFallbackUrl' site/store-checkout-server.js
+
+          grep -q 'PROMOTION_START_AT="2026-09-03T06:00:00.000Z"' site/promotion-runtime.js
+          grep -q 'PROMOTION_END_AT="2026-09-08T06:00:00.000Z"' site/promotion-runtime.js
+          grep -q 'couponPercent:25' site/promotion-runtime.js
+          grep -q 'everydayMarkupPercent:35' site/promotion-runtime.js
+          grep -q 'promoMarkupPercent:60' site/promotion-runtime.js
+          grep -q 'batteryShippingCents:2799' site/promotion-runtime.js
+
+          grep -q '/api/store-catalog?section=rv-outdoor' .github/workflows/release-candidate-gate.yml
+          ! grep -q 'VERIFIED EBAY CATALOG' .github/workflows/release-candidate-gate.yml
+          ! grep -q 'fallbackCatalog' .github/workflows/release-candidate-gate.yml
+
+      - name: Deploy exact candidate to isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=final45preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify exact candidate preview
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${DEPLOYMENT_URL%/}"
+          test -n "$base"
+          echo "FINAL_PREVIEW_URL=$base"
+
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /marketplace /terms; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 -o /tmp/route.html -w '%{http_code}' "$base$route" || true)
+            echo "FINAL_PREVIEW_ROUTE ${route}=${code}"
+            test "$code" = "200"
+          done
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/site-shell.js" -o /tmp/site-shell.js
+          grep -q 'Hawaii Lithium Shipping & Freight' /tmp/site-shell.js
+          ! grep -q 'Hawaii Lithium Program' /tmp/site-shell.js
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/store" -o /tmp/store.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/store.html
+          ! grep -q 'Hawaii Lithium Program' /tmp/store.html
+          ! grep -qi 'Coming soon.*shipping availability' /tmp/store.html
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/rv-store" -o /tmp/rv.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/rv.html
+          ! grep -q 'Hawaii Lithium Program' /tmp/rv.html
+          ! grep -qi 'Coming soon.*shipping availability' /tmp/rv.html
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/rv-store.js" -o /tmp/rv-store.js
+          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
+          ! grep -q '&ebay=' /tmp/rv-store.js
+          ! grep -q 'fallbackCatalog' /tmp/rv-store.js
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          node <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('/tmp/lithium.json','utf8'));
+          const p=Array.isArray(d.products)?d.products:[];
+          console.log(`FINAL_PREVIEW_LITHIUM_COUNT=${p.length}`);
+          if(p.length!==38) throw new Error(`Expected 38 Lithium products, got ${p.length}`);
+          if(p.some(x=>!(Number(x.priceCents)>0))) throw new Error('Lithium product missing positive customer price');
+          if(p.some(x=>String(x.publishStatus||'published').toLowerCase()!=='published')) throw new Error('Non-published Lithium product exposed');
+          const first=p[0];
+          if(!first?.id) throw new Error('Missing Lithium sample id');
+          fs.writeFileSync('/tmp/lithium-id',String(first.id));
+          console.log(`FINAL_PREVIEW_LITHIUM_SAMPLE=${first.id}`);
+          console.log(`FINAL_PREVIEW_LITHIUM_SAMPLE_PRICE=${first.priceCents}`);
+          console.log(`FINAL_PREVIEW_LITHIUM_SAMPLE_SHIPPING=${first.shippingStatus||''}`);
+          NODE
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/lithium-batteries" -o /tmp/lithium.html
+          node <<'NODE'
+          const fs=require('fs'); const h=fs.readFileSync('/tmp/lithium.html','utf8');
+          const cards=(h.match(/class="lithium-card"/g)||[]).length;
+          const prerender=h.includes('data-prerendered="true"');
+          const count=((h.match(/data-lithium-count[^>]*>([^<]*)</)||[])[1]||'').trim();
+          console.log(`FINAL_PREVIEW_LITHIUM_PRERENDER=${prerender}`);
+          console.log(`FINAL_PREVIEW_LITHIUM_CARD_COUNT=${cards}`);
+          console.log(`FINAL_PREVIEW_LITHIUM_COUNT_MARKER=${count}`);
+          if(!prerender || cards!==38 || count!=='38') throw new Error('Lithium server-prerender mismatch');
+          NODE
+
+          id="$(cat /tmp/lithium-id)"
+          product_code=$(curl -sS -L --retry 8 --retry-all-errors -o /tmp/product.html -w '%{http_code}' "$base/product?id=${id}&store=lithium")
+          echo "FINAL_PREVIEW_LITHIUM_PRODUCT_DETAIL=${product_code}"
+          test "$product_code" = "200"
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q '\$99 per actual battery' /tmp/hawaii.html
+          grep -q 'Awaiting Consolidation' /tmp/hawaii.html
+          grep -qi 'warehouse.*pickup\|freight-terminal pickup' /tmp/hawaii.html
+
+          curl -fsSL --retry 8 --retry-all-errors "$base/api/store/promotion" -o /tmp/promo.json
+          node <<'NODE'
+          const fs=require('fs'); const p=JSON.parse(fs.readFileSync('/tmp/promo.json','utf8'));
+          console.log('FINAL_PREVIEW_PROMOTION='+JSON.stringify(p));
+          if(p.startAt!=='2026-09-03T06:00:00.000Z') throw new Error('Promotion start mismatch');
+          if(p.endAt!=='2026-09-08T06:00:00.000Z') throw new Error('Promotion end mismatch');
+          const now=Date.now(), start=Date.parse(p.startAt), end=Date.parse(p.endAt);
+          if(now < start && p.active!==false) throw new Error('Promotion active before authorized start');
+          if(now >= end && p.active!==false) throw new Error('Promotion active after authorized end');
+          if(now < start && p.windowState!=='scheduled') throw new Error(`Expected scheduled state before start, got ${p.windowState}`);
+          NODE
+
+      - name: Final proof receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Elevation 4.5 final exact candidate proof — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate: 687f1b7d9f24a85f3ada83df06c52edde872d8b6' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production parent: cc5f59fa8d7374d41d51ec56a0e91e20198cb612' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Lithium: 38/38 API + 38/38 server prerender PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hawaii static/runtime navigation: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RV direct checkout URL cleanup/server-authoritative fallback: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Labor Day authorized time window: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
