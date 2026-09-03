@@ -81,15 +81,16 @@ jobs:
         run: |
           set -euo pipefail
           for route in / /what-we-do /store /rv-store /lithium-batteries /hawaii-lithium-batteries /privacy /terms /start-a-project /solar-project /marketplace /make-a-listing /work-with-us; do
-            code=$(curl -L -sS -o /tmp/page -w '%{http_code}' "$PREVIEW_URL$route")
+            code=$(curl -L -sS -A 'Mozilla/5.0 Elevation-QA' -o /tmp/page -w '%{http_code}' "$PREVIEW_URL$route")
             test "$code" = 200
             echo "$route $code"
           done
           python - <<'PY'
-          import json, os, urllib.request
+          import json, os, subprocess
           base=os.environ['PREVIEW_URL']
           def get(path):
-              with urllib.request.urlopen(base+path, timeout=40) as r: return json.load(r)
+              raw=subprocess.check_output(['curl','-fsSL','-A','Mozilla/5.0 Elevation-QA',base+path], text=True)
+              return json.loads(raw)
           def count_payload(x):
               if isinstance(x,list): return len(x)
               if isinstance(x,dict):
@@ -112,8 +113,7 @@ jobs:
           print(f'RV_COUNT={rc}')
           print('FEATURED=4+4')
           PY
-          h=$(curl -L -sS "$PREVIEW_URL/hawaii-lithium-batteries")
-          # Server prerender must still expose all 38 product detail links/cards.
+          h=$(curl -L -sS -A 'Mozilla/5.0 Elevation-QA' "$PREVIEW_URL/hawaii-lithium-batteries")
           cards=$(printf '%s' "$h" | grep -o 'href="/product?id=' | wc -l | tr -d ' ')
           test "$cards" -ge 38
           echo "HAWAII_PRERENDER=$cards"
@@ -166,6 +166,7 @@ jobs:
           if(api>5) throw new Error('Hawaii API calls regressed='+api);
           const txt=(await a.page.locator('body').innerText());
           if(!txt.includes('Hawaii Lithium Batteries') || !txt.includes('$99')) throw new Error('Hawaii customer copy missing');
+          const hawaiiRequests=a.requests.length;
           await a.page.close();
           for(const path of ['/','/hawaii-lithium-batteries']){
             const m=await audit(path,true);
@@ -175,7 +176,7 @@ jobs:
           }
           console.log('HOMEPAGE_DUPLICATE=0');
           console.log('APPROVED_IMAGES=960x540 PASS');
-          console.log(`HAWAII_REQUESTS=${a.requests.length}`);
+          console.log(`HAWAII_REQUESTS=${hawaiiRequests}`);
           console.log(`HAWAII_API_CALLS=${api}`);
           console.log(`HAWAII_INDIVIDUAL_STATUS=${indiv}`);
           console.log(`HAWAII_BATCH_STATUS=${batch}`);
@@ -188,11 +189,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # This hotfix may alter public product-detail routing only; server checkout, PayPal, shipping rules and promotion authority must be untouched.
           ! git diff --name-only "$ACCEPTED_PARENT" "$CANDIDATE_SHA" | grep -Eq 'site/(store-checkout-server|shipping-rules|promotion-runtime|_worker|store-orders|paypal)'
           grep -q 'LABORDAY25' site/promotion-runtime.js
           grep -q '2799' site/promotion-runtime.js
-          grep -q '9900' site/shipping-rules-runtime.js 2>/dev/null || grep -R -q '9900' site | head -1
+          grep -R -q '9900' site
           echo 'PROTECTED_COMMERCE_SOURCE=PASS' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Final preview summary
         shell: bash
