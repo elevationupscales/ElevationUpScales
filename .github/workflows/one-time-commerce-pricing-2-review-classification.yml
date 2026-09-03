@@ -1,0 +1,53 @@
+name: One-Time Commerce Pricing 2 Review Classification
+on:
+  push:
+    branches: [runner/commerce-pricing-2-review-classification-2026-09-03]
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 0ca23957e4d5de945fba9cd3e3899f28cd84b965
+      - name: Inject temporary aggregate-only diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          anchor='    if(url.pathname==="/api/admin/commerce-pricing") return handleCommercePricingAdminApi(request,env);\n'
+          if anchor not in s: raise SystemExit('pricing route marker missing')
+          block='''    if(url.pathname==="/api/qa/review-classification-summary") {\n      const db=env?.MARKETPLACE_DB; if(!db||typeof db.prepare!=="function") return Response.json({error:"Catalog DB unavailable"},{status:503});\n      const rows=(await db.prepare(`SELECT m.publish_status,m.review_state,m.shipping_status,m.store_section FROM eus_inventory_items i LEFT JOIN eus_catalog_meta m ON m.inventory_item_id=i.id`).all()).results||[];\n      const inc=(obj,key)=>obj[key]=(obj[key]||0)+1; const out={total:rows.length,publish:{},shipping:{},sections:{},review:{blank:0,blocking:0,verification:0,operational:0,other:0}};\n      for(const row of rows){const pub=String(row.publish_status||"(blank)").trim(),ship=String(row.shipping_status||"(blank)").trim(),section=String(row.store_section||"(blank)").trim(),note=String(row.review_state||"").trim().toLowerCase(); inc(out.publish,pub);inc(out.shipping,ship);inc(out.sections,section); if(!note){out.review.blank++;continue;} if(/hold|blocked|do not publish|unavailable|zero stock|out of stock/.test(note))out.review.blocking++; else if(/review|verify|verification|confirm|pending|manual/.test(note))out.review.verification++; else if(/import|doba|supplier|catalog|source|pricing|price|shipping|route/.test(note))out.review.operational++; else out.review.other++;}\n      return Response.json(out,{headers:{"Cache-Control":"no-store"}});\n    }\n'''
+          p.write_text(s.replace(anchor,anchor+block,1))
+          PY
+          node --check site/_worker.js
+      - id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=commerce-pricing-2-review-summary
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read aggregate classification
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 8 --retry-all-errors --retry-delay 2 "${BASE%/}/api/qa/review-classification-summary" -o /tmp/review-classification.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/review-classification.json'))
+          assert d.get('total')==76,d
+          print(json.dumps(d,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: commerce-pricing-2-review-classification
+          path: /tmp/review-classification.json
+          if-no-files-found: error
