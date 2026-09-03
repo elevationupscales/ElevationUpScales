@@ -1,0 +1,206 @@
+name: One-Time Elevation 4.5 Hotfix 2 Preview
+on:
+  push:
+    branches:
+      - runner/4.5-hotfix2-preview-2026-09-03
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      CANDIDATE_SHA: f5cc4a57f07a32a1fb56c36b8529bf7c84aab742
+      ACCEPTED_PARENT: 071b69ceddecaa51516ad01d762360a468c00925
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f5cc4a57f07a32a1fb56c36b8529bf7c84aab742
+          fetch-depth: 0
+      - name: Exact source and clean release gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse HEAD^)" = "$ACCEPTED_PARENT"
+          git diff --check "$ACCEPTED_PARENT" "$CANDIDATE_SHA"
+          ! git diff --name-only "$ACCEPTED_PARENT" "$CANDIDATE_SHA" | grep -q '^\.github/'
+          ! find .github -type f -iname '*hotfix2*' -print -quit | grep -q .
+          git diff --name-only "$ACCEPTED_PARENT" "$CANDIDATE_SHA" | tee /tmp/hotfix2-files.txt
+      - name: Source invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in site/*.js; do node --check "$f" >/dev/null; done
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          root=Path('site')
+          shell=(root/'site-shell.js').read_text()
+          hawaii=(root/'hawaii-lithium-batteries.html').read_text()
+          terms=(root/'terms.html').read_text()
+          privacy=(root/'privacy.html').read_text()
+          sitemap=(root/'sitemap.xml').read_text()
+          pd=(root/'product-detail.js').read_text()
+          assert 'home-capabilities.js' not in shell
+          assert 'Hawaii Lithium Batteries' in shell
+          assert 'Honolulu pickup pricing' in shell
+          assert 'Alaska quote options' not in shell
+          assert hawaii.index('id="hawaii-products"') < hawaii.index('id="how-it-works"') < hawaii.index('id="hawaii-request"')
+          assert 'Residential lithium delivery is not currently offered' not in terms
+          assert 'additional quoted charge where available' in terms
+          assert 'PayPal order or transaction identifiers' in privacy
+          assert 'full payment-card credentials' in privacy
+          for route in ['/what-we-do','/start-a-project','/store','/rv-store','/lithium-batteries','/hawaii-lithium-batteries','/marketplace','/privacy','/terms']:
+              assert f'https://elevationupscales.com{route}' in sitemap
+          assert '/checkout' not in sitemap and '/admin' not in sitemap
+          assert '&ebay=' not in pd
+          ET.parse(root/'sitemap.xml')
+          for img in ['homepage-option-2-lithium-solar.webp','homepage-option-3-home-rv-lifestyle.webp']:
+              p=root/'assets'/img
+              assert p.exists() and p.stat().st_size < 100000
+          print('SOURCE_INVARIANTS=PASS')
+          PY
+      - name: Deploy exact candidate to isolated Cloudflare preview
+        id: deploy
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npm install --no-save wrangler@4 >/dev/null 2>&1
+          npx wrangler pages deploy site --project-name="${{ vars.CLOUDFLARE_PAGES_PROJECT }}" --branch=hotfix2-preview 2>&1 | tee /tmp/deploy.log
+          URL=$(grep -Eo 'https://[a-z0-9]+\.[a-zA-Z0-9.-]+\.pages\.dev' /tmp/deploy.log | tail -1)
+          if [ -z "$URL" ]; then URL=$(grep -Eo 'https://[^ ]+\.pages\.dev' /tmp/deploy.log | tail -1); fi
+          test -n "$URL"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "PREVIEW_URL=$URL" >> "$GITHUB_ENV"
+          echo "Preview: $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preview route and commerce runtime proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in / /what-we-do /store /rv-store /lithium-batteries /hawaii-lithium-batteries /privacy /terms /start-a-project /solar-project /marketplace /make-a-listing /work-with-us; do
+            code=$(curl -L -sS -o /tmp/page -w '%{http_code}' "$PREVIEW_URL$route")
+            test "$code" = 200
+            echo "$route $code"
+          done
+          python - <<'PY'
+          import json, os, urllib.request
+          base=os.environ['PREVIEW_URL']
+          def get(path):
+              with urllib.request.urlopen(base+path, timeout=40) as r: return json.load(r)
+          def count_payload(x):
+              if isinstance(x,list): return len(x)
+              if isinstance(x,dict):
+                  for k in ('products','items','results','catalog'):
+                      if isinstance(x.get(k),list): return len(x[k])
+              raise AssertionError(type(x))
+          lithium=get('/api/store-catalog?section=lithium')
+          try: rv=get('/api/store-catalog?section=rv-outdoor')
+          except Exception: rv=get('/api/store-catalog?section=rv')
+          featured=get('/api/store/featured')
+          lc=count_payload(lithium); rc=count_payload(rv)
+          assert lc==38, lc
+          assert rc>=20, rc
+          if isinstance(featured,dict):
+              li=featured.get('lithium') or featured.get('lithiumProducts') or []
+              rvi=featured.get('rv') or featured.get('rvOutdoor') or featured.get('rvProducts') or []
+              assert len(li)==4, len(li)
+              assert len(rvi)==4, len(rvi)
+          print(f'LITHIUM_COUNT={lc}')
+          print(f'RV_COUNT={rc}')
+          print('FEATURED=4+4')
+          PY
+          h=$(curl -L -sS "$PREVIEW_URL/hawaii-lithium-batteries")
+          # Server prerender must still expose all 38 product detail links/cards.
+          cards=$(printf '%s' "$h" | grep -o 'href="/product?id=' | wc -l | tr -d ' ')
+          test "$cards" -ge 38
+          echo "HAWAII_PRERENDER=$cards"
+      - name: Browser UX, mobile and performance proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/h2browser && cd /tmp/h2browser
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium --with-deps >/dev/null 2>&1
+          cat > verify.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const base=process.env.PREVIEW_URL;
+          const browser=await chromium.launch({headless:true});
+          async function audit(path, mobile=false){
+            const page=await browser.newPage({viewport: mobile?{width:390,height:844}:{width:1440,height:1000}});
+            const requests=[];
+            page.on('request',r=>requests.push(r.url()));
+            await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(4500);
+            return {page,requests};
+          }
+          let a=await audit('/');
+          const dup=await a.page.locator('.eus-home-capabilities,[data-eus-home-capabilities]').count();
+          if(dup!==0) throw new Error('duplicate homepage capabilities='+dup);
+          if(await a.page.locator('#services').count()===0) throw new Error('normal Services missing');
+          const shop=await a.page.locator('#shop-elevation,[data-home-commerce]').count();
+          if(shop===0) throw new Error('home commerce missing');
+          for(const sel of ['img[src*="homepage-option-2-lithium-solar.webp"]','img[src*="homepage-option-3-home-rv-lifestyle.webp"]']){
+            const el=a.page.locator(sel).first();
+            await el.scrollIntoViewIfNeeded(); await a.page.waitForTimeout(500);
+            const d=await el.evaluate(img=>({nw:img.naturalWidth,nh:img.naturalHeight,complete:img.complete}));
+            if(!d.complete || d.nw!==960 || d.nh!==540) throw new Error(sel+JSON.stringify(d));
+          }
+          await a.page.close();
+          a=await audit('/hawaii-lithium-batteries');
+          const order=await a.page.evaluate(()=>{
+            const p=document.querySelector('#hawaii-products'),h=document.querySelector('#how-it-works'),r=document.querySelector('#hawaii-request');
+            const pos=e=>[...document.querySelectorAll('body *')].indexOf(e);
+            return {p:pos(p),h:pos(h),r:pos(r)};
+          });
+          if(!(order.p>=0 && order.p<order.h && order.h<order.r)) throw new Error('Hawaii order '+JSON.stringify(order));
+          const indiv=a.requests.filter(u=>u.includes('/api/hawaii-lithium/status?')).length;
+          const batch=a.requests.filter(u=>u.includes('/api/hawaii-lithium/statuses')).length;
+          const api=a.requests.filter(u=>u.includes('/api/')).length;
+          if(indiv!==0) throw new Error('individual Hawaii status calls='+indiv);
+          if(batch>1) throw new Error('batched Hawaii status calls='+batch);
+          if(a.requests.length>28) throw new Error('Hawaii requests regressed='+a.requests.length);
+          if(api>5) throw new Error('Hawaii API calls regressed='+api);
+          const txt=(await a.page.locator('body').innerText());
+          if(!txt.includes('Hawaii Lithium Batteries') || !txt.includes('$99')) throw new Error('Hawaii customer copy missing');
+          await a.page.close();
+          for(const path of ['/','/hawaii-lithium-batteries']){
+            const m=await audit(path,true);
+            const overflow=await m.page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
+            if(overflow) throw new Error('mobile horizontal overflow '+path);
+            await m.page.close();
+          }
+          console.log('HOMEPAGE_DUPLICATE=0');
+          console.log('APPROVED_IMAGES=960x540 PASS');
+          console.log(`HAWAII_REQUESTS=${a.requests.length}`);
+          console.log(`HAWAII_API_CALLS=${api}`);
+          console.log(`HAWAII_INDIVIDUAL_STATUS=${indiv}`);
+          console.log(`HAWAII_BATCH_STATUS=${batch}`);
+          console.log('MOBILE_OVERFLOW=0');
+          await browser.close();
+          JS
+          node verify.mjs | tee /tmp/browser-proof.txt
+          cat /tmp/browser-proof.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Protected commerce regression source proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This hotfix may alter public product-detail routing only; server checkout, PayPal, shipping rules and promotion authority must be untouched.
+          ! git diff --name-only "$ACCEPTED_PARENT" "$CANDIDATE_SHA" | grep -Eq 'site/(store-checkout-server|shipping-rules|promotion-runtime|_worker|store-orders|paypal)'
+          grep -q 'LABORDAY25' site/promotion-runtime.js
+          grep -q '2799' site/promotion-runtime.js
+          grep -q '9900' site/shipping-rules-runtime.js 2>/dev/null || grep -R -q '9900' site | head -1
+          echo 'PROTECTED_COMMERCE_SOURCE=PASS' | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Final preview summary
+        shell: bash
+        run: |
+          {
+            echo "## Elevation 4.5 Hotfix 2 Exact Preview PASS"
+            echo "- Candidate: $CANDIDATE_SHA"
+            echo "- Parent: $ACCEPTED_PARENT"
+            echo "- Preview: $PREVIEW_URL"
+            echo "- Production not changed"
+          } >> "$GITHUB_STEP_SUMMARY"
