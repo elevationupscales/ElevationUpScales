@@ -1,0 +1,42 @@
+name: One-Time 4.5 Review Quote Diagnostic
+
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths:
+      - .github/workflows/one-time-45-review-quote-diagnostic.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: b16ea0e5f8587cc44f056557b144eb3d4b87be25
+      - name: Print authoritative review-required quote response
+        shell: bash
+        env:
+          PREVIEW: https://bcdc5904.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PREVIEW/api/store/catalog?section=lithium-batteries" -o /tmp/li.json
+          curl -fsSL "$PREVIEW/api/hawaii-lithium/statuses" -o /tmp/statuses.json
+          PREVIEW="$PREVIEW" node <<'NODE'
+          (async()=>{
+            const fs=require('fs');
+            const base=process.env.PREVIEW;
+            const products=JSON.parse(fs.readFileSync('/tmp/li.json','utf8')).products||[];
+            const statuses=JSON.parse(fs.readFileSync('/tmp/statuses.json','utf8')).statuses||{};
+            const p=products.find(x=>{const s=statuses[x.id]||statuses[String(x.sku||'').toLowerCase()];return s?.customerState==='review_required'});
+            if(!p) throw new Error('No review-required Lithium SKU found');
+            const response=await fetch(base+'/api/store-checkout/quote',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','Origin':base},body:JSON.stringify({source:'lithium',id:p.id,name:p.title,quantity:1,shipping:{state:'HI'}})});
+            const text=await response.text();
+            console.log('REVIEW_PRODUCT_ID='+p.id);
+            console.log('REVIEW_PRODUCT_SKU='+(p.sku||''));
+            console.log('QUOTE_HTTP='+response.status);
+            console.log('QUOTE_BODY='+text);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
