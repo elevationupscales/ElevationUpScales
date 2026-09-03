@@ -1,0 +1,137 @@
+name: One-Time 4.5 Combined Lithium Pricing Audit
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-pricing-audit-2026-09-03
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Locate production Catalog D1 and audit Lithium margin floor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN"
+          test -n "$CF_ACCOUNT"
+          auth=(-H "Authorization: Bearer $CF_TOKEN" -H 'Content-Type: application/json')
+          curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/d1/database?per_page=100" "${auth[@]}" -o /tmp/d1-list.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/d1-list.json'))
+          assert data.get('success'), data
+          with open('/tmp/d1-candidates.tsv','w') as f:
+              for row in data.get('result',[]):
+                  f.write(f"{row.get('uuid') or row.get('id','')}\t{row.get('name','')}\n")
+          PY
+          dbid=''
+          dbname=''
+          while IFS=$'\t' read -r id name; do
+            [ -n "$id" ] || continue
+            body=$(python3 - <<'PY'
+          import json
+          print(json.dumps({'sql':"SELECT name FROM sqlite_master WHERE type='table' AND name='eus_inventory_items' LIMIT 1"}))
+          PY
+          )
+            code=$(curl -sS -o /tmp/probe.json -w '%{http_code}' -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/d1/database/$id/query" "${auth[@]}" --data "$body" || true)
+            if [ "$code" = "200" ] && python3 - <<'PY'
+          import json,sys
+          try:
+              d=json.load(open('/tmp/probe.json'))
+              rows=((d.get('result') or [{}])[0].get('results') or [])
+              sys.exit(0 if any(r.get('name')=='eus_inventory_items' for r in rows) else 1)
+          except Exception:
+              sys.exit(1)
+          PY
+            then
+              dbid="$id"; dbname="$name"; break
+            fi
+          done < /tmp/d1-candidates.tsv
+          test -n "$dbid"
+          echo "Catalog database located: $dbname"
+          python3 - <<'PY' >/tmp/query.json
+          import json
+          sql='''
+          SELECT
+            i.id,
+            i.sku,
+            i.name,
+            i.supplier,
+            i.supplier_product_id,
+            i.cost_cents,
+            i.price_cents,
+            i.status,
+            m.supplier_sku,
+            m.store_section,
+            m.publish_status,
+            m.review_state,
+            m.supplier_stock,
+            (SELECT ds.base_cost_cents FROM eus_doba_source_state ds WHERE ds.catalog_product_id=i.id AND ds.source_state='CURRENT' ORDER BY ds.last_observed_at DESC LIMIT 1) AS doba_base_cost_cents,
+            (SELECT ds.export_price_cents FROM eus_doba_source_state ds WHERE ds.catalog_product_id=i.id AND ds.source_state='CURRENT' ORDER BY ds.last_observed_at DESC LIMIT 1) AS doba_export_price_cents,
+            (SELECT ds.last_observed_at FROM eus_doba_source_state ds WHERE ds.catalog_product_id=i.id AND ds.source_state='CURRENT' ORDER BY ds.last_observed_at DESC LIMIT 1) AS doba_observed_at
+          FROM eus_inventory_items i
+          JOIN eus_catalog_meta m ON m.inventory_item_id=i.id
+          WHERE lower(COALESCE(m.store_section,''))='lithium-batteries'
+          ORDER BY i.sku
+          '''
+          print(json.dumps({'sql':sql}))
+          PY
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/d1/database/$dbid/query" "${auth[@]}" --data @/tmp/query.json -o /tmp/lithium-query.json
+          python3 - <<'PY'
+          import json, math
+          d=json.load(open('/tmp/lithium-query.json'))
+          assert d.get('success'), d
+          rows=((d.get('result') or [{}])[0].get('results') or [])
+          audit=[]
+          for r in rows:
+              catalog_cost=int(r.get('cost_cents') or 0)
+              doba_cost=int(r.get('doba_base_cost_cents') or 0)
+              cost=doba_cost or catalog_cost
+              stored=int(r.get('price_cents') or 0)
+              floor=math.ceil(cost*1.60) if cost>0 else 0
+              active_list=floor if str(r.get('supplier') or '').lower()=='doba' and cost>0 else stored
+              promo=active_list-round(active_list*0.25) if active_list>0 else 0
+              required_sale=math.ceil(cost*1.20) if cost>0 else 0
+              audit.append({
+                'id':r.get('id'),'sku':r.get('sku'),'name':r.get('name'),'supplier':r.get('supplier'),
+                'catalogCostCents':catalog_cost,'dobaBaseCostCents':doba_cost,'authoritativeCostCents':cost,
+                'storedRetailCents':stored,'requiredNormalFloorCents':floor,'activePromoListCents':active_list,
+                'promoMerchandiseCents':promo,'requiredPromoFloorCents':required_sale,
+                'costSourceMismatch':bool(catalog_cost and doba_cost and abs(catalog_cost-doba_cost)>2),
+                'missingAuthoritativeCost':cost<=0,
+                'storedBelowFloor':bool(cost>0 and stored<floor),
+                'promoBelowProtectedFloor':bool(cost>0 and promo<required_sale),
+                'publishStatus':r.get('publish_status'),'reviewState':r.get('review_state'),'supplierStock':r.get('supplier_stock'),
+                'dobaObservedAt':r.get('doba_observed_at')
+              })
+          summary={
+            'count':len(audit),
+            'missingCost':sum(x['missingAuthoritativeCost'] for x in audit),
+            'storedBelowFloor':sum(x['storedBelowFloor'] for x in audit),
+            'promoBelowProtectedFloor':sum(x['promoBelowProtectedFloor'] for x in audit),
+            'costSourceMismatch':sum(x['costSourceMismatch'] for x in audit),
+          }
+          out={'summary':summary,'products':audit}
+          json.dump(out,open('/tmp/lithium-pricing-audit.json','w'),indent=2)
+          print(json.dumps(summary,indent=2))
+          print('--- PRODUCT AUDIT ---')
+          for x in audit:
+              print(f"{x['sku']} | cost={x['authoritativeCostCents']} | stored={x['storedRetailCents']} | floor={x['requiredNormalFloorCents']} | promo={x['promoMerchandiseCents']} | promoFloor={x['requiredPromoFloorCents']} | missing={x['missingAuthoritativeCost']} | below={x['storedBelowFloor']} | promoBelow={x['promoBelowProtectedFloor']}")
+          if summary['missingCost'] or summary['promoBelowProtectedFloor'] or summary['costSourceMismatch']:
+              raise SystemExit('Lithium pricing audit found unresolved authoritative-cost or protected-floor failures')
+          PY
+      - name: Upload sanitized audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lithium-pricing-audit
+          path: /tmp/lithium-pricing-audit.json
+          if-no-files-found: warn
