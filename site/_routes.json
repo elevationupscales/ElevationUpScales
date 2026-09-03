@@ -7,6 +7,8 @@
     "/checkout/*",
     "/lithium-batteries",
     "/lithium-batteries/*",
+    "/hawaii-lithium-batteries",
+    "/hawaii-lithium-batteries/*",
     "/rv-store",
     "/rv-store/*",
     "/worker-core.js",

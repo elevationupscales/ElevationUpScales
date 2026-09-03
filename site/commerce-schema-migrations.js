@@ -1,4 +1,4 @@
-export const COMMERCE_SCHEMA_VERSION = "2026.09.02.1";
+export const COMMERCE_SCHEMA_VERSION = "2026.09.03.1";
 
 const MIGRATIONS = [
   {
@@ -79,6 +79,15 @@ const MIGRATIONS = [
       `CREATE INDEX IF NOT EXISTS idx_eus_shipping_rule_events_created ON eus_shipping_rule_events(created_at DESC)`,
     ],
   },
+  {
+    id: "2026-09-03-shipping-rules-certainty-v2",
+    description: "Shipping rule operational certainty state",
+    statements: [
+      `ALTER TABLE eus_shipping_rules ADD COLUMN certainty_state TEXT NOT NULL DEFAULT 'VERIFIED / ACTIVE'`,
+      `UPDATE eus_shipping_rules SET certainty_state='REVIEW REQUIRED' WHERE region='AK'`,
+    ],
+  },
+
 ];
 
 let schemaPromise = null;

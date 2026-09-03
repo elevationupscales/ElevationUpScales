@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/site-shell.css?v=3.11.30">
   <link rel="stylesheet" href="/store-checkout.css?v=4.4.0">
   <script defer src="/site-shell.js?v=3.11.46"></script>
-  <script defer src="/store-checkout.js?v=4.5.0"></script>
+  <script defer src="/store-checkout.js?v=4.5.1"></script>
   <script defer src="/store-variant-image-enhancer.js?v=3.11.43"></script>
 <link rel="stylesheet" href="/labor-day-promo.css?v=4.4.2">
 <script defer src="/labor-day-promo.js?v=4.4.2"></script>
@@ -98,22 +98,22 @@
               <input id="checkout-phone" name="phone" type="tel" autocomplete="tel">
             </label>
 
-            <label class="eus-checkout-field-wide">
+            <label class="eus-checkout-field-wide eus-checkout-address-field">
               <span>Address</span>
               <input id="checkout-address1" name="address1" autocomplete="address-line1" required>
             </label>
 
-            <label class="eus-checkout-field-wide">
+            <label class="eus-checkout-field-wide eus-checkout-address-field">
               <span>Address 2</span>
               <input id="checkout-address2" name="address2" autocomplete="address-line2">
             </label>
 
-            <label>
+            <label class="eus-checkout-address-field">
               <span>City</span>
               <input id="checkout-city" name="city" autocomplete="address-level2" required>
             </label>
 
-            <div class="eus-checkout-row">
+            <div class="eus-checkout-row eus-checkout-address-field">
               <label>
                 <span>State</span>
                 <input id="checkout-state" name="state" maxlength="2" autocomplete="address-level1" required>
@@ -134,7 +134,7 @@
           <div class="eus-checkout-total-row"><dt>Total</dt><dd id="checkout-total">—</dd></div>
         </dl>
 
-        <section id="checkout-hawaii-freight" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">HAWAII LITHIUM SHIPPING &amp; FREIGHT</p><h3 id="checkout-hawaii-state">Freight Review Required</h3><p id="checkout-hawaii-math"></p><p><strong>Warehouse / freight-terminal pickup.</strong> Shipment timing is estimated and depends on freight coordination and product eligibility.</p><a id="checkout-hawaii-reserve" class="eus-checkout-hawaii-cta" href="/hawaii-lithium-batteries#hawaii-request">Reserve / Request Shipping Review</a></section>
+        <section id="checkout-hawaii-freight" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">HAWAII LITHIUM SHIPPING &amp; FREIGHT</p><h3 id="checkout-hawaii-state">Freight Review Required</h3><p id="checkout-hawaii-math"></p><p><strong>$99 per actual battery covers freight to the Honolulu warehouse / freight-terminal pickup location.</strong> Timing is estimated and not guaranteed.</p><p>Need delivery from the Honolulu pickup location to your home, business or another address? <strong>Additional delivery charges apply.</strong> Contact Elevation for a delivery quote: <a href="tel:+12088134998">208-813-4998</a> · <a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a>.</p><a id="checkout-hawaii-reserve" class="eus-checkout-hawaii-cta" href="/hawaii-lithium-batteries#hawaii-request">Reserve / Request Shipping Review</a></section>
 
         <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>
         <div id="checkout-paypal" class="eus-checkout-paypal" hidden></div>
@@ -142,6 +142,7 @@
         <section id="checkout-success" class="eus-checkout-success" hidden>
           <h2>Payment complete</h2>
           <p id="checkout-success-reference"></p>
+          <section id="checkout-hawaii-next" hidden><p class="eus-checkout-step">WHAT HAPPENS NEXT</p><ol><li><strong>Order Received.</strong> Elevation verifies the exact product, current inventory and freight readiness. Normally you do not need to take action.</li><li><strong>Elevation Coordinates Freight.</strong> Elevation handles the applicable supplier, documentation, consolidation and freight coordination.</li><li><strong>You Receive Updates.</strong> Updates may include Order Confirmed, Freight In Process, Shipment Scheduled, In Transit, Arrived in Honolulu and Ready for Pickup. Dates are only provided when confirmed.</li><li><strong>Pickup Information.</strong> Once ready, Elevation sends the confirmed Honolulu pickup location, address, instructions, order reference and any verified pickup requirements.</li><li><strong>Optional Address Delivery.</strong> For delivery beyond the Honolulu pickup location, contact Elevation for an additional delivery quote at 208-813-4998 or casey@elevationupscales.com.</li></ol></section>
           <a href="/store">Return to Store</a>
         </section>
       </section>

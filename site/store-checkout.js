@@ -36,6 +36,8 @@
   const hawaiiReserve = document.querySelector("#checkout-hawaii-reserve");
   const contactShippingLabel = document.querySelector("#checkout-contact-shipping-label");
   const shippingFields = document.querySelector("#checkout-shipping-fields");
+  const addressFields = [...document.querySelectorAll(".eus-checkout-address-field")];
+  const hawaiiNext = document.querySelector("#checkout-hawaii-next");
 
   let quote = null;
   let paypalButtons = null;
@@ -93,14 +95,9 @@
   const formReady = () => {
     const address = shipping();
     const buyer = customer();
-    return Boolean(
-      address.fullName &&
-      address.address1 &&
-      address.city &&
-      /^[A-Z]{2}$/.test(address.state) &&
-      /^\d{5}(?:-\d{4})?$/.test(address.postalCode) &&
-      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(buyer.email)
-    );
+    const emailReady = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(buyer.email);
+    if (quote?.hawaii?.customerState === "shipping_available") return Boolean(address.fullName && emailReady);
+    return Boolean(address.fullName && address.address1 && address.city && /^[A-Z]{2}$/.test(address.state) && /^\d{5}(?:-\d{4})?$/.test(address.postalCode) && emailReady);
   };
 
   const fallbackUrl = (body = {}) => {
@@ -175,25 +172,26 @@
     if (couponStatusEl) couponStatusEl.textContent = next.couponCode ? `${next.couponCode} applied — shipping is not discounted.` : (next.promotion?.active ? `Labor Day coupon available for eligible merchandise.` : "");
     const isHawaii = Boolean(next.hawaii);
     shippingEl.textContent = money(next.shippingCents);
-    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Hawaii Consolidated Freight" : "Shipping";
+    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Hawaii Freight — Honolulu Pickup" : "Shipping";
     totalEl.textContent = money(next.totalCents);
     if (retailerEl) retailerEl.hidden = source !== "lithium";
     if (hawaiiPanel) hawaiiPanel.hidden = !isHawaii;
-    if (contactShippingLabel) contactShippingLabel.hidden = isHawaii;
-    if (shippingFields) shippingFields.hidden = isHawaii;
+    if (contactShippingLabel) { contactShippingLabel.hidden = false; contactShippingLabel.textContent = isHawaii ? "Contact & pickup" : "Contact & shipping"; }
+    if (shippingFields) shippingFields.hidden = false;
+    addressFields.forEach((field) => { field.hidden = isHawaii; });
     if (isHawaii) {
       const batteryCount = Number(next.battery?.batteryUnitsPerItem || 1) * Number(next.quantity || 1);
       const freightRate = Number(next.hawaii?.customerFreightPerBatteryCents || next.shippingRule?.rateCents || 0);
       const customerState = String(next.hawaii?.customerState || "review_required");
       if (hawaiiStateEl) hawaiiStateEl.textContent = next.hawaii?.statusLabel || (customerState === "shipping_available" ? "Shipping Available" : customerState === "unavailable" ? "Currently Unavailable" : "Freight Review Required");
       if (hawaiiMath) {
-        if (customerState === "shipping_available") hawaiiMath.textContent = `Battery ${money(next.unitPriceCents)} × ${next.quantity}. Hawaii Freight ${money(freightRate)} × ${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} = ${money(next.shippingCents)}. Order total ${money(next.totalCents)} before any applicable tax.`;
+        if (customerState === "shipping_available") hawaiiMath.textContent = `Battery ${money(next.unitPriceCents)} × ${next.quantity}. Honolulu pickup freight ${money(freightRate)} × ${batteryCount} actual batter${batteryCount === 1 ? "y" : "ies"} = ${money(next.shippingCents)}. Order total ${money(next.totalCents)} before any applicable tax.`;
         else if (customerState === "unavailable") hawaiiMath.textContent = "This exact battery is currently unavailable for the selected Hawaii freight path. No payment will be collected.";
         else hawaiiMath.textContent = "Freight Review Required. Reserve or request shipping review before payment is treated as shipping-confirmed.";
       }
       if (shippingEl) shippingEl.textContent = customerState === "shipping_available" ? money(next.shippingCents) : (customerState === "unavailable" ? "Unavailable" : "Review required");
-      if (hawaiiReserve) hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request";
-      paypalEl.hidden = true;
+      if (hawaiiReserve) { hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request"; hawaiiReserve.hidden = customerState === "shipping_available"; hawaiiReserve.textContent = customerState === "unavailable" ? "Check Availability / Contact Elevation" : "Reserve / Request Shipping Review"; }
+      paypalEl.hidden = customerState !== "shipping_available";
     }
     setProductImage(next.productImage, productName);
 
@@ -227,7 +225,7 @@
     if (Array.isArray(body.variants) && body.variants.length && !body.variantId && variantEl.value) {
       return requestQuote();
     }
-    if (body.hawaii) { const stateValue=String(body.hawaii.customerState||"review_required"); setStatus(stateValue==="shipping_available" ? "Hawaii shipping rule loaded. Reserve the order for freight coordination before payment." : stateValue==="unavailable" ? "This battery is currently unavailable for the Hawaii freight path. No payment will be collected." : "Freight Review Required. Reserve / request shipping review before payment.", stateValue==="unavailable" ? "error" : "ready"); }
+    if (body.hawaii) { const stateValue=String(body.hawaii.customerState||"review_required"); setStatus(stateValue==="shipping_available" ? "Hawaii shipping is available. Complete your contact information and use Buy Now — Elevation handles the freight coordination." : stateValue==="unavailable" ? "This battery is currently unavailable for Hawaii shipping. No payment will be collected." : "Freight Review Required. Send a short review request and Elevation will contact you with the next step.", stateValue==="unavailable" ? "error" : "ready"); }
     else setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");
     return body;
   }
@@ -263,7 +261,7 @@
 
       onClick(_data, actions) {
         if (!formReady()) {
-          setStatus("Complete the shipping and contact information before paying.", "error");
+          setStatus(quote?.hawaii ? "Enter your name and email before paying. Elevation will send confirmed Honolulu pickup details later." : "Complete the shipping and contact information before paying.", "error");
           document.querySelector("#checkout-name")?.focus();
           return actions.reject();
         }
@@ -317,6 +315,7 @@
         successReferenceEl.textContent = window.__EUS_STORE_REFERENCE__
           ? `Order ${window.__EUS_STORE_REFERENCE__}`
           : `PayPal order ${body.id || data.orderID}`;
+        if (hawaiiNext) hawaiiNext.hidden = !(quote?.hawaii?.customerState === "shipping_available");
         successEl.hidden = false;
       },
 
@@ -360,7 +359,7 @@
       if (source === "lithium" && destinationHint === "HI") document.querySelector("#checkout-state").value = "HI";
       await requestQuote();
       if (!quote) return;
-      if (quote.hawaii) return;
+      if (quote.hawaii && quote.hawaii.customerState !== "shipping_available") return;
       if (await loadPayPal()) {
         setStatus("Secure PayPal checkout ready.", "ready");
         await renderPayPal();

@@ -452,7 +452,7 @@ async function quoteRv(raw, env) {
     couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,shippingRule,
     variantId:"",variantName:"",variants:[],physical:true,
     battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?Number(rule?.rateCents||0):0},
-    ...(hawaiiFreight?{hawaii:{customerState:hawaiiStatus?.customerState||"review_required",statusLabel:hawaiiStatus?.label||"Freight Review Required",customerFreightPerBatteryCents:Number(rule?.rateCents||9900),preferredConsolidationUnits:Number(rule?.preferredConsolidationQuantity||3),warehousePickupOnly:Boolean(rule?.pickupOnly??true),requiresReservation:true,paymentAllowed:false,timing:rule?.timingMessage||"Warehouse / freight-terminal pickup. Shipment timing is estimated and depends on freight coordination and product eligibility.",requestUrl}}:{}),
+    ...(hawaiiFreight?{hawaii:{customerState:hawaiiStatus?.customerState||"review_required",statusLabel:hawaiiStatus?.label||"Freight Review Required",customerFreightPerBatteryCents:Number(rule?.rateCents||9900),preferredConsolidationUnits:Number(rule?.preferredConsolidationQuantity||3),warehousePickupOnly:Boolean(rule?.pickupOnly??true),pickupLocationLabel:"Honolulu warehouse / freight-terminal pickup location",requiresReservation:(hawaiiStatus?.customerState||"review_required")!=="shipping_available",paymentAllowed:(hawaiiStatus?.customerState||"review_required")==="shipping_available",finalMileQuoteRequired:true,finalMileMessage:"Delivery beyond the Honolulu pickup location is an additional quoted service.",supportPhone:"208-813-4998",supportEmail:"casey@elevationupscales.com",timing:rule?.timingMessage||"Honolulu warehouse / freight-terminal pickup. Shipment timing is estimated and not guaranteed.",requestUrl}}:{}),
     doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };
 }
@@ -536,7 +536,7 @@ function buildPayPalPurchaseUnit(quote, reference, address) {
   };
   if (Number(quote.discountCents)>0) breakdown.discount={currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.discountCents)};
   const purchaseUnit={reference_id:reference,custom_id:reference,description:clean(`${quote.productName}${quote.variantName?` — ${quote.variantName}`:""}`,127),amount:{currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.totalCents),breakdown},items:[{name:clean(quote.productName,127),quantity:String(quote.quantity),unit_amount:{currency_code:DEFAULT_CURRENCY,value:centsToValue(quote.unitPriceCents)},...(quote.variantName?{description:clean(quote.variantName,127)}:{}),category:quote.physical?"PHYSICAL_GOODS":"DIGITAL_GOODS"}]};
-  if (quote.physical) purchaseUnit.shipping={name:{full_name:address.fullName},address:{address_line_1:address.address1,...(address.address2?{address_line_2:address.address2}:{}),admin_area_2:address.city,admin_area_1:address.state,postal_code:address.postalCode,country_code:address.countryCode}};
+  if (quote.physical && !(quote.hawaii?.customerState === "shipping_available" && quote.hawaii?.warehousePickupOnly)) purchaseUnit.shipping={name:{full_name:address.fullName},address:{address_line_1:address.address1,...(address.address2?{address_line_2:address.address2}:{}),admin_area_2:address.city,admin_area_1:address.state,postal_code:address.postalCode,country_code:address.countryCode}};
   return purchaseUnit;
 }
 
@@ -555,9 +555,12 @@ async function createStoreOrder(request, env) {
   if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
   const quote = await quoteStoreItem(raw, env);
   if (!quote.ok) return json(quote, quote.status || 400);
-  if (quote.hawaii?.requiresReservation) return json({error:"Hawaii lithium orders use consolidated freight reservation before payment and carrier tender.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
+  if (quote.hawaii?.customerState === "review_required") return json({error:"Freight Review Required. Elevation will verify the battery and Hawaii freight path and contact you with the next step.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
+  if (quote.hawaii?.customerState === "unavailable") return json({error:"Currently Unavailable for Hawaii Shipping",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   const address = normalizeAddress(raw?.shipping);
-  if (quote.physical && !validAddress(address)) return json({ error: "A valid U.S. shipping address is required" }, 400);
+  const hawaiiPickup = quote.hawaii?.customerState === "shipping_available" && quote.hawaii?.warehousePickupOnly;
+  if (quote.physical && !hawaiiPickup && !validAddress(address)) return json({ error: "A valid U.S. shipping address is required" }, 400);
+  if (hawaiiPickup && (!address.fullName || !validEmail(customer.email))) return json({ error: "Name and email are required for Hawaii pickup orders" }, 400);
   let db;
   try { db = await ensureCommerceSchema(env); }
   catch (error) {
@@ -575,7 +578,7 @@ async function createStoreOrder(request, env) {
       paypal: {
         experience_context: {
           user_action: "PAY_NOW",
-          shipping_preference: quote.physical ? "SET_PROVIDED_ADDRESS" : "NO_SHIPPING",
+          shipping_preference: quote.physical && !(quote.hawaii?.customerState === "shipping_available" && quote.hawaii?.warehousePickupOnly) ? "SET_PROVIDED_ADDRESS" : "NO_SHIPPING",
           brand_name: "Elevation UpScales, Inc.",
         },
       },
@@ -612,7 +615,7 @@ async function createStoreOrder(request, env) {
       quote.totalCents,
       JSON.stringify(customer),
       JSON.stringify(address),
-      JSON.stringify({...quote.doba,shippingRule:quote.shippingRule||{},promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
+      JSON.stringify({...quote.doba,shippingRule:quote.shippingRule||{},hawaii:quote.hawaii||null,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
       clean(body.id, 80),
       "",
       "created",
