@@ -18,7 +18,10 @@ try{
   const home=await browser.newPage({viewport:{width:1440,height:1000}});
   let r=await home.goto(base+'/',{waitUntil:'domcontentloaded',timeout:60000});
   if(!r?.ok()) throw new Error(`home HTTP ${r?.status()}`);
-  await home.waitForTimeout(1800);
+  const commerce=home.locator('[data-home-commerce]');
+  await commerce.waitFor({state:'attached',timeout:15000});
+  await commerce.scrollIntoViewIfNeeded();
+  await home.waitForFunction(()=>document.querySelectorAll('[data-home-products="lithium"] article').length===4&&document.querySelectorAll('[data-home-products="rv"] article').length===4,{timeout:20000});
   const featuredLithium=await home.locator('[data-home-products="lithium"] article').count();
   const featuredRv=await home.locator('[data-home-products="rv"] article').count();
   if(featuredLithium!==4||featuredRv!==4) throw new Error(`homepage featured ${featuredLithium}+${featuredRv}`);
@@ -27,7 +30,7 @@ try{
   if(!option2.ok||option2.w!==960||option2.h!==540) throw new Error(`option2 ${JSON.stringify(option2)}`);
   if(!option3.ok||option3.w!==960||option3.h!==540) throw new Error(`option3 ${JSON.stringify(option3)}`);
   const homeOverflow=await overflow(home); if(homeOverflow>2) throw new Error(`home overflow ${homeOverflow}`);
-  out.home={featuredLithium,featuredRv,option2,option3,overflow:homeOverflow};
+  out.home={featuredLithium,featuredRv,option2,option3,overflow:homeOverflow,lazyHydration:'scroll-verified'};
   await home.close();
 
   const catalog=await fetchJson(base+'/api/store/catalog?section=lithium-batteries');
