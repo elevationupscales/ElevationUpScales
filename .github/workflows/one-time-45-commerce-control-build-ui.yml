@@ -1,0 +1,38 @@
+name: One-Time 4.5 Commerce Control Build UI
+
+on:
+  push:
+    branches: [build/4.5-commerce-control-2026-09-02]
+    paths:
+      - .github/workflows/one-time-45-commerce-control-build-ui.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: build/4.5-commerce-control-2026-09-02
+          fetch-depth: 0
+      - name: Apply customer/admin UI patch
+        run: python .github/scripts/apply_45_commerce_ui.py
+      - name: Validate and commit UI patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+          grep -q 'data-home-commerce' site/index.html
+          grep -q '/api/hawaii-lithium/statuses' site/lithium-shop.js
+          ! grep -q 'fetch(`/api/hawaii-lithium/status?sku=' site/lithium-shop.js
+          grep -q 'data-shipping-rules-admin' site/admin-lithium-shipping.html
+          grep -q 'Freight Review Required' site/checkout/index.html
+          grep -q 'what-we-do' site/sitemap.xml
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site
+          git commit -m "Build 4.5 commerce customer experience and performance layer"
+          git push origin HEAD:build/4.5-commerce-control-2026-09-02
