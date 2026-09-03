@@ -1,0 +1,160 @@
+name: One-Time 4.5 Combined Final Preview
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-final-preview-2026-09-03
+
+permissions:
+  contents: read
+  actions: read
+  deployments: write
+
+jobs:
+  final-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Preserve QA scripts and freeze exact application SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/scripts/combined_preview_browser.mjs /tmp/combined_preview_browser.mjs
+          cp .github/scripts/combined_preview_validate.py /tmp/combined_preview_validate.py
+          cp .github/scripts/combined_preview_quote_check.py /tmp/combined_preview_quote_check.py
+          git fetch origin 9827aa9c2c55ffb54329dcff36fe109a04c94cff
+          git checkout --detach 9827aa9c2c55ffb54329dcff36fe109a04c94cff
+          test "$(git rev-parse HEAD)" = "9827aa9c2c55ffb54329dcff36fe109a04c94cff"
+          test "$(git merge-base HEAD 071b69ceddecaa51516ad01d762360a468c00925)" = "071b69ceddecaa51516ad01d762360a468c00925"
+      - name: Exact source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in site/promotion-runtime.js site/_worker.js site/lithium-shop.js site/product-detail.js site/store-checkout-server.js site/store-checkout.js; do node --check "$f"; done
+          git diff --check 071b69ceddecaa51516ad01d762360a468c00925..HEAD
+          test "$(git hash-object site/assets/homepage-option-2-lithium-solar.webp)" = "a46c581bb612b43b6e876b6cf3183710af198673"
+          test "$(git hash-object site/assets/homepage-option-3-home-rv-lifestyle.webp)" = "04858f98e6eb344dc922e42916b4301ba8c29ddf"
+          file site/assets/homepage-option-2-lithium-solar.webp site/assets/homepage-option-3-home-rv-lifestyle.webp | tee /tmp/image-file.txt
+          grep -c 'Web/P image' /tmp/image-file.txt | grep -q '^2$'
+          grep -q 'lithium-protected-floor' site/promotion-runtime.js
+          grep -q 'Hawaii Pickup Price' site/lithium-shop.js
+          grep -q 'program=hawaii' site/lithium-shop.js
+          grep -q 'pickupPriceCents' site/store-checkout-server.js
+          grep -q 'Hawaii Pickup Price' site/checkout/index.html
+          grep -q 'WHAT HAPPENS NEXT' site/checkout/index.html
+          grep -q '208-813-4998' site/checkout/index.html
+          grep -q 'Need delivery from our Honolulu pickup location' site/checkout/index.html
+          grep -q '25% off eligible Elevation merchandise. Shipping is excluded.' site/checkout/index.html
+          ! git diff --name-only 071b69ceddecaa51516ad01d762360a468c00925..HEAD | grep -q '^\.github/'
+      - name: Download authoritative Lithium cost audit evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/cost-audit
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 33784084029
+      - id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=combined-hotfix-final-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Runtime, Catalog and protected pricing verification
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          ua='Mozilla/5.0 ElevationPreview/4.5'
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout /product /start-a-project /solar-project /marketplace /terms /privacy /admin /admin-catalog /admin-store-orders /admin-lithium-shipping; do
+            code=$(curl -A "$ua" -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -A "$ua" -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/catalog.json
+          curl -A "$ua" -fsS "$base/api/store/featured" -o /tmp/featured.json
+          python3 /tmp/combined_preview_validate.py | tee /tmp/pricing-summary.txt
+          curl -A "$ua" -fsS "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q 'Hawaii Pickup Price' /tmp/hawaii.html
+          grep -q 'program=hawaii' /tmp/hawaii.html
+          grep -q 'data-hawaii-action' /tmp/hawaii.html
+          curl -A "$ua" -fsS "$base/api/hawaii-lithium/statuses" -o /tmp/hawaii-statuses.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/hawaii-statuses.json'))
+          assert int(d.get('customerFreightPerBatteryCents') or 0)==9900,d
+          assert d.get('pickupOnly') is True,d
+          assert isinstance(d.get('statuses'),dict) and len(d['statuses'])>0,d
+          PY
+          curl -A "$ua" -fsS "$base/terms" -o /tmp/terms.html
+          curl -A "$ua" -fsS "$base/privacy" -o /tmp/privacy.html
+          curl -A "$ua" -fsS "$base/sitemap.xml" -o /tmp/sitemap.xml
+          grep -qi 'Honolulu' /tmp/terms.html
+          grep -qi 'commerce\|order\|payment' /tmp/privacy.html
+          grep -q '<loc>https://elevationupscales.com/hawaii-lithium-batteries</loc>' /tmp/sitemap.xml
+      - name: Authoritative checkout math and Hawaii payment boundary
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          python3 - <<'PY' >/tmp/quote-lower48-payload.json
+          import json
+          p=json.load(open('/tmp/battery.json'))
+          print(json.dumps({'source':'lithium','id':p['id'],'name':p.get('title','Lithium Battery'),'quantity':1,'couponCode':'LABORDAY25','shipping':{'state':'CO'}}))
+          PY
+          python3 - <<'PY' >/tmp/quote-hawaii-payload.json
+          import json
+          p=json.load(open('/tmp/battery.json'))
+          print(json.dumps({'source':'lithium','id':p['id'],'name':p.get('title','Lithium Battery'),'quantity':1,'couponCode':'LABORDAY25','shipping':{'state':'HI'}}))
+          PY
+          curl -sS -A 'Mozilla/5.0 ElevationPreview/4.5' -H "Origin: $base" -H 'Content-Type: application/json' -X POST "$base/api/store-checkout/quote" --data @/tmp/quote-lower48-payload.json -o /tmp/quote-lower48.json
+          curl -sS -A 'Mozilla/5.0 ElevationPreview/4.5' -H "Origin: $base" -H 'Content-Type: application/json' -X POST "$base/api/store-checkout/quote" --data @/tmp/quote-hawaii-payload.json -o /tmp/quote-hawaii.json
+          python3 /tmp/combined_preview_quote_check.py | tee /tmp/quote-summary.txt
+          state=$(python3 - <<'PY'
+          import json
+          print((json.load(open('/tmp/quote-hawaii.json')).get('hawaii') or {}).get('customerState',''))
+          PY
+          )
+          if [ "$state" != "shipping_available" ]; then
+            python3 - <<'PY' >/tmp/order-hi.json
+          import json
+          q=json.load(open('/tmp/quote-hawaii-payload.json'))
+          q['customer']={'email':'qa-preview@example.com','phone':''}
+          q['shipping']={'fullName':'QA Preview','address1':'','address2':'','city':'','state':'HI','postalCode':'','countryCode':'US'}
+          print(json.dumps(q))
+          PY
+            code=$(curl -sS -A 'Mozilla/5.0 ElevationPreview/4.5' -H "Origin: $base" -H 'Content-Type: application/json' -X POST "$base/api/store-checkout/orders" --data @/tmp/order-hi.json -o /tmp/order-hi-response.json -w '%{http_code}')
+            echo "Hawaii review/unavailable order create=$code"
+            test "$code" = "409"
+          fi
+      - name: Browser, mobile, image decode and performance verification
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw
+          cp /tmp/combined_preview_browser.mjs /tmp/pw/test.mjs
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          node test.mjs | tee /tmp/browser-summary.json
+      - name: Final exact preview summary
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '### Elevation 4.5 Combined Hotfix Preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Application SHA: 9827aa9c2c55ffb54329dcff36fe109a04c94cff' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${BASE}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production unchanged: 071b69ceddecaa51516ad01d762360a468c00925' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/pricing-summary.txt >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/quote-summary.txt >> "$GITHUB_STEP_SUMMARY"
