@@ -140,6 +140,10 @@ jobs:
           ! grep -q '&ebay=' site/rv-store.js
           ! grep -q 'fallbackCatalog' site/rv-store.js
           ! grep -q 'rv-store-hero__media' site/rv-store.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/store.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/rv-store.html
+          ! grep -q 'Hawaii Lithium Program' site/store.html
+          ! grep -q 'Hawaii Lithium Program' site/rv-store.html
 
           # Inventory foundation remains protected and operationally separate.
           test -f site/admin-inventory.html
@@ -202,8 +206,16 @@ jobs:
 
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-config.js" | grep -q 'store-image-quality.js?v=3.11.41'
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-image-quality.js" | grep -q 'TARGET_WIDTH = 1920'
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store" | grep -q 'Apparel Store'
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/rv-store" | grep -q 'VERIFIED EBAY CATALOG'
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store" -o /tmp/store.html
+          grep -q 'Apparel Store' /tmp/store.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/store.html
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/rv-store" -o /tmp/rv-store.html
+          grep -Eq 'RV &amp; OUTDOOR STORE|RV & OUTDOOR STORE' /tmp/rv-store.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/rv-store.html
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/rv-store.js" -o /tmp/rv-store.js
+          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
+          ! grep -q '&ebay=' /tmp/rv-store.js
+          ! grep -q 'fallbackCatalog' /tmp/rv-store.js
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/" | grep -q 'Start a Project'
 
       - name: Record release-candidate receipt
