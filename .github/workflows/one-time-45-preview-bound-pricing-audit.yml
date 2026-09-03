@@ -1,0 +1,80 @@
+name: One-Time 4.5 Preview-Bound Lithium Pricing Audit
+
+on:
+  push:
+    branches:
+      - runner/4.5-combined-pricing-audit-2026-09-03
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: f5cc4a57f07a32a1fb56c36b8529bf7c84aab742
+      - name: Inject temporary read-only pricing diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          token=$(openssl rand -hex 24)
+          echo "::add-mask::$token"
+          echo "AUDIT_TOKEN=$token" >> "$GITHUB_ENV"
+          AUDIT_TOKEN="$token" python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          marker='    const url = new URL(request.url);\n'
+          assert marker in s
+          token=os.environ['AUDIT_TOKEN']
+          block=f'''    const url = new URL(request.url);\n    if (url.pathname === "/api/qa/lithium-pricing-audit") {{\n      if (request.headers.get("X-EUS-QA-Token") !== "{token}") return new Response("Not found", {{status:404,headers:{{"Cache-Control":"no-store"}}}});\n      const db=env?.MARKETPLACE_DB;\n      if(!db||typeof db.prepare!=="function") return Response.json({{error:"Catalog DB unavailable"}},{{status:503,headers:{{"Cache-Control":"no-store"}}}});\n      const sql=`SELECT i.id,i.sku,i.name,i.supplier,i.supplier_product_id,i.cost_cents,i.price_cents,m.supplier_sku,m.publish_status,m.review_state,m.supplier_stock,(SELECT ds.base_cost_cents FROM eus_doba_source_state ds WHERE ds.catalog_product_id=i.id AND ds.source_state='CURRENT' ORDER BY ds.last_observed_at DESC LIMIT 1) AS doba_base_cost_cents,(SELECT ds.last_observed_at FROM eus_doba_source_state ds WHERE ds.catalog_product_id=i.id AND ds.source_state='CURRENT' ORDER BY ds.last_observed_at DESC LIMIT 1) AS doba_observed_at FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id WHERE lower(COALESCE(m.store_section,''))='lithium-batteries' AND lower(COALESCE(m.publish_status,''))='published' AND i.price_cents>0 AND (m.supplier_stock IS NULL OR m.supplier_stock>0) ORDER BY i.sku`;\n      const result=await db.prepare(sql).all();\n      const rows=(result?.results||[]).map((r)=>{{const catalogCost=Number(r.cost_cents||0),dobaCost=Number(r.doba_base_cost_cents||0),cost=dobaCost||catalogCost,stored=Number(r.price_cents||0),floor=cost>0?Math.ceil(cost*1.60):0,list=(String(r.supplier||"").toLowerCase()==="doba"&&cost>0)?Math.round(cost*1.60):stored,promo=list>0?list-Math.round(list*0.25):0,promoFloor=cost>0?Math.ceil(cost*1.20):0;return{{id:r.id,sku:r.sku,name:r.name,supplier:r.supplier,catalogCostCents:catalogCost,dobaBaseCostCents:dobaCost,authoritativeCostCents:cost,storedRetailCents:stored,requiredNormalFloorCents:floor,activePromoListCents:list,promoMerchandiseCents:promo,requiredPromoFloorCents:promoFloor,costSourceMismatch:Boolean(catalogCost&&dobaCost&&Math.abs(catalogCost-dobaCost)>2),missingAuthoritativeCost:cost<=0,storedBelowFloor:Boolean(cost>0&&stored<floor),promoBelowProtectedFloor:Boolean(cost>0&&promo<promoFloor),publishStatus:r.publish_status,reviewState:r.review_state,supplierStock:r.supplier_stock,dobaObservedAt:r.doba_observed_at}};}});\n      return Response.json({{count:rows.length,rows}},{{headers:{{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}}}});\n    }}\n'''
+          p.write_text(s.replace(marker,block,1))
+          PY
+          node --check site/_worker.js
+      - id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=qa-pricing-audit
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Query bound Catalog and calculate protected-floor audit
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsS --retry 8 --retry-all-errors --retry-delay 2 -H "X-EUS-QA-Token: $AUDIT_TOKEN" "$base/api/qa/lithium-pricing-audit" -o /tmp/lithium-pricing-audit.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/lithium-pricing-audit.json'))
+          rows=d.get('rows') or []
+          summary={
+            'count':len(rows),
+            'missingCost':sum(bool(x.get('missingAuthoritativeCost')) for x in rows),
+            'storedBelowFloor':sum(bool(x.get('storedBelowFloor')) for x in rows),
+            'promoBelowProtectedFloor':sum(bool(x.get('promoBelowProtectedFloor')) for x in rows),
+            'costSourceMismatch':sum(bool(x.get('costSourceMismatch')) for x in rows),
+          }
+          json.dump({'summary':summary,'products':rows},open('/tmp/lithium-pricing-audit-sanitized.json','w'),indent=2)
+          print(json.dumps(summary,indent=2))
+          for x in rows:
+              if x.get('missingAuthoritativeCost') or x.get('promoBelowProtectedFloor') or x.get('costSourceMismatch') or x.get('storedBelowFloor'):
+                  print(f"AUDIT_FLAG {x.get('sku')} stored={x.get('storedRetailCents')} floor={x.get('requiredNormalFloorCents')} promo={x.get('promoMerchandiseCents')} promoFloor={x.get('requiredPromoFloorCents')} missing={x.get('missingAuthoritativeCost')} mismatch={x.get('costSourceMismatch')}")
+          if len(rows)==0:
+              raise SystemExit('No published Lithium products returned')
+          if summary['missingCost'] or summary['promoBelowProtectedFloor'] or summary['costSourceMismatch']:
+              raise SystemExit('Unresolved Lithium protected-floor audit failures')
+          PY
+      - name: Upload pricing audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lithium-pricing-audit-bound-preview
+          path: /tmp/lithium-pricing-audit-sanitized.json
+          if-no-files-found: warn
