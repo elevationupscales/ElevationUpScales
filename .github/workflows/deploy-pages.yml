@@ -61,7 +61,7 @@ jobs:
           grep -q '/sync-admin-runtime.js' site/_routes.json
           grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
           grep -q 'fallbackCatalog' site/rv-store.js
-          grep -q 'Hawaii Lithium Program' site/hawaii-lithium-batteries.html
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/hawaii-lithium-batteries.html
           grep -q 'Secure checkout' site/checkout/index.html
           grep -q 'Stage 1 of 7' site/solar-project.html
           grep -q '208-813-4998' site/index.html
