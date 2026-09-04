@@ -1,0 +1,95 @@
+name: One-Time CP2 Import Prep Leakcheck
+on:
+  push:
+    branches:
+      - runner/cp2-import-prep-leakcheck-2026-09-03
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 5c16949b8722d2eda64bf1918de66cd32a65be88
+          fetch-depth: 0
+      - name: Exact control-state gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "5c16949b8722d2eda64bf1918de66cd32a65be88"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          git merge-base --is-ancestor 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf HEAD
+          git show origin/main:release-receipts/ELEVATION_4.5_COMBINED_FINAL_COPY_PRODUCTION_RECEIPT_2026-09-03.md | grep -q 'Final deployed application SHA: `31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf`'
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+          ! grep -q '\.run(' site/commerce-pricing-runtime.js
+      - name: Deploy exact candidate
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=cp2ipleak
+      - name: Scan public routes APIs and direct modules
+        env:
+          BASE: https://cp2ipleak.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          mkdir -p /tmp/public-scan
+          routes=(
+            "/" "/store" "/rv-store" "/lithium-batteries" "/hawaii-lithium-batteries" "/product" "/checkout"
+            "/api/store/catalog?section=lithium-batteries" "/api/store-catalog?section=rv-outdoor" "/api/store/featured" "/api/store/promotion" "/api/shipping-rules"
+          )
+          i=0
+          for route in "${routes[@]}"; do
+            out="/tmp/public-scan/r${i}.txt"
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 -o "$out" -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+            i=$((i+1))
+          done
+          for path in commerce-pricing-runtime.js doba-csv-sync-runtime.js catalog-admin-runtime.js; do
+            code=$(curl -sS -L -o "/tmp/public-scan/module-$path" -w '%{http_code}' "$base/$path" || true)
+            echo "/$path=$code"
+          done
+          code=$(curl -sS -o /tmp/admin-unauth.json -w '%{http_code}' "$base/api/admin/commerce-pricing")
+          echo "/api/admin/commerce-pricing=$code"
+          test "$code" = "401"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re,json
+          patterns=[
+            r'authoritativeCostCents',r'authoritative_cost',r'recommendedRetailCents',r'recommended_retail',
+            r'protectedNormalFloorCents',r'protectedPromoFloorCents',r'merchandiseMargin',r'sourceSnapshot',
+            r'supplierIdentity',r'upstreamSupplier',r'catalogCostCents',r'costEvidence',r'source_refresh_required',
+            r'reconciliationSummary',r'lithiumReconciliation',r'listGrossCents',r'promoGrossCents'
+          ]
+          leaks=[]
+          for p in Path('/tmp/public-scan').iterdir():
+            text=p.read_text(errors='ignore')
+            for pat in patterns:
+              if re.search(pat,text,re.I): leaks.append({'response':p.name,'pattern':pat})
+          print(json.dumps({'exposures':leaks},indent=2))
+          if leaks: raise SystemExit('INTERNAL_DATA_EXPOSURE')
+          PY
+      - name: Frozen commerce regression
+        env:
+          BASE: https://cp2ipleak.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsS "$BASE/api/shipping-rules" -o /tmp/shipping.json
+          curl -fsS "$BASE/api/store/promotion" -o /tmp/promo.json
+          python3 - <<'PY'
+          import json
+          s=json.load(open('/tmp/shipping.json')); p=json.load(open('/tmp/promo.json'))
+          sr=json.dumps(s); pr=json.dumps(p)
+          assert '2799' in sr and '9900' in sr, s
+          assert 'LABORDAY25' in pr and '25' in pr, p
+          assert 'shippingDiscounted' not in pr or 'false' in pr.lower(), p
+          PY
+      - name: Summary
+        run: |
+          echo '### CP2 public-data boundary PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '0 internal-pricing/supplier-data exposures in required public routes/APIs/direct-module checks.' >> "$GITHUB_STEP_SUMMARY"
