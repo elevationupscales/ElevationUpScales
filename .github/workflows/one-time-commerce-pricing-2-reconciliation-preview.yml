@@ -30,7 +30,7 @@ jobs:
           ! grep -q '\.run(' site/commerce-pricing-runtime.js
           grep -q 'HUMAN REVIEW GATE' site/admin-commerce-pricing.html
           grep -q 'Reconciliation Action / Reason' site/admin-commerce-pricing.html
-          grep -q 'upstreamSupplier' site/doba-csv-sync.js
+          grep -q 'upstreamSupplier' site/doba-csv-sync-runtime.js
       - name: Deploy exact candidate preview
         uses: cloudflare/wrangler-action@v4
         with:
