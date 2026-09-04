@@ -55,6 +55,8 @@ export default {
       "/worker-core.js",
       "/commerce-pricing-runtime.js",
       "/catalog-admin-runtime.js",
+      "/catalog-admin-server.js",
+      "/commerce-schema-migrations.js",
       "/doba-csv-sync-runtime.js",
       "/promotion-runtime.js",
       "/shipping-rules-runtime.js",
