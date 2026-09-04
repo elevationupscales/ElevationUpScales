@@ -1,0 +1,179 @@
+name: SOK 4.6 Pre-Purchase Backorder Finalize V3
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-prepurchase-finalize-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Load runner patch helper
+        uses: actions/checkout@v6
+        with:
+          ref: runner/sok-4-6-prepurchase-finalize-2026-09-04
+          fetch-depth: 1
+      - name: Preserve and repair helper matcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp release-tools/sok-4-6-prepurchase-finalize.py /tmp/sok-finalize.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/sok-finalize.py')
+          s=p.read_text()
+          old="pattern = r'async function patchAvailability\\(request,env,sku,admin\\)\\{.*?\\n\\}\\n\\nexport async function handleSokAvailabilityPublicApi'"
+          new="pattern = r'async function patchAvailability\\(request,env,sku,admin\\)\\{.*?\\}\\n\\nexport async function handleSokAvailabilityPublicApi'"
+          if s.count(old)!=1:
+              raise SystemExit(f'helper matcher marker count={s.count(old)}')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Check out protected production main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          clean: true
+      - name: Reconcile SOK work and apply final patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'b6e33ba2e5b9f1ce354907ea4f98534e61407f51'
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git fetch origin work/sok-4-6-prepurchase-backorder-2026-09-04
+          git switch -c release/sok-4-6-prepurchase-backorder-2026-09-04-v3
+          git cherry-pick 493e89e1d0fb5af408767995d551a459b6940dec d4ded90291c138c2a35342c9103bb9a11544f84d 75c651d5ec4075a24a472d790679bfac7d4888e3 957dc7542545517d90d2443d73a3b0cf86a0c841 943c5c1157c808e83dd9db0cbcfb318e40f987cd 4283154cfdd52b7fe1ccd4d6c70b3de5260401a6
+          python3 /tmp/sok-finalize.py
+          git diff --check
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+      - name: Run release acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          checks=(
+            "grep -Fq \"'NOT CONFIRMED',?,?,?,?,?,?,?,?,?,?,?,?,'SOP REQUIRED'\" site/sok-operations-runtime.js"
+            "grep -Fq 'public_purchase_mode' site/sok-availability-runtime.js"
+            "grep -Fq 'PURCHASE_OPTIONS' site/sok-availability-runtime.js"
+            "grep -Fq 'See Purchase Options' site/sok-availability-runtime.js"
+            "grep -Fq 'Available on Backorder' site/sok-availability-runtime.js"
+            "grep -Fq 'Pre-Purchase' site/sok-availability-runtime.js"
+            "grep -Fq 'SK12V100PC' site/sok-availability-runtime.js"
+            "grep -Fq 'SK48V100N' site/sok-availability-runtime.js"
+            "grep -Fq 'pricingMode:\"sok-map\"' site/sok-availability-runtime.js"
+            "grep -Fq 'AUTHORIZED SOK ENERGY DEALER' site/lithium-batteries.html"
+            "grep -Fq 'Email Us About This Product' site/sok-order.html"
+            "grep -Fq 'Request Commercial Pricing' site/sok-order.html"
+            "grep -Fq 'Check Hawaii Availability' site/sok-order.html"
+            "grep -Fq 'HAWAII_OPERATIONAL_MAX_QTY = 3' site/sok-operations-runtime.js"
+            "! grep -R -E '<img[^>]+(us\\.sokbattery\\.com|sokbattery\\.com)' site --include='*.html' --include='*.js'"
+          )
+          n=0
+          for c in "${checks[@]}"; do bash -c "$c"; n=$((n+1)); echo "PASS $n/15"; done
+          grep -Fq 'if(purchaseMode!=="DIRECT_CHECKOUT") paymentEligible=false' site/sok-availability-runtime.js
+          grep -Fq 'if (quote.availability?.paymentEligible === false)' site/store-checkout-server.js
+          ! grep -E 'primaryImage:"https?://|images:\["https?://' site/sok-availability-runtime.js
+      - name: Commit and push RC
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add site coordination/decisions/DEC-008-sok-authorized-dealer-catalog-and-purchase-modes.md
+          git commit -m 'Finalize SOK catalog purchase options and backorder flow'
+          sha=$(git rev-parse HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          git push --force origin HEAD:refs/heads/release/sok-4-6-prepurchase-backorder-2026-09-04
+      - name: Deploy isolated RC preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-final
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify live RC
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"; echo "RC=$base"
+          for route in / /lithium-batteries /hawaii-lithium-batteries /sok-order.html /checkout/ /rv-store /marketplace /start-a-project /solar-project /admin-sok; do code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/body -w '%{http_code}' "$base$route"); test "$code" = 200 || { echo "$route=$code"; cat /tmp/body; exit 1; }; done
+          curl -sS -L "$base/api/sok/catalog" -o /tmp/sok.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/sok.json')); rows=d.get('products') or d.get('items') or []
+          assert len(rows)==2,d
+          by={r['sku']:r for r in rows}; assert {'SK12V100PC','SK48V100N'}<=set(by),by
+          assert by['SK12V100PC']['availabilityMode']=='available'; assert by['SK48V100N']['availabilityMode']=='prepurchase'
+          for r in rows:
+              assert r['publicPurchaseMode']=='PURCHASE_OPTIONS',r
+              assert r['commerceCta']=='See Purchase Options',r
+              assert r['paymentEligible'] is False,r
+              assert r['purchaseUrl'].startswith('/sok-order.html'),r
+              assert r['hawaiiStatus']=='freight_review_required',r
+              assert r['promotion']['eligible'] is False and r['promotion']['pricingMode']=='sok-map',r
+          raw=open('/tmp/sok.json').read().lower()
+          for x in ['suppliercost','supplierinventory','sourcewarehouse','dropshipcost','landedcost','margin','us.sokbattery.com']: assert x not in raw,x
+          print('SOK catalog PASS')
+          PY
+          curl -sS -L "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          python3 -c 'import json; d=json.load(open("/tmp/lithium.json")); s={str(r.get("sku","")).upper() for r in d.get("products",[])}; assert {"SK12V100PC","SK48V100N"}<=s,s'
+          curl -sS -L "$base/lithium-batteries" -o /tmp/lithium.html
+          grep -Fq 'AUTHORIZED SOK ENERGY DEALER' /tmp/lithium.html; grep -Fq 'SK12V100PC' /tmp/lithium.html; grep -Fq 'SK48V100N' /tmp/lithium.html; grep -Fq 'See Purchase Options' /tmp/lithium.html
+          curl -sS -L "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -Fq 'SK12V100PC' /tmp/hawaii.html; grep -Fq 'SK48V100N' /tmp/hawaii.html; grep -Fq 'Freight Review Required' /tmp/hawaii.html; ! grep -qi KINGBOSS /tmp/hawaii.html; ! grep -q '\$418' /tmp/hawaii.html; ! grep -q '\$1,298' /tmp/hawaii.html
+          quote(){ curl -sS -o "$2" -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d "$1" "$base/api/store-checkout/quote"; }
+          code=$(quote '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"CO"}}' /tmp/q12); test "$code" = 200 || { cat /tmp/q12; exit 1; }
+          code=$(quote '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"CO"}}' /tmp/q48); test "$code" = 200 || { cat /tmp/q48; exit 1; }
+          python3 -c 'import json; a=json.load(open("/tmp/q12")); b=json.load(open("/tmp/q48")); assert a["unitPriceCents"]==31900 and b["unitPriceCents"]==119900; assert all(q["availability"]["purchaseMode"]=="PURCHASE_OPTIONS" and q["availability"]["paymentEligible"] is False for q in [a,b])'
+          code=$(quote '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"couponCode":"LABORDAY25","shipping":{"state":"CO"}}' /tmp/promo); test "$code" = 409 || { cat /tmp/promo; exit 1; }
+          code=$(quote '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"HI"}}' /tmp/hi1); test "$code" = 409; grep -qi 'Freight Review Required' /tmp/hi1
+          code=$(quote '{"source":"lithium","id":"sok-sk48v100n","quantity":4,"shipping":{"state":"HI"}}' /tmp/hi4); test "$code" = 409; grep -qi 'Commercial Quantity' /tmp/hi4
+          code=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base/api/admin/sok-availability"); test "$code" = 401
+          for p in /sok-availability-runtime.js /sok-operations-runtime.js; do code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base$p"); test "$code" = 404; done
+      - name: Promote greenlit candidate to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ steps.candidate.outputs.sha }}"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = 'b6e33ba2e5b9f1ce354907ea4f98534e61407f51'
+          git merge-base --is-ancestor origin/main HEAD
+          git push origin HEAD:main
+      - name: Deploy production
+        id: prod
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify production and record receipt
+        shell: bash
+        env:
+          APP_SHA: ${{ steps.candidate.outputs.sha }}
+          PREVIEW: ${{ steps.preview.outputs.deployment-url }}
+          IMMUTABLE: ${{ steps.prod.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          for base in "${IMMUTABLE%/}" https://elevationupscales.com; do
+            for route in / /lithium-batteries /hawaii-lithium-batteries /sok-order.html /checkout/ /rv-store /marketplace /start-a-project /solar-project /admin-sok; do code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 3 -o /tmp/body -w '%{http_code}' "$base$route"); test "$code" = 200 || { echo "$base$route=$code"; exit 1; }; done
+            curl -sS -L "$base/api/sok/catalog" -o /tmp/prod.json
+            python3 -c 'import json; r=(json.load(open("/tmp/prod.json")).get("products") or []); assert len(r)==2; assert all(x["publicPurchaseMode"]=="PURCHASE_OPTIONS" and x["paymentEligible"] is False for x in r)'
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base/sok-operations-runtime.js"); test "$code" = 404
+            code=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base/api/admin/sok-availability"); test "$code" = 401
+          done
+          mkdir -p release-receipts
+          printf '%s\n' '# SOK 4.6 Pre-Purchase / Backorder Production Receipt' '' '- Production parent: b6e33ba2e5b9f1ce354907ea4f98534e61407f51' "- Application SHA: ${APP_SHA}" "- RC preview: ${PREVIEW}" "- Immutable production: ${IMMUTABLE}" '- Canonical: https://elevationupscales.com' '- Acceptance: 15/15 static + JS syntax + live RC + production PASS' '- Public products: SK12V100PC, SK48V100N' '- Purchase mode: PURCHASE_OPTIONS' '- SK12: Available; SK48: Pre-Purchase' '- Payment: blocked until DIRECT_CHECKOUT plus all other gates pass' '- Hawaii: 1-3 freight review; 4+ commercial freight review' '- MAP: LABORDAY25 excluded' '- Carrier acceptance: NOT PROVEN' '- Economics: NOT PROVEN' '- Supplier/internal data boundary: PASS' '- SOK media: no unverified hotlinks or speculative imagery introduced' > release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md
+          git add release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record SOK 4.6 pre-purchase backorder production receipt [release-generated]'
+          git push origin HEAD:main
+          git push origin "${APP_SHA}:refs/heads/baseline-2026-09-04-sok-4-6-prepurchase-backorder-production"
+          echo "APP_SHA=$APP_SHA"; echo "RECEIPT_SHA=$(git rev-parse HEAD)"; echo "PREVIEW=$PREVIEW"; echo "IMMUTABLE=$IMMUTABLE"
