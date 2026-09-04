@@ -1,0 +1,28 @@
+name: SOK 4.6 Pre-Purchase Live Diagnostic
+on:
+  push:
+    branches:
+      - runner/sok-4-6-prepurchase-live-diagnostic-2026-09-04
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect preview APIs
+        shell: bash
+        run: |
+          set -u
+          base='https://0f22c981.elevationupscales.pages.dev'
+          for url in '/api/sok/catalog' '/api/store/catalog?section=lithium-batteries' '/hawaii-lithium-batteries'; do
+            echo "===== $url ====="
+            code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 2 -o /tmp/body -w '%{http_code}' "$base$url" || true)
+            echo "HTTP=$code"
+            cat /tmp/body
+            echo
+          done
+          echo '===== SK12 CO quote ====='
+          curl -sS -i -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true
+          echo
+          echo '===== SK48 CO quote ====='
+          curl -sS -i -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true
