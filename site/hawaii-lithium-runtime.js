@@ -1,4 +1,5 @@
 import { resolveShippingRule } from "./shipping-rules-runtime.js";
+import { resolveSokHawaiiCustomerStatus, HAWAII_OPERATIONAL_MAX_QTY } from "./sok-operations-runtime.js";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const REQUEST_STATES = new Set(["NEW","REVIEWING","PRODUCT MATCHED","SHIPPING RESEARCH","QUOTE READY","CUSTOMER CONTACTED","CLOSED","HOLD","CANCELLED"]);
 const DOC_STATES = new Set(["UNKNOWN","REQUESTED","RECEIVED","VERIFIED","EXPIRED / RECHECK","RECHECK REQUIRED","NOT APPLICABLE"]);
@@ -305,12 +306,16 @@ async function publicRequest(request, env) {
   const raw = await readBody(request);
   const name = clean(raw.name,120), email=clean(raw.email,180).toLowerCase(), phone=clean(raw.phone,40), zip=clean(raw.hawaiiZip||raw.zip,10);
   const island=ISLANDS.has(clean(raw.island,80))?clean(raw.island,80):"Hawaii — General"; const intendedUse=USES.has(clean(raw.intendedUse,80))?clean(raw.intendedUse,80):"Other";
-  const quantity=Math.min(100,Math.max(1,int(raw.quantity,1))); const consent=boolInt(raw.consent);
+  const quantity=Math.min(100,Math.max(1,int(raw.quantity,1))); const commercialQuantity=quantity>HAWAII_OPERATIONAL_MAX_QTY; const consent=boolInt(raw.consent);
   if(!name)return json({error:"Name is required"},400); if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return json({error:"A valid email is required"},400);
   if(!/^\d{5}(?:-\d{4})?$/.test(zip))return json({error:"A valid Hawaii ZIP code is required"},400); if(!consent)return json({error:"Contact consent is required"},400);
   const db=await ensureSchema(env); const created=now(); const requestId=id("HI-REQ");
   await db.prepare(`INSERT INTO eus_hawaii_lithium_requests (id,name,email,phone,hawaii_zip,island,product_interest,quantity,intended_use,notes,consent,state,reservation_date,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,'NEW',?,?,?)`)
     .bind(requestId,name,email,phone,zip,island,clean(raw.productInterest,240),quantity,intendedUse,clean(raw.notes,3000),consent,created,created,created).run();
+  if(commercialQuantity){
+    await db.prepare("UPDATE eus_hawaii_lithium_requests SET state='REVIEWING',fulfillment_state='HOLD',updated_at=? WHERE id=?").bind(now(),requestId).run();
+    return json({ok:true,requestId,customerState:"commercial_review_required",label:"Commercial Quantity — Freight Review Required",quoteRequired:true,paymentAllowed:false,maxStandardQuantity:HAWAII_OPERATIONAL_MAX_QTY},202);
+  }
   await audit(db,"request",requestId,"created","customer",{island,quantity,intendedUse});
   return json({ok:true,requestId,state:"NEW",message:"Your Hawaii lithium availability request is reserved for review. No payment has been collected."},201);
 }
@@ -353,6 +358,8 @@ function customerState(record, destinations = []) {
 }
 
 export async function resolveHawaiiCustomerStatus(env, { sku = "", productId = "", destination = "Hawaii — General" } = {}) {
+  const sokState = await resolveSokHawaiiCustomerStatus(env,{sku,productId,destination});
+  if(sokState) return sokState;
   const db = await ensureSchema(env);
   const exactSku = clean(sku, 180);
   const exactProductId = clean(productId, 120);

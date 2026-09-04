@@ -241,8 +241,16 @@
     const response = await fetch("/api/store/catalog?section=lithium-batteries", { headers: { Accept: "application/json" }, cache: "no-store" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !Array.isArray(data.products)) throw new Error("Catalog unavailable");
-    state.products = publicProducts(data.products);
-    return data.products;
+    let products = data.products;
+    if (hawaiiMode) {
+      const eligibilityResponse = await fetch("/api/hawaii-lithium/eligible-products", { headers: { Accept: "application/json" }, cache: "no-store" });
+      const eligibility = await eligibilityResponse.json().catch(() => ({}));
+      const allowedIds = new Set(Array.isArray(eligibility.items) ? eligibility.items.map((item) => String(item.catalogProductId || "").trim()).filter(Boolean) : []);
+      const allowedSkus = new Set(Array.isArray(eligibility.items) ? eligibility.items.map((item) => String(item.sku || "").trim().toUpperCase()).filter(Boolean) : []);
+      products = eligibilityResponse.ok ? products.filter((product) => allowedIds.has(String(product.id || "").trim()) || allowedSkus.has(String(product.sku || "").trim().toUpperCase())) : [];
+    }
+    state.products = publicProducts(products);
+    return products;
   }
 
   async function hydrateAndRender() {
