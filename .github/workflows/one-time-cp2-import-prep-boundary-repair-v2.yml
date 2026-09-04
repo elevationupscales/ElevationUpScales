@@ -1,0 +1,70 @@
+name: One-Time CP2 Import Prep Boundary Repair V2
+on:
+  push:
+    branches:
+      - runner/cp2-import-prep-boundary-repair-v2-2026-09-03
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: cf629e22dfcd0573419bdc03971feafa452f3df4
+          fetch-depth: 0
+      - name: Exact parent gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "cf629e22dfcd0573419bdc03971feafa452f3df4"
+          git fetch origin main work/commerce-pricing-2-import-preparation-2026-09-03
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          test "$(git rev-parse origin/work/commerce-pricing-2-import-preparation-2026-09-03)" = "cf629e22dfcd0573419bdc03971feafa452f3df4"
+      - name: Complete routing and serializer boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          # Route Worker-only modules through the Worker so the explicit 404 block can enforce the boundary.
+          p=Path('site/_routes.json'); data=json.loads(p.read_text())
+          for route in ['/commerce-pricing-runtime.js','/promotion-runtime.js']:
+              if route not in data['include']: data['include'].append(route)
+          p.write_text(json.dumps(data,indent=2)+'\n')
+
+          # Expand explicit internal-runtime denial to server modules already routed through the Worker.
+          p=Path('site/_worker.js'); s=p.read_text()
+          s=s.replace('''      "/catalog-admin-runtime.js",\n      "/doba-csv-sync-runtime.js",''','''      "/catalog-admin-runtime.js",\n      "/catalog-admin-server.js",\n      "/commerce-schema-migrations.js",\n      "/doba-csv-sync-runtime.js",''',1)
+          p.write_text(s)
+
+          # Remove provider/source management identifiers from public Catalog serialization.
+          p=Path('site/catalog-admin-runtime.js'); s=p.read_text()
+          old='''      id: p.id, sku: p.sku, title: p.title, description: p.description, category: p.category,\n      supplier: p.supplier, sourceType: p.sourceType, fulfillmentMode: p.fulfillmentMode,\n      priceCents: priced.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,\n      shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,\n      sourceUrl: p.sourceUrl, ebayItemId: p.ebayItemId, salesChannels: p.salesChannels,\n      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: {'''
+          new='''      id: p.id, sku: p.sku, title: p.title, description: p.description, category: p.category,\n      priceCents: priced.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,\n      shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,\n      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: {'''
+          if old not in s: raise SystemExit('public catalog source-field marker missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check site/_worker.js
+          node --check site/catalog-admin-runtime.js
+          python3 -m json.tool site/_routes.json >/dev/null
+          git diff --check
+          git diff --name-only cf629e22dfcd0573419bdc03971feafa452f3df4..HEAD || true
+          git diff --name-only > /tmp/changed
+          cat /tmp/changed
+          test "$(sort /tmp/changed)" = $'site/_routes.json\nsite/_worker.js\nsite/catalog-admin-runtime.js'
+          git diff --quiet 5c16949b8722d2eda64bf1918de66cd32a65be88 -- site/commerce-pricing-runtime.js site/promotion-runtime.js site/shipping-rules-runtime.js site/store-checkout-server.js site/store-orders-admin-server.js
+      - name: Commit clean descendant
+        run: |
+          set -euo pipefail
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site/_routes.json site/_worker.js site/catalog-admin-runtime.js
+          git commit -m 'Complete internal pricing data boundary'
+          git push origin HEAD:work/commerce-pricing-2-import-preparation-2026-09-03
+          echo "PREP_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Summary
+        run: |
+          echo '### CP2 internal-data boundary repair V2 built' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: \`$PREP_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo 'No pricing, shipping, checkout, PayPal, publication, inventory, or Catalog data writes.' >> "$GITHUB_STEP_SUMMARY"
