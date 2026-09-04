@@ -1,0 +1,67 @@
+name: One-Time CP2 Import Prep Boundary Repair
+on:
+  push:
+    branches:
+      - runner/cp2-import-prep-boundary-repair-2026-09-03
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 5c16949b8722d2eda64bf1918de66cd32a65be88
+          fetch-depth: 0
+      - name: Exact parent gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "5c16949b8722d2eda64bf1918de66cd32a65be88"
+          git fetch origin main work/commerce-pricing-2-import-preparation-2026-09-03
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          test "$(git rev-parse origin/work/commerce-pricing-2-import-preparation-2026-09-03)" = "5c16949b8722d2eda64bf1918de66cd32a65be88"
+      - name: Apply minimal internal-data boundary repair
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          # 1) Prevent HTTP requests from serving Worker/server-only runtime modules as static assets.
+          p=Path('site/_worker.js'); s=p.read_text()
+          anchor='    const url=new URL(request.url);\n'
+          if anchor not in s:
+              # tolerate whitespace/function formatting in current source
+              anchor='    const url = new URL(request.url);\n'
+          if anchor not in s: raise SystemExit('worker URL anchor missing')
+          block='''    const internalRuntimePaths = new Set([\n      "/_worker.js",\n      "/worker-core.js",\n      "/commerce-pricing-runtime.js",\n      "/catalog-admin-runtime.js",\n      "/doba-csv-sync-runtime.js",\n      "/promotion-runtime.js",\n      "/shipping-rules-runtime.js",\n      "/store-checkout-server.js",\n      "/store-orders-admin-server.js",\n      "/hawaii-lithium-runtime.js",\n      "/sync-admin-runtime.js",\n      "/apparel-provider-runtime.js"\n    ]);\n    if (internalRuntimePaths.has(url.pathname)) return new Response("Not found", { status: 404, headers: { "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } });\n'''
+          s=s.replace(anchor,anchor+block,1)
+          p.write_text(s)
+
+          # 2) Public Catalog responses get only customer-facing promotion fields.
+          p=Path('site/catalog-admin-runtime.js'); s=p.read_text()
+          old='''      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: priced.promotion\n    };'''
+          new='''      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: {\n        active: Boolean(priced?.promotion?.active), eligible: Boolean(priced?.promotion?.eligible), couponEligible: Boolean(priced?.promotion?.couponEligible),\n        couponCode: clean(priced?.promotion?.couponCode,40), couponPercent: int(priced?.promotion?.couponPercent,0),\n        listPriceCents: int(priced?.promotion?.listPriceCents ?? priced?.priceCents,0), couponPriceCents: int(priced?.promotion?.couponPriceCents ?? priced?.priceCents,0),\n        shippingDiscounted: Boolean(priced?.promotion?.shippingDiscounted)\n      }\n    };'''
+          if old not in s: raise SystemExit('public promotion serialization marker missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check site/_worker.js
+          node --check site/catalog-admin-runtime.js
+          git diff --check
+          changed=$(git diff --name-only)
+          printf '%s\n' "$changed"
+          test "$changed" = $'site/_worker.js\nsite/catalog-admin-runtime.js'
+          # Internal pricing engine untouched.
+          git diff --quiet 5c16949b8722d2eda64bf1918de66cd32a65be88 -- site/commerce-pricing-runtime.js site/promotion-runtime.js site/shipping-rules-runtime.js site/store-checkout-server.js site/store-orders-admin-server.js
+      - name: Commit clean prep descendant
+        run: |
+          set -euo pipefail
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site/_worker.js site/catalog-admin-runtime.js
+          git commit -m 'Seal internal pricing data from public surfaces'
+          git push origin HEAD:work/commerce-pricing-2-import-preparation-2026-09-03
+          echo "PREP_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Summary
+        run: |
+          echo '### CP2 import-prep boundary repair built' >> "$GITHUB_STEP_SUMMARY"
+          echo "Prep candidate: \`$PREP_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Changed only `_worker.js` and `catalog-admin-runtime.js`; pricing/shipping/payment logic untouched.' >> "$GITHUB_STEP_SUMMARY"
