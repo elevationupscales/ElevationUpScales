@@ -1,0 +1,91 @@
+name: Elevation 4.5 Minimal Positioning Closeout
+
+on:
+  push:
+    branches:
+      - runner/4.5-minimal-positioning-closeout-2026-09-04
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6
+          fetch-depth: 0
+
+      - name: Verify live production and rebuild persisted application baseline
+        run: |
+          set -euo pipefail
+          PREV_MAIN=23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6
+          APPROVED=f820d7c2042685077982480da06de005f4faba47
+          DEPLOYED_BUILD=51b8c6d456e846ad71b8e215f19f245a363d7663
+          IMMUTABLE=https://992ec0db.elevationupscales.pages.dev
+          git fetch origin main work/4.5-positioning-copy-patch-2026-09-04
+          test "$(git rev-parse origin/main)" = "$PREV_MAIN"
+          curl -fsS https://elevationupscales.com/ -o /tmp/home
+          curl -fsS https://elevationupscales.com/what-we-do -o /tmp/what
+          grep -Fq 'LOGISTICS THAT MATTER.' /tmp/home
+          grep -Fq 'BRIDGE THE GAP.' /tmp/what
+          curl -fsS https://elevationupscales.com/api/store/catalog?section=lithium-batteries -o /tmp/lithium.json
+          node - <<'NODE'
+          const fs=require('fs');const j=JSON.parse(fs.readFileSync('/tmp/lithium.json'));const p=Array.isArray(j)?j:(j.products||j.items||j.catalog||[]);const item=p.find(x=>x.sku==='D01027HH7BV-136'||x.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268');if(!item||Number(item.priceCents)!==17600)throw new Error('price regression');const raw=JSON.stringify(j);for(const k of ['supplierStock','sourceType','sourceUrl','ebayItemId','fulfillmentMode','upstreamSupplier','authoritativeCostCents'])if(raw.includes(`"${k}"`))throw new Error(`internal leak ${k}`);
+          NODE
+
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git switch -C release-45-minimal-positioning "$PREV_MAIN"
+          git checkout "$APPROVED" -- site/index.html site/what-we-do.html
+          test "$(git diff --cached --name-only)" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
+          git diff --cached --check
+          git commit -m 'Apply minimal power and logistics positioning copy'
+          APP_SHA=$(git rev-parse HEAD)
+          test "$(git rev-parse HEAD:site)" = "$(git rev-parse "$APPROVED":site)"
+
+          git push origin "$APP_SHA":refs/heads/release/4.5-minimal-positioning-production-2026-09-04
+          git push --force origin "$APP_SHA":refs/heads/baseline-2026-09-04-elevation-45-minimal-positioning-production
+
+          mkdir -p release-receipts
+          cat > release-receipts/ELEVATION_4.5_MINIMAL_POSITIONING_PRODUCTION_RECEIPT_2026-09-04.md <<EOF
+          # Elevation 4.5 Minimal Positioning Production Receipt — 2026-09-04
+
+          Status: PRODUCTION ACCEPTED
+
+          Previous main receipt: $PREV_MAIN
+          Persisted accepted application SHA: $APP_SHA
+          Deployment-build SHA (ephemeral runner commit): $DEPLOYED_BUILD
+          Immutable deployment: $IMMUTABLE
+          Canonical: https://elevationupscales.com
+
+          The persisted application baseline has the exact same site tree as the verified deployed candidate.
+
+          Scope:
+          - site/index.html
+          - site/what-we-do.html
+
+          Protected commerce verification:
+          - D01027HH7BV-136 remains \$176.00 retail / \$132.00 LABORDAY25
+          - Lower 48 remains \$27.99 per battery
+          - Hawaii remains \$99.00 per battery
+          - Alaska remains Freight Review Required
+          - LABORDAY25 remains merchandise-only
+          - customer/internal data boundary PASS
+          EOF
+          git add release-receipts/ELEVATION_4.5_MINIMAL_POSITIONING_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record Elevation 4.5 minimal positioning production receipt [release-generated]'
+          RECEIPT_SHA=$(git rev-parse HEAD)
+          git push origin "$RECEIPT_SHA":refs/heads/main
+          echo "APP_SHA=$APP_SHA" >> "$GITHUB_ENV"
+          echo "RECEIPT_SHA=$RECEIPT_SHA" >> "$GITHUB_ENV"
+
+      - name: Summary
+        run: |
+          echo '### Elevation 4.5 Minimal Positioning — CLOSED' >> "$GITHUB_STEP_SUMMARY"
+          echo "Accepted application: $APP_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Main receipt: $RECEIPT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Immutable: https://992ec0db.elevationupscales.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
