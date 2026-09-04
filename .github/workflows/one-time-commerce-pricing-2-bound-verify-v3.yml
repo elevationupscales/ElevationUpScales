@@ -1,0 +1,103 @@
+name: One-Time Commerce Pricing 2 Bound Verify V3
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-2-bound-verify-v3-2026-09-03
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 5c16949b8722d2eda64bf1918de66cd32a65be88
+          fetch-depth: 0
+      - name: Exact candidate gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "5c16949b8722d2eda64bf1918de66cd32a65be88"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          git merge-base --is-ancestor 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf HEAD
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+          ! grep -q '\.run(' site/commerce-pricing-runtime.js
+      - name: Inject temporary token-protected verifier
+        run: |
+          set -euo pipefail
+          token=$(openssl rand -hex 32)
+          echo "::add-mask::$token"
+          echo "QA_TOKEN=$token" >> "$GITHUB_ENV"
+          QA_TOKEN="$token" python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('site/commerce-pricing-runtime.js')
+          s=p.read_text()
+          if 'export async function buildCommercePricingAudit(env){' not in s:
+              s=s.replace('async function audit(env){','export async function buildCommercePricingAudit(env){',1)
+              s=s.replace('const result=await audit(env);','const result=await buildCommercePricingAudit(env);',1)
+          p.write_text(s)
+          w=Path('site/_worker.js')
+          s=w.read_text()
+          old='import { handleCommercePricingAdminApi } from "./commerce-pricing-runtime.js";'
+          new='import { handleCommercePricingAdminApi, buildCommercePricingAudit } from "./commerce-pricing-runtime.js";'
+          if old not in s: raise SystemExit('pricing import marker missing')
+          s=s.replace(old,new,1)
+          anchor='    if(url.pathname==="/api/admin/commerce-pricing") return handleCommercePricingAdminApi(request,env);\n'
+          if anchor not in s: raise SystemExit('pricing route anchor missing')
+          token=os.environ['QA_TOKEN']
+          block=f'''    if(url.pathname==="/api/qa/cp2-bound") {{\n      if(request.headers.get("X-EUS-QA-Token")!=="{token}") return new Response("Not found",{{status:404,headers:{{"Cache-Control":"no-store"}}}});\n      try {{ const data=await buildCommercePricingAudit(env); return Response.json(data,{{headers:{{"Cache-Control":"no-store"}}}}); }} catch(error) {{ return Response.json({{error:String(error?.message||error)}},{{status:503}}); }}\n    }}\n'''
+          w.write_text(s.replace(anchor,anchor+block,1))
+          PY
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+      - name: Deploy short diagnostic alias
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=cp2bverify
+      - name: Verify bound reconciliation and shipping invariants
+        env:
+          BASE: https://cp2bverify.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 12 --retry-all-errors --retry-delay 2 -H "X-EUS-QA-Token: $QA_TOKEN" "${BASE%/}/api/qa/cp2-bound" -o /tmp/audit.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/audit.json'))
+          s=d.get('summary') or {}; r=d.get('reconciliationSummary') or {}; ship=d.get('shippingInputs') or {}; rows=d.get('lithiumReconciliation') or []
+          expected={'catalogProducts':76,'published':58,'actualLithium':31,'missingAuthoritativeCost':0,'sourceCostMismatch':0,'promoFloorFailures':0,'storedBelowProtectedFloor':31,'lithiumReconciliationCount':31}
+          for k,v in expected.items(): assert s.get(k)==v,(k,s.get(k),v)
+          assert r.get('total')==31,r
+          assert r.get('UPDATE')==31,r
+          assert r.get('KEEP')==0,r
+          assert r.get('EXCLUDE FROM PROMO')==0,r
+          assert r.get('REVIEW REQUIRED')==0,r
+          assert len(rows)==31,len(rows)
+          assert all((x.get('reconciliation') or {}).get('action')=='UPDATE' for x in rows)
+          assert all((x.get('reconciliation') or {}).get('floorResult')=='PASS' for x in rows)
+          assert all((x.get('supplierIdentity') or {}).get('provider')=='doba' for x in rows)
+          assert int((ship.get('LOWER48') or {}).get('rateCents') or 0)==2799,ship
+          assert int((ship.get('HI') or {}).get('rateCents') or 0)==9900,ship
+          assert bool((ship.get('AK') or {}).get('quoteRequired')) is True,ship
+          result={'generatedAt':d.get('generatedAt'),'elapsedMs':d.get('elapsedMs'),'summary':{k:s.get(k) for k in expected},'reconciliationSummary':r,'shipping':{'LOWER48':ship.get('LOWER48'),'HI':ship.get('HI'),'AK':ship.get('AK')}}
+          print(json.dumps(result,indent=2))
+          open('/tmp/cp2-bound-verify.json','w').write(json.dumps(result,indent=2)+'\n')
+          PY
+      - name: Upload verification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-pricing-2-bound-verification
+          path: /tmp/cp2-bound-verify.json
+          if-no-files-found: error
+          retention-days: 1
+      - name: Summary
+        run: |
+          echo '### Commerce Pricing & Supplier Catalog 2.0 — BOUND VERIFY PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate SHA: `5c16949b8722d2eda64bf1918de66cd32a65be88`' >> "$GITHUB_STEP_SUMMARY"
+          echo '31 UPDATE / 0 KEEP / 0 EXCLUDE FROM PROMO / 0 REVIEW REQUIRED.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Shipping unchanged: Lower 48 $27.99 / Hawaii $99 / Alaska review.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No Catalog, pricing, publication, supplier import, shipping, or payment mutation.' >> "$GITHUB_STEP_SUMMARY"
