@@ -1,0 +1,44 @@
+name: SOK 4.6 Pre-Purchase D1 Debug
+on:
+  push:
+    branches:
+      - runner/sok-4-6-prepurchase-d1-debug-2026-09-04
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: runner/sok-4-6-prepurchase-d1-debug-2026-09-04
+      - name: Instrument preview-only errors
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('site/sok-availability-runtime.js')
+          t=p.read_text()
+          t=t.replace('console.error(JSON.stringify({event:"sok_public_catalog_error",message:clean(error?.message,240)}));return[];','console.error(JSON.stringify({event:"sok_public_catalog_error",message:clean(error?.message,240)}));throw error;')
+          t=t.replace('return json({error:"SOK availability request failed"},500);','return json({error:"SOK availability request failed",debugMessage:clean(error?.message,1000),debugStack:clean(error?.stack,2000)},500);',1)
+          p.write_text(t)
+          PY
+          node --check site/sok-availability-runtime.js
+      - name: Deploy diagnostic preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-d1-debug
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Show SOK API error
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set +e
+          curl -sS -i "${BASE%/}/api/sok/catalog"
+          echo
