@@ -1,0 +1,448 @@
+name: SOK 4.6 Pre-Purchase Backorder Finalize
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-prepurchase-finalize-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out protected production main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Build reconciled candidate from production
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_main='b6e33ba2e5b9f1ce354907ea4f98534e61407f51'
+          test "$(git rev-parse HEAD)" = "$expected_main"
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git fetch origin work/sok-4-6-prepurchase-backorder-2026-09-04
+          git switch -c release/sok-4-6-prepurchase-backorder-2026-09-04
+          git cherry-pick \
+            493e89e1d0fb5af408767995d551a459b6940dec \
+            d4ded90291c138c2a35342c9103bb9a11544f84d \
+            75c651d5ec4075a24a472d790679bfac7d4888e3 \
+            957dc7542545517d90d2443d73a3b0cf86a0c841 \
+            943c5c1157c808e83dd9db0cbcfb318e40f987cd \
+            4283154cfdd52b7fe1ccd4d6c70b3de5260401a6
+
+      - name: Apply SQL repair and DEC-008 purchase-mode wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # 1) Fix the confirmed D1 INSERT mismatch: 34 columns must receive 34 values.
+          p=Path('site/sok-operations-runtime.js')
+          s=p.read_text()
+          bad="'NOT CONFIRMED',?,?,?,?,?,?,?,?,?,?,?,?,?,'SOP REQUIRED'"
+          good="'NOT CONFIRMED',?,?,?,?,?,?,?,?,?,?,?,?,'SOP REQUIRED'"
+          if s.count(bad)!=1:
+              raise SystemExit(f'expected one 35/34 SOK INSERT marker, found {s.count(bad)}')
+          s=s.replace(bad,good,1)
+          p.write_text(s)
+
+          # 2) Keep availability and public purchase mode independent.
+          p=Path('site/sok-availability-runtime.js')
+          s=p.read_text()
+          needle='const MODES=new Set(["available","prepurchase","backorder","unavailable"]);\n'
+          if s.count(needle)!=1: raise SystemExit('availability mode marker not found')
+          s=s.replace(needle,needle+'const PURCHASE_MODES=new Set(["CATALOG_ONLY","CONTACT_TO_ORDER","PURCHASE_OPTIONS","DIRECT_CHECKOUT","UNAVAILABLE"]);\n',1)
+
+          needle='  await addColumn(db,"ALTER TABLE eus_sok_product_ops ADD COLUMN availability_mode TEXT NOT NULL DEFAULT \'unavailable\'");\n'
+          if s.count(needle)!=1: raise SystemExit('availability schema marker not found')
+          s=s.replace(needle,needle+'  await addColumn(db,"ALTER TABLE eus_sok_product_ops ADD COLUMN public_purchase_mode TEXT NOT NULL DEFAULT \'PURCHASE_OPTIONS\'");\n',1)
+
+          pattern=r'export function commercePresentation\(row,destinationState=""\)\{.*?\n\}\n\nfunction publicProduct\(row\)\{.*?\n\}\n\nexport async function publicSokCatalogProducts'
+          replacement=r'''export function commercePresentation(row,destinationState=""){
+  const mode=MODES.has(clean(row?.availability_mode,30).toLowerCase())?clean(row.availability_mode,30).toLowerCase():"unavailable";
+  const purchaseRaw=upper(row?.public_purchase_mode||"PURCHASE_OPTIONS",40);
+  const purchaseMode=PURCHASE_MODES.has(purchaseRaw)?purchaseRaw:"PURCHASE_OPTIONS";
+  const approved=bool(row?.management_approved);
+  const timing=clean(row?.expected_ship_window,300)||clean(row?.expected_available_date,80);
+  const timingNotice=clean(row?.customer_timing_notice,500)||SAFE_TIMING_NOTICE;
+  const replenishment=bool(row?.supplier_replenishment_confirmed);
+  let label="Temporarily Unavailable",baseCta="Check Availability",basePaymentEligible=false,requiresTimingAcknowledgement=false;
+  if(mode==="available"&&approved){label="Available";baseCta="Buy Now";basePaymentEligible=true;}
+  else if(mode==="prepurchase"&&approved&&bool(row?.prepurchase_enabled)){label="Pre-Purchase";baseCta="Pre-Purchase";basePaymentEligible=Boolean(timing);requiresTimingAcknowledgement=basePaymentEligible;}
+  else if(mode==="backorder"&&approved&&bool(row?.backorder_enabled)){label="Available on Backorder";baseCta="Available on Backorder";basePaymentEligible=Boolean(replenishment&&timing);requiresTimingAcknowledgement=basePaymentEligible;}
+  let cta=baseCta,paymentEligible=basePaymentEligible;
+  if(purchaseMode!=="DIRECT_CHECKOUT") paymentEligible=false;
+  if(purchaseMode==="CATALOG_ONLY") cta="View Product";
+  else if(purchaseMode==="CONTACT_TO_ORDER") cta="Email Us to Order";
+  else if(purchaseMode==="PURCHASE_OPTIONS") cta="See Purchase Options";
+  else if(purchaseMode==="UNAVAILABLE"){cta="Currently Unavailable";paymentEligible=false;label="Temporarily Unavailable";}
+  if(upper(destinationState,2)==="HI") paymentEligible=false;
+  return{mode,label,cta,paymentEligible,requiresTimingAcknowledgement:paymentEligible&&requiresTimingAcknowledgement,expectedAvailableDate:clean(row?.expected_available_date,80),expectedShipWindow:clean(row?.expected_ship_window,300),timingNotice,managementApproved:approved,replenishmentConfirmed:replenishment,purchaseMode};
+}
+
+function publicProduct(row){
+  const sku=upper(row?.sku,120),d=SOK_PUBLIC[sku];if(!d)return null;
+  const availability=commercePresentation(row,"");
+  const reservationUrl=`/sok-order.html?sku=${encodeURIComponent(sku)}&mode=${encodeURIComponent(availability.mode)}`;
+  const detailUrl=`/product?id=${encodeURIComponent(d.id)}&store=lithium`;
+  const checkoutUrl=`/checkout/?source=lithium&id=${encodeURIComponent(d.id)}&name=${encodeURIComponent(d.title)}`;
+  let purchaseUrl=reservationUrl;
+  if(availability.purchaseMode==="CATALOG_ONLY"||availability.purchaseMode==="UNAVAILABLE") purchaseUrl=detailUrl;
+  else if(availability.paymentEligible) purchaseUrl=checkoutUrl;
+  const hawaiiStatus=bool(row?.hawaii_eligible)?"shipping_available":"freight_review_required";
+  return{id:d.id,sku,title:d.title,description:d.description,category:d.category,priceCents:d.mapCents,availabilityStatus:(availability.mode==="unavailable"||availability.purchaseMode==="UNAVAILABLE")?"unavailable":"available",shippingStatus:bool(row?.lower48_eligible)?"verified":"quote_required",shippingCents:null,primaryImage:"",images:[],storeSection:"lithium-batteries",publishStatus:"published",updatedAt:clean(row?.updated_at,80),purchaseUrl,promotion:{active:false,eligible:false,couponEligible:false,couponCode:"",couponPercent:0,pricingMode:"sok-map",shippingDiscounted:false},brand:"SOK Energy",authorizedDealer:true,sokProduct:true,availabilityMode:availability.mode,publicPurchaseMode:availability.purchaseMode,commerceLabel:availability.label,commerceCta:availability.cta,paymentEligible:availability.paymentEligible,requiresTimingAcknowledgement:availability.requiresTimingAcknowledgement,expectedAvailableDate:availability.expectedAvailableDate,expectedShipWindow:availability.expectedShipWindow,customerTimingNotice:availability.timingNotice,reservationUrl,purchaseOptionsUrl:reservationUrl,hawaiiStatus};
+}
+
+export async function publicSokCatalogProducts'''
+          s,n=re.subn(pattern,replacement,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'commerce/public product replacement failed: {n}')
+
+          old='SELECT sku,availability_mode,prepurchase_enabled,backorder_enabled,expected_available_date,expected_ship_window,supplier_replenishment_confirmed,customer_timing_notice,management_approved,lifecycle_state,hazmat_document_state,hazmat_state,carrier_state,economics_state,hawaii_eligible,commercial_ready,updated_at,updated_by FROM eus_sok_product_ops'
+          new='SELECT sku,availability_mode,public_purchase_mode,prepurchase_enabled,backorder_enabled,expected_available_date,expected_ship_window,supplier_replenishment_confirmed,customer_timing_notice,management_approved,lifecycle_state,hazmat_document_state,hazmat_state,carrier_state,economics_state,hawaii_eligible,commercial_ready,updated_at,updated_by FROM eus_sok_product_ops'
+          if s.count(old)!=1: raise SystemExit('admin snapshot SELECT marker not found')
+          s=s.replace(old,new,1)
+
+          pattern=r'async function patchAvailability\(request,env,sku,admin\)\{.*?\n\}\n\nexport async function handleSokAvailabilityPublicApi'
+          replacement=r'''async function patchAvailability(request,env,sku,admin){const db=await ensureSokAvailabilitySchema(env);const existing=await db.prepare("SELECT * FROM eus_sok_product_ops WHERE upper(sku)=? LIMIT 1").bind(upper(sku,120)).first();if(!existing)return json({error:"SOK SKU not found"},404);const raw=await request.json().catch(()=>({}));const mode=clean(raw.availabilityMode??existing.availability_mode,30).toLowerCase();if(!MODES.has(mode))return json({error:"Invalid availability mode"},400);const purchaseMode=upper(raw.publicPurchaseMode??existing.public_purchase_mode,40);if(!PURCHASE_MODES.has(purchaseMode))return json({error:"Invalid public purchase mode"},400);const prep=raw.prepurchaseEnabled===undefined?bool(existing.prepurchase_enabled):bool(raw.prepurchaseEnabled),back=raw.backorderEnabled===undefined?bool(existing.backorder_enabled):bool(raw.backorderEnabled),replenish=raw.supplierReplenishmentConfirmed===undefined?bool(existing.supplier_replenishment_confirmed):bool(raw.supplierReplenishmentConfirmed),approved=raw.managementApproved===undefined?bool(existing.management_approved):bool(raw.managementApproved),date=clean(raw.expectedAvailableDate??existing.expected_available_date,80),window=clean(raw.expectedShipWindow??existing.expected_ship_window,300),notice=clean(raw.customerTimingNotice??existing.customer_timing_notice,500)||SAFE_TIMING_NOTICE,stamp=now();await db.prepare("UPDATE eus_sok_product_ops SET availability_mode=?,public_purchase_mode=?,prepurchase_enabled=?,backorder_enabled=?,expected_available_date=?,expected_ship_window=?,supplier_replenishment_confirmed=?,customer_timing_notice=?,management_approved=?,updated_at=?,updated_by=? WHERE upper(sku)=?").bind(mode,purchaseMode,prep?1:0,back?1:0,date,window,replenish?1:0,notice,approved?1:0,stamp,admin,upper(sku,120)).run();await db.prepare("INSERT INTO eus_sok_events (id,entity_type,entity_id,action,details_json,actor,created_at) VALUES (?,?,?,?,?,?,?)").bind(`SOK-EVT-${crypto.randomUUID()}`,"product",upper(sku,120),"availability_updated",JSON.stringify({availabilityMode:mode,publicPurchaseMode:purchaseMode,prepurchaseEnabled:prep,backorderEnabled:back,expectedAvailableDate:date,expectedShipWindow:window,supplierReplenishmentConfirmed:replenish,managementApproved:approved}),admin,stamp).run();return json(await availabilityAdminSnapshot(db));}
+
+export async function handleSokAvailabilityPublicApi'''
+          s,n=re.subn(pattern,replacement,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'admin patch replacement failed: {n}')
+          s=s.replace('export const __sokAvailabilityTest={commercePresentation,SAFE_TIMING_NOTICE};','export const __sokAvailabilityTest={commercePresentation,SAFE_TIMING_NOTICE,PURCHASE_MODES};',1)
+          p.write_text(s)
+
+          # 3) Admin gets one per-SKU public purchase mode control.
+          p=Path('site/admin-sok-availability.js')
+          s=p.read_text()
+          old='${badge(p.availability_mode)} ${badge(p.carrier_state)} ${badge(p.economics_state)}'
+          new='${badge(p.availability_mode)} ${badge(p.public_purchase_mode)} ${badge(p.carrier_state)} ${badge(p.economics_state)}'
+          if s.count(old)!=1: raise SystemExit('admin badge marker not found')
+          s=s.replace(old,new,1)
+          old='</select></label><label>Expected available date'
+          new='</select></label><label>Public purchase mode<select name="publicPurchaseMode">${["CATALOG_ONLY","CONTACT_TO_ORDER","PURCHASE_OPTIONS","DIRECT_CHECKOUT","UNAVAILABLE"].map(v=>`<option value="${v}" ${v===p.public_purchase_mode?"selected":""}>${v}</option>`).join("")}</select></label><label>Expected available date'
+          if s.count(old)!=1: raise SystemExit('admin purchase-mode insertion marker not found')
+          s=s.replace(old,new,1)
+          old='body={availabilityMode:f.get("availabilityMode"),expectedAvailableDate:'
+          new='body={availabilityMode:f.get("availabilityMode"),publicPurchaseMode:f.get("publicPurchaseMode"),expectedAvailableDate:'
+          if s.count(old)!=1: raise SystemExit('admin PATCH body marker not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # 4) Server-rendered Lithium cards honor the same purchase mode/CTA as hydrated cards.
+          p=Path('site/_worker.js')
+          s=p.read_text()
+          old='const pickupPriceCents=merchandiseCents+pickupFreightCents;return'
+          new='const pickupPriceCents=merchandiseCents+pickupFreightCents;const hawaiiPriceReady=!product?.sokProduct||clean(product?.hawaiiStatus,40).toLowerCase()==="shipping_available";const normalActionUrl=clean(product?.purchaseUrl||checkout,1000)||checkout;const normalActionLabel=clean(product?.commerceCta||"Buy Now",80)||"Buy Now";return'
+          if s.count(old)!=1: raise SystemExit('worker lithium card calculation marker not found')
+          s=s.replace(old,new,1)
+          old='` href="${htmlEsc(checkout)}"`'
+          if s.count(old)!=1: raise SystemExit(f'worker checkout href marker count {s.count(old)}')
+          s=s.replace(old,'` href="${htmlEsc(normalActionUrl)}"`',1)
+          old='${hawaii?"Check Hawaii Availability":"Buy Now"}'
+          if s.count(old)!=1: raise SystemExit('worker CTA marker not found')
+          s=s.replace(old,'${hawaii?"Check Hawaii Availability":htmlEsc(normalActionLabel)}',1)
+          old='${batteryUnits>0?htmlEsc(money(pickupPriceCents)):"Freight Review Required"}'
+          if s.count(old)!=1: raise SystemExit('worker Hawaii pickup display marker not found')
+          s=s.replace(old,'${batteryUnits>0&&hawaiiPriceReady?htmlEsc(money(pickupPriceCents)):"Freight Review Required"}',1)
+          old='${hawaii&&batteryUnits>0?htmlEsc(money(pickupPriceCents)):htmlEsc(money(product?.priceCents))}'
+          if s.count(old)!=1: raise SystemExit('worker Hawaii footer price marker not found')
+          s=s.replace(old,'${hawaii&&batteryUnits>0&&hawaiiPriceReady?htmlEsc(money(pickupPriceCents)):htmlEsc(money(product?.priceCents))}',1)
+          p.write_text(s)
+
+          # 5) Client-rendered cards use customer-safe Hawaii readiness; no unproven SOK freight price.
+          p=Path('site/lithium-shop.js')
+          s=p.read_text()
+          old='const pickupPriceCents = merchandiseCents + (batteryUnits > 0 ? 9900 * batteryUnits : 0);'
+          new='const pickupPriceCents = merchandiseCents + (batteryUnits > 0 ? 9900 * batteryUnits : 0);\n    const hawaiiPriceReady = !product?.sokProduct || String(product?.hawaiiStatus || "").toLowerCase() === "shipping_available";'
+          if s.count(old)!=1: raise SystemExit('client pickup calculation marker not found')
+          s=s.replace(old,new,1)
+          old='${batteryUnits > 0 ? money.format(pickupPriceCents / 100) : "Freight Review Required"}'
+          if s.count(old)!=1: raise SystemExit('client Hawaii pickup display marker not found')
+          s=s.replace(old,'${batteryUnits > 0 && hawaiiPriceReady ? money.format(pickupPriceCents / 100) : "Freight Review Required"}',1)
+          old='${hawaiiMode && batteryUnits > 0 ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}'
+          if s.count(old)!=1: raise SystemExit('client Hawaii footer marker not found')
+          s=s.replace(old,'${hawaiiMode && batteryUnits > 0 && hawaiiPriceReady ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}',1)
+          p.write_text(s)
+
+          # 6) Assisted-purchase page implements the accepted purchase-options panel.
+          p=Path('site/sok-order.html')
+          s=p.read_text()
+          s=s.replace('<title>SOK Order Reservation | Elevation UpScales</title>','<title>SOK Purchase Options | Elevation UpScales</title>',1)
+          s=s.replace('content="Reserve or start a pre-purchase/backorder request for SOK lithium batteries through Elevation UpScales."','content="Review purchase, commercial pricing, Hawaii freight, pre-purchase and backorder options for SOK lithium batteries through Elevation UpScales."',1)
+          s=s.replace('<h1>Start a SOK Order</h1><p>This request lets Elevation begin availability, fulfillment and freight processing before payment when a product is on pre-purchase, backorder or destination review.</p>','<h1>SOK Purchase Options</h1><p>This SOK product is available through Elevation UpScales. Ordering options may depend on quantity and destination. Choose the path that fits your order; unresolved routes remain reservation-first and do not collect payment.</p>',1)
+          s=s.replace('<h2 id="sok-order-title">SOK Battery Reservation</h2>','<h2 id="sok-order-title">Start Your Purchase Request</h2>',1)
+          marker='<p id="sok-order-mode">Availability and final timing will be confirmed before the order advances.</p>'
+          if s.count(marker)!=1: raise SystemExit('SOK order mode marker not found')
+          actions=marker+'<div class="lithium-actions" aria-label="SOK purchase options"><a class="button button-outline" id="sok-email-product" href="mailto:casey@elevationupscales.com">Email Us About This Product</a><button class="button button-outline" type="button" data-sok-intent="commercial">Request Commercial Pricing</button><button class="button button-outline" type="button" data-sok-intent="hawaii">Check Hawaii Availability</button></div>'
+          s=s.replace(marker,actions,1)
+          form='<form id="sok-order-form" style="display:grid;gap:14px">'
+          if s.count(form)!=1: raise SystemExit('SOK order form marker not found')
+          s=s.replace(form,form+'<input id="sok-order-intent" name="intent" type="hidden" value="purchase_options">',1)
+          s=s.replace('placeholder="Project, quantity or timing details"','placeholder="Intended use, project details, quantity or timing notes"',1)
+          s=s.replace('>Start Order Processing</button>','>Submit Purchase Request</button>',1)
+          p.write_text(s)
+
+          # 7) Assisted-purchase behavior auto-carries safe product context and builds a prefilled email inquiry.
+          Path('site/sok-order.js').write_text(r'''(()=>{"use strict";const params=new URLSearchParams(location.search),form=document.querySelector("#sok-order-form"),status=document.querySelector("#sok-order-status"),skuEl=document.querySelector("#sok-order-sku"),qtyEl=document.querySelector("#sok-order-qty"),stateEl=document.querySelector("#sok-order-state"),modeEl=document.querySelector("#sok-order-mode"),intentEl=document.querySelector("#sok-order-intent"),emailLink=document.querySelector("#sok-email-product");const products={SK12V100PC:{id:"sok-sk12v100pc",name:"SOK SK12V100PC 12.8V 100Ah 1280Wh LiFePO4 Battery"},SK48V100N:{id:"sok-sk48v100n",name:"SOK SK48V100N 51.2V 100Ah 5120Wh Server Rack LiFePO4 Battery"}};const sku=String(params.get("sku")||"").trim().toUpperCase(),mode=String(params.get("mode")||"").trim().toLowerCase(),product=products[sku]||{id:"",name:sku||"SOK battery"};skuEl.value=sku;if(params.get("qty"))qtyEl.value=params.get("qty");if(params.get("state"))stateEl.value=String(params.get("state")).trim().toUpperCase();if(mode==="prepurchase")modeEl.textContent="PRE-PURCHASE — Expected fulfillment timing is an estimate and may change. Elevation will confirm the current supply window before payment when required.";else if(mode==="backorder")modeEl.textContent="AVAILABLE ON BACKORDER — Elevation will confirm replenishment and estimated fulfillment timing before payment when required.";else modeEl.textContent="Availability and final timing will be confirmed before the order advances.";const productUrl=product.id?`${location.origin}/product?id=${encodeURIComponent(product.id)}&store=lithium`:location.href;function refreshEmail(){if(!emailLink)return;const subject=`SOK purchase options — ${sku||"battery"}`,body=[`I'm interested in the ${product.name}.`,`SKU: ${sku||"Not selected"}`,`Quantity: ${qtyEl.value||""}`,`Shipping destination: ${stateEl.value||""}`,"Intended use: ",`Product: ${productUrl}`].join("\n");emailLink.href=`mailto:casey@elevationupscales.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;}[qtyEl,stateEl].forEach(el=>el?.addEventListener("input",refreshEmail));document.querySelectorAll("[data-sok-intent]").forEach(btn=>btn.addEventListener("click",()=>{const intent=String(btn.dataset.sokIntent||"purchase_options");intentEl.value=intent;if(intent==="hawaii"){stateEl.value="HI";status.textContent="Hawaii availability selected. Standard Hawaii requests are limited to 1–3 batteries; larger quantities route to commercial freight review.";stateEl.dispatchEvent(new Event("input"));}else{status.textContent="Commercial pricing selected. Enter the quantity and destination below so Elevation can review the order.";}form.scrollIntoView({behavior:"smooth",block:"start"});}));refreshEmail();form?.addEventListener("submit",async e=>{e.preventDefault();status.textContent="Submitting purchase request…";const rawNotes=document.querySelector("#sok-order-notes").value.trim(),context=`Purchase option: ${intentEl.value}; Product: ${product.name}; Product URL: ${productUrl}`;const body={sku:skuEl.value,quantity:Number.parseInt(qtyEl.value||"1",10)||1,destinationState:stateEl.value.trim().toUpperCase(),name:document.querySelector("#sok-order-name").value.trim(),email:document.querySelector("#sok-order-email").value.trim(),phone:document.querySelector("#sok-order-phone").value.trim(),notes:rawNotes?`${context}; Notes: ${rawNotes}`:context};try{const r=await fetch("/api/sok/reservations",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Unable to start the order");status.textContent=`${d.status}. Reference ${d.reservationId}. ${d.nextStep}`;form.querySelector("button[type=submit]").disabled=true;}catch(err){status.textContent=err.message;}});})();''')
+
+          # 8) Restrained SOK co-branding on Lithium; Hawaii copy reflects catalog-first rather than already-qualified-only.
+          p=Path('site/lithium-batteries.html')
+          s=p.read_text()
+          marker='<p class="lithium-retailer-badge"><strong>LICENSED LITHIUM BATTERY RETAILER</strong></p>'
+          if s.count(marker)!=1: raise SystemExit('Lithium retailer badge marker not found')
+          s=s.replace(marker,marker+'<p class="lithium-retailer-badge"><strong>AUTHORIZED SOK ENERGY DEALER</strong></p>',1)
+          p.write_text(s)
+
+          p=Path('site/hawaii-lithium-batteries.html')
+          s=p.read_text()
+          s=s.replace('Shop battery models currently approved to enter Elevation’s Hawaii freight workflow. Select a battery first, then complete the Hawaii freight intake for the exact SKU and quantity.','Browse SOK battery models available through Elevation UpScales for Hawaii. Select a battery first, then complete freight review for the exact SKU, quantity and destination.',1)
+          s=s.replace('Shop the battery models currently approved for Elevation’s Hawaii freight workflow. Choose the product first. Hawaii freight review begins only after the exact battery, quantity and destination are known.','Browse SOK battery models available through Elevation UpScales. Choose the product first. Hawaii freight review begins only after the exact battery, quantity and destination are known.',1)
+          s=s.replace('>View Hawaii Battery Inventory</a>','>Browse Hawaii Battery Catalog</a>',1)
+          s=s.replace('Choose from the dedicated Hawaii-eligible battery list.','Choose from the Hawaii battery catalog. Products that still need carrier or economics qualification remain freight review required.',1)
+          p.write_text(s)
+          PY
+
+          git diff --check
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+
+      - name: Run expanded acceptance suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          pass=0
+          check(){ "$@"; pass=$((pass+1)); echo "PASS $pass/15"; }
+          check grep -Fq "'NOT CONFIRMED',?,?,?,?,?,?,?,?,?,?,?,?,'SOP REQUIRED'" site/sok-operations-runtime.js
+          check grep -Fq 'public_purchase_mode' site/sok-availability-runtime.js
+          check grep -Fq 'PURCHASE_OPTIONS' site/sok-availability-runtime.js
+          check grep -Fq 'See Purchase Options' site/sok-availability-runtime.js
+          check grep -Fq 'Available on Backorder' site/sok-availability-runtime.js
+          check grep -Fq 'Pre-Purchase' site/sok-availability-runtime.js
+          check grep -Fq 'SK12V100PC' site/sok-availability-runtime.js
+          check grep -Fq 'SK48V100N' site/sok-availability-runtime.js
+          check grep -Fq 'pricingMode:"sok-map"' site/sok-availability-runtime.js
+          check grep -Fq 'AUTHORIZED SOK ENERGY DEALER' site/lithium-batteries.html
+          check grep -Fq 'Email Us About This Product' site/sok-order.html
+          check grep -Fq 'Request Commercial Pricing' site/sok-order.html
+          check grep -Fq 'Check Hawaii Availability' site/sok-order.html
+          check grep -Fq 'HAWAII_OPERATIONAL_MAX_QTY = 3' site/sok-operations-runtime.js
+          check bash -c '! grep -R -E "<img[^>]+(us\\.sokbattery\\.com|sokbattery\\.com)" site --include="*.html" --include="*.js"'
+          test "$pass" = 15
+
+          # Direct payment is purchase-mode gated before PayPal.
+          grep -Fq 'if(purchaseMode!=="DIRECT_CHECKOUT") paymentEligible=false' site/sok-availability-runtime.js
+          grep -Fq 'if (quote.availability?.paymentEligible === false)' site/store-checkout-server.js
+
+          # No customer-facing SOK media hotlinks or speculative rack images were added.
+          ! grep -R -E 'primaryImage:"https?://|images:\["https?://' site/sok-availability-runtime.js
+
+      - name: Commit and publish release candidate branch
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add site coordination/decisions/DEC-008-sok-authorized-dealer-catalog-and-purchase-modes.md
+          git commit -m 'Finalize SOK catalog purchase options and backorder flow'
+          sha=$(git rev-parse HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          git push origin HEAD:refs/heads/release/sok-4-6-prepurchase-backorder-2026-09-04
+
+      - name: Deploy isolated Release Candidate preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-final
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify isolated preview
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          echo "RC=$base"
+          for route in / /lithium-batteries /hawaii-lithium-batteries /sok-order.html /checkout/ /rv-store /marketplace /start-a-project /solar-project /admin-sok; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/body -w '%{http_code}' "$base$route")
+            test "$code" = 200 || { echo "$route returned $code"; cat /tmp/body; exit 1; }
+          done
+
+          curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 "$base/api/sok/catalog" -o /tmp/sok.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/sok.json'))
+          rows=d.get('products') or d.get('items') or []
+          assert len(rows)==2, d
+          by={r['sku']:r for r in rows}
+          assert {'SK12V100PC','SK48V100N'} <= set(by), by
+          assert by['SK12V100PC']['availabilityMode']=='available', by['SK12V100PC']
+          assert by['SK48V100N']['availabilityMode']=='prepurchase', by['SK48V100N']
+          for r in rows:
+              assert r['publicPurchaseMode']=='PURCHASE_OPTIONS', r
+              assert r['commerceCta']=='See Purchase Options', r
+              assert r['paymentEligible'] is False, r
+              assert r['purchaseUrl'].startswith('/sok-order.html'), r
+              assert r['promotion']['eligible'] is False and r['promotion']['pricingMode']=='sok-map', r
+              assert r['hawaiiStatus']=='freight_review_required', r
+          raw=open('/tmp/sok.json').read().lower()
+          for forbidden in ['suppliercost','supplierinventory','sourcewarehouse','dropshipcost','landedcost','margin']:
+              assert forbidden not in raw, forbidden
+          assert 'us.sokbattery.com' not in raw
+          print('SOK public catalog PASS')
+          PY
+
+          curl -sS -L "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/lithium.json'))
+          rows=d.get('products') or []
+          skus={str(r.get('sku','')).upper() for r in rows}
+          assert 'SK12V100PC' in skus and 'SK48V100N' in skus, skus
+          print('Merged Lithium catalog PASS')
+          PY
+
+          curl -sS -L "$base/lithium-batteries" -o /tmp/lithium.html
+          grep -Fq 'AUTHORIZED SOK ENERGY DEALER' /tmp/lithium.html
+          grep -Fq 'SK12V100PC' /tmp/lithium.html
+          grep -Fq 'SK48V100N' /tmp/lithium.html
+          grep -Fq 'See Purchase Options' /tmp/lithium.html
+
+          curl -sS -L "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -Fq 'Hawaii SOK Battery Catalog' /tmp/hawaii.html
+          grep -Fq 'SK12V100PC' /tmp/hawaii.html
+          grep -Fq 'SK48V100N' /tmp/hawaii.html
+          grep -Fq 'Freight Review Required' /tmp/hawaii.html
+          ! grep -qi 'KINGBOSS' /tmp/hawaii.html
+          ! grep -q '\$1,298' /tmp/hawaii.html
+          ! grep -q '\$418' /tmp/hawaii.html
+
+          quote(){
+            local payload="$1" out="$2"
+            curl -sS -o "$out" -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d "$payload" "$base/api/store-checkout/quote"
+          }
+          code=$(quote '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"CO"}}' /tmp/q12.json)
+          test "$code" = 200 || { cat /tmp/q12.json; exit 1; }
+          code=$(quote '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"CO"}}' /tmp/q48.json)
+          test "$code" = 200 || { cat /tmp/q48.json; exit 1; }
+          python3 - <<'PY'
+          import json
+          for f in ['/tmp/q12.json','/tmp/q48.json']:
+              q=json.load(open(f))
+              assert q['availability']['purchaseMode']=='PURCHASE_OPTIONS', q
+              assert q['availability']['paymentEligible'] is False, q
+              assert q['availability']['cta']=='See Purchase Options', q
+          assert json.load(open('/tmp/q12.json'))['unitPriceCents']==31900
+          assert json.load(open('/tmp/q48.json'))['unitPriceCents']==119900
+          print('Purchase-mode payment gate PASS')
+          PY
+
+          code=$(quote '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"couponCode":"LABORDAY25","shipping":{"state":"CO"}}' /tmp/promo.json)
+          test "$code" = 409 || { echo "SOK promo expected 409 got $code"; cat /tmp/promo.json; exit 1; }
+
+          code=$(quote '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"HI"}}' /tmp/hi1.json)
+          test "$code" = 409 || { echo "HI qty1 expected 409 got $code"; cat /tmp/hi1.json; exit 1; }
+          grep -qi 'Freight Review Required' /tmp/hi1.json
+          code=$(quote '{"source":"lithium","id":"sok-sk48v100n","quantity":4,"shipping":{"state":"HI"}}' /tmp/hi4.json)
+          test "$code" = 409 || { echo "HI qty4 expected 409 got $code"; cat /tmp/hi4.json; exit 1; }
+          grep -qi 'Commercial Quantity' /tmp/hi4.json
+
+          code=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base/api/admin/sok-availability")
+          test "$code" = 401
+          for path in /sok-availability-runtime.js /sok-operations-runtime.js; do
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base$path")
+            test "$code" = 404 || { echo "$path expected 404 got $code"; exit 1; }
+          done
+
+      - name: Promote candidate to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ steps.candidate.outputs.sha }}"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = 'b6e33ba2e5b9f1ce354907ea4f98534e61407f51'
+          git merge-base --is-ancestor origin/main HEAD
+          git push origin HEAD:main
+
+      - name: Deploy production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify canonical production
+        shell: bash
+        env:
+          IMMUTABLE: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          for base in "${IMMUTABLE%/}" 'https://elevationupscales.com'; do
+            for route in / /lithium-batteries /hawaii-lithium-batteries /sok-order.html /checkout/ /rv-store /marketplace /start-a-project /solar-project /admin-sok; do
+              code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 3 -o /tmp/body -w '%{http_code}' "$base$route")
+              test "$code" = 200 || { echo "$base$route returned $code"; cat /tmp/body; exit 1; }
+            done
+            curl -sS -L --retry 10 --retry-all-errors --retry-delay 3 "$base/api/sok/catalog" -o /tmp/sok-prod.json
+            python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/sok-prod.json'))
+          rows=d.get('products') or d.get('items') or []
+          assert len(rows)==2, d
+          for r in rows:
+              assert r['publicPurchaseMode']=='PURCHASE_OPTIONS', r
+              assert r['paymentEligible'] is False, r
+          PY
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base/sok-operations-runtime.js")
+            test "$code" = 404
+            code=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base/api/admin/sok-availability")
+            test "$code" = 401
+          done
+
+      - name: Record production receipt and baseline
+        shell: bash
+        env:
+          APP_SHA: ${{ steps.candidate.outputs.sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PRODUCTION_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-receipts
+          cat > release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md <<EOF
+          # SOK 4.6 Pre-Purchase / Backorder Production Receipt
+
+          - Production parent: b6e33ba2e5b9f1ce354907ea4f98534e61407f51
+          - Application SHA: ${APP_SHA}
+          - RC preview: ${PREVIEW_URL}
+          - Immutable production: ${PRODUCTION_URL}
+          - Canonical production: https://elevationupscales.com
+          - Acceptance: 15/15 static + JavaScript syntax + isolated live preview PASS
+          - Public SOK products: SK12V100PC, SK48V100N
+          - Public purchase mode at launch: PURCHASE_OPTIONS
+          - Availability at launch: SK12V100PC Available; SK48V100N Pre-Purchase
+          - Payment: blocked until a SKU is explicitly moved to DIRECT_CHECKOUT and all availability/destination gates also pass
+          - Hawaii: 1–3 controlled freight review; 4+ commercial freight review
+          - SOK MAP: LABORDAY25 excluded
+          - Carrier acceptance: NOT PROVEN
+          - Economics: NOT PROVEN
+          - Public/internal supplier data boundary: PASS
+          - SOK local media: no unverified image/logo assets introduced; approved media remains pending asset availability
+          - Supplier refresh: none
+          - Commerce Pricing 2.0 rerun: none
+          EOF
+          git add release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record SOK 4.6 pre-purchase backorder production receipt [release-generated]'
+          git push origin HEAD:main
+          git push origin "${APP_SHA}:refs/heads/baseline-2026-09-04-sok-4-6-prepurchase-backorder-production"
+          echo "RECEIPT_SHA=$(git rev-parse HEAD)"
