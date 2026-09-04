@@ -3,6 +3,7 @@ import { getPromotionConfig, pricingForProduct, applyCoupon, isActualLithiumBatt
 import { resolveShippingRule } from "./shipping-rules-runtime.js";
 import { resolveHawaiiCustomerStatus } from "./hawaii-lithium-runtime.js";
 import { evaluateSokHawaiiOrder } from "./sok-operations-runtime.js";
+import { getSokCheckoutEntry } from "./sok-availability-runtime.js";
 const PAYPAL_SANDBOX_ORIGIN = "https://api-m.sandbox.paypal.com";
 const PAYPAL_LIVE_ORIGIN = "https://api-m.paypal.com";
 const FOURTHWALL_ORIGIN = "https://elevationupscales-shop.fourthwall.com";
@@ -405,19 +406,20 @@ async function quoteApparel(raw, env) {
 async function quoteRv(raw, env) {
   const id = clean(raw?.id, 120);
   const source = clean(raw?.source,20).toLowerCase() === "lithium" ? "lithium" : "rv";
-  const catalogEntry = await catalogRvEntry(env, id);
+  const destinationState = clean(raw?.shipping?.state, 2).toUpperCase();
+  const catalogEntry = await catalogRvEntry(env, id) || (source === "lithium" ? await getSokCheckoutEntry(env,id,destinationState) : null);
   const mappedEntry = source === "rv" ? rvMapEntry(env, id) : null;
   const entry = source === "lithium" ? catalogEntry : (catalogEntry || mappedEntry);
   const serverFallbackUrl = source === "rv" ? (trustedEbayUrl(mappedEntry?.ebayUrl) || ebayUrlFromItemId(mappedEntry?.ebayItemId) || await catalogRvFallbackUrl(env, id)) : "";
   const fallback = serverFallbackUrl ? {fallback:"ebay",ebayUrl:serverFallbackUrl} : {};
   if (!entry) return {ok:false,status:409,...fallback,error:source==="lithium"?"Lithium Catalog identity or verified shipping is unavailable":"Doba shipping is not mapped for this item"};
-  if (entry.shippingVerified !== true) return {ok:false,status:409,...fallback,error:"Doba shipping is not verified for this item"};
+  if (entry.shippingVerified !== true) return {ok:false,status:409,...fallback,error:"Shipping is not verified for this item"};
   if (entry.storeSection && ((source==="lithium"&&entry.storeSection!=="lithium-batteries")||(source==="rv"&&entry.storeSection!=="rv-outdoor"))) return {ok:false,status:409,error:"Catalog store identity does not match checkout source"};
-  const destinationState = clean(raw?.shipping?.state, 2).toUpperCase();
   const blockedStates = Array.isArray(entry.blockedStates) ? entry.blockedStates.map((value) => clean(value, 2).toUpperCase()) : [];
   const product = entry.productIdentity || {title:entry.name||raw?.name,category:"",supplier:"doba",supplierCostCents:0,priceCents:entry.priceCents,storeSection:source==="lithium"?"lithium-batteries":"rv-outdoor"};
   const config = await getPromotionConfig(env);
   const priced = pricingForProduct(product, config);
+  const availability = entry.sokAvailability || null;
   const actualBattery = source==="lithium" && isActualLithiumBattery(product);
   if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && ["HI","AK"].includes(destinationState))) return {ok:false,status:409,...fallback,error:"This Doba item is not available for the selected shipping state"};
   const qty = quantity(raw?.quantity);
@@ -453,6 +455,7 @@ async function quoteRv(raw, env) {
   const requestUrl = `/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(clean(entry.name||raw?.name,240))}&qty=${qty}#hawaii-request`;
   return {
     ok:true,source,id,productName:clean(entry.name||raw?.name,240)||(source==="lithium"?"Lithium item":"RV & Outdoor item"),productImage:clean(entry.imageUrl||entry.image,1200),quantity:qty,
+    availability:availability?{...availability,reservationUrl:`/sok-order.html?sku=${encodeURIComponent(hawaiiSku||product?.sku||"")}&mode=${encodeURIComponent(availability.mode||"unavailable")}&qty=${qty}${destinationState?`&state=${encodeURIComponent(destinationState)}`:""}`} : null,
     unitPriceCents,listMerchandiseCents,discountCents:coupon.discountCents,merchandiseCents:coupon.merchandiseCents,shippingCents,totalCents:coupon.merchandiseCents+shippingCents,
     couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,shippingRule,
     variantId:"",variantName:"",variants:[],physical:true,
@@ -558,6 +561,8 @@ async function createStoreOrder(request, env) {
   if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
   const quote = await quoteStoreItem(raw, env);
   if (!quote.ok) return json(quote, quote.status || 400);
+  if (quote.availability?.paymentEligible === false) return json({error:quote.availability?.mode==="prepurchase"?"Pre-Purchase timing must be confirmed before payment.":quote.availability?.mode==="backorder"?"Backorder replenishment and timing must be confirmed before payment.":"This item is not currently eligible for payment.",reservationRequired:true,reservationUrl:quote.availability?.reservationUrl,quote},409);
+  if (quote.availability?.requiresTimingAcknowledgement && raw?.availabilityTimingAcknowledged !== true) return json({error:"Please acknowledge the estimated fulfillment timing before payment.",timingAcknowledgementRequired:true,quote},409);
   if (quote.hawaii?.customerState === "review_required") return json({error:"Freight Review Required. Elevation will verify the battery and Hawaii freight path and contact you with the next step.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   if (quote.hawaii?.customerState === "unavailable") return json({error:"Currently Unavailable for Hawaii Shipping",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
@@ -620,7 +625,7 @@ async function createStoreOrder(request, env) {
       quote.totalCents,
       JSON.stringify(customer),
       JSON.stringify(address),
-      JSON.stringify({...quote.doba,shippingRule:quote.shippingRule||{},hawaii:quote.hawaii||null,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
+      JSON.stringify({...quote.doba,shippingRule:quote.shippingRule||{},hawaii:quote.hawaii||null,availability:quote.availability||null,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
       clean(body.id, 80),
       "",
       "created",
