@@ -36,14 +36,12 @@ jobs:
           test "$(git rev-parse origin/baseline-2026-09-04-commerce-pricing-2-post-import-production)" = "$PREV_APP"
           git merge-base --is-ancestor "$PREV_APP" "$APPROVED"
           test "$(git diff --name-only "$PREV_APP".."$APPROVED")" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
-
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
           git switch -C release-45-minimal-positioning "$PREV_MAIN"
           git checkout "$APPROVED" -- site/index.html site/what-we-do.html
-          test "$(git diff --name-only)" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
-          git diff --check
-          git add site/index.html site/what-we-do.html
+          test "$(git diff --cached --name-only)" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
+          git diff --cached --check
           git commit -m 'Apply minimal power and logistics positioning copy'
           APP_SHA=$(git rev-parse HEAD)
           test "$(git rev-parse HEAD:site)" = "$(git rev-parse "$APPROVED":site)"
@@ -96,7 +94,6 @@ jobs:
           grep -Fq 'BRIDGE THE GAP.' /tmp/what.html
           grep -Fq 'PRODUCTS. POWER. ACCESS.' /tmp/what.html
           grep -Fq 'BUILT FROM USE.' /tmp/what.html
-
           curl -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
           node - <<'NODE'
           const fs=require('fs');
@@ -111,13 +108,11 @@ jobs:
           if(leaked.length) throw new Error(`Internal fields exposed: ${leaked.join(', ')}`);
           if(!('availabilityStatus' in item)||!('purchaseUrl' in item)) throw new Error('Protected public fields missing');
           NODE
-
           curl -fsS "$base/api/store/promotion" -o /tmp/promotion.json
           node -e 'const x=require("/tmp/promotion.json"); if(x.couponCode!=="LABORDAY25"||Number(x.couponPercent)!==25) process.exit(1)'
           curl -fsS "$base/api/shipping-rules" -o /tmp/shipping.json
           grep -q '2799' /tmp/shipping.json
           grep -q '9900' /tmp/shipping.json
-
           BASE_URL="$base" node - <<'NODE'
           const base=process.env.BASE_URL;
           async function call(path,options={}){const r=await fetch(base+path,options);let b;try{b=await r.json()}catch{b={}}return{status:r.status,body:b}}
@@ -132,7 +127,6 @@ jobs:
             if(hi.status!==200||Number(hi.body.hawaii?.customerFreightPerBatteryCents)!==9900||hi.body.hawaii?.paymentAllowed!==false)throw new Error('Hawaii regression');
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
-
           for internal in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
             code=$(curl -sS -o /tmp/internal -w '%{http_code}' "$base/$internal" || true)
             test "$code" = "404"
