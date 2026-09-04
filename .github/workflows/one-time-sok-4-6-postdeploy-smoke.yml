@@ -1,0 +1,83 @@
+name: SOK 4.6 Post-Deploy Smoke
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-postdeploy-smoke-2026-09-04
+
+permissions:
+  contents: read
+
+env:
+  CANONICAL: https://elevationupscales.com
+  EXPECTED_MAIN: b6e33ba2e5b9f1ce354907ea4f98534e61407f51
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check current production ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote=$(git ls-remote https://github.com/elevationupscales/ElevationUpScales refs/heads/main | awk '{print $1}')
+          echo "main=$remote"
+          test "$remote" = "$EXPECTED_MAIN"
+
+      - name: Canonical route smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${CANONICAL%/}"
+          for route in / /store /lithium-batteries /hawaii-lithium-batteries /rv-store /checkout/ /start-a-project /solar-project /marketplace /admin /admin-lithium-shipping /admin-sok; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/body -w '%{http_code}' "$base$route" || true)
+            echo "$route => $code"
+            test "$code" = "200"
+          done
+
+      - name: SOK and Hawaii smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${CANONICAL%/}"
+          curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 --fail "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/hawaii.html
+          grep -q 'Standard Hawaii orders are currently limited to 1–3 batteries' /tmp/hawaii.html
+          grep -q 'Hawaii-Eligible Battery List' /tmp/hawaii.html
+          ! grep -q 'KINGBOSS' /tmp/hawaii.html
+          ! grep -q 'PHMSA' /tmp/hawaii.html
+
+          code=$(curl -sS -o /tmp/eligible.json -w '%{http_code}' "$base/api/hawaii-lithium/eligible-products" || true)
+          echo "eligible-products => $code: $(cat /tmp/eligible.json)"
+          test "$code" = "200"
+          grep -q '"maxStandardQuantity":3' /tmp/eligible.json
+          ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|margin|landed|dropShip' /tmp/eligible.json
+
+          code=$(curl -sS -o /tmp/admin.json -w '%{http_code}' "$base/api/admin/sok-operations" || true)
+          echo "admin-sok-api => $code"
+          test "$code" = "401"
+
+          code=$(curl -sS -o /tmp/runtime -w '%{http_code}' "$base/sok-operations-runtime.js" || true)
+          echo "sok-runtime => $code"
+          test "$code" = "404"
+
+          for runtime in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base/$runtime" || true)
+            echo "$runtime => $code"
+            test "$code" = "404"
+          done
+
+      - name: Existing commerce regression smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${CANONICAL%/}"
+          curl -sS -L --fail "$base/rv-store" -o /tmp/rv.html
+          grep -q 'Shop the Store' /tmp/rv.html
+          curl -sS -L --fail "$base/start-a-project" -o /tmp/project.html
+          grep -q 'Start a Project' /tmp/project.html
+          curl -sS -L --fail "$base/solar-project" -o /tmp/solar.html
+          grep -q 'Stage 1 of 7' /tmp/solar.html
+          curl -sS -L --fail "$base/marketplace" -o /tmp/marketplace.html
+          grep -qi 'Marketplace' /tmp/marketplace.html
+          echo 'POST-DEPLOY SMOKE PASS'
