@@ -1,0 +1,342 @@
+name: Final Evening Commerce Pricing 2 Production
+
+on:
+  push:
+    branches:
+      - runner/final-evening-commerce-pricing-2-production-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: final-evening-commerce-pricing-2-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: ${{ !contains(github.event.head_commit.message, '[release-generated]') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: d6938c518c3c2deff55365f052f258019ede2f8a
+          fetch-depth: 0
+
+      - name: Reconfirm exact production parent and verified application tree
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "d6938c518c3c2deff55365f052f258019ede2f8a"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          test "$(git rev-parse HEAD^1)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          test "$(git rev-parse HEAD^2)" = "0516dc269073aae645caa6ac7e22b0fd356abdeb"
+          test "$(git rev-parse HEAD:site)" = "65830ec4f3be342b8eacdcb4452f36eab2511051"
+          test "$(git rev-parse HEAD:release-receipts)" = "54c6160eaa297a25c299aef610362eadcd82c9b4"
+
+      - name: Harden customer-facing availability and purchase routing
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(path, old, new):
+              p=Path(path); s=p.read_text()
+              if old not in s:
+                  raise SystemExit(f"expected source not found in {path}")
+              p.write_text(s.replace(old,new,1))
+
+          # Public Catalog response: expose derived customer fields, never raw supplier/source fields.
+          replace_once(
+              "site/catalog-admin-runtime.js",
+              '''      priceCents: priced.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,\n      shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,\n      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: {''',
+              '''      priceCents: priced.priceCents,\n      availabilityStatus: (p.supplierStock === null || p.supplierStock === undefined || String(p.supplierStock).trim() === "") ? "check" : (Number(p.supplierStock) > 0 ? "available" : "unavailable"),\n      shippingStatus: p.shippingStatus, shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,\n      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt,\n      purchaseUrl: (() => { const source=clean(p.sourceType,40).toLowerCase(); const ebay=clean(p.ebayItemId,20); const section=p.storeSection==="lithium-batteries"?"lithium":"rv"; if(source==="doba" && clean(p.publishStatus,30).toLowerCase()==="published" && clean(p.shippingStatus,30).toLowerCase()==="verified" && Number(priced.priceCents)>0) return `/checkout/?source=${section}&id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.title)}`; if(/^\\d{12}$/.test(ebay)) return `https://www.ebay.com/itm/${ebay}`; return ""; })(),\n      promotion: {'''
+          )
+
+          # Lithium collection: use customer-facing availability only; never display supplier stock counts/text.
+          replace_once(
+              "site/lithium-shop.js",
+              '''      const stock = Number(product.supplierStock);\n      if (Number.isFinite(stock) && stock <= 0) return false;''',
+              '''      if (String(product.availabilityStatus || "check").toLowerCase() === "unavailable") return false;'''
+          )
+          replace_once(
+              "site/lithium-shop.js",
+              '''    const inventory = Number.isFinite(Number(product.supplierStock)) ? `${Math.max(0, Number(product.supplierStock))} available` : "Supplier-managed availability";''',
+              '''    const inventory = String(product.availabilityStatus || "check").toLowerCase() === "available" ? "Available" : "Availability confirmed before order";'''
+          )
+
+          # RV collection: derived availability + derived purchase URL only.
+          p=Path("site/rv-store.js"); s=p.read_text()
+          s,n=re.subn(
+              r'  function publicCatalogProduct\(product\) \{.*?\}\n\n  function normalizeCatalogProduct',
+              '''  function publicCatalogProduct(product) {if(!product)return false;const publishStatus=String(product.publishStatus||"").toLowerCase();if(publishStatus&&publishStatus!=="published")return false;if(!(Number(product.priceCents)>0))return false;if(String(product.availabilityStatus||"check").toLowerCase()==="unavailable")return false;if(String(product.shippingStatus||"unverified").toLowerCase()==="unverified")return false;return true;}\n\n  function normalizeCatalogProduct''',
+              s, count=1, flags=re.S
+          )
+          if n!=1: raise SystemExit("rv publicCatalogProduct replacement failed")
+          s,n=re.subn(
+              r'  function normalizeCatalogProduct\(product,index\)\{.*?\}\n\n  function syncList',
+              '''  function normalizeCatalogProduct(product,index){const catalogId=String(product?.id||product?.sku||`catalog-${index}`);const rawName=String(product?.title||product?.name||"RV & Outdoor item").trim();const publicPurchaseUrl=String(product?.purchaseUrl||"").trim();const buyUrl=/^(?:\\/|https?:\\/\\/)/i.test(publicPurchaseUrl)?publicPurchaseUrl:"";return{id:catalogId,itemNumber:"",sku:String(product?.sku||""),name:compactTitle(rawName),sourceName:rawName,subtitle:useCase(rawName),category:normalizeCategory(product?.category,rawName),priceCents:Number(product?.priceCents||0),imageUrl:String(product?.primaryImage||product?.images?.[0]||""),buyUrl,detailUrl:`/product?id=${encodeURIComponent(catalogId)}&store=rv`,shippingStatus:String(product?.shippingStatus||"unverified").toLowerCase(),order:index,catalogSource:"elevation-catalog"};}\n\n  function syncList''',
+              s, count=1, flags=re.S
+          )
+          if n!=1: raise SystemExit("rv normalizeCatalogProduct replacement failed")
+          p.write_text(s)
+
+          # Product detail: no raw supplier/source dependency in customer JavaScript.
+          p=Path("site/product-detail.js"); s=p.read_text()
+          s,n=re.subn(
+              r'    const stock = Number\(product\.supplierStock\);\n    if \(Number\.isFinite\(stock\) && stock <= 0\) return false;',
+              '    if (String(product.availabilityStatus || "check").toLowerCase() === "unavailable") return false;',
+              s, count=1
+          )
+          if n!=1: raise SystemExit("product availability replacement failed")
+          s,n=re.subn(
+              r'  function purchaseUrl\(product\) \{.*?\n  \}\n\n  function productImages',
+              '''  function purchaseUrl(product) {\n    const value = clean(product?.purchaseUrl, 1200);\n    return /^(?:\\/|https?:\\/\\/)/i.test(value) ? value : "";\n  }\n\n  function productImages''',
+              s, count=1, flags=re.S
+          )
+          if n!=1: raise SystemExit("product purchase routing replacement failed")
+          p.write_text(s)
+          PY
+
+          node --check site/catalog-admin-runtime.js
+          node --check site/lithium-shop.js
+          node --check site/rv-store.js
+          node --check site/product-detail.js
+          git diff --check
+
+          # Customer-delivered scripts must not retain raw sourcing/stock routing fields or supplier-facing copy.
+          for file in site/lithium-shop.js site/rv-store.js site/product-detail.js; do
+            ! grep -Ein 'supplierStock|supplier-managed|supplier_managed|sourceType|sourceUrl|ebayItemId|fulfillmentMode' "$file"
+          done
+
+          # Pricing/import internals remain server-side and direct-served runtime paths stay under the Worker gate.
+          grep -q 'availabilityStatus' site/catalog-admin-runtime.js
+          grep -q 'purchaseUrl' site/catalog-admin-runtime.js
+
+      - name: Commit exact hardened application candidate locally
+        id: candidate
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git switch -C final-evening-release
+          git add site/catalog-admin-runtime.js site/lithium-shop.js site/rv-store.js site/product-detail.js
+          git commit -m 'Harden customer Catalog boundary and preserve purchase routing'
+          sha=$(git rev-parse HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "APP_SHA=$sha" >> "$GITHUB_ENV"
+          echo "Candidate: $sha"
+
+      - name: Validate application architecture before preview
+        run: |
+          set -euo pipefail
+          for file in \
+            site/index.html site/_worker.js site/_routes.json \
+            site/catalog-admin-runtime.js site/lithium-shop.js site/rv-store.js site/product-detail.js \
+            site/store.html site/lithium-batteries.html site/hawaii-lithium-batteries.html \
+            site/checkout/index.html site/start-a-project.html site/solar-project.html; do
+            test -f "$file"
+          done
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check HEAD^
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+
+      - name: Deploy exact candidate preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=cp2finalpreview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify preview commerce, customer boundary, and purchase paths
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /product?id=cat-e91de8a6-3e69-45b3-b749-605befbdb268 /checkout/ /start-a-project /solar-project /terms /privacy /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+          curl -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          curl -fsS "$base/api/store/catalog?section=rv-outdoor" -o /tmp/rv.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const banned=new Set(['supplierStock','supplier','sourceType','sourceUrl','ebayItemId','fulfillmentMode','authoritativeCostCents','recommendedRetailCents','protectedNormalFloorCents','protectedPromoFloorCents','sourceSnapshot','supplierIdentity','upstreamSupplier','reconciliationSummary','lithiumReconciliation','landedCost','riskReserve']);
+          function body(path){const j=JSON.parse(fs.readFileSync(path,'utf8'));return Array.isArray(j)?j:(j.products||j.items||j.catalog||[])}
+          function keys(v,out=[]){if(Array.isArray(v))for(const x of v)keys(x,out);else if(v&&typeof v==='object')for(const [k,x] of Object.entries(v)){out.push(k);keys(x,out)}return out}
+          const lithium=body('/tmp/lithium.json'),rv=body('/tmp/rv.json');
+          if(lithium.length<31) throw new Error(`Lithium collection too small: ${lithium.length}`);
+          const item=lithium.find(p=>p.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268'||p.sku==='D01027HH7BV-136');
+          if(!item||Number(item.priceCents)!==17600) throw new Error('Representative $176 price failed');
+          if(!['available','unavailable','check'].includes(String(item.availabilityStatus))) throw new Error('Derived availability missing');
+          const leaked=[...new Set([...keys(lithium),...keys(rv)].filter(k=>banned.has(k)))];
+          if(leaked.length) throw new Error(`Public Catalog leaked internal keys: ${leaked.join(', ')}`);
+          if(rv.length && !rv.some(p=>typeof p.purchaseUrl==='string')) throw new Error('RV public purchase routing missing');
+          NODE
+
+          for script in lithium-shop.js rv-store.js product-detail.js; do
+            curl -fsS "$base/$script" -o "/tmp/$script"
+            ! grep -Ein 'supplierStock|supplier-managed|supplier_managed|sourceType|sourceUrl|ebayItemId|fulfillmentMode' "/tmp/$script"
+          done
+
+          for internal in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
+            code=$(curl -sS -o /tmp/internal -w '%{http_code}' "$base/$internal" || true)
+            echo "$internal direct=$code"
+            test "$code" = "404"
+          done
+
+          curl -fsS "$base/api/shipping-rules" -o /tmp/shipping.json
+          grep -q '2799' /tmp/shipping.json
+          grep -q '9900' /tmp/shipping.json
+          curl -fsS "$base/api/store/promotion" -o /tmp/promotion.json
+          node -e 'const x=require("/tmp/promotion.json");if(x.couponCode!=="LABORDAY25"||Number(x.couponPercent)!==25)process.exit(1)'
+
+          BASE_URL="$base" node - <<'NODE'
+          const base=process.env.BASE_URL;
+          async function call(path,options={}){const r=await fetch(base+path,options);let b;try{b=await r.json()}catch{b={}}return{status:r.status,body:b}}
+          (async()=>{
+            const headers={'Content-Type':'application/json','Origin':base};
+            const id='cat-e91de8a6-3e69-45b3-b749-605befbdb268';
+            const co=await call('/api/store-checkout/quote',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',shipping:{state:'CO'}})});
+            if(co.status!==200||Number(co.body.unitPriceCents)!==17600||Number(co.body.merchandiseCents)!==13200||Number(co.body.shippingCents)!==2799||co.body.promotion?.shippingDiscounted!==false)throw new Error('Lower 48 quote regression');
+            const ak=await call('/api/store-checkout/quote',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',shipping:{state:'AK'}})});
+            if(ak.status!==409||ak.body.shippingReviewRequired!==true)throw new Error('Alaska gate regression');
+            const hi=await call('/api/store-checkout/quote',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',shipping:{state:'HI'}})});
+            if(hi.status!==200||Number(hi.body.hawaii?.customerFreightPerBatteryCents)!==9900||hi.body.hawaii?.paymentAllowed!==false)throw new Error('Hawaii quote regression');
+            const order=await call('/api/store-checkout/orders',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',customer:{email:'final-production-verification@example.com'},shipping:{fullName:'Verification Only',address1:'1 Test Way',city:'Honolulu',state:'HI',postalCode:'96813',countryCode:'US'}})});
+            if(order.status!==409||order.body.hawaiiFreight!==true)throw new Error('Hawaii pre-PayPal gate regression');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Advance main only after exact preview PASS
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          git merge-base --is-ancestor b73b166e5887e86abb6044ccbdeb4e9c293cbe65 HEAD
+          git push origin HEAD:main
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+
+      - name: Deploy exact verified application to production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify immutable production deployment and canonical
+        env:
+          IMMUTABLE: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          verify_base(){
+            local base="${1%/}"
+            for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout/ /start-a-project /solar-project /terms /privacy /admin; do
+              code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+              echo "$base$route=$code"
+              test "$code" = "200"
+            done
+            curl -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/live-lithium.json
+            BASE_JSON=/tmp/live-lithium.json node - <<'NODE'
+            const fs=require('fs');const j=JSON.parse(fs.readFileSync(process.env.BASE_JSON,'utf8'));const p=Array.isArray(j)?j:(j.products||j.items||j.catalog||[]);const item=p.find(x=>x.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268'||x.sku==='D01027HH7BV-136');if(!item||Number(item.priceCents)!==17600||!('availabilityStatus' in item)||('supplierStock' in item)||('sourceType' in item)||('sourceUrl' in item))process.exit(1);
+          NODE
+          }
+          verify_base "$IMMUTABLE"
+
+          canonical=https://elevationupscales.com
+          ok=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS "$canonical/api/store/catalog?section=lithium-batteries" -o /tmp/canonical.json && CANONICAL_JSON=/tmp/canonical.json node - <<'NODE'
+            const fs=require('fs');const j=JSON.parse(fs.readFileSync(process.env.CANONICAL_JSON,'utf8'));const p=Array.isArray(j)?j:(j.products||j.items||j.catalog||[]);const item=p.find(x=>x.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268'||x.sku==='D01027HH7BV-136');if(!item||Number(item.priceCents)!==17600||!('availabilityStatus' in item)||('supplierStock' in item)||('sourceType' in item)||('sourceUrl' in item))process.exit(1);
+          NODE
+            then ok=1; break; fi
+            sleep 3
+          done
+          test "$ok" = "1"
+          verify_base "$canonical"
+
+          for script in lithium-shop.js rv-store.js product-detail.js; do
+            curl -fsS "$canonical/$script" -o "/tmp/canonical-$script"
+            ! grep -Ein 'supplierStock|supplier-managed|supplier_managed|sourceType|sourceUrl|ebayItemId|fulfillmentMode' "/tmp/canonical-$script"
+          done
+
+          for internal in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
+            code=$(curl -sS -o /tmp/internal -w '%{http_code}' "$canonical/$internal" || true)
+            test "$code" = "404"
+          done
+
+      - name: Record production receipt and accepted application baseline
+        env:
+          PROD_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          receipt=release-receipts/COMMERCE_PRICING_2_POST_IMPORT_PRODUCTION_RECEIPT_2026-09-04.md
+          cat > "$receipt" <<EOF
+          # Commerce Pricing 2.0 Post-Import Production Receipt — 2026-09-04
+
+          ## Release
+          - Status: PRODUCTION PASS / ACCEPTED
+          - Previous accepted application SHA: \`31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf\`
+          - Previous main receipt SHA: \`b73b166e5887e86abb6044ccbdeb4e9c293cbe65\`
+          - Pricing 2.0 verified application source: \`0516dc269073aae645caa6ac7e22b0fd356abdeb\`
+          - Import execution candidate: \`9d5a2fec1ef214ea289c6fef3869abe12914da6b\`
+          - Integration SHA before final boundary hardening: \`d6938c518c3c2deff55365f052f258019ede2f8a\`
+          - Deployed application SHA: \`$APP_SHA\`
+          - Immutable Cloudflare Pages deployment: $PROD_URL
+          - Canonical: https://elevationupscales.com
+          - Successful post-import verification run: \`33826626759\`
+          - Final production workflow run: \`$GITHUB_RUN_ID\`
+
+          ## Pricing Import State
+          - 31 intended retail-price writes
+          - 31 actual writes
+          - 0 unintended writes
+          - 0 other Catalog-field or publication changes
+          - 31/31 protected-floor PASS
+          - Representative SKU \`D01027HH7BV-136\`: \$176.00 retail / \$132.00 after LABORDAY25
+
+          ## Protected Controls
+          - Lower 48 lithium shipping: \$27.99 per battery
+          - Hawaii lithium customer freight: \$99.00 per battery
+          - Alaska: freight review required
+          - LABORDAY25: 25% eligible merchandise only; freight/shipping not discounted
+          - Hawaii review-required orders remain blocked before PayPal
+
+          ## Public / Internal Boundary
+          - Public Catalog uses derived customer-facing availability, not raw supplier stock counts.
+          - Customer scripts do not receive raw supplier/source routing fields.
+          - Internal pricing/supplier runtimes remain inaccessible by direct public request.
+          - Internal-data exposure verification: PASS
+          - KINGBOSS upstream Supplier attribution was not injected into current source snapshots.
+
+          ## Rollback
+          - Pre-promotion main baseline: \`baseline-2026-09-04-pre-commerce-pricing-2-app-promotion\`
+          - Previous accepted app rollback: \`baseline-2026-09-03-elevation-45-final-copy-production\`
+
+          ## Source archive
+          - Import execution archive SHA-256: \`25b1b38a949b8a5568f68b14fc98b9caab6adc3b7dbe13beeb32d221f572d928\`
+          EOF
+
+          git add "$receipt"
+          git commit -m 'Record Commerce Pricing 2 post-import production receipt [release-generated]'
+          receipt_sha=$(git rev-parse HEAD)
+          git push origin HEAD:main
+          git branch -f baseline-2026-09-04-commerce-pricing-2-post-import-production "$APP_SHA"
+          git push -f origin baseline-2026-09-04-commerce-pricing-2-post-import-production
+          echo "RECEIPT_SHA=$receipt_sha" >> "$GITHUB_ENV"
+
+      - name: Completion summary
+        run: |
+          echo '### Commerce Pricing 2.0 final production promotion — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Application SHA: $APP_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Receipt SHA: $RECEIPT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo '31/31 imported prices preserved; customer operations-text boundary hardened; canonical production verified.' >> "$GITHUB_STEP_SUMMARY"
