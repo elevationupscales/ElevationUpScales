@@ -1,0 +1,206 @@
+name: Elevation 4.5 Minimal Positioning Production
+
+on:
+  push:
+    branches:
+      - runner/4.5-minimal-positioning-production-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: elevation-45-minimal-positioning-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout protected production main
+        uses: actions/checkout@v6
+        with:
+          ref: 23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6
+          fetch-depth: 0
+
+      - name: Reconfirm production truth and build exact application commit
+        id: candidate
+        run: |
+          set -euo pipefail
+          PREV_MAIN=23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6
+          PREV_APP=3c525a28df066a1394f0e5c07404fc4a0e820626
+          APPROVED=f820d7c2042685077982480da06de005f4faba47
+          git fetch origin main work/4.5-positioning-copy-patch-2026-09-04 baseline-2026-09-04-commerce-pricing-2-post-import-production
+          test "$(git rev-parse origin/main)" = "$PREV_MAIN"
+          test "$(git rev-parse origin/baseline-2026-09-04-commerce-pricing-2-post-import-production)" = "$PREV_APP"
+          git merge-base --is-ancestor "$PREV_APP" "$APPROVED"
+          test "$(git diff --name-only "$PREV_APP".."$APPROVED")" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
+
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git switch -C release-45-minimal-positioning "$PREV_MAIN"
+          git checkout "$APPROVED" -- site/index.html site/what-we-do.html
+          test "$(git diff --name-only)" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
+          git diff --check
+          git add site/index.html site/what-we-do.html
+          git commit -m 'Apply minimal power and logistics positioning copy'
+          APP_SHA=$(git rev-parse HEAD)
+          test "$(git rev-parse HEAD:site)" = "$(git rev-parse "$APPROVED":site)"
+          echo "APP_SHA=$APP_SHA" >> "$GITHUB_ENV"
+          echo "sha=$APP_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Verify exact scope and protected application before production
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only 23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6..HEAD)" = "$(printf '%s\n' site/index.html site/what-we-do.html)"
+          grep -Fq 'LOGISTICS THAT MATTER.' site/index.html
+          grep -Fq 'BUILT FROM EXPERIENCE.' site/index.html
+          grep -Fq 'PRODUCTS THAT WORK.' site/index.html
+          grep -Fq 'FIELD SUPPORT.' site/index.html
+          grep -Fq 'REAL-WORLD USE.' site/index.html
+          grep -Fq 'BRIDGE THE GAP.' site/what-we-do.html
+          grep -Fq 'PRODUCTS. POWER. ACCESS.' site/what-we-do.html
+          grep -Fq 'BUILT FROM USE.' site/what-we-do.html
+          ! grep -Fq 'Projects come first.' site/index.html
+          ! grep -Fq 'HomeAndConstructionBusiness' site/index.html
+          grep -Fq '"@type":"Organization"' site/index.html
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+
+      - name: Deploy exact application candidate to production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify immutable production deployment
+        env:
+          BASE: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          echo "IMMUTABLE_URL=$base" >> "$GITHUB_ENV"
+          for route in / /what-we-do /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries '/product?id=cat-e91de8a6-3e69-45b3-b749-605befbdb268' /checkout/ /start-a-project /solar-project /terms /privacy /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            test "$code" = "200"
+          done
+          curl -fsS "$base/" -o /tmp/home.html
+          curl -fsS "$base/what-we-do" -o /tmp/what.html
+          grep -Fq 'LOGISTICS THAT MATTER.' /tmp/home.html
+          grep -Fq 'BUILT FROM EXPERIENCE.' /tmp/home.html
+          grep -Fq 'PRODUCTS THAT WORK.' /tmp/home.html
+          grep -Fq 'BRIDGE THE GAP.' /tmp/what.html
+          grep -Fq 'PRODUCTS. POWER. ACCESS.' /tmp/what.html
+          grep -Fq 'BUILT FROM USE.' /tmp/what.html
+
+          curl -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const j=JSON.parse(fs.readFileSync('/tmp/lithium.json','utf8'));
+          const products=Array.isArray(j)?j:(j.products||j.items||j.catalog||[]);
+          if(products.length<31) throw new Error(`Lithium collection too small: ${products.length}`);
+          const item=products.find(p=>p.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268'||p.sku==='D01027HH7BV-136');
+          if(!item||Number(item.priceCents)!==17600) throw new Error('Representative price regression');
+          const banned=['supplierStock','sourceType','sourceUrl','ebayItemId','fulfillmentMode','supplierIdentity','upstreamSupplier','authoritativeCostCents','recommendedRetailCents','protectedNormalFloorCents','protectedPromoFloorCents'];
+          const raw=JSON.stringify(j);
+          const leaked=banned.filter(k=>raw.includes(`"${k}"`));
+          if(leaked.length) throw new Error(`Internal fields exposed: ${leaked.join(', ')}`);
+          if(!('availabilityStatus' in item)||!('purchaseUrl' in item)) throw new Error('Protected public fields missing');
+          NODE
+
+          curl -fsS "$base/api/store/promotion" -o /tmp/promotion.json
+          node -e 'const x=require("/tmp/promotion.json"); if(x.couponCode!=="LABORDAY25"||Number(x.couponPercent)!==25) process.exit(1)'
+          curl -fsS "$base/api/shipping-rules" -o /tmp/shipping.json
+          grep -q '2799' /tmp/shipping.json
+          grep -q '9900' /tmp/shipping.json
+
+          BASE_URL="$base" node - <<'NODE'
+          const base=process.env.BASE_URL;
+          async function call(path,options={}){const r=await fetch(base+path,options);let b;try{b=await r.json()}catch{b={}}return{status:r.status,body:b}}
+          (async()=>{
+            const headers={'Content-Type':'application/json','Origin':base};
+            const id='cat-e91de8a6-3e69-45b3-b749-605befbdb268';
+            const co=await call('/api/store-checkout/quote',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',shipping:{state:'CO'}})});
+            if(co.status!==200||Number(co.body.unitPriceCents)!==17600||Number(co.body.merchandiseCents)!==13200||Number(co.body.shippingCents)!==2799||co.body.promotion?.shippingDiscounted!==false)throw new Error('Lower 48 regression');
+            const ak=await call('/api/store-checkout/quote',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',shipping:{state:'AK'}})});
+            if(ak.status!==409||ak.body.shippingReviewRequired!==true)throw new Error('Alaska gate regression');
+            const hi=await call('/api/store-checkout/quote',{method:'POST',headers,body:JSON.stringify({source:'lithium',id,quantity:1,couponCode:'LABORDAY25',shipping:{state:'HI'}})});
+            if(hi.status!==200||Number(hi.body.hawaii?.customerFreightPerBatteryCents)!==9900||hi.body.hawaii?.paymentAllowed!==false)throw new Error('Hawaii regression');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+          for internal in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
+            code=$(curl -sS -o /tmp/internal -w '%{http_code}' "$base/$internal" || true)
+            test "$code" = "404"
+          done
+
+      - name: Verify canonical production
+        run: |
+          set -euo pipefail
+          base='https://elevationupscales.com'
+          ok=0
+          for i in $(seq 1 24); do
+            if curl -fsS --retry 2 --retry-all-errors "$base/" -o /tmp/canonical-home && grep -Fq 'LOGISTICS THAT MATTER.' /tmp/canonical-home; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = "1"
+          for route in / /what-we-do /store /lithium-batteries /hawaii-lithium-batteries /checkout/ /start-a-project /terms /privacy; do
+            code=$(curl -sS -L --retry 4 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            test "$code" = "200"
+          done
+          curl -fsS "$base/what-we-do" -o /tmp/canonical-what
+          grep -Fq 'BRIDGE THE GAP.' /tmp/canonical-what
+          grep -Fq 'PRODUCTS. POWER. ACCESS.' /tmp/canonical-what
+          curl -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/canonical-lithium.json
+          node - <<'NODE'
+          const fs=require('fs'); const j=JSON.parse(fs.readFileSync('/tmp/canonical-lithium.json','utf8')); const p=Array.isArray(j)?j:(j.products||j.items||j.catalog||[]); const item=p.find(x=>x.sku==='D01027HH7BV-136'||x.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268'); if(!item||Number(item.priceCents)!==17600) throw new Error('canonical price regression'); const raw=JSON.stringify(j); for(const k of ['supplierStock','sourceType','sourceUrl','ebayItemId','fulfillmentMode','upstreamSupplier','authoritativeCostCents']) if(raw.includes(`"${k}"`)) throw new Error(`canonical internal leak ${k}`);
+          NODE
+
+      - name: Record receipt and advance protected baseline
+        run: |
+          set -euo pipefail
+          mkdir -p release-receipts
+          cat > release-receipts/ELEVATION_4.5_MINIMAL_POSITIONING_PRODUCTION_RECEIPT_2026-09-04.md <<EOF
+          # Elevation 4.5 Minimal Positioning Production Receipt — 2026-09-04
+
+          Status: PRODUCTION ACCEPTED
+
+          Previous main receipt: 23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6
+          Previous accepted application: 3c525a28df066a1394f0e5c07404fc4a0e820626
+          New application SHA: $APP_SHA
+          Immutable deployment: $IMMUTABLE_URL
+          Canonical: https://elevationupscales.com
+
+          Scope:
+          - site/index.html
+          - site/what-we-do.html
+
+          Protected commerce verification:
+          - D01027HH7BV-136 remains $176.00 retail / $132.00 LABORDAY25
+          - Lower 48 remains $27.99 per battery
+          - Hawaii remains $99.00 per battery
+          - Alaska remains Freight Review Required
+          - LABORDAY25 remains merchandise-only
+          - customer/internal data boundary PASS
+          EOF
+          git add release-receipts/ELEVATION_4.5_MINIMAL_POSITIONING_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record Elevation 4.5 minimal positioning production receipt [release-generated]'
+          RECEIPT_SHA=$(git rev-parse HEAD)
+          echo "RECEIPT_SHA=$RECEIPT_SHA" >> "$GITHUB_ENV"
+          git push origin "$APP_SHA":refs/heads/release/4.5-minimal-positioning-production-2026-09-04
+          git push --force origin "$APP_SHA":refs/heads/baseline-2026-09-04-elevation-45-minimal-positioning-production
+          git push origin "$RECEIPT_SHA":refs/heads/main
+
+      - name: Final release summary
+        run: |
+          echo '### Elevation 4.5 Minimal Positioning — PRODUCTION ACCEPTED' >> "$GITHUB_STEP_SUMMARY"
+          echo "Application SHA: $APP_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Receipt/main SHA: $RECEIPT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable deployment: $IMMUTABLE_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Changed application files: site/index.html, site/what-we-do.html' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Internal operations data boundary: PASS' >> "$GITHUB_STEP_SUMMARY"
