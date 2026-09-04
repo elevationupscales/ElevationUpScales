@@ -1,0 +1,109 @@
+name: One-Time CP2 Import Prep Boundary Verify V2
+on:
+  push:
+    branches:
+      - runner/cp2-import-prep-boundary-verify-v2-2026-09-03
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: cf629e22dfcd0573419bdc03971feafa452f3df4
+          fetch-depth: 0
+      - name: Exact candidate gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "cf629e22dfcd0573419bdc03971feafa452f3df4"
+          test "$(git rev-parse HEAD^)" = "5c16949b8722d2eda64bf1918de66cd32a65be88"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          node --check site/_worker.js
+          node --check site/catalog-admin-runtime.js
+          node --check site/commerce-pricing-runtime.js
+          git diff --name-only 5c16949b8722d2eda64bf1918de66cd32a65be88..HEAD | sort > /tmp/changed
+          cat /tmp/changed
+          test "$(cat /tmp/changed)" = $'site/_worker.js\nsite/catalog-admin-runtime.js'
+      - name: Deploy repaired candidate
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=cp2ipreview
+      - name: Public API and static-module boundary
+        env:
+          BASE: https://cp2ipreview.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          mkdir -p /tmp/scan
+          routes=(
+            "/" "/store" "/rv-store" "/lithium-batteries" "/hawaii-lithium-batteries" "/product" "/checkout"
+            "/api/store/catalog?section=lithium-batteries" "/api/store-catalog?section=rv-outdoor" "/api/store/featured" "/api/store/promotion" "/api/shipping-rules"
+          )
+          i=0
+          for route in "${routes[@]}"; do
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 -o "/tmp/scan/r${i}.txt" -w '%{http_code}' "$base$route")
+            echo "$route=$code"; test "$code" = "200"; i=$((i+1))
+          done
+          internal=( _worker.js worker-core.js commerce-pricing-runtime.js catalog-admin-runtime.js doba-csv-sync-runtime.js promotion-runtime.js shipping-rules-runtime.js store-checkout-server.js store-orders-admin-server.js hawaii-lithium-runtime.js sync-admin-runtime.js apparel-provider-runtime.js )
+          for p in "${internal[@]}"; do
+            code=$(curl -sS -L -o "/tmp/scan/internal-$p" -w '%{http_code}' "$base/$p")
+            echo "/$p=$code"; test "$code" = "404"
+          done
+          code=$(curl -sS -o /tmp/admin.json -w '%{http_code}' "$base/api/admin/commerce-pricing"); test "$code" = "401"
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          # Key-level checks on the two public Catalog APIs.
+          for fname in ['r7.txt','r8.txt']:
+            data=json.loads(Path('/tmp/scan/'+fname).read_text())
+            forbidden={'supplier','sourceType','fulfillmentMode','sourceUrl','ebayItemId','salesChannels','supplierCostCents','catalogCostCents','authoritativeCostCents','recommendedRetailCents','protectedNormalFloorCents','protectedPromoFloorCents','markupPercent','pricingMode','protectedFloorApplied','reason','sourceSnapshot','supplierIdentity','upstreamSupplier','costEvidence','merchandiseMargin','reconciliation','reconciliationSummary','lithiumReconciliation','reviewState','internalNotes','updatedBy','createdBy'}
+            def walk(v,path='$'):
+              found=[]
+              if isinstance(v,dict):
+                for k,val in v.items():
+                  if k in forbidden: found.append(f'{path}.{k}')
+                  found+=walk(val,f'{path}.{k}')
+              elif isinstance(v,list):
+                for i,val in enumerate(v): found+=walk(val,f'{path}[{i}]')
+              return found
+            found=walk(data)
+            if found:
+              print(fname,found[:100])
+              raise SystemExit('FORBIDDEN_PUBLIC_CATALOG_KEYS')
+          # Content-level checks across required public pages/APIs.
+          patterns=[r'authoritativeCostCents',r'recommendedRetailCents',r'protectedNormalFloorCents',r'protectedPromoFloorCents',r'merchandiseMargin',r'sourceSnapshot',r'upstreamSupplier',r'catalogCostCents',r'costEvidence',r'source_refresh_required',r'reconciliationSummary',r'lithiumReconciliation',r'listGrossCents',r'promoGrossCents',r'pricingMode',r'markupPercent']
+          leaks=[]
+          for p in Path('/tmp/scan').glob('r*.txt'):
+            text=p.read_text(errors='ignore')
+            for pat in patterns:
+              if re.search(pat,text,re.I): leaks.append((p.name,pat))
+          print({'contentLeaks':leaks})
+          if leaks: raise SystemExit('INTERNAL_CONTENT_EXPOSURE')
+          PY
+      - name: Commerce invariant smoke
+        env:
+          BASE: https://cp2ipreview.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsS "$BASE/api/store/promotion" -o /tmp/promo.json
+          curl -fsS "$BASE/api/shipping-rules" -o /tmp/ship.json
+          python3 - <<'PY'
+          import json
+          p=json.load(open('/tmp/promo.json')); s=json.load(open('/tmp/ship.json'))
+          assert p.get('active') is True,p
+          assert p.get('couponCode')=='LABORDAY25',p
+          assert int(p.get('couponPercent') or 0)==25,p
+          raw=json.dumps(s)
+          assert '2799' in raw and '9900' in raw, s
+          assert ('Alaska' in raw or 'AK' in raw), s
+          PY
+      - name: Summary
+        run: |
+          echo '### CP2 repaired public boundary PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate: `cf629e22dfcd0573419bdc03971feafa452f3df4`' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Required public pages/APIs passed; internal runtime modules 404; Admin pricing API unauthenticated=401.' >> "$GITHUB_STEP_SUMMARY"
