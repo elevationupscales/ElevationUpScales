@@ -21,7 +21,9 @@
     "/doba-csv-sync-runtime.js",
     "/apparel-provider-runtime.js",
     "/commerce-schema-migrations.js",
-    "/shipping-rules-runtime.js"
+    "/shipping-rules-runtime.js",
+    "/commerce-pricing-runtime.js",
+    "/promotion-runtime.js"
   ],
   "exclude": []
 }
