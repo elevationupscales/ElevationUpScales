@@ -1,0 +1,60 @@
+name: SOK 4.6 Pre-Purchase Preview Diagnostic
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-prepurchase-diagnostic-2026-09-04
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 943c5c1157c808e83dd9db0cbcfb318e40f987cd
+          fetch-depth: 1
+
+      - name: Static sanity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "943c5c1157c808e83dd9db0cbcfb318e40f987cd"
+          git diff --check
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+
+      - name: Deploy diagnostic preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-diagnostic
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Probe SOK APIs
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -u
+          base="${BASE%/}"
+          echo "BASE=$base"
+          for path in '/api/sok/catalog' '/api/store/catalog?section=lithium-batteries' '/api/hawaii-lithium/eligible-products'; do
+            echo "===== $path ====="
+            code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 2 -o /tmp/body -w '%{http_code}' "$base$path" || true)
+            echo "HTTP=$code"
+            cat /tmp/body 2>/dev/null || true
+            echo
+          done
+          echo '===== SOK checkout SK12 CO ====='
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
+          echo "HTTP=$code"; cat /tmp/body 2>/dev/null || true; echo
+          echo '===== SOK checkout SK48 CO ====='
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
+          echo "HTTP=$code"; cat /tmp/body 2>/dev/null || true; echo
