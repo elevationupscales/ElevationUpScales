@@ -1,5 +1,5 @@
 from pathlib import Path
-import sys
+import subprocess, sys
 repo=Path(sys.argv[1]).resolve()
 p=repo/"site/lithium-shop.js"
 text=p.read_text()
@@ -32,4 +32,7 @@ p.write_text(text.replace(old,new,1))
 p=repo/"site/hawaii-lithium-batteries.html"
 h=p.read_text().replace('<strong>Shipping Available</strong><p>Buy Now is available for the exact battery under the current Hawaii route.</p>','<strong>Available for Hawaii Freight Review</strong><p>The exact battery can enter the current Hawaii freight-intake path. Final freight and payment state remain server-confirmed.</p>')
 p.write_text(h)
-print("Hawaii eligible-list client routing applied")
+
+# Intent-to-add makes newly created files visible to the release delta gate without committing them early.
+subprocess.run(["git","add","-N","site/admin-sok.css","site/admin-sok.html","site/admin-sok.js","site/sok-operations-runtime.js"],cwd=repo,check=True)
+print("Hawaii eligible-list client routing applied; new SOK files registered for delta validation")
