@@ -1,0 +1,290 @@
+name: SOK 4.6 Recovery Production
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-recovery-production-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: sok-4-6-recovery-production
+  cancel-in-progress: false
+
+env:
+  EXPECTED_MAIN: 6d75f24222cf17432c5ae89c875d14496a6d6888
+  TARGET_BRANCH: work/sok-4-6-integration-2026-09-04
+  BASELINE_BRANCH: baseline-2026-09-04-sok-4-6-production
+
+jobs:
+  recover-test-preview-promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out recovery controls
+        uses: actions/checkout@v6
+        with:
+          ref: runner/sok-4-6-recovery-production-2026-09-04
+          path: control
+          fetch-depth: 1
+
+      - name: Check out accepted production source
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: repo
+          fetch-depth: 0
+
+      - name: Rebuild SOK 4.6 candidate from protected main
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd repo
+          current="$(git rev-parse HEAD)"
+          test "$current" = "$EXPECTED_MAIN"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+
+          python3 ../control/deployment/sok-4-6/recover.py "$PWD" "$(cd ../control && pwd)"
+          python3 ../control/deployment/sok-4-6/postpatch.py "$PWD"
+
+          echo 'Changed files:'
+          git diff --name-status
+          git diff --check
+
+          changed="$(git diff --name-only | sort)"
+          expected="$(cat <<'EOF'
+          site/_worker.js
+          site/admin-lithium-shipping.html
+          site/admin-sok.css
+          site/admin-sok.html
+          site/admin-sok.js
+          site/hawaii-lithium-batteries.html
+          site/hawaii-lithium-runtime.js
+          site/lithium-shop.js
+          site/site-shell.js
+          site/sok-operations-runtime.js
+          site/store-checkout-server.js
+          EOF
+          )"
+          expected="$(printf '%s\n' "$expected" | sed 's/^ *//' | sort)"
+          test "$changed" = "$expected"
+
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+
+          # 14 SOK 4.6 boundary tests.
+          test_no=0
+          pass(){ test_no=$((test_no+1)); echo "PASS $test_no/14 — $1"; }
+
+          grep -q 'PRIMARY AUTHORIZED BATTERY PARTNER — SOK ENERGY' site/sok-operations-runtime.js; pass 'dedicated authorized SOK operating lane'
+          grep -q 'SK48V100N' site/sok-operations-runtime.js && grep -q 'anchorSku:"SK48V100N"' site/sok-operations-runtime.js; pass 'SK48V100N anchor SKU'
+          grep -q 'HAZMAT DOCUMENTED' site/sok-operations-runtime.js && grep -q 'CARRIER ACCEPTED' site/sok-operations-runtime.js && grep -q 'ECONOMICS APPROVED' site/sok-operations-runtime.js && grep -q 'COMMERCIAL READY' site/sok-operations-runtime.js; pass 'qualification lifecycle gates'
+          grep -q 'sds_state' site/sok-operations-runtime.js && grep -q 'un38_state' site/sok-operations-runtime.js && grep -q 'exact_sku_check' site/sok-operations-runtime.js; pass 'exact-SKU compliance gates'
+          grep -q 'HAWAII_OPERATIONAL_MAX_QTY = 3' site/sok-operations-runtime.js && grep -q 'commercial_review_required' site/hawaii-lithium-runtime.js; pass 'three-unit Hawaii controlled-launch gate'
+          grep -q 'eus_sok_quantity_overrides' site/sok-operations-runtime.js && grep -q 'override_hash' site/sok-operations-runtime.js && grep -q 'used_key' site/sok-operations-runtime.js; pass 'authenticated one-time quantity overrides'
+          grep -q 'Commercial Quantity — Freight Review Required' site/sok-operations-runtime.js && grep -q 'commercialQuoteRequired' site/store-checkout-server.js; pass 'commercial-quote routing'
+          for profile in SOK-12-1 SOK-12-3 SOK-48-1 SOK-48-3 SOK-MIX-STARTER SOK-48-PALLET SOK-12-PALLET; do grep -q "$profile" site/sok-operations-runtime.js; done; pass 'reusable freight profiles'
+          grep -q 'SOK purchase/PO blocked until buyer commitment' site/sok-operations-runtime.js && grep -q 'managementInventoryOverride' site/sok-operations-runtime.js; pass 'purchase and PO safeguards'
+          grep -q 'filterHawaiiEligibleCatalogProducts' site/_worker.js && grep -q '/api/hawaii-lithium/eligible-products' site/lithium-shop.js; pass 'bounded dedicated Hawaii storefront query'
+          grep -q 'KINGBOSS_CATALOG_IDS.has' site/_worker.js && grep -q 'This model is currently unavailable for Hawaii delivery' site/sok-operations-runtime.js; pass 'Kingboss retained but Hawaii-ineligible'
+          grep -q '/sok-operations-runtime.js' site/_worker.js && grep -q '/api/admin/sok-operations' site/_worker.js && ! grep -q 'supplierCostCents' site/admin-sok.js; pass 'private supplier/internal-data boundary'
+          grep -q 'eus_sok_rr_research' site/sok-operations-runtime.js && grep -q '/api/admin/sok-operations/rr-research' site/sok-operations-runtime.js; pass 'private R&R research lane'
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' site/hawaii-lithium-batteries.html && grep -q 'max="3" value="1"' site/hawaii-lithium-batteries.html && ! grep -q 'PHMSA' site/hawaii-lithium-batteries.html; pass 'simple customer Hawaii freight intake'
+          test "$test_no" = 14
+
+          # Protected production invariants remain intact.
+          grep -q 'const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900' site/hawaii-lithium-runtime.js
+          grep -q 'const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900' site/store-checkout-server.js
+          grep -q '2799' site/shipping-rules-runtime.js
+          grep -q 'LABORDAY25' site/promotion-runtime.js
+          grep -q 'Start a Project' site/index.html
+          grep -q 'Stage 1 of 7' site/solar-project.html
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          ! grep -q '&ebay=' site/rv-store.js
+          test -f site/marketplace.html
+          test -f site/checkout/index.html
+
+          # No migration/import/supplier refresh/product activation is executed by this release.
+          ! git diff | grep -Eq 'price_cents[[:space:]]*=|UPDATE eus_inventory_items|INSERT INTO eus_inventory_items|supplier refresh|DOBA.*sync'
+
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git checkout -b "$TARGET_BRANCH"
+          git add site/_worker.js site/admin-lithium-shipping.html site/admin-sok.css site/admin-sok.html site/admin-sok.js site/hawaii-lithium-batteries.html site/hawaii-lithium-runtime.js site/lithium-shop.js site/site-shell.js site/sok-operations-runtime.js site/store-checkout-server.js
+          git commit -m 'Integrate SOK 4.6 controlled battery operations and Hawaii routing'
+          app_sha="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_MAIN"
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+          echo "app_sha=$app_sha" >> "$GITHUB_OUTPUT"
+          echo "Candidate: $app_sha"
+
+      - name: Deploy isolated SOK 4.6 Release Candidate preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-release-candidate
+          workingDirectory: repo
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify isolated Release Candidate
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          test -n "$base"
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout/ /start-a-project /solar-project /admin /admin-lithium-shipping /admin-sok; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/eus.html -w '%{http_code}' "$base$route" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+          curl -sS -L --fail "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/hawaii.html
+          grep -q 'Standard Hawaii orders are currently limited to 1–3 batteries' /tmp/hawaii.html
+          ! grep -q 'PHMSA' /tmp/hawaii.html
+
+          curl -sS -L --fail "$base/lithium-shop.js" -o /tmp/lithium-shop.js
+          grep -q '/api/hawaii-lithium/eligible-products' /tmp/lithium-shop.js
+
+          eligible_code=$(curl -sS -o /tmp/eligible.json -w '%{http_code}' "$base/api/hawaii-lithium/eligible-products" || true)
+          test "$eligible_code" = "200"
+          grep -q '"maxStandardQuantity":3' /tmp/eligible.json
+          ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|margin|landed' /tmp/eligible.json
+
+          admin_code=$(curl -sS -o /tmp/sok-admin.json -w '%{http_code}' "$base/api/admin/sok-operations" || true)
+          test "$admin_code" = "401"
+          runtime_code=$(curl -sS -o /tmp/sok-runtime.txt -w '%{http_code}' "$base/sok-operations-runtime.js" || true)
+          test "$runtime_code" = "404"
+
+          # Existing protected internal runtimes remain private.
+          for runtime in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
+            code=$(curl -sS -o /tmp/internal.txt -w '%{http_code}' "$base/$runtime" || true)
+            test "$code" = "404"
+          done
+
+          echo '### SOK 4.6 isolated Release Candidate — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: ${{ steps.build.outputs.app_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $base" >> "$GITHUB_STEP_SUMMARY"
+          echo '14/14 boundary tests: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Normal storefront regression gate: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public/internal data boundary: PASS' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guard current main and promote approved application
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd repo
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git rev-parse HEAD)" = "${{ steps.build.outputs.app_sha }}"
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_MAIN"
+          git push origin "HEAD:refs/heads/main"
+          git push origin "HEAD:refs/heads/$BASELINE_BRANCH"
+          echo "Promoted application ${{ steps.build.outputs.app_sha }} to main and protected baseline."
+
+      - name: Deploy SOK 4.6 production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          workingDirectory: repo
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production immutable and canonical
+        shell: bash
+        env:
+          IMMUTABLE: ${{ steps.production.outputs.deployment-url }}
+          CANONICAL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for base in "${IMMUTABLE%/}" "${CANONICAL%/}"; do
+            for route in / /lithium-batteries /hawaii-lithium-batteries /rv-store /checkout/ /start-a-project /solar-project /marketplace; do
+              code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 3 -o /tmp/prod.html -w '%{http_code}' "$base$route" || true)
+              echo "$base$route=$code"
+              test "$code" = "200"
+            done
+            curl -sS -L --retry 10 --retry-all-errors --retry-delay 3 --fail "$base/hawaii-lithium-batteries" -o /tmp/prod-hawaii.html
+            grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/prod-hawaii.html
+            grep -q 'Standard Hawaii orders are currently limited to 1–3 batteries' /tmp/prod-hawaii.html
+            eligible_code=$(curl -sS -o /tmp/prod-eligible.json -w '%{http_code}' "$base/api/hawaii-lithium/eligible-products" || true)
+            test "$eligible_code" = "200"
+            grep -q '"maxStandardQuantity":3' /tmp/prod-eligible.json
+            ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|margin|landed' /tmp/prod-eligible.json
+            runtime_code=$(curl -sS -o /tmp/prod-runtime.txt -w '%{http_code}' "$base/sok-operations-runtime.js" || true)
+            test "$runtime_code" = "404"
+          done
+
+      - name: Record production receipt
+        id: receipt
+        shell: bash
+        env:
+          APP_SHA: ${{ steps.build.outputs.app_sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PROD_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          cd repo
+          mkdir -p release-receipts
+          cat > release-receipts/SOK_4.6_PRODUCTION_RECEIPT_2026-09-04.md <<'EOF'
+          # SOK 4.6 Production Receipt — 2026-09-04
+
+          Status: PRODUCTION ACCEPTED
+
+          Release: SOK 4.6 controlled manufacturer-direct battery operations + simple Hawaii storefront routing
+          Previous main: 6d75f24222cf17432c5ae89c875d14496a6d6888
+          Application SHA: __APP_SHA__
+          Application baseline: baseline-2026-09-04-sok-4-6-production
+          Preview: __PREVIEW_URL__
+          Immutable production: __PROD_URL__
+          Canonical: https://elevationupscales.com
+
+          Verified:
+          - 14/14 SOK boundary tests PASS
+          - full JavaScript syntax PASS
+          - exact parent / lineage PASS
+          - SOK private operating runtime + protected admin API
+          - SK48V100N anchor lifecycle and exact-SKU compliance gates
+          - reusable SOK freight profiles
+          - 1–3 battery Hawaii controlled-launch gate
+          - authenticated one-time quantity override architecture
+          - 4+ commercial-quantity freight review routing
+          - buyer-commitment / Management-override PO safeguard
+          - Kingboss retained in normal commerce but excluded from Hawaii path
+          - dedicated Hawaii-eligible battery collection derived from the master Catalog
+          - normal shopping remains separate from Hawaii freight intake
+          - public/internal supplier-data boundary PASS
+          - private R&R commercial research lane
+          - no supplier refresh executed
+          - no product activation executed
+          - no database migration/data write executed during deployment
+          - Commerce Pricing 2.0 import not rerun
+          - Lower-48 / Marketplace / Start a Project / Solar Builder regression routes PASS
+          EOF
+          sed -i "s|__APP_SHA__|$APP_SHA|g; s|__PREVIEW_URL__|$PREVIEW_URL|g; s|__PROD_URL__|$PROD_URL|g" release-receipts/SOK_4.6_PRODUCTION_RECEIPT_2026-09-04.md
+          git add release-receipts/SOK_4.6_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record SOK 4.6 production receipt [release-generated]'
+          receipt_sha="$(git rev-parse HEAD)"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$APP_SHA"
+          git push origin "HEAD:refs/heads/main"
+          echo "receipt_sha=$receipt_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Final release summary
+        shell: bash
+        run: |
+          echo '### SOK 4.6 — PRODUCTION ACCEPTED' >> "$GITHUB_STEP_SUMMARY"
+          echo "Application: ${{ steps.build.outputs.app_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Receipt main: ${{ steps.receipt.outputs.receipt_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${{ steps.preview.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production: ${{ steps.production.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment and canonical verification: PASS' >> "$GITHUB_STEP_SUMMARY"
