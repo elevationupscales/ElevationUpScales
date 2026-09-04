@@ -1,0 +1,348 @@
+name: SOK 4.6 Pre-Purchase Backorder Production
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-prepurchase-backorder-production-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: sok-4-6-prepurchase-backorder-production
+  cancel-in-progress: false
+
+env:
+  BASELINE_SHA: 67a85bbb56b3471511b1e191dc92417ebe6b69c3
+  EXPECTED_MAIN: b6e33ba2e5b9f1ce354907ea4f98534e61407f51
+  EXPECTED_WORK_HEAD: 957dc7542545517d90d2443d73a3b0cf86a0c841
+  WORK_BRANCH: work/sok-4-6-prepurchase-backorder-2026-09-04
+  NEW_BASELINE: baseline-2026-09-04-sok-4-6-prepurchase-backorder-production
+
+jobs:
+  build-test-preview-promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out release controls
+        uses: actions/checkout@v6
+        with:
+          ref: runner/sok-4-6-prepurchase-backorder-production-2026-09-04
+          path: control
+          fetch-depth: 1
+
+      - name: Check out SOK work branch
+        uses: actions/checkout@v6
+        with:
+          ref: work/sok-4-6-prepurchase-backorder-2026-09-04
+          path: candidate
+          fetch-depth: 0
+
+      - name: Patch existing SOK 4.6 architecture
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd candidate
+          test "$(git rev-parse HEAD)" = "$EXPECTED_WORK_HEAD"
+          git fetch origin main "$WORK_BRANCH" --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git rev-parse origin/$WORK_BRANCH)" = "$EXPECTED_WORK_HEAD"
+          git merge-base --is-ancestor "$BASELINE_SHA" HEAD
+
+          python3 ../control/deployment/sok-4-6-prepurchase/patch.py "$PWD"
+          git diff --check
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+
+          expected=$(cat <<'EOF'
+          site/_routes.json
+          site/_worker.js
+          site/admin-sok-availability.js
+          site/admin-sok.html
+          site/checkout/index.html
+          site/hawaii-lithium-batteries.html
+          site/lithium-shop.js
+          site/sok-availability-runtime.js
+          site/sok-operations-runtime.js
+          site/sok-order.html
+          site/sok-order.js
+          site/store-checkout-server.js
+          site/store-checkout.js
+          EOF
+          )
+          expected="$(printf '%s\n' "$expected" | sed 's/^ *//' | sort)"
+          actual="$(git diff --name-only "$BASELINE_SHA" | sort)"
+          echo "$actual"
+          test "$actual" = "$expected"
+
+          # Pure availability-state tests.
+          node --experimental-default-type=module <<'NODE'
+          import { __sokAvailabilityTest } from './site/sok-availability-runtime.js';
+          const p=__sokAvailabilityTest.commercePresentation;
+          const available=p({availability_mode:'available',management_approved:1},'CO');
+          if(available.label!=='Available'||available.cta!=='Buy Now'||!available.paymentEligible) throw new Error('available state failed');
+          const pre=p({availability_mode:'prepurchase',management_approved:1,prepurchase_enabled:1,expected_ship_window:'Estimated window',customer_timing_notice:'Expected fulfillment timing is an estimate and may change.'},'CO');
+          if(pre.label!=='Pre-Purchase'||!pre.paymentEligible||!pre.requiresTimingAcknowledgement) throw new Error('prepurchase state failed');
+          const back=p({availability_mode:'backorder',management_approved:1,backorder_enabled:1,supplier_replenishment_confirmed:1,expected_available_date:'2026-10-01'},'CO');
+          if(back.label!=='Available on Backorder'||!back.paymentEligible||!back.requiresTimingAcknowledgement) throw new Error('backorder state failed');
+          const unavailable=p({availability_mode:'unavailable',management_approved:1},'CO');
+          if(unavailable.paymentEligible) throw new Error('unavailable payment gate failed');
+          const hi=p({availability_mode:'available',management_approved:1},'HI');
+          if(hi.paymentEligible) throw new Error('availability mode bypassed Hawaii gate');
+          console.log('availability-state unit tests PASS');
+          NODE
+
+          # Acceptance / protected-boundary static gates.
+          test_no=0
+          pass(){ test_no=$((test_no+1)); echo "PASS $test_no/11 — $1"; }
+          grep -q 'label="Available";cta="Buy Now";paymentEligible=true' site/sok-availability-runtime.js; pass 'Available renders Buy Now when commerce state permits'
+          grep -q 'label="Pre-Purchase";cta="Pre-Purchase"' site/sok-availability-runtime.js && grep -q 'Expected fulfillment timing is an estimate and may change' site/checkout/index.html; pass 'Pre-Purchase + timing disclosure'
+          grep -q 'label="Available on Backorder"' site/sok-availability-runtime.js && grep -q 'supplier_replenishment_confirmed' site/sok-availability-runtime.js; pass 'Backorder + replenishment/timing gate'
+          grep -q 'mode==="unavailable"' site/sok-availability-runtime.js && grep -q 'paymentEligible === false' site/store-checkout-server.js; pass 'Unavailable cannot accept payment'
+          grep -q 'if(upper(destinationState,2)==="HI") paymentEligible=false' site/sok-availability-runtime.js && grep -q 'evaluateSokHawaiiOrder' site/store-checkout-server.js; pass 'Pre-Purchase cannot bypass Hawaii carrier/economics'
+          grep -q 'evaluateSokHawaiiOrder' site/store-checkout-server.js && grep -q 'CARRIER ACCEPTED' site/sok-operations-runtime.js && grep -q 'ECONOMICS APPROVED' site/sok-operations-runtime.js; pass 'Backorder cannot bypass Hawaii qualification'
+          grep -q 'HAWAII_OPERATIONAL_MAX_QTY = 3' site/sok-operations-runtime.js && grep -q 'Commercial Quantity — Freight Review Required' site/sok-operations-runtime.js; pass 'Hawaii qty 4+ remains blocked'
+          grep -q 'destinationState' site/sok-availability-runtime.js && grep -q 'lower48_eligible' site/sok-availability-runtime.js; pass 'Lower-48 separated from Hawaii controls'
+          ! grep -q 'supplierCostCents' site/admin-sok-availability.js && ! grep -q 'supplierInventory' site/admin-sok-availability.js; pass 'raw supplier cost/inventory stay private publicly'
+          grep -q 'availability_updated' site/sok-availability-runtime.js && grep -q 'eus_sok_events' site/sok-availability-runtime.js; pass 'admin changes auditable'
+          grep -q 'pricingMode:"sok-map"' site/sok-availability-runtime.js && grep -q 'supplier:"sok"' site/sok-availability-runtime.js && grep -q 'supplier==="doba"' site/promotion-runtime.js; pass 'Pricing 2.0 / MAP / promotion boundary preserved'
+          test "$test_no" = 11
+
+          # Manufacturer-document gate update without falsely accepting carrier/economics.
+          grep -q "hazmat_document_state='DOCUMENTED / READY FOR CARRIER REVIEW'" site/sok-availability-runtime.js
+          grep -q "sds_state='RECEIVED'" site/sok-availability-runtime.js
+          grep -q "un38_state='RECEIVED'" site/sok-availability-runtime.js
+          grep -q "'NOT CHECKED','ESTIMATE ONLY'" site/sok-availability-runtime.js
+          grep -q 'SOK-12-2' site/sok-availability-runtime.js
+          grep -q 'SOK-48-2' site/sok-availability-runtime.js
+
+          # Protected existing systems.
+          grep -q 'const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900' site/store-checkout-server.js
+          grep -q 'const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900' site/hawaii-lithium-runtime.js
+          grep -q 'LABORDAY25' site/promotion-runtime.js
+          grep -q 'Start a Project' site/index.html
+          grep -q 'Stage 1 of 7' site/solar-project.html
+          test -f site/marketplace.html
+          test -f site/rv-store.html
+
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git add site
+          git commit -m 'Add SOK pre-purchase backorder and document qualification'
+          candidate_sha="$(git rev-parse HEAD)"
+          git push origin "HEAD:refs/heads/$WORK_BRANCH"
+          echo "candidate_sha=$candidate_sha" >> "$GITHUB_OUTPUT"
+          echo "Candidate: $candidate_sha"
+
+      - name: Deploy isolated Release Candidate preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-backorder-rc
+          workingDirectory: candidate
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Live preview acceptance tests
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /lithium-batteries /hawaii-lithium-batteries /sok-order.html /checkout/ /rv-store /marketplace /start-a-project /solar-project /admin-sok; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/body -w '%{http_code}' "$base$route" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+          curl -sS -L --fail "$base/api/sok/catalog" -o /tmp/sok.json
+          grep -q 'SK12V100PC' /tmp/sok.json
+          grep -q 'SK48V100N' /tmp/sok.json
+          grep -q '"availabilityMode":"available"' /tmp/sok.json
+          grep -q '"availabilityMode":"prepurchase"' /tmp/sok.json
+          ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|dropShip|landed|margin' /tmp/sok.json
+
+          curl -sS -L --fail "$base/api/store/catalog?section=lithium-batteries" -o /tmp/catalog.json
+          grep -q 'SK12V100PC' /tmp/catalog.json
+          grep -q 'SK48V100N' /tmp/catalog.json
+          ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|dropShip|landed' /tmp/catalog.json
+
+          curl -sS -L --fail "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q 'Hawaii SOK Battery Catalog' /tmp/hawaii.html
+          grep -q 'SK12V100PC' /tmp/hawaii.html
+          grep -q 'SK48V100N' /tmp/hawaii.html
+          ! grep -q 'KINGBOSS' /tmp/hawaii.html
+
+          # Lower-48 AVAILABLE quote.
+          code=$(curl -sS -o /tmp/q12.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
+          echo "SK12 CO quote=$code $(cat /tmp/q12.json)"
+          test "$code" = "200"
+          grep -q '"mode":"available"' /tmp/q12.json
+          grep -q '"paymentEligible":true' /tmp/q12.json
+          grep -q '"unitPriceCents":31900' /tmp/q12.json
+
+          # PRE-PURCHASE quote remains reservation-first without a credible timing window.
+          code=$(curl -sS -o /tmp/q48.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
+          echo "SK48 CO quote=$code $(cat /tmp/q48.json)"
+          test "$code" = "200"
+          grep -q '"mode":"prepurchase"' /tmp/q48.json
+          grep -q '"paymentEligible":false' /tmp/q48.json
+          grep -q 'Expected fulfillment timing is an estimate and may change' /tmp/q48.json
+
+          # SOK MAP products cannot inherit LABORDAY25.
+          code=$(curl -sS -o /tmp/coupon.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"couponCode":"LABORDAY25","shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
+          test "$code" = "409"
+          grep -qi 'not eligible' /tmp/coupon.json
+
+          # Hawaii gates stay stronger than availability mode.
+          code=$(curl -sS -o /tmp/hi1.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"HI"}}' "$base/api/store-checkout/quote" || true)
+          echo "HI qty1=$code $(cat /tmp/hi1.json)"
+          test "$code" = "409"
+          grep -q 'Freight Review Required' /tmp/hi1.json
+
+          code=$(curl -sS -o /tmp/hi4.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":4,"shipping":{"state":"HI"}}' "$base/api/store-checkout/quote" || true)
+          echo "HI qty4=$code $(cat /tmp/hi4.json)"
+          test "$code" = "409"
+          grep -q 'Commercial Quantity' /tmp/hi4.json
+
+          # Reservation route validates before any write.
+          code=$(curl -sS -o /tmp/res.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"sku":"SK48V100N","quantity":1,"destinationState":"CO","name":"Test","email":"invalid"}' "$base/api/sok/reservations" || true)
+          test "$code" = "400"
+
+          # Admin/private boundaries.
+          code=$(curl -sS -o /tmp/admin.json -w '%{http_code}' "$base/api/admin/sok-availability" || true); test "$code" = "401"
+          code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base/sok-availability-runtime.js" || true); test "$code" = "404"
+          code=$(curl -sS -o /tmp/private2 -w '%{http_code}' "$base/sok-operations-runtime.js" || true); test "$code" = "404"
+
+          echo '### SOK pre-purchase/backorder RC — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: ${{ steps.build.outputs.candidate_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $base" >> "$GITHUB_STEP_SUMMARY"
+          echo '11/11 new acceptance tests + protected SOK gates: PASS' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build production application on current main lineage
+        id: prodapp
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/elevationupscales/ElevationUpScales.git prod
+          cd prod
+          git checkout main
+          git fetch origin "$WORK_BRANCH" --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN"
+          test "$(git rev-parse origin/$WORK_BRANCH)" = "${{ steps.build.outputs.candidate_sha }}"
+          changed="$(git diff --name-only "$BASELINE_SHA" "${{ steps.build.outputs.candidate_sha }}" -- 'site/**')"
+          test -n "$changed"
+          while IFS= read -r file; do git checkout "${{ steps.build.outputs.candidate_sha }}" -- "$file"; done <<< "$changed"
+          git diff --check
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git add site
+          git commit -m 'Promote SOK pre-purchase backorder commerce controls'
+          app_sha="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_MAIN"
+          git push origin "HEAD:refs/heads/main"
+          git push origin "HEAD:refs/heads/$NEW_BASELINE"
+          echo "app_sha=$app_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          workingDirectory: prod
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production canonical
+        shell: bash
+        env:
+          IMMUTABLE: ${{ steps.production.outputs.deployment-url }}
+          CANONICAL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for base in "${IMMUTABLE%/}" "${CANONICAL%/}"; do
+            echo "VERIFY $base"
+            for route in / /lithium-batteries /hawaii-lithium-batteries /sok-order.html /checkout/ /rv-store /marketplace /start-a-project /solar-project; do
+              code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 3 -o /tmp/prod-route -w '%{http_code}' "$base$route" || true)
+              test "$code" = "200"
+            done
+            curl -sS -L --fail "$base/api/sok/catalog" -o /tmp/prod-sok.json
+            grep -q 'SK12V100PC' /tmp/prod-sok.json
+            grep -q 'SK48V100N' /tmp/prod-sok.json
+            ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|dropShip|landed|margin' /tmp/prod-sok.json
+            curl -sS -L --fail "$base/hawaii-lithium-batteries" -o /tmp/prod-hi.html
+            grep -q 'Hawaii SOK Battery Catalog' /tmp/prod-hi.html
+            ! grep -q 'KINGBOSS' /tmp/prod-hi.html
+            code=$(curl -sS -o /tmp/private -w '%{http_code}' "$base/sok-availability-runtime.js" || true); test "$code" = "404"
+          done
+
+      - name: Record production receipt
+        id: receipt
+        shell: bash
+        env:
+          APP_SHA: ${{ steps.prodapp.outputs.app_sha }}
+          CANDIDATE_SHA: ${{ steps.build.outputs.candidate_sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PROD_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          cd prod
+          mkdir -p release-receipts
+          cat > release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md <<'EOF'
+          # SOK 4.6 Document Qualification + Pre-Purchase / Backorder Production Receipt
+
+          Status: PRODUCTION ACCEPTED
+
+          Previous application baseline: 67a85bbb56b3471511b1e191dc92417ebe6b69c3
+          Candidate: __CANDIDATE_SHA__
+          Production application: __APP_SHA__
+          Production baseline: baseline-2026-09-04-sok-4-6-prepurchase-backorder-production
+          Preview: __PREVIEW_URL__
+          Immutable production: __PROD_URL__
+          Canonical: https://elevationupscales.com
+
+          Verified:
+          - manufacturer SDS/MSDS and UN38.3 evidence marked RECEIVED for SK12V100PC and SK48V100N
+          - hazmat documentation state: DOCUMENTED / READY FOR CARRIER REVIEW
+          - carrier acceptance remains NOT YET PROVEN / NOT CHECKED
+          - economics remains ESTIMATE ONLY until exact freight and landed-cost approval
+          - controlled H2O + Approved qualification profiles include 1, 2 and 3 unit loads
+          - SOK catalog is browseable regardless of Hawaii freight readiness
+          - AVAILABLE / PRE-PURCHASE / BACKORDER / UNAVAILABLE commerce states supported
+          - SK12V100PC starts AVAILABLE for Lower-48 destination-gated checkout
+          - SK48V100N starts PRE-PURCHASE, reservation-first until credible timing is entered
+          - pre-purchase/backorder timing disclosure and payment acknowledgment enforced
+          - backorder payment additionally requires confirmed replenishment + credible timing
+          - Hawaii carrier/economics gates remain authoritative for all availability modes
+          - Hawaii quantity 4+ remains Commercial Quantity — Freight Review Required
+          - SOK MAP products remain excluded from LABORDAY25
+          - no supplier inventory count or internal cost/routing fields exposed publicly
+          - admin availability changes write auditable SOK events
+          - customer reservation/backorder intake creates trackable SOK reservation records without payment
+          - existing PayPal, Pricing 2.0, shipping, Marketplace, Start a Project and Solar Builder regressions PASS
+          EOF
+          sed -i "s|__CANDIDATE_SHA__|$CANDIDATE_SHA|g; s|__APP_SHA__|$APP_SHA|g; s|__PREVIEW_URL__|$PREVIEW_URL|g; s|__PROD_URL__|$PROD_URL|g" release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md
+          git add release-receipts/SOK_4.6_PREPURCHASE_BACKORDER_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record SOK pre-purchase backorder production receipt [release-generated]'
+          receipt_sha="$(git rev-parse HEAD)"
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$APP_SHA"
+          git push origin "HEAD:refs/heads/main"
+          echo "receipt_sha=$receipt_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Final summary
+        shell: bash
+        run: |
+          echo '### SOK 4.6 Pre-Purchase / Backorder — PRODUCTION ACCEPTED' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: ${{ steps.build.outputs.candidate_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Application: ${{ steps.prodapp.outputs.app_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Receipt main: ${{ steps.receipt.outputs.receipt_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Baseline: $NEW_BASELINE" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${{ steps.preview.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production: ${{ steps.production.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
