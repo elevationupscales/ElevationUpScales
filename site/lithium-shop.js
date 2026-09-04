@@ -141,6 +141,7 @@
     const batteryUnits = hawaiiMode ? batteryUnitsFor(product) : 0;
     const merchandiseCents = Number(product.priceCents || 0);
     const pickupPriceCents = merchandiseCents + (batteryUnits > 0 ? 9900 * batteryUnits : 0);
+    const hawaiiPriceReady = !product?.sokProduct || String(product?.hawaiiStatus || "").toLowerCase() === "shipping_available";
     return `<article class="lithium-card" data-product-id="${esc(id)}" data-hawaii-sku="${esc(sku)}" data-shipping-status="${esc(String(product.shippingStatus || "unverified"))}"${hawaiiMode ? ` data-hawaii-merchandise-cents="${merchandiseCents}" data-hawaii-battery-units="${batteryUnits}"` : ""}>
       <div class="lithium-card__image"><a class="lithium-card__detail-link" href="${esc(detailUrl)}" aria-label="View ${esc(view.title)} details">${imageMarkup(product.primaryImage || "/assets/logo.webp", view.title, index)}</a></div>
       <div class="lithium-card__body">
@@ -149,8 +150,8 @@
         ${view.specs ? `<p class="lithium-card__spec-line">${esc(view.specs)}</p>` : ""}
         <div class="lithium-card__shipping ${status.className}" data-hawaii-status>${esc(status.label)}</div>
         ${!hawaiiMode && product?.sokProduct ? `<p class="lithium-card__spec-line"><strong>${esc(commerce.label)}</strong>${commerce.window ? ` · ${esc(commerce.window)}` : ""}</p>${commerce.mode === "prepurchase" || commerce.mode === "backorder" ? `<p class="lithium-card__spec-line">${esc(commerce.timing || "Expected fulfillment timing is an estimate and may change.")}</p>` : ""}` : ""}
-        ${hawaiiMode ? `<div class="hawaii-card-simple"><p><strong>Availability</strong><span>${esc(inventory)}</span></p><p><strong>Hawaii Pickup Price</strong><span data-hawaii-pickup-price>${batteryUnits > 0 ? money.format(pickupPriceCents / 100) : "Freight Review Required"}</span></p><p><strong>Included Freight</strong><span>To our Honolulu warehouse / pickup location</span></p><p><strong>Address Delivery</strong><span>Additional charge · quote required</span></p></div>` : ""}
-        <div class="lithium-card__footer"><strong>${hawaiiMode && batteryUnits > 0 ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" ${hawaiiMode ? `data-hawaii-action data-checkout-url="${esc(checkoutUrl)}" data-review-url="${esc(reviewUrl)}" href="${esc(reviewUrl)}"` : `href="${esc(normalActionUrl)}"`}>${hawaiiMode ? "Check Hawaii Availability" : esc(normalActionLabel)}</a></div></div>
+        ${hawaiiMode ? `<div class="hawaii-card-simple"><p><strong>Availability</strong><span>${esc(inventory)}</span></p><p><strong>Hawaii Pickup Price</strong><span data-hawaii-pickup-price>${batteryUnits > 0 && hawaiiPriceReady ? money.format(pickupPriceCents / 100) : "Freight Review Required"}</span></p><p><strong>Included Freight</strong><span>To our Honolulu warehouse / pickup location</span></p><p><strong>Address Delivery</strong><span>Additional charge · quote required</span></p></div>` : ""}
+        <div class="lithium-card__footer"><strong>${hawaiiMode && batteryUnits > 0 && hawaiiPriceReady ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" ${hawaiiMode ? `data-hawaii-action data-checkout-url="${esc(checkoutUrl)}" data-review-url="${esc(reviewUrl)}" href="${esc(reviewUrl)}"` : `href="${esc(normalActionUrl)}"`}>${hawaiiMode ? "Check Hawaii Availability" : esc(normalActionLabel)}</a></div></div>
       </div>
     </article>`;
   }
