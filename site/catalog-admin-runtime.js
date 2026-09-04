@@ -341,7 +341,12 @@ export async function handleCatalogPublicApi(request, env, pathname) {
       priceCents: priced.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,
       shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,
       sourceUrl: p.sourceUrl, ebayItemId: p.ebayItemId, salesChannels: p.salesChannels,
-      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: priced.promotion
+      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: {
+        active: Boolean(priced?.promotion?.active), eligible: Boolean(priced?.promotion?.eligible), couponEligible: Boolean(priced?.promotion?.couponEligible),
+        couponCode: clean(priced?.promotion?.couponCode,40), couponPercent: int(priced?.promotion?.couponPercent,0),
+        listPriceCents: int(priced?.promotion?.listPriceCents ?? priced?.priceCents,0), couponPriceCents: int(priced?.promotion?.couponPriceCents ?? priced?.priceCents,0),
+        shippingDiscounted: Boolean(priced?.promotion?.shippingDiscounted)
+      }
     };
   });
   return json({ products, count: products.length, section: allowedSection || "all" }, 200, { "Cache-Control": "no-store" });

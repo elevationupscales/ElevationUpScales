@@ -50,6 +50,21 @@ async function enhanceStorefront(request,response,env,section){if(request.method
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const internalRuntimePaths = new Set([
+      "/_worker.js",
+      "/worker-core.js",
+      "/commerce-pricing-runtime.js",
+      "/catalog-admin-runtime.js",
+      "/doba-csv-sync-runtime.js",
+      "/promotion-runtime.js",
+      "/shipping-rules-runtime.js",
+      "/store-checkout-server.js",
+      "/store-orders-admin-server.js",
+      "/hawaii-lithium-runtime.js",
+      "/sync-admin-runtime.js",
+      "/apparel-provider-runtime.js"
+    ]);
+    if (internalRuntimePaths.has(url.pathname)) return new Response("Not found", { status: 404, headers: { "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } });
     if (["/worker-core.js","/store-checkout-server.js","/store-orders-admin-server.js","/catalog-admin-server.js","/catalog-admin-runtime.js","/hawaii-lithium-runtime.js","/sync-admin-runtime.js","/doba-csv-sync-runtime.js","/apparel-provider-runtime.js","/commerce-schema-migrations.js","/shipping-rules-runtime.js"].includes(url.pathname)) return new Response("Not found",{status:404,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
     const isQuote=url.pathname==="/api/store-checkout/quote"; const isCreate=url.pathname==="/api/store-checkout/orders"; const isCapture=/^\/api\/store-checkout\/orders\/[A-Z0-9]{8,40}\/capture$/i.test(url.pathname);
     if((isQuote||isCreate||isCapture)&&request.method==="POST"&&!sameOriginPost(request)) return checkoutJson({error:"Cross-origin request denied"},403);
