@@ -126,8 +126,7 @@
   function isLiveProduct(product) {
     if (!product || clean(product.publishStatus, 30).toLowerCase() !== "published") return false;
     if (!(Number(product.priceCents) > 0)) return false;
-    const stock = Number(product.supplierStock);
-    if (Number.isFinite(stock) && stock <= 0) return false;
+    if (String(product.availabilityStatus || "check").toLowerCase() === "unavailable") return false;
     if (clean(product.shippingStatus, 30).toLowerCase() === "hold") return false;
     if (sectionFor(product) === "rv" && clean(product.shippingStatus, 30).toLowerCase() === "unverified") return false;
     return true;
@@ -142,15 +141,8 @@
   }
 
   function purchaseUrl(product) {
-    if (sectionFor(product) === "lithium") return elevationCheckoutUrl(product);
-    const supplier = clean(product?.supplier || product?.sourceType, 40).toLowerCase();
-    const publishStatus = clean(product?.publishStatus, 30).toLowerCase();
-    const shippingStatus = clean(product?.shippingStatus, 30).toLowerCase();
-    if (supplier === "doba" && publishStatus === "published" && shippingStatus === "verified" && Number(product?.priceCents) > 0) return elevationCheckoutUrl(product);
-    const ebay = clean(product?.ebayItemId, 20);
-    if (/^\d{12}$/.test(ebay)) return `https://www.ebay.com/itm/${ebay}`;
-    const sourceUrl = clean(product?.sourceUrl, 1200);
-    return /^https?:\/\//i.test(sourceUrl) ? sourceUrl : "";
+    const value = clean(product?.purchaseUrl, 1200);
+    return /^(?:\/|https?:\/\/)/i.test(value) ? value : "";
   }
 
   function productImages(product) {

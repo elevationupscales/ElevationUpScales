@@ -21,8 +21,7 @@
       const status = String(product.publishStatus || "").toLowerCase();
       if (status && status !== "published") return false;
       if (!(Number(product.priceCents) > 0)) return false;
-      const stock = Number(product.supplierStock);
-      if (Number.isFinite(stock) && stock <= 0) return false;
+      if (String(product.availabilityStatus || "check").toLowerCase() === "unavailable") return false;
       if (hawaiiMode && batteryUnitsFor(product) < 1) return false;
       return true;
     });
@@ -126,7 +125,7 @@
     const detailUrl = `/product?id=${encodeURIComponent(id)}&store=lithium${hawaiiMode ? "&program=hawaii" : ""}`;
     const checkoutUrl = `/checkout/?source=lithium&id=${encodeURIComponent(id)}&name=${encodeURIComponent(view.rawTitle || view.title)}${hawaiiMode ? "&state=HI" : ""}`;
     const reviewUrl = `/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(view.rawTitle || view.title)}&qty=1#hawaii-request`;
-    const inventory = Number.isFinite(Number(product.supplierStock)) ? `${Math.max(0, Number(product.supplierStock))} available` : "Supplier-managed availability";
+    const inventory = String(product.availabilityStatus || "check").toLowerCase() === "available" ? "Available" : "Availability confirmed before order";
     const status = hawaiiMode ? { label: "Checking Hawaii Availability", className: "is-quote" } : shipping;
     const batteryUnits = hawaiiMode ? batteryUnitsFor(product) : 0;
     const merchandiseCents = Number(product.priceCents || 0);

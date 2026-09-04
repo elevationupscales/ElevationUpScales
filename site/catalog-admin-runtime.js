@@ -337,9 +337,12 @@ export async function handleCatalogPublicApi(request, env, pathname) {
     const priced = pricingForProduct(p, promotionConfig);
     return {
       id: p.id, sku: p.sku, title: p.title, description: p.description, category: p.category,
-      priceCents: priced.priceCents, supplierStock: p.supplierStock, shippingStatus: p.shippingStatus,
-      shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,
-      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt, promotion: {
+      priceCents: priced.priceCents,
+      availabilityStatus: (p.supplierStock === null || p.supplierStock === undefined || String(p.supplierStock).trim() === "") ? "check" : (Number(p.supplierStock) > 0 ? "available" : "unavailable"),
+      shippingStatus: p.shippingStatus, shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,
+      storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt,
+      purchaseUrl: (() => { const source=clean(p.sourceType,40).toLowerCase(); const ebay=clean(p.ebayItemId,20); const section=p.storeSection==="lithium-batteries"?"lithium":"rv"; if(source==="doba" && clean(p.publishStatus,30).toLowerCase()==="published" && clean(p.shippingStatus,30).toLowerCase()==="verified" && Number(priced.priceCents)>0) return `/checkout/?source=${section}&id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.title)}`; if(/^\d{12}$/.test(ebay)) return `https://www.ebay.com/itm/${ebay}`; return ""; })(),
+      promotion: {
         active: Boolean(priced?.promotion?.active), eligible: Boolean(priced?.promotion?.eligible), couponEligible: Boolean(priced?.promotion?.couponEligible),
         couponCode: clean(priced?.promotion?.couponCode,40), couponPercent: int(priced?.promotion?.couponPercent,0),
         listPriceCents: int(priced?.promotion?.listPriceCents ?? priced?.priceCents,0), couponPriceCents: int(priced?.promotion?.couponPriceCents ?? priced?.priceCents,0),
