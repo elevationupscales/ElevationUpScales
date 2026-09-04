@@ -1,0 +1,106 @@
+name: Elevation 4.5 Positioning Copy Preview V2
+
+on:
+  push:
+    branches:
+      - runner/4.5-positioning-copy-preview-v2-2026-09-04
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: f820d7c2042685077982480da06de005f4faba47
+          fetch-depth: 0
+      - name: Verify protected baseline and exact patch scope
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "f820d7c2042685077982480da06de005f4faba47"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "23ac3ab83842ff9cd1df0eaf5e79ab8c60f518f6"
+          git merge-base --is-ancestor 3c525a28df066a1394f0e5c07404fc4a0e820626 HEAD
+          changed="$(git diff --name-only 3c525a28df066a1394f0e5c07404fc4a0e820626..HEAD)"
+          expected=$(printf '%s\n' site/index.html site/what-we-do.html)
+          test "$changed" = "$expected"
+          git diff --check 3c525a28df066a1394f0e5c07404fc4a0e820626..HEAD
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+      - name: Verify minimal positioning copy before preview
+        run: |
+          set -euo pipefail
+          grep -Fq 'LOGISTICS THAT MATTER.' site/index.html
+          grep -Fq 'BUILT FROM EXPERIENCE.' site/index.html
+          grep -Fq 'PRODUCTS THAT WORK.' site/index.html
+          grep -Fq 'FIELD SUPPORT.' site/index.html
+          grep -Fq 'REAL-WORLD USE.' site/index.html
+          grep -Fq 'BRIDGE THE GAP.' site/what-we-do.html
+          grep -Fq 'PRODUCTS. POWER. ACCESS.' site/what-we-do.html
+          grep -Fq 'BUILT FROM USE.' site/what-we-do.html
+          grep -Fq 'Hawaii Power &amp; Logistics' site/what-we-do.html
+          grep -Fq 'Technician Services' site/what-we-do.html
+          ! grep -Fq 'Projects come first.' site/index.html
+          ! grep -Fq 'HomeAndConstructionBusiness' site/index.html
+          grep -Fq '"@type":"Organization"' site/index.html
+      - id: deploy
+        name: Deploy isolated positioning preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=position45previewv2
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify preview routes and protected commerce
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /what-we-do /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout/ /start-a-project /solar-project /terms /privacy /admin; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            test "$code" = "200"
+          done
+          curl -fsS "$base/" -o /tmp/home.html
+          curl -fsS "$base/what-we-do" -o /tmp/what.html
+          grep -Fq 'LOGISTICS THAT MATTER.' /tmp/home.html
+          grep -Fq 'BUILT FROM EXPERIENCE.' /tmp/home.html
+          grep -Fq 'PRODUCTS THAT WORK.' /tmp/home.html
+          grep -Fq 'FIELD SUPPORT.' /tmp/home.html
+          grep -Fq 'REAL-WORLD USE.' /tmp/home.html
+          grep -Fq 'BRIDGE THE GAP.' /tmp/what.html
+          grep -Fq 'PRODUCTS. POWER. ACCESS.' /tmp/what.html
+          grep -Fq 'BUILT FROM USE.' /tmp/what.html
+          curl -fsS "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const j=JSON.parse(fs.readFileSync('/tmp/lithium.json','utf8'));
+          const products=Array.isArray(j)?j:(j.products||j.items||j.catalog||[]);
+          if(products.length<31) throw new Error(`Lithium collection too small: ${products.length}`);
+          const item=products.find(p=>p.id==='cat-e91de8a6-3e69-45b3-b749-605befbdb268'||p.sku==='D01027HH7BV-136');
+          if(!item||Number(item.priceCents)!==17600) throw new Error('Representative price regression');
+          const banned=['supplierStock','sourceType','sourceUrl','ebayItemId','fulfillmentMode','supplierIdentity','upstreamSupplier','authoritativeCostCents','recommendedRetailCents','protectedNormalFloorCents','protectedPromoFloorCents'];
+          const raw=JSON.stringify(j);
+          const leaked=banned.filter(k=>raw.includes(`"${k}"`));
+          if(leaked.length) throw new Error(`Internal fields exposed: ${leaked.join(', ')}`);
+          if(!('availabilityStatus' in item)||!('purchaseUrl' in item)) throw new Error('Protected public Catalog fields missing');
+          NODE
+          curl -fsS "$base/api/store/promotion" -o /tmp/promotion.json
+          node -e 'const x=require("/tmp/promotion.json"); if(x.couponCode!=="LABORDAY25"||Number(x.couponPercent)!==25) process.exit(1)'
+          curl -fsS "$base/api/shipping-rules" -o /tmp/shipping.json
+          grep -q '2799' /tmp/shipping.json
+          grep -q '9900' /tmp/shipping.json
+          for internal in catalog-admin-runtime.js commerce-pricing-runtime.js doba-csv-sync-runtime.js; do
+            code=$(curl -sS -o /tmp/internal -w '%{http_code}' "$base/$internal" || true)
+            test "$code" = "404"
+          done
+      - name: Completion summary
+        run: |
+          echo '### Elevation 4.5 minimal positioning preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate: f820d7c2042685077982480da06de005f4faba47' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Changed application files: site/index.html, site/what-we-do.html' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production was not modified. Final production approval is still required.' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
