@@ -1,0 +1,252 @@
+name: SOK 4.6 Media Production
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-media-production-2026-09-04
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: sok-4-6-media-production
+  cancel-in-progress: false
+
+env:
+  EXPECTED_MAIN: 62bd91bc7d2447c11aac95811fec8671821f1308
+  WORK_BRANCH: work/sok-4-6-media-2026-09-04
+  BASELINE_BRANCH: baseline-2026-09-04-sok-4-6-media-production
+
+jobs:
+  build-preview-promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current accepted production
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Guard production lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+
+      - name: Download approved official SOK media into Elevation storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site/assets/brands/sok/sk48v100n site/assets/brands/sok/sk12v100pc
+          curl -fsSL --retry 4 --retry-delay 2 'https://static.wixstatic.com/media/0fa809_f93d9d4612d44728a5d8622abee37467~mv2.jpg' -o site/assets/brands/sok/sk48v100n/hero.jpg
+          curl -fsSL --retry 4 --retry-delay 2 'https://static.wixstatic.com/media/0fa809_0c4fccf4c42a4aa284c892d758ac3de7~mv2.png' -o site/assets/brands/sok/sk12v100pc/hero.png
+          curl -fsSL --retry 4 --retry-delay 2 'https://static.wixstatic.com/media/0fa809_f7e13a70cbcc46cbb7bcecac84bd989e~mv2.png' -o site/assets/brands/sok/sk48v100n/system-cabinet.png
+          curl -fsSL --retry 4 --retry-delay 2 'https://0fa80982-c142-44c6-a762-5e4fe5133859.usrfiles.com/ugd/0fa809_ae420bcfd7ec41e8a3c91a2ff68075bb.pdf' -o site/assets/brands/sok/sk48v100n/spec-sheet.pdf
+          curl -fsSL --retry 4 --retry-delay 2 'https://0fa80982-c142-44c6-a762-5e4fe5133859.usrfiles.com/ugd/0fa809_48d992564bfb4ed6aaab2e397383de84.pdf' -o site/assets/brands/sok/sk12v100pc/spec-sheet.pdf
+
+          test "$(file -b --mime-type site/assets/brands/sok/sk48v100n/hero.jpg)" = 'image/jpeg'
+          test "$(file -b --mime-type site/assets/brands/sok/sk12v100pc/hero.png)" = 'image/png'
+          test "$(file -b --mime-type site/assets/brands/sok/sk48v100n/system-cabinet.png)" = 'image/png'
+          test "$(file -b --mime-type site/assets/brands/sok/sk48v100n/spec-sheet.pdf)" = 'application/pdf'
+          test "$(file -b --mime-type site/assets/brands/sok/sk12v100pc/spec-sheet.pdf)" = 'application/pdf'
+          test "$(stat -c%s site/assets/brands/sok/sk48v100n/hero.jpg)" -gt 10000
+          test "$(stat -c%s site/assets/brands/sok/sk12v100pc/hero.png)" -gt 10000
+          test "$(stat -c%s site/assets/brands/sok/sk48v100n/system-cabinet.png)" -gt 10000
+
+      - name: Wire SOK media and co-branded presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          def rep(path,old,new):
+              p=Path(path); t=p.read_text()
+              if old not in t: raise SystemExit(f'missing anchor: {path}: {old[:100]}')
+              p.write_text(t.replace(old,new,1))
+
+          rep('site/sok-availability-runtime.js','defaultMode:"available"}', 'defaultMode:"available",primaryImage:"/assets/brands/sok/sk12v100pc/hero.png",images:["/assets/brands/sok/sk12v100pc/hero.png"],specSheet:"/assets/brands/sok/sk12v100pc/spec-sheet.pdf"}')
+          rep('site/sok-availability-runtime.js','defaultMode:"prepurchase"}', 'defaultMode:"prepurchase",primaryImage:"/assets/brands/sok/sk48v100n/hero.jpg",images:["/assets/brands/sok/sk48v100n/hero.jpg","/assets/brands/sok/sk48v100n/system-cabinet.png"],specSheet:"/assets/brands/sok/sk48v100n/spec-sheet.pdf"}')
+          rep('site/sok-availability-runtime.js','primaryImage:"",images:[],storeSection:"lithium-batteries"','primaryImage:d.primaryImage,images:d.images,downloads:[{label:"SOK Specification Sheet",url:d.specSheet}],storeSection:"lithium-batteries"')
+          rep('site/sok-availability-runtime.js','imageUrl:"",priceCents:d.mapCents','imageUrl:d.primaryImage,priceCents:d.mapCents')
+
+          feature='''<section class="sok-brand-feature" aria-labelledby="sok-brand-title"><div class="container sok-brand-feature__grid"><div class="sok-brand-feature__copy"><p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p><div class="sok-brand-wordmark" aria-label="SOK Battery">SOK <span>BATTERY</span></div><h2 id="sok-brand-title">SOK LiFePO4 Battery Systems</h2><p>Elevation UpScales supplies selected SOK lithium battery solutions for RV, marine, solar, off-grid and commercial energy-storage applications.</p><div class="lithium-actions"><a class="button button-primary" href="/product?id=sok-sk48v100n&amp;store=lithium">View 48V Rack Battery</a><a class="button button-outline" href="/product?id=sok-sk12v100pc&amp;store=lithium">View 12V 100Ah Battery</a></div><div class="sok-brand-downloads"><a href="/assets/brands/sok/sk48v100n/spec-sheet.pdf">SK48V100N Spec Sheet</a><a href="/assets/brands/sok/sk12v100pc/spec-sheet.pdf">SK12V100PC Spec Sheet</a></div></div><figure class="sok-brand-feature__media"><img src="/assets/brands/sok/sk48v100n/system-cabinet.png" alt="SOK 48V rack battery cabinet shown as an example of a scalable energy storage configuration" loading="lazy" decoding="async"><figcaption>Example scalable rack configuration. Cabinet and battery configuration are quoted separately.</figcaption></figure></div></section>'''
+          rep('site/lithium-batteries.html','</section><nav class="lithium-category-strip"',f'</section>{feature}<nav class="lithium-category-strip"')
+          rep('site/lithium-batteries.html','lithium-shop.css?v=4.4.3','lithium-shop.css?v=4.6.2')
+
+          css='''\n/* SOK authorized-dealer feature — co-branded without replacing Elevation identity */\n.sok-brand-feature{padding:42px 0;background:linear-gradient(180deg,#0b0b0b,#111);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}\n.sok-brand-feature__grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:32px;align-items:center}\n.sok-brand-wordmark{display:inline-flex;align-items:baseline;gap:.38rem;margin:.25rem 0 .55rem;font-size:clamp(2rem,5vw,3.7rem);font-weight:900;letter-spacing:-.045em;color:#f4f4f4}.sok-brand-wordmark span{font-size:.34em;letter-spacing:.18em;color:#d9362b}.sok-brand-feature__copy h2{margin-top:.25rem}.sok-brand-feature__copy p{max-width:700px}.sok-brand-downloads{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px}.sok-brand-downloads a{font-weight:700;text-decoration:underline;text-underline-offset:4px}.sok-brand-feature__media{margin:0;padding:18px;border:1px solid rgba(255,255,255,.1);background:#fff;border-radius:18px}.sok-brand-feature__media img{display:block;width:100%;height:auto;object-fit:contain}.sok-brand-feature__media figcaption{margin-top:10px;color:#444;font-size:.86rem;line-height:1.4}@media(max-width:820px){.sok-brand-feature__grid{grid-template-columns:1fr}.sok-brand-feature__media{order:-1}}\n'''
+          p=Path('site/lithium-shop.css'); p.write_text(p.read_text()+css)
+          PY
+
+          node --check site/sok-availability-runtime.js
+          git diff --check
+          ! grep -R -E 'static\.wixstatic\.com|usrfiles\.com' site/lithium-batteries.html site/sok-availability-runtime.js site/lithium-shop.js
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' site/lithium-batteries.html
+          grep -q '/assets/brands/sok/sk48v100n/hero.jpg' site/sok-availability-runtime.js
+          grep -q '/assets/brands/sok/sk12v100pc/hero.png' site/sok-availability-runtime.js
+          grep -q 'SOK Specification Sheet' site/sok-availability-runtime.js
+          grep -q 'Cabinet and battery configuration are quoted separately' site/lithium-batteries.html
+
+          # Existing commerce state and safety gates remain intact.
+          grep -q 'PURCHASE_OPTIONS' site/sok-availability-runtime.js
+          grep -q 'SK12V100PC' site/sok-availability-runtime.js
+          grep -q 'SK48V100N' site/sok-availability-runtime.js
+          grep -q 'HAWAII_OPERATIONAL_MAX_QTY = 3' site/sok-operations-runtime.js
+          grep -q 'CARRIER ACCEPTED' site/sok-operations-runtime.js
+          grep -q 'ECONOMICS APPROVED' site/sok-operations-runtime.js
+          grep -q 'LABORDAY25' site/promotion-runtime.js
+
+      - name: Commit media release candidate
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git checkout -b "$WORK_BRANCH"
+          git add site/lithium-batteries.html site/lithium-shop.css site/sok-availability-runtime.js site/assets/brands/sok
+          git commit -m 'Add approved SOK product media and spec literature'
+          app_sha="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_MAIN"
+          git push origin "HEAD:refs/heads/$WORK_BRANCH"
+          echo "app_sha=$app_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy isolated media preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-media-rc
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify media preview and protected commerce behavior
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in /lithium-batteries /hawaii-lithium-batteries /product?id=sok-sk48v100n\&store=lithium /product?id=sok-sk12v100pc\&store=lithium /sok-order.html /checkout/; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/lithium-batteries" -o /tmp/lithium.html
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/lithium.html
+          grep -q 'SOK LiFePO4 Battery Systems' /tmp/lithium.html
+          grep -q '/assets/brands/sok/sk48v100n/system-cabinet.png' /tmp/lithium.html
+          ! grep -E 'static\.wixstatic\.com|usrfiles\.com' /tmp/lithium.html
+
+          for asset in /assets/brands/sok/sk48v100n/hero.jpg /assets/brands/sok/sk12v100pc/hero.png /assets/brands/sok/sk48v100n/system-cabinet.png /assets/brands/sok/sk48v100n/spec-sheet.pdf /assets/brands/sok/sk12v100pc/spec-sheet.pdf; do
+            code=$(curl -sS -L --fail -o /tmp/asset -w '%{http_code}' "$base$asset")
+            echo "$asset=$code"
+            test "$code" = "200"
+          done
+
+          curl -sS -L --fail "$base/api/sok/catalog" -o /tmp/sok.json
+          grep -q 'SK12V100PC' /tmp/sok.json
+          grep -q 'SK48V100N' /tmp/sok.json
+          grep -q '/assets/brands/sok/sk48v100n/hero.jpg' /tmp/sok.json
+          grep -q '/assets/brands/sok/sk12v100pc/hero.png' /tmp/sok.json
+          ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|dropShip|landed|margin' /tmp/sok.json
+
+          code=$(curl -sS -o /tmp/hi.json -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":4,"shipping":{"state":"HI"}}' "$base/api/store-checkout/quote" || true)
+          test "$code" = "409"
+          grep -q 'Commercial Quantity' /tmp/hi.json
+
+      - name: Guard main and promote approved media candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git rev-parse HEAD)" = "${{ steps.build.outputs.app_sha }}"
+          git push origin "HEAD:refs/heads/main"
+          git push origin "HEAD:refs/heads/$BASELINE_BRANCH"
+
+      - name: Deploy production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production canonical
+        shell: bash
+        env:
+          IMMUTABLE: ${{ steps.production.outputs.deployment-url }}
+          CANONICAL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          for base in "${IMMUTABLE%/}" "${CANONICAL%/}"; do
+            curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 --fail "$base/lithium-batteries" -o /tmp/prod.html
+            grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/prod.html
+            grep -q 'SOK LiFePO4 Battery Systems' /tmp/prod.html
+            for asset in /assets/brands/sok/sk48v100n/hero.jpg /assets/brands/sok/sk12v100pc/hero.png /assets/brands/sok/sk48v100n/system-cabinet.png /assets/brands/sok/sk48v100n/spec-sheet.pdf /assets/brands/sok/sk12v100pc/spec-sheet.pdf; do
+              curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 --fail "$base$asset" -o /tmp/asset
+            done
+            curl -sS -L --fail "$base/api/sok/catalog" -o /tmp/prod-sok.json
+            grep -q 'SK12V100PC' /tmp/prod-sok.json
+            grep -q 'SK48V100N' /tmp/prod-sok.json
+            ! grep -Eq 'supplierCost|supplierInventory|sourceWarehouse|dropShip|landed|margin' /tmp/prod-sok.json
+          done
+
+      - name: Record media production receipt
+        id: receipt
+        shell: bash
+        env:
+          APP_SHA: ${{ steps.build.outputs.app_sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PROD_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-receipts
+          cat > release-receipts/SOK_4.6_MEDIA_PRODUCTION_RECEIPT_2026-09-04.md <<'EOF'
+          # SOK 4.6 Media Production Receipt — 2026-09-04
+
+          Status: PRODUCTION ACCEPTED
+
+          Parent: 62bd91bc7d2447c11aac95811fec8671821f1308
+          Application SHA: __APP_SHA__
+          Baseline: baseline-2026-09-04-sok-4-6-media-production
+          Preview: __PREVIEW_URL__
+          Immutable production: __PROD_URL__
+          Canonical: https://elevationupscales.com
+
+          Scope:
+          - approved SOK SK48V100N official hero image stored locally
+          - approved SOK SK12V100PC official hero image stored locally
+          - approved SOK rack-cabinet/system image stored locally
+          - official SK48V100N spec sheet stored locally
+          - official SK12V100PC spec sheet stored locally
+          - co-branded Authorized SOK Energy Dealer section on Lithium storefront
+          - no hotlinked SOK production media
+          - no public compliance packet/MSDS/UN38.3 exposure
+          - no pricing, MAP, promotion, PayPal, carrier, economics, Hawaii quantity, PO or reservation gate changes
+          - supplier/internal data boundary PASS
+          EOF
+          sed -i "s|__APP_SHA__|$APP_SHA|g; s|__PREVIEW_URL__|$PREVIEW_URL|g; s|__PROD_URL__|$PROD_URL|g" release-receipts/SOK_4.6_MEDIA_PRODUCTION_RECEIPT_2026-09-04.md
+          git config user.name 'Elevation Release Automation'
+          git config user.email 'release@elevationupscales.com'
+          git add release-receipts/SOK_4.6_MEDIA_PRODUCTION_RECEIPT_2026-09-04.md
+          git commit -m 'Record SOK 4.6 media production receipt [release-generated]'
+          receipt_sha="$(git rev-parse HEAD)"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$APP_SHA"
+          git push origin "HEAD:refs/heads/main"
+          echo "receipt_sha=$receipt_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Final summary
+        shell: bash
+        run: |
+          echo '### SOK 4.6 Media — PRODUCTION ACCEPTED' >> "$GITHUB_STEP_SUMMARY"
+          echo "Application: ${{ steps.build.outputs.app_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Receipt: ${{ steps.receipt.outputs.receipt_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: ${{ steps.preview.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production: ${{ steps.production.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
