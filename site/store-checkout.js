@@ -42,6 +42,12 @@
   const shippingFields = document.querySelector("#checkout-shipping-fields");
   const addressFields = [...document.querySelectorAll(".eus-checkout-address-field")];
   const hawaiiNext = document.querySelector("#checkout-hawaii-next");
+  const availabilityPanel=document.querySelector("#checkout-availability-panel");
+  const availabilityLabel=document.querySelector("#checkout-availability-label");
+  const availabilityTiming=document.querySelector("#checkout-availability-timing");
+  const availabilityAckRow=document.querySelector("#checkout-availability-ack-row");
+  const availabilityAck=document.querySelector("#checkout-availability-ack");
+  const availabilityReserve=document.querySelector("#checkout-availability-reserve");
 
   let quote = null;
   let paypalButtons = null;
@@ -93,10 +99,12 @@
     quantity: Number.parseInt(quantityEl.value || "1", 10) || 1,
     variantId: variantEl?.value || "",
     couponCode: couponCodeEl?.value.trim() || "",
+    availabilityTimingAcknowledged: Boolean(availabilityAck?.checked),
     ...(["rv","lithium"].includes(source) ? { shipping: shipping() } : {}),
   });
 
   const formReady = () => {
+    if (quote?.availability?.requiresTimingAcknowledgement && !availabilityAck?.checked) return false;
     const address = shipping();
     const buyer = customer();
     const emailReady = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(buyer.email);
@@ -199,6 +207,7 @@
       if (hawaiiReserve) { hawaiiReserve.href = next.hawaii?.requestUrl || "/hawaii-lithium-batteries#hawaii-request"; hawaiiReserve.hidden = customerState === "shipping_available"; hawaiiReserve.textContent = customerState === "unavailable" ? "Check Availability / Contact Elevation" : "Reserve / Request Shipping Review"; }
       paypalEl.hidden = customerState !== "shipping_available";
     }
+    if(availabilityPanel){const a=next.availability||null;availabilityPanel.hidden=!a||a.mode==="available";if(a){availabilityLabel.textContent=a.label||"Product Availability";availabilityTiming.textContent=[a.expectedShipWindow||a.expectedAvailableDate||"",a.timingNotice||""].filter(Boolean).join(" — ");availabilityAckRow.hidden=!a.requiresTimingAcknowledgement;availabilityReserve.href=a.reservationUrl||"/sok-order.html";availabilityReserve.hidden=Boolean(a.paymentEligible);if(!a.paymentEligible)paypalEl.hidden=true;}}
     setProductImage(next.productImage, productName);
 
     const variants = Array.isArray(next.variants) ? next.variants : [];
@@ -232,6 +241,8 @@
       return requestQuote();
     }
     if (body.hawaii) { const stateValue=String(body.hawaii.customerState||"review_required"); setStatus(stateValue==="shipping_available" ? "Hawaii shipping is available. Complete your contact information and use Buy Now — Elevation handles the freight coordination." : stateValue==="unavailable" ? "This battery is currently unavailable for Hawaii shipping. No payment will be collected." : "Freight Review Required. Send a short review request and Elevation will contact you with the next step.", stateValue==="unavailable" ? "error" : "ready"); }
+    else if(body.availability && body.availability.paymentEligible===false) setStatus(`${body.availability.label||"Product review required"}. Start the reservation/order review to continue; no payment will be collected yet.`,"ready");
+    else if(body.availability && ["prepurchase","backorder"].includes(String(body.availability.mode||""))) setStatus(`${body.availability.label}. Review and acknowledge the estimated fulfillment timing before payment.`,"ready");
     else setStatus(config?.configured ? "Secure PayPal checkout ready." : "Order details loaded.", config?.configured ? "ready" : "");
     return body;
   }

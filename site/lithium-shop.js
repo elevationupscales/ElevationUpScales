@@ -117,6 +117,13 @@
     images.forEach((img) => observer.observe(img));
   }
 
+  function commerceFor(product) {
+    const mode=String(product?.availabilityMode||"available").toLowerCase();
+    const label=product?.commerceLabel||(mode==="prepurchase"?"PRE-PURCHASE":mode==="backorder"?"AVAILABLE ON BACKORDER":mode==="unavailable"?"TEMPORARILY UNAVAILABLE":"AVAILABLE");
+    const cta=product?.commerceCta||(mode==="prepurchase"?"Pre-Purchase":mode==="backorder"?"Available on Backorder":mode==="unavailable"?"Check Availability":"Buy Now");
+    return {mode,label,cta,paymentEligible:product?.paymentEligible!==false,reservationUrl:String(product?.reservationUrl||"").trim(),timing:String(product?.customerTimingNotice||"").trim(),window:String(product?.expectedShipWindow||product?.expectedAvailableDate||"").trim()};
+  }
+
   function card(product, index = 0) {
     const sku = String(product.sku || product.id || "").trim();
     const id = String(product.id || "").trim();
@@ -125,7 +132,11 @@
     const detailUrl = `/product?id=${encodeURIComponent(id)}&store=lithium${hawaiiMode ? "&program=hawaii" : ""}`;
     const checkoutUrl = `/checkout/?source=lithium&id=${encodeURIComponent(id)}&name=${encodeURIComponent(view.rawTitle || view.title)}${hawaiiMode ? "&state=HI" : ""}`;
     const reviewUrl = `/hawaii-lithium-batteries?productId=${encodeURIComponent(id)}&product=${encodeURIComponent(view.rawTitle || view.title)}&qty=1#hawaii-request`;
-    const inventory = String(product.availabilityStatus || "check").toLowerCase() === "available" ? "Available" : "Availability confirmed before order";
+    const commerce=commerceFor(product);
+    const reservationUrl=commerce.reservationUrl||`/sok-order.html?sku=${encodeURIComponent(sku)}&mode=${encodeURIComponent(commerce.mode)}`;
+    const normalActionUrl=commerce.paymentEligible?checkoutUrl:reservationUrl;
+    const normalActionLabel=commerce.cta;
+    const inventory = product?.sokProduct ? commerce.label : (String(product.availabilityStatus || "check").toLowerCase() === "available" ? "Available" : "Availability confirmed before order");
     const status = hawaiiMode ? { label: "Checking Hawaii Availability", className: "is-quote" } : shipping;
     const batteryUnits = hawaiiMode ? batteryUnitsFor(product) : 0;
     const merchandiseCents = Number(product.priceCents || 0);
@@ -137,8 +148,9 @@
         <h3><a class="lithium-card__title-link" href="${esc(detailUrl)}">${esc(view.title)}</a></h3>
         ${view.specs ? `<p class="lithium-card__spec-line">${esc(view.specs)}</p>` : ""}
         <div class="lithium-card__shipping ${status.className}" data-hawaii-status>${esc(status.label)}</div>
+        ${!hawaiiMode && product?.sokProduct ? `<p class="lithium-card__spec-line"><strong>${esc(commerce.label)}</strong>${commerce.window ? ` · ${esc(commerce.window)}` : ""}</p>${commerce.mode === "prepurchase" || commerce.mode === "backorder" ? `<p class="lithium-card__spec-line">${esc(commerce.timing || "Expected fulfillment timing is an estimate and may change.")}</p>` : ""}` : ""}
         ${hawaiiMode ? `<div class="hawaii-card-simple"><p><strong>Availability</strong><span>${esc(inventory)}</span></p><p><strong>Hawaii Pickup Price</strong><span data-hawaii-pickup-price>${batteryUnits > 0 ? money.format(pickupPriceCents / 100) : "Freight Review Required"}</span></p><p><strong>Included Freight</strong><span>To our Honolulu warehouse / pickup location</span></p><p><strong>Address Delivery</strong><span>Additional charge · quote required</span></p></div>` : ""}
-        <div class="lithium-card__footer"><strong>${hawaiiMode && batteryUnits > 0 ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" ${hawaiiMode ? `data-hawaii-action data-checkout-url="${esc(checkoutUrl)}" data-review-url="${esc(reviewUrl)}" href="${esc(reviewUrl)}"` : `href="${esc(checkoutUrl)}"`}>${hawaiiMode ? "Check Hawaii Availability" : "Buy Now"}</a></div></div>
+        <div class="lithium-card__footer"><strong>${hawaiiMode && batteryUnits > 0 ? money.format(pickupPriceCents / 100) : money.format(merchandiseCents / 100)}</strong><div class="lithium-card__actions"><a class="button button-outline" href="${esc(detailUrl)}">View Details</a><a class="button button-primary" ${hawaiiMode ? `data-hawaii-action data-checkout-url="${esc(checkoutUrl)}" data-review-url="${esc(reviewUrl)}" href="${esc(reviewUrl)}"` : `href="${esc(normalActionUrl)}"`}>${hawaiiMode ? "Check Hawaii Availability" : esc(normalActionLabel)}</a></div></div>
       </div>
     </article>`;
   }
@@ -242,12 +254,13 @@
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !Array.isArray(data.products)) throw new Error("Catalog unavailable");
     let products = data.products;
+    try { const sokResponse=await fetch("/api/sok/catalog",{headers:{Accept:"application/json"},cache:"no-store"}); const sokData=await sokResponse.json().catch(()=>({})); if(sokResponse.ok&&Array.isArray(sokData.products)){ const keys=new Set(sokData.products.flatMap(p=>[String(p.id||"").toLowerCase(),String(p.sku||"").toLowerCase()])); products=[...sokData.products,...products.filter(p=>!keys.has(String(p.id||"").toLowerCase())&&!keys.has(String(p.sku||"").toLowerCase()))]; } } catch (_) {}
     if (hawaiiMode) {
       const eligibilityResponse = await fetch("/api/hawaii-lithium/eligible-products", { headers: { Accept: "application/json" }, cache: "no-store" });
       const eligibility = await eligibilityResponse.json().catch(() => ({}));
       const allowedIds = new Set(Array.isArray(eligibility.items) ? eligibility.items.map((item) => String(item.catalogProductId || "").trim()).filter(Boolean) : []);
       const allowedSkus = new Set(Array.isArray(eligibility.items) ? eligibility.items.map((item) => String(item.sku || "").trim().toUpperCase()).filter(Boolean) : []);
-      products = eligibilityResponse.ok ? products.filter((product) => allowedIds.has(String(product.id || "").trim()) || allowedSkus.has(String(product.sku || "").trim().toUpperCase())) : [];
+      products = eligibilityResponse.ok ? products.filter((product) => product?.sokProduct || allowedIds.has(String(product.id || "").trim()) || allowedSkus.has(String(product.sku || "").trim().toUpperCase())) : products.filter((product)=>product?.sokProduct);
     }
     state.products = publicProducts(products);
     return products;
@@ -257,6 +270,7 @@
     try {
       const rows = state.products.length ? state.products : await loadCatalog();
       render(rows);
+      if (hawaiiMode) syncHawaiiStatuses();
     } catch (_) {
       if (!(grid.dataset.prerendered === "true" && grid.children.length)) render([]);
     }
@@ -265,6 +279,7 @@
   function init() {
     if (grid.dataset.prerendered === "true" && grid.children.length) {
       if (hawaiiMode) { hydrateDeferredImages(grid); syncHawaiiStatuses(); }
+      hydrateAndRender();
       return;
     }
     hydrateAndRender();
