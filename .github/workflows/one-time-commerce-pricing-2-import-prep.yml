@@ -1,0 +1,272 @@
+name: One-Time Commerce Pricing 2 Import Preparation
+on:
+  push:
+    branches:
+      - runner/commerce-pricing-2-import-prep-2026-09-03
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 5c16949b8722d2eda64bf1918de66cd32a65be88
+          fetch-depth: 0
+
+      - name: Exact control-state gate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "5c16949b8722d2eda64bf1918de66cd32a65be88"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "b73b166e5887e86abb6044ccbdeb4e9c293cbe65"
+          git merge-base --is-ancestor 31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf HEAD
+          grep -q 'Final deployed application SHA: `31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf`' release-receipts/ELEVATION_4.5_COMBINED_FINAL_COPY_PRODUCTION_RECEIPT_2026-09-03.md
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+          node --check site/promotion-runtime.js
+          node --check site/shipping-rules-runtime.js
+          ! grep -q '\.run(' site/commerce-pricing-runtime.js
+
+      - name: Deploy exact read-only candidate preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=cp2importprep
+
+      - name: Public boundary and regression gate
+        env:
+          BASE: https://cp2importprep.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          mkdir -p /tmp/public-scan
+          routes=(
+            "/"
+            "/store"
+            "/rv-store"
+            "/lithium-batteries"
+            "/hawaii-lithium-batteries"
+            "/product"
+            "/checkout"
+            "/api/store/catalog?section=lithium-batteries"
+            "/api/store-catalog?section=rv-outdoor"
+            "/api/store/featured"
+            "/api/store/promotion"
+            "/api/shipping-rules"
+          )
+          i=0
+          for route in "${routes[@]}"; do
+            out="/tmp/public-scan/r${i}.txt"
+            code=$(curl -sS -L --retry 10 --retry-all-errors --retry-delay 2 -o "$out" -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+            i=$((i+1))
+          done
+          # Admin pricing data must remain authenticated.
+          code=$(curl -sS -o /tmp/admin-unauth.json -w '%{http_code}' "$base/api/admin/commerce-pricing")
+          test "$code" = "401"
+          # Direct internal runtime/module requests are also scanned if routable.
+          for path in commerce-pricing-runtime.js doba-csv-sync-runtime.js catalog-admin-runtime.js; do
+            curl -sS -L "$base/$path" -o "/tmp/public-scan/module-$path" || true
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json
+          root=Path('/tmp/public-scan')
+          patterns=[
+            r'authoritativeCostCents',r'authoritative_cost',r'recommendedRetailCents',r'recommended_retail',
+            r'protectedNormalFloorCents',r'protectedPromoFloorCents',r'merchandiseMargin',r'sourceSnapshot',
+            r'supplierIdentity',r'upstreamSupplier',r'catalogCostCents',r'costEvidence',r'source_refresh_required',
+            r'reconciliationSummary',r'lithiumReconciliation',r'listGrossCents',r'promoGrossCents'
+          ]
+          leaks=[]
+          for p in root.iterdir():
+            text=p.read_text(errors='ignore')
+            for pat in patterns:
+              if re.search(pat,text,re.I): leaks.append({'file':p.name,'pattern':pat})
+          print(json.dumps({'exposures':leaks},indent=2))
+          if leaks: raise SystemExit('INTERNAL_DATA_EXPOSURE')
+          PY
+          # Frozen shipping and promotion controls.
+          curl -fsS "$base/api/shipping-rules" -o /tmp/shipping.json
+          curl -fsS "$base/api/store/promotion" -o /tmp/promo.json
+          python3 - <<'PY'
+          import json
+          ship=json.load(open('/tmp/shipping.json'))
+          promo=json.load(open('/tmp/promo.json'))
+          raw=json.dumps(ship)
+          assert '2799' in raw, ship
+          assert '9900' in raw, ship
+          assert 'Alaska' in raw or 'AK' in raw, ship
+          praw=json.dumps(promo)
+          assert 'LABORDAY25' in praw, promo
+          assert '25' in praw, promo
+          assert 'shippingDiscounted' not in praw or 'false' in praw.lower(), promo
+          PY
+
+      - name: Inject temporary token-protected audit exporter
+        run: |
+          set -euo pipefail
+          token=$(openssl rand -hex 32)
+          echo "::add-mask::$token"
+          echo "QA_TOKEN=$token" >> "$GITHUB_ENV"
+          QA_TOKEN="$token" python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('site/commerce-pricing-runtime.js')
+          s=p.read_text()
+          if 'export async function buildCommercePricingAudit(env){' not in s:
+            s=s.replace('async function audit(env){','export async function buildCommercePricingAudit(env){',1)
+            s=s.replace('const result=await audit(env);','const result=await buildCommercePricingAudit(env);',1)
+          p.write_text(s)
+          w=Path('site/_worker.js')
+          s=w.read_text()
+          old='import { handleCommercePricingAdminApi } from "./commerce-pricing-runtime.js";'
+          new='import { handleCommercePricingAdminApi, buildCommercePricingAudit } from "./commerce-pricing-runtime.js";'
+          if old not in s: raise SystemExit('pricing import marker missing')
+          s=s.replace(old,new,1)
+          anchor='    if(url.pathname==="/api/admin/commerce-pricing") return handleCommercePricingAdminApi(request,env);\n'
+          if anchor not in s: raise SystemExit('pricing route anchor missing')
+          token=os.environ['QA_TOKEN']
+          block=f'''    if(url.pathname==="/api/qa/cp2-import-prep") {{\n      if(request.headers.get("X-EUS-QA-Token")!=="{token}") return new Response("Not found",{{status:404,headers:{{"Cache-Control":"no-store"}}}});\n      try {{ const data=await buildCommercePricingAudit(env); return Response.json(data,{{headers:{{"Cache-Control":"no-store"}}}}); }} catch(error) {{ return Response.json({{error:String(error?.message||error)}},{{status:503}}); }}\n    }}\n'''
+          w.write_text(s.replace(anchor,anchor+block,1))
+          PY
+          node --check site/_worker.js
+          node --check site/commerce-pricing-runtime.js
+
+      - name: Deploy temporary bound-data diagnostic
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=cp2ipqa
+
+      - name: Build exact 31-SKU dry-run package
+        env:
+          BASE: https://cp2ipqa.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 12 --retry-all-errors --retry-delay 2 -H "X-EUS-QA-Token: $QA_TOKEN" "${BASE%/}/api/qa/cp2-import-prep" -o /tmp/audit.json
+          mkdir -p /tmp/cp2-import-prep
+          python3 - <<'PY'
+          import json,csv,hashlib,math,os
+          from pathlib import Path
+          from datetime import datetime, timezone
+          audit=json.load(open('/tmp/audit.json'))
+          rows=audit.get('lithiumReconciliation') or []
+          summary=audit.get('summary') or {}
+          shipping=audit.get('shippingInputs') or {}
+          promo=audit.get('promotion') or {}
+          assert len(rows)==31, len(rows)
+          assert summary.get('lithiumReconciliationCount')==31, summary
+          assert summary.get('missingAuthoritativeCost')==0, summary
+          assert summary.get('sourceCostMismatch')==0, summary
+          assert summary.get('promoFloorFailures')==0, summary
+          assert all((r.get('reconciliation') or {}).get('action')=='UPDATE' for r in rows)
+          assert all((r.get('reconciliation') or {}).get('floorResult')=='PASS' for r in rows)
+          assert int((shipping.get('LOWER48') or {}).get('rateCents') or 0)==2799,shipping
+          assert int((shipping.get('HI') or {}).get('rateCents') or 0)==9900,shipping
+          assert bool((shipping.get('AK') or {}).get('quoteRequired')) is True,shipping
+          assert bool(promo.get('active')) is True,promo
+          assert str(promo.get('couponCode'))=='LABORDAY25',promo
+          assert int(promo.get('couponPercent') or 0)==25,promo
+          ids=[r.get('id') for r in rows]; assert len(set(ids))==31 and all(ids)
+          targets=[(r.get('id'),'price_cents') for r in rows]; assert len(set(targets))==31
+          out=[]; rollback=[]
+          def money(c): return f"${int(c)/100:.2f}"
+          for r in rows:
+            rec=r.get('reconciliation') or {}; pr=r.get('promotion') or {}; mm=r.get('merchandiseMargin') or {}; src=r.get('sourceSnapshot') or {}; sid=r.get('supplierIdentity') or {}
+            current=int(r.get('catalogPriceCents') or 0); proposed=int(rec.get('recommendedRetailCents') or r.get('effectiveListPriceCents') or 0); cost=int(r.get('authoritativeCostCents') or 0); promo_price=int(pr.get('couponPriceCents') or 0)
+            normal_floor=int(pr.get('protectedNormalFloorCents') or 0); promo_floor=int(pr.get('protectedPromoFloorCents') or 0)
+            assert current>0 and proposed>0 and cost>0 and promo_price>0
+            assert proposed>=normal_floor and promo_price>=promo_floor
+            list_gross=proposed-cost; promo_gross=promo_price-cost
+            assert list_gross>=0 and promo_gross>=0
+            pct=((proposed-current)/current*100) if current else None
+            source_ref=f"eus_doba_source_state:item_no={src.get('itemNo') or r.get('supplierProductId')};supplier_sku={src.get('supplierSku') or r.get('supplierSku')};last_observed_at={src.get('lastObservedAt') or ''};state={src.get('state') or ''}"
+            current_upstream=(src.get('upstreamSupplier') or '').strip()
+            current_brand=(src.get('brand') or '').strip()
+            upstream=current_upstream if current_upstream else 'Source refresh needed'
+            brand=current_brand if current_brand else ''
+            before={
+              'table':'eus_inventory_items','catalog_product_id':r.get('id'),'guard_price_cents':current,
+              'price_cents':current,'catalog_updated_at':r.get('updatedAt'),'publication_state':r.get('publishStatus'),
+              'authoritative_cost_cents':cost,'source_snapshot_reference':source_ref,
+              'promotion_state':{'active':bool(pr.get('active')),'code':pr.get('couponCode'),'percent':pr.get('couponPercent'),'shipping_discounted':bool(pr.get('shippingDiscounted'))}
+            }
+            after={'table':'eus_inventory_items','catalog_product_id':r.get('id'),'set':{'price_cents':proposed},'guard':{'price_cents':current}}
+            row={
+              'catalog_product_id':r.get('id'),'catalog_sku':r.get('sku'),'provider_sku':r.get('supplierProductId'),'provider_supplier_sku':r.get('supplierSku'),'product_name':r.get('title'),
+              'publication_state':r.get('publishStatus'),'authoritative_source_cost_cents':cost,'authoritative_source_cost':money(cost),
+              'current_catalog_retail_cents':current,'current_catalog_retail':money(current),'proposed_catalog_retail_cents':proposed,'proposed_catalog_retail':money(proposed),
+              'dollar_price_change_cents':proposed-current,'dollar_price_change':money(proposed-current),'percentage_price_change':round(pct,2),
+              'active_promotion':pr.get('couponCode') if pr.get('active') else '', 'promotion_percent':int(pr.get('couponPercent') or 0),
+              'laborday25_merchandise_price_cents':promo_price,'laborday25_merchandise_price':money(promo_price),
+              'protected_normal_floor_cents':normal_floor,'protected_normal_floor':money(normal_floor),'protected_promo_floor_cents':promo_floor,'protected_promo_floor':money(promo_floor),
+              'gross_contribution_before_promotion_cents':list_gross,'gross_contribution_before_promotion':money(list_gross),
+              'gross_contribution_after_promotion_cents':promo_gross,'gross_contribution_after_promotion':money(promo_gross),
+              'gross_margin_before_promotion_percent':round((list_gross/proposed)*100,2),'gross_margin_after_promotion_percent':round((promo_gross/promo_price)*100,2),
+              'reconciliation_action':rec.get('action'),'update_reason':rec.get('reason'),'floor_result':rec.get('floorResult'),
+              'source_snapshot_reference':source_ref,'source_snapshot_state':src.get('state'),'source_last_observed_at':src.get('lastObservedAt'),
+              'provider':sid.get('provider') or r.get('supplier') or r.get('sourceType'),'upstream_supplier':upstream,'brand':brand,
+              'before_value_rollback_payload':before,'after_value_proposed_payload':after
+            }
+            out.append(row); rollback.append({'catalog_product_id':r.get('id'),'catalog_sku':r.get('sku'),'rollback':before,'expected_after_price_cents':proposed})
+          # Exact mutation-boundary proof.
+          assert len(out)==31 and len(rollback)==31
+          assert len({x['catalog_product_id'] for x in out})==31
+          assert all(set(x['after_value_proposed_payload']['set'])=={'price_cents'} for x in out)
+          write_boundary={
+            'intended_catalog_retail_price_writes':31,'unintended_writes':0,'catalog_other_field_writes':0,'publication_changes':0,
+            'supplier_source_writes':0,'inventory_changes':0,'shipping_changes':0,'promotion_changes':0,'checkout_changes':0,'paypal_changes':0,
+            'store_order_changes':0,'hawaii_eligibility_changes':0,'admin_auth_changes':0
+          }
+          package={
+            'mode':'IMPORT PREPARATION ONLY — NO WRITES PERFORMED','candidate_sha':'5c16949b8722d2eda64bf1918de66cd32a65be88',
+            'production_application_sha':'31d2bb33d5dabd94ac007ff8ebcdc3b98a3dbfcf','main_receipt_sha':'b73b166e5887e86abb6044ccbdeb4e9c293cbe65',
+            'generated_at':datetime.now(timezone.utc).isoformat(),'source_audit_generated_at':audit.get('generatedAt'),'promotion':promo,'shipping_inputs':shipping,
+            'write_boundary':write_boundary,'records':out
+          }
+          root=Path('/tmp/cp2-import-prep')
+          detail=root/'ELEVATION_COMMERCE_PRICING_2_31_SKU_DRY_RUN_IMPORT_2026-09-03.json'; detail.write_text(json.dumps(package,indent=2)+'\n')
+          rb=root/'ELEVATION_COMMERCE_PRICING_2_31_SKU_ROLLBACK_2026-09-03.json'; rb.write_text(json.dumps({'mode':'ROLLBACK MANIFEST — PREP ONLY','candidate_sha':package['candidate_sha'],'records':rollback},indent=2)+'\n')
+          fields=[k for k in out[0].keys() if k not in ('before_value_rollback_payload','after_value_proposed_payload')]+['before_value_rollback_payload','after_value_proposed_payload']
+          with (root/'ELEVATION_COMMERCE_PRICING_2_31_SKU_DRY_RUN_IMPORT_2026-09-03.csv').open('w',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=fields); w.writeheader()
+            for x in out:
+              y=dict(x); y['before_value_rollback_payload']=json.dumps(y['before_value_rollback_payload'],separators=(',',':')); y['after_value_proposed_payload']=json.dumps(y['after_value_proposed_payload'],separators=(',',':')); w.writerow(y)
+          upstream_refresh=sum(1 for x in out if x['upstream_supplier']=='Source refresh needed')
+          brands_present=sum(1 for x in out if x['brand'])
+          md=f'''# Commerce Pricing & Supplier Catalog 2.0 — Dry-Run Import Manifest\n\n**IMPORT PREPARATION ONLY — NO WRITES PERFORMED**\n\n- Candidate SHA: `{package['candidate_sha']}`\n- Accepted production application: `{package['production_application_sha']}`\n- Records: **31**\n- Intended writes: **31 retail-price writes**\n- Unintended writes: **0**\n- Publication changes: **0**\n- Shipping changes: **0**\n- Promotion changes: **0**\n- PayPal changes: **0**\n- Source/supplier snapshot writes: **0**\n- Inventory changes: **0**\n- Checkout changes: **0**\n- 31/31 protected-floor result: **PASS**\n- Current upstream supplier missing / source refresh needed: **{upstream_refresh}**\n- Current-source brand values present: **{brands_present}**\n\n## Frozen operating inputs\n\n- Lower 48 Lithium: **$27.99 per actual battery**\n- Hawaii: **$99 per actual battery**, Honolulu pickup architecture\n- Alaska: **Freight Review Required / Quote Required**\n- Promotion: **LABORDAY25 — 25% merchandise only; shipping excluded**\n\n## Write boundary\n\nEvery proposed mutation targets only `eus_inventory_items.price_cents`, guarded by Catalog product ID and the prior `price_cents`. No other Catalog field appears in the proposed `set` payload.\n\n## Supplier identity rule\n\nUpstream supplier is included only when present in the authoritative current source snapshot. Missing current-source supplier metadata is recorded as **Source refresh needed**; historical KINGBOSS evidence is not injected into current records.\n\n## Stop condition\n\nThis package is prepared for Management review only. **IMPORT EXECUTION IS NOT AUTHORIZED.**\n'''
+          (root/'ELEVATION_COMMERCE_PRICING_2_IMPORT_PREPARATION_MANAGEMENT_REVIEW_2026-09-03.md').write_text(md)
+          # Copy verification inputs needed for audit trail.
+          Path(root/'BOUND_AUDIT_SUMMARY.json').write_text(json.dumps({'generatedAt':audit.get('generatedAt'),'elapsedMs':audit.get('elapsedMs'),'summary':summary,'reconciliationSummary':audit.get('reconciliationSummary'),'promotion':promo,'shippingInputs':shipping},indent=2)+'\n')
+          manifest={'mode':'IMPORT PREPARATION ONLY — NO WRITES PERFORMED','candidate_sha':package['candidate_sha'],'files':{}}
+          for p in sorted(root.iterdir()):
+            if p.name=='MANIFEST.json': continue
+            manifest['files'][p.name]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+          (root/'MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps({'records':len(out),'writeBoundary':write_boundary,'upstreamSourceRefreshNeeded':upstream_refresh,'brandsPresent':brands_present,'sourceAuditGeneratedAt':audit.get('generatedAt')},indent=2))
+          PY
+          cd /tmp && zip -qr commerce-pricing-2-import-preparation.zip cp2-import-prep
+
+      - name: Upload dry-run package
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-pricing-2-import-preparation
+          path: |
+            /tmp/commerce-pricing-2-import-preparation.zip
+            /tmp/cp2-import-prep/*
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Summary
+        run: |
+          echo '### Commerce Pricing & Supplier Catalog 2.0 — IMPORT PREPARATION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate: `5c16949b8722d2eda64bf1918de66cd32a65be88`' >> "$GITHUB_STEP_SUMMARY"
+          echo '**31 intended retail-price writes / 0 unintended writes.**' >> "$GITHUB_STEP_SUMMARY"
+          echo '0 publication / shipping / promotion / PayPal changes.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'IMPORT PREPARATION ONLY — NO WRITES PERFORMED.' >> "$GITHUB_STEP_SUMMARY"
