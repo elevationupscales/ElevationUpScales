@@ -20,11 +20,23 @@ jobs:
           ref: 943c5c1157c808e83dd9db0cbcfb318e40f987cd
           fetch-depth: 1
 
-      - name: Static sanity
+      - name: Instrument diagnostic preview only
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "943c5c1157c808e83dd9db0cbcfb318e40f987cd"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('site/sok-availability-runtime.js')
+          s=p.read_text()
+          old='console.error(JSON.stringify({event:"sok_public_catalog_error",message:clean(error?.message,240)}));return[];'
+          if old not in s: raise SystemExit('public catalog catch marker not found')
+          s=s.replace(old,'throw error;',1)
+          old2='return json({error:"SOK availability request failed"},500);'
+          if old2 not in s: raise SystemExit('public handler catch marker not found')
+          s=s.replace(old2,'return json({error:"SOK availability request failed",diagnostic:clean(error?.message,300)},500);',1)
+          p.write_text(s)
+          PY
           git diff --check
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
 
@@ -34,10 +46,10 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-diagnostic
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-46-prepurchase-diagnostic-v2
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Probe SOK APIs
+      - name: Probe SOK initialization
         shell: bash
         env:
           BASE: ${{ steps.preview.outputs.deployment-url }}
@@ -52,9 +64,3 @@ jobs:
             cat /tmp/body 2>/dev/null || true
             echo
           done
-          echo '===== SOK checkout SK12 CO ====='
-          code=$(curl -sS -o /tmp/body -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk12v100pc","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
-          echo "HTTP=$code"; cat /tmp/body 2>/dev/null || true; echo
-          echo '===== SOK checkout SK48 CO ====='
-          code=$(curl -sS -o /tmp/body -w '%{http_code}' -H "Origin: $base" -H 'Content-Type: application/json' -d '{"source":"lithium","id":"sok-sk48v100n","quantity":1,"shipping":{"state":"CO"}}' "$base/api/store-checkout/quote" || true)
-          echo "HTTP=$code"; cat /tmp/body 2>/dev/null || true; echo
