@@ -7,7 +7,8 @@
     "check": "node deployment/qa/clean-baseline-static.mjs",
     "qa:commerce": "node deployment/qa/web-com-commerce-regression.mjs",
     "qa:analytics": "node deployment/qa/web-com-analytics-static.mjs",
-    "qa": "npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:analytics",
+    "qa:navigation": "node deployment/qa/web-com-navigation-static.mjs",
+    "qa": "npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:analytics && npm run qa:navigation",
     "qa:preview": "bash deployment/qa/clean-baseline-preview.sh"
   },
   "dependencies": {
