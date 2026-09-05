@@ -89,3 +89,5 @@ jobs:
             -f expected_parent_sha="$(git rev-parse origin/main)" \
             -f release_label=sok-4-6-catalog-commercialization
           echo "Candidate ${{ steps.commit.outputs.candidate_sha }} pushed; Release Candidate Gate dispatched."
+
+# trigger: 2026-09-05 commercialization retry
