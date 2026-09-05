@@ -1,0 +1,62 @@
+name: WEB-COM-0905-01 Static Gate
+
+on:
+  push:
+    branches:
+      - work/web-com-0905-01-storefront
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-com-0905-01-static
+  cancel-in-progress: true
+
+jobs:
+  validate-storefront-slice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out storefront branch
+        uses: actions/checkout@v6
+        with:
+          ref: work/web-com-0905-01-storefront
+          fetch-depth: 0
+
+      - name: Verify accepted baseline lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          git merge-base --is-ancestor 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7 HEAD
+          test "$(git rev-parse origin/main)" = "0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7"
+
+      - name: Run canonical clean-baseline QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+          git diff --exit-code
+
+      - name: Confirm protected commerce sources are untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            site/store-checkout-server.js \
+            site/promotion-runtime.js \
+            site/shipping-rules-runtime.js \
+            site/hawaii-lithium-runtime.js \
+            site/sok-operations-runtime.js \
+            site/sok-availability-runtime.js; do
+            git diff --quiet 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7..HEAD -- "$file"
+          done
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo "### WEB-COM-0905-01 static gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical QA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Protected commerce sources: UNCHANGED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview/production: NOT RUN" >> "$GITHUB_STEP_SUMMARY"
