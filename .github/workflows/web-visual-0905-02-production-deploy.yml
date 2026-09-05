@@ -1,0 +1,218 @@
+name: WEB-VISUAL-0905-02 Production Promotion
+
+on:
+  push:
+    branches:
+      - control/web-visual-0905-02-production-deploy-20260905
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: web-visual-0905-02-production
+  cancel-in-progress: false
+
+env:
+  CANDIDATE_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+  PROD: https://elevationupscales.com
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+
+      - name: Re-resolve exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse origin/main)" = "$CANDIDATE_SHA"
+          test -f site/assets/brand/storefront-wordmark.webp
+          grep -q 'Power Beyond' site/index.html
+          grep -q 'Built Around SOK' site/index.html
+          grep -q 'We Handle the Logistics' site/index.html
+          echo exact_production_source=PASS
+
+      - name: Final static and commerce regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          echo final_static_regression=PASS
+
+      - id: deploy
+        name: Promote exact candidate to Cloudflare production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          test -n "$base"
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /checkout /start-a-project /solar-project /admin; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            echo "immutable $route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'Power Beyond' /tmp/home.html
+          grep -q 'Built Around SOK' /tmp/home.html
+          grep -q 'We Handle the Logistics' /tmp/home.html
+          curl -sS -L --fail "$base/assets/brand/storefront-wordmark.webp" -o /tmp/wordmark.webp
+          test -s /tmp/wordmark.webp
+          echo immutable_smoke=PASS
+          echo "immutable_url=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for canonical production and smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in $(seq 1 12); do
+            code=$(curl -sS -L --retry 2 --retry-all-errors --retry-delay 1 -o /tmp/canonical-home.html -w '%{http_code}' "$PROD/") || code=000
+            if [ "$code" = "200" ] && grep -q 'Power Beyond' /tmp/canonical-home.html && grep -q 'Built Around SOK' /tmp/canonical-home.html && grep -q 'We Handle the Logistics' /tmp/canonical-home.html; then
+              ok=1
+              break
+            fi
+            echo "canonical propagation attempt $attempt not ready"
+            sleep 5
+          done
+          test "$ok" = 1
+          for route in /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /rv-store /lithium-batteries /hawaii-lithium-batteries /checkout; do
+            code=$(curl -sS -L --retry 4 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$PROD$route")
+            echo "canonical $route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$PROD/assets/brand/storefront-wordmark.webp" -o /tmp/canonical-wordmark.webp
+          test -s /tmp/canonical-wordmark.webp
+          curl -sS -L --fail "$PROD/assets/brands/sok/sk12v100pc/hero.png" -o /tmp/canonical-sok.png
+          test -s /tmp/canonical-sok.png
+          echo canonical_smoke=PASS
+
+      - name: Safe PayPal configuration and quote regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location "$PROD/api/store-checkout/config" > /tmp/config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/config.json'))
+          assert data.get('ok') is True
+          assert data.get('environment') == 'live'
+          assert data.get('credentialsConfigured') is True
+          assert data.get('checkoutEnabled') is True
+          assert bool(data.get('clientId'))
+          print('paypal_live_config=PASS')
+          PY
+          cat > /tmp/request.json <<'JSON'
+          {"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":""}
+          JSON
+          code=$(curl --silent --show-error --location \
+            -H "Origin: $PROD" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data @/tmp/request.json \
+            --output /tmp/quote.json \
+            --write-out '%{http_code}' \
+            "$PROD/api/store-checkout/quote")
+          test "$code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/quote.json'))
+          assert data.get('ok') is True
+          assert int(data.get('unitPriceCents') or 0) > 0
+          assert int(data.get('totalCents') or 0) > 0
+          print('production_quote=PASS')
+          print('unit_price_cents='+str(data.get('unitPriceCents')))
+          print('shipping_cents='+str(data.get('shippingCents')))
+          print('total_cents='+str(data.get('totalCents')))
+          print('paypal_order_created=NO')
+          print('capture_called=NO')
+          PY
+
+      - name: Capture production visual evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+          mkdir -p production-visual-evidence
+          cat > production-visual.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const base='https://elevationupscales.com';
+          const browser=await chromium.launch({headless:true});
+          const checks=[];
+          for (const [mode,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+            for (const [name,path] of [['home','/'],['sok','/sok-batteries']]) {
+              const context=await browser.newContext({viewport});
+              const page=await context.newPage();
+              const res=await page.goto(base+path,{waitUntil:'networkidle',timeout:60000});
+              if(!res||res.status()!==200) throw new Error(`${mode} ${path} status ${res?.status()}`);
+              await page.waitForTimeout(1000);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} overflow ${overflow}`);
+              const bad=await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{const r=i.getBoundingClientRect();const s=getComputedStyle(i);return r.width>2&&s.display!=='none'&&s.visibility!=='hidden'&&(!i.complete||i.naturalWidth===0)}).map(i=>i.currentSrc||i.src));
+              if(bad.length) throw new Error(`${mode} ${path} broken images ${bad.join(', ')}`);
+              if(name==='home') {
+                if(!(await page.locator('.retail-hero').isVisible())) throw new Error(`${mode} homepage retail hero missing`);
+                if(!(await page.getByText('Power Beyond', {exact:false}).first().isVisible())) throw new Error(`${mode} homepage hero copy missing`);
+                if(!(await page.getByText('Built Around SOK', {exact:false}).first().isVisible())) throw new Error(`${mode} homepage SOK section missing`);
+              }
+              const brand=page.locator('.eus-brand>img').first();
+              if(await brand.count()) {
+                const content=await brand.evaluate(el=>getComputedStyle(el).content);
+                if(!String(content).includes('storefront-wordmark')) throw new Error(`${mode} ${path} storefront wordmark missing`);
+              }
+              await page.screenshot({path:`production-visual-evidence/${name}-${mode}.png`,fullPage:true});
+              checks.push({mode,path,overflow,badImages:bad.length});
+              await context.close();
+            }
+          }
+          await browser.close();
+          fs.writeFileSync('production-visual-evidence/report.json',JSON.stringify({candidate:'37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4',base,checks},null,2));
+          console.log('production_visual_gate=PASS');
+          NODE
+          node production-visual.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-visual-0905-02-production-evidence
+          path: production-visual-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Production receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo '### WEB-VISUAL-0905-02 — PRODUCTION PASS'
+            echo "- Candidate: $CANDIDATE_SHA"
+            echo "- GitHub main: $(git ls-remote origin refs/heads/main | cut -f1)"
+            echo "- Immutable deployment: $BASE"
+            echo '- Canonical production smoke: PASS'
+            echo '- Desktop/mobile visual evidence: PASS'
+            echo '- PayPal live config: PASS'
+            echo '- Server-authoritative quote: PASS'
+            echo '- PayPal order creation: NOT PERFORMED'
+            echo '- Capture/payment: NOT PERFORMED'
+          } >> "$GITHUB_STEP_SUMMARY"
