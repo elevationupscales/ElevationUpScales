@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const shell = fs.readFileSync("site/site-shell.js", "utf8");
 const home = fs.readFileSync("site/index.html", "utf8");
+const solarServices = fs.readFileSync("site/solar-services.html", "utf8");
 
 const shopStart = shell.indexOf("const SHOP_LINKS");
 const shopEnd = shell.indexOf("function randomId", shopStart);
@@ -23,12 +24,16 @@ for (const route of [
 assert.equal(shopBlock.includes('"/marketplace"'), false, "Marketplace must remain separate from Elevation Catalog/Shop ownership");
 assert.equal(shopBlock.includes('"/solar-services"'), false, "Solar services must remain under Services, not be duplicated into Shop ownership");
 
-assert.ok(home.includes("eus-menu--marketplace"), "homepage must expose the separate Marketplace menu");
-assert.ok(home.includes('href="/marketplace#all"'), "homepage Marketplace menu must route to the existing marketplace");
-assert.ok(home.includes("eus-menu--services"), "homepage must expose Services navigation");
-assert.ok(home.includes('href="/solar-services"'), "Solar & Off-Grid must route through the existing Services route");
-assert.ok(home.includes("eus-menu--shop"), "homepage must expose the shared Shop menu");
+assert.ok(home.includes('href="#shop"'), "homepage must retain its direct Shop section route");
+assert.ok(home.includes('href="/marketplace"'), "homepage must expose Marketplace as a separate top-level destination");
+assert.ok(home.includes('href="/solar-project?source=home-elevation-funnel"'), "homepage Solar route must continue to the existing Solar Builder entry point");
 assert.ok(home.includes('href="/start-a-project"'), "primary Start a Project route must remain present");
+
+assert.ok(solarServices.includes("eus-menu--services"), "full service navigation must retain Services ownership");
+assert.ok(solarServices.includes('href="/solar-services"'), "Solar & Off-Grid must remain under the existing Services route");
+assert.ok(solarServices.includes("eus-menu--marketplace"), "full service navigation must retain separate Marketplace ownership");
+assert.ok(solarServices.includes('href="/marketplace#all"'), "full service navigation must route Marketplace to the existing marketplace");
+assert.ok(solarServices.includes("eus-menu--shop"), "full service navigation must retain the Shop menu owner");
 
 const redirects = fs.readFileSync("site/_redirects", "utf8");
 assert.ok(redirects.includes("/solar-services.html /solar-services 301"), "canonical Solar Services redirect must remain intact");
