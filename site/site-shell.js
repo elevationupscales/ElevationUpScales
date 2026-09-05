@@ -368,7 +368,7 @@
     if (!document.querySelector('link[data-retail-shell]')) {
       const style = document.createElement("link");
       style.rel = "stylesheet";
-      style.href = "/retail-first.css?v=5.0.1";
+      style.href = "/retail-first.css?v=5.3.0";
       style.dataset.retailShell = "true";
       document.head.append(style);
     }
