@@ -30,7 +30,9 @@ jobs:
       - name: Install media tooling
         run: python -m pip install --disable-pip-version-check requests beautifulsoup4 pillow
       - name: Build full SOK catalog and local media
-        run: python runner/deployment/one-time-sok-full-line-finalize.py target
+        run: |
+          python runner/deployment/one-time-sok-full-line-finalize.py target
+          python runner/deployment/one-time-sok-full-line-fix.py target
       - name: Validate candidate before commit
         working-directory: target
         run: |
