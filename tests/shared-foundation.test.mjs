@@ -4,11 +4,11 @@ import {
   HTML_SECURITY_HEADERS,
   htmlResponse,
   jsonResponse,
-} from "../src/worker/response.js";
+} from "../site/worker/shared/response.js";
 import {
   escapeHtml,
   jsonForInlineScript,
-} from "../src/shared/html.js";
+} from "../site/worker/shared/html.js";
 import {
   cleanList,
   cleanString,
@@ -17,12 +17,12 @@ import {
   hasEarlySolarContact,
   isValidEmail,
   isValidPhone,
-} from "../src/shared/validation.js";
+} from "../site/worker/shared/validation.js";
 import {
   sanitizeBuild,
   sanitizeContact,
   sanitizeSolarMilestone,
-} from "../src/shared/solar-sanitizers.js";
+} from "../site/worker/shared/solar-sanitizers.js";
 
 assert.equal(API_SECURITY_HEADERS["X-Frame-Options"], "DENY");
 assert.equal(HTML_SECURITY_HEADERS["X-Frame-Options"], "SAMEORIGIN");

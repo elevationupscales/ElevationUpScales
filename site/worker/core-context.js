@@ -1,3 +1,24 @@
+import {
+  API_SECURITY_HEADERS,
+  HTML_SECURITY_HEADERS,
+  jsonResponse,
+} from "./shared/response.js";
+import { escapeHtml, jsonForInlineScript } from "./shared/html.js";
+import {
+  cleanList,
+  cleanString,
+  configuredEmail,
+  hasBasicContact,
+  hasEarlySolarContact,
+  isValidEmail,
+  isValidPhone,
+} from "./shared/validation.js";
+import {
+  sanitizeBuild,
+  sanitizeContact,
+  sanitizeSolarMilestone,
+} from "./shared/solar-sanitizers.js";
+
 const SHOP_ORIGIN = "https://elevationupscales-shop.fourthwall.com";
 const PUBLIC_ORIGIN = "https://elevationupscales.com";
 const MAX_PAGES = 10;
@@ -30,144 +51,6 @@ const NOTIFICATION_TYPES = Object.freeze({
   admin_new_work_with_us_request: { templateId: "admin_new_work_with_us_request_v1", sourceSystem: "work_with_us", delivery: "current" },
   admin_notification_failure: { templateId: "admin_notification_failure_v1", sourceSystem: "internal", delivery: "future" },
 });
-
-const API_SECURITY_HEADERS = {
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "Referrer-Policy": "no-referrer",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
-};
-
-const HTML_SECURITY_HEADERS = {
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "SAMEORIGIN",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-  "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com https://elevationupscales-shop.fourthwall.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; upgrade-insecure-requests",
-};
-
-function jsonResponse(data, status = 200, extraHeaders = {}) {
-  return Response.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store",
-      ...API_SECURITY_HEADERS,
-      ...extraHeaders,
-    },
-  });
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function jsonForInlineScript(value) {
-  return JSON.stringify(value)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
-}
-
-function cleanString(value, max = 500) {
-  return String(value ?? "").trim().slice(0, max);
-}
-
-function cleanList(value, maxItems = 40, maxItemLength = 220) {
-  if (!Array.isArray(value)) return [];
-  return value.slice(0, maxItems).map((item) => cleanString(item, maxItemLength)).filter(Boolean);
-}
-
-function sanitizeBuild(raw = {}) {
-  return {
-    package: cleanString(raw.package, 140),
-    ecosystem: cleanString(raw.ecosystem, 140),
-    classification: cleanString(raw.classification, 140),
-    complexity: cleanString(raw.complexity, 140),
-    panel: cleanString(raw.panel, 300),
-    battery: cleanString(raw.battery, 300),
-    inverter: cleanString(raw.inverter, 300),
-    controller: cleanString(raw.controller, 300),
-    alternator: cleanString(raw.alternator, 300),
-    shore: cleanString(raw.shore, 300),
-    monitoring: cleanString(raw.monitoring, 300),
-    wiring: cleanString(raw.wiring, 300),
-    loads: cleanList(raw.loads),
-    services: cleanList(raw.services),
-    alerts: cleanList(raw.alerts),
-    estimatedDailySolar: cleanString(raw.estimatedDailySolar, 120),
-    usableBatteryReserve: cleanString(raw.usableBatteryReserve, 120),
-    estimatedDailyUsage: cleanString(raw.estimatedDailyUsage, 120),
-    estimatedEnergyBalance: cleanString(raw.estimatedEnergyBalance, 120),
-    powerUseContext: cleanString(raw.powerUseContext, 180),
-    notes: cleanString(raw.notes, 2_500),
-  };
-}
-
-function sanitizeContact(raw = {}) {
-  return {
-    name: cleanString(raw.name, 120),
-    firstName: cleanString(raw.firstName, 80),
-    phone: cleanString(raw.phone, 80),
-    email: cleanString(raw.email, 180).toLowerCase(),
-    location: cleanString(raw.location, 180),
-    rv: cleanString(raw.rv, 260),
-    preferred: cleanString(raw.preferred, 80),
-    timing: cleanString(raw.timing, 120),
-    installLocation: cleanString(raw.installLocation, 180),
-    available: cleanString(raw.available, 80),
-    details: cleanString(raw.details, 2_500),
-    consent: Boolean(raw.consent),
-  };
-}
-
-function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || ""));
-}
-
-function configuredEmail(value) {
-  const raw = cleanString(value, 240).trim();
-  if (!raw) return "";
-  if (isValidEmail(raw)) return raw.toLowerCase();
-  const match = raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  return match && isValidEmail(match[0]) ? match[0].toLowerCase() : "";
-}
-
-function isValidPhone(value) {
-  const text = String(value || "").trim();
-  const digits = text.replace(/\D/g, "");
-  return /^[0-9+().\-\s]{7,30}$/.test(text) && digits.length >= 7 && digits.length <= 15;
-}
-
-function hasBasicContact(contact) {
-  return Boolean(contact.name && contact.consent && (isValidPhone(contact.phone) || isValidEmail(contact.email)));
-}
-
-function hasEarlySolarContact(contact) {
-  return Boolean(contact?.consent && (isValidPhone(contact?.phone) || isValidEmail(contact?.email)));
-}
-
-function sanitizeSolarMilestone(raw = {}) {
-  const hasProgress = raw.progressPercent !== null && raw.progressPercent !== undefined && raw.progressPercent !== "";
-  const progress = hasProgress ? Number(raw.progressPercent) : NaN;
-  return {
-    kind: cleanString(raw.kind, 80),
-    currentStep: cleanString(raw.currentStep, 100),
-    progressPercent: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : null,
-    powerSnapshotViewed: Boolean(raw.powerSnapshotViewed),
-    summaryViewed: Boolean(raw.summaryViewed),
-    reviewOpened: Boolean(raw.reviewOpened),
-    notesSaved: Boolean(raw.notesSaved),
-  };
-}
 
 function eventHeading(eventType) {
   return {
