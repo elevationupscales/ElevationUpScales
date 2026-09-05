@@ -1,0 +1,83 @@
+name: WEB-VISUAL-0905-02 Header Style Diagnostic
+
+on:
+  push:
+    branches:
+      - diagnostic/web-visual-0905-02-header-style-state
+
+permissions:
+  contents: read
+
+env:
+  PROD: https://elevationupscales.com
+  CANDIDATE_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+      - name: Verify exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse origin/main)" = "$CANDIDATE_SHA"
+          grep -n "style.href = \"/retail-first.css" site/site-shell.js || true
+          grep -n "storefront-wordmark" site/retail-first.css || true
+      - name: Inspect served retail stylesheet variants
+        shell: bash
+        run: |
+          set -euo pipefail
+          for q in '5.0.1' '5.1.0'; do
+            curl -sS -L --fail -D "/tmp/h$q" "$PROD/retail-first.css?v=$q" -o "/tmp/c$q.css"
+            echo "variant=$q bytes=$(wc -c < /tmp/c$q.css) sha256=$(sha256sum /tmp/c$q.css | cut -d' ' -f1)"
+            grep -q "storefront-wordmark.webp" "/tmp/c$q.css" && echo "variant=$q wordmark_rule=YES" || echo "variant=$q wordmark_rule=NO"
+            grep -i '^cache-control:\|^age:\|^cf-cache-status:\|^etag:' "/tmp/h$q" | tr -d '\r' || true
+          done
+      - name: Install Playwright
+        shell: bash
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+      - name: Inspect homepage and SOK DOM/CSS state
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > state.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          for(const [name,path] of [['home','/'],['sok','/sok-batteries'],['order','/sok-order.html?sku=SK12V100PC&intent=purchase_options'],['product','/sok/sk12v100pc/']]){
+            const context=await browser.newContext({viewport:{width:1440,height:1000}});
+            const page=await context.newPage();
+            const failed=[];
+            page.on('response',r=>{if(r.status()>=400&&['document','stylesheet','script','image'].includes(r.request().resourceType())) failed.push([r.status(),r.request().resourceType(),r.url()]);});
+            const r=await page.goto('https://elevationupscales.com'+path,{waitUntil:'domcontentloaded',timeout:30000});
+            await page.waitForTimeout(5000);
+            const state=await page.evaluate(()=>{
+              const brand=document.querySelector('.eus-brand>img');
+              const css=brand?getComputedStyle(brand):null;
+              return {
+                status:document.readyState,
+                bodyClass:document.body.className,
+                shopIntro:!!document.querySelector('.shop-intro'),
+                retailStyles:[...document.querySelectorAll('link[rel="stylesheet"]')].map(x=>x.href).filter(x=>x.includes('retail-first')),
+                dynamicRetailStyle:[...document.querySelectorAll('link[data-retail-shell]')].map(x=>x.href),
+                brandSrc:brand?.getAttribute('src')||null,
+                brandCurrentSrc:brand?.currentSrc||null,
+                brandContent:css?.content||null,
+                brandObjectFit:css?.objectFit||null,
+                brandBox:brand?{w:brand.getBoundingClientRect().width,h:brand.getBoundingClientRect().height}:null,
+              };
+            });
+            console.log(name+' '+JSON.stringify(state));
+            console.log(name+' failed='+JSON.stringify(failed));
+            await context.close();
+          }
+          await browser.close();
+          NODE
+          node state.mjs
