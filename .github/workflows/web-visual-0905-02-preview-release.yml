@@ -124,7 +124,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p visual-evidence
-          cat > /tmp/visual-smoke.mjs <<'NODE'
+          cat > visual-smoke.mjs <<'NODE'
           import { chromium } from 'playwright';
           import fs from 'node:fs';
           const base = process.env.BASE.replace(/\/$/, '');
@@ -214,7 +214,8 @@ jobs:
           console.log(`desktop_mobile_visual_routes=${report.length}`);
           console.log('desktop_mobile_visual=PASS');
           NODE
-          node /tmp/visual-smoke.mjs
+          node visual-smoke.mjs
+          rm -f visual-smoke.mjs
 
       - name: Verify preview PayPal safety boundary
         env:
