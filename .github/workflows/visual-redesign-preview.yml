@@ -1,0 +1,89 @@
+name: Elevation Visual Redesign Preview
+
+on:
+  push:
+    branches:
+      - design/website-visual-redesign-2026-09-05
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-visual-redesign-preview
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EXPECTED_PRODUCTION_MAIN: 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7
+      PREVIEW_BRANCH: website-visual-redesign-v1
+    steps:
+      - name: Check out visual redesign branch
+        uses: actions/checkout@v6
+        with:
+          ref: design/website-visual-redesign-2026-09-05
+          fetch-depth: 0
+
+      - name: Protect production and enforce design-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_PRODUCTION_MAIN"
+          git merge-base --is-ancestor origin/main HEAD
+          allowed='^(\.github/workflows/visual-redesign-preview\.yml|deployment/design/REDESIGN_V1_CONTROL\.md|site/redesign-v1\.css|site/redesign-v1\.js|site/script\.js|site/sok-batteries\.html)$'
+          unexpected="$(git diff --name-only origin/main...HEAD | grep -Ev "$allowed" || true)"
+          test -z "$unexpected" || { echo "Unexpected non-design files:"; echo "$unexpected"; exit 1; }
+          echo "Production protected: $EXPECTED_PRODUCTION_MAIN"
+          echo "Design-only file scope: PASS"
+
+      - name: Run canonical source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+          git diff --exit-code
+
+      - name: Deploy isolated redesign preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ env.PREVIEW_BRANCH }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run clean-baseline preview regression
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$PREVIEW_URL"
+          curl -fsSL "$PREVIEW_URL/" | grep -q 'redesign-v1.css\|script.js'
+          curl -fsSL "$PREVIEW_URL/redesign-v1.css" | grep -q 'Elevation UpScales visual redesign v1'
+          curl -fsSL "$PREVIEW_URL/redesign-v1.js" | grep -q 'POWER & SHOP'
+
+      - name: Verify candidate immutability
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          echo "Candidate SHA: $(git rev-parse HEAD)"
+
+      - name: Summary
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### Elevation Visual Redesign V1 — PREVIEW PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Design-only scope: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical source QA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Clean-baseline regression: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production main: UNCHANGED ($EXPECTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
