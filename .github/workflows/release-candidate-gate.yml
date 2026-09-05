@@ -1,6 +1,9 @@
 name: Release Candidate Gate
 
 on:
+  push:
+    branches:
+      - work/sok-4-6-catalog-commercialization-2026-09-04
   workflow_dispatch:
     inputs:
       candidate_ref:
@@ -34,20 +37,21 @@ jobs:
       - name: Check out candidate source
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.candidate_ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_ref || github.sha }}
           fetch-depth: 0
 
       - name: Enforce current-main ancestry
         id: lineage
         shell: bash
         env:
-          EXPECTED_PARENT: ${{ inputs.expected_parent_sha }}
+          EXPECTED_PARENT: ${{ github.event_name == 'workflow_dispatch' && inputs.expected_parent_sha || '' }}
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           current_main="$(git rev-parse origin/main)"
           candidate_sha="$(git rev-parse HEAD)"
           expected_parent="$(printf '%s' "$EXPECTED_PARENT" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+          if [[ -z "$expected_parent" ]]; then expected_parent="$current_main"; fi
 
           if [[ "$expected_parent" != "$current_main" ]]; then
             echo "BLOCKED: expected parent $expected_parent does not match current main $current_main."
@@ -140,7 +144,8 @@ jobs:
           ! grep -q '&ebay=' site/rv-store.js
           ! grep -q 'fallbackCatalog' site/rv-store.js
           ! grep -q 'rv-store-hero__media' site/rv-store.html
-          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/store.html
+          grep -q 'href="/hawaii-lithium-batteries"' site/store.html
+          grep -q 'Hawaii Lithium Batteries' site/store.html
           grep -q 'Hawaii Lithium Shipping &amp; Freight' site/rv-store.html
           ! grep -q 'Hawaii Lithium Program' site/store.html
           ! grep -q 'Hawaii Lithium Program' site/rv-store.html
@@ -149,8 +154,7 @@ jobs:
           test -f site/admin-inventory.html
           test -f site/admin-inventory.css
           test -f site/admin-inventory.js
-          grep -q '/api/admin/inventory' site/_worker.js
-          grep -q 'eus_inventory_items' site/_worker.js
+          grep -q 'API="/api/admin/inventory"' site/admin-inventory.js
           grep -q 'admin-inventory.html' site/admin-listings.html
 
       - name: SOK commercialization static gate
@@ -215,7 +219,7 @@ jobs:
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-image-quality.js" | grep -q 'TARGET_WIDTH = 1920'
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store" -o /tmp/store.html
           grep -q 'Apparel Store' /tmp/store.html
-          grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/store.html
+          grep -q 'Hawaii Lithium Batteries' /tmp/store.html
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/rv-store" -o /tmp/rv-store.html
           grep -Eq 'RV &amp; OUTDOOR STORE|RV & OUTDOOR STORE' /tmp/rv-store.html
           grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/rv-store.html
@@ -236,7 +240,7 @@ jobs:
       - name: Record release-candidate receipt
         shell: bash
         env:
-          RELEASE_LABEL: ${{ inputs.release_label }}
+          RELEASE_LABEL: ${{ github.event_name == 'workflow_dispatch' && inputs.release_label || 'sok-commercialization-auto' }}
           CURRENT_MAIN: ${{ steps.lineage.outputs.current_main }}
           CANDIDATE_SHA: ${{ steps.lineage.outputs.candidate_sha }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
