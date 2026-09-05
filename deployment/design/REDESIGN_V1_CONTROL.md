@@ -16,18 +16,21 @@ Branch:
 
 Translate the approved Elevation/SOK tropical off-grid visual direction into a real ecommerce interface while preserving the clean production application's business behavior.
 
-The interaction model borrows high-level shopping patterns observed on battery ecommerce sites such as simple category browsing, application-first merchandising, visible filters, large product imagery, availability/action hierarchy, and support links. It does not copy external source code, proprietary imagery, product claims, or page text.
+The interaction model borrows high-level shopping patterns observed on mature battery ecommerce sites: simple category browsing, application-first merchandising, visible filters, large product imagery, clear availability/action hierarchy, and fast routes into support. It does not copy external source code, proprietary imagery, product claims, or page text.
 
 ## Design-only architecture
 
 The redesign is intentionally implemented as a late presentation overlay:
 
-- `site/redesign-v1.css` — visual theme only
-- `site/redesign-v1.js` — presentation-only DOM enhancements
-- `site/script.js` — tiny loader added after the existing contact/year behavior
-- `site/sok-batteries.html` — adds existing `script.js` so the SOK catalog receives the same reversible overlay
+- `site/redesign-v1.css` — global visual tokens, header, homepage and shared public styling
+- `site/redesign-v1-pages.css` — storefront/product/page-specific presentation
+- `site/redesign-v1.js` — presentation-only DOM enhancements and browse navigation
+- `site/site-shell.js` — one append-only public loader block marked `EUS_VISUAL_REDESIGN_V1_LOADER`
+- `deployment/design/apply-redesign-loader.py` — idempotent migration used to append the loader safely
 
-No Worker, D1, API, auth, checkout, PayPal, supplier, Catalog source-of-truth, Hawaii freight engine, or routing contract is changed by this design pass.
+`site/script.js` and `site/sok-batteries.html` were restored byte-for-byte to the accepted production versions after the shared shell loader was installed.
+
+No Worker, D1, API, auth, checkout logic, PayPal logic, supplier integration, Catalog source-of-truth, Hawaii freight engine, or routing contract is changed by this design pass.
 
 ## Preserved contracts
 
@@ -51,27 +54,31 @@ The branch hides the legacy emblem visually in the public header and restyles th
 Presentation additions include:
 
 - persistent Power & Shop category rail;
-- homepage Shop by Solution expansion;
-- stronger SOK merchandising;
-- high-contrast product cards;
-- voltage/use filters already present in the application are restyled rather than replaced;
+- homepage Shop by Solution expansion covering Lithium, SOK, Solar, Hawaii, RV, Backup and Commercial;
+- stronger SOK merchandising and existing voltage/use filters;
+- larger product imagery and denser scan-friendly cards;
+- improved RV collection search/category/sort presentation;
+- two-column premium product detail presentation on desktop;
 - Hawaii Logistics availability badge where appropriate;
-- simplified browse-first CTA hierarchy.
+- simplified browse-first CTA hierarchy;
+- consistent dark navy / cyan ecommerce language across public pages.
 
 ## Revert
 
 Production is untouched while this branch is in review.
 
-To discard the experiment: delete the branch.
+To discard the experiment now: delete the branch.
 
 If later merged and a visual rollback is required:
 
-1. restore `site/script.js` from the prior accepted production baseline;
-2. restore `site/sok-batteries.html` from the prior accepted production baseline;
-3. delete `site/redesign-v1.css`;
+1. restore `site/site-shell.js` from baseline `0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7`;
+2. delete `site/redesign-v1.css`;
+3. delete `site/redesign-v1-pages.css`;
 4. delete `site/redesign-v1.js`.
 
-No DB, Worker, checkout, API, or data rollback is required.
+That fully removes the redesign loader and presentation layer.
+
+No DB, Worker, checkout, API, freight, auth, supplier, or production-data rollback is required.
 
 ## Preview gate
 
@@ -83,6 +90,7 @@ Before any production consideration:
 - SOK catalog and Purchase Options smoke;
 - lithium/Hawaii route smoke;
 - RV/store/product browsing smoke;
+- Solar Builder / Start a Project / checkout presentation load through shared shell;
 - desktop/mobile visual review;
 - no horizontal overflow;
 - no active 719 Elevation contact route;
