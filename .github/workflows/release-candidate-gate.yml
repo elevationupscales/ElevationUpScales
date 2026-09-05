@@ -153,6 +153,13 @@ jobs:
           grep -q 'eus_inventory_items' site/_worker.js
           grep -q 'admin-inventory.html' site/admin-listings.html
 
+      - name: SOK commercialization static gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/sok-commercialization-static.mjs
+          git diff --check
+
       - name: Check JavaScript syntax
         shell: bash
         run: |
@@ -218,6 +225,14 @@ jobs:
           ! grep -q 'fallbackCatalog' /tmp/rv-store.js
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/" | grep -q 'Start a Project'
 
+      - name: Smoke SOK commercialization preview
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          bash deployment/qa/sok-commercialization-preview.sh "$DEPLOYMENT_URL"
+
       - name: Record release-candidate receipt
         shell: bash
         env:
@@ -234,4 +249,5 @@ jobs:
           echo "Lineage guard: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Protected regression gate: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview smoke: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "SOK commercialization gate: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
