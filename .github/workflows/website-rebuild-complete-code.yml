@@ -42,6 +42,12 @@ jobs:
           set -euo pipefail
           python deployment/rebuild/integrate-worker-shared-foundation.py
 
+      - name: Extract canonical Worker route contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python deployment/rebuild/extract-worker-routes.py
+
       - name: Finish Worker dependency surfaces
         shell: bash
         run: |
@@ -78,7 +84,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- site/worker tests/shared-foundation.test.mjs src; then
+          if git diff --quiet -- site/worker-core.js site/worker tests/shared-foundation.test.mjs src; then
             echo "No generated Worker changes remain to commit."
             echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
             exit 0
@@ -86,8 +92,8 @@ jobs:
 
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
-          git add -A -- site/worker tests/shared-foundation.test.mjs src
-          git commit -m "Integrate Website Rebuild shared Worker foundation [skip rebuild-generation]"
+          git add -A -- site/worker-core.js site/worker tests/shared-foundation.test.mjs src
+          git commit -m "Finish Website Rebuild Worker route and shared ownership [skip rebuild-generation]"
           candidate_sha=$(git rev-parse HEAD)
           git push origin HEAD:work/website-rebuild-complete-code-2026-09-05
           echo "sha=$candidate_sha" >> "$GITHUB_OUTPUT"
@@ -103,5 +109,6 @@ jobs:
           echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Canonical QA: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Worker shared foundation: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Worker route-contract ownership: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Worker dependency consolidation: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production main: UNCHANGED ($EXPECTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
