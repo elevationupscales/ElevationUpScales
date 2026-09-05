@@ -6,7 +6,8 @@
     "test": "node tests/shared-foundation.test.mjs && node tests/core-route-registry.test.mjs && node deployment/qa/phase2a-admin-static.mjs && node deployment/qa/worker-import-surface-static.mjs",
     "check": "node deployment/qa/clean-baseline-static.mjs",
     "qa:commerce": "node deployment/qa/web-com-commerce-regression.mjs",
-    "qa": "npm run rebuild:verify && npm test && npm run check && npm run qa:commerce",
+    "qa:analytics": "node deployment/qa/web-com-analytics-static.mjs",
+    "qa": "npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:analytics",
     "qa:preview": "bash deployment/qa/clean-baseline-preview.sh"
   },
   "dependencies": {
