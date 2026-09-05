@@ -1,0 +1,126 @@
+name: WEB-VISUAL-0905-01 Isolated Preview
+
+on:
+  push:
+    branches:
+      - preview/web-visual-0905-01-retail-first
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: web-visual-0905-01-preview
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EXPECTED_PRODUCTION_MAIN: 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7
+      VISUAL_PARENT: 1f313d78a9b13becac4c53d41238ee206e66717b
+      PREVIEW_BRANCH: web-visual-0905-01-preview
+    steps:
+      - name: Check out exact visual candidate
+        uses: actions/checkout@v6
+        with:
+          ref: preview/web-visual-0905-01-retail-first
+          fetch-depth: 0
+
+      - name: Protect production lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_PRODUCTION_MAIN"
+          git merge-base --is-ancestor "$VISUAL_PARENT" HEAD
+          echo "Production main remains $EXPECTED_PRODUCTION_MAIN"
+          echo "Visual candidate: $(git rev-parse HEAD)"
+
+      - name: Run committed-source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          git diff --exit-code
+
+      - name: Enforce Pages limits and block credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
+            echo "BLOCKED: credential-like value found in deployable source."
+            exit 1
+          fi
+
+      - name: Deploy isolated retail preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ env.PREVIEW_BRANCH }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run canonical deployed regression
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$PREVIEW_URL"
+
+      - name: Verify retail-first deployed experience
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_URL%/}"
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/" -o /tmp/home.html
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/retail-first.css?v=5.0.0" -o /tmp/retail.css
+          grep -Fq 'Lithium.<br>Logistics.<br>Off-Grid Power.' /tmp/home.html
+          grep -Fq 'Lithium &amp; Outdoor Dealer' /tmp/home.html
+          grep -Fq 'FREIGHT &amp; SHIPPING LOGISTICS' /tmp/home.html
+          grep -Fq 'Shop Lithium' /tmp/home.html
+          grep -Fq 'Shop RV &amp; Outdoor' /tmp/home.html
+          grep -Fq 'retail-more-menu' /tmp/home.html
+          grep -Fq "elevation-lithium-social-card.webp" /tmp/retail.css
+          grep -Fq '.retail-hero::before' /tmp/retail.css
+          grep -Fq '@media (max-width:560px)' /tmp/retail.css
+          python - <<'PY'
+          from pathlib import Path
+          home=Path('/tmp/home.html').read_text()
+          nav=home.split('<nav class="eus-nav"',1)[1].split('</nav>',1)[0]
+          assert '<a class="eus-nav-link" href="/marketplace' not in nav
+          assert 'retail-more-menu' in nav
+          assert nav.index('retail-more-menu') < nav.index('href="/marketplace"')
+          print('Marketplace hierarchy: PASS')
+          PY
+          echo "Retail-first deployed visual contract: PASS"
+
+      - name: Verify candidate remained immutable
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+
+      - name: Summary
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### WEB-VISUAL-0905-01 isolated preview — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical QA + deployed regression: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Retail-first tropical visual contract: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Marketplace hierarchy: LAST-LAYER PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production main: UNCHANGED ($EXPECTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
