@@ -180,6 +180,7 @@
       ["/store", "Apparel Store", "Hats, apparel, artwork, stickers, and official Elevation releases"],
       ["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],
       ["/lithium-batteries", "Lithium Battery Shop", "LiFePO4 batteries for RV, solar, van, and off-grid power"],
+      ["/sok-batteries", "SOK Battery Systems", "Authorized SOK Energy Dealer · 12V and 48V LiFePO4"],
       ["/hawaii-lithium-batteries", "Hawaii Power & Logistics", "Eligible battery models · Hawaii freight intake"],
       ["/collector", "Collector Series", "Explore the four-card collection and Golden Ticket"],
     ];
