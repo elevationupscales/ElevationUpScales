@@ -7,6 +7,14 @@
   document.documentElement.classList.add("eus-redesign-v1");
   document.body?.classList.add("eus-redesign-v1");
 
+  if(!document.querySelector('link[data-eus-redesign="v1-apps"]')){
+    const apps=document.createElement("link");
+    apps.rel="stylesheet";
+    apps.href="/redesign-v1-apps.css?v=1.0.0";
+    apps.dataset.eusRedesign="v1-apps";
+    document.head.append(apps);
+  }
+
   document.querySelectorAll(".eus-wordmark__tagline").forEach((node)=>{
     node.textContent="OFF-GRID POWER • SUPPLY • LOGISTICS";
   });
