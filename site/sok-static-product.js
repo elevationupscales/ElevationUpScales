@@ -7,6 +7,14 @@
   const track=(type,details={})=>window.EUSIntent?.track?.(type,sku,{source:"sok-product-page",sku,...details});
   const esc=(value)=>String(value??"").replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
+  function installPresentationStyles(){
+    if(document.querySelector('link[href*="sok-storefront-v2.css"]'))return;
+    const link=document.createElement("link");
+    link.rel="stylesheet";
+    link.href="/sok-storefront-v2.css?v=4.9.0";
+    document.head.append(link);
+  }
+
   function installBreadcrumbs(){
     const main=document.querySelector("main#product");
     const hero=document.querySelector(".sok-product-hero");
@@ -103,6 +111,7 @@
     });
   }
 
+  installPresentationStyles();
   track("sok_product_view");
   installBreadcrumbs();
   installCapabilityStrip();
