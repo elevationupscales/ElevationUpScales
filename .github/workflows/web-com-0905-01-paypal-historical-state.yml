@@ -1,0 +1,46 @@
+name: WEB-COM-0905-01 PayPal Historical State
+
+on:
+  push:
+    branches:
+      - diagnostic/web-com-0905-01-paypal-historical-state
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read PayPal config from current and historical previews
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          urls = {
+            'current_candidate': 'https://58676326.elevationupscales.pages.dev',
+            'historical_immutable': 'https://771df459.elevationupscales.pages.dev',
+            'historical_alias': 'https://paypal-sandbox-launch.elevationupscales.pages.dev',
+          }
+          for name, base in urls.items():
+              out = subprocess.check_output([
+                  'curl','--silent','--show-error','--fail','--location','--retry','6','--retry-all-errors','--retry-delay','2',
+                  '--connect-timeout','15','--max-time','45',f'{base}/api/store-checkout/config'
+              ], text=True)
+              data=json.loads(out)
+              print(name+':')
+              print('  environment='+str(data.get('environment')))
+              print('  credentials_configured='+str(bool(data.get('credentialsConfigured'))).lower())
+              print('  checkout_enabled='+str(bool(data.get('checkoutEnabled'))).lower())
+              print('  client_id_present='+str(bool(data.get('clientId'))).lower())
+              print('  sandbox_transaction_allowed='+('YES' if data.get('environment')=='sandbox' and data.get('checkoutEnabled') else 'NO'))
+          print('mutation_performed=NO')
+          PY
+
+      - name: Record diagnostic boundary
+        shell: bash
+        run: |
+          echo '### PayPal historical-state diagnostic' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GET-only configuration inspection.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No order creation/capture, secret or variable changes, bindings changes, or production deployment performed.' >> "$GITHUB_STEP_SUMMARY"
