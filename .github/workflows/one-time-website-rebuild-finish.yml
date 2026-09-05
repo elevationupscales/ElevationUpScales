@@ -84,14 +84,28 @@ jobs:
         run: |
           set -euo pipefail
           base="${BASE%/}"
-          for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system; do
-            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page --write-out '%{http_code}' "$base$route" || true); test "$code" = 200 || { echo "$route => $code"; exit 1; }
-          done
-          code=$(curl -sS -o /tmp/health --write-out '%{http_code}' "$base/api/health"); test "$code" = 200
-          for route in /api/admin/operations /api/admin/inventory /api/admin/leads /api/admin/listings /api/admin/market-analytics; do code=$(curl -sS -o /tmp/admin --write-out '%{http_code}' "$base$route" || true); test "$code" = 401 || { echo "$route expected 401 got $code"; exit 1; }; done
-          for route in /worker-core.js /worker/core-context.js /worker/domains/admin-auth.js /sok-full-line-runtime.js /sok-full-line-data.js; do code=$(curl -sS -o /tmp/hidden --write-out '%{http_code}' "$base$route" || true); test "$code" = 404 || { echo "$route expected 404 got $code"; exit 1; }; done
+          check_status() {
+            local expected="$1"; shift
+            local route="$1"
+            local code
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/eus-response --write-out '%{http_code}' "$base$route" || true)
+            echo "CHECK $route => $code (expected $expected)"
+            if [ "$code" != "$expected" ]; then
+              echo "BODY PREVIEW:"
+              head -c 500 /tmp/eus-response || true
+              echo
+              return 1
+            fi
+          }
+          for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system; do check_status 200 "$route"; done
+          check_status 200 /api/health
+          for route in /api/admin/operations /api/admin/inventory /api/admin/leads /api/admin/listings /api/admin/market-analytics; do check_status 401 "$route"; done
+          for route in /worker-core.js /worker/core-context.js /worker/domains/admin-auth.js /sok-full-line-runtime.js /sok-full-line-data.js; do check_status 404 "$route"; done
+          echo "RUN sok-commercialization-preview.sh"
           bash deployment/qa/sok-commercialization-preview.sh "$base"
+          echo "RUN sok-full-line-preview.sh"
           bash deployment/qa/sok-full-line-preview.sh "$base"
+          echo "RUN website-integrity-preview.sh"
           bash deployment/qa/website-integrity-preview.sh "$base"
       - name: Preserve validated non-production candidate
         id: candidate
