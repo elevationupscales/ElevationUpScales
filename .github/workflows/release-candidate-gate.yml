@@ -1,9 +1,6 @@
 name: Release Candidate Gate
 
 on:
-  push:
-    branches:
-      - work/sok-4-6-catalog-commercialization-2026-09-04
   workflow_dispatch:
     inputs:
       candidate_ref:
@@ -30,43 +27,41 @@ concurrency:
 
 jobs:
   validate-and-preview:
-    name: Validate current-main lineage and deploy isolated preview
+    name: Validate exact candidate and deploy isolated preview
     runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Check out candidate source
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_ref || github.sha }}
+          ref: ${{ inputs.candidate_ref }}
           fetch-depth: 0
 
       - name: Enforce current-main ancestry
         id: lineage
         shell: bash
         env:
-          EXPECTED_PARENT: ${{ github.event_name == 'workflow_dispatch' && inputs.expected_parent_sha || '' }}
+          EXPECTED_PARENT: ${{ inputs.expected_parent_sha }}
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           current_main="$(git rev-parse origin/main)"
           candidate_sha="$(git rev-parse HEAD)"
           expected_parent="$(printf '%s' "$EXPECTED_PARENT" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
-          if [[ -z "$expected_parent" ]]; then expected_parent="$current_main"; fi
 
-          if [[ "$expected_parent" != "$current_main" ]]; then
+          if [[ -z "$expected_parent" || "$expected_parent" != "$current_main" ]]; then
             echo "BLOCKED: expected parent $expected_parent does not match current main $current_main."
             echo "Rebase/rebuild the candidate from current main before previewing it."
             exit 1
           fi
 
           if [[ "$candidate_sha" == "$current_main" ]]; then
-            echo "BLOCKED: candidate_ref points to main itself. Use Deploy Elevation UpScales for a main preview."
+            echo "BLOCKED: candidate_ref points to main itself. Use the standard deploy workflow for a main preview."
             exit 1
           fi
 
           if ! git merge-base --is-ancestor "$current_main" "$candidate_sha"; then
             echo "BLOCKED: current main is not an ancestor of candidate $candidate_sha."
-            echo "This prevents an older prepared deployment from overwriting newer production work."
             exit 1
           fi
 
@@ -75,7 +70,7 @@ jobs:
           echo "Current main: $current_main"
           echo "Candidate: $candidate_sha"
 
-      - name: Report candidate delta and protect deployment controls
+      - name: Report delta and protect release controls
         shell: bash
         env:
           CURRENT_MAIN: ${{ steps.lineage.outputs.current_main }}
@@ -86,105 +81,26 @@ jobs:
           test -n "$changed"
 
           if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/deploy-pages\.yml|BASELINE-2026-08-23\.md|SOURCE-LINEAGE\.md)$'; then
-            echo "BLOCKED: candidate changes protected deployment/baseline control files."
+            echo "BLOCKED: candidate changes protected production deployment/baseline controls."
             exit 1
           fi
 
-      - name: Verify protected production invariants
+      - name: Canonical clean-baseline QA
         shell: bash
         run: |
           set -euo pipefail
-
-          # Core customer and Cloudflare files.
-          test -f site/index.html
-          test -f site/_worker.js
-          test -f site/_routes.json
-          test -f site/_headers
-          test -f site/start-a-project.html
-          test -f site/marketplace.html
-
-          # Primary project intake and correct customer contact routing.
-          grep -q 'href="/start-a-project"' site/index.html
-          grep -q 'Start a Project' site/index.html
-          grep -q '+1-208-813-4998' site/index.html
-
-          # Authentic homepage media and incorporated Mission Control analytics work.
-          grep -q 'hero-tile-project.webp' site/index.html
-          test -f site/admin-market-pulse.js
-          grep -q 'Website Sessions' site/admin-market-pulse.js
-          grep -q 'Start a Project Opens' site/admin-market-pulse.js
-          grep -q 'Submitted Leads' site/admin-market-pulse.js
-          grep -q 'visitorLeadConversion' site/admin-market-pulse.js
-          test -f site/follow-up-request.js
-          grep -q 'Elevation UpScales, Inc.' site/follow-up-request.js
-
-          # Accepted seven-stage Solar lineage and duplicate-route integrity.
-          test -f site/solar-visual-guide.css
-          grep -q 'Stage 1 of 7' site/solar-project.html
-          grep -q 'data-jump="panels"' site/solar-project.html
-          grep -q 'data-jump="services"' site/solar-project.html
-          cmp -s site/solar-project.html site/solar-project/index.html
-
-          # Current split-store and v3.11.41 image-quality lineage.
-          test -f site/store.html
-          test -f site/store-config.js
-          test -f site/store-catalog-resilience.js
-          test -f site/store-image-quality.js
-          grep -q 'store-catalog-resilience.js?v=3.11.38&quality=original-r4' site/store-config.js
-          grep -q 'store-image-quality.js?v=3.11.41' site/store-config.js
-          grep -q 'TARGET_WIDTH = 1920' site/store-image-quality.js
-          grep -q 'MIN_FULL_COUNT = 13' site/store-catalog-resilience.js
-          grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
-
-          # Current Catalog-driven RV storefront architecture.
-          test -f site/rv-store.html
-          test -f site/rv-store.js
-          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
-          grep -q 'elevation-catalog' site/rv-store.js
-          ! grep -q '&ebay=' site/rv-store.js
-          ! grep -q 'fallbackCatalog' site/rv-store.js
-          ! grep -q 'rv-store-hero__media' site/rv-store.html
-          grep -q 'href="/hawaii-lithium-batteries"' site/store.html
-          grep -q 'Hawaii Lithium Batteries' site/store.html
-          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/rv-store.html
-          ! grep -q 'Hawaii Lithium Program' site/store.html
-          ! grep -q 'Hawaii Lithium Program' site/rv-store.html
-
-          # Inventory foundation remains protected and operationally separate.
-          test -f site/admin-inventory.html
-          test -f site/admin-inventory.css
-          test -f site/admin-inventory.js
-          grep -q '/api/admin/inventory' site/admin-inventory.js
-          grep -q 'admin-inventory.html' site/admin-listings.html
-
-      - name: SOK commercialization static gate
-        shell: bash
-        run: |
-          set -euo pipefail
-          node deployment/qa/sok-commercialization-static.mjs
+          npm run qa
           git diff --check
 
-      - name: Check JavaScript syntax
+      - name: Enforce Pages limits and block credentials
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find site -type f -name '*.js' -print0)
-
-      - name: Enforce Cloudflare Pages limits and block credentials
-        shell: bash
-        run: |
-          set -euo pipefail
-          file_count=$(find site -type f | wc -l)
-          test "$file_count" -le 20000
-          oversized=$(find site -type f -size +25M -print -quit)
-          test -z "$oversized"
-
-          blocked=$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)
-          test -z "$blocked"
-          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site; then
-            echo "BLOCKED: credential-like value found in website source."
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
+            echo "BLOCKED: credential-like value found in deployable source."
             exit 1
           fi
 
@@ -197,64 +113,27 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=candidate-gate-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Smoke candidate preview
+      - name: Canonical clean-baseline preview regression
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          base="${DEPLOYMENT_URL%/}"
-          test -n "$base"
-
-          for route in / /store /rv-store /start-a-project /marketplace /solar-project; do
-            echo "Smoke testing ${base}${route}"
-            code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/eus-smoke.html --write-out '%{http_code}' "${base}${route}" || true)
-            if [[ "$code" != "200" ]]; then
-              echo "Preview smoke failed for ${route}: ${code:-curl-error}"
-              exit 1
-            fi
-          done
-
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-config.js" -o /tmp/store-config.js
-          grep -q 'store-image-quality.js?v=3.11.41' /tmp/store-config.js
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-image-quality.js" -o /tmp/store-image-quality.js
-          grep -q 'TARGET_WIDTH = 1920' /tmp/store-image-quality.js
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store" -o /tmp/store.html
-          grep -q 'Apparel Store' /tmp/store.html
-          grep -q 'Hawaii Lithium Batteries' /tmp/store.html
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/rv-store" -o /tmp/rv-store.html
-          grep -Eq 'RV &amp; OUTDOOR STORE|RV & OUTDOOR STORE' /tmp/rv-store.html
-          grep -q 'Hawaii Lithium Shipping &amp; Freight' /tmp/rv-store.html
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/rv-store.js" -o /tmp/rv-store.js
-          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
-          ! grep -q '&ebay=' /tmp/rv-store.js
-          ! grep -q 'fallbackCatalog' /tmp/rv-store.js
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/" -o /tmp/home.html
-          grep -q 'Start a Project' /tmp/home.html
-
-      - name: Smoke SOK commercialization preview
-        shell: bash
-        env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
-        run: |
-          set -euo pipefail
-          bash deployment/qa/sok-commercialization-preview.sh "$DEPLOYMENT_URL"
+          bash deployment/qa/clean-baseline-preview.sh "$DEPLOYMENT_URL"
 
       - name: Record release-candidate receipt
         shell: bash
         env:
-          RELEASE_LABEL: ${{ github.event_name == 'workflow_dispatch' && inputs.release_label || 'sok-commercialization-auto' }}
+          RELEASE_LABEL: ${{ inputs.release_label }}
           CURRENT_MAIN: ${{ steps.lineage.outputs.current_main }}
           CANDIDATE_SHA: ${{ steps.lineage.outputs.candidate_sha }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo "### Elevation UpScales controlled candidate" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Elevation UpScales controlled candidate — PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Release: $RELEASE_LABEL" >> "$GITHUB_STEP_SUMMARY"
           echo "Required parent: $CURRENT_MAIN" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
-          echo "Lineage guard: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Protected regression gate: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Preview smoke: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "SOK commercialization gate: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical static QA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical preview regression: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
