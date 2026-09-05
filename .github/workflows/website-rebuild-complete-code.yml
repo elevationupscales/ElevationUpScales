@@ -1,0 +1,100 @@
+name: Website Rebuild Complete Code
+
+on:
+  push:
+    branches:
+      - work/website-rebuild-complete-code-2026-09-05
+
+permissions:
+  contents: write
+  deployments: write
+
+concurrency:
+  group: website-rebuild-complete-code
+  cancel-in-progress: false
+
+jobs:
+  finish-and-validate:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EXPECTED_PRODUCTION_MAIN: 995ddef117be2ba5b26e154ea43409271fc938a9
+      PREVIEW_BRANCH: website-rebuild-complete-code-preview
+    steps:
+      - name: Check out code-completion branch
+        uses: actions/checkout@v6
+        with:
+          ref: work/website-rebuild-complete-code-2026-09-05
+          fetch-depth: 0
+
+      - name: Protect accepted production lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_PRODUCTION_MAIN"
+          git merge-base --is-ancestor origin/main HEAD
+          echo "Production main remains $EXPECTED_PRODUCTION_MAIN"
+
+      - name: Finish Worker dependency surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          python deployment/rebuild/finish-worker-imports.py
+          git diff --check
+
+      - name: Run canonical clean-baseline QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+
+      - name: Deploy isolated code-completion preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ env.PREVIEW_BRANCH }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run canonical clean-baseline preview gate
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          bash deployment/qa/clean-baseline-preview.sh "$PREVIEW_URL"
+
+      - name: Preserve validated code-completion candidate
+        id: preserve
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/worker-core.js site/worker/domains; then
+            echo "No generated Worker changes remain to commit."
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/worker-core.js site/worker/domains
+          git commit -m "Finish Website Rebuild Worker dependency consolidation [skip rebuild-generation]"
+          candidate_sha=$(git rev-parse HEAD)
+          git push origin HEAD:work/website-rebuild-complete-code-2026-09-05
+          echo "sha=$candidate_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+          CANDIDATE_SHA: ${{ steps.preserve.outputs.sha }}
+        run: |
+          echo "### Website Rebuild code completion — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical QA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Worker dependency consolidation: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production main: UNCHANGED ($EXPECTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
