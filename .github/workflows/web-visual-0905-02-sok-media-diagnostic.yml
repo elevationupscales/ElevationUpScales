@@ -1,0 +1,93 @@
+name: WEB-VISUAL-0905-02 SOK Media Diagnostic
+
+on:
+  push:
+    branches:
+      - diagnostic/web-visual-0905-02-sok-media
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    env:
+      PROD: https://elevationupscales.com
+      PREVIEW: https://12f149e9.elevationupscales.pages.dev
+      PARENT_SHA: 1ab4f033b395a441336428cf651a89d2921b4b3c
+      CANDIDATE_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+      - name: Verify assets and unchanged runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$PARENT_SHA"
+          git diff --quiet "$PARENT_SHA".."$CANDIDATE_SHA" -- site/sok-batteries.js site/sok-full-line-data.js site/sok-full-line-runtime.js site/sok-storefront-v2.css site/sok-commercialization.css
+          for f in \
+            site/assets/brands/sok/sk12v100h/hero.webp \
+            site/assets/brands/sok/sk12v100pc/hero.png \
+            site/assets/brands/sok/sk12v206h/hero.webp \
+            site/assets/brands/sok/sk12v206ph/hero.webp \
+            site/assets/brands/sok/sk12v280h/hero.webp \
+            site/assets/brands/sok/sk12v314ph/hero.webp; do
+            test -f "$f"
+            echo "repo $f bytes=$(wc -c < "$f") sha256=$(sha256sum "$f" | cut -d' ' -f1)"
+          done
+          echo repository_media_presence=PASS
+      - name: Compare production and preview HTTP delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            /assets/brands/sok/sk12v100h/hero.webp
+            /assets/brands/sok/sk12v100pc/hero.png
+            /assets/brands/sok/sk12v206h/hero.webp
+            /assets/brands/sok/sk12v206ph/hero.webp
+            /assets/brands/sok/sk12v280h/hero.webp
+            /assets/brands/sok/sk12v314ph/hero.webp
+          )
+          mkdir -p /tmp/media
+          for p in "${paths[@]}"; do
+            key=$(echo "$p" | tr '/' '_')
+            for pair in "prod|$PROD" "preview|$PREVIEW"; do
+              label=${pair%%|*}; base=${pair#*|}
+              headers="/tmp/media/${label}${key}.headers"
+              body="/tmp/media/${label}${key}.body"
+              code=$(curl -sS -L --retry 3 --retry-all-errors --retry-delay 1 -D "$headers" -o "$body" -w '%{http_code}' "$base$p" || true)
+              ctype=$(grep -i '^content-type:' "$headers" | tail -1 | tr -d '\r' | cut -d' ' -f2- || true)
+              echo "$label $p code=$code type=$ctype bytes=$(wc -c < "$body") sha256=$(sha256sum "$body" | cut -d' ' -f1)"
+            done
+          done
+      - name: Browser-decode direct asset URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+          cat > check.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const paths=['/assets/brands/sok/sk12v100h/hero.webp','/assets/brands/sok/sk12v100pc/hero.png','/assets/brands/sok/sk12v206h/hero.webp','/assets/brands/sok/sk12v206ph/hero.webp','/assets/brands/sok/sk12v280h/hero.webp','/assets/brands/sok/sk12v314ph/hero.webp'];
+          const targets=[['prod',process.env.PROD],['preview',process.env.PREVIEW]];
+          const browser=await chromium.launch({headless:true});
+          for(const [label,base] of targets){
+            const context=await browser.newContext({viewport:{width:1000,height:800}});
+            const page=await context.newPage();
+            await page.setContent('<!doctype html><body></body>');
+            for(const path of paths){
+              const result=await page.evaluate(async ({url})=>{
+                const img=new Image();
+                const done=new Promise(resolve=>{img.onload=()=>resolve({ok:true,w:img.naturalWidth,h:img.naturalHeight,complete:img.complete});img.onerror=()=>resolve({ok:false,w:img.naturalWidth,h:img.naturalHeight,complete:img.complete});});
+                img.src=url; document.body.appendChild(img); return await done;
+              },{url:base+path});
+              console.log(`${label} ${path} decode=${JSON.stringify(result)}`);
+            }
+            await context.close();
+          }
+          await browser.close();
+          NODE
+          node check.mjs
