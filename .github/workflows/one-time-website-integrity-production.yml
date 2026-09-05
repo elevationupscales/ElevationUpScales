@@ -1,0 +1,111 @@
+name: One-time Website Integrity Production
+
+on:
+  push:
+    branches:
+      - runner/website-integrity-production-2026-09-05
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: website-integrity-production-2026-09-05
+  cancel-in-progress: false
+
+jobs:
+  deploy-and-verify:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact accepted release
+        uses: actions/checkout@v6
+        with:
+          ref: 176dbd96cac420b1e52e4fb19ab2483a6caeb46b
+          fetch-depth: 0
+
+      - name: Enforce exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "176dbd96cac420b1e52e4fb19ab2483a6caeb46b"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "176dbd96cac420b1e52e4fb19ab2483a6caeb46b"
+
+      - name: Re-run accepted release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/website-integrity-static.mjs
+          node deployment/qa/sok-commercialization-static.mjs
+          node deployment/qa/sok-full-line-static.mjs
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+          test -z "$(find site -type f -size +25M -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+
+      - name: Deploy exact release to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable production deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          bash deployment/qa/sok-commercialization-preview.sh "$BASE"
+          bash deployment/qa/sok-full-line-preview.sh "$BASE"
+          bash deployment/qa/website-integrity-preview.sh "$BASE"
+          base="${BASE%/}"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ '/sok-order.html?sku=SK48V100N&intent=purchase_options' /checkout/ /start-a-project /solar-project /marketplace /sitemap.xml; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/production-route -w '%{http_code}' "$base$route" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+      - name: Smoke canonical production
+        shell: bash
+        run: |
+          set -euo pipefail
+          canonical="https://elevationupscales.com"
+          passed=0
+          for attempt in $(seq 1 15); do
+            echo "Canonical website integrity smoke attempt $attempt"
+            if bash deployment/qa/sok-commercialization-preview.sh "$canonical" && bash deployment/qa/sok-full-line-preview.sh "$canonical" && bash deployment/qa/website-integrity-preview.sh "$canonical"; then
+              passed=1
+              break
+            fi
+            sleep 5
+          done
+          test "$passed" = "1"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ '/sok-order.html?sku=SK48V100N&intent=purchase_options' /checkout/ /start-a-project /solar-project /marketplace /sitemap.xml; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/canonical-route -w '%{http_code}' "${canonical}${route}" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+      - name: Production acceptance summary
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### WEBSITE INTEGRITY / SOK HOMEPAGE / ANALYTICS — PRODUCTION ACCEPTED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Application SHA: 176dbd96cac420b1e52e4fb19ab2483a6caeb46b" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production parent: 253b4f326b6bc5a616c481a59cc06cfe03abccff" >> "$GITHUB_STEP_SUMMARY"
+          echo "RC run: 33944263215" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable deployment: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical: https://elevationupscales.com" >> "$GITHUB_STEP_SUMMARY"
+          echo "Homepage SOK merchandising: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Purchase Options short flow: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Conditional Hawaii field visibility: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Analytics event map/dedupe: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "SOK media/gallery: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Sitemap/internal routes: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "MAP/Hawaii/PayPal/supplier-data inherited gates: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Post-production canonical smoke: PASS" >> "$GITHUB_STEP_SUMMARY"
