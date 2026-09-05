@@ -43,13 +43,13 @@ jobs:
           git diff --check
           test -z "$(find site -type f -size +25M -print -quit)"
           ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
-      - name: Commit one-pass candidate
+      - name: Commit one-pass application candidate
         working-directory: target
         run: |
           set -euo pipefail
           git config user.name "Elevation Release Automation"
           git config user.email "release@elevationupscales.com"
-          git add site deployment/qa .github/workflows/release-candidate-gate.yml
+          git add site deployment/qa
           git status --short
           git diff --cached --quiet && { echo "No candidate changes to commit"; exit 1; }
           git commit -m "Complete SOK full-line shoppable catalog"
