@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "rebuild:verify": "python deployment/rebuild/verify-complete-rebuild.py",
-    "test": "node tests/shared-foundation.test.mjs && node tests/core-route-registry.test.mjs && node deployment/qa/phase2a-admin-static.mjs && node deployment/qa/worker-import-surface-static.mjs",
+    "test": "node tests/shared-foundation.test.mjs && node tests/core-route-registry.test.mjs && node deployment/qa/phase2a-admin-static.mjs && node deployment/qa/worker-import-surface-static.mjs && node deployment/qa/labor-day-sok-shopability-static.mjs",
     "check": "node deployment/qa/clean-baseline-static.mjs",
     "qa": "npm run rebuild:verify && npm test && npm run check",
     "qa:preview": "bash deployment/qa/clean-baseline-preview.sh"

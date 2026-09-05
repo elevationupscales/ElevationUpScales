@@ -1,0 +1,142 @@
+name: Manager Labor Day SOK RC
+
+on:
+  push:
+    branches:
+      - manager/labor-day-sok-shopability-paypal-2026-09-05
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: manager-labor-day-sok-rc
+  cancel-in-progress: true
+
+jobs:
+  validate-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact manager candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Enforce accepted production ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          current_main="$(git rev-parse origin/main)"
+          test "$current_main" = "0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7"
+          git merge-base --is-ancestor "$current_main" HEAD
+          test "$(git rev-parse HEAD)" != "$current_main"
+          echo "Accepted main: $current_main"
+          echo "Candidate: $(git rev-parse HEAD)"
+
+      - name: Canonical QA and JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site deployment/qa -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          git diff --check
+          git diff --exit-code
+
+      - name: Confirm controlled application delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed"
+          test -n "$changed"
+          if printf '%s\n' "$changed" | grep -Ev '^(site/sok-static-product\.js|site/sok-batteries\.js|site/sok-shopability\.css|deployment/qa/labor-day-sok-shopability-(static|preview)\.mjs|package\.json|\.github/workflows/manager-labor-day-sok-rc\.yml)$' | grep -q .; then
+            echo "BLOCKED: unexpected file in Labor Day SOK candidate"
+            exit 1
+          fi
+
+      - name: Verify current production Labor Day and PayPal status read-only
+        shell: bash
+        env:
+          CANONICAL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/prod-config.json --write-out '%{http_code}' "$CANONICAL/api/store-checkout/config" || true)
+          test "$code" = "200"
+          node - <<'NODE'
+          const fs = require('fs');
+          const c = JSON.parse(fs.readFileSync('/tmp/prod-config.json', 'utf8'));
+          const safe = {
+            ok: c.ok === true,
+            environment: c.environment || '',
+            credentialsConfigured: c.credentialsConfigured === true,
+            configured: c.configured === true,
+            checkoutEnabled: c.checkoutEnabled === true,
+            liveCheckoutApproved: c.liveCheckoutApproved === true,
+            clientIdPresent: Boolean(c.clientId),
+            promotionActive: c.promotion?.active === true,
+            promotionCode: c.promotion?.couponCode || '',
+            promotionPercent: Number(c.promotion?.couponPercent || 0),
+          };
+          console.log('PRODUCTION_COMMERCE_STATE=' + JSON.stringify(safe));
+          if (!safe.ok) throw new Error('Production checkout config API is not healthy');
+          if (safe.environment !== 'live') throw new Error('Production PayPal is not in live mode');
+          if (!safe.credentialsConfigured || !safe.configured || !safe.checkoutEnabled || !safe.liveCheckoutApproved || !safe.clientIdPresent) throw new Error('Production PayPal live checkout is not fully enabled');
+          if (!safe.promotionActive || safe.promotionCode !== 'LABORDAY25' || safe.promotionPercent !== 25) throw new Error('Labor Day promotion is not active as approved');
+          NODE
+
+      - name: Deploy isolated manager preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=manager-labor-day-sok-rc
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Baseline preview regression
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$BASE"
+
+      - name: Existing SOK commercialization regression
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          bash deployment/qa/sok-commercialization-preview.sh "$BASE"
+          bash deployment/qa/sok-full-line-preview.sh "$BASE"
+
+      - name: Labor Day shopability and PayPal runtime gate
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          node deployment/qa/labor-day-sok-shopability-preview.mjs "$BASE"
+
+      - name: Candidate immutability
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+
+      - name: Manager RC receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Labor Day SOK shopability manager RC' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Current production Labor Day + PayPal live status: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'SOK commercialization/full-line regression: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal sandbox preview gate: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Successful PayPal capture: HUMAN SANDBOX BUYER APPROVAL STILL REQUIRED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
