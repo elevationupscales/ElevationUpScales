@@ -5,7 +5,7 @@ ROOT=Path('.')
 CORE=ROOT/'site/worker-core.js'; REGISTRY=ROOT/'src/core-route-registry.js'
 OUTDIR=ROOT/'site/worker/domains'; CONTEXT=ROOT/'site/worker/core-context.js'; REPORT=ROOT/'deployment/qa/WORKER_ROUTE_OWNERSHIP.md'
 src=CORE.read_text(); registry_text=REGISTRY.read_text()
-route_rows=[dict(match=m.group(1),path=m.group(2),domain=m.group(3),handler=m.group(4)) for m in re.finditer(r'\{\s*match:\s*"([^"]+)",\s*path:\s*"([^"]+)",\s*domain:\s*"([^"]+)",\s*handler:\s*"([^"]+)"',registry_text)]
+route_rows=[dict(match=m.group(1),path=m.group(2),domain=m.group(3),handler=m.group(4),access=m.group(5)) for m in re.finditer(r'\{\s*match:\s*"([^"]+)",\s*path:\s*"([^"]+)",\s*domain:\s*"([^"]+)",\s*handler:\s*"([^"]+)",\s*access:\s*"([^"]+)"',registry_text)]
 if len(route_rows)!=37: raise SystemExit(f'Expected 37 registry rows, found {len(route_rows)}')
 
 decl_re=re.compile(r'(?m)^(?:(async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(|(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b|class\s+([A-Za-z_$][\w$]*)\b|export\s+default\b)')
