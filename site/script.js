@@ -23,13 +23,18 @@ if (year) year.textContent = String(new Date().getFullYear());
    Presentation-only and branch-isolated. Remove this block to revert the redesign. */
 (() => {
   if (location.pathname.startsWith("/admin")) return;
-  if (!document.querySelector('link[data-eus-redesign="v1"]')) {
+  const styles = [
+    ["v1", "/redesign-v1.css?v=1.0.0"],
+    ["v1-pages", "/redesign-v1-pages.css?v=1.0.0"]
+  ];
+  styles.forEach(([key, href]) => {
+    if (document.querySelector(`link[data-eus-redesign="${key}"]`)) return;
     const theme = document.createElement("link");
     theme.rel = "stylesheet";
-    theme.href = "/redesign-v1.css?v=1.0.0";
-    theme.dataset.eusRedesign = "v1";
+    theme.href = href;
+    theme.dataset.eusRedesign = key;
     document.head.append(theme);
-  }
+  });
   if (!document.querySelector('script[data-eus-redesign="v1"]')) {
     const behavior = document.createElement("script");
     behavior.src = "/redesign-v1.js?v=1.0.0";
