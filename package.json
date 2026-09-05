@@ -2,8 +2,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/shared-foundation.test.mjs",
-    "check": "node --check src/worker/response.js && node --check src/shared/html.js && node --check src/shared/validation.js && node --check src/shared/solar-sanitizers.js"
+    "test": "node tests/shared-foundation.test.mjs && node tests/core-route-registry.test.mjs && node deployment/qa/phase2a-admin-static.mjs && node deployment/qa/worker-import-surface-static.mjs",
+    "check": "node deployment/qa/clean-baseline-static.mjs",
+    "qa": "npm test && npm run check",
+    "qa:preview": "bash deployment/qa/clean-baseline-preview.sh"
   },
   "dependencies": {
     "wrangler": "^4.129.0"
