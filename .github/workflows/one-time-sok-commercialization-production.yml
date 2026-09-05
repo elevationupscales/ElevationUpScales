@@ -1,0 +1,103 @@
+name: One-time SOK 4.6 Commercialization Production
+
+on:
+  push:
+    branches:
+      - runner/sok-4-6-commercialization-production-2026-09-04
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: sok-4-6-commercialization-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-and-verify:
+    name: Deploy exact accepted candidate and verify production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact accepted release
+        uses: actions/checkout@v6
+        with:
+          ref: 6ce552aa023c9832d2bfd8fd9c93d6029ebc5c36
+          fetch-depth: 0
+
+      - name: Enforce exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "6ce552aa023c9832d2bfd8fd9c93d6029ebc5c36"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "6ce552aa023c9832d2bfd8fd9c93d6029ebc5c36"
+
+      - name: Re-run accepted release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/sok-commercialization-static.mjs
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+          test -z "$(find site -type f -size +25M -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+
+      - name: Deploy exact release to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable production deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          bash deployment/qa/sok-commercialization-preview.sh "$BASE"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /sok-batteries /checkout/ /start-a-project /solar-project /marketplace; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/production-route -w '%{http_code}' "${BASE%/}${route}" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+      - name: Smoke canonical production
+        shell: bash
+        run: |
+          set -euo pipefail
+          canonical="https://elevationupscales.com"
+          passed=0
+          for attempt in $(seq 1 12); do
+            echo "Canonical SOK smoke attempt $attempt"
+            if bash deployment/qa/sok-commercialization-preview.sh "$canonical"; then
+              passed=1
+              break
+            fi
+            sleep 5
+          done
+          test "$passed" = "1"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /sok-batteries /checkout/ /start-a-project /solar-project /marketplace; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/canonical-route -w '%{http_code}' "${canonical}${route}" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+      - name: Production acceptance receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### SOK 4.6 COMMERCIALIZATION — PRODUCTION ACCEPTED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Validated application SHA: ef4f20c71efa045e6a7bcbc1d94c5ba9f6bc7beb" >> "$GITHUB_STEP_SUMMARY"
+          echo "Final clean release SHA: 6ce552aa023c9832d2bfd8fd9c93d6029ebc5c36" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production SHA: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable deployment: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical: https://elevationupscales.com" >> "$GITHUB_STEP_SUMMARY"
+          echo "MAP result: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Hawaii 1-3 / blocked 4+ gate: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Supplier-data exposure: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Post-production canonical smoke: PASS" >> "$GITHUB_STEP_SUMMARY"
