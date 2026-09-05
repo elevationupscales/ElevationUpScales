@@ -28,6 +28,16 @@ assert.equal(
   matchCoreRoute("/api/admin/listings/abc")?.handler,
   "handleAdminListings",
 );
+assert.deepEqual(
+  {
+    domain: matchCoreRoute("/api/store-products")?.domain,
+    handler: matchCoreRoute("/api/store-products")?.handler,
+  },
+  {
+    domain: "compatibility",
+    handler: "handleStoreProductsCompatibility",
+  },
+);
 assert.equal(matchCoreRoute("/not-a-core-route"), null);
 
 for (const required of [
@@ -38,6 +48,7 @@ for (const required of [
   "marketplace",
   "inventory",
   "solar",
+  "compatibility",
 ]) {
   assert.ok(CORE_DOMAINS.includes(required), `missing domain ${required}`);
 }
