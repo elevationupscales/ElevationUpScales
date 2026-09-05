@@ -1,11 +1,11 @@
 /**
- * Exact current worker-core route ownership registry.
+ * Exact current Worker route ownership registry for the clean-baseline candidate.
  *
- * Source baseline:
- * 176dbd96cac420b1e52e4fb19ab2483a6caeb46b
+ * Production baseline:
+ * 995ddef117be2ba5b26e154ea43409271fc938a9
  *
- * This is documentation-as-code for decomposition. It does not deploy or
- * replace the production Worker.
+ * The registry is documentation-as-code and a parity contract for the
+ * decomposed Worker runtime.
  */
 export const CORE_ROUTE_REGISTRY = Object.freeze([
   { match: "exact", path: "/api/solar-build-notify", domain: "solar", handler: "handleSolarNotification", access: "public-write" },
@@ -50,7 +50,7 @@ export const CORE_ROUTE_REGISTRY = Object.freeze([
   { match: "exact", path: "/api/admin/marketplace-issues", domain: "marketplace", handler: "handleAdminMarketplaceIssues", access: "admin" },
   { match: "prefix-or-exact", path: "/api/admin/listings", domain: "marketplace", handler: "handleAdminListings", access: "admin-mixed" },
 
-  { match: "exact", path: "/api/store-products", domain: "store-legacy", handler: "getCatalog", access: "public" },
+  { match: "exact", path: "/api/store-products", domain: "compatibility", handler: "handleStoreProductsCompatibility", access: "public" },
 ]);
 
 export const CORE_DOMAINS = Object.freeze(
