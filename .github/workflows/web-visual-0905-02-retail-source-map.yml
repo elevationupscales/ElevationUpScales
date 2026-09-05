@@ -1,0 +1,27 @@
+name: WEB-VISUAL-0905-02 Retail Source Map
+on:
+  push:
+    branches:
+      - diagnostic/web-visual-0905-02-retail-source-map
+permissions:
+  contents: read
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+      - name: Locate generated retail/SOK shell references
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '--- sok-product-page occurrences ---'
+          grep -RIn --exclude-dir=.git 'sok-product-page' site deployment tests || true
+          echo '--- site-shell 4.5.2 all occurrences ---'
+          grep -RIn --exclude-dir=.git 'site-shell.js?v=4.5.2' site deployment tests || true
+          echo '--- retail-first 5.0.1 all occurrences ---'
+          grep -RIn --exclude-dir=.git 'retail-first.css?v=5.0.1' site deployment tests || true
+          echo '--- exact retailRoute code context ---'
+          grep -RIn --exclude-dir=.git 'retailRoute' site deployment tests || true
