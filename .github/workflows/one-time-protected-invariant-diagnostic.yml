@@ -55,3 +55,5 @@ jobs:
           check admin-inventory-link grep -q 'admin-inventory.html' site/admin-listings.html
           echo "FAILURES=$failures"
           test "$failures" -eq 0
+
+# trigger: identify stale production assertion
