@@ -98,7 +98,24 @@ jobs:
             fi
           }
           for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system; do check_status 200 "$route"; done
-          check_status 200 /api/health
+
+          health_code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/eus-health --write-out '%{http_code}' "$base/api/health" || true)
+          echo "CHECK /api/health => $health_code (accepted contract: 200 ok OR 503 degraded only for notification configuration)"
+          test "$health_code" = 200 -o "$health_code" = 503
+          HEALTH_FILE=/tmp/eus-health node - <<'NODE'
+          const fs=require('fs');
+          const payload=JSON.parse(fs.readFileSync(process.env.HEALTH_FILE,'utf8'));
+          const s=payload.services||{};
+          if(!['ok','degraded'].includes(payload.status)) throw new Error('Unexpected health status '+payload.status);
+          for(const [key,expected] of [['siteAssets','configured'],['marketplaceDatabase','ok'],['leadsDatabase','ok'],['marketplaceImages','configured'],['siteAnalyticsD1','ok']]) {
+            if(s[key]!==expected) throw new Error(`Core health regression ${key}: ${s[key]} expected ${expected}`);
+          }
+          if(payload.status==='degraded' && s.marketplaceNotifications==='configured' && s.solarNotifications==='configured') {
+            throw new Error('Degraded health is not explained by accepted optional notification configuration');
+          }
+          console.log('Accepted health contract: PASS');
+          NODE
+
           for route in /api/admin/operations /api/admin/inventory /api/admin/leads /api/admin/listings /api/admin/market-analytics; do check_status 401 "$route"; done
           for route in /worker-core.js /worker/core-context.js /worker/domains/admin-auth.js /sok-full-line-runtime.js /sok-full-line-data.js; do check_status 404 "$route"; done
           echo "RUN sok-commercialization-preview.sh"
