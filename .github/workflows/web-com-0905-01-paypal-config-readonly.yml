@@ -1,0 +1,43 @@
+name: WEB-COM-0905-01 PayPal Config Read Only
+
+on:
+  push:
+    branches:
+      - diagnostic/web-com-0905-01-paypal-config
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-current-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read current isolated preview PayPal config only
+        shell: bash
+        env:
+          PREVIEW_URL: https://58676326.elevationupscales.pages.dev
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --retry 8 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 15 --max-time 45 \
+            "${PREVIEW_URL%/}/api/store-checkout/config" > /tmp/paypal-config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/paypal-config.json'))
+          assert data.get('ok') is True
+          environment=data.get('environment')
+          assert environment in ('sandbox','live')
+          print('paypal_environment='+environment)
+          print('credentials_configured='+str(bool(data.get('credentialsConfigured'))).lower())
+          print('checkout_enabled='+str(bool(data.get('checkoutEnabled'))).lower())
+          print('client_id_present='+str(bool(data.get('clientId'))).lower())
+          print('sandbox_transaction_allowed='+('YES' if environment == 'sandbox' and data.get('checkoutEnabled') else 'NO'))
+          print('mutation_performed=NO')
+          PY
+
+      - name: Record read-only result
+        shell: bash
+        run: |
+          echo '### WEB-COM-0905-01 PayPal config read-only check' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preview: https://58676326.elevationupscales.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No order creation, capture, secret change, variable change, or production deployment performed.' >> "$GITHUB_STEP_SUMMARY"
