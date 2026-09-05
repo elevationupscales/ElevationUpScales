@@ -71,6 +71,71 @@ run(
   ],
 );
 
+const runtimeShared = [
+  "site/worker/shared/response.js",
+  "site/worker/shared/html.js",
+  "site/worker/shared/validation.js",
+  "site/worker/shared/solar-sanitizers.js",
+];
+for (const file of runtimeShared) {
+  assert.ok(fs.existsSync(path.join(root, file)), `${file} is required as the deployed shared implementation`);
+}
+
+const retiredPrepDuplicates = [
+  "src/worker/response.js",
+  "src/shared/html.js",
+  "src/shared/validation.js",
+  "src/shared/solar-sanitizers.js",
+];
+for (const file of retiredPrepDuplicates) {
+  assert.equal(
+    fs.existsSync(path.join(root, file)),
+    false,
+    `${file} must not duplicate the deployed Worker shared implementation`,
+  );
+}
+
+const sharedFoundationTest = text("tests/shared-foundation.test.mjs");
+assert.equal(sharedFoundationTest.includes("../src/"), false, "shared foundation tests must exercise deployed Worker modules");
+assert.ok(
+  sharedFoundationTest.includes("../site/worker/shared/response.js") &&
+    sharedFoundationTest.includes("../site/worker/shared/html.js") &&
+    sharedFoundationTest.includes("../site/worker/shared/validation.js") &&
+    sharedFoundationTest.includes("../site/worker/shared/solar-sanitizers.js"),
+  "shared foundation tests must point to all deployed Worker shared modules",
+);
+
+const coreContext = text("site/worker/core-context.js");
+for (const moduleName of ["response", "html", "validation", "solar-sanitizers"]) {
+  assert.ok(
+    coreContext.includes(`from "./shared/${moduleName}.js"`),
+    `core-context must consume deployed shared ${moduleName}`,
+  );
+}
+for (const duplicateDefinition of [
+  "const API_SECURITY_HEADERS =",
+  "const HTML_SECURITY_HEADERS =",
+  "function jsonResponse(",
+  "function escapeHtml(",
+  "function jsonForInlineScript(",
+  "function cleanString(",
+  "function cleanList(",
+  "function sanitizeBuild(",
+  "function sanitizeContact(",
+  "function sanitizeSolarMilestone(",
+  "function isValidEmail(",
+  "function configuredEmail(",
+  "function isValidPhone(",
+  "function hasBasicContact(",
+  "function hasEarlySolarContact(",
+]) {
+  assert.equal(
+    coreContext.includes(duplicateDefinition),
+    false,
+    `core-context must not redefine shared helper: ${duplicateDefinition}`,
+  );
+}
+
 assert.equal(
   fs.existsSync(path.join(root, "site/admin-command-center-pass1.css")),
   false,
