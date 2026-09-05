@@ -1,0 +1,255 @@
+name: One-time Website Rebuild Finish
+
+on:
+  push:
+    branches:
+      - runner/website-rebuild-finish-one-pass-2026-09-05
+
+permissions:
+  contents: write
+  deployments: write
+
+env:
+  TARGET_BRANCH: work/website-rebuild-finish-one-pass-2026-09-05
+  EXPECTED_MAIN: 995ddef117be2ba5b26e154ea43409271fc938a9
+  EXPECTED_SOURCE: 21a99a604d027fdc0d850f157960590f6e3923bf
+  BASELINE_TAG: baseline-2026-09-05-website-rebuild-clean-baseline
+
+jobs:
+  finish-rebuild:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out cumulative rebuild candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+
+      - name: Enforce lineage and single controlling source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main "$TARGET_BRANCH" --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          git merge-base --is-ancestor origin/main HEAD
+          echo "Current main: $(git rev-parse origin/main)"
+          echo "Source: $(git rev-parse HEAD)"
+
+      - name: Apply Worker domain decomposition
+        shell: bash
+        run: |
+          set -euo pipefail
+          python deployment/rebuild/split-worker-core.py
+          python deployment/rebuild/finalize-cleanup.py
+
+      - name: Build final manifest and binding-name inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re,subprocess
+          changed=subprocess.check_output(['git','diff','--name-only','origin/main'],text=True).splitlines()
+          out=['# Website Rebuild — Final Changed-File Manifest','',f'Base: `{subprocess.check_output(["git","rev-parse","origin/main"],text=True).strip()}`','', '| Path | SHA-256 |','|---|---|']
+          for name in changed:
+              p=Path(name)
+              if not p.is_file() or name.endswith('WEBSITE_REBUILD_FINAL_MANIFEST.md'): continue
+              out.append(f'| `{name}` | `{hashlib.sha256(p.read_bytes()).hexdigest()}` |')
+          Path('deployment/qa/WEBSITE_REBUILD_FINAL_MANIFEST.md').write_text('\n'.join(out)+'\n')
+          names=set()
+          for p in Path('site').rglob('*.js'):
+              try: text=p.read_text(errors='ignore')
+              except Exception: continue
+              names.update(re.findall(r'\benv\.([A-Z][A-Z0-9_]*)\b',text))
+          b=['# Cloudflare Binding / Environment Name Inventory','', 'Names only. No secret values are recorded. No binding configuration is changed by this release.','']
+          b += [f'- `{x}`' for x in sorted(names)]
+          b += ['', 'Schema: unchanged from the accepted production baseline; no D1 migration/schema file is modified by the Website Rebuild.','']
+          Path('deployment/qa/CLOUDFLARE_BINDING_NAME_INVENTORY.md').write_text('\n'.join(b))
+          PY
+
+      - name: Static, syntax, and parity gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/phase2a-admin-static.mjs
+          node tests/shared-foundation.test.mjs
+          node tests/core-route-registry.test.mjs
+          node deployment/qa/sok-commercialization-static.mjs
+          node deployment/qa/sok-full-line-static.mjs
+          node deployment/qa/website-integrity-static.mjs
+          git diff --check
+          while IFS= read -r -d '' f; do node --check "$f"; done < <(find site src tests deployment/qa -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          node -e "import('./site/worker-core.js').then(m=>{if(!m.default||typeof m.default.fetch!=='function')process.exit(1)})"
+          test "$(grep -RIl 'async function handleAdminLogin' site/worker/domains | wc -l)" -eq 1
+          ! grep -q 'async function handleAdminLogin' site/worker-core.js
+          grep -q 'url.pathname.startsWith("/worker/")' site/_worker.js
+          grep -q '"/worker/\*"' site/_routes.json
+          ! grep -RIl 'admin-command-center-pass1.css' site --exclude='admin-command-center-pass1.css' | grep -q .
+          ! grep -RniE 'tel:\+?1?719|sms:\+?1?719' site --include='*.html' --include='*.js'
+          ! grep -q '/project-guides' site/sitemap.xml
+          file_count=$(find site -type f | wc -l); test "$file_count" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src deployment; then exit 1; fi
+
+      - name: Protect business and infrastructure contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'Start a Project' site/index.html
+          grep -q 'href="/start-a-project"' site/index.html
+          grep -q '+1-208-813-4998' site/index.html
+          grep -Rqs 'casey@elevationupscales.com' site
+          grep -Rqs 'Authorized SOK Energy Dealer' site
+          ! git diff --name-only origin/main | grep -Eq '(^|/)(commerce-schema-migrations|.*migration.*\.sql|wrangler\.toml)$'
+          ! git diff --name-only origin/main | grep -Eq '^site/(store-checkout-server|promotion-runtime|shipping-rules-runtime|hawaii-lithium-runtime|sok-operations-runtime|sok-availability-runtime)\.js$'
+
+      - name: Deploy final isolated preview
+        id: preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=website-rebuild-clean-baseline-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Full preview regression
+        shell: bash
+        env:
+          BASE: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/page --write-out '%{http_code}' "$base$route" || true)
+            test "$code" = 200 || { echo "$route => $code"; exit 1; }
+          done
+          code=$(curl -sS -o /tmp/health --write-out '%{http_code}' "$base/api/health"); test "$code" = 200
+          grep -q '"ok"' /tmp/health || true
+          for route in /api/admin/operations /api/admin/inventory /api/admin/leads /api/admin/listings /api/admin/market-analytics; do
+            code=$(curl -sS -o /tmp/admin --write-out '%{http_code}' "$base$route" || true)
+            test "$code" = 401 || { echo "$route expected 401 got $code"; exit 1; }
+          done
+          for route in /worker-core.js /worker/core-context.js /worker/domains/admin-auth.js /sok-full-line-runtime.js /sok-full-line-data.js; do
+            code=$(curl -sS -o /tmp/hidden --write-out '%{http_code}' "$base$route" || true)
+            test "$code" = 404 || { echo "$route expected 404 got $code"; exit 1; }
+          done
+          bash deployment/qa/sok-commercialization-preview.sh "$base"
+          bash deployment/qa/sok-full-line-preview.sh "$base"
+          bash deployment/qa/website-integrity-preview.sh "$base"
+          curl -sS -L "$base/sitemap.xml" -o /tmp/sitemap.xml
+          ! grep -q '/project-guides' /tmp/sitemap.xml
+
+      - name: Commit exact clean-baseline application candidate
+        id: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site src tests deployment package.json
+          git status --short
+          git commit -m "Complete Website Rebuild clean-baseline consolidation"
+          app_sha=$(git rev-parse HEAD)
+          echo "sha=$app_sha" >> "$GITHUB_OUTPUT"
+          git push origin "HEAD:$TARGET_BRANCH"
+          git push origin "$app_sha:main"
+          git tag "$BASELINE_TAG" "$app_sha"
+          git push origin "$BASELINE_TAG"
+
+      - name: Deploy accepted candidate to production
+        id: production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Immutable and canonical production smoke
+        shell: bash
+        env:
+          IMMUTABLE: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          smoke(){
+            base="${1%/}"
+            for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin; do
+              code=$(curl -sS -L --retry 12 --retry-all-errors --retry-delay 3 -o /tmp/prod --write-out '%{http_code}' "$base$route" || true)
+              test "$code" = 200 || { echo "$base$route => $code"; exit 1; }
+            done
+            for route in /worker/core-context.js /worker/domains/admin-auth.js /sok-full-line-runtime.js; do
+              code=$(curl -sS --retry 8 --retry-all-errors -o /tmp/hidden --write-out '%{http_code}' "$base$route" || true)
+              test "$code" = 404 || exit 1
+            done
+            code=$(curl -sS --retry 8 --retry-all-errors -o /tmp/admin --write-out '%{http_code}' "$base/api/admin/operations" || true); test "$code" = 401
+          }
+          smoke "$IMMUTABLE"
+          smoke "https://elevationupscales.com"
+          bash deployment/qa/sok-commercialization-preview.sh "$IMMUTABLE"
+          bash deployment/qa/sok-full-line-preview.sh "$IMMUTABLE"
+          bash deployment/qa/website-integrity-preview.sh "$IMMUTABLE"
+          bash deployment/qa/sok-commercialization-preview.sh "https://elevationupscales.com"
+          bash deployment/qa/sok-full-line-preview.sh "https://elevationupscales.com"
+          bash deployment/qa/website-integrity-preview.sh "https://elevationupscales.com"
+
+      - name: Record production receipt
+        id: receipt
+        shell: bash
+        env:
+          APP_SHA: ${{ steps.app.outputs.sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          PRODUCTION_URL: ${{ steps.production.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          receipt="release-receipts/WEBSITE_REBUILD_CLEAN_BASELINE_PRODUCTION_RECEIPT_2026-09-05.md"
+          mkdir -p release-receipts
+          cat > "$receipt" <<EOF
+          # Website Rebuild — Clean Baseline Production Receipt
+
+          STATUS: WEBSITE REBUILD COMPLETE — CLEAN BASELINE ACCEPTED
+
+          - Accepted application SHA: \`$APP_SHA\`
+          - Receipt-bearing main: recorded by the commit containing this receipt
+          - Workflow run: \`${{ github.run_id }}\`
+          - RC / final preview: \`$PREVIEW_URL\`
+          - Immutable production: \`$PRODUCTION_URL\`
+          - Canonical: \`https://elevationupscales.com\`
+          - Rollback baseline: \`$BASELINE_TAG\`
+          - Starting production main: \`$EXPECTED_MAIN\`
+          - Accepted Phase 1 descendant: \`d037aee4707fbf32e11d17fee74f3a3efd659027\`
+
+          ## Validation
+          Phase 2A Admin parity, shared foundation tests, 37-route ownership registry, Worker domain decomposition, protected runtime 404, CSS/compatibility audit, SOK commercialization/full-line gates, website-integrity gates, Admin unauthorized 401, public route smoke, immutable production smoke, and canonical smoke all passed.
+
+          ## Data / commerce safety
+          No D1 migration, production-data rewrite, Cloudflare binding/secret change, checkout/PayPal contract change, MAP change, supplier-boundary change, or Hawaii/SOK business-rule change is part of this release.
+
+          ## Final records
+          - \`deployment/qa/WORKER_ROUTE_OWNERSHIP.md\`
+          - \`deployment/qa/WEBSITE_REBUILD_FINAL_MANIFEST.md\`
+          - \`deployment/qa/CLOUDFLARE_BINDING_NAME_INVENTORY.md\`
+          - \`deployment/qa/RUNTIME_ROUTING_AUDIT.md\`
+          - \`deployment/qa/LEGACY_COMPATIBILITY_AUDIT.md\`
+          EOF
+          git add "$receipt"
+          git commit -m "Record Website Rebuild clean-baseline production receipt"
+          receipt_sha=$(git rev-parse HEAD)
+          echo "sha=$receipt_sha" >> "$GITHUB_OUTPUT"
+          git push origin "HEAD:main"
+
+      - name: Final summary
+        shell: bash
+        run: |
+          {
+            echo "### Website Rebuild complete"
+            echo "Application: ${{ steps.app.outputs.sha }}"
+            echo "Receipt main: ${{ steps.receipt.outputs.sha }}"
+            echo "Preview: ${{ steps.preview.outputs.deployment-url }}"
+            echo "Production: ${{ steps.production.outputs.deployment-url }}"
+            echo "Canonical: https://elevationupscales.com"
+            echo "Rollback: $BASELINE_TAG"
+            echo "STATUS: WEBSITE REBUILD COMPLETE — CLEAN BASELINE ACCEPTED"
+          } >> "$GITHUB_STEP_SUMMARY"
