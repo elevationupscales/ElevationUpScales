@@ -18,12 +18,12 @@
   });
 
   const SHOP_LINKS = Object.freeze([
-    ["/store", "Apparel Store", "Hats, apparel, artwork, stickers, and official Elevation releases"],
-    ["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],
-    ["/lithium-batteries", "Lithium Battery Shop", "LiFePO4 batteries for RV, solar, van, and off-grid power"],
-    ["/sok-batteries", "SOK Battery Systems", "Authorized SOK Energy Dealer · 12V and 48V LiFePO4"],
-    ["/hawaii-lithium-batteries", "Hawaii Power & Logistics", "Eligible battery models · Hawaii freight intake"],
-    ["/collector", "Collector Series", "Explore the four-card collection and Golden Ticket"],
+    ["/lithium-batteries", "Lithium Batteries", "12V, 24V and 48V LiFePO4 for RV, solar and off-grid power"],
+    ["/sok-batteries", "SOK Energy", "Authorized SOK Energy Dealer · batteries, chargers and accessories"],
+    ["/rv-store", "RV & Outdoor", "RV essentials, camping, travel and practical outdoor equipment"],
+    ["/hawaii-lithium-batteries", "Hawaii Power & Logistics", "Battery availability and destination-specific freight review"],
+    ["/store", "Elevation Gear", "Apparel, hats and current Elevation releases"],
+    ["/collector", "Collector Series", "Explore current collector releases"],
   ]);
 
   function randomId() {
@@ -360,6 +360,42 @@
     );
   }
 
+  function installRetailStoreShell() {
+    const path = location.pathname.replace(/\/+$/, "") || "/";
+    const retailRoute = path === "/store" || path === "/rv-store" || path === "/lithium-batteries" || path === "/sok-batteries" || path === "/hawaii-lithium-batteries" || path === "/collector" || path === "/checkout" || path === "/product" || path.startsWith("/sok/");
+    if (!retailRoute || document.body.classList.contains("retail-home")) return;
+    document.body.classList.add("retail-store-shell");
+    if (!document.querySelector('link[data-retail-shell]')) {
+      const style = document.createElement("link");
+      style.rel = "stylesheet";
+      style.href = "/retail-first.css?v=5.0.1";
+      style.dataset.retailShell = "true";
+      document.head.append(style);
+    }
+    const header = document.querySelector(".eus-header");
+    const nav = header?.querySelector(".eus-nav");
+    if (!header || !nav) return;
+    const tagline = header.querySelector(".eus-wordmark__tagline");
+    if (tagline) tagline.textContent = "Lithium • Logistics • Off-Grid Power";
+    header.querySelector(".eus-project-trigger--direct")?.remove();
+    nav.setAttribute("aria-label", "Primary shopping navigation");
+    nav.innerHTML = `
+      <details class="eus-menu eus-menu--shop"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>
+      <a class="eus-nav-link" href="/lithium-batteries">Lithium</a>
+      <a class="eus-nav-link" href="/sok-batteries">SOK Energy</a>
+      <a class="eus-nav-link" href="/rv-store">RV & Outdoor</a>
+      <a class="eus-nav-link" href="/solar-project">Off-Grid Power</a>
+      <a class="eus-nav-link" href="/hawaii-lithium-batteries">Freight & Logistics</a>
+      <details class="eus-menu retail-more-menu"><summary class="eus-nav-trigger">More <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
+        <a href="/solar-services"><span><strong>Power & Solar Services</strong><small>Planning, troubleshooting and off-grid project support</small></span></a>
+        <a href="/rv-services"><span><strong>RV Services</strong><small>Repair, restoration, inspections and upgrades</small></span></a>
+        <a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or complete-system project support</small></span></a>
+        <a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics, projects and field experience</small></span></a>
+        <a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth opportunities</small></span></a>
+        <a href="/marketplace"><span><strong>Marketplace</strong><small>Local listings and community inventory</small></span></a>
+      </div></details>`;
+  }
+
   function installNavigation() {
     const header = document.querySelector(".eus-header");
     if (!header) return;
@@ -440,5 +476,6 @@
   const analytics = installAnalytics();
   applyStartProjectPresentation();
   installSupportAndContactAnalytics(analytics);
+  installRetailStoreShell();
   installNavigation();
 })();
