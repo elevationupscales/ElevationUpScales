@@ -1,0 +1,49 @@
+name: WEB-COM-0905-02 PayPal Production State
+
+on:
+  push:
+    branches:
+      - diagnostic/web-com-0905-02-paypal-production-state
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read production PayPal configuration and checkout surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          urls = {
+            'canonical_production': 'https://elevationupscales.com',
+            'accepted_immutable_production': 'https://9e2fb406.elevationupscales.pages.dev',
+          }
+          for name, base in urls.items():
+              out = subprocess.check_output([
+                  'curl','--silent','--show-error','--fail','--location','--retry','8','--retry-all-errors','--retry-delay','2',
+                  '--connect-timeout','15','--max-time','45',f'{base}/api/store-checkout/config'
+              ], text=True)
+              data=json.loads(out)
+              print(name+':')
+              for key in ('ok','environment','credentialsConfigured','checkoutEnabled'):
+                  print(f'  {key}={data.get(key)}')
+              print('  client_id_present='+str(bool(data.get('clientId'))).lower())
+              print('  paypal_ready='+str(bool(data.get('credentialsConfigured') and data.get('checkoutEnabled') and data.get('clientId'))).lower())
+              headers=subprocess.check_output([
+                  'curl','--silent','--show-error','--head','--location','--retry','5','--retry-all-errors','--connect-timeout','15','--max-time','45',f'{base}/checkout'
+              ], text=True)
+              print('  checkout_http_headers_received='+str(bool(headers)).lower())
+              print('  paypal_csp_present='+str('paypal.com' in headers.lower()).lower())
+          print('mutation_performed=NO')
+          PY
+
+      - name: Record boundary
+        shell: bash
+        run: |
+          echo '### Production PayPal diagnostic' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GET/HEAD-only runtime inspection.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No order creation/capture, configuration mutation, secret change, binding change, or deployment performed.' >> "$GITHUB_STEP_SUMMARY"
