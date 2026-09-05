@@ -186,7 +186,7 @@
     const hawaiiPickupFreightCents = Number(next.hawaii?.pickupFreightCents ?? next.shippingCents ?? 0);
     const hawaiiPickupPriceCents = Number(next.hawaii?.pickupPriceCents ?? next.totalCents ?? 0);
     shippingEl.textContent = money(isHawaii ? hawaiiPickupFreightCents : next.shippingCents);
-    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Included Honolulu freight" : "Shipping";
+    if (shippingLabelEl) shippingLabelEl.textContent = isHawaii ? "Freight to Honolulu pickup" : "Shipping";
     if (merchandiseLabelEl) merchandiseLabelEl.textContent = isHawaii ? (Number(next.discountCents) > 0 ? "Battery after Labor Day discount" : "Battery") : "Merchandise after coupon";
     if (listMerchandiseRow) listMerchandiseRow.hidden = isHawaii;
     if (totalLabelEl) totalLabelEl.textContent = isHawaii ? "Hawaii Pickup Price" : "Total";

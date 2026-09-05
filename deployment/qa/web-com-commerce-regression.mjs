@@ -129,15 +129,17 @@ assert.match(checkoutSource, /PAYPAL_ENV[^\n]{0,120}live[^\n]{0,120}sandbox/);
 assert.match(checkoutSource, /WHERE paypal_order_id=\?/);
 assert.equal(checkoutSource.includes("HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY"), false, "retired fixed Hawaii freight constant must not return");
 assert.equal(checkoutSource.includes("HAWAII_PREFERRED_CONSOLIDATION_UNITS"), false, "unused checkout-local Hawaii consolidation constant must not return");
+assert.equal(checkoutSource.includes("9900"), false, "retired $99 Hawaii freight fallback must not return to checkout source");
 
 const customerSafeFiles = [
   "site/store-checkout-server.js",
+  "site/store-checkout.js",
   "site/sok-order.js",
   "site/sok-order.html",
   "site/sok-full-line-runtime.js",
   "site/hawaii-lithium-runtime.js",
 ].map((file) => fs.readFileSync(file, "utf8")).join("\n");
-for (const retired of ["$99/battery", "$99 per battery", "Included Freight"]) {
+for (const retired of ["$99/battery", "$99 per battery", "Included Freight", "Included Honolulu freight"]) {
   assert.equal(customerSafeFiles.includes(retired), false, `retired Hawaii freight claim found: ${retired}`);
 }
 
