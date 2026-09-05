@@ -4,7 +4,8 @@ import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
 import { handleCatalogAdminApi, handleCatalogPublicApi } from "./catalog-admin-runtime.js";
 import { handleHawaiiLithiumAdminApi, handleHawaiiLithiumPublicApi } from "./hawaii-lithium-runtime.js";
 import { handleSokOperationsAdminApi, handleSokOperationsPublicApi, filterHawaiiEligibleCatalogProducts } from "./sok-operations-runtime.js";
-import { handleSokAvailabilityPublicApi, handleSokAvailabilityAdminApi, publicSokCatalogProducts } from "./sok-availability-runtime.js";
+import { handleSokAvailabilityAdminApi, publicSokCatalogProducts } from "./sok-availability-runtime.js";
+import { handleSokFullLinePublicApi, handleSokFullLinePage } from "./sok-full-line-runtime.js";
 import { handleSyncAdminApi, handleSyncScheduledApi } from "./sync-admin-runtime.js";
 import { handleDobaCsvSyncAdminApi } from "./doba-csv-sync-runtime.js";
 import { handleApparelProviderAdminApi } from "./apparel-provider-runtime.js";
@@ -68,12 +69,14 @@ export default {
       "/hawaii-lithium-runtime.js",
       "/sok-operations-runtime.js",
       "/sok-availability-runtime.js",
+      "/sok-full-line-runtime.js",
+      "/sok-full-line-data.js",
       "/sync-admin-runtime.js",
       "/apparel-provider-runtime.js"
     ]);
     if (internalRuntimePaths.has(url.pathname)) return new Response("Not found", { status: 404, headers: { "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } });
     if (["/worker-core.js","/store-checkout-server.js","/store-orders-admin-server.js","/catalog-admin-server.js","/catalog-admin-runtime.js","/hawaii-lithium-runtime.js","/sok-operations-runtime.js",
-      "/sok-availability-runtime.js","/sync-admin-runtime.js","/doba-csv-sync-runtime.js","/apparel-provider-runtime.js","/commerce-schema-migrations.js","/shipping-rules-runtime.js"].includes(url.pathname)) return new Response("Not found",{status:404,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
+      "/sok-availability-runtime.js","/sok-full-line-runtime.js","/sok-full-line-data.js","/sync-admin-runtime.js","/doba-csv-sync-runtime.js","/apparel-provider-runtime.js","/commerce-schema-migrations.js","/shipping-rules-runtime.js"].includes(url.pathname)) return new Response("Not found",{status:404,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
     const isQuote=url.pathname==="/api/store-checkout/quote"; const isCreate=url.pathname==="/api/store-checkout/orders"; const isCapture=/^\/api\/store-checkout\/orders\/[A-Z0-9]{8,40}\/capture$/i.test(url.pathname);
     if((isQuote||isCreate||isCapture)&&request.method==="POST"&&!sameOriginPost(request)) return checkoutJson({error:"Cross-origin request denied"},403);
     if((isQuote||isCreate) && await kingbossDestinationBlocked(request)) return checkoutJson({error:"Kingboss supplier fulfillment is available to the lower 48 only. Alaska and Hawaii require a separate shipping review."},409);
@@ -85,7 +88,7 @@ export default {
     if(url.pathname==="/api/admin/promotion") return handlePromotionAdminApi(request,env);
     if(url.pathname==="/api/admin/store-orders"||url.pathname.startsWith("/api/admin/store-orders/")) return handleStoreOrdersAdminApi(request,env,url.pathname);
     if(url.pathname==="/api/store-catalog"||url.pathname==="/api/store/catalog") return mergedCatalogPublicApi(request,env,url.pathname);
-    if(url.pathname==="/api/sok/catalog"||url.pathname==="/api/sok/reservations") return handleSokAvailabilityPublicApi(request,env,url.pathname);
+    if(url.pathname==="/api/sok/catalog"||url.pathname==="/api/sok/reservations") return handleSokFullLinePublicApi(request,env,url.pathname);
     if(url.pathname==="/api/hawaii-lithium/eligible-products") return handleSokOperationsPublicApi(request,env,url.pathname);
     if(url.pathname.startsWith("/api/hawaii-lithium/")) return handleHawaiiLithiumPublicApi(request,env,url.pathname);
     if(url.pathname==="/api/admin/catalog"||url.pathname.startsWith("/api/admin/catalog/")) return handleCatalogAdminApi(request,env,url.pathname);
@@ -97,6 +100,7 @@ export default {
     if(url.pathname==="/api/admin/doba-csv-sync") return handleDobaCsvSyncAdminApi(request,env,url.pathname);
     if(url.pathname==="/api/admin/apparel-providers") return handleApparelProviderAdminApi(request,env,url.pathname);
     if(url.pathname==="/api/sync/run") return handleSyncScheduledApi(request,env,url.pathname);
+    if(url.pathname.startsWith("/sok/")){const page=await handleSokFullLinePage(request,env,url.pathname);if(page)return page;}
     const response=await coreWorker.fetch(request,env,ctx);
     if(url.pathname==="/checkout"||url.pathname==="/checkout/") return checkoutResponse(response);
     if(url.pathname==="/lithium-batteries"||url.pathname==="/lithium-batteries/") return enhanceStorefront(request,response,env,"lithium");

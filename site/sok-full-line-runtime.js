@@ -29,7 +29,6 @@ async function createFullLineReservation(request,env){
   const raw=await request.json().catch(()=>({}));
   const sku=upper(raw.sku);const product=SOK_FULL_LINE_BY_SKU[sku];
   if(!product)return json({error:"SOK product not found"},404);
-  if(sku==="SK12V100PC"||sku==="SK48V100N")return handleSokAvailabilityPublicApi(request,env,"/api/sok/reservations");
   const intents=new Set(["purchase_options","product","commercial","hawaii"]);
   let inquiryIntent=clean(raw.intent,40).toLowerCase();if(!intents.has(inquiryIntent))inquiryIntent="purchase_options";
   const name=clean(raw.name,120),email=clean(raw.email,180).toLowerCase(),phone=clean(raw.phone,60),destination=upper(raw.destinationState,2),quantity=Math.max(1,Math.min(1000,integer(raw.quantity,1)));
@@ -42,9 +41,11 @@ async function createFullLineReservation(request,env){
   const db=await ensureSokAvailabilitySchema(env);
   await addColumn(db,"ALTER TABLE eus_sok_customer_reservations ADD COLUMN hawaii_island TEXT NOT NULL DEFAULT ''");
   await addColumn(db,"ALTER TABLE eus_sok_customer_reservations ADD COLUMN site_type TEXT NOT NULL DEFAULT ''");
+  let availabilityMode="purchase_options";
+  if(sku==="SK12V100PC"||sku==="SK48V100N"){try{const row=await db.prepare("SELECT availability_mode FROM eus_sok_product_ops WHERE upper(sku)=? LIMIT 1").bind(sku).first();availabilityMode=clean(row?.availability_mode,30)||availabilityMode;}catch(_){}}
   const id=`SOK-RES-${crypto.randomUUID()}`,stamp=now();
   const context=[notes,productUrl?`Product URL: ${productUrl}`:"",`Public product: ${product.id}`].filter(Boolean).join("; ");
-  await db.prepare("INSERT INTO eus_sok_customer_reservations (id,sku,quantity,availability_mode,destination_state,customer_name,customer_email,customer_phone,customer_notes,status,commercial_quantity,created_at,updated_at,inquiry_intent,company,postal_code,intended_use,demand_type,hawaii_island,site_type) VALUES (?,?,?,'purchase_options',?,?,?,?,?,'RECEIVED',?,?,?,?,?,?,?,?,?,?,?)").bind(id,sku,quantity,destination,name,email,phone,context,commercial?1:0,stamp,stamp,inquiryIntent,company,postalCode,intendedUse,demandType,island,siteType).run();
+  await db.prepare("INSERT INTO eus_sok_customer_reservations (id,sku,quantity,availability_mode,destination_state,customer_name,customer_email,customer_phone,customer_notes,status,commercial_quantity,created_at,updated_at,inquiry_intent,company,postal_code,intended_use,demand_type,hawaii_island,site_type) VALUES (?,?,?,?,?,?,?,?,?,'RECEIVED',?,?,?,?,?,?,?,?,?,?,?)").bind(id,sku,quantity,availabilityMode,destination,name,email,phone,context,commercial?1:0,stamp,stamp,inquiryIntent,company,postalCode,intendedUse,demandType,island,siteType).run();
   try{await db.prepare("INSERT INTO eus_sok_events (id,entity_type,entity_id,action,details_json,actor,created_at) VALUES (?,?,?,?,?,?,?)").bind(`SOK-EVT-${crypto.randomUUID()}`,"customer_reservation",id,"received",JSON.stringify({sku,quantity,destination,inquiryIntent,demandType,commercialQuantity:commercial,hawaiiIsland:island,siteType}),"public-reservation",stamp).run();}catch(_){}
   const status=commercial?"COMMERCIAL INQUIRY RECEIVED":inquiryIntent==="hawaii"?"HAWAII PURCHASE REQUEST RECEIVED":inquiryIntent==="product"?"PRODUCT INQUIRY RECEIVED":"PURCHASE REQUEST RECEIVED";
   const nextStep=commercial?"Elevation will review the requested configuration and contact you with the appropriate commercial path.":inquiryIntent==="hawaii"?"Elevation will confirm the product-specific Hawaii freight path before payment is required.":"Elevation will confirm sourcing, timing and the appropriate purchase path before the order advances.";
@@ -63,10 +64,10 @@ function priceMarkup(product){return Number(product.priceCents)>0?`<p class="sok
 function actionsMarkup(product){
   const po=`/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=purchase_options`;
   const commercial=`/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=commercial`;
-  const email=`mailto:${PUBLIC_EMAIL}?subject=${encodeURIComponent(`SOK ${product.sku} product inquiry`)}&body=${encodeURIComponent(`I am interested in ${product.title}.\n\nProduct: https://elevationupscales.com${product.detailUrl}\nQuantity:\nDestination ZIP:\nIntended use:\n`)}`;
+  const inquiry=`/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=product`;
   const primary=product.publicPurchaseMode==="COMMERCIAL_ONLY"?`<a class="button button-primary" data-sok-page-action="commercial" href="${commercial}">Request Commercial Pricing</a>`:`<a class="button button-primary" data-sok-page-action="purchase-options" href="${po}">See Purchase Options</a>`;
   const hawaii=product.batteryRelevant?`<a class="button button-outline" data-sok-page-action="hawaii" href="/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=hawaii&state=HI">Check Hawaii Availability</a>`:"";
-  return `<div class="sok-product-actions">${primary}<a class="button button-outline" data-sok-page-action="email" href="${esc(email)}">Email Us About This Product</a><a class="button button-outline" data-sok-page-action="commercial" href="${commercial}">Request Commercial Pricing</a>${hawaii}</div>`;
+  return `<div class="sok-product-actions">${primary}<a class="button button-outline" data-sok-page-action="email" href="${inquiry}">Email Us About This Product</a><a class="button button-outline" data-sok-page-action="commercial" href="${commercial}">Request Commercial Pricing</a>${hawaii}</div><p class="sok-public-email">Public inquiry destination: ${PUBLIC_EMAIL}</p>`;
 }
 function renderFacts(product){const facts=[product.voltage,product.capacity,product.energy,product.category].filter(Boolean);return facts.map(v=>`<span>${esc(v)}</span>`).join("");}
 function renderList(values){return (values||[]).map(v=>`<li>${esc(v)}</li>`).join("");}
