@@ -49,6 +49,16 @@ assert(collectionJs.includes("sok-card__media-strip"), "collection approved-medi
 
 const config = await jsonFetch("/api/store-checkout/config");
 assert(config.response.status === 200 && config.body.ok === true, "checkout config API is healthy");
+console.log("PAYPAL_PREVIEW_STATE=" + JSON.stringify({
+  environment: config.body.environment || "",
+  credentialsConfigured: Boolean(config.body.credentialsConfigured),
+  configured: Boolean(config.body.configured),
+  checkoutEnabled: Boolean(config.body.checkoutEnabled),
+  liveCheckoutApproved: Boolean(config.body.liveCheckoutApproved),
+  promotionActive: Boolean(config.body.promotion?.active),
+  promotionCode: config.body.promotion?.couponCode || "",
+  promotionPercent: Number(config.body.promotion?.couponPercent || 0),
+}));
 assert(config.body.environment === "sandbox", "candidate preview PayPal environment is sandbox");
 assert(config.body.credentialsConfigured === true, "PayPal sandbox credentials are configured");
 assert(config.body.configured === true && config.body.checkoutEnabled === true, "sandbox checkout is enabled");
