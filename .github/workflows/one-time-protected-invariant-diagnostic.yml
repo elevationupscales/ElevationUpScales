@@ -1,0 +1,57 @@
+name: One-time Protected Invariant Diagnostic
+
+on:
+  push:
+    branches:
+      - work/sok-4-6-catalog-commercialization-2026-09-04
+    paths:
+      - .github/workflows/one-time-protected-invariant-diagnostic.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/sok-4-6-catalog-commercialization-2026-09-04
+      - name: Check protected assertions individually
+        shell: bash
+        run: |
+          set +e
+          failures=0
+          check(){ label="$1"; shift; "$@" >/dev/null 2>&1; rc=$?; if [ $rc -eq 0 ]; then echo "PASS $label"; else echo "FAIL $label"; failures=$((failures+1)); fi; }
+          check homepage-start-link grep -q 'href="/start-a-project"' site/index.html
+          check homepage-start-copy grep -q 'Start a Project' site/index.html
+          check homepage-phone grep -q '+1-208-813-4998' site/index.html
+          check homepage-media grep -q 'hero-tile-project.webp' site/index.html
+          check pulse-sessions grep -q 'Website Sessions' site/admin-market-pulse.js
+          check pulse-start-opens grep -q 'Start a Project Opens' site/admin-market-pulse.js
+          check pulse-submitted grep -q 'Submitted Leads' site/admin-market-pulse.js
+          check pulse-conversion grep -q 'visitorLeadConversion' site/admin-market-pulse.js
+          check followup-brand grep -q 'Elevation UpScales, Inc.' site/follow-up-request.js
+          check solar-stage grep -q 'Stage 1 of 7' site/solar-project.html
+          check solar-panels grep -q 'data-jump="panels"' site/solar-project.html
+          check solar-services grep -q 'data-jump="services"' site/solar-project.html
+          check solar-duplicate cmp -s site/solar-project.html site/solar-project/index.html
+          check store-resilience-version grep -q 'store-catalog-resilience.js?v=3.11.38&quality=original-r4' site/store-config.js
+          check store-image-version grep -q 'store-image-quality.js?v=3.11.41' site/store-config.js
+          check image-target grep -q 'TARGET_WIDTH = 1920' site/store-image-quality.js
+          check min-full-count grep -q 'MIN_FULL_COUNT = 13' site/store-catalog-resilience.js
+          check buy-now-text grep -q 'link.textContent = "Buy Now"' site/store-catalog-resilience.js
+          check rv-api grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          check rv-catalog-source grep -q 'elevation-catalog' site/rv-store.js
+          check rv-no-ebay bash -lc "! grep -q '&ebay=' site/rv-store.js"
+          check rv-no-fallback bash -lc "! grep -q 'fallbackCatalog' site/rv-store.js"
+          check rv-no-hero-media bash -lc "! grep -q 'rv-store-hero__media' site/rv-store.html"
+          check store-hawaii-label grep -q 'Hawaii Lithium Shipping &amp; Freight' site/store.html
+          check rv-hawaii-label grep -q 'Hawaii Lithium Shipping &amp; Freight' site/rv-store.html
+          check store-no-old-program bash -lc "! grep -q 'Hawaii Lithium Program' site/store.html"
+          check rv-no-old-program bash -lc "! grep -q 'Hawaii Lithium Program' site/rv-store.html"
+          check worker-admin-inventory grep -q '/api/admin/inventory' site/_worker.js
+          check worker-inventory-table grep -q 'eus_inventory_items' site/_worker.js
+          check admin-inventory-link grep -q 'admin-inventory.html' site/admin-listings.html
+          echo "FAILURES=$failures"
+          test "$failures" -eq 0
