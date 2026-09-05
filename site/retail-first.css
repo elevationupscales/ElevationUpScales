@@ -1,217 +1,240 @@
-/* Elevation UpScales retail-first visual layer
- * Lithium • Logistics • Off-Grid Power
- * Presentation only: no commerce/runtime policy changes.
+/* Elevation UpScales storefront visual system
+ * Owner-approved visual reference: 2026-09-05 SOK/Elevation storefront concept.
+ * Storefront identity asset: /assets/brand/storefront-wordmark.webp
+ * Presentation only. No pricing, inventory, MAP, shipping, checkout or runtime policy changes.
  */
 :root{
-  --retail-bg:#05090c;
-  --retail-panel:#091218;
-  --retail-panel-2:#0c1820;
-  --retail-text:#f4f8fb;
-  --retail-muted:#a7b6c0;
-  --retail-cyan:#38d8ff;
-  --retail-cyan-2:#0fb8e7;
-  --retail-line:rgba(89,211,241,.22);
-  --retail-shadow:0 24px 70px rgba(0,0,0,.35);
+  --retail-bg:#02070a;
+  --retail-bg-2:#061217;
+  --retail-panel:#07161b;
+  --retail-panel-2:#0a1d23;
+  --retail-panel-soft:#0d232a;
+  --retail-text:#f7fbfc;
+  --retail-muted:#8fa5ae;
+  --retail-muted-2:#bac9ce;
+  --retail-cyan:#21ccef;
+  --retail-cyan-soft:#71e5f5;
+  --retail-line:rgba(55,207,235,.22);
+  --retail-line-strong:rgba(55,207,235,.48);
+  --retail-white-line:rgba(255,255,255,.09);
+  --retail-radius:7px;
+  --retail-radius-lg:10px;
+  --retail-shadow:0 20px 55px rgba(0,0,0,.38);
 }
-body.retail-home{background:var(--retail-bg);color:var(--retail-text)}
-.retail-home main{overflow:hidden}
-.retail-home .container{width:min(1180px,calc(100% - 40px))}
 
-/* Retail utility + compact brand header */
-.retail-utility{background:#020507;border-bottom:1px solid rgba(255,255,255,.08);font-size:.76rem;letter-spacing:.04em;color:#c5d1d8}
-.retail-utility__inner{min-height:32px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-.retail-utility__identity{font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em}
-.retail-utility__links{display:flex;align-items:center;gap:18px;white-space:nowrap}
-.retail-utility a{color:#dce8ee;text-decoration:none}
-.retail-utility a:hover{color:var(--retail-cyan)}
-.retail-home .eus-header{position:sticky;top:0;z-index:70;background:rgba(4,9,13,.91);backdrop-filter:blur(18px);border-bottom:1px solid rgba(64,214,250,.16);box-shadow:0 8px 30px rgba(0,0,0,.18)}
-.retail-home .eus-header__inner{min-height:76px;gap:22px}
-.retail-home .eus-brand{min-width:210px;gap:10px;text-decoration:none}
-.retail-home .eus-brand img{width:58px;height:48px;object-fit:contain}
-.retail-home .eus-wordmark{display:flex;flex-direction:column;line-height:1}
-.retail-home .eus-wordmark strong{font-size:1rem;letter-spacing:.14em;color:#fff}
-.retail-home .eus-wordmark__sub{font-size:.66rem;letter-spacing:.24em;color:#c6d3da;margin-top:4px}
-.retail-home .eus-wordmark__tagline{font-size:.56rem;color:var(--retail-cyan);letter-spacing:.08em;margin-top:6px;text-transform:uppercase}
-.retail-home .eus-nav{margin-left:auto;gap:3px;align-items:center}
-.retail-home .eus-nav-link,.retail-home .eus-nav-trigger{font-size:.82rem;font-weight:800;letter-spacing:.01em;padding:10px 9px;border-radius:8px;color:#e8eff3;white-space:nowrap}
-.retail-home .eus-nav-link:hover,.retail-home .eus-nav-trigger:hover,.retail-home .eus-menu[open]>.eus-nav-trigger{background:rgba(55,216,255,.09);color:#fff}
-.retail-home .eus-dropdown{background:#071116;border:1px solid rgba(55,216,255,.22);box-shadow:0 22px 55px rgba(0,0,0,.45);border-radius:14px}
-.retail-home .eus-dropdown a{border-radius:10px}
-.retail-home .eus-dropdown a:hover{background:rgba(55,216,255,.08)}
-.retail-home .eus-dropdown strong{color:#fff}
-.retail-home .eus-dropdown small{color:#9eb0ba}
-.retail-more-menu .eus-dropdown{right:0;left:auto;min-width:290px}
-.retail-more-menu .eus-dropdown a:last-child{margin-top:8px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09)}
+/*
+ * POWER/STOREFRONT SCOPE
+ * /store apparel deliberately stays on the Bull + Bear identity.
+ * site-shell adds .retail-store-shell to customer commerce routes.
+ */
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))){
+  background:var(--retail-bg)!important;
+  color:var(--retail-text)!important;
+  color-scheme:dark;
+}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) main{background:var(--retail-bg)!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .container{width:min(1180px,calc(100% - 38px))}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) a{transition:border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease}
 
-/* Tropical retail hero */
-.retail-hero{position:relative;min-height:640px;display:grid;align-items:center;background:#061018;isolation:isolate}
-.retail-hero::before{content:"";position:absolute;inset:-4%;z-index:-3;background-image:url('/assets/elevation-lithium-social-card.webp');background-size:cover;background-position:center 46%;filter:saturate(.95) contrast(1.05) brightness(.76) blur(.4px);transform:scale(1.05)}
-.retail-hero::after{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(2,8,12,.96) 0%,rgba(2,9,14,.88) 38%,rgba(2,12,18,.66) 68%,rgba(2,7,10,.52) 100%),linear-gradient(180deg,rgba(2,8,12,.16),rgba(3,9,13,.45) 68%,#05090c 100%)}
-.retail-hero__glow{position:absolute;inset:auto -10% -38% 28%;height:70%;z-index:-1;background:radial-gradient(circle,rgba(22,194,235,.18),transparent 66%);pointer-events:none}
-.retail-hero__inner{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(290px,.62fr);gap:56px;align-items:center;padding:88px 0 102px}
-.retail-kicker{margin:0 0 18px;color:var(--retail-cyan);font-size:.76rem;font-weight:900;letter-spacing:.17em;text-transform:uppercase}
-.retail-hero h1{margin:0;max-width:760px;font-size:clamp(3rem,6vw,5.85rem);line-height:.91;letter-spacing:-.055em;color:#fff;text-wrap:balance}
-.retail-hero__lead{max-width:690px;margin:24px 0 0;font-size:clamp(1.08rem,1.7vw,1.34rem);line-height:1.55;color:#d2dde3}
-.retail-hero__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
-.retail-home .retail-primary{background:linear-gradient(135deg,#28c9f1,#0aa7d3);border-color:transparent;color:#001016;box-shadow:0 12px 34px rgba(19,187,228,.22)}
-.retail-home .retail-primary:hover{transform:translateY(-1px);filter:brightness(1.08)}
-.retail-home .retail-secondary{border-color:rgba(255,255,255,.28);background:rgba(4,11,16,.48);color:#fff;backdrop-filter:blur(8px)}
-.retail-home .retail-secondary:hover{border-color:var(--retail-cyan);background:rgba(27,175,211,.1)}
-.retail-hero__trust{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:27px;color:#b8c7cf;font-size:.82rem;font-weight:700}
-.retail-hero__trust span{display:inline-flex;align-items:center;gap:7px}
-.retail-hero__trust span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--retail-cyan);box-shadow:0 0 12px rgba(55,216,255,.65)}
-.retail-hero__panel{align-self:end;margin-bottom:4px;padding:22px;border:1px solid rgba(104,220,247,.25);border-radius:20px;background:linear-gradient(155deg,rgba(7,18,25,.78),rgba(4,9,13,.58));box-shadow:var(--retail-shadow);backdrop-filter:blur(14px)}
-.retail-hero__panel small{display:block;color:var(--retail-cyan);font-size:.66rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
-.retail-hero__panel strong{display:block;margin-top:8px;font-size:1.2rem;color:#fff}
-.retail-hero__panel p{margin:8px 0 0;color:#b6c6cf;line-height:1.5;font-size:.92rem}
-.retail-hero__panel a{display:inline-block;margin-top:16px;color:#fff;font-weight:800;text-decoration:none}
-.retail-hero__panel a:hover{color:var(--retail-cyan)}
+/* STORE-SIDE WORDMARK — does not alter company/service/apparel identity */
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand{
+  min-width:214px!important;
+  width:214px!important;
+  gap:0!important;
+  text-decoration:none!important;
+}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand>img{
+  content:url('/assets/brand/storefront-wordmark.webp');
+  width:214px!important;
+  height:72px!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+  object-position:left center!important;
+  background:transparent!important;
+}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand>.eus-wordmark{display:none!important}
 
-/* Store-first sections */
-.retail-section{padding:76px 0}
-.retail-section--tight{padding:56px 0}
-.retail-section--panel{background:linear-gradient(180deg,#071016,#05090c)}
-.retail-section__head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:30px}
-.retail-section__head>div{max-width:760px}
-.retail-eyebrow{margin:0 0 8px;color:var(--retail-cyan);font-size:.72rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
-.retail-section h2{margin:0;color:#fff;font-size:clamp(2rem,4vw,3.3rem);line-height:1;letter-spacing:-.035em}
-.retail-section__intro{margin:12px 0 0;color:var(--retail-muted);line-height:1.6;max-width:760px}
+/* utility + shared retail header */
+.retail-utility{background:#010506;border-bottom:1px solid rgba(255,255,255,.055);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#9fb2b9}
+.retail-utility__inner{min-height:27px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.retail-utility__identity{font-weight:900;color:#eef6f8}
+.retail-utility__links{display:flex;align-items:center;gap:20px;white-space:nowrap}
+.retail-utility a{color:#b8c8ce;text-decoration:none}.retail-utility a:hover{color:var(--retail-cyan)}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-header{
+  position:sticky;top:0;z-index:80;
+  background:rgba(2,7,10,.97)!important;
+  border-bottom:1px solid rgba(55,207,235,.16)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.24)!important;
+  backdrop-filter:blur(14px);
+}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-header__inner{min-height:76px!important;gap:20px!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-nav{margin-left:auto;gap:1px;align-items:center}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-nav-link,
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-nav-trigger{
+  padding:9px 8px!important;border-radius:5px!important;color:#d7e3e7!important;
+  font-size:.68rem!important;font-weight:850!important;letter-spacing:.035em!important;text-transform:uppercase;white-space:nowrap;
+}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-nav-link:hover,
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-nav-trigger:hover,
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-menu[open]>.eus-nav-trigger{background:rgba(33,204,239,.08)!important;color:#fff!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-dropdown{background:#061419!important;border:1px solid var(--retail-line)!important;border-radius:8px!important;box-shadow:var(--retail-shadow)!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-dropdown a{border-radius:5px!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-dropdown a:hover{background:rgba(33,204,239,.07)!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-dropdown strong{color:#fff!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-dropdown small{color:#94aab2!important}
+.retail-more-menu .eus-dropdown{right:0;left:auto;min-width:285px}
 
-.retail-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.retail-category{position:relative;min-height:245px;display:flex;align-items:flex-end;overflow:hidden;border:1px solid rgba(255,255,255,.11);border-radius:18px;text-decoration:none;background:#0b151b;box-shadow:0 12px 32px rgba(0,0,0,.22);isolation:isolate}
-.retail-category::before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--retail-image);background-size:cover;background-position:center;transform:scale(1.015);transition:transform .35s ease}
-.retail-category::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(3,8,11,.10),rgba(3,8,11,.82) 63%,rgba(3,8,11,.97))}
-.retail-category:hover{border-color:rgba(55,216,255,.45);transform:translateY(-2px)}
-.retail-category:hover::before{transform:scale(1.045)}
-.retail-category__copy{padding:22px;width:100%}
-.retail-category__copy small{display:block;color:var(--retail-cyan);font-size:.66rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
-.retail-category__copy strong{display:block;margin-top:5px;color:#fff;font-size:1.35rem;line-height:1.08}
-.retail-category__copy p{margin:8px 0 0;color:#c1ced4;font-size:.88rem;line-height:1.45}
+/* one button system */
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .button,
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) button:not(.eus-menu-toggle):not(.eus-nav-trigger):not(.product-gallery__nav){
+  border-radius:5px!important;font-weight:850!important;box-shadow:none!important;letter-spacing:.01em;
+}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) :is(.retail-primary,.button-primary){background:var(--retail-cyan)!important;border-color:var(--retail-cyan)!important;color:#001015!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) :is(.retail-primary,.button-primary):hover{filter:brightness(1.06);transform:translateY(-1px)}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) :is(.retail-secondary,.button-outline){background:rgba(1,10,14,.62)!important;border:1px solid rgba(255,255,255,.28)!important;color:#fff!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) :is(.retail-secondary,.button-outline):hover{border-color:var(--retail-cyan)!important;background:rgba(33,204,239,.07)!important}
 
-/* Logistics as core differentiator */
-.retail-logistics{position:relative;padding:90px 0;background:#071017;isolation:isolate;overflow:hidden}
-.retail-logistics::before{content:"";position:absolute;inset:0;z-index:-2;background:url('/assets/elevation-lithium-social-card.webp') center/cover no-repeat;opacity:.20;filter:saturate(.9) contrast(1.08);transform:scale(1.08)}
-.retail-logistics::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#061018 0%,rgba(5,14,20,.92) 55%,rgba(5,14,20,.72)),linear-gradient(180deg,rgba(5,14,20,.28),#061018)}
-.retail-logistics__grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:56px;align-items:start}
-.retail-logistics__copy h2{margin:0;font-size:clamp(2.25rem,4.7vw,4.25rem);line-height:.98;letter-spacing:-.045em;color:#fff}
-.retail-logistics__copy>p{color:#c2d0d7;font-size:1.05rem;line-height:1.65;max-width:630px}
-.retail-logistics__lanes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.retail-logistics__lane{padding:20px;border:1px solid var(--retail-line);border-radius:15px;background:rgba(5,13,18,.72);backdrop-filter:blur(8px)}
-.retail-logistics__lane small{color:var(--retail-cyan);font-weight:900;letter-spacing:.11em;text-transform:uppercase}
-.retail-logistics__lane h3{margin:7px 0 6px;color:#fff;font-size:1.08rem}
-.retail-logistics__lane p{margin:0;color:#aebfc8;line-height:1.5;font-size:.88rem}
-.retail-logistics__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+/* shared type */
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) :is(.eyebrow,.retail-eyebrow,.retail-kicker){color:var(--retail-cyan)!important;font-size:.64rem!important;font-weight:900!important;letter-spacing:.17em!important;text-transform:uppercase}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) h1{color:#fff;letter-spacing:-.045em}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) h2{color:#fff;letter-spacing:-.03em}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) p{color:var(--retail-muted-2)}
 
-/* SOK + products */
-.retail-home .home-sok,.retail-home .home-commerce{background:#05090c;color:var(--retail-text)}
-.retail-home .home-sok{padding:76px 0;border-top:1px solid rgba(255,255,255,.06)}
-.retail-home .home-sok__head{align-items:end}
-.retail-home .home-sok__head h2,.retail-home .home-commerce__head h2,.retail-home .home-commerce__group-head h3{color:#fff}
-.retail-home .home-sok__head p,.retail-home .home-commerce__head p{color:var(--retail-muted)}
-.retail-home .home-sok__card,.retail-home .home-product-card{background:#0a141a;border:1px solid rgba(255,255,255,.1);box-shadow:none}
-.retail-home .home-sok__card:hover,.retail-home .home-product-card:hover{border-color:rgba(55,216,255,.35)}
-.retail-home .home-sok__card h3,.retail-home .home-product-card h3,.retail-home .home-product-card h3 a{color:#fff}
-.retail-home .home-sok__card p,.retail-home .home-product-card p{color:#aebdc5}
-.retail-home .home-product-card__body>strong{color:#fff}
-.retail-home .home-commerce{padding:0 0 86px}
-.retail-home .home-commerce__head{padding-top:0}
-.retail-home .home-commerce__group{border-top-color:rgba(255,255,255,.1)}
+/* HOMEPAGE — reference composition */
+.retail-hero{position:relative;min-height:580px;display:grid;align-items:center;background:#061217;isolation:isolate;overflow:hidden;border-bottom:1px solid rgba(55,207,235,.08)}
+.retail-hero::before{content:"";position:absolute;inset:-2%;z-index:-3;background:url('/assets/elevation-lithium-social-card.webp') center 50%/cover no-repeat;filter:saturate(.88) contrast(1.04) brightness(.72);transform:scale(1.025)}
+.retail-hero::after{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(1,6,9,.97) 0%,rgba(1,7,10,.9) 36%,rgba(2,9,12,.59) 68%,rgba(2,8,11,.48) 100%),linear-gradient(180deg,rgba(0,0,0,.04),rgba(2,8,11,.3) 72%,#02070a 100%)}
+.retail-hero__glow{position:absolute;inset:auto -4% -45% 33%;height:68%;z-index:-1;background:radial-gradient(circle,rgba(33,204,239,.14),transparent 67%);pointer-events:none}
+.retail-hero__inner{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(310px,.72fr);gap:64px;align-items:center;padding:74px 0 82px}
+.retail-hero h1{margin:0;max-width:650px;font-size:clamp(3rem,5.7vw,5.25rem);line-height:.92;letter-spacing:-.052em;color:#fff;text-wrap:balance}
+.retail-hero__lead{max-width:590px;margin:20px 0 0;font-size:clamp(.98rem,1.4vw,1.14rem);line-height:1.55;color:#d0dde1!important}
+.retail-hero__actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:25px}.retail-hero__actions .button{min-height:38px;padding:10px 16px;font-size:.72rem}
+.retail-hero__trust{display:flex;flex-wrap:wrap;gap:9px 16px;margin-top:21px;color:#9caeb5;font-size:.7rem;font-weight:750}.retail-hero__trust span{display:inline-flex;align-items:center;gap:7px}.retail-hero__trust span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--retail-cyan);box-shadow:0 0 9px rgba(33,204,239,.62)}
+.retail-hero__panel{align-self:center;padding:18px 20px;border:1px solid rgba(55,207,235,.29);border-radius:8px;background:rgba(4,15,19,.78);box-shadow:0 18px 44px rgba(0,0,0,.34);backdrop-filter:blur(12px)}
+.retail-hero__panel small{display:block;color:var(--retail-cyan);font-size:.56rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.retail-hero__panel strong{display:block;margin-top:7px;font-size:1.02rem;color:#fff}.retail-hero__panel p{margin:7px 0 0;color:#aebfc5!important;line-height:1.48;font-size:.78rem}.retail-hero__panel>a{display:inline-block;margin-top:13px;color:var(--retail-cyan);font-size:.72rem;font-weight:850;text-decoration:none}
+.reference-sok-products{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}.reference-sok-product{display:grid;grid-template-columns:70px 1fr;align-items:center;gap:9px;padding:8px;border:1px solid rgba(255,255,255,.09);border-radius:6px;background:rgba(1,8,11,.76);text-decoration:none}.reference-sok-product img{width:70px;height:54px;object-fit:contain;background:#f0f3f2;border-radius:3px}.reference-sok-product b{display:block;color:#fff;font-size:.68rem}.reference-sok-product span span{display:block;color:#8fa4ad;font-size:.58rem;margin-top:2px}
+.retail-section{padding:58px 0;background:var(--retail-bg)}.retail-section--tight{padding:42px 0}.retail-section--panel{background:linear-gradient(180deg,#071318,#041014)}.retail-section__head{display:flex;align-items:end;justify-content:space-between;gap:26px;margin-bottom:21px}.retail-section__head>div{max-width:700px}.retail-section h2,.retail-logistics h2,.home-sok h2,.home-commerce h2{margin:0;color:#fff!important;font-size:clamp(1.8rem,3.4vw,2.8rem)!important;line-height:1.02!important;letter-spacing:-.035em!important}.retail-section__intro{margin:9px 0 0;color:var(--retail-muted)!important;line-height:1.55;max-width:690px;font-size:.88rem}
+.retail-category-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.retail-category{position:relative;min-height:150px;display:flex;align-items:flex-end;overflow:hidden;border:1px solid var(--retail-line);border-radius:6px;text-decoration:none;background:#0b171c;box-shadow:none;isolation:isolate}.retail-category::before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--retail-image);background-size:cover;background-position:center;transform:scale(1.015);transition:transform .28s ease}.retail-category::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(2,7,9,.08),rgba(2,7,9,.58) 48%,rgba(2,7,9,.96))}.retail-category:hover{border-color:var(--retail-line-strong);transform:translateY(-1px)}.retail-category:hover::before{transform:scale(1.035)}.retail-category__copy{padding:13px 14px;width:100%}.retail-category__copy small{display:block;color:var(--retail-cyan);font-size:.48rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.retail-category__copy strong{display:block;margin-top:3px;color:#fff;font-size:.92rem;line-height:1.08}.retail-category__copy p{margin:5px 0 0;color:#b6c5ca!important;font-size:.64rem;line-height:1.35}
+.retail-logistics{position:relative;padding:72px 0;background:#061317;isolation:isolate;overflow:hidden;border-block:1px solid rgba(55,207,235,.08)}.retail-logistics::before{content:"";position:absolute;inset:0;z-index:-2;background:url('/assets/elevation-lithium-social-card.webp') center/cover no-repeat;opacity:.15;filter:saturate(.8);transform:scale(1.05)}.retail-logistics::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#041115 0%,rgba(4,17,21,.94) 55%,rgba(4,17,21,.78))}.retail-logistics__grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:52px;align-items:start}.retail-logistics__copy>p{color:#b8c8ce!important;font-size:.9rem;line-height:1.6;max-width:580px}.retail-logistics__lanes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.retail-logistics__lane{padding:16px;border:1px solid var(--retail-line);border-radius:6px;background:rgba(3,14,17,.76)}.retail-logistics__lane small{color:var(--retail-cyan);font-size:.52rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.retail-logistics__lane h3{margin:6px 0 5px;color:#fff;font-size:.88rem}.retail-logistics__lane p{margin:0;color:#9eb1b8!important;line-height:1.45;font-size:.68rem}.retail-logistics__actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.retail-home .home-sok,.retail-home .home-commerce{background:var(--retail-bg)!important;color:var(--retail-text)}.retail-home .home-sok{padding:58px 0;border-top:1px solid rgba(255,255,255,.04)}.retail-home .home-sok__head,.retail-home .home-commerce__head{margin-bottom:20px}.retail-home .home-sok__head p,.retail-home .home-commerce__head p{color:var(--retail-muted)!important;font-size:.82rem}.retail-home .home-sok__grid{gap:12px!important}.retail-home .home-sok__card,.retail-home .home-product-card{background:#07161b!important;border:1px solid var(--retail-line)!important;border-radius:6px!important;box-shadow:none!important;overflow:hidden}.retail-home .home-sok__card:hover,.retail-home .home-product-card:hover{border-color:var(--retail-line-strong)!important}.retail-home .home-sok__media,.retail-home .home-product-card__media{background:#f2f5f4!important}.retail-home .home-sok__card h3,.retail-home .home-product-card h3,.retail-home .home-product-card h3 a{color:#fff!important;font-size:.92rem!important}.retail-home .home-sok__card p,.retail-home .home-product-card p{color:#9fb1b8!important;font-size:.72rem!important}.retail-home .home-commerce{padding:0 0 64px}.retail-home .home-commerce__group{border-top-color:rgba(255,255,255,.075)!important}
+.retail-feature-band{display:grid;grid-template-columns:1.12fr .88fr;gap:12px}.retail-feature-band__media,.retail-feature-band__copy{min-height:340px;border-radius:7px;overflow:hidden;border:1px solid var(--retail-line)}.retail-feature-band__media{background:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.45)),url('/assets/solar/solar-hero-desktop.webp') center/cover no-repeat}.retail-feature-band__copy{display:flex;flex-direction:column;justify-content:center;padding:34px;background:#07161b}.retail-feature-band__copy p{color:#aebfc5!important;line-height:1.6}.retail-support-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.retail-support-card{padding:19px;border:1px solid var(--retail-line);border-radius:6px;background:#07161b}.retail-support-card h3{margin:0;color:#fff;font-size:1rem}.retail-support-card p{color:#9fb1b8!important;line-height:1.5;font-size:.75rem}.retail-support-card a{color:var(--retail-cyan);font-weight:850;text-decoration:none}.retail-marketplace-note{margin-top:34px;padding-top:20px;border-top:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:20px;align-items:center;color:#8297a0;font-size:.74rem}.retail-marketplace-note a{color:#aebfc5;text-decoration:none}
 
-/* Off-grid + service support */
-.retail-feature-band{display:grid;grid-template-columns:1.12fr .88fr;gap:18px}
-.retail-feature-band__media,.retail-feature-band__copy{min-height:390px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
-.retail-feature-band__media{background:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.48)),url('/assets/solar/solar-hero-desktop.webp') center/cover no-repeat}
-.retail-feature-band__copy{display:flex;flex-direction:column;justify-content:center;padding:42px;background:linear-gradient(145deg,#0b1820,#071017)}
-.retail-feature-band__copy h2{font-size:clamp(2.1rem,4vw,3.5rem)}
-.retail-feature-band__copy p{color:#afc0c8;line-height:1.65}
-.retail-support-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.retail-support-card{padding:24px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:#091218}
-.retail-support-card h3{margin:0;color:#fff}
-.retail-support-card p{color:#aebdc5;line-height:1.55}
-.retail-support-card a{color:var(--retail-cyan);font-weight:800;text-decoration:none}
-.retail-marketplace-note{margin-top:42px;padding-top:26px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:20px;align-items:center;color:#8fa1aa;font-size:.85rem}
-.retail-marketplace-note a{color:#afc0c8;text-decoration:none}
-.retail-marketplace-note a:hover{color:var(--retail-cyan)}
+/* SUBPAGE HERO SYSTEM */
+:is(.lithium-hero,.rv-store-hero,.hawaii-program-hero,.sok-hero){
+  position:relative!important;
+  overflow:hidden!important;
+  background:#061318!important;
+  border-bottom:1px solid rgba(55,207,235,.11)!important;
+}
+:is(.lithium-hero,.rv-store-hero,.hawaii-program-hero){padding:62px 0 58px!important}
+.lithium-hero{background:linear-gradient(90deg,rgba(2,8,11,.96),rgba(4,16,21,.83)),url('/assets/homepage-option-2-lithium-solar.webp') center/cover!important}
+.rv-store-hero{background:linear-gradient(90deg,rgba(2,8,11,.96),rgba(4,16,21,.78)),url('/assets/hero-galaxy-rv.webp') center/cover!important}
+.hawaii-program-hero{background:linear-gradient(90deg,rgba(2,8,11,.96),rgba(4,16,21,.74)),url('/assets/elevation-lithium-social-card.webp') center/cover!important}
+:is(.lithium-hero,.rv-store-hero,.hawaii-program-hero) h1{max-width:780px;margin:10px 0 14px!important;font-size:clamp(2.55rem,5vw,4.45rem)!important;line-height:.96!important;color:#fff!important}
+:is(.lithium-hero,.rv-store-hero,.hawaii-program-hero) p:not(.eyebrow):not(.lithium-retailer-badge):not(.hawaii-license){max-width:720px;color:#bccbd0!important;font-size:.96rem!important;line-height:1.55!important}
+:is(.lithium-retailer-badge,.hawaii-license){display:inline-flex!important;margin:6px 8px 6px 0!important;padding:6px 9px!important;border:1px solid rgba(55,207,235,.32)!important;border-radius:4px!important;background:rgba(2,10,14,.68)!important;color:var(--retail-cyan)!important;font-size:.58rem!important;letter-spacing:.11em!important}
 
-.retail-home .site-footer{background:#020507;border-top:1px solid rgba(255,255,255,.08)}
-.retail-home .footer-brand p,.retail-home .copyright{color:#82939c}
+/* Lithium + Hawaii */
+body.retail-store-shell.lithium-page :is(.sok-brand-feature,.lithium-market,.hawaii-info,.hawaii-request-section,.section){background:var(--retail-bg)!important;color:var(--retail-text)!important}
+body.retail-store-shell.lithium-page :is(.sok-brand-feature__grid,.hawaii-info__grid,.hawaii-request-wrap,.hawaii-batch-banner,.hawaii-step,.hawaii-status-card,.hawaii-rule-card){border-color:var(--retail-line)!important;border-radius:7px!important;background:var(--retail-panel)!important;box-shadow:none!important}
+body.retail-store-shell.lithium-page .sok-brand-feature{padding:48px 0!important;border-block:1px solid rgba(55,207,235,.08)}
+body.retail-store-shell.lithium-page .sok-brand-feature__grid{padding:22px!important}
+body.retail-store-shell.lithium-page .sok-brand-feature__media img{background:#eef2f1;border-radius:5px!important}
+body.retail-store-shell.lithium-page .sok-brand-wordmark{color:#fff!important}.sok-brand-wordmark span{color:var(--retail-cyan)!important}
+body.retail-store-shell.lithium-page .lithium-category-strip{background:#031015!important;border-block:1px solid var(--retail-line)!important}
+body.retail-store-shell.lithium-page .lithium-market{padding:50px 0 62px!important}
+body.retail-store-shell.lithium-page .lithium-market__head h2{font-size:clamp(1.8rem,3vw,2.55rem)!important}
+body.retail-store-shell.lithium-page :is(.lithium-controls,.lithium-card,.lithium-product-card){background:var(--retail-panel)!important;border:1px solid var(--retail-line)!important;border-radius:7px!important;box-shadow:none!important}
+body.retail-store-shell.lithium-page :is(.lithium-grid img,.sok-brand-feature__media img){object-fit:contain!important}
+body.retail-store-shell.lithium-page :is(input,select,textarea){background:#041217!important;border:1px solid rgba(255,255,255,.15)!important;color:#fff!important;border-radius:5px!important}
+body.retail-store-shell.lithium-page :is(input,select,textarea):focus{outline:2px solid rgba(33,204,239,.33)!important;border-color:var(--retail-cyan)!important}
+body.retail-store-shell.lithium-page .hawaii-request-section{padding:54px 0!important;border-top:1px solid rgba(55,207,235,.08)}
+body.retail-store-shell.lithium-page .hawaii-request-wrap{padding:24px!important}.hawaii-request-form{background:#051419!important;border-color:var(--retail-line)!important;border-radius:7px!important}
 
-@media (max-width:1060px){
-  .retail-home .eus-header__inner{min-height:70px}
-  .retail-home .eus-brand{min-width:190px}
-  .retail-home .eus-nav-link,.retail-home .eus-nav-trigger{font-size:.77rem;padding:9px 6px}
-  .retail-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .retail-hero__inner{grid-template-columns:1fr .5fr;gap:28px}
+/* SOK catalog */
+body.retail-store-shell.sok-catalog-page .sok-hero{padding:58px 0 34px!important;background:linear-gradient(90deg,#02090d 0%,rgba(4,15,20,.94) 52%,rgba(4,15,20,.72)),url('/assets/brands/sok/sk48v100n/hero.jpg') right center/58% auto no-repeat!important}
+body.retail-store-shell.sok-catalog-page .sok-hero__grid{gap:42px!important;align-items:center!important}
+body.retail-store-shell.sok-catalog-page .sok-hero h1{font-size:clamp(2.75rem,5vw,4.6rem)!important;line-height:.94!important;max-width:720px!important}
+body.retail-store-shell.sok-catalog-page .sok-hero p{color:#bac9ce!important;line-height:1.55!important}
+body.retail-store-shell.sok-catalog-page .sok-hero figure{border:1px solid var(--retail-line)!important;border-radius:7px!important;background:rgba(2,10,14,.7)!important;overflow:hidden!important}
+body.retail-store-shell.sok-catalog-page .sok-hero figure img{background:#eef2f1!important;object-fit:contain!important}
+body.retail-store-shell.sok-catalog-page .sok-capability-strip{border:1px solid var(--retail-line)!important;border-radius:6px!important;background:#041318!important}
+body.retail-store-shell.sok-catalog-page :is(.sok-discovery,.sok-shop,.sok-paths){background:var(--retail-bg)!important;color:var(--retail-text)!important}
+body.retail-store-shell.sok-catalog-page .sok-discovery{padding:48px 0!important}
+body.retail-store-shell.sok-catalog-page .sok-discovery__grid>*{background:var(--retail-panel)!important;border:1px solid var(--retail-line)!important;border-radius:6px!important;box-shadow:none!important;color:#fff!important}
+body.retail-store-shell.sok-catalog-page .sok-discovery__grid small{color:#93a9b1!important}
+body.retail-store-shell.sok-catalog-page .sok-shop{padding:50px 0 62px!important;border-top:1px solid rgba(55,207,235,.08)}
+body.retail-store-shell.sok-catalog-page :is(.sok-search input,.sok-filter button){background:#041217!important;border:1px solid rgba(255,255,255,.14)!important;color:#dbe6e9!important;border-radius:5px!important}
+body.retail-store-shell.sok-catalog-page .sok-filter button.is-active{border-color:var(--retail-cyan)!important;background:rgba(33,204,239,.12)!important;color:#fff!important}
+body.retail-store-shell.sok-catalog-page :is(.sok-card,.sok-product-card){background:var(--retail-panel)!important;border:1px solid var(--retail-line)!important;border-radius:7px!important;box-shadow:none!important;overflow:hidden!important}
+body.retail-store-shell.sok-catalog-page :is(.sok-card img,.sok-product-card img){background:#f0f3f2!important;object-fit:contain!important}
+body.retail-store-shell.sok-catalog-page .sok-paths__grid article{background:var(--retail-panel)!important;border:1px solid var(--retail-line)!important;border-radius:7px!important;box-shadow:none!important}
+
+/* RV + Outdoor */
+body.retail-store-shell:has(.rv-store-hero) :is(.rv-store-market,.rv-store-nav){background:var(--retail-bg)!important;color:var(--retail-text)!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-store-trust article{background:rgba(4,15,20,.76)!important;border:1px solid var(--retail-line)!important;border-radius:6px!important;box-shadow:none!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-store-trust strong{color:#fff!important}body.retail-store-shell:has(.rv-store-hero) .rv-store-trust span{color:#9fb1b8!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-store-nav{border-block:1px solid rgba(55,207,235,.1)!important;background:#031015!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-store-nav a{color:#aebfc5!important}body.retail-store-shell:has(.rv-store-hero) .rv-store-nav a.is-current{color:var(--retail-cyan)!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-store-market{padding:48px 0 64px!important}
+body.retail-store-shell:has(.rv-store-hero) :is(.rv-store-controls input,.rv-store-controls select){background:#041217!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff!important;border-radius:5px!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-category-rail button{background:#041217!important;border:1px solid rgba(255,255,255,.12)!important;color:#b9c8cd!important;border-radius:4px!important}body.retail-store-shell:has(.rv-store-hero) .rv-category-rail button.is-active{border-color:var(--retail-cyan)!important;color:#fff!important;background:rgba(33,204,239,.1)!important}
+body.retail-store-shell:has(.rv-store-hero) :is(.rv-product-card,.shopping-list,.marketplace-summary){background:var(--retail-panel)!important;border:1px solid var(--retail-line)!important;border-radius:6px!important;box-shadow:none!important}
+body.retail-store-shell:has(.rv-store-hero) .rv-product-media{background:#f0f3f2!important}body.retail-store-shell:has(.rv-store-hero) .rv-product-image{object-fit:contain!important;background:#f0f3f2!important}body.retail-store-shell:has(.rv-store-hero) .rv-product-copy h3,body.retail-store-shell:has(.rv-store-hero) .rv-product-title-link{color:#fff!important}body.retail-store-shell:has(.rv-store-hero) :is(.rv-product-subtitle,.rv-product-stock){color:#93a8b0!important}
+
+/* product details */
+body.retail-store-shell.product-detail-page .product-detail-shell{background:var(--retail-bg)!important;padding:36px 0 64px!important}
+body.retail-store-shell.product-detail-page :is(.product-detail,.product-gallery,.product-summary,.product-description,.product-specifications,.product-unavailable,.related-products){background:var(--retail-bg)!important;color:var(--retail-text)!important}
+body.retail-store-shell.product-detail-page .product-detail{gap:22px!important}
+body.retail-store-shell.product-detail-page :is(.product-gallery__stage,.product-summary,.product-description,.product-specifications,.product-unavailable){border:1px solid var(--retail-line)!important;border-radius:7px!important;background:var(--retail-panel)!important;box-shadow:none!important}
+body.retail-store-shell.product-detail-page .product-gallery__stage{background:#f1f4f3!important}body.retail-store-shell.product-detail-page .product-gallery__stage img{object-fit:contain!important;background:#f1f4f3!important}
+body.retail-store-shell.product-detail-page .product-gallery__thumbs button{border-radius:4px!important;background:#f1f4f3!important;border-color:rgba(255,255,255,.14)!important}
+body.retail-store-shell.product-detail-page .product-summary h1{color:#fff!important;font-size:clamp(1.9rem,3.2vw,3rem)!important;line-height:1!important}body.retail-store-shell.product-detail-page .product-price{color:#fff!important}body.retail-store-shell.product-detail-page .product-shipping,body.retail-store-shell.product-detail-page .product-note{color:#94a9b1!important}
+body.retail-store-shell.product-detail-page .related-products{border-top:1px solid rgba(55,207,235,.09)!important}
+
+/* checkout — focused but same storefront identity */
+body.retail-store-shell.eus-checkout-page{background:var(--retail-bg)!important;color:var(--retail-text)!important}
+body.retail-store-shell.eus-checkout-page .eus-checkout-main{background:var(--retail-bg)!important}
+body.retail-store-shell.eus-checkout-page .eus-checkout-heading{border-bottom-color:rgba(55,207,235,.11)!important}
+body.retail-store-shell.eus-checkout-page .eus-checkout-eyebrow,body.retail-store-shell.eus-checkout-page .eus-checkout-step,body.retail-store-shell.eus-checkout-page .eus-checkout-kicker{color:var(--retail-cyan)!important}
+body.retail-store-shell.eus-checkout-page :is(.eus-checkout-product-panel,.eus-checkout-card,.eus-checkout-hawaii,.eus-checkout-success){background:var(--retail-panel)!important;border:1px solid var(--retail-line)!important;border-radius:7px!important;box-shadow:none!important}
+body.retail-store-shell.eus-checkout-page .eus-checkout-image-frame{background:#f0f3f2!important;border-radius:5px!important}body.retail-store-shell.eus-checkout-page .eus-checkout-image-frame img{object-fit:contain!important}
+body.retail-store-shell.eus-checkout-page :is(input,select){background:#041217!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff!important;border-radius:5px!important}body.retail-store-shell.eus-checkout-page :is(input,select):focus{outline:2px solid rgba(33,204,239,.3)!important;border-color:var(--retail-cyan)!important}
+body.retail-store-shell.eus-checkout-page .eus-checkout-total-row{border-top-color:var(--retail-line)!important}body.retail-store-shell.eus-checkout-page .eus-checkout-legal{background:#010506!important;border-top:1px solid var(--retail-line)!important}
+
+/* generic SOK detail routes rendered under /sok/ */
+body.retail-store-shell:not(:has(.shop-intro)) :is(.sok-product-shell,.sok-product-hero,.sok-product-main,.sok-product-detail,.sok-order-shell){background:var(--retail-bg)!important;color:var(--retail-text)!important}
+body.retail-store-shell:not(:has(.shop-intro)) :is(.sok-product-card,.sok-product-panel,.sok-order-card){border-color:var(--retail-line)!important;border-radius:7px!important;background:var(--retail-panel)!important;box-shadow:none!important}
+
+/* footer */
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .site-footer{background:#010506!important;border-top:1px solid rgba(55,207,235,.1)!important;color:#879aa2!important}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .site-footer a{color:#aebfc5!important}.retail-home .site-footer a:hover,.retail-store-shell:not(:has(.shop-intro)) .site-footer a:hover{color:var(--retail-cyan)!important}
+
+/* image discipline */
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) img{max-width:100%}
+:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) :is(.rv-product-image,.home-product-card img,.home-sok__media img,.sok-card img,.sok-product-card img,.lithium-grid img,.product-gallery img){image-rendering:auto}
+
+/* responsive */
+@media (max-width:1040px){
+  :is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand{min-width:188px!important;width:188px!important}:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand>img{width:188px!important;height:64px!important}
+  .retail-hero__inner{grid-template-columns:1fr .68fr;gap:32px}.retail-category-grid{grid-template-columns:repeat(3,1fr)}
+  .retail-category:last-child:nth-child(5){grid-column:auto}.retail-logistics__grid{gap:34px}
 }
 @media (max-width:820px){
-  .retail-home .container{width:min(100% - 28px,1180px)}
-  .retail-utility__inner{min-height:30px}
   .retail-utility__links a:first-child{display:none}
-  .retail-home .eus-header{top:0}
-  .retail-home .eus-header__inner{min-height:66px}
-  .retail-home .eus-brand{min-width:0}
-  .retail-home .eus-brand img{width:52px;height:44px}
-  .retail-home .eus-wordmark__tagline{display:block}
-  .retail-home .eus-nav{background:#061017;border-top:1px solid rgba(55,216,255,.14)}
-  .retail-home .eus-nav-link,.retail-home .eus-nav-trigger{font-size:.95rem;padding:13px 16px}
-  .retail-more-menu .eus-dropdown{min-width:0}
-  .retail-hero{min-height:590px}
-  .retail-hero::before{background-position:62% center;opacity:.9}
-  .retail-hero::after{background:linear-gradient(90deg,rgba(2,8,12,.96),rgba(2,9,14,.84)),linear-gradient(180deg,rgba(2,8,12,.08),#05090c 96%)}
-  .retail-hero__inner{display:block;padding:72px 0 78px}
-  .retail-hero__panel{max-width:520px;margin-top:34px}
-  .retail-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .retail-logistics__grid,.retail-feature-band{grid-template-columns:1fr}
-  .retail-logistics__lanes{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .retail-feature-band__media{min-height:300px}
-  .retail-support-grid{grid-template-columns:1fr}
+  :is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-header__inner{min-height:68px!important}
+  :is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand{min-width:168px!important;width:168px!important}:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand>img{width:168px!important;height:58px!important}
+  .retail-hero{min-height:auto}.retail-hero__inner{grid-template-columns:1fr;gap:24px;padding:54px 0 58px}.retail-hero h1{font-size:clamp(3rem,11vw,4.5rem)}.retail-hero__panel{max-width:610px}
+  .retail-category-grid{grid-template-columns:repeat(2,1fr)}.retail-logistics__grid,.retail-feature-band{grid-template-columns:1fr}.retail-support-grid{grid-template-columns:1fr}.retail-feature-band__media{min-height:270px}
+  body.retail-store-shell.sok-catalog-page .sok-hero{background:linear-gradient(180deg,rgba(2,8,11,.92),rgba(4,15,20,.94)),url('/assets/brands/sok/sk48v100n/hero.jpg') center/cover!important}
 }
 @media (max-width:560px){
-  .retail-utility__identity{font-size:.62rem;letter-spacing:.08em}
-  .retail-utility__links{gap:10px;font-size:.67rem}
-  .retail-home .eus-wordmark strong{font-size:.86rem}
-  .retail-home .eus-wordmark__sub{font-size:.58rem}
-  .retail-home .eus-wordmark__tagline{font-size:.49rem}
-  .retail-hero{min-height:560px}
-  .retail-hero__inner{padding:58px 0 66px}
-  .retail-hero h1{font-size:clamp(2.72rem,14vw,4.1rem)}
-  .retail-hero__lead{font-size:1rem}
-  .retail-hero__actions{display:grid;grid-template-columns:1fr}
-  .retail-hero__actions .button{text-align:center;justify-content:center}
-  .retail-hero__panel{padding:18px}
-  .retail-section{padding:58px 0}
-  .retail-section__head{display:block}
-  .retail-section__head>.button{margin-top:18px}
-  .retail-category-grid{grid-template-columns:1fr}
-  .retail-category{min-height:215px}
-  .retail-logistics{padding:64px 0}
-  .retail-logistics__lanes{grid-template-columns:1fr}
-  .retail-logistics__actions{display:grid}
-  .retail-feature-band__copy{padding:28px}
-  .retail-feature-band__media{min-height:240px;background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.48)),url('/assets/solar/solar-hero-mobile.webp')}
-  .retail-marketplace-note{display:block}
-  .retail-marketplace-note a{display:inline-block;margin-top:10px}
+  :is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .container{width:min(100% - 28px,1180px)}
+  .retail-utility__inner{min-height:25px}.retail-utility__identity{font-size:.52rem}.retail-utility__links{font-size:.54rem}
+  :is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand{min-width:150px!important;width:150px!important}:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) .eus-brand>img{width:150px!important;height:51px!important}
+  .retail-hero__inner{padding:45px 0 50px}.retail-hero h1{font-size:clamp(2.75rem,16vw,4rem)}.retail-hero__lead{font-size:.92rem}.retail-hero__actions{display:grid;grid-template-columns:1fr}.retail-hero__actions .button{text-align:center}.retail-hero__trust{display:grid}.reference-sok-products{grid-template-columns:1fr}.reference-sok-product{grid-template-columns:64px 1fr}.reference-sok-product img{width:64px;height:50px}
+  .retail-section{padding:44px 0}.retail-category-grid{grid-template-columns:1fr}.retail-category{min-height:132px}.retail-logistics{padding:54px 0}.retail-logistics__lanes{grid-template-columns:1fr}.retail-logistics__actions{display:grid}.retail-feature-band__copy{padding:24px}.retail-feature-band__media{min-height:230px}.retail-marketplace-note{align-items:flex-start;flex-direction:column}
+  :is(.lithium-hero,.rv-store-hero,.hawaii-program-hero){padding:46px 0!important}:is(.lithium-hero,.rv-store-hero,.hawaii-program-hero) h1{font-size:clamp(2.4rem,13vw,3.7rem)!important}
+  body.retail-store-shell.lithium-page .sok-brand-feature__grid,body.retail-store-shell.lithium-page .hawaii-request-wrap{padding:16px!important}
 }
-
-
-/* Shared retail shell for shopping, product and checkout routes */
-body.retail-store-shell .eus-header{position:sticky;top:0;z-index:70;background:rgba(4,9,13,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(64,214,250,.16);box-shadow:0 8px 30px rgba(0,0,0,.18)}
-body.retail-store-shell .eus-header__inner{min-height:72px;gap:20px}
-body.retail-store-shell .eus-brand{min-width:205px;gap:10px;text-decoration:none}
-body.retail-store-shell .eus-brand img{width:56px;height:46px;object-fit:contain}
-body.retail-store-shell .eus-wordmark{display:flex;flex-direction:column;line-height:1}
-body.retail-store-shell .eus-wordmark strong{font-size:.96rem;letter-spacing:.14em;color:#fff}
-body.retail-store-shell .eus-wordmark__sub{font-size:.64rem;letter-spacing:.24em;color:#c6d3da;margin-top:4px}
-body.retail-store-shell .eus-wordmark__tagline{font-size:.52rem;color:var(--retail-cyan);letter-spacing:.07em;margin-top:6px;text-transform:uppercase}
-body.retail-store-shell .eus-nav{margin-left:auto;gap:3px;align-items:center}
-body.retail-store-shell .eus-nav-link,body.retail-store-shell .eus-nav-trigger{font-size:.8rem;font-weight:800;padding:10px 8px;border-radius:8px;color:#e8eff3;white-space:nowrap}
-body.retail-store-shell .eus-nav-link:hover,body.retail-store-shell .eus-nav-trigger:hover,body.retail-store-shell .eus-menu[open]>.eus-nav-trigger{background:rgba(55,216,255,.09);color:#fff}
-body.retail-store-shell .eus-dropdown{background:#071116;border:1px solid rgba(55,216,255,.22);box-shadow:0 22px 55px rgba(0,0,0,.45);border-radius:14px}
-body.retail-store-shell .eus-dropdown a{border-radius:10px}
-body.retail-store-shell .eus-dropdown a:hover{background:rgba(55,216,255,.08)}
-body.retail-store-shell .eus-dropdown strong{color:#fff}
-body.retail-store-shell .eus-dropdown small{color:#9eb0ba}
-body.retail-store-shell .retail-more-menu .eus-dropdown{right:0;left:auto;min-width:290px}
-body.retail-store-shell .retail-more-menu .eus-dropdown a:last-child{margin-top:8px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09)}
-@media(max-width:1060px){body.retail-store-shell .eus-nav-link,body.retail-store-shell .eus-nav-trigger{font-size:.74rem;padding:9px 5px}}
-@media(max-width:820px){body.retail-store-shell .eus-header__inner{min-height:66px}body.retail-store-shell .eus-brand{min-width:0}body.retail-store-shell .eus-brand img{width:50px;height:42px}body.retail-store-shell .eus-nav{background:#061017;border-top:1px solid rgba(55,216,255,.14)}body.retail-store-shell .eus-nav-link,body.retail-store-shell .eus-nav-trigger{font-size:.95rem;padding:13px 16px}body.retail-store-shell .retail-more-menu .eus-dropdown{min-width:0}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.retail-category::before{transition:none!important}:is(body.retail-home,body.retail-store-shell:not(:has(.shop-intro))) a{transition:none!important}}
