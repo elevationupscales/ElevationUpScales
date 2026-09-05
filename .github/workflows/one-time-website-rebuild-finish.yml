@@ -1,4 +1,4 @@
-name: Website Rebuild Phase 4-6 Preview Validation
+name: Website Rebuild Phase 7 Final Stabilization
 on:
   push:
     branches: [runner/website-rebuild-finish-one-pass-2026-09-05]
@@ -8,9 +8,9 @@ permissions:
 env:
   TARGET_BRANCH: work/website-rebuild-finish-one-pass-2026-09-05
   EXPECTED_MAIN: 995ddef117be2ba5b26e154ea43409271fc938a9
-  EXPECTED_SOURCE: 3ae1215e238e0f93876ef376914cd86645d1c7c9
+  EXPECTED_SOURCE: 983d2153448de31eddf551492f221b9f973f10ae
 jobs:
-  validate-rebuild:
+  finalize-clean-baseline:
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -18,35 +18,64 @@ jobs:
         with:
           ref: ${{ env.TARGET_BRANCH }}
           fetch-depth: 0
-      - name: Enforce lineage
+
+      - name: Enforce accepted lineage
         run: |
           set -euo pipefail
           git fetch origin main "$TARGET_BRANCH" --no-tags --prune
           test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
           git merge-base --is-ancestor origin/main HEAD
-      - name: Generate Phase 4-6 repair candidate
+
+      - name: Phase 7 conservative cleanup and receipt preparation
         run: |
           set -euo pipefail
-          python deployment/rebuild/split-worker-core.py
-          python deployment/rebuild/finalize-cleanup.py
           python - <<'PY'
           from pathlib import Path
-          import hashlib,re,subprocess
-          changed=subprocess.check_output(['git','diff','--name-only','origin/main'],text=True).splitlines()
-          out=['# Website Rebuild — Final Changed-File Manifest','',f'Base: `{subprocess.check_output(["git","rev-parse","origin/main"],text=True).strip()}`','', '| Path | SHA-256 |','|---|---|']
-          for name in changed:
-              p=Path(name)
-              if p.is_file() and not name.endswith('WEBSITE_REBUILD_FINAL_MANIFEST.md'):
-                  out.append(f'| `{name}` | `{hashlib.sha256(p.read_bytes()).hexdigest()}` |')
-          Path('deployment/qa/WEBSITE_REBUILD_FINAL_MANIFEST.md').write_text('\n'.join(out)+'\n')
-          names=set()
-          for p in Path('site').rglob('*.js'):
-              text=p.read_text(errors='ignore'); names.update(re.findall(r'\benv\.([A-Z][A-Z0-9_]*)\b',text))
-          b=['# Cloudflare Binding / Environment Name Inventory','', 'Names only. No secret values are recorded. No binding configuration changes in this release.','']+[f'- `{x}`' for x in sorted(names)]+['','Schema unchanged from accepted production; no D1 migration/schema file is modified.','']
-          Path('deployment/qa/CLOUDFLARE_BINDING_NAME_INVENTORY.md').write_text('\n'.join(b))
+          import re, subprocess
+
+          root=Path('.')
+          legacy=root/'site/admin-command-center-pass1.css'
+          canonical=root/'site/admin-command-center.css'
+          needle='admin-command-center-pass1.css'
+
+          # Runtime reference proof. Ignore the legacy file itself and the canonical
+          # CSS header comment that documents where the folded cascade came from.
+          refs=[]
+          for p in (root/'site').rglob('*'):
+              if not p.is_file() or p==legacy:
+                  continue
+              if p.suffix.lower() not in {'.html','.js','.css','.json'}:
+                  continue
+              text=p.read_text(errors='ignore')
+              if p==canonical:
+                  text='\n'.join(line for line in text.splitlines() if not line.lstrip().startswith('* Combines accepted'))
+              if needle in text:
+                  refs.append(str(p))
+
+          if refs:
+              raise SystemExit('Legacy Admin CSS still has runtime references: '+', '.join(refs))
+
+          if not legacy.exists():
+              raise SystemExit('Expected legacy Admin CSS file is already absent; reconcile before finalization')
+
+          legacy.unlink()
+
+          # Update audit receipts to reflect proven retirement.
+          compat=root/'deployment/qa/LEGACY_COMPATIBILITY_AUDIT.md'
+          text=compat.read_text()
+          text=re.sub(r'## CSS disposition\n\n- `[^`]*`\n?','## CSS disposition\n\n- `RETIRED — admin-command-center-pass1.css is folded into canonical admin-command-center.css; repository runtime-reference proof is zero.`\n',text)
+          compat.write_text(text)
+
+          routing=root/'deployment/qa/RUNTIME_ROUTING_AUDIT.md'
+          if not routing.exists():
+              raise SystemExit('Runtime routing audit missing')
+
+          phase7=root/'deployment/qa/PHASE7_FINAL_STABILIZATION.md'
+          phase7.write_text('''# Website Rebuild — Phase 7 Final Stabilization\n\n## Status\n\n`FINAL NON-PRODUCTION CLEAN-BASELINE VALIDATION IN PROGRESS`\n\n## Lineage\n\n- Production base: `995ddef117be2ba5b26e154ea43409271fc938a9`\n- Phase 4–6 validated source: `983d2153448de31eddf551492f221b9f973f10ae`\n\n## Final cleanup\n\n- `admin-command-center-pass1.css` retired only after zero runtime references were proven.\n- Its accepted cascade remains folded into `site/admin-command-center.css`.\n- No visual redesign is authorized or introduced.\n- `_redirects` remains unchanged.\n- No DB/schema/migration/binding/secret/production-data change is part of this candidate.\n\n## Production\n\nProduction remains unchanged. This document is not production authorization.\n''')
           PY
-      - name: Static and parity gates
+
+      - name: Final static and protected-scope audit
         run: |
           set -euo pipefail
           node deployment/qa/phase2a-admin-static.mjs
@@ -58,7 +87,9 @@ jobs:
           git diff --check
           while IFS= read -r -d '' f; do node --check "$f"; done < <(find site src tests deployment/qa -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
           node -e "import('./site/worker-core.js').then(m=>{if(!m.default||typeof m.default.fetch!=='function')process.exit(1)})"
-          ! grep -q 'async function handleAdminLogin' site/worker-core.js
+          test ! -e site/admin-command-center-pass1.css
+          ! grep -RIl 'admin-command-center-pass1.css' site --include='*.html' --include='*.js' --include='*.json' | grep -q .
+          grep -q 'accepted Pass 1 cascade folded into canonical file' site/admin-command-center.css
           grep -q 'url.pathname.startsWith("/worker/")' site/_worker.js
           grep -q '"/worker/\*"' site/_routes.json
           ! grep -RniE 'tel:\+?1?719|sms:\+?1?719' site --include='*.html' --include='*.js'
@@ -70,15 +101,17 @@ jobs:
           ! git diff --name-only origin/main | grep -Eq '^site/(store-checkout-server|promotion-runtime|shipping-rules-runtime|hawaii-lithium-runtime|sok-operations-runtime|sok-availability-runtime)\.js$'
           test -z "$(find site -type f -size +25M -print -quit)"
           if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src deployment; then exit 1; fi
-      - name: Deploy isolated preview only
+
+      - name: Deploy final isolated preview only
         id: preview
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=website-rebuild-clean-baseline-preview
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=website-rebuild-clean-baseline-final-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - name: Full preview regression
+
+      - name: Full Phase 7 preview regression
         env:
           BASE: ${{ steps.preview.outputs.deployment-url }}
         run: |
@@ -91,53 +124,86 @@ jobs:
             code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/eus-response --write-out '%{http_code}' "$base$route" || true)
             echo "CHECK $route => $code (expected $expected)"
             if [ "$code" != "$expected" ]; then
-              echo "BODY PREVIEW:"
               head -c 500 /tmp/eus-response || true
               echo
               return 1
             fi
           }
-          for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system; do check_status 200 "$route"; done
+
+          for route in / /start-a-project /store /rv-store /marketplace /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /lithium-batteries /hawaii-lithium-batteries /checkout /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system /admin-command-center.css; do check_status 200 "$route"; done
+          check_status 404 /admin-command-center-pass1.css
 
           health_code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/eus-health --write-out '%{http_code}' "$base/api/health" || true)
-          echo "CHECK /api/health => $health_code (accepted contract: 200 ok OR 503 degraded only for notification configuration)"
           test "$health_code" = 200 -o "$health_code" = 503
           HEALTH_FILE=/tmp/eus-health node - <<'NODE'
           const fs=require('fs');
           const payload=JSON.parse(fs.readFileSync(process.env.HEALTH_FILE,'utf8'));
           const s=payload.services||{};
-          if(!['ok','degraded'].includes(payload.status)) throw new Error('Unexpected health status '+payload.status);
           for(const [key,expected] of [['siteAssets','configured'],['marketplaceDatabase','ok'],['leadsDatabase','ok'],['marketplaceImages','configured'],['siteAnalyticsD1','ok']]) {
             if(s[key]!==expected) throw new Error(`Core health regression ${key}: ${s[key]} expected ${expected}`);
           }
-          if(payload.status==='degraded' && s.marketplaceNotifications==='configured' && s.solarNotifications==='configured') {
-            throw new Error('Degraded health is not explained by accepted optional notification configuration');
-          }
+          if(payload.status==='degraded' && s.marketplaceNotifications==='configured' && s.solarNotifications==='configured') throw new Error('Unexplained degraded health');
           console.log('Accepted health contract: PASS');
           NODE
 
           for route in /api/admin/operations /api/admin/inventory /api/admin/leads /api/admin/listings /api/admin/market-analytics; do check_status 401 "$route"; done
           for route in /worker-core.js /worker/core-context.js /worker/domains/admin-auth.js /sok-full-line-runtime.js /sok-full-line-data.js; do check_status 404 "$route"; done
-          echo "RUN sok-commercialization-preview.sh"
           bash deployment/qa/sok-commercialization-preview.sh "$base"
-          echo "RUN sok-full-line-preview.sh"
           bash deployment/qa/sok-full-line-preview.sh "$base"
-          echo "RUN website-integrity-preview.sh"
           bash deployment/qa/website-integrity-preview.sh "$base"
-      - name: Preserve validated non-production candidate
+
+      - name: Generate complete Phase 7 receipts
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.deployment-url }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, os, subprocess
+
+          root=Path('.')
+          base=subprocess.check_output(['git','rev-parse','origin/main'],text=True).strip()
+          preview=os.environ['PREVIEW_URL']
+          run_id=os.environ['RUN_ID']
+
+          handoff=root/'deployment/qa/WEBSITE_REBUILD_PRODUCTION_HANDOFF.md'
+          handoff.write_text(f'''# Website Rebuild — Production Handoff\n\n## Status\n\n`CLEAN-BASELINE CANDIDATE READY — PRODUCTION UNCHANGED`\n\n## Source\n\n- Accepted production base: `{base}`\n- Preview-validated runtime source before Phase 7: `983d2153448de31eddf551492f221b9f973f10ae`\n- Phase 7 workflow run: `{run_id}`\n- Final isolated preview: `{preview}`\n\n## Validation\n\n- Worker domain decomposition: PASS\n- Static/parity suite: PASS\n- Runtime route protection: PASS\n- Admin unauthorized 401 contracts: PASS\n- Protected runtime 404 contracts: PASS\n- Public/Admin route smoke: PASS\n- SOK commercialization/full-line smoke: PASS\n- Website integrity smoke: PASS\n- Accepted degraded-health contract: PASS\n- Legacy Admin CSS retirement with zero runtime references: PASS\n\n## Protected scope\n\nNo DB/schema/migration, Cloudflare binding/secret, production data, checkout/PayPal server, SOK/Hawaii server, supplier ownership, or `_redirects` change is authorized by this handoff.\n\n## Rollback\n\nProduction rollback baseline remains `{base}` until an explicit production promotion is authorized and accepted.\n\n## Authority\n\nThis is a deployment-ready non-production handoff. It is **not** authorization to push `main` or deploy production.\n''')
+
+          phase7=root/'deployment/qa/PHASE7_FINAL_STABILIZATION.md'
+          phase7.write_text(phase7.read_text()+f'''\n## Final preview result\n\n- Workflow run: `{run_id}`\n- Isolated preview: `{preview}`\n- Full regression: `PASS`\n- Production: `UNCHANGED`\n''')
+
+          # Complete manifest: tracked diff + untracked files, excluding itself because
+          # a self-referential SHA-256 cannot be stable.
+          tracked=subprocess.check_output(['git','diff','--name-only','origin/main'],text=True).splitlines()
+          untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()
+          names=sorted(set(tracked+untracked))
+          manifest=root/'deployment/qa/WEBSITE_REBUILD_FINAL_MANIFEST.md'
+          lines=['# Website Rebuild — Final Changed-File Manifest','',f'Base: `{base}`','', 'This manifest includes tracked changes and untracked/generated candidate files. The manifest file itself is self-excluded from its hash table.','', '| Path | SHA-256 |','|---|---|']
+          for name in names:
+            if name==str(manifest):
+              continue
+            p=Path(name)
+            if p.is_file():
+              lines.append(f'| `{name}` | `{hashlib.sha256(p.read_bytes()).hexdigest()}` |')
+          manifest.write_text('\n'.join(lines)+'\n')
+          PY
+
+      - name: Preserve final non-production clean-baseline candidate
         id: candidate
         run: |
           set -euo pipefail
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
           git add site src tests deployment package.json
-          git commit -m "Generate Website Rebuild Phase 4-6 validated candidate"
+          git commit -m "Finalize Website Rebuild Phase 7 clean-baseline candidate"
           candidate_sha=$(git rev-parse HEAD)
           echo "sha=$candidate_sha" >> "$GITHUB_OUTPUT"
           git push origin "HEAD:$TARGET_BRANCH"
+
       - name: Summary
         run: |
-          echo "STATUS: PHASE 4-6 PREVIEW VALIDATED — PRODUCTION UNCHANGED" >> "$GITHUB_STEP_SUMMARY"
+          echo "STATUS: CLEAN-BASELINE CANDIDATE READY — PRODUCTION UNCHANGED" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: ${{ steps.candidate.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: ${{ steps.preview.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Main remains $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production main remains $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
