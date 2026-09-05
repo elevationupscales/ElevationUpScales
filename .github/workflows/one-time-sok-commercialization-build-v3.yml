@@ -32,6 +32,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cp .github/workflows/release-candidate-gate.yml /tmp/release-candidate-gate.yml
+          cp deployment/one-time-sok-commercialization-build.py /tmp/one-time-sok-commercialization-build.py
           python3 <<'PY'
           from pathlib import Path
           p=Path('deployment/one-time-sok-commercialization-build.py')
@@ -43,6 +45,8 @@ jobs:
           p.write_text(text.replace(old,new,1))
           PY
           python3 deployment/one-time-sok-commercialization-build.py
+          cp /tmp/release-candidate-gate.yml .github/workflows/release-candidate-gate.yml
+          cp /tmp/one-time-sok-commercialization-build.py deployment/one-time-sok-commercialization-build.py
 
       - name: Validate source
         shell: bash
@@ -51,27 +55,17 @@ jobs:
           node deployment/qa/sok-commercialization-static.mjs
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
           git diff --check
+          test -z "$(git diff --name-only -- .github/workflows deployment/one-time-sok-commercialization-build.py)"
           git status --short
 
-      - name: Remove one-time build tooling
-        shell: bash
-        run: |
-          set -euo pipefail
-          git rm -f \
-            .github/workflows/one-time-sok-commercialization-build.yml \
-            .github/workflows/one-time-sok-commercialization-build-v2.yml \
-            .github/workflows/one-time-sok-commercialization-build-v3.yml \
-            deployment/one-time-sok-commercialization-build.py
-
-      - name: Commit commercialization candidate
+      - name: Commit application candidate
         id: commit
         shell: bash
         run: |
           set -euo pipefail
           git config user.name elevationupscales
           git config user.email caseymyoung@gmail.com
-          git add .github/workflows/release-candidate-gate.yml deployment/qa site
-          git add -u
+          git add deployment/qa site
           git commit -m "Complete SOK catalog commercialization candidate"
           git push origin HEAD:work/sok-4-6-catalog-commercialization-2026-09-04
           echo "candidate_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -90,4 +84,4 @@ jobs:
             -f release_label=sok-4-6-catalog-commercialization
           echo "Candidate ${{ steps.commit.outputs.candidate_sha }} pushed; Release Candidate Gate dispatched."
 
-# trigger: 2026-09-05 commercialization retry
+# trigger: workflow config is repository-managed; application build only
