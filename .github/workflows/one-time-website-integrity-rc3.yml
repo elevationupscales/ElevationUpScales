@@ -21,14 +21,14 @@ jobs:
       - name: Check out exact candidate
         uses: actions/checkout@v6
         with:
-          ref: 944ba2b0443ef498122c61a8eddb0ed2145c22a4
+          ref: 176dbd96cac420b1e52e4fb19ab2483a6caeb46b
           fetch-depth: 0
 
       - name: Enforce lineage
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "944ba2b0443ef498122c61a8eddb0ed2145c22a4"
+          test "$(git rev-parse HEAD)" = "176dbd96cac420b1e52e4fb19ab2483a6caeb46b"
           git fetch origin main --no-tags --prune
           test "$(git rev-parse origin/main)" = "253b4f326b6bc5a616c481a59cc06cfe03abccff"
           git merge-base --is-ancestor origin/main HEAD
@@ -133,6 +133,7 @@ jobs:
           for(const [mode,route,width,height] of cases){
             const page=await browser.newPage({viewport:{width,height}});
             await page.route('**/api/site-event',r=>r.fulfill({status:202,contentType:'application/json',body:'{"ok":true}'}));
+            await page.route('https://cloudflareinsights.com/cdn-cgi/rum',r=>r.fulfill({status:204,headers:{'access-control-allow-origin':'*'}}));
             const errs=[];
             page.on('pageerror',e=>errs.push(`pageerror:${e.message}`));
             page.on('console',m=>{if(m.type()==='error')errs.push(`console:${m.text()}`)});
@@ -166,7 +167,7 @@ jobs:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           echo "### WEBSITE INTEGRITY / SOK HOMEPAGE / ANALYTICS RC — PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Candidate: 944ba2b0443ef498122c61a8eddb0ed2145c22a4" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: 176dbd96cac420b1e52e4fb19ab2483a6caeb46b" >> "$GITHUB_STEP_SUMMARY"
           echo "Production parent: 253b4f326b6bc5a616c481a59cc06cfe03abccff" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Homepage SOK merchandising: PASS" >> "$GITHUB_STEP_SUMMARY"
@@ -176,5 +177,5 @@ jobs:
           echo "Sitemap/internal links: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Console/runtime/mobile: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "MAP/Hawaii/PayPal/supplier-data inherited gates: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Anomaly corrected: stale /project-guides sitemap entry" >> "$GITHUB_STEP_SUMMARY"
+          echo "Anomalies corrected: stale /project-guides sitemap entry; hidden Hawaii field CSS override" >> "$GITHUB_STEP_SUMMARY"
           echo "Production promotion: MANAGEMENT AUTHORIZED IF THIS RUN PASSES" >> "$GITHUB_STEP_SUMMARY"
