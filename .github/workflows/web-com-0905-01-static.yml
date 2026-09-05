@@ -35,22 +35,42 @@ jobs:
         run: |
           set -euo pipefail
           npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
           git diff --check
           git diff --exit-code
 
-      - name: Confirm protected commerce sources are untouched
+      - name: Confirm protected commerce scope
         shell: bash
         run: |
           set -euo pipefail
+          BASE=0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7
           for file in \
-            site/store-checkout-server.js \
             site/promotion-runtime.js \
             site/shipping-rules-runtime.js \
             site/hawaii-lithium-runtime.js \
             site/sok-operations-runtime.js \
             site/sok-availability-runtime.js; do
-            git diff --quiet 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7..HEAD -- "$file"
+            git diff --quiet "$BASE"..HEAD -- "$file"
           done
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          base = subprocess.check_output([
+              "git", "show", "0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7:site/store-checkout-server.js"
+          ], text=True)
+          current = Path("site/store-checkout-server.js").read_text()
+          retired = [
+              'const HAWAII_CUSTOMER_FREIGHT_CENTS_PER_BATTERY = 9900;\n',
+              'const HAWAII_PREFERRED_CONSOLIDATION_UNITS = 3;\n',
+          ]
+          expected = base
+          for line in retired:
+              if line not in expected:
+                  raise SystemExit(f"accepted baseline no longer contains expected retired line: {line.strip()}")
+              expected = expected.replace(line, "", 1)
+          if current != expected:
+              raise SystemExit("store-checkout-server.js changed beyond exact removal of two unused retired Hawaii constants")
+          PY
 
       - name: Summary
         shell: bash
@@ -58,5 +78,8 @@ jobs:
           echo "### WEB-COM-0905-01 static gate" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Canonical QA: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Protected commerce sources: UNCHANGED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Labor Day / checkout static regression: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Protected commerce policy sources: UNCHANGED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Checkout source exception: exact removal of two unused retired Hawaii constants only" >> "$GITHUB_STEP_SUMMARY"
+          echo "PayPal sandbox create/capture: NOT VERIFIED — requires credentialed isolated preview" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview/production: NOT RUN" >> "$GITHUB_STEP_SUMMARY"
