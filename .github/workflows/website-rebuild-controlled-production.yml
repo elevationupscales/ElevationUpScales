@@ -1,0 +1,155 @@
+name: Website Rebuild Controlled Production
+
+on:
+  push:
+    branches:
+      - runner/website-rebuild-controlled-production-2026-09-05
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-pages-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VALIDATED_APPLICATION: 0ad9c73781d82fc276476fe6123b4c27cd544492
+      RECEIPT_MAIN: b018c83f9ab93bb30ad803f3b321385cd55bc94d
+      ROLLBACK_SHA: 995ddef117be2ba5b26e154ea43409271fc938a9
+      CANONICAL: https://elevationupscales.com
+    steps:
+      - name: Check out controlled promotion source
+        uses: actions/checkout@v6
+        with:
+          ref: runner/website-rebuild-controlled-production-2026-09-05
+          fetch-depth: 0
+
+      - name: Exact-lineage and exact-site preflight
+        id: preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          current_main="$(git rev-parse origin/main)"
+          test "$current_main" = "$RECEIPT_MAIN"
+          git merge-base --is-ancestor "$ROLLBACK_SHA" "$VALIDATED_APPLICATION"
+          git merge-base --is-ancestor "$VALIDATED_APPLICATION" "$RECEIPT_MAIN"
+          git merge-base --is-ancestor "$RECEIPT_MAIN" HEAD
+          git diff --quiet "$VALIDATED_APPLICATION"...HEAD -- site
+          echo "Current main: $current_main"
+          echo "Validated application: $VALIDATED_APPLICATION"
+          echo "Exact deployable site tree: PASS"
+
+      - name: Canonical source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+          git diff --exit-code
+
+      - name: Enforce Pages limits and block credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
+            echo "BLOCKED: credential-like value found in deployable source."
+            exit 1
+          fi
+
+      - name: Mark production attempt
+        shell: bash
+        run: echo 'PRODUCTION_ATTEMPTED=true' >> "$GITHUB_ENV"
+
+      - name: Deploy exact validated site to production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable production deployment
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$DEPLOYMENT_URL"
+
+      - name: Verify canonical asset parity and smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          for asset in site-shell.js admin-command-center.js sok-order.js; do
+            expected="$(sha256sum "site/$asset" | awk '{print $1}')"
+            matched=0
+            for attempt in $(seq 1 18); do
+              curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 "$CANONICAL/$asset?rebuild=$GITHUB_RUN_ID-$attempt" -o "/tmp/$asset"
+              actual="$(sha256sum "/tmp/$asset" | awk '{print $1}')"
+              if [ "$actual" = "$expected" ]; then
+                matched=1
+                break
+              fi
+              sleep 4
+            done
+            test "$matched" = "1"
+            echo "$asset canonical hash: PASS"
+          done
+          npm run qa:preview -- "$CANONICAL"
+
+      - name: Production receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Website Rebuild controlled production — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Validated application: $VALIDATED_APPLICATION" >> "$GITHUB_STEP_SUMMARY"
+          echo "Receipt-bearing main: $RECEIPT_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Rollback baseline: $ROLLBACK_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable production: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical: $CANONICAL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical source QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Immutable smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical asset parity: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout rollback baseline on failure
+        if: ${{ failure() && env.PRODUCTION_ATTEMPTED == 'true' }}
+        shell: bash
+        run: |
+          git checkout --force "$ROLLBACK_SHA"
+
+      - name: Roll back production on failure
+        if: ${{ failure() && env.PRODUCTION_ATTEMPTED == 'true' }}
+        id: rollback
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify rollback on failure
+        if: ${{ failure() && env.PRODUCTION_ATTEMPTED == 'true' }}
+        shell: bash
+        env:
+          ROLLBACK_URL: ${{ steps.rollback.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          for base in "$ROLLBACK_URL" "$CANONICAL"; do
+            for route in / /store /rv-store /marketplace /checkout /start-a-project /admin; do
+              code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/rollback.html -w '%{http_code}' "${base%/}$route")
+              echo "rollback ${base%/}$route=$code"
+              test "$code" = "200"
+            done
+          done
