@@ -1,4 +1,43 @@
 import {
+  SOLAR_NOTIFY_PATH,
+  MARKETPLACE_SUBMIT_PATH,
+  MARKETPLACE_PUBLIC_PATH,
+  MARKETPLACE_IMAGE_PREFIX,
+  MARKETPLACE_CONTACT_PREFIX,
+  MARKETPLACE_SHARE_PREFIX,
+  MARKETPLACE_EVENT_PATH,
+  SITE_EVENT_PATH,
+  LEGACY_SITE_EVENT_PATH,
+  MARKETPLACE_HEALTH_PATH,
+  HEALTH_PATH,
+  ADMIN_LOGIN_PATH,
+  ADMIN_LOGOUT_PATH,
+  ADMIN_SESSION_PATH,
+  ADMIN_LISTINGS_PATH,
+  ADMIN_MARKETPLACE_ISSUES_PATH,
+  ADMIN_OPERATIONS_PATH,
+  ADMIN_LEADS_PATH,
+  ADMIN_MARKETPLACE_FOLLOWUPS_PATH,
+  ADMIN_QA_TOKEN_PATH,
+  MARKETPLACE_QA_VALIDATE_PATH,
+  MARKETPLACE_REPORT_ISSUE_PATH,
+  ADMIN_IMPORT_LEGACY_PATH,
+  PROJECT_CLASSIFY_PATH,
+  PROJECT_SUBMIT_PATH,
+  PROJECT_CAPTURE_PATH,
+  PROJECT_CONTACT_REQUEST_PATH,
+  PROJECT_FOLLOWUP_REQUEST_PATH,
+  PROJECT_HANDYMAN_PHOTOS_PATH,
+  WORK_WITH_US_SUBMIT_PATH,
+  ADMIN_OPPORTUNITIES_PATH,
+  ADMIN_MARKET_ANALYTICS_PATH,
+  ADMIN_SOLAR_QA_TOKEN_PATH,
+  ADMIN_INVENTORY_PATH,
+  PUBLIC_INVENTORY_PATH,
+  SOLAR_QA_VALIDATE_PATH,
+} from "./routes.js";
+
+import {
   API_SECURITY_HEADERS,
   HTML_SECURITY_HEADERS,
   jsonResponse,
@@ -26,7 +65,6 @@ const MAX_PAGE_BYTES = 2_000_000;
 const STORE_BUILD = "3.0.3";
 const OPERATIONS_BUILD = "3.11.30-store-navigation-repair";
 
-const SOLAR_NOTIFY_PATH = "/api/solar-build-notify";
 const SOLAR_NOTIFY_MAX_BYTES = 56_000;
 const DEFAULT_SOLAR_EMAIL_TO = "casey@elevationupscales.com";
 
@@ -701,41 +739,6 @@ async function getCatalog(request) {
   return response;
 }
 
-const MARKETPLACE_SUBMIT_PATH = "/api/marketplace/submit";
-const MARKETPLACE_PUBLIC_PATH = "/api/marketplace/listings";
-const MARKETPLACE_IMAGE_PREFIX = "/api/marketplace/image/";
-const MARKETPLACE_CONTACT_PREFIX = "/api/marketplace/contact/";
-const MARKETPLACE_SHARE_PREFIX = "/marketplace/listing/";
-const MARKETPLACE_EVENT_PATH = "/api/marketplace/event";
-const SITE_EVENT_PATH = "/api/site-event";
-const LEGACY_SITE_EVENT_PATH = "/api/site/event";
-const MARKETPLACE_HEALTH_PATH = "/api/marketplace/health";
-const HEALTH_PATH = "/api/health";
-const ADMIN_LOGIN_PATH = "/api/admin/login";
-const ADMIN_LOGOUT_PATH = "/api/admin/logout";
-const ADMIN_SESSION_PATH = "/api/admin/session";
-const ADMIN_LISTINGS_PATH = "/api/admin/listings";
-const ADMIN_MARKETPLACE_ISSUES_PATH = "/api/admin/marketplace-issues";
-const ADMIN_OPERATIONS_PATH = "/api/admin/operations";
-const ADMIN_LEADS_PATH = "/api/admin/leads";
-const ADMIN_MARKETPLACE_FOLLOWUPS_PATH = "/api/admin/marketplace-followups";
-const ADMIN_QA_TOKEN_PATH = "/api/admin/qa-token";
-const MARKETPLACE_QA_VALIDATE_PATH = "/api/marketplace/qa-validate";
-const MARKETPLACE_REPORT_ISSUE_PATH = "/api/marketplace/report-issue";
-const ADMIN_IMPORT_LEGACY_PATH = "/api/admin/import-legacy";
-const PROJECT_CLASSIFY_PATH = "/api/project/classify";
-const PROJECT_SUBMIT_PATH = "/api/project/submit";
-const PROJECT_CAPTURE_PATH = "/api/project/capture-contact";
-const PROJECT_CONTACT_REQUEST_PATH = "/api/project/contact-request";
-const PROJECT_FOLLOWUP_REQUEST_PATH = "/api/project/follow-up-request";
-const PROJECT_HANDYMAN_PHOTOS_PATH = "/api/project/handyman-photos";
-const WORK_WITH_US_SUBMIT_PATH = "/api/work-with-us/submit";
-const ADMIN_OPPORTUNITIES_PATH = "/api/admin/opportunities";
-const ADMIN_MARKET_ANALYTICS_PATH = "/api/admin/market-analytics";
-const ADMIN_SOLAR_QA_TOKEN_PATH = "/api/admin/solar-qa-token";
-const ADMIN_INVENTORY_PATH = "/api/admin/inventory";
-const PUBLIC_INVENTORY_PATH = "/api/store-inventory";
-const SOLAR_QA_VALIDATE_PATH = "/api/solar/qa-validate";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const DEFAULT_MARKETPLACE_EMAIL_TO = "casey@elevationupscales.com";
 const MARKETPLACE_MAX_IMAGE_BYTES = 10 * 1024 * 1024;

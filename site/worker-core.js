@@ -35,7 +35,7 @@ import {
   ADMIN_INVENTORY_PATH,
   PUBLIC_INVENTORY_PATH,
   SOLAR_QA_VALIDATE_PATH,
-} from "./worker/core-context.js";
+} from "./worker/routes.js";
 import { handleAdminLogin, handleAdminLogout, handleAdminSession } from "./worker/domains/admin-auth.js";
 import { handleAdminOperations } from "./worker/domains/admin-overview.js";
 import { handleMarketplaceEvent, handleSiteEvent } from "./worker/domains/analytics.js";
