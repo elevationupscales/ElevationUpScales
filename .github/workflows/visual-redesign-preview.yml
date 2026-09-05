@@ -34,7 +34,7 @@ jobs:
           git fetch origin main --no-tags --prune
           test "$(git rev-parse origin/main)" = "$EXPECTED_PRODUCTION_MAIN"
           git merge-base --is-ancestor origin/main HEAD
-          allowed='^(\.github/workflows/visual-redesign-preview\.yml|deployment/design/REDESIGN_V1_CONTROL\.md|site/redesign-v1\.css|site/redesign-v1-pages\.css|site/redesign-v1\.js|site/script\.js|site/sok-batteries\.html)$'
+          allowed='^(\.github/workflows/visual-redesign-preview\.yml|deployment/design/REDESIGN_V1_CONTROL\.md|deployment/design/apply-redesign-loader\.py|site/redesign-v1\.css|site/redesign-v1-pages\.css|site/redesign-v1\.js|site/site-shell\.js|site/script\.js|site/sok-batteries\.html)$'
           unexpected="$(git diff --name-only origin/main...HEAD | grep -Ev "$allowed" || true)"
           test -z "$unexpected" || { echo "Unexpected non-design files:"; echo "$unexpected"; exit 1; }
           echo "Production protected: $EXPECTED_PRODUCTION_MAIN"
@@ -67,7 +67,11 @@ jobs:
           curl -fsSL "$PREVIEW_URL/redesign-v1.css" | grep -q 'Elevation UpScales visual redesign v1'
           curl -fsSL "$PREVIEW_URL/redesign-v1-pages.css" | grep -q 'page-specific storefront styling'
           curl -fsSL "$PREVIEW_URL/redesign-v1.js" | grep -q 'POWER & SHOP'
-          curl -fsSL "$PREVIEW_URL/script.js" | grep -q 'redesign-v1-pages.css'
+          if grep -q 'EUS_VISUAL_REDESIGN_V1_LOADER' site/site-shell.js; then
+            curl -fsSL "$PREVIEW_URL/site-shell.js" | grep -q 'EUS_VISUAL_REDESIGN_V1_LOADER'
+          else
+            curl -fsSL "$PREVIEW_URL/script.js" | grep -q 'redesign-v1-pages.css'
+          fi
 
       - name: Verify candidate immutability
         shell: bash
