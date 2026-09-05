@@ -87,4 +87,4 @@ Compatibility behavior is retained unless direct route, redirect, metadata, site
 
 ## CSS disposition
 
-- `RETAINED — references remain: site/admin-command-center.css`
+- `RETIRED — admin-command-center-pass1.css is folded into canonical admin-command-center.css; repository runtime-reference proof is zero.`
