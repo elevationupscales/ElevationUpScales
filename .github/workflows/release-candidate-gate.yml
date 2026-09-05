@@ -85,12 +85,13 @@ jobs:
             exit 1
           fi
 
-      - name: Canonical clean-baseline QA
+      - name: Canonical committed-source QA
         shell: bash
         run: |
           set -euo pipefail
           npm run qa
           git diff --check
+          git diff --exit-code
 
       - name: Enforce Pages limits and block credentials
         shell: bash
@@ -119,7 +120,14 @@ jobs:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          bash deployment/qa/clean-baseline-preview.sh "$DEPLOYMENT_URL"
+          npm run qa:preview -- "$DEPLOYMENT_URL"
+
+      - name: Verify candidate remained immutable
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          test "$(git rev-parse HEAD)" = "${{ steps.lineage.outputs.candidate_sha }}"
 
       - name: Record release-candidate receipt
         shell: bash
@@ -134,6 +142,7 @@ jobs:
           echo "Required parent: $CURRENT_MAIN" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
-          echo "Canonical static QA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical committed-source QA: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Canonical preview regression: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate immutability: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
