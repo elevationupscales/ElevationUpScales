@@ -215,8 +215,10 @@ jobs:
             fi
           done
 
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-config.js" | grep -q 'store-image-quality.js?v=3.11.41'
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-image-quality.js" | grep -q 'TARGET_WIDTH = 1920'
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-config.js" -o /tmp/store-config.js
+          grep -q 'store-image-quality.js?v=3.11.41' /tmp/store-config.js
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store-image-quality.js" -o /tmp/store-image-quality.js
+          grep -q 'TARGET_WIDTH = 1920' /tmp/store-image-quality.js
           curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/store" -o /tmp/store.html
           grep -q 'Apparel Store' /tmp/store.html
           grep -q 'Hawaii Lithium Batteries' /tmp/store.html
@@ -227,7 +229,8 @@ jobs:
           grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
           ! grep -q '&ebay=' /tmp/rv-store.js
           ! grep -q 'fallbackCatalog' /tmp/rv-store.js
-          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/" | grep -q 'Start a Project'
+          curl --silent --show-error --location --retry 8 --retry-all-errors "${base}/" -o /tmp/home.html
+          grep -q 'Start a Project' /tmp/home.html
 
       - name: Smoke SOK commercialization preview
         shell: bash

@@ -23,6 +23,6 @@ PY2
 for asset in /assets/brands/sok/sk12v100pc/hero.png /assets/brands/sok/sk12v100pc/spec-sheet.pdf /assets/brands/sok/sk48v100n/hero.jpg /assets/brands/sok/sk48v100n/spec-sheet.pdf /assets/brands/sok/sk48v100n/system-cabinet.png /sok-product-merch.js /sok-solar-builder.js; do code=$(curl -sS -L --retry 8 --retry-all-errors -o /dev/null -w '%{http_code}' "${base}${asset}"); [[ "$code" == 200 ]] || { echo "FAIL asset $asset = $code"; exit 1; }; done
 for protected in /sok-availability-runtime.js /sok-operations-runtime.js /commerce-pricing-runtime.js /catalog-admin-runtime.js /doba-csv-sync-runtime.js; do code=$(curl -sS -o /dev/null -w '%{http_code}' "${base}${protected}" || true); [[ "$code" == 404 ]] || { echo "FAIL protected $protected = $code"; exit 1; }; done
 code=$(curl -sS -o /dev/null -w '%{http_code}' "${base}/api/admin/sok-availability" || true); [[ "$code" == 401 ]] || { echo "FAIL SOK admin auth = $code"; exit 1; }
-curl -sS -L "${base}/solar-project" | grep -q 'sok-solar-builder.js'
-curl -sS -L "${base}/lithium-shop.js" | grep -q '4+ · Freight Review Required'
+curl -sS -L "${base}/solar-project" -o /tmp/sok-solar-project; grep -q 'sok-solar-builder.js' /tmp/sok-solar-project
+curl -sS -L "${base}/lithium-shop.js" -o /tmp/sok-lithium-shop.js; grep -q '4+ · Freight Review Required' /tmp/sok-lithium-shop.js
 echo "SOK commercialization preview smoke: PASS"
