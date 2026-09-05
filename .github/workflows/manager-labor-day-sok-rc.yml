@@ -56,6 +56,36 @@ jobs:
             exit 1
           fi
 
+      - name: Verify current production Labor Day and PayPal status read-only
+        shell: bash
+        env:
+          CANONICAL: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 45 --output /tmp/prod-config.json --write-out '%{http_code}' "$CANONICAL/api/store-checkout/config" || true)
+          test "$code" = "200"
+          node - <<'NODE'
+          const fs = require('fs');
+          const c = JSON.parse(fs.readFileSync('/tmp/prod-config.json', 'utf8'));
+          const safe = {
+            ok: c.ok === true,
+            environment: c.environment || '',
+            credentialsConfigured: c.credentialsConfigured === true,
+            configured: c.configured === true,
+            checkoutEnabled: c.checkoutEnabled === true,
+            liveCheckoutApproved: c.liveCheckoutApproved === true,
+            clientIdPresent: Boolean(c.clientId),
+            promotionActive: c.promotion?.active === true,
+            promotionCode: c.promotion?.couponCode || '',
+            promotionPercent: Number(c.promotion?.couponPercent || 0),
+          };
+          console.log('PRODUCTION_COMMERCE_STATE=' + JSON.stringify(safe));
+          if (!safe.ok) throw new Error('Production checkout config API is not healthy');
+          if (safe.environment !== 'live') throw new Error('Production PayPal is not in live mode');
+          if (!safe.credentialsConfigured || !safe.configured || !safe.checkoutEnabled || !safe.liveCheckoutApproved || !safe.clientIdPresent) throw new Error('Production PayPal live checkout is not fully enabled');
+          if (!safe.promotionActive || safe.promotionCode !== 'LABORDAY25' || safe.promotionPercent !== 25) throw new Error('Labor Day promotion is not active as approved');
+          NODE
+
       - name: Deploy isolated manager preview
         id: deploy
         uses: cloudflare/wrangler-action@v4
@@ -105,7 +135,8 @@ jobs:
           echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
           echo 'Canonical QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Current production Labor Day + PayPal live status: PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'SOK commercialization/full-line regression: PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'PayPal sandbox configuration + quote controls: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal sandbox preview gate: PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'Successful PayPal capture: HUMAN SANDBOX BUYER APPROVAL STILL REQUIRED' >> "$GITHUB_STEP_SUMMARY"
           echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
