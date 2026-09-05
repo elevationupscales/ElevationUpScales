@@ -1,0 +1,176 @@
+name: One-time Website Integrity RC2
+
+on:
+  push:
+    branches:
+      - runner/website-integrity-rc2-2026-09-05
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: website-integrity-rc2-2026-09-05
+  cancel-in-progress: false
+
+jobs:
+  validate-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact repaired candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 944ba2b0443ef498122c61a8eddb0ed2145c22a4
+          fetch-depth: 0
+
+      - name: Enforce lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "944ba2b0443ef498122c61a8eddb0ed2145c22a4"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "253b4f326b6bc5a616c481a59cc06cfe03abccff"
+          git merge-base --is-ancestor origin/main HEAD
+
+      - name: Static syntax and protected release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/website-integrity-static.mjs
+          node deployment/qa/sok-commercialization-static.mjs
+          node deployment/qa/sok-full-line-static.mjs
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+          test -z "$(find site -type f -size +25M -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+
+      - name: Deploy isolated RC preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=website-integrity-final-rc2
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Existing SOK commercialization smoke
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: bash deployment/qa/sok-commercialization-preview.sh "$BASE"
+
+      - name: Existing SOK full-line smoke
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: bash deployment/qa/sok-full-line-preview.sh "$BASE"
+
+      - name: Website integrity smoke
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: bash deployment/qa/website-integrity-preview.sh "$BASE"
+
+      - name: Crawl sitemap and key internal links
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/sitemap.xml" -o /tmp/sitemap.xml
+          python - <<'PY' > /tmp/routes.txt
+          import re
+          from pathlib import Path
+          xml=Path('/tmp/sitemap.xml').read_text()
+          for loc in re.findall(r'<loc>https://elevationupscales\.com([^<]*)</loc>',xml): print(loc or '/')
+          PY
+          while IFS= read -r route; do
+            code=$(curl -sSL --retry 5 --retry-all-errors --retry-delay 1 -o /tmp/crawl -w '%{http_code}' "$base$route" || true)
+            echo "$route=$code"
+            test "$code" = 200
+          done < /tmp/routes.txt
+          python - <<'PY' > /tmp/key-links.txt
+          import re, urllib.parse, urllib.request, os
+          base=os.environ['BASE'].rstrip('/'); host=urllib.parse.urlparse(base).netloc
+          pages=['/','/sok-batteries','/sok/sk12v100pc/','/sok/sk48v100n/','/sok-order.html?sku=SK48V100N&intent=purchase_options']
+          seen=set()
+          for route in pages:
+              html=urllib.request.urlopen(base+route,timeout=30).read().decode('utf-8','ignore')
+              for href in re.findall(r'href=["\']([^"\']+)',html,re.I):
+                  if href.startswith(('#','mailto:','tel:','javascript:')): continue
+                  u=urllib.parse.urlparse(href)
+                  if u.scheme and u.netloc and u.netloc not in ('elevationupscales.com',host): continue
+                  path=(u.path or '/') + (('?' + u.query) if u.query else '')
+                  if path not in seen: seen.add(path); print(path)
+          PY
+          while IFS= read -r route; do
+            code=$(curl -sSL --retry 5 --retry-all-errors --retry-delay 1 -o /tmp/link -w '%{http_code}' "$base$route" || true)
+            echo "link $route=$code"
+            test "$code" = 200
+          done < /tmp/key-links.txt
+
+      - name: Browser console runtime and mobile layout check
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/eus-browser && cd /tmp/eus-browser
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+          cat > check.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          const cases=[
+            ['desktop','/',1440,1000],['desktop','/sok-batteries',1440,1000],['desktop','/sok/sk48v100n/',1440,1000],['desktop','/sok-order.html?sku=SK48V100N&intent=purchase_options',1440,1000],['desktop','/solar-project',1440,1000],
+            ['mobile','/',390,844],['mobile','/sok-batteries',390,844],['mobile','/sok/sk12v100pc/',390,844],['mobile','/sok-order.html?sku=SK12V100PC&intent=purchase_options',390,844]
+          ];
+          const failures=[];
+          for(const [mode,route,width,height] of cases){
+            const page=await browser.newPage({viewport:{width,height}});
+            await page.route('**/api/site-event',r=>r.fulfill({status:202,contentType:'application/json',body:'{"ok":true}'}));
+            const errs=[];
+            page.on('pageerror',e=>errs.push(`pageerror:${e.message}`));
+            page.on('console',m=>{if(m.type()==='error')errs.push(`console:${m.text()}`)});
+            const response=await page.goto(base+route,{waitUntil:'networkidle',timeout:60000}).catch(()=>null);
+            if(!response||!response.ok()) failures.push(`${mode} ${route}: navigation ${response?.status()||'failed'}`);
+            await page.waitForTimeout(400);
+            const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+3);
+            if(overflow) failures.push(`${mode} ${route}: horizontal overflow`);
+            if(errs.length) failures.push(`${mode} ${route}: ${errs.join(' | ')}`);
+            if(route==='/'){
+              const visible=await page.locator('[data-home-sok]').isVisible().catch(()=>false);
+              if(!visible) failures.push(`${mode} /: SOK homepage section not visible`);
+            }
+            if(route.startsWith('/sok-order.html')){
+              const visibleFields=await page.evaluate(()=>[...document.querySelectorAll('#sok-order-form input:not([type=hidden]),#sok-order-form select,#sok-order-form textarea')].filter(el=>!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length)).length);
+              if(visibleFields>8) failures.push(`${mode} ${route}: short form has ${visibleFields} visible fields`);
+              const submit=await page.locator('#sok-order-form button[type=submit]').isVisible().catch(()=>false);
+              if(!submit) failures.push(`${mode} ${route}: submit CTA not visible`);
+            }
+            await page.close();
+          }
+          await browser.close();
+          if(failures.length){console.error(failures.join('\n'));process.exit(1)}
+          console.log('Browser console/runtime/mobile gate: PASS');
+          JS
+          node check.mjs
+
+      - name: RC acceptance summary
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### WEBSITE INTEGRITY / SOK HOMEPAGE / ANALYTICS RC — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: 944ba2b0443ef498122c61a8eddb0ed2145c22a4" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production parent: 253b4f326b6bc5a616c481a59cc06cfe03abccff" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Homepage SOK merchandising: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Purchase Options short flow: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Analytics event map/dedupe: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "SOK media/gallery: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Sitemap/internal links: PASS (stale /project-guides removed)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Console/runtime/mobile: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "MAP/Hawaii/PayPal/supplier-data inherited gates: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production promotion: MANAGEMENT AUTHORIZED IF THIS RUN PASSES" >> "$GITHUB_STEP_SUMMARY"
