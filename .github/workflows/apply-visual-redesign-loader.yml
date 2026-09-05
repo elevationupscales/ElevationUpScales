@@ -1,0 +1,42 @@
+name: Apply Visual Redesign Loader
+
+on:
+  push:
+    branches:
+      - runner/apply-visual-redesign-loader-2026-09-05
+
+permissions:
+  contents: write
+
+jobs:
+  apply-loader:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out design branch
+        uses: actions/checkout@v6
+        with:
+          ref: design/website-visual-redesign-2026-09-05
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify production baseline and apply loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7"
+          python deployment/design/apply-redesign-loader.py
+          changed="$(git diff --name-only)"
+          test "$changed" = "site/site-shell.js" || { echo "Unexpected migration diff: $changed"; exit 1; }
+          npm run qa
+          git diff --check
+
+      - name: Commit loader to design branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add site/site-shell.js
+          git commit -m "Load visual redesign globally through public site shell"
+          git push origin HEAD:design/website-visual-redesign-2026-09-05
