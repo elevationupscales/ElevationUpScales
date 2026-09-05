@@ -1,0 +1,99 @@
+name: WEB-VISUAL-0905-01 Static Gate
+
+on:
+  push:
+    branches:
+      - work/web-visual-0905-01-retail-first
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-visual-0905-01-static
+  cancel-in-progress: true
+
+jobs:
+  validate-retail-visual:
+    runs-on: ubuntu-latest
+    env:
+      ACCEPTED_PRODUCTION_MAIN: 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7
+      VISUAL_PARENT: 1f313d78a9b13becac4c53d41238ee206e66717b
+    steps:
+      - name: Check out visual branch
+        uses: actions/checkout@v6
+        with:
+          ref: work/web-visual-0905-01-retail-first
+          fetch-depth: 0
+
+      - name: Verify lineage and production custody
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$ACCEPTED_PRODUCTION_MAIN"
+          git merge-base --is-ancestor "$VISUAL_PARENT" HEAD
+          echo "Production main unchanged: $ACCEPTED_PRODUCTION_MAIN"
+          echo "Visual parent: $VISUAL_PARENT"
+          echo "Candidate: $(git rev-parse HEAD)"
+
+      - name: Run canonical QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          git diff --exit-code
+
+      - name: Enforce presentation-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          allowed='^(site/index\.html|site/retail-first\.css|\.github/workflows/web-visual-0905-01-(static|preview)\.yml)$'
+          unexpected="$(git diff --name-only "$VISUAL_PARENT"..HEAD | grep -Ev "$allowed" || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected visual-pass files changed:"
+            echo "$unexpected"
+            exit 1
+          fi
+          for file in \
+            site/store-checkout-server.js \
+            site/store-checkout.js \
+            site/promotion-runtime.js \
+            site/shipping-rules-runtime.js \
+            site/hawaii-lithium-runtime.js \
+            site/sok-operations-runtime.js \
+            site/sok-availability-runtime.js \
+            site/sok-full-line-data.js \
+            site/sok-full-line-runtime.js \
+            site/site-shell.js \
+            site/home-commerce.js; do
+            git diff --quiet "$VISUAL_PARENT"..HEAD -- "$file"
+          done
+          echo "Commerce/runtime sources unchanged from validated storefront parent."
+
+      - name: Verify retail-first visual contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Lithium.<br>Logistics.<br>Off-Grid Power.' site/index.html
+          grep -Fq 'Lithium &amp; Outdoor Dealer' site/index.html
+          grep -Fq 'FREIGHT &amp; SHIPPING LOGISTICS' site/index.html
+          grep -Fq 'Shop Lithium' site/index.html
+          grep -Fq 'Shop RV &amp; Outdoor' site/index.html
+          grep -Fq 'Authorized SOK Energy Dealer' site/index.html
+          grep -Fq "elevation-lithium-social-card.webp" site/retail-first.css
+          grep -Fq 'retail-marketplace-note' site/index.html
+          grep -Fq 'data-home-logistics-capability' site/index.html
+          echo "Retail-first identity, tropical layer, SOK, logistics and Marketplace demotion markers: PASS"
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo "### WEB-VISUAL-0905-01 static gate — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical QA + commerce regression: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Presentation-only scope: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Retail-first visual contract: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production main: UNCHANGED ($ACCEPTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview/production deployment: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
