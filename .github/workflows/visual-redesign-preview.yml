@@ -64,12 +64,17 @@ jobs:
         run: |
           set -euo pipefail
           npm run qa:preview -- "$PREVIEW_URL"
-          curl -fsSL "$PREVIEW_URL/redesign-v1.css" | grep -q 'Elevation UpScales visual redesign v1'
-          curl -fsSL "$PREVIEW_URL/redesign-v1-pages.css" | grep -q 'page-specific storefront styling'
-          curl -fsSL "$PREVIEW_URL/redesign-v1-apps.css" | grep -q 'public application surfaces'
-          curl -fsSL "$PREVIEW_URL/redesign-v1.js" | grep -q 'POWER & SHOP'
-          curl -fsSL "$PREVIEW_URL/redesign-v1.js" | grep -q 'redesign-v1-apps.css'
-          curl -fsSL "$PREVIEW_URL/site-shell.js" | grep -q 'EUS_VISUAL_REDESIGN_V1_LOADER'
+          curl -fsSL "$PREVIEW_URL/redesign-v1.css" -o /tmp/redesign-v1.css
+          curl -fsSL "$PREVIEW_URL/redesign-v1-pages.css" -o /tmp/redesign-v1-pages.css
+          curl -fsSL "$PREVIEW_URL/redesign-v1-apps.css" -o /tmp/redesign-v1-apps.css
+          curl -fsSL "$PREVIEW_URL/redesign-v1.js" -o /tmp/redesign-v1.js
+          curl -fsSL "$PREVIEW_URL/site-shell.js" -o /tmp/site-shell.js
+          grep -q 'Elevation UpScales visual redesign v1' /tmp/redesign-v1.css
+          grep -q 'page-specific storefront styling' /tmp/redesign-v1-pages.css
+          grep -q 'public application surfaces' /tmp/redesign-v1-apps.css
+          grep -q 'POWER & SHOP' /tmp/redesign-v1.js
+          grep -q 'redesign-v1-apps.css' /tmp/redesign-v1.js
+          grep -q 'EUS_VISUAL_REDESIGN_V1_LOADER' /tmp/site-shell.js
 
       - name: Verify candidate immutability
         shell: bash
