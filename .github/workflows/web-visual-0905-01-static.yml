@@ -45,11 +45,11 @@ jobs:
           git diff --check
           git diff --exit-code
 
-      - name: Enforce presentation-only scope
+      - name: Enforce retail-presentation scope
         shell: bash
         run: |
           set -euo pipefail
-          allowed='^(site/index\.html|site/retail-first\.css|deployment/qa/web-com-navigation-static\.mjs|\.github/workflows/web-visual-0905-01-(static|preview)\.yml)$'
+          allowed='^(site/index\.html|site/retail-first\.css|site/site-shell\.js|site/lithium-batteries\.html|deployment/qa/web-com-navigation-static\.mjs|\.github/workflows/web-visual-0905-01-(static|preview)\.yml)$'
           unexpected="$(git diff --name-only "$VISUAL_PARENT"..HEAD | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected" ]; then
             echo "Unexpected visual-pass files changed:"
@@ -66,11 +66,10 @@ jobs:
             site/sok-availability-runtime.js \
             site/sok-full-line-data.js \
             site/sok-full-line-runtime.js \
-            site/site-shell.js \
             site/home-commerce.js; do
             git diff --quiet "$VISUAL_PARENT"..HEAD -- "$file"
           done
-          echo "Commerce/runtime sources unchanged from validated storefront parent."
+          echo "Commerce decision/runtime sources unchanged from validated storefront parent."
 
       - name: Verify retail-first visual contract
         shell: bash
@@ -85,7 +84,14 @@ jobs:
           grep -Fq "elevation-lithium-social-card.webp" site/retail-first.css
           grep -Fq 'retail-marketplace-note' site/index.html
           grep -Fq 'data-home-logistics-capability' site/index.html
-          echo "Retail-first identity, tropical layer, SOK, logistics and Marketplace demotion markers: PASS"
+          grep -Fq 'installRetailStoreShell' site/site-shell.js
+          grep -Fq 'Lithium • Logistics • Off-Grid Power' site/site-shell.js
+          grep -Fq 'LITHIUM &amp; OUTDOOR DEALER' site/lithium-batteries.html
+          if grep -Fq '$99 per actual battery' site/lithium-batteries.html; then
+            echo 'retired Hawaii flat-freight copy remains'
+            exit 1
+          fi
+          echo "Retail-first identity, tropical layer, shared shopping shell, SOK, logistics and Marketplace demotion markers: PASS"
 
       - name: Summary
         shell: bash
@@ -93,7 +99,7 @@ jobs:
           echo "### WEB-VISUAL-0905-01 static gate — PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Canonical QA + commerce regression: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Presentation-only scope: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Retail-first visual contract: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Retail-presentation scope: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Shared retail shell + tropical visual contract: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production main: UNCHANGED ($ACCEPTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview/production deployment: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
