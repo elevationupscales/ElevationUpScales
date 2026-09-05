@@ -1,0 +1,220 @@
+name: WEB-VISUAL-0905-02 Final Stabilized Gate
+
+on:
+  push:
+    branches:
+      - control/web-visual-0905-02-final-gate-v2-20260905
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      PARENT_SHA: 1ab4f033b395a441336428cf651a89d2921b4b3c
+      CANDIDATE_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+      PROD: https://elevationupscales.com
+      PREVIEW: https://12f149e9.elevationupscales.pages.dev
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+
+      - name: Re-resolve exact release state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse origin/main)" = "$PARENT_SHA"
+          test "$(git rev-list --count "$PARENT_SHA".."$CANDIDATE_SHA")" = 1
+          git diff --name-only "$PARENT_SHA".."$CANDIDATE_SHA" | sort >/tmp/actual
+          cat >/tmp/expected <<'EOF'
+          site/assets/brand/storefront-wordmark.note.txt
+          site/assets/brand/storefront-wordmark.webp
+          site/index.html
+          site/retail-first.css
+          site/sok-batteries.html
+          site/sok-order.html
+          EOF
+          diff -u /tmp/expected /tmp/actual
+          git diff --quiet "$PARENT_SHA".."$CANDIDATE_SHA" -- site/store.html site/store-checkout-server.js site/store-checkout.js site/promotion-runtime.js site/shipping-rules-runtime.js site/hawaii-lithium-runtime.js site/sok-operations-runtime.js site/sok-availability-runtime.js site/sok-full-line-data.js site/sok-full-line-runtime.js site/sok-batteries.js site/worker/domains/marketplace.js site/worker/domains/inventory.js
+          echo exact_release_state=PASS
+
+      - name: Canonical static and commerce regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          git diff --exit-code
+
+      - name: Canonical preview route/security/SOK regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$PREVIEW"
+
+      - name: Reconfirm SOK local media integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            /assets/brands/sok/sk12v100h/hero.webp
+            /assets/brands/sok/sk12v100pc/hero.png
+            /assets/brands/sok/sk12v206h/hero.webp
+            /assets/brands/sok/sk12v206ph/hero.webp
+            /assets/brands/sok/sk12v280h/hero.webp
+            /assets/brands/sok/sk12v314ph/hero.webp
+          )
+          for p in "${paths[@]}"; do
+            rel="site$p"
+            expected=$(sha256sum "$rel" | cut -d' ' -f1)
+            for base in "$PROD" "$PREVIEW"; do
+              tmp=$(mktemp)
+              code=$(curl -sS -L --retry 3 --retry-all-errors --retry-delay 1 -o "$tmp" -w '%{http_code}' "$base$p")
+              test "$code" = 200
+              test "$(sha256sum "$tmp" | cut -d' ' -f1)" = "$expected"
+              rm -f "$tmp"
+            done
+          done
+          echo sok_local_media_byte_integrity=PASS
+
+      - name: Install browser verifier
+        shell: bash
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Stabilized comparative desktop/mobile visual gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p visual-evidence
+          cat > final-visual.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const prod=process.env.PROD.replace(/\/$/,'');
+          const preview=process.env.PREVIEW.replace(/\/$/,'');
+          const api=await fetch(preview+'/api/store-products');
+          if(!api.ok) throw new Error('store-products '+api.status);
+          const raw=await api.json();
+          const rows=Array.isArray(raw)?raw:(raw.products||raw.items||raw.results||raw.data?.products||[]);
+          const live=rows.find(p=>p&&(p.id||p.sku)&&String(p.publishStatus||p.publish_status||'published').toLowerCase()==='published');
+          if(!live) throw new Error('No published product for detail QA');
+          const productId=String(live.id||live.sku);
+          const section=String(live.storeSection||live.store_section||'').toLowerCase().includes('lithium')?'lithium':'rv';
+          const routes=[['home','/'],['lithium','/lithium-batteries'],['sok-catalog','/sok-batteries'],['sok-12v','/sok/sk12v100pc/'],['sok-48v','/sok/sk48v100n/'],['sok-order','/sok-order.html?sku=SK12V100PC&intent=purchase_options'],['rv-store','/rv-store'],['hawaii','/hawaii-lithium-batteries'],['product',`/product?id=${encodeURIComponent(productId)}&store=${section}`],['checkout','/checkout/?source=apparel&id=black-and-gold-signature-t-shirt'],['apparel','/store']];
+          const normalize=(url,base)=>{try{const u=new URL(url);const b=new URL(base);return u.origin===b.origin?`self:${u.pathname}${u.search}`:`ext:${u.href}`}catch{return String(url)}};
+          const browser=await chromium.launch({headless:true});
+          const viewports=[['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]];
+          const report=[];
+          async function observe(base,path,viewport){
+            const context=await browser.newContext({viewport});
+            const page=await context.newPage();
+            const failed=[];
+            page.on('response',r=>{const t=r.request().resourceType();if(r.status()>=400&&['document','stylesheet','script','image'].includes(t))failed.push({status:r.status(),type:t,url:r.url()})});
+            const response=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:45000});
+            if(!response||response.status()!==200) throw new Error(`${base} ${path} document ${response?.status()}`);
+            await page.waitForTimeout(5000);
+            await page.evaluate(async()=>{
+              const imgs=[...document.images].filter(i=>{try{return new URL(i.currentSrc||i.src,location.href).origin===location.origin}catch{return false}});
+              await Promise.all(imgs.map(i=>i.complete?Promise.resolve():new Promise(resolve=>{const done=()=>resolve();i.addEventListener('load',done,{once:true});i.addEventListener('error',done,{once:true});setTimeout(done,5000)})));
+            });
+            const badImages=await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{const s=getComputedStyle(i);return s.display!=='none'&&s.visibility!=='hidden'&&i.getBoundingClientRect().width>2&&(!i.complete||i.naturalWidth===0)}).map(i=>i.currentSrc||i.src||i.alt));
+            const failureKeys=[...new Set([...badImages.map(u=>normalize(u,base)),...failed.map(x=>`${x.type}:${normalize(x.url,base)}`)])].sort();
+            return {context,page,failureKeys};
+          }
+          for(const [mode,viewport] of viewports){
+            for(const [name,path] of routes){
+              const p=await observe(prod,path,viewport);
+              const c=await observe(preview,path,viewport);
+              const prodSet=new Set(p.failureKeys);
+              const previewOnly=c.failureKeys.filter(x=>!prodSet.has(x));
+              if(previewOnly.length) throw new Error(`${mode} ${path} candidate-only failures: ${previewOnly.join(' | ')}`);
+              const overflow=await c.page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} horizontal overflow ${overflow}px`);
+              const brand=c.page.locator('.eus-brand>img').first();
+              if(await brand.count()){
+                const mark=await brand.evaluate(el=>({content:getComputedStyle(el).content,objectFit:getComputedStyle(el).objectFit,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height}));
+                if(name==='apparel'){
+                  if(String(mark.content).includes('storefront-wordmark')) throw new Error(`${mode} /store wordmark leaked into Apparel`);
+                }else{
+                  if(!String(mark.content).includes('storefront-wordmark')) throw new Error(`${mode} ${path} storefront wordmark missing`);
+                  if(mark.objectFit!=='contain') throw new Error(`${mode} ${path} wordmark object-fit=${mark.objectFit}`);
+                  if(mark.w<120||mark.h<35||mark.h>100) throw new Error(`${mode} ${path} wordmark box ${mark.w}x${mark.h}`);
+                }
+              }
+              if(name==='home'){
+                if(!(await c.page.locator('.retail-hero').isVisible())) throw new Error(`${mode} homepage hero missing`);
+                if(!(await c.page.locator('.retail-hero .button').first().isVisible())) throw new Error(`${mode} homepage CTA missing`);
+              }
+              if(name==='sok-order'&&(await c.page.locator('form input').count())<3) throw new Error(`${mode} SOK order fields missing`);
+              if(name==='product'){
+                const status=await c.page.locator('[data-product-status]').textContent().catch(()=>'');
+                if(/unavailable|unable|error/i.test(String(status))) throw new Error(`${mode} product status ${status}`);
+              }
+              if(name==='checkout'){
+                const status=await c.page.locator('#checkout-status').textContent().catch(()=>'');
+                if(/item is unavailable|checkout item is unavailable/i.test(String(status))) throw new Error(`${mode} checkout status ${status}`);
+              }
+              if(mode==='mobile'){
+                const toggle=c.page.locator('.eus-menu-toggle').first();
+                if(await toggle.count()&&await toggle.isVisible()){
+                  await toggle.click(); await c.page.waitForTimeout(150);
+                  if((await toggle.getAttribute('aria-expanded'))!=='true') throw new Error(`mobile ${path} menu failed`);
+                }
+              }
+              await c.page.screenshot({path:`visual-evidence/${name}-${mode}.png`,fullPage:true});
+              report.push({mode,path,productionFailures:p.failureKeys,candidateFailures:c.failureKeys,previewOnlyFailures:previewOnly,overflow});
+              await p.context.close(); await c.context.close();
+            }
+          }
+          await browser.close();
+          fs.writeFileSync('visual-evidence/report.json',JSON.stringify({prod,preview,productId,section,report},null,2));
+          console.log(`routes_verified=${report.length}`);
+          console.log('candidate_only_failures=0');
+          console.log('desktop_mobile_visual=PASS');
+          NODE
+          node final-visual.mjs
+
+      - name: Preview PayPal production-secret boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PREVIEW/api/store-checkout/config" -o /tmp/config.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/config.json'))
+          assert d.get('ok') is True
+          if d.get('environment') == 'live':
+              assert d.get('checkoutEnabled') is False
+              assert not d.get('clientId')
+          print('preview_paypal_safety=PASS')
+          print('preview_paypal_transaction=EXPECTED_NOT_VERIFIED')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-visual-0905-02-final-stabilized-evidence
+          path: visual-evidence/
+          retention-days: 14
+
+      - name: Receipt
+        shell: bash
+        run: |
+          echo '### WEB-VISUAL-0905-02 final stabilized preview gate — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Parent/current main: $PARENT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Exact six-file scope: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Protected systems: PASS / unchanged' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical static + commerce + route/security/SOK gates: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'SOK local media byte integrity: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate-only broken assets: ZERO' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pre-existing media defects: NON-REGRESSION VERIFIED / NON-BLOCKING PER OPERATIONS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Desktop/mobile required-route visual regression: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preview PayPal: expected not verified; production-secret boundary preserved' >> "$GITHUB_STEP_SUMMARY"
