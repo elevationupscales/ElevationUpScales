@@ -20,10 +20,12 @@ Before working, read the relevant current records in this order:
 
 1. Owner/Casey's newest explicit direction.
 2. `EUS MANAGEMENT DIRECTORY — ChatGPT Workers & Gmail Workflow (LIVE)`.
-3. The active controlling management feed for the workstream.
-4. The newest accepted production receipt/baseline when code or deployment is involved.
-5. Relevant manager-specific standards/feeds (Website, Operations, Supplier, Freight, Advertising, Finance/Legal, etc.).
-6. Current work-item handoff/candidate receipt.
+3. `MANAGEMENT README — Overseer Directive / Worker Synchronization (LIVE)` / this repository README.
+4. `MANAGEMENT INDEX — Active Manager Feeds / Required Cross-Checks (LIVE)` and `/coordination/MANAGER_FEED_INDEX.md`.
+5. The active controlling management feed for the workstream.
+6. The newest accepted production receipt/baseline when code or deployment is involved.
+7. Relevant manager-specific standards/feeds (Website, Operations, Supplier, Freight, Advertising, Finance/Legal, etc.).
+8. Current work-item handoff/candidate receipt.
 
 If records conflict, do not guess. Reconcile against the newest accepted owner/management direction and update the controlling feed.
 
@@ -42,6 +44,7 @@ Report:
 - current baseline/main SHA
 - branch/candidate if one exists
 - exact claimed scope
+- expected files/systems to change
 - excluded/protected scope
 - relevant manager feeds checked
 - current blocker/dependency
@@ -96,6 +99,8 @@ Workers must not read only the manager feed that assigned them.
 
 Before implementation, ask: **Which other managers own truth that this work depends on?**
 
+Use `/coordination/MANAGER_FEED_INDEX.md` as the cross-check map.
+
 Examples:
 
 - Website visual/product work → Website + Operations + Supplier/Partnership + Brand/Advertising where applicable.
@@ -119,6 +124,8 @@ Before changing shared code or a shared business workflow:
 7. reconcile before continuing.
 
 Only one controlling candidate/handoff may exist for one production release scope.
+
+If overlap is detected, use `/coordination/prompts/OVERLAP_CONFLICT_STOP_PROMPT.md`.
 
 ## Deployment Rule
 
@@ -152,11 +159,14 @@ For all work, `NOT VERIFIED` is never `PASS`.
 
 Use the templates under `/coordination/prompts/`:
 
-- `WORKER_START_CHECKIN_PROMPT.md`
-- `WEBSITE_WORKER_SYNC_PROMPT.md`
-- `WORKER_HANDOFF_CHECKOUT_PROMPT.md`
-- `MANAGER_RECONCILIATION_PROMPT.md`
-- `DEPLOYMENT_CUSTODY_PROMPT.md`
+- `WORKER_START_CHECKIN_PROMPT.md` — universal worker start/resume
+- `WEBSITE_WORKER_SYNC_PROMPT.md` — mandatory website reporting/synchronization
+- `MATERIAL_MILESTONE_UPDATE_PROMPT.md` — update Management after material state changes
+- `WORKER_HANDOFF_CHECKOUT_PROMPT.md` — required worker check-out/handoff
+- `MANAGER_RECONCILIATION_PROMPT.md` — cross-manager alignment before direction changes
+- `DEPLOYMENT_CUSTODY_PROMPT.md` — explicit release custody gate
+- `VISUAL_BRAND_WORK_PROMPT.md` — visual/reference-fidelity acceptance
+- `OVERLAP_CONFLICT_STOP_PROMPT.md` — stop/reconcile overlapping workers or candidates
 
 These prompts are designed to be copy/pasted into workers when a worker forgets the coordination rules.
 
