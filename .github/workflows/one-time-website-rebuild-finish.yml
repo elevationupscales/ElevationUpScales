@@ -8,7 +8,7 @@ permissions:
 env:
   TARGET_BRANCH: work/website-rebuild-finish-one-pass-2026-09-05
   EXPECTED_MAIN: 995ddef117be2ba5b26e154ea43409271fc938a9
-  EXPECTED_SOURCE: fcc359d7fbeebbd3330f5b359aa873a3336aa1b4
+  EXPECTED_SOURCE: 3ae1215e238e0f93876ef376914cd86645d1c7c9
 jobs:
   validate-rebuild:
     runs-on: ubuntu-latest
