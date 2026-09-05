@@ -32,7 +32,13 @@ for(const event of ["homepage_sok_open","sok_catalog_view","sok_product_view","s
   must(workerRuntime.includes(`\"${event}\"`),`backend event allowlist missing ${event}`);
   must(map.includes(`\`${event}\``),`event map missing ${event}`);
 }
-must(shell.includes("intentRecent"),"central analytics dedupe missing");
+
+// Verify the accepted central analytics dedupe contract semantically rather than by legacy variable name.
+must(/const\s+recent\s*=\s*new\s+Map\s*\(\s*\)/.test(shell),"central analytics recent-event map missing");
+must(shell.includes('`${eventType}|${value}|${location.pathname}`'),"analytics dedupe key must include event, value, and route");
+must(/now\s*-\s*prior\s*<\s*900/.test(shell),"analytics dedupe 900ms window missing");
+must(/recent\.set\(key,\s*now\)/.test(shell),"analytics dedupe timestamp update missing");
+
 must(!orderJs.includes("company:"),"company field still submitted");
 must(!orderJs.includes("intendedUse:"),"intended-use field still submitted");
 must(!orderJs.includes("demandType:"),"demand-type field still submitted");
