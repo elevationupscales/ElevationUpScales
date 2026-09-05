@@ -1,0 +1,47 @@
+name: One-time Website Integrity Build
+
+on:
+  push:
+    branches:
+      - runner/website-integrity-build-final-2026-09-05
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out active work branch
+        uses: actions/checkout@v6
+        with:
+          ref: work/website-integrity-sok-homepage-analytics-2026-09-05
+          fetch-depth: 0
+      - name: Apply approved one-sweep patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/elevationupscales/ElevationUpScales/runner/website-integrity-build-final-2026-09-05/deployment/apply-website-integrity-sweep.py -o /tmp/apply.py
+          python /tmp/apply.py
+      - name: Validate static, syntax and protected SOK gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/website-integrity-static.mjs
+          node deployment/qa/sok-commercialization-static.mjs
+          node deployment/qa/sok-full-line-static.mjs
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+          test -z "$(find site -type f -size +25M -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+      - name: Commit exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add site deployment/qa
+          git diff --cached --quiet && { echo 'No changes'; exit 1; }
+          git commit -m "Website integrity SOK homepage analytics one-sweep"
+          git push origin HEAD:work/website-integrity-sok-homepage-analytics-2026-09-05
+          echo "candidate=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
