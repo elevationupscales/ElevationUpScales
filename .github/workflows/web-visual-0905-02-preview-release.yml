@@ -87,7 +87,7 @@ jobs:
           grep -Fq "/assets/brand/storefront-wordmark.webp" site/retail-first.css
           grep -Fq "object-fit:contain" site/retail-first.css
           grep -Fq "body.retail-store-shell:not(:has(.shop-intro))" site/retail-first.css
-          grep -Fq "Power Beyond the Grid" site/index.html
+          grep -Fq "Power Beyond<br>the Grid." site/index.html
           grep -Fq "Authorized SOK Energy Dealer" site/index.html
           grep -Fq "shop-intro" site/store.html
           echo "storefront_identity_contract=PASS"
