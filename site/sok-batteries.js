@@ -110,7 +110,7 @@
     query=normalize(search.value).slice(0,80);
     clearTimeout(searchTimer);
     searchTimer=setTimeout(()=>{
-      if(query.length>=2||!query)track("sok_catalog_search",query||"cleared",{characters:query.length});
+      if(query.length>=2||!query)track("sok_catalog_search",query?"query":"cleared",{characters:query.length});
     },450);
     render();
   });

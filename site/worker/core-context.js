@@ -772,7 +772,7 @@ const SITE_INTENT_EVENT_TYPES = new Set([
   "submit_attempt", "lead_submitted", "out_of_area_path_selected", "outside_area_review_selected", "outside_area_to_work_with_us",
   "store_open", "store_section_view", "store_category_select", "store_search_used", "store_sort_changed", "store_destination_click", "store_product_click",
   "work_with_us_open", "opportunity_type_selected", "opportunity_form_started", "opportunity_submitted",
-  "homepage_sok_open", "sok_catalog_view", "sok_catalog_filter", "sok_product_view", "sok_media_view", "purchase_options_open", "purchase_inquiry_start", "purchase_inquiry_submit", "hawaii_options_open", "commercial_review_route", "add_to_cart", "checkout_start", "solar_builder_sok_cta"
+  "homepage_sok_open", "homepage_logistics_capability_view", "homepage_logistics_route", "homepage_product_buy_open", "homepage_product_detail_open", "sok_catalog_view", "sok_catalog_filter", "sok_catalog_search", "sok_product_open", "sok_product_view", "sok_related_product_open", "sok_media_view", "purchase_options_open", "purchase_inquiry_start", "purchase_inquiry_submit", "hawaii_options_open", "commercial_review_route", "add_to_cart", "checkout_start", "solar_builder_sok_cta"
 ]);
 const SITE_INTENT_SERVER_ONLY_EVENT_TYPES = new Set(["lead_submitted","opportunity_submitted","solar_contact_captured","solar_lead_created","solar_build_started","solar_review_opened","solar_completed_submitted"]);
 const SITE_INTENT_CLIENT_EVENT_TYPES = new Set([...SITE_INTENT_EVENT_TYPES].filter((type) => !SITE_INTENT_SERVER_ONLY_EVENT_TYPES.has(type)));
@@ -1658,8 +1658,8 @@ async function getMarketplaceRowWithViews(env, id) {
 }
 
 function sanitizeSiteEventDetails(raw = {}) {
-  const allowedStrings = new Set(["package", "classification", "projectType", "intakeIntent", "serviceArea", "source", "status", "journeyReference", "contactMethod", "visitorMarket", "cta_id", "source_page", "contact_method", "build", "buildReference", "builderStage", "builderStep", "milestone", "destination", "section", "category", "product", "referrerHost", "utmSource", "utmMedium", "utmCampaign"]);
-  const allowedNumbers = new Set(["arrayWatts", "batteryKwh", "inverterWatts", "dailySolarKwh", "estimatedUsageKwh"]);
+  const allowedStrings = new Set(["package", "classification", "projectType", "intakeIntent", "serviceArea", "source", "status", "journeyReference", "contactMethod", "visitorMarket", "cta_id", "source_page", "contact_method", "build", "buildReference", "builderStage", "builderStep", "milestone", "destination", "section", "category", "product", "referrerHost", "utmSource", "utmMedium", "utmCampaign", "sourceControl", "stage", "intent", "mediaIndex", "relatedSku"]);
+  const allowedNumbers = new Set(["arrayWatts", "batteryKwh", "inverterWatts", "dailySolarKwh", "estimatedUsageKwh", "characters"]);
   const output = {};
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return output;
   for (const [key, value] of Object.entries(raw)) {
