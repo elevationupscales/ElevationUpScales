@@ -1,0 +1,109 @@
+name: WEB-COM-0905-01 Isolated Preview
+
+on:
+  push:
+    branches:
+      - preview/web-com-0905-01-storefront
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: web-com-0905-01-preview
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EXPECTED_PRODUCTION_MAIN: 0f343f281e72ddf102c5174b02e8c4a0a8dbf1d7
+      PREVIEW_BRANCH: web-com-0905-01-preview
+    steps:
+      - name: Check out exact preview candidate
+        uses: actions/checkout@v6
+        with:
+          ref: preview/web-com-0905-01-storefront
+          fetch-depth: 0
+
+      - name: Protect production lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_PRODUCTION_MAIN"
+          git merge-base --is-ancestor "$EXPECTED_PRODUCTION_MAIN" HEAD
+          echo "Production main remains $EXPECTED_PRODUCTION_MAIN"
+          echo "Preview candidate: $(git rev-parse HEAD)"
+
+      - name: Run canonical committed-source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+          git diff --exit-code
+
+      - name: Enforce Pages limits and block credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
+            echo "BLOCKED: credential-like value found in deployable source."
+            exit 1
+          fi
+
+      - name: Deploy isolated storefront preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ env.PREVIEW_BRANCH }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run canonical clean-baseline preview regression
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$PREVIEW_URL"
+
+      - name: Verify storefront customer-facing content
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${PREVIEW_URL%/}"
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/" | grep -Fq 'LOGISTICS THAT MATTER.'
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/" | grep -Fq 'href="/marketplace"'
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/sok-batteries" | grep -Fq 'Find the product by voltage, use or model.'
+          curl -fsSL --retry 8 --retry-all-errors --retry-delay 2 "$base/sok-batteries" | grep -Fq 'AUTHORIZED SOK ENERGY DEALER'
+          echo "Customer-facing storefront content: PASS"
+
+      - name: Verify candidate remained immutable
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+
+      - name: Summary
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### WEB-COM-0905-01 isolated preview — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical QA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical preview regression: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Storefront content smoke: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "PayPal sandbox create/capture: NOT VERIFIED — separate credentialed transaction test required" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production main: UNCHANGED ($EXPECTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
