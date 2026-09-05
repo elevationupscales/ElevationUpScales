@@ -69,7 +69,7 @@ jobs:
           replace_once('site/sok-full-line-runtime.js','site-shell.js?v=4.8.0','site-shell.js?v=4.9.0')
           PY
 
-      - name: Enforce exact hotfix scope
+      - name: Enforce exact hotfix scope and byte-equivalent substitutions
         shell: bash
         run: |
           set -euo pipefail
@@ -89,11 +89,34 @@ jobs:
           EOF
           diff -u /tmp/expected /tmp/actual
           git diff --check
-          if git diff | grep -E '^[-+].*(STORE_LIVE_CHECKOUT_ENABLED|PAYPAL_|shipping|freightCents|priceCents|MAP|promotion|coupon|inventory|capture|orders)' >/tmp/forbidden; then
-            cat /tmp/forbidden
-            echo 'Unexpected commerce-sensitive textual change' >&2
-            exit 1
-          fi
+          python - <<'PY'
+          import os, subprocess
+          from pathlib import Path
+
+          parent=os.environ['PARENT_SHA']
+          mappings={
+            'site/site-shell.js':('/retail-first.css?v=5.0.1','/retail-first.css?v=5.3.0'),
+            'site/rv-store.html':('site-shell.js?v=4.5.2','site-shell.js?v=4.9.0'),
+            'site/lithium-batteries.html':('site-shell.js?v=4.5.2','site-shell.js?v=4.9.0'),
+            'site/hawaii-lithium-batteries.html':('site-shell.js?v=4.5.2','site-shell.js?v=4.9.0'),
+            'site/product.html':('site-shell.js?v=4.5.2','site-shell.js?v=4.9.0'),
+            'site/sok-batteries.html':('site-shell.js?v=4.5.2','site-shell.js?v=4.9.0'),
+            'site/store.html':('site-shell.js?v=4.5.2','site-shell.js?v=4.9.0'),
+            'site/checkout/index.html':('site-shell.js?v=3.11.46','site-shell.js?v=4.9.0'),
+            'site/collector.html':('site-shell.js?v=3.11.46','site-shell.js?v=4.9.0'),
+            'site/sok-order.html':('site-shell.js?v=4.8.0','site-shell.js?v=4.9.0'),
+            'site/sok-full-line-runtime.js':('site-shell.js?v=4.8.0','site-shell.js?v=4.9.0'),
+          }
+          for path,(old,new) in mappings.items():
+              original=subprocess.check_output(['git','show',f'{parent}:{path}'],text=True)
+              current=Path(path).read_text()
+              if original.count(old)!=1:
+                  raise SystemExit(f'{path}: parent occurrence count for {old!r} != 1')
+              expected=original.replace(old,new,1)
+              if current != expected:
+                  raise SystemExit(f'{path}: change exceeds approved cache-key substitution')
+          print('byte_equivalent_cache_substitutions=PASS')
+          PY
           echo exact_cache_bust_scope=PASS
 
       - name: Full static and commerce regression
@@ -114,5 +137,4 @@ jobs:
           git add site/site-shell.js site/rv-store.html site/lithium-batteries.html site/hawaii-lithium-batteries.html site/product.html site/sok-batteries.html site/store.html site/checkout/index.html site/collector.html site/sok-order.html site/sok-full-line-runtime.js
           git commit -m 'fix(visual): bust stale retail shell stylesheet cache'
           git push origin HEAD:"$TARGET_BRANCH"
-          echo "hotfix_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "hotfix_sha=$(git rev-parse HEAD)"
