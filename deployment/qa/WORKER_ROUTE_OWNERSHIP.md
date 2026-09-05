@@ -1,6 +1,12 @@
 # Website Rebuild — Worker Route Ownership
 
-Generated from registry SHA-256 `21deae98cfd2d0758e24e0ea25bc01cf345c89df74cf77a7f317a1b30d7c1872`.
+## Status
+
+`CODE-COMPLETION OWNERSHIP MAP`
+
+Production baseline: `995ddef117be2ba5b26e154ea43409271fc938a9`
+
+The current clean-baseline branch routes all 37 documented Worker contracts through explicit domain handlers. `site/worker-core.js` is a dispatcher only; it no longer owns business handler implementations or imports the legacy shared context for route constants.
 
 | Route | Match | Domain | Handler | Access |
 |---|---|---|---|---|
@@ -40,17 +46,27 @@ Generated from registry SHA-256 `21deae98cfd2d0758e24e0ea25bc01cf345c89df74cf77a
 | `/api/admin/qa-token` | exact | system | `handleAdminQaToken` | admin-write |
 | `/api/admin/marketplace-issues` | exact | marketplace | `handleAdminMarketplaceIssues` | admin |
 | `/api/admin/listings` | prefix-or-exact | marketplace | `handleAdminListings` | admin-mixed |
-| `/api/store-products` | exact | store-legacy | `getCatalog` | public |
+| `/api/store-products` | exact | compatibility | `handleStoreProductsCompatibility` | public |
 
 ## Runtime layout
 
-- `site/worker-core.js` — thin compatibility/router entry point; no moved business handler implementations.
-- `site/worker/core-context.js` — shared legacy-compatible helper/data context.
+- `site/worker-core.js` — thin dispatcher/static-fallback entry point; no business handler implementations.
+- `site/worker/routes.js` — canonical Worker route constants used directly by the dispatcher and re-used by the shared context.
+- `site/worker/core-context.js` — shared compatibility/data/infrastructure context only; shared security/response/HTML/validation/Solar sanitizers are imported rather than duplicated.
+- `site/worker/shared/response.js` — API/HTML response security headers and JSON/HTML response helpers.
+- `site/worker/shared/html.js` — HTML and inline-JSON escaping.
+- `site/worker/shared/validation.js` — common string/list/contact validation.
+- `site/worker/shared/solar-sanitizers.js` — Solar-specific sanitization built on common validation.
 - `site/worker/domains/*.js` — current route handler implementations grouped by domain.
-- `/api/store-products` remains an explicit compatibility route backed by shared catalog logic.
+- `/api/store-products` remains an explicit compatibility route owned by `compatibility.js` and backed by the same catalog source.
 
-## Cross-domain handler dependencies
+## Dependency controls
 
-- `handleAdminOperations` (admin-overview) → `handleHealth` (system)
+- Domain modules use explicit named dependencies; the legacy `import * as core` + whole-context destructure is prohibited by `deployment/qa/worker-import-surface-static.mjs`.
+- Shared-foundation tests execute the deployed `site/worker/shared/*` modules; duplicate `src/shared/*` preparation implementations are prohibited by the canonical static gate.
+- `handleAdminOperations` (admin-overview) → `handleHealth` (system) remains the one documented cross-domain handler dependency.
+- Cross-domain module graph cycle check: PASS.
 
-Cross-domain module graph cycle check: PASS
+## Runtime protection
+
+`/worker/*`, `/worker-core.js`, and other protected runtime sources remain intercepted/non-public. Preview regression requires the expected 404 contracts.
