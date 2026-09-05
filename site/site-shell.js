@@ -442,3 +442,30 @@
   installSupportAndContactAnalytics(analytics);
   installNavigation();
 })();
+
+/* EUS_VISUAL_REDESIGN_V1_LOADER
+   Presentation-only experiment. Remove this block to restore the accepted shell. */
+(()=>{
+  if(window.__EUS_VISUAL_REDESIGN_V1_LOADED__) return;
+  window.__EUS_VISUAL_REDESIGN_V1_LOADED__=true;
+  if((location.pathname||"").startsWith("/admin")) return;
+  const styles=[
+    ["v1","/redesign-v1.css?v=1.0.0"],
+    ["v1-pages","/redesign-v1-pages.css?v=1.0.0"]
+  ];
+  styles.forEach(([key,href])=>{
+    if(document.querySelector(`link[data-eus-redesign="${key}"]`)) return;
+    const link=document.createElement("link");
+    link.rel="stylesheet";
+    link.href=href;
+    link.dataset.eusRedesign=key;
+    document.head.append(link);
+  });
+  if(!document.querySelector('script[data-eus-redesign="v1"]')){
+    const script=document.createElement("script");
+    script.src="/redesign-v1.js?v=1.0.0";
+    script.async=false;
+    script.dataset.eusRedesign="v1";
+    document.head.append(script);
+  }
+})();
