@@ -49,7 +49,7 @@ assert(collectionJs.includes("sok-card__media-strip"), "collection approved-medi
 
 const config = await jsonFetch("/api/store-checkout/config");
 assert(config.response.status === 200 && config.body.ok === true, "checkout config API is healthy");
-console.log("PAYPAL_PREVIEW_STATE=" + JSON.stringify({
+const paypalState = {
   environment: config.body.environment || "",
   credentialsConfigured: Boolean(config.body.credentialsConfigured),
   configured: Boolean(config.body.configured),
@@ -58,11 +58,18 @@ console.log("PAYPAL_PREVIEW_STATE=" + JSON.stringify({
   promotionActive: Boolean(config.body.promotion?.active),
   promotionCode: config.body.promotion?.couponCode || "",
   promotionPercent: Number(config.body.promotion?.couponPercent || 0),
-}));
-assert(config.body.environment === "sandbox", "candidate preview PayPal environment is sandbox");
-assert(config.body.credentialsConfigured === true, "PayPal sandbox credentials are configured");
-assert(config.body.configured === true && config.body.checkoutEnabled === true, "sandbox checkout is enabled");
-assert(typeof config.body.clientId === "string" && config.body.clientId.length > 10, "PayPal client ID is available to checkout");
+};
+console.log("PAYPAL_PREVIEW_STATE=" + JSON.stringify(paypalState));
+const sandboxReady = paypalState.environment === "sandbox" && paypalState.credentialsConfigured && paypalState.configured && paypalState.checkoutEnabled;
+if (sandboxReady) {
+  assert(typeof config.body.clientId === "string" && config.body.clientId.length > 10, "PayPal sandbox client ID is available to checkout");
+  console.log("PASS: candidate preview PayPal environment is sandbox and transaction-capable");
+} else {
+  assert(paypalState.environment === "live", "non-sandbox preview reports live rather than an unknown PayPal environment");
+  assert(paypalState.credentialsConfigured === true, "PayPal credentials are present in the live-mode preview");
+  assert(paypalState.configured === false && paypalState.checkoutEnabled === false && paypalState.liveCheckoutApproved === false, "live-mode preview is fail-closed and cannot accept real money");
+  console.log("BLOCKER: preview is live-mode/fail-closed, so PayPal sandbox transaction testing cannot run here");
+}
 assert(config.body.promotion?.active === true, "Labor Day promotion is active in preview");
 assert(config.body.promotion?.couponCode === "LABORDAY25", "Labor Day coupon code is LABORDAY25");
 assert(config.body.promotion?.couponPercent === 25, "Labor Day coupon is 25 percent");
@@ -111,5 +118,6 @@ const checkoutClient = (await textFetch("/store-checkout.js")).text;
 assert(checkoutClient.includes("/api/store-checkout/orders"), "checkout client is wired to PayPal order creation endpoint");
 assert(checkoutClient.includes("/capture"), "checkout client is wired to PayPal capture endpoint");
 
-console.log("Labor Day SOK shopability preview + PayPal configuration/quote gate PASS");
-console.log("TRANSACTION GATE: sandbox buyer approval + successful capture must be completed separately before production promotion.");
+console.log("Labor Day SOK shopability + non-transaction checkout controls PASS");
+if (!sandboxReady) throw new Error("TRANSACTION BLOCKER: Cloudflare Preview must be restored to PayPal sandbox before production promotion");
+console.log("TRANSACTION GATE: sandbox environment is ready; successful capture still requires sandbox buyer approval.");
