@@ -6,22 +6,22 @@ on:
       - work/website-rebuild-complete-code-2026-09-05
 
 permissions:
-  contents: write
+  contents: read
   deployments: write
 
 concurrency:
   group: website-rebuild-complete-code
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  finish-and-validate:
+  validate-clean-baseline:
     runs-on: ubuntu-latest
     environment: production
     env:
       EXPECTED_PRODUCTION_MAIN: 995ddef117be2ba5b26e154ea43409271fc938a9
       PREVIEW_BRANCH: website-rebuild-complete-code-preview
     steps:
-      - name: Check out code-completion branch
+      - name: Check out committed code-completion branch
         uses: actions/checkout@v6
         with:
           ref: work/website-rebuild-complete-code-2026-09-05
@@ -36,31 +36,13 @@ jobs:
           git merge-base --is-ancestor origin/main HEAD
           echo "Production main remains $EXPECTED_PRODUCTION_MAIN"
 
-      - name: Integrate deployed Worker shared foundation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python deployment/rebuild/integrate-worker-shared-foundation.py
-
-      - name: Extract canonical Worker route contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          python deployment/rebuild/extract-worker-routes.py
-
-      - name: Finish Worker dependency surfaces
-        shell: bash
-        run: |
-          set -euo pipefail
-          python deployment/rebuild/finish-worker-imports.py
-          git diff --check
-
-      - name: Run canonical clean-baseline QA
+      - name: Verify committed rebuild source
         shell: bash
         run: |
           set -euo pipefail
           npm run qa
           git diff --check
+          git diff --exit-code
 
       - name: Deploy isolated code-completion preview
         id: deploy
@@ -77,38 +59,24 @@ jobs:
           PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           set -euo pipefail
-          bash deployment/qa/clean-baseline-preview.sh "$PREVIEW_URL"
+          npm run qa:preview -- "$PREVIEW_URL"
 
-      - name: Preserve validated code-completion candidate
-        id: preserve
+      - name: Verify candidate remained immutable
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- site/worker-core.js site/worker tests/shared-foundation.test.mjs src; then
-            echo "No generated Worker changes remain to commit."
-            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          git config user.name elevationupscales
-          git config user.email caseymyoung@gmail.com
-          git add -A -- site/worker-core.js site/worker tests/shared-foundation.test.mjs src
-          git commit -m "Finish Website Rebuild Worker route and shared ownership [skip rebuild-generation]"
-          candidate_sha=$(git rev-parse HEAD)
-          git push origin HEAD:work/website-rebuild-complete-code-2026-09-05
-          echo "sha=$candidate_sha" >> "$GITHUB_OUTPUT"
+          git diff --exit-code
+          echo "Candidate SHA: $(git rev-parse HEAD)"
 
       - name: Summary
         shell: bash
         env:
           PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
-          CANDIDATE_SHA: ${{ steps.preserve.outputs.sha }}
         run: |
-          echo "### Website Rebuild code completion — PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Website Rebuild committed code — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Committed source invariants: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Canonical QA: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Worker shared foundation: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Worker route-contract ownership: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Worker dependency consolidation: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview regression: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production main: UNCHANGED ($EXPECTED_PRODUCTION_MAIN)" >> "$GITHUB_STEP_SUMMARY"
