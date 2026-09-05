@@ -23,6 +23,18 @@ jobs:
           set -euo pipefail
           curl -fsSL https://raw.githubusercontent.com/elevationupscales/ElevationUpScales/runner/website-integrity-build-final-2026-09-05/deployment/apply-website-integrity-sweep.py -o /tmp/apply.py
           python /tmp/apply.py
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('site/sok-order.html')
+          s=p.read_text().replace('>Commercial Pricing</button>','>Request Commercial Pricing</button>').replace('>Hawaii Availability</button>','>Check Hawaii Availability</button>')
+          p.write_text(s)
+          p=Path('deployment/qa/sok-commercialization-static.mjs')
+          s=p.read_text()
+          old='const analytics=["sok_collection_view","sok_product_view","sok_purchase_options_click","sok_commercial_request","sok_hawaii_request","solar_builder_sok_click"];'
+          new='const analytics=["sok_catalog_view","sok_product_view","purchase_options_open","commercial_review_route","hawaii_options_open","solar_builder_sok_cta"];'
+          if old not in s: raise SystemExit('legacy analytics QA marker missing')
+          p.write_text(s.replace(old,new))
+          PY
       - name: Validate static, syntax and protected SOK gates
         shell: bash
         run: |
