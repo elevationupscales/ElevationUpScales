@@ -1,0 +1,82 @@
+name: WEB-VISUAL-0905-02 Mobile Lithium Media Compare
+
+on:
+  push:
+    branches:
+      - diagnostic/web-visual-0905-02-mobile-media-baseline
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    env:
+      PROD: https://elevationupscales.com
+      PREVIEW: https://e0c7dc83.elevationupscales.pages.dev
+      EXPECTED_MAIN: 1ab4f033b395a441336428cf651a89d2921b4b3c
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+      - name: Confirm source state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          git diff --quiet "$EXPECTED_MAIN"..HEAD -- site/lithium-batteries.js site/lithium-batteries.html site/store-checkout-server.js site/store-checkout.js
+          echo source_nonregression=PASS
+      - name: Install browser
+        shell: bash
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+      - name: Compare production and preview mobile lithium failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p mobile-media-compare
+          cat > compare.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const targets=[['production',process.env.PROD],['preview',process.env.PREVIEW]];
+          const browser=await chromium.launch({headless:true});
+          const results={};
+          for(const [label,base] of targets){
+            const context=await browser.newContext({viewport:{width:390,height:844}});
+            const page=await context.newPage();
+            const responses=[];
+            page.on('response',r=>{if(r.request().resourceType()==='image'&&r.status()>=400) responses.push(r.url())});
+            const doc=await page.goto(base+'/lithium-batteries',{waitUntil:'domcontentloaded',timeout:45000});
+            if(!doc||doc.status()!==200) throw new Error(`${label} document ${doc?.status()}`);
+            await page.waitForTimeout(5000);
+            const bad=await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{const s=getComputedStyle(i);return s.display!=='none'&&s.visibility!=='hidden'&&i.getBoundingClientRect().width>2&&(!i.complete||i.naturalWidth===0)}).map(i=>i.currentSrc||i.src).filter(Boolean));
+            const all=[...new Set([...bad,...responses])].sort();
+            results[label]=all;
+            await page.screenshot({path:`mobile-media-compare/${label}.png`,fullPage:true});
+            await context.close();
+          }
+          await browser.close();
+          const prod=new Set(results.production), prev=new Set(results.preview);
+          const common=[...prev].filter(x=>prod.has(x)).sort();
+          const previewOnly=[...prev].filter(x=>!prod.has(x)).sort();
+          const productionOnly=[...prod].filter(x=>!prev.has(x)).sort();
+          const report={production:results.production,preview:results.preview,productionBad:prod.size,previewBad:prev.size,commonBad:common.length,previewOnly,productionOnly};
+          fs.writeFileSync('mobile-media-compare/report.json',JSON.stringify(report,null,2));
+          console.log(`production_bad=${prod.size}`);
+          console.log(`preview_bad=${prev.size}`);
+          console.log(`common_bad=${common.length}`);
+          console.log(`preview_only=${previewOnly.length}`);
+          console.log(`production_only=${productionOnly.length}`);
+          if(previewOnly.length||productionOnly.length) throw new Error('mobile media failure sets are not identical');
+          console.log('mobile_media_baseline_nonregression=PASS');
+          console.log(common.join('\n'));
+          NODE
+          node compare.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-visual-0905-02-mobile-media-compare
+          path: mobile-media-compare/
+          retention-days: 14
