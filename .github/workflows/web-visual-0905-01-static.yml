@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          allowed='^(site/index\.html|site/retail-first\.css|\.github/workflows/web-visual-0905-01-(static|preview)\.yml)$'
+          allowed='^(site/index\.html|site/retail-first\.css|deployment/qa/web-com-navigation-static\.mjs|\.github/workflows/web-visual-0905-01-(static|preview)\.yml)$'
           unexpected="$(git diff --name-only "$VISUAL_PARENT"..HEAD | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected" ]; then
             echo "Unexpected visual-pass files changed:"
