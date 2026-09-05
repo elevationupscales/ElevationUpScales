@@ -1,0 +1,118 @@
+name: WEB-VISUAL-0905-02 Retail Cache Bust Build
+
+on:
+  push:
+    branches:
+      - control/web-visual-0905-02-cache-bust-build-20260905
+
+permissions:
+  contents: write
+
+env:
+  PARENT_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+  TARGET_BRANCH: hotfix/web-visual-0905-02-retail-css-cache-bust
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: hotfix/web-visual-0905-02-retail-css-cache-bust
+          fetch-depth: 0
+
+      - name: Assert clean parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main "$TARGET_BRANCH" --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$PARENT_SHA"
+          test "$(git rev-parse origin/main)" = "$PARENT_SHA"
+          test -z "$(git status --porcelain)"
+          echo hotfix_parent=PASS
+
+      - name: Apply presentation-only cache bust
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p=Path(path)
+              text=p.read_text()
+              count=text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected 1 occurrence of {old!r}, found {count}')
+              p.write_text(text.replace(old,new,1))
+              print(f'updated {path}: {old} -> {new}')
+
+          replace_once('site/site-shell.js','/retail-first.css?v=5.0.1','/retail-first.css?v=5.3.0')
+
+          for path in [
+              'site/rv-store.html',
+              'site/lithium-batteries.html',
+              'site/hawaii-lithium-batteries.html',
+              'site/product.html',
+              'site/sok-batteries.html',
+              'site/store.html',
+          ]:
+              replace_once(path,'site-shell.js?v=4.5.2','site-shell.js?v=4.9.0')
+
+          for path in [
+              'site/checkout/index.html',
+              'site/collector.html',
+          ]:
+              replace_once(path,'site-shell.js?v=3.11.46','site-shell.js?v=4.9.0')
+
+          replace_once('site/sok-order.html','site-shell.js?v=4.8.0','site-shell.js?v=4.9.0')
+          replace_once('site/sok-full-line-runtime.js','site-shell.js?v=4.8.0','site-shell.js?v=4.9.0')
+          PY
+
+      - name: Enforce exact hotfix scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only | sort > /tmp/actual
+          cat > /tmp/expected <<'EOF'
+          site/checkout/index.html
+          site/collector.html
+          site/hawaii-lithium-batteries.html
+          site/lithium-batteries.html
+          site/product.html
+          site/rv-store.html
+          site/site-shell.js
+          site/sok-batteries.html
+          site/sok-full-line-runtime.js
+          site/sok-order.html
+          site/store.html
+          EOF
+          diff -u /tmp/expected /tmp/actual
+          git diff --check
+          if git diff | grep -E '^[-+].*(STORE_LIVE_CHECKOUT_ENABLED|PAYPAL_|shipping|freightCents|priceCents|MAP|promotion|coupon|inventory|capture|orders)' >/tmp/forbidden; then
+            cat /tmp/forbidden
+            echo 'Unexpected commerce-sensitive textual change' >&2
+            exit 1
+          fi
+          echo exact_cache_bust_scope=PASS
+
+      - name: Full static and commerce regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          echo regression=PASS
+
+      - name: Commit hotfix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site/site-shell.js site/rv-store.html site/lithium-batteries.html site/hawaii-lithium-batteries.html site/product.html site/sok-batteries.html site/store.html site/checkout/index.html site/collector.html site/sok-order.html site/sok-full-line-runtime.js
+          git commit -m 'fix(visual): bust stale retail shell stylesheet cache'
+          git push origin HEAD:"$TARGET_BRANCH"
+          echo "hotfix_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "hotfix_sha=$(git rev-parse HEAD)"
