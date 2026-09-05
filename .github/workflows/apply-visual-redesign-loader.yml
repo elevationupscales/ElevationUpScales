@@ -30,6 +30,7 @@ jobs:
           test "$changed" = "site/site-shell.js" || { echo "Unexpected migration diff: $changed"; exit 1; }
           npm run qa
           git diff --check
+          echo "Redesign loader migration: PASS"
 
       - name: Commit loader to design branch
         shell: bash
