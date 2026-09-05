@@ -1,15 +1,4 @@
-import * as core from "./worker/core-context.js";
-import { handleAdminLogin, handleAdminLogout, handleAdminSession } from "./worker/domains/admin-auth.js";
-import { handleAdminOperations } from "./worker/domains/admin-overview.js";
-import { handleMarketplaceEvent, handleSiteEvent } from "./worker/domains/analytics.js";
-import { handleAdminMarketAnalytics } from "./worker/domains/analytics-reporting.js";
-import { handleRetiredLegacyMarketplaceImport } from "./worker/domains/compatibility.js";
-import { handleAdminInventory, handlePublicInventory } from "./worker/domains/inventory.js";
-import { handleAdminLeads, handleAdminOpportunities, handleProjectCapture, handleProjectClassify, handleProjectContactRequest, handleProjectFollowUpRequest, handleProjectHandymanPhotos, handleProjectSubmit } from "./worker/domains/leads.js";
-import { handleAdminListings, handleAdminMarketplaceFollowups, handleAdminMarketplaceIssues, handleMarketplaceContact, handleMarketplaceHealth, handleMarketplaceImage, handleMarketplaceIssueReport, handleMarketplacePublicListings, handleMarketplaceQaValidate, handleMarketplaceShare, handleMarketplaceSubmit } from "./worker/domains/marketplace.js";
-import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
-import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
-import { handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
+import * as core from "../core-context.js";
 
 const {
   SHOP_ORIGIN,
@@ -306,66 +295,8 @@ const {
   verifySolarQaToken
 } = core;
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
+async function handleWorkWithUsSubmit(request,env,ctx){if(request.method!=="POST")return jsonResponse({error:"Method not allowed"},405,{Allow:"POST"});if(!sameOriginRequest(request))return jsonResponse({error:"Cross-origin request denied"},403);if(!env.LEADS_DB)return jsonResponse({error:"Opportunity storage is not configured"},503);const allowance=await durableRateLimit(env.LEADS_DB,request,env,"wwu-submit-hour",8,60*60);if(!allowance.allowed)return jsonResponse({error:"Too many submissions. Please try again later."},429,{"Retry-After":String(allowance.retryAfter||60)});const parsed=await readLimitedJson(request,24_000);if(parsed.error)return jsonResponse({error:"Invalid Work With Us submission"},400);const b=parsed.value||{},type=cleanString(b.opportunityType,30).toLowerCase(),contact=safeContactPayload({...b,consent:b.consent});if(!WWU_TYPES.has(type)||!contact.name||!isValidEmail(contact.email)||!contact.consent)return jsonResponse({error:"Name, valid email and contact permission are required"},400);if(type==="technician"&&!isValidPhone(contact.phone))return jsonResponse({error:"Technician opportunities require a usable phone number"},400);const reference=projectReference(`WWU-${type.toUpperCase()}`),now=new Date().toISOString(),message=cleanString(b.message,2500);if(!message)return jsonResponse({error:"Please include a short message"},400);const location=cleanString(b.location,180),source=cleanString(b.source,120)||"work-with-us",details=cleanWwuDetails(type,b.details);try{await env.LEADS_DB.prepare(`INSERT INTO work_with_us_opportunities (reference,opportunity_type,name,email,phone,location,preferred_contact,message,details_json,status,next_action,source,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(reference,type,contact.name,contact.email,contact.phone,location,contact.preferredContact,message,JSON.stringify(details),"new","Review Submission",source,now,now).run()}catch(error){if(/no such table/i.test(String(error?.message||error)))return jsonResponse({error:"Work With Us migration is required",migrationRequired:true},503);throw error}const ownerNotification=await scheduleOwnerLeadNotification(env,ctx,workWithUsOwnerNotificationSpec({reference,type,contact,location,message,source}));if(env.MARKETPLACE_DB&&cleanString(b.sessionId,100)){await recordSiteEvent(env,{eventType:"opportunity_submitted",eventValue:type,sessionId:cleanString(b.sessionId,100),reference,page:"/work-with-us",details:{source,status:"new"}},{serverConfirmed:true,request}).catch(()=>{})}return jsonResponse({ok:true,stored:true,reference,opportunityType:type,status:"new",ownerNotification},201)}
 
-    if (url.pathname === SOLAR_NOTIFY_PATH) {
-      return handleSolarNotification(request, env, ctx);
-    }
-
-    if (url.pathname === HEALTH_PATH) return handleHealth(request, env);
-    if (url.pathname === MARKETPLACE_HEALTH_PATH) return handleMarketplaceHealth(request, env);
-    if (url.pathname === MARKETPLACE_EVENT_PATH) return handleMarketplaceEvent(request, env, ctx);
-    if (url.pathname === SITE_EVENT_PATH || url.pathname === LEGACY_SITE_EVENT_PATH) return handleSiteEvent(request, env);
-    if (url.pathname === PROJECT_CLASSIFY_PATH) return handleProjectClassify(request);
-    if (url.pathname === PROJECT_CAPTURE_PATH) return handleProjectCapture(request, env, ctx);
-    if (url.pathname === PROJECT_CONTACT_REQUEST_PATH) return handleProjectContactRequest(request, env, ctx);
-    if (url.pathname === PROJECT_FOLLOWUP_REQUEST_PATH) return handleProjectFollowUpRequest(request, env, ctx);
-    if (url.pathname === PROJECT_HANDYMAN_PHOTOS_PATH) return handleProjectHandymanPhotos(request, env);
-    if (url.pathname === PROJECT_SUBMIT_PATH) return handleProjectSubmit(request, env, ctx);
-    if (url.pathname === WORK_WITH_US_SUBMIT_PATH) return handleWorkWithUsSubmit(request, env, ctx);
-    if (url.pathname === MARKETPLACE_SUBMIT_PATH) return handleMarketplaceSubmit(request, env);
-    if (url.pathname === MARKETPLACE_PUBLIC_PATH) return handleMarketplacePublicListings(request, env);
-    if (url.pathname.startsWith(MARKETPLACE_IMAGE_PREFIX)) return handleMarketplaceImage(request, env, url.pathname);
-    if (url.pathname.startsWith(MARKETPLACE_CONTACT_PREFIX)) return handleMarketplaceContact(request, env, url.pathname);
-    if (url.pathname.startsWith(MARKETPLACE_SHARE_PREFIX)) return handleMarketplaceShare(request, env, url.pathname);
-    if (url.pathname === MARKETPLACE_REPORT_ISSUE_PATH) return handleMarketplaceIssueReport(request, env);
-    if (url.pathname === ADMIN_LOGIN_PATH) return handleAdminLogin(request, env);
-    if (url.pathname === ADMIN_LOGOUT_PATH) return handleAdminLogout(request, env);
-    if (url.pathname === ADMIN_SESSION_PATH) return handleAdminSession(request, env);
-    if (url.pathname === ADMIN_IMPORT_LEGACY_PATH) return handleRetiredLegacyMarketplaceImport(request);
-    if (url.pathname === ADMIN_OPERATIONS_PATH) return handleAdminOperations(request, env);
-    if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
-    if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
-    if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
-    if (url.pathname === PUBLIC_INVENTORY_PATH) return handlePublicInventory(request, env);
-    if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
-    if (url.pathname === SOLAR_QA_VALIDATE_PATH) return handleSolarQaValidate(request, env);
-    if (url.pathname === ADMIN_LEADS_PATH || url.pathname.startsWith(`${ADMIN_LEADS_PATH}/`)) return handleAdminLeads(request, env, url.pathname);
-    if (url.pathname === ADMIN_MARKETPLACE_FOLLOWUPS_PATH || url.pathname.startsWith(`${ADMIN_MARKETPLACE_FOLLOWUPS_PATH}/`)) return handleAdminMarketplaceFollowups(request, env, url.pathname);
-    if (url.pathname === MARKETPLACE_QA_VALIDATE_PATH) return handleMarketplaceQaValidate(request, env);
-    if (url.pathname === ADMIN_QA_TOKEN_PATH) return handleAdminQaToken(request, env);
-    if (url.pathname === ADMIN_MARKETPLACE_ISSUES_PATH) return handleAdminMarketplaceIssues(request, env);
-    if (url.pathname === ADMIN_LISTINGS_PATH || url.pathname.startsWith(`${ADMIN_LISTINGS_PATH}/`)) return handleAdminListings(request, env, url.pathname);
-
-    if (url.pathname === "/api/store-products") {
-      if (request.method !== "GET" && request.method !== "HEAD") {
-        return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
-      }
-
-      try {
-        const response = await getCatalog(request);
-        return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
-      } catch (error) {
-        console.error(JSON.stringify({ event: "store_catalog_error", message: error instanceof Error ? error.message : String(error) }));
-        return Response.json(
-          { error: "The live catalog is temporarily unavailable." },
-          { status: 502, headers: { "Cache-Control": "no-store", ...API_SECURITY_HEADERS, "X-EUS-Store-Build": STORE_BUILD } },
-        );
-      }
-    }
-
-    return env.ASSETS.fetch(request);
-  },
+export {
+  handleWorkWithUsSubmit
 };

@@ -74,7 +74,7 @@ export default {
       "/sync-admin-runtime.js",
       "/apparel-provider-runtime.js"
     ]);
-    if (internalRuntimePaths.has(url.pathname)) return new Response("Not found", { status: 404, headers: { "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } });
+    if (url.pathname.startsWith("/worker/") || internalRuntimePaths.has(url.pathname)) return new Response("Not found", { status: 404, headers: { "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } });
     if (["/worker-core.js","/store-checkout-server.js","/store-orders-admin-server.js","/catalog-admin-server.js","/catalog-admin-runtime.js","/hawaii-lithium-runtime.js","/sok-operations-runtime.js",
       "/sok-availability-runtime.js","/sok-full-line-runtime.js","/sok-full-line-data.js","/sync-admin-runtime.js","/doba-csv-sync-runtime.js","/apparel-provider-runtime.js","/commerce-schema-migrations.js","/shipping-rules-runtime.js"].includes(url.pathname)) return new Response("Not found",{status:404,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
     const isQuote=url.pathname==="/api/store-checkout/quote"; const isCreate=url.pathname==="/api/store-checkout/orders"; const isCapture=/^\/api\/store-checkout\/orders\/[A-Z0-9]{8,40}\/capture$/i.test(url.pathname);

@@ -1,15 +1,4 @@
-import * as core from "./worker/core-context.js";
-import { handleAdminLogin, handleAdminLogout, handleAdminSession } from "./worker/domains/admin-auth.js";
-import { handleAdminOperations } from "./worker/domains/admin-overview.js";
-import { handleMarketplaceEvent, handleSiteEvent } from "./worker/domains/analytics.js";
-import { handleAdminMarketAnalytics } from "./worker/domains/analytics-reporting.js";
-import { handleRetiredLegacyMarketplaceImport } from "./worker/domains/compatibility.js";
-import { handleAdminInventory, handlePublicInventory } from "./worker/domains/inventory.js";
-import { handleAdminLeads, handleAdminOpportunities, handleProjectCapture, handleProjectClassify, handleProjectContactRequest, handleProjectFollowUpRequest, handleProjectHandymanPhotos, handleProjectSubmit } from "./worker/domains/leads.js";
-import { handleAdminListings, handleAdminMarketplaceFollowups, handleAdminMarketplaceIssues, handleMarketplaceContact, handleMarketplaceHealth, handleMarketplaceImage, handleMarketplaceIssueReport, handleMarketplacePublicListings, handleMarketplaceQaValidate, handleMarketplaceShare, handleMarketplaceSubmit } from "./worker/domains/marketplace.js";
-import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
-import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
-import { handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
+import * as core from "../core-context.js";
 
 const {
   SHOP_ORIGIN,
@@ -306,66 +295,82 @@ const {
   verifySolarQaToken
 } = core;
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
+async function handleAdminQaToken(request, env) {
+  const auth = await requireAdmin(request, env);
+  if (auth.response) return auth.response;
+  if (request.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "POST" });
+  if (!sameOriginRequest(request)) return jsonResponse({ error: "Cross-origin request denied" }, 403);
+  return jsonResponse({ ok: true, ...(await createMarketplaceQaToken(env)) });
+}
 
-    if (url.pathname === SOLAR_NOTIFY_PATH) {
-      return handleSolarNotification(request, env, ctx);
+async function handleHealth(request, env) {
+  if (request.method !== "GET" && request.method !== "HEAD") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+  let marketplaceDb = "unconfigured";
+  if (env.MARKETPLACE_DB) {
+    try {
+      await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok").first();
+      marketplaceDb = "ok";
+    } catch (_) {
+      marketplaceDb = "error";
     }
-
-    if (url.pathname === HEALTH_PATH) return handleHealth(request, env);
-    if (url.pathname === MARKETPLACE_HEALTH_PATH) return handleMarketplaceHealth(request, env);
-    if (url.pathname === MARKETPLACE_EVENT_PATH) return handleMarketplaceEvent(request, env, ctx);
-    if (url.pathname === SITE_EVENT_PATH || url.pathname === LEGACY_SITE_EVENT_PATH) return handleSiteEvent(request, env);
-    if (url.pathname === PROJECT_CLASSIFY_PATH) return handleProjectClassify(request);
-    if (url.pathname === PROJECT_CAPTURE_PATH) return handleProjectCapture(request, env, ctx);
-    if (url.pathname === PROJECT_CONTACT_REQUEST_PATH) return handleProjectContactRequest(request, env, ctx);
-    if (url.pathname === PROJECT_FOLLOWUP_REQUEST_PATH) return handleProjectFollowUpRequest(request, env, ctx);
-    if (url.pathname === PROJECT_HANDYMAN_PHOTOS_PATH) return handleProjectHandymanPhotos(request, env);
-    if (url.pathname === PROJECT_SUBMIT_PATH) return handleProjectSubmit(request, env, ctx);
-    if (url.pathname === WORK_WITH_US_SUBMIT_PATH) return handleWorkWithUsSubmit(request, env, ctx);
-    if (url.pathname === MARKETPLACE_SUBMIT_PATH) return handleMarketplaceSubmit(request, env);
-    if (url.pathname === MARKETPLACE_PUBLIC_PATH) return handleMarketplacePublicListings(request, env);
-    if (url.pathname.startsWith(MARKETPLACE_IMAGE_PREFIX)) return handleMarketplaceImage(request, env, url.pathname);
-    if (url.pathname.startsWith(MARKETPLACE_CONTACT_PREFIX)) return handleMarketplaceContact(request, env, url.pathname);
-    if (url.pathname.startsWith(MARKETPLACE_SHARE_PREFIX)) return handleMarketplaceShare(request, env, url.pathname);
-    if (url.pathname === MARKETPLACE_REPORT_ISSUE_PATH) return handleMarketplaceIssueReport(request, env);
-    if (url.pathname === ADMIN_LOGIN_PATH) return handleAdminLogin(request, env);
-    if (url.pathname === ADMIN_LOGOUT_PATH) return handleAdminLogout(request, env);
-    if (url.pathname === ADMIN_SESSION_PATH) return handleAdminSession(request, env);
-    if (url.pathname === ADMIN_IMPORT_LEGACY_PATH) return handleRetiredLegacyMarketplaceImport(request);
-    if (url.pathname === ADMIN_OPERATIONS_PATH) return handleAdminOperations(request, env);
-    if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
-    if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
-    if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
-    if (url.pathname === PUBLIC_INVENTORY_PATH) return handlePublicInventory(request, env);
-    if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
-    if (url.pathname === SOLAR_QA_VALIDATE_PATH) return handleSolarQaValidate(request, env);
-    if (url.pathname === ADMIN_LEADS_PATH || url.pathname.startsWith(`${ADMIN_LEADS_PATH}/`)) return handleAdminLeads(request, env, url.pathname);
-    if (url.pathname === ADMIN_MARKETPLACE_FOLLOWUPS_PATH || url.pathname.startsWith(`${ADMIN_MARKETPLACE_FOLLOWUPS_PATH}/`)) return handleAdminMarketplaceFollowups(request, env, url.pathname);
-    if (url.pathname === MARKETPLACE_QA_VALIDATE_PATH) return handleMarketplaceQaValidate(request, env);
-    if (url.pathname === ADMIN_QA_TOKEN_PATH) return handleAdminQaToken(request, env);
-    if (url.pathname === ADMIN_MARKETPLACE_ISSUES_PATH) return handleAdminMarketplaceIssues(request, env);
-    if (url.pathname === ADMIN_LISTINGS_PATH || url.pathname.startsWith(`${ADMIN_LISTINGS_PATH}/`)) return handleAdminListings(request, env, url.pathname);
-
-    if (url.pathname === "/api/store-products") {
-      if (request.method !== "GET" && request.method !== "HEAD") {
-        return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
-      }
-
-      try {
-        const response = await getCatalog(request);
-        return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
-      } catch (error) {
-        console.error(JSON.stringify({ event: "store_catalog_error", message: error instanceof Error ? error.message : String(error) }));
-        return Response.json(
-          { error: "The live catalog is temporarily unavailable." },
-          { status: 502, headers: { "Cache-Control": "no-store", ...API_SECURITY_HEADERS, "X-EUS-Store-Build": STORE_BUILD } },
-        );
-      }
+  }
+  const marketplaceEmailConfigured = Boolean(
+    isValidEmail(cleanString(env.MARKETPLACE_EMAIL_TO || DEFAULT_MARKETPLACE_EMAIL_TO, 180)) &&
+    isValidEmail(cleanString(env.MARKETPLACE_EMAIL_FROM || env.SOLAR_EMAIL_FROM, 180)) &&
+    ((env.EMAIL && typeof env.EMAIL.send === "function") || (env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_EMAIL_API_TOKEN))
+  );
+  const solarEmailConfigured = Boolean(
+    isValidEmail(cleanString(env.SOLAR_EMAIL_TO || DEFAULT_SOLAR_EMAIL_TO, 180)) &&
+    isValidEmail(cleanString(env.SOLAR_EMAIL_FROM, 180)) &&
+    ((env.EMAIL && typeof env.EMAIL.send === "function") || (env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_EMAIL_API_TOKEN))
+  );
+  let leadsDb = "unconfigured";
+  if (env.LEADS_DB) {
+    try {
+      await env.LEADS_DB.prepare("SELECT 1 AS ok").first();
+      leadsDb = "ok";
+    } catch (_) {
+      leadsDb = "error";
     }
+  }
+  let siteAnalyticsD1 = "unconfigured";
+  if (env.MARKETPLACE_DB) {
+    try {
+      await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok FROM eus_site_events LIMIT 1").first();
+      siteAnalyticsD1 = "ok";
+    } catch (_) {
+      siteAnalyticsD1 = "error";
+    }
+  }
+  const siteAnalyticsEngine = env.SITE_ANALYTICS && typeof env.SITE_ANALYTICS.writeDataPoint === "function" ? "configured" : "disabled_deferred";
+  const legacyAnalyticsEngine = env.ANALYTICS && typeof env.ANALYTICS.writeDataPoint === "function" ? "configured" : "unconfigured";
+  const healthy = marketplaceDb === "ok" && leadsDb === "ok" && siteAnalyticsD1 === "ok" && Boolean(env.ASSETS) && Boolean(env.LISTING_IMAGES) && marketplaceEmailConfigured && solarEmailConfigured;
+  const payload = {
+    status: healthy ? "ok" : "degraded",
+    build: OPERATIONS_BUILD,
+    checkedAt: new Date().toISOString(),
+    services: {
+      siteAssets: env.ASSETS ? "configured" : "unconfigured",
+      marketplaceDatabase: marketplaceDb,
+      leadsDatabase: leadsDb,
+      marketplaceImages: env.LISTING_IMAGES ? "configured" : "unconfigured",
+      siteAnalyticsD1,
+      siteAnalyticsEngine,
+      legacyAnalyticsEngine,
+      marketplaceNotifications: marketplaceEmailConfigured ? "configured" : "unconfigured",
+      solarNotifications: solarEmailConfigured ? "configured" : "unconfigured",
+    },
+    note: "D1 eus_site_events is the active first-party analytics store. Analytics Engine is intentionally deferred; notification status confirms configuration only, not inbox delivery.",
+  };
+  const response = jsonResponse(payload, healthy ? 200 : 503, {
+    "X-EUS-Operations-Build": OPERATIONS_BUILD,
+    "X-EUS-Monitoring": "health",
+    "X-Robots-Tag": "noindex, nofollow, noarchive",
+  });
+  return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
+}
 
-    return env.ASSETS.fetch(request);
-  },
+export {
+  handleAdminQaToken,
+  handleHealth
 };

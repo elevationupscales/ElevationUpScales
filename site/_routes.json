@@ -12,6 +12,7 @@
     "/rv-store",
     "/rv-store/*",
     "/worker-core.js",
+    "/worker/*",
     "/store-checkout-server.js",
     "/store-orders-admin-server.js",
     "/catalog-admin-server.js",

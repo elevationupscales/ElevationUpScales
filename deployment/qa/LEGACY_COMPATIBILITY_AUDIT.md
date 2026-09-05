@@ -1,0 +1,90 @@
+# Website Rebuild — Legacy / Compatibility Audit
+
+## Policy
+
+Compatibility behavior is retained unless direct route, redirect, metadata, sitemap and browser parity prove retirement safe. This pass does not remove aliases merely because they are old.
+
+## Redirect contract — RETAINED / COMPATIBILITY
+
+- `/gallery /#work 301`
+- `/gallery/ /#work 301`
+- `/gallery.html /#work 301`
+- `/admin/ /admin 308`
+- `/admin.html /admin 301`
+- `/admin-analytics.html /admin-analytics 301`
+- `/admin-channels.html /admin-channels 301`
+- `/admin-promotion.html /admin-promotion 301`
+- `/admin-listings/ /admin-listings 308`
+- `/admin-listings.html /admin-listings 301`
+- `/assets/new-client-coupon.webp / 301`
+- `/index.html / 301`
+- `/home-services.html /home-services 301`
+- `/rv-services.html /rv-services 301`
+- `/solar-services.html /solar-services 301`
+- `/privacy.html /privacy 301`
+- `/store.html /store 301`
+- `/marketplace.html /marketplace 301`
+- `/rv /marketplace 301`
+- `/rv/ /marketplace 301`
+- `/rv.html /marketplace 301`
+- `/rvs /marketplace 301`
+- `/rvs/ /marketplace 301`
+- `/rvs.html /marketplace 301`
+- `/list-an-rv.html /list-an-rv 301`
+- `/collector.html /collector 301`
+- `/start-a-project.html /start-a-project 301`
+- `/other-ways-we-can-help.html /other-ways-we-can-help 301`
+- `/work-with-us.html /work-with-us 301`
+- `/start-a-project/ /start-a-project 301`
+- `/other-ways-we-can-help/ /other-ways-we-can-help 301`
+- `/work-with-us/ /work-with-us 301`
+- `/solar-project/ /solar-project 301`
+- `/product.html /product 301`
+- `/product/ /product 308`
+- `/home-project /start-a-project?type=home&source=legacy-route 302`
+- `/home-project/ /start-a-project?type=home&source=legacy-route 302`
+- `/home-project.html /start-a-project?type=home&source=legacy-route 302`
+- `/rv-project /start-a-project?type=rv&source=legacy-route 302`
+- `/rv-project/ /start-a-project?type=rv&source=legacy-route 302`
+- `/rv-project.html /start-a-project?type=rv&source=legacy-route 302`
+- `/make-a-listing.html /make-a-listing 301`
+- `/list-a-vehicle.html /list-a-vehicle 301`
+- `/vehicles /marketplace#vehicles 302`
+- `/vehicles/ /marketplace#vehicles 302`
+- `/vehicles.html /marketplace#vehicles 302`
+- `/list-a-motorcycle.html /list-a-motorcycle 301`
+- `/list-a-boat.html /list-a-boat 301`
+- `/list-a-bicycle.html /list-a-bicycle 301`
+- `/sell /make-a-listing 301`
+- `/sell-a-vehicle /make-a-listing 301`
+- `/sell-an-rv /list-an-rv 301`
+- `/cars /marketplace#vehicles 302`
+- `/trucks /marketplace#vehicles 302`
+- `/cars-trucks /marketplace#vehicles 302`
+- `/sell-a-car /list-a-vehicle 302`
+- `/sell-a-truck /list-a-vehicle 302`
+- `/list-a-car /list-a-vehicle 302`
+- `/list-a-truck /list-a-vehicle 302`
+- `/technician.html /technician 301`
+- `/report-an-issue.html /report-an-issue 301`
+- `/outdoor-store /rv-store 301`
+- `/rv-outdoor-store /rv-store 301`
+- `/shop/rv /rv-store 301`
+
+## Explicit retained compatibility
+
+- `.html` aliases where configured
+- `/home-project*`
+- `/rv-project*`
+- Marketplace seller aliases
+- Store/RV aliases
+- `/technician.html`
+- Gallery legacy aliases
+
+## Explicit retired/non-route
+
+- `/project-guides` remains absent from the sitemap and is not recreated.
+
+## CSS disposition
+
+- `RETAINED — references remain: site/admin-command-center.css`
