@@ -14,8 +14,15 @@ assert rows['SK12V100PC']['priceCents'] >= 31900
 assert rows['SK48V100N']['priceCents'] >= 119900
 assert rows['SK12V100PC']['availabilityMode'] == 'available'
 assert rows['SK48V100N']['availabilityMode'] == 'prepurchase'
-for p in rows.values():
-    promo=p.get('promotion',{}); assert promo.get('eligible') is False; assert promo.get('couponEligible') is False; assert promo.get('pricingMode') == 'sok-map'
+for sku,p in rows.items():
+    promo=p.get('promotion',{})
+    assert promo.get('eligible') is False
+    assert promo.get('couponEligible') is False
+    if sku in ('SK12V100PC','SK48V100N'):
+        assert promo.get('pricingMode') == 'sok-map'
+    else:
+        assert p.get('priceCents') is None
+        assert promo.get('pricingMode') == 'purchase-options'
 raw=json.dumps(d).lower()
 for token in ['suppliercost','supplierinventory','sourcewarehouse','dropshipcost','landedcost','margincents','primary_carrier','carrier_state','economics_state']:
     assert token not in raw, token
