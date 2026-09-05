@@ -1,0 +1,120 @@
+name: One-time SOK Full-Line Production
+
+on:
+  push:
+    branches:
+      - runner/sok-full-line-production-2026-09-04
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: sok-full-line-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-and-verify:
+    name: Deploy exact accepted full-line release and verify production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact accepted release
+        uses: actions/checkout@v6
+        with:
+          ref: 0dc18bb546a542da4ae98713dc57bd59e7b02c42
+          fetch-depth: 0
+
+      - name: Enforce exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "0dc18bb546a542da4ae98713dc57bd59e7b02c42"
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "0dc18bb546a542da4ae98713dc57bd59e7b02c42"
+
+      - name: Re-run accepted release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deployment/qa/sok-commercialization-static.mjs
+          node deployment/qa/sok-full-line-static.mjs
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+          test -z "$(find site -type f -size +25M -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+          test -f site/index.html
+          test -f site/store.html
+          test -f site/rv-store.html
+          test -f site/lithium-batteries.html
+          test -f site/hawaii-lithium-batteries.html
+          test -f site/checkout/index.html
+          test -f site/start-a-project.html
+          test -f site/marketplace.html
+          test -f site/solar-project.html
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'Hawaii Lithium Batteries' site/store.html
+          grep -q 'sok-solar-builder.js' site/solar-project.html
+          grep -q '208-813-4998' site/index.html
+
+      - name: Deploy exact release to Cloudflare production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable production deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          bash deployment/qa/sok-commercialization-preview.sh "$BASE"
+          bash deployment/qa/sok-full-line-preview.sh "$BASE"
+          base="${BASE%/}"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /sok-batteries /checkout/ /start-a-project /solar-project /marketplace; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/production-route -w '%{http_code}' "$base$route" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+      - name: Smoke canonical production
+        shell: bash
+        run: |
+          set -euo pipefail
+          canonical="https://elevationupscales.com"
+          passed=0
+          for attempt in $(seq 1 12); do
+            echo "Canonical SOK full-line smoke attempt $attempt"
+            if bash deployment/qa/sok-commercialization-preview.sh "$canonical" && bash deployment/qa/sok-full-line-preview.sh "$canonical"; then
+              passed=1
+              break
+            fi
+            sleep 5
+          done
+          test "$passed" = "1"
+          for route in / /store /rv-store /lithium-batteries /hawaii-lithium-batteries /sok-batteries /checkout/ /start-a-project /solar-project /marketplace; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/canonical-route -w '%{http_code}' "${canonical}${route}" || true)
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+
+      - name: Production acceptance receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### SOK FULL-LINE CATALOG — PRODUCTION ACCEPTED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Validated application SHA: fb8d8bc9e394d0b4ba478ba5c475e7a344ad2233" >> "$GITHUB_STEP_SUMMARY"
+          echo "Final clean release SHA: 0dc18bb546a542da4ae98713dc57bd59e7b02c42" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production SHA: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable deployment: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical: https://elevationupscales.com" >> "$GITHUB_STEP_SUMMARY"
+          echo "RC run: 33940268474" >> "$GITHUB_STEP_SUMMARY"
+          echo "MAP / Purchase Options result: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Hawaii 1-3 / 4+ gate: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Supplier-data exposure: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Post-production canonical smoke: PASS" >> "$GITHUB_STEP_SUMMARY"
