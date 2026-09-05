@@ -1,0 +1,128 @@
+name: WEB-VISUAL-0905-02 Production Visual Audit
+
+on:
+  push:
+    branches:
+      - control/web-visual-0905-02-production-visual-audit-20260905
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+  PROD: https://elevationupscales.com
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+
+      - name: Confirm deployed source remains exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse origin/main)" = "$CANDIDATE_SHA"
+          curl -sS -L --fail "$PROD/" -o /tmp/home.html
+          grep -q 'Power Beyond' /tmp/home.html
+          grep -q 'Built Around SOK' /tmp/home.html
+          grep -q 'We Handle the Logistics' /tmp/home.html
+          echo production_source_and_copy=PASS
+
+      - name: Install browser verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Stabilized desktop/mobile production visual audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p production-visual-evidence
+          cat > production-visual.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const base='https://elevationupscales.com';
+          const browser=await chromium.launch({headless:true});
+          const checks=[];
+          async function badVisibleImages(page){
+            return await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{
+              const r=i.getBoundingClientRect(); const s=getComputedStyle(i);
+              const visible=s.display!=='none'&&s.visibility!=='hidden'&&r.width>2&&r.height>2&&r.bottom>0&&r.top<innerHeight;
+              return visible&&(!i.complete||i.naturalWidth===0);
+            }).map(i=>i.currentSrc||i.src||i.alt));
+          }
+          for (const [mode,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+            for (const [name,path] of [['home','/'],['sok','/sok-batteries']]) {
+              const context=await browser.newContext({viewport});
+              const page=await context.newPage();
+              const res=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:30000});
+              if(!res||res.status()!==200) throw new Error(`${mode} ${path} status ${res?.status()}`);
+              await page.waitForTimeout(3500);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} overflow ${overflow}`);
+              let bad=await badVisibleImages(page);
+              if(bad.length){ await page.waitForTimeout(3000); bad=await badVisibleImages(page); }
+              if(bad.length) throw new Error(`${mode} ${path} visible broken images ${bad.join(', ')}`);
+              const brand=page.locator('.eus-brand>img').first();
+              if(await brand.count()) {
+                const mark=await brand.evaluate(el=>({content:getComputedStyle(el).content,fit:getComputedStyle(el).objectFit,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height}));
+                if(!String(mark.content).includes('storefront-wordmark')) throw new Error(`${mode} ${path} storefront wordmark missing`);
+                if(mark.fit!=='contain') throw new Error(`${mode} ${path} wordmark object-fit=${mark.fit}`);
+                if(mark.w<120||mark.h<35||mark.h>100) throw new Error(`${mode} ${path} wordmark box ${mark.w}x${mark.h}`);
+              }
+              if(name==='home') {
+                if(!(await page.locator('.retail-hero').isVisible())) throw new Error(`${mode} homepage retail hero missing`);
+                if(!(await page.getByText('Power Beyond', {exact:false}).first().isVisible())) throw new Error(`${mode} homepage hero copy missing`);
+                if(!(await page.getByText('Built Around SOK', {exact:false}).first().isVisible())) throw new Error(`${mode} homepage SOK section missing`);
+                if(!(await page.getByText('We Handle the Logistics', {exact:false}).first().isVisible())) throw new Error(`${mode} homepage logistics section missing`);
+              } else {
+                if(!(await page.getByText('SOK power with a clear path to purchase.', {exact:false}).first().isVisible())) throw new Error(`${mode} SOK catalog hero missing`);
+              }
+              if(mode==='mobile') {
+                const toggle=page.locator('.eus-menu-toggle').first();
+                if(await toggle.count()&&await toggle.isVisible()) {
+                  await toggle.click(); await page.waitForTimeout(250);
+                  if((await toggle.getAttribute('aria-expanded'))!=='true') throw new Error(`mobile ${path} menu failed`);
+                }
+              }
+              await page.screenshot({path:`production-visual-evidence/${name}-${mode}.png`,fullPage:true});
+              checks.push({mode,path,overflow,badVisibleImages:bad.length});
+              await context.close();
+            }
+          }
+          await browser.close();
+          fs.writeFileSync('production-visual-evidence/report.json',JSON.stringify({candidate:'37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4',base,checks},null,2));
+          console.log('production_visual_audit=PASS');
+          NODE
+          node production-visual.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-visual-0905-02-production-evidence
+          path: production-visual-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Receipt
+        shell: bash
+        run: |
+          {
+            echo '### WEB-VISUAL-0905-02 production visual audit — PASS'
+            echo "- Candidate / main: $CANDIDATE_SHA"
+            echo '- Canonical production: https://elevationupscales.com'
+            echo '- Desktop homepage: PASS'
+            echo '- Mobile homepage: PASS'
+            echo '- Desktop SOK catalog: PASS'
+            echo '- Mobile SOK catalog: PASS'
+            echo '- Storefront wordmark: PASS'
+            echo '- Horizontal overflow: PASS'
+            echo '- Visible broken images: 0'
+          } >> "$GITHUB_STEP_SUMMARY"
