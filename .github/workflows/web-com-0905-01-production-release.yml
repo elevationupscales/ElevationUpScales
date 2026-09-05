@@ -1,0 +1,202 @@
+name: WEB-COM-0905-01 Production Release
+
+on:
+  push:
+    branches:
+      - control/web-com-0905-01-production-20260905
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: web-com-0905-01-production
+  cancel-in-progress: false
+
+env:
+  APPROVED_SHA: 1ab4f033b395a441336428cf651a89d2921b4b3c
+  PROD_BASE: https://elevationupscales.com
+
+jobs:
+  deploy-and-smoke:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact owner-approved candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 1ab4f033b395a441336428cf651a89d2921b4b3c
+          fetch-depth: 0
+
+      - name: Verify production custody and exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$APPROVED_SHA"
+          test "$(git rev-parse origin/main)" = "$APPROVED_SHA"
+          echo "approved_source=$APPROVED_SHA"
+
+      - name: Re-run canonical release QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          git diff --exit-code
+
+      - name: Block deployable credentials and oversized artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
+            echo 'BLOCKED: credential-like value found in deployable source.'
+            exit 1
+          fi
+
+      - name: Deploy exact candidate to Cloudflare Pages production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable production deployment
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          echo "deployment_url=$DEPLOY_URL"
+          npm run qa:preview -- "${DEPLOY_URL%/}"
+
+      - name: Wait for canonical production to serve approved visual candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 20); do
+            if curl -fsSL --retry 2 --retry-all-errors "$PROD_BASE/" -o /tmp/prod-home.html \
+              && grep -Fq 'Lithium.<br>Logistics.<br>Off-Grid Power.' /tmp/prod-home.html \
+              && grep -Fq 'Lithium &amp; Outdoor Dealer' /tmp/prod-home.html \
+              && grep -Fq 'FREIGHT &amp; SHIPPING LOGISTICS' /tmp/prod-home.html; then
+              echo "canonical_visual=PASS attempt=$attempt"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo 'Canonical production did not converge to the approved candidate in time.'
+          exit 1
+
+      - name: Production PayPal live configuration smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 6 --retry-all-errors "$PROD_BASE/api/store-checkout/config" -o /tmp/paypal-config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/paypal-config.json'))
+          assert data.get('ok') is True
+          assert data.get('environment') == 'live'
+          assert data.get('credentialsConfigured') is True
+          assert data.get('checkoutEnabled') is True
+          assert bool(data.get('clientId'))
+          print('paypal_live_config=PASS')
+          PY
+
+      - name: Production server-authoritative quote smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/quote-request.json <<'JSON'
+          {"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":"","couponCode":""}
+          JSON
+          code=$(curl -sS -L --retry 4 --retry-all-errors \
+            -H "Origin: $PROD_BASE" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data @/tmp/quote-request.json \
+            -o /tmp/quote.json -w '%{http_code}' \
+            "$PROD_BASE/api/store-checkout/quote")
+          cat /tmp/quote.json
+          test "$code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/quote.json'))
+          assert data.get('ok') is True
+          assert int(data.get('unitPriceCents') or 0) > 0
+          assert int(data.get('totalCents') or 0) > 0
+          print('production_quote=PASS')
+          print('unit_price_cents='+str(data.get('unitPriceCents')))
+          print('shipping_cents='+str(data.get('shippingCents')))
+          print('total_cents='+str(data.get('totalCents')))
+          PY
+
+      - name: Production PayPal live order-initiation smoke — NO CAPTURE
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/order-request.json <<'JSON'
+          {
+            "source":"apparel",
+            "id":"black-and-gold-signature-t-shirt",
+            "quantity":1,
+            "variantId":"",
+            "couponCode":"",
+            "customer":{"email":"paypal-smoke@elevationupscales.com","phone":""},
+            "shipping":{
+              "fullName":"WEB-COM-0905-01 PAYPAL SMOKE - DO NOT FULFILL",
+              "address1":"1 Test Way",
+              "address2":"",
+              "city":"Denver",
+              "state":"CO",
+              "postalCode":"80202",
+              "countryCode":"US"
+            }
+          }
+          JSON
+          code=$(curl -sS -L --retry 2 --retry-all-errors \
+            -H "Origin: $PROD_BASE" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data @/tmp/order-request.json \
+            -o /tmp/order.json -w '%{http_code}' \
+            "$PROD_BASE/api/store-checkout/orders")
+          cat /tmp/order.json
+          test "$code" = "200" -o "$code" = "201"
+          python - <<'PY'
+          import json,re
+          data=json.load(open('/tmp/order.json'))
+          order_id=str(data.get('id') or '')
+          assert re.fullmatch(r'[A-Za-z0-9]{8,40}', order_id), data
+          print('paypal_live_order_create=PASS')
+          print('paypal_order_id='+order_id)
+          print('store_reference='+str(data.get('reference') or ''))
+          print('capture_called=NO')
+          print('funds_moved=NO')
+          PY
+
+      - name: Final production route and security smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$PROD_BASE"
+
+      - name: Release receipt
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### WEB-COM-0905-01 production release — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Approved source: $APPROVED_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production deployment: $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical production: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Technical / commerce / visual production smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal live config: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal live order initiation: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PayPal capture: NOT CALLED / NO FUNDS MOVED' >> "$GITHUB_STEP_SUMMARY"
