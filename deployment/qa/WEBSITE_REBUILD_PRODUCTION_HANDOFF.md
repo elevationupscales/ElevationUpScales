@@ -2,36 +2,95 @@
 
 ## Status
 
-`CLEAN-BASELINE CANDIDATE READY — PRODUCTION UNCHANGED`
+`WEBSITE REBUILD CODE COMPLETE — CLEAN BASELINE VALIDATED — PRODUCTION UNCHANGED`
 
-## Source
+## Validated application source
 
 - Accepted production base: `995ddef117be2ba5b26e154ea43409271fc938a9`
-- Preview-validated runtime source before Phase 7: `983d2153448de31eddf551492f221b9f973f10ae`
-- Phase 7 workflow run: `33970456341`
-- Final isolated preview: `https://72508c71.elevationupscales.pages.dev`
+- Final validated application candidate: `0ad9c73781d82fc276476fe6123b4c27cd544492`
+- Final committed-source validation run: `33973499299`
+- Final isolated preview: `https://fb9fc421.elevationupscales.pages.dev`
+- Candidate relation to production: `48 commits ahead / 0 behind`
+- Production `main`: unchanged at `995ddef117be2ba5b26e154ea43409271fc938a9`
 
-## Validation
+Receipt-only commits after the validated application candidate may update this handoff/manifest. They do not change `site/` runtime code and do not replace the validated application SHA above.
 
-- Worker domain decomposition: PASS
-- Static/parity suite: PASS
-- Runtime route protection: PASS
-- Admin unauthorized 401 contracts: PASS
-- Protected runtime 404 contracts: PASS
-- Public/Admin route smoke: PASS
-- SOK commercialization/full-line smoke: PASS
-- Website integrity smoke: PASS
-- Accepted degraded-health contract: PASS
-- Legacy Admin CSS retirement with zero runtime references: PASS
+## Code completion
+
+- Browser shell consolidation: PASS
+- SOK Purchase Options consolidation: PASS
+- Admin view-model/control consolidation: PASS
+- Worker business-domain decomposition: PASS
+- Thin `worker-core.js` dispatcher: PASS
+- Explicit named Worker dependencies: PASS
+- Shared Worker response/security/HTML/validation runtime: PASS
+- Duplicate shared prep implementations retired: PASS
+- Canonical Worker route-contract module: PASS
+- `/api/store-products` compatibility ownership moved into compatibility domain: PASS
+- Runtime source protection: PASS
+- Legacy Admin Pass 1 CSS retirement: PASS
+- Compatibility/redirect retention: PASS
+
+## Script / build completion
+
+Canonical commands:
+
+- `npm run rebuild:verify`
+- `npm test`
+- `npm run check`
+- `npm run qa`
+- `npm run qa:preview -- <preview-url>`
+
+Final script behavior:
+
+- `deployment/rebuild/verify-complete-rebuild.py` is the authoritative rebuild-layout verifier.
+- `split-worker-core.py` and `finalize-cleanup.py` are safe verification-only compatibility entrypoints; their historical mutation behavior is retired.
+- Migration utilities are retained for provenance but are not executed by final CI.
+- `.github/workflows/website-rebuild-complete-code.yml` validates committed source only; it does not generate, recommit, push `main`, or deploy production.
+- `.github/workflows/release-candidate-gate.yml` uses the same canonical committed-source and preview gates and verifies candidate immutability.
+
+## Final validation
+
+Run `33973499299` passed:
+
+- rebuild source invariants;
+- complete unit/static suite;
+- 111 JavaScript syntax checks;
+- Worker compilation;
+- isolated Pages preview deployment;
+- public route regression;
+- Admin route regression;
+- Admin/sync unauthorized `401` contracts;
+- protected runtime `404` contracts;
+- `/api/store-products` GET + HEAD compatibility;
+- accepted health/degraded-notification contract;
+- SOK commercialization smoke;
+- SOK full-line smoke;
+- website integrity smoke;
+- candidate working-tree immutability.
 
 ## Protected scope
 
-No DB/schema/migration, Cloudflare binding/secret, production data, checkout/PayPal server, SOK/Hawaii server, supplier ownership, or `_redirects` change is authorized by this handoff.
+This rebuild does **not** authorize or contain intentional changes to:
+
+- D1 schema/migrations;
+- production data;
+- Cloudflare binding values or secrets;
+- checkout/PayPal server business rules;
+- SOK/Hawaii server business rules;
+- supplier source-of-truth ownership;
+- Marketplace/Catalog separation;
+- Technician Portal ownership;
+- accepted `_redirects` compatibility behavior.
 
 ## Rollback
 
-Production rollback baseline remains `995ddef117be2ba5b26e154ea43409271fc938a9` until an explicit production promotion is authorized and accepted.
+Until explicit production promotion is accepted, rollback/production baseline remains:
 
-## Authority
+`995ddef117be2ba5b26e154ea43409271fc938a9`
 
-This is a deployment-ready non-production handoff. It is **not** authorization to push `main` or deploy production.
+## Disposition
+
+The approved Website Rebuild **code build is complete**.
+
+The next action belongs to controlled Deployment: validate/promote the exact application candidate through the existing production authorization path. This handoff is not itself authorization to push `main` or deploy production.
