@@ -1,0 +1,129 @@
+name: One-time Independent Website Rebuild QA
+
+on:
+  push:
+    branches:
+      - runner/independent-website-rebuild-qa-2026-09-05
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: independent-website-rebuild-qa-2026-09-05
+  cancel-in-progress: true
+
+env:
+  CANDIDATE_SHA: 0ad9c73781d82fc276476fe6123b4c27cd544492
+  ACCEPTED_MAIN: 995ddef117be2ba5b26e154ea43409271fc938a9
+  PREVIEW_BRANCH: independent-website-rebuild-qa-2026-09-05
+
+jobs:
+  independent-qa:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out exact finished candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Verify lineage and accepted production has not moved
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse origin/main)" = "$ACCEPTED_MAIN"
+          git merge-base --is-ancestor "$ACCEPTED_MAIN" "$CANDIDATE_SHA"
+          test "$(git rev-list --count "$ACCEPTED_MAIN..$CANDIDATE_SHA")" -eq 48
+          test "$(git rev-list --count "$CANDIDATE_SHA..$ACCEPTED_MAIN")" -eq 0
+
+      - name: Independently protect business-critical server contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          protected=(
+            site/store-checkout-server.js
+            site/store-orders-admin-server.js
+            site/commerce-pricing-runtime.js
+            site/promotion-runtime.js
+            site/hawaii-lithium-runtime.js
+            site/sok-operations-runtime.js
+            site/sok-availability-runtime.js
+            site/sok-full-line-runtime.js
+            site/sync-admin-runtime.js
+            site/doba-csv-sync-runtime.js
+            site/apparel-provider-runtime.js
+            site/commerce-schema-migrations.js
+            site/_redirects
+          )
+          for path in "${protected[@]}"; do
+            if ! git diff --quiet "$ACCEPTED_MAIN" "$CANDIDATE_SHA" -- "$path"; then
+              echo "Protected contract changed unexpectedly: $path" >&2
+              exit 1
+            fi
+          done
+          echo "Protected business/server contract diff: PASS"
+
+      - name: Run canonical committed-source QA independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run rebuild:verify
+          npm test
+          npm run check
+          git diff --check "$ACCEPTED_MAIN" "$CANDIDATE_SHA"
+          git diff --exit-code
+
+      - name: Independent JavaScript syntax sweep
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+            count=$((count + 1))
+          done < <(find site src tests deployment/qa -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          echo "JavaScript syntax files checked: $count"
+          test "$count" -ge 100
+
+      - name: Deploy separate independent preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ env.PREVIEW_BRANCH }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run canonical preview regression independently
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$PREVIEW_URL"
+
+      - name: Candidate immutability and final result
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          {
+            echo "### Independent Website Rebuild QA — PASS"
+            echo "Candidate: $CANDIDATE_SHA"
+            echo "Accepted main: $ACCEPTED_MAIN"
+            echo "Independent preview: $PREVIEW_URL"
+            echo "Lineage: PASS (48 ahead / 0 behind)"
+            echo "Protected server contracts: PASS"
+            echo "Canonical source QA: PASS"
+            echo "Independent JavaScript syntax sweep: PASS"
+            echo "Preview regression: PASS"
+            echo "Candidate immutability: PASS"
+            echo "Production: UNCHANGED"
+          } >> "$GITHUB_STEP_SUMMARY"
