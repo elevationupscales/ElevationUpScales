@@ -1,0 +1,99 @@
+name: WEB-VISUAL-0905-02 Baseline Media Compare
+
+on:
+  push:
+    branches:
+      - control/web-visual-0905-02-release-20260905
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    env:
+      PROD: https://elevationupscales.com
+      PREVIEW: https://web-visual-0905-02-preview.elevationupscales.pages.dev
+      EXPECTED_MAIN: 1ab4f033b395a441336428cf651a89d2921b4b3c
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: control/web-visual-0905-02-release-20260905
+          fetch-depth: 0
+
+      - name: Confirm production source is still unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          echo "production_main_unchanged=PASS"
+
+      - name: Install headless verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Compare live baseline and exact-candidate preview lithium media
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p media-compare
+          cat > baseline-media-compare.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const targets = [['production',process.env.PROD],['preview',process.env.PREVIEW]];
+          const browser = await chromium.launch({headless:true});
+          const results={};
+          for (const [label,base] of targets) {
+            const context=await browser.newContext({viewport:{width:1440,height:1000}});
+            const page=await context.newPage();
+            const responses=[];
+            page.on('response',r=>{if(r.request().resourceType()==='image') responses.push({url:r.url(),status:r.status()});});
+            const doc=await page.goto(base+'/lithium-batteries',{waitUntil:'domcontentloaded',timeout:45000});
+            if(!doc||doc.status()!==200) throw new Error(`${label} document ${doc?.status()}`);
+            await page.waitForTimeout(4500);
+            const imgs=await page.locator('img').evaluateAll(nodes=>nodes.map(i=>({src:i.currentSrc||i.src||'',visible:getComputedStyle(i).display!=='none'&&getComputedStyle(i).visibility!=='hidden'&&i.getBoundingClientRect().width>2,complete:i.complete,naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight})).filter(x=>x.visible));
+            const bad=imgs.filter(x=>!x.complete||x.naturalWidth===0).map(x=>x.src).sort();
+            const doba=imgs.filter(x=>x.src.includes('image.doba.com')).map(x=>({src:x.src,ok:x.complete&&x.naturalWidth>0,naturalWidth:x.naturalWidth,naturalHeight:x.naturalHeight}));
+            results[label]={bad,doba,responseFailures:responses.filter(x=>x.status>=400)};
+            await page.screenshot({path:`media-compare/${label}-lithium.png`,fullPage:true});
+            await context.close();
+          }
+          await browser.close();
+          const prodBad=new Set(results.production.bad);
+          const prevBad=new Set(results.preview.bad);
+          const previewOnly=[...prevBad].filter(x=>!prodBad.has(x));
+          const prodOnly=[...prodBad].filter(x=>!prevBad.has(x));
+          const common=[...prevBad].filter(x=>prodBad.has(x));
+          const summary={productionBad:results.production.bad.length,previewBad:results.preview.bad.length,commonBad:common.length,previewOnlyBad:previewOnly.length,productionOnlyBad:prodOnly.length,common,previewOnly,productionOnly:prodOnly,results};
+          fs.writeFileSync('media-compare/report.json',JSON.stringify(summary,null,2));
+          console.log(`production_bad_images=${summary.productionBad}`);
+          console.log(`preview_bad_images=${summary.previewBad}`);
+          console.log(`common_bad_images=${summary.commonBad}`);
+          console.log(`preview_only_bad_images=${summary.previewOnlyBad}`);
+          console.log(`production_only_bad_images=${summary.productionOnlyBad}`);
+          if(summary.productionBad===0 && summary.previewBad>0) console.log('classification=PREVIEW_HOST_ONLY_MEDIA_FAILURE');
+          else if(summary.commonBad===summary.previewBad && summary.previewOnlyBad===0) console.log('classification=PREEXISTING_BASELINE_MEDIA_FAILURE');
+          else if(summary.previewOnlyBad>0) console.log('classification=MIXED_OR_PREVIEW_SPECIFIC_MEDIA_FAILURE');
+          else console.log('classification=NO_MEDIA_FAILURE');
+          NODE
+          node baseline-media-compare.mjs
+          rm -f baseline-media-compare.mjs
+
+      - name: Upload comparison evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-visual-0905-02-baseline-media-compare
+          path: media-compare/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Receipt
+        shell: bash
+        run: |
+          echo '### WEB-VISUAL-0905-02 baseline media compare complete' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production remained unchanged during diagnostic.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'See report artifact for production vs preview broken-image classification.' >> "$GITHUB_STEP_SUMMARY"
