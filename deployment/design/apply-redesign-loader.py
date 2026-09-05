@@ -43,5 +43,5 @@ source = TARGET.read_text(encoding="utf-8")
 if MARKER in source:
     print("Shared redesign loader already present; no change.")
 else:
-    TARGET.write_text(source.rstrip() + BLOCK + "\n", encoding="utf-8")
+    TARGET.write_text(source.rstrip() + BLOCK.rstrip() + "\n", encoding="utf-8")
     print("Appended presentation-only redesign loader to site/site-shell.js")
