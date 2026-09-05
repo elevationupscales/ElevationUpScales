@@ -1,0 +1,99 @@
+name: WEB-VISUAL-0905-01 Final Retail Shell Patch 2
+
+on:
+  push:
+    branches:
+      - work/web-visual-0905-01-retail-first
+
+permissions:
+  contents: write
+
+jobs:
+  finish-retail-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/web-visual-0905-01-retail-first
+          fetch-depth: 0
+      - name: Apply final retail presentation patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          home=Path('site/index.html')
+          s=home.read_text()
+          for old,new in {
+            'data-eus-event="hero_power_cta"':'data-eus-event="homepage_product_detail_open"',
+            'data-eus-event="hero_sok_cta"':'data-eus-event="homepage_sok_open"',
+            'data-eus-event="shop_application_open"':'data-eus-event="homepage_product_detail_open"',
+            'data-eus-event="commercial_power_open"':'data-eus-event="commercial_review_route"',
+            'data-eus-event="hawaii_logistics_open"':'data-eus-event="homepage_logistics_route"',
+            'data-eus-event="sok_catalog_open"':'data-eus-event="homepage_sok_open"',
+            'data-eus-event="purchase_options_start"':'data-eus-event="purchase_options_open"',
+          }.items():
+            if old not in s: raise SystemExit(f'missing analytics marker {old}')
+            s=s.replace(old,new)
+          home.write_text(s)
+
+          lithium=Path('site/lithium-batteries.html')
+          s=lithium.read_text()
+          old='Some currently qualified Hawaii battery listings use <strong>$99 per actual battery</strong> to the Honolulu warehouse / freight-terminal pickup location. SOK products do not inherit that flat freight assumption: they show <strong>Freight Review Required</strong> until the exact product route is qualified. Alaska shipping remains Freight Review Required.'
+          new='Hawaii battery orders use product-, quantity-, and destination-specific freight review. Eligible purchase paths show current availability or <strong>Freight Review Required</strong> before payment. SOK products remain route-specific and do not inherit a flat freight assumption. Alaska shipping remains Freight Review Required.'
+          if old not in s: raise SystemExit('retired fixed Hawaii freight copy not found')
+          s=s.replace(old,new).replace('LICENSED LITHIUM BATTERY RETAILER','LITHIUM &amp; OUTDOOR DEALER')
+          lithium.write_text(s)
+
+          shell=Path('site/site-shell.js')
+          s=shell.read_text()
+          old='''  const SHOP_LINKS = Object.freeze([\n    ["/store", "Apparel Store", "Hats, apparel, artwork, stickers, and official Elevation releases"],\n    ["/rv-store", "RV & Outdoor Store", "RV parts, accessories, camping gear, travel items, and off-grid essentials"],\n    ["/lithium-batteries", "Lithium Battery Shop", "LiFePO4 batteries for RV, solar, van, and off-grid power"],\n    ["/sok-batteries", "SOK Battery Systems", "Authorized SOK Energy Dealer · 12V and 48V LiFePO4"],\n    ["/hawaii-lithium-batteries", "Hawaii Power & Logistics", "Eligible battery models · Hawaii freight intake"],\n    ["/collector", "Collector Series", "Explore the four-card collection and Golden Ticket"],\n  ]);'''
+          new='''  const SHOP_LINKS = Object.freeze([\n    ["/lithium-batteries", "Lithium Batteries", "12V, 24V and 48V LiFePO4 for RV, solar and off-grid power"],\n    ["/sok-batteries", "SOK Energy", "Authorized SOK Energy Dealer · batteries, chargers and accessories"],\n    ["/rv-store", "RV & Outdoor", "RV essentials, camping, travel and practical outdoor equipment"],\n    ["/hawaii-lithium-batteries", "Hawaii Power & Logistics", "Battery availability and destination-specific freight review"],\n    ["/store", "Elevation Gear", "Apparel, hats and current Elevation releases"],\n    ["/collector", "Collector Series", "Explore current collector releases"],\n  ]);'''
+          if old not in s: raise SystemExit('SHOP_LINKS block changed unexpectedly')
+          s=s.replace(old,new,1)
+          anchor='  function installNavigation() {'
+          retail='''  function installRetailStoreShell() {\n    const path = location.pathname.replace(/\\/+$/, "") || "/";\n    const retailRoute = path === "/store" || path === "/rv-store" || path === "/lithium-batteries" || path === "/sok-batteries" || path === "/hawaii-lithium-batteries" || path === "/collector" || path === "/checkout" || path === "/product" || path.startsWith("/sok/");\n    if (!retailRoute || document.body.classList.contains("retail-home")) return;\n    document.body.classList.add("retail-store-shell");\n    if (!document.querySelector('link[data-retail-shell]')) {\n      const style = document.createElement("link");\n      style.rel = "stylesheet";\n      style.href = "/retail-first.css?v=5.0.1";\n      style.dataset.retailShell = "true";\n      document.head.append(style);\n    }\n    const header = document.querySelector(".eus-header");\n    const nav = header?.querySelector(".eus-nav");\n    if (!header || !nav) return;\n    const tagline = header.querySelector(".eus-wordmark__tagline");\n    if (tagline) tagline.textContent = "Lithium • Logistics • Off-Grid Power";\n    header.querySelector(".eus-project-trigger--direct")?.remove();\n    nav.setAttribute("aria-label", "Primary shopping navigation");\n    nav.innerHTML = `\n      <details class="eus-menu eus-menu--shop"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>\n      <a class="eus-nav-link" href="/lithium-batteries">Lithium</a>\n      <a class="eus-nav-link" href="/sok-batteries">SOK Energy</a>\n      <a class="eus-nav-link" href="/rv-store">RV & Outdoor</a>\n      <a class="eus-nav-link" href="/solar-project">Off-Grid Power</a>\n      <a class="eus-nav-link" href="/hawaii-lithium-batteries">Freight & Logistics</a>\n      <details class="eus-menu retail-more-menu"><summary class="eus-nav-trigger">More <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">\n        <a href="/solar-services"><span><strong>Power & Solar Services</strong><small>Planning, troubleshooting and off-grid project support</small></span></a>\n        <a href="/rv-services"><span><strong>RV Services</strong><small>Repair, restoration, inspections and upgrades</small></span></a>\n        <a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or complete-system project support</small></span></a>\n        <a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics, projects and field experience</small></span></a>\n        <a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth opportunities</small></span></a>\n        <a href="/marketplace"><span><strong>Marketplace</strong><small>Local listings and community inventory</small></span></a>\n      </div></details>`;\n  }\n\n'''
+          if 'function installRetailStoreShell()' in s: raise SystemExit('retail shell already present')
+          if anchor not in s: raise SystemExit('navigation anchor missing')
+          s=s.replace(anchor,retail+anchor,1)
+          init='  installSupportAndContactAnalytics(analytics);\n  installNavigation();'
+          if init not in s: raise SystemExit('shell init anchor missing')
+          s=s.replace(init,'  installSupportAndContactAnalytics(analytics);\n  installRetailStoreShell();\n  installNavigation();',1)
+          shell.write_text(s)
+
+          css=Path('site/retail-first.css')
+          s=css.read_text()
+          if 'Shared retail shell for shopping' in s: raise SystemExit('shared retail CSS already present')
+          s+='''\n\n/* Shared retail shell for shopping, product and checkout routes */\nbody.retail-store-shell .eus-header{position:sticky;top:0;z-index:70;background:rgba(4,9,13,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(64,214,250,.16);box-shadow:0 8px 30px rgba(0,0,0,.18)}\nbody.retail-store-shell .eus-header__inner{min-height:72px;gap:20px}\nbody.retail-store-shell .eus-brand{min-width:205px;gap:10px;text-decoration:none}\nbody.retail-store-shell .eus-brand img{width:56px;height:46px;object-fit:contain}\nbody.retail-store-shell .eus-wordmark{display:flex;flex-direction:column;line-height:1}\nbody.retail-store-shell .eus-wordmark strong{font-size:.96rem;letter-spacing:.14em;color:#fff}\nbody.retail-store-shell .eus-wordmark__sub{font-size:.64rem;letter-spacing:.24em;color:#c6d3da;margin-top:4px}\nbody.retail-store-shell .eus-wordmark__tagline{font-size:.52rem;color:var(--retail-cyan);letter-spacing:.07em;margin-top:6px;text-transform:uppercase}\nbody.retail-store-shell .eus-nav{margin-left:auto;gap:3px;align-items:center}\nbody.retail-store-shell .eus-nav-link,body.retail-store-shell .eus-nav-trigger{font-size:.8rem;font-weight:800;padding:10px 8px;border-radius:8px;color:#e8eff3;white-space:nowrap}\nbody.retail-store-shell .eus-nav-link:hover,body.retail-store-shell .eus-nav-trigger:hover,body.retail-store-shell .eus-menu[open]>.eus-nav-trigger{background:rgba(55,216,255,.09);color:#fff}\nbody.retail-store-shell .eus-dropdown{background:#071116;border:1px solid rgba(55,216,255,.22);box-shadow:0 22px 55px rgba(0,0,0,.45);border-radius:14px}\nbody.retail-store-shell .eus-dropdown a{border-radius:10px}\nbody.retail-store-shell .eus-dropdown a:hover{background:rgba(55,216,255,.08)}\nbody.retail-store-shell .eus-dropdown strong{color:#fff}\nbody.retail-store-shell .eus-dropdown small{color:#9eb0ba}\nbody.retail-store-shell .retail-more-menu .eus-dropdown{right:0;left:auto;min-width:290px}\nbody.retail-store-shell .retail-more-menu .eus-dropdown a:last-child{margin-top:8px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09)}\n@media(max-width:1060px){body.retail-store-shell .eus-nav-link,body.retail-store-shell .eus-nav-trigger{font-size:.74rem;padding:9px 5px}}\n@media(max-width:820px){body.retail-store-shell .eus-header__inner{min-height:66px}body.retail-store-shell .eus-brand{min-width:0}body.retail-store-shell .eus-brand img{width:50px;height:42px}body.retail-store-shell .eus-nav{background:#061017;border-top:1px solid rgba(55,216,255,.14)}body.retail-store-shell .eus-nav-link,body.retail-store-shell .eus-nav-trigger{font-size:.95rem;padding:13px 16px}body.retail-store-shell .retail-more-menu .eus-dropdown{min-width:0}}\n'''
+          css.write_text(s)
+
+          qa=Path('.github/workflows/web-visual-0905-01-static.yml')
+          s=qa.read_text()
+          needle='site/index\\.html|site/retail-first\\.css|deployment/qa/web-com-navigation-static\\.mjs'
+          repl='site/index\\.html|site/retail-first\\.css|site/site-shell\\.js|site/lithium-batteries\\.html|deployment/qa/web-com-navigation-static\\.mjs'
+          if needle not in s: raise SystemExit('static scope regex anchor missing')
+          s=s.replace(needle,repl,1)
+          protected='            site/site-shell.js \\\n'
+          if protected not in s: raise SystemExit('site-shell protection line missing')
+          s=s.replace(protected,'',1)
+          marker="          grep -Fq 'data-home-logistics-capability' site/index.html\n"
+          if marker not in s: raise SystemExit('visual QA marker missing')
+          s=s.replace(marker,marker+"          grep -Fq 'installRetailStoreShell' site/site-shell.js\n          if grep -Fq '$99 per actual battery' site/lithium-batteries.html; then echo 'retired Hawaii flat-freight copy remains'; exit 1; fi\n",1)
+          qa.write_text(s)
+          PY
+
+          rm -f .github/workflows/web-visual-0905-01-finish.yml
+          rm -f .github/workflows/web-visual-0905-01-finish2.yml
+          git diff --check
+          git status --short
+
+      - name: Commit final visual candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add -A
+          git commit -m "feat(visual): finish shared retail header and freight copy"
+          git push origin HEAD:work/web-visual-0905-01-retail-first
