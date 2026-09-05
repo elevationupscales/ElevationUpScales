@@ -7,12 +7,6 @@
   document.documentElement.classList.add("eus-redesign-v1");
   document.body?.classList.add("eus-redesign-v1");
 
-  const text=(selector,value)=>{
-    const node=document.querySelector(selector);
-    if(node) node.textContent=value;
-    return node;
-  };
-
   document.querySelectorAll(".eus-wordmark__tagline").forEach((node)=>{
     node.textContent="OFF-GRID POWER • SUPPLY • LOGISTICS";
   });
@@ -83,6 +77,23 @@
       label.textContent="SHOP BY SOLUTION";
       routes.insertAdjacentElement("beforebegin",label);
       routes.setAttribute("aria-label","Shop by solution");
+    }
+
+    if(routes&&!routes.querySelector('[data-redesign-route="sok"]')){
+      const extra=[
+        ["sok","SOK","SOK Battery Systems","/sok-batteries","/assets/brands/sok/sk12v100pc/hero.png"],
+        ["backup","BACKUP","Backup Power","/sok-batteries#sok-products","/assets/brands/sok/sk48v100n/hero.jpg"],
+        ["commercial","COMMERCIAL","Commercial Power","/sok-batteries#sok-products","/assets/brands/sok/sk48v100n/system-cabinet.png"]
+      ];
+      extra.forEach(([key,small,strong,href,image])=>{
+        const a=document.createElement("a");
+        a.className="hc-route";
+        a.href=href;
+        a.dataset.redesignRoute=key;
+        a.style.setProperty("--route-image",`url('${image}')`);
+        a.innerHTML=`<small>${small}</small><strong>${strong}</strong>`;
+        routes.append(a);
+      });
     }
 
     if(!document.querySelector(".eus-value-strip")){
