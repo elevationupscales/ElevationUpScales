@@ -25,14 +25,35 @@ jobs:
           python /tmp/apply.py
           python - <<'PY'
           from pathlib import Path
+
           p=Path('site/sok-order.html')
           s=p.read_text().replace('>Commercial Pricing</button>','>Request Commercial Pricing</button>').replace('>Hawaii Availability</button>','>Check Hawaii Availability</button>')
           p.write_text(s)
+
+          p=Path('site/sok-order.js')
+          s=p.read_text()
+          s=s.replace("document.querySelector(\\'[data-sok-intent=\"hawaii\"]\\')", "document.querySelector('[data-sok-intent=\"hawaii\"]')")
+          old='updateHawaii(next==="hawaii"&&announce);track(next==="hawaii"?"hawaii_options_open":next==="commercial"?"commercial_review_route":"purchase_options_open",{intent:next,quantityBand:quantityBand()});}'
+          new='updateHawaii(next==="hawaii"&&announce);if(announce)track(next==="hawaii"?"hawaii_options_open":next==="commercial"?"commercial_review_route":"purchase_options_open",{intent:next,quantityBand:quantityBand()});}'
+          if old not in s: raise SystemExit('intent initialization tracking marker missing')
+          p.write_text(s.replace(old,new))
+
           p=Path('deployment/qa/sok-commercialization-static.mjs')
           s=p.read_text()
           old='const analytics=["sok_collection_view","sok_product_view","sok_purchase_options_click","sok_commercial_request","sok_hawaii_request","solar_builder_sok_click"];'
           new='const analytics=["sok_catalog_view","sok_product_view","purchase_options_open","commercial_review_route","hawaii_options_open","solar_builder_sok_cta"];'
-          if old not in s: raise SystemExit('legacy analytics QA marker missing')
+          if old not in s: raise SystemExit('legacy commercialization analytics QA marker missing')
+          p.write_text(s.replace(old,new))
+
+          p=Path('deployment/qa/sok-full-line-static.mjs')
+          s=p.read_text()
+          old='for(const event of ["sok_collection_view","sok_catalog_filter","sok_purchase_options_click","sok_email_inquiry","sok_commercial_request","sok_hawaii_request"])assert.match(collection,new RegExp(event));'
+          new='for(const event of ["sok_catalog_view","sok_catalog_filter","purchase_options_open","commercial_review_route","hawaii_options_open"])assert.match(collection,new RegExp(event));'
+          if old not in s: raise SystemExit('legacy full-line analytics QA marker missing')
+          s=s.replace(old,new)
+          old='for(const token of ["hawaiiIsland","siteType","postalCode","intendedUse","demandType","productUrl"])assert.match(order,new RegExp(token));'
+          new='for(const token of ["hawaiiIsland","postalCode","productUrl","sok-order-name","sok-order-email","sok-order-phone"])assert.match(order,new RegExp(token));for(const removed of ["sok-order-company","sok-order-site-type","sok-order-use","sok-order-demand"])assert.equal(order.includes(removed),false,`long-form field remains ${removed}`);'
+          if old not in s: raise SystemExit('legacy full-line long-form QA marker missing')
           p.write_text(s.replace(old,new))
           PY
       - name: Validate static, syntax and protected SOK gates
