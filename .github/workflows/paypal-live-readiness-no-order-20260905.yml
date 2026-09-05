@@ -1,0 +1,71 @@
+name: PayPal Live Readiness — No Order
+
+on:
+  push:
+    branches:
+      - diagnostic/paypal-live-create-no-capture-20260905
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live checkout configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://elevationupscales.com'
+          curl --silent --show-error --fail --location "${base}/api/store-checkout/config" > /tmp/config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/config.json'))
+          assert data.get('ok') is True
+          assert data.get('environment') == 'live'
+          assert data.get('credentialsConfigured') is True
+          assert data.get('checkoutEnabled') is True
+          assert bool(data.get('clientId'))
+          print('paypal_live_config=PASS')
+          PY
+
+      - name: Exercise production server-authoritative quote
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://elevationupscales.com'
+          cat > /tmp/request.json <<'JSON'
+          {"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":""}
+          JSON
+          code=$(curl --silent --show-error --location \
+            -H "Origin: ${base}" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data @/tmp/request.json \
+            --output /tmp/quote.json \
+            --write-out '%{http_code}' \
+            "${base}/api/store-checkout/quote")
+          cat /tmp/quote.json
+          test "$code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/quote.json'))
+          assert data.get('ok') is True
+          assert int(data.get('unitPriceCents') or 0) > 0
+          assert int(data.get('totalCents') or 0) > 0
+          print('production_quote=PASS')
+          print('unit_price_cents='+str(data.get('unitPriceCents')))
+          print('shipping_cents='+str(data.get('shippingCents')))
+          print('total_cents='+str(data.get('totalCents')))
+          print('paypal_order_created=NO')
+          print('capture_called=NO')
+          PY
+
+      - name: Record safety boundary
+        shell: bash
+        run: |
+          echo '### Production PayPal readiness' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Live configuration: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Server-authoritative production quote: PASS if prior step succeeds' >> "$GITHUB_STEP_SUMMARY"
+          echo '- PayPal order creation: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Capture/payment: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
