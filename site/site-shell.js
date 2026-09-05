@@ -17,8 +17,14 @@
     } catch (_) { return intentId(); }
   };
   const intentSession = intentSessionId();
+  const intentRecent = new Map();
   const intentTrack = (eventType, eventValue = "", details = {}) => {
     if (!eventType || document.visibilityState === "prerender") return;
+    const dedupeKey = `${eventType}|${String(eventValue||"")}|${location.pathname}`;
+    const stamp = Date.now(), prior = intentRecent.get(dedupeKey) || 0;
+    if (stamp - prior < 900) return;
+    intentRecent.set(dedupeKey, stamp);
+    if (intentRecent.size > 80) for (const [key, at] of intentRecent) if (stamp - at > 5000) intentRecent.delete(key);
     fetch(intentEndpoint, {
       method: "POST",
       credentials: "same-origin",
@@ -34,6 +40,19 @@
     if (!sessionStorage.getItem(startKey)) { sessionStorage.setItem(startKey, "1"); intentTrack("session_start"); }
   } catch (_) { intentTrack("session_start"); }
   intentTrack("page_view");
+  document.addEventListener("click", (event) => {
+    const el = event.target.closest("[data-eus-event]");
+    if (!el) return;
+    const type = String(el.dataset.eusEvent || "").trim();
+    const value = String(el.dataset.eusValue || "").trim();
+    if (type) intentTrack(type, value, { source: "data-event" });
+  });
+  document.addEventListener("click", (event) => {
+    const add = event.target.closest("[data-add-to-cart],[data-cart-add],[data-product-add]");
+    if (add) intentTrack("add_to_cart", String(add.dataset.sku || add.dataset.productId || add.dataset.id || "product").slice(0,120), { source: "commerce" });
+    const checkout = event.target.closest('a[href^="/checkout"],[data-checkout-start]');
+    if (checkout) intentTrack("checkout_start", "checkout", { source: "commerce" });
+  });
   if (location.pathname === "/marketplace" || location.pathname.startsWith("/marketplace/listing/")) intentTrack("marketplace_open");
 
   if (location.pathname === "/start-a-project") {
