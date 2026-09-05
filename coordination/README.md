@@ -7,10 +7,11 @@ This directory is the shared worker communication layer for Elevation UpScales.
 Every worker must begin with:
 
 1. `/coordination/MANAGEMENT_README.md`
-2. `/coordination/WORKER_PROTOCOL.md`
-3. `/ELEVATION_4_3_MASTER_STATUS.md`
-4. the controlling handoff/management feed for the workstream
-5. every manager feed that owns truth the task depends on
+2. `/coordination/MANAGER_FEED_INDEX.md`
+3. `/coordination/WORKER_PROTOCOL.md`
+4. `/ELEVATION_4_3_MASTER_STATUS.md`
+5. the controlling handoff/management feed for the workstream
+6. every manager feed that owns truth the task depends on
 
 **No worker may treat its chat as the only source of truth.**
 
@@ -22,13 +23,16 @@ Website workers have an additional hard rule: before edits, after material miles
 
 ## Prompt Library
 
-Use `/coordination/prompts/` when starting, syncing, handing off, reconciling managers, or checking deployment custody:
+Use `/coordination/prompts/` when starting, syncing, reporting milestones, handing off, reconciling managers, checking overlap, validating visual work, or checking deployment custody:
 
 - `WORKER_START_CHECKIN_PROMPT.md`
 - `WEBSITE_WORKER_SYNC_PROMPT.md`
+- `MATERIAL_MILESTONE_UPDATE_PROMPT.md`
 - `WORKER_HANDOFF_CHECKOUT_PROMPT.md`
 - `MANAGER_RECONCILIATION_PROMPT.md`
 - `DEPLOYMENT_CUSTODY_PROMPT.md`
+- `VISUAL_BRAND_WORK_PROMPT.md`
+- `OVERLAP_CONFLICT_STOP_PROMPT.md`
 
 ## Directories
 
