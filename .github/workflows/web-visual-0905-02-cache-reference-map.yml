@@ -1,0 +1,27 @@
+name: WEB-VISUAL-0905-02 Cache Reference Map
+on:
+  push:
+    branches:
+      - diagnostic/web-visual-0905-02-cache-reference-map
+permissions:
+  contents: read
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+          fetch-depth: 0
+      - name: Map retail shell and stylesheet cache references
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '--- site-shell 4.5.2 HTML refs ---'
+          grep -RIl 'site-shell.js?v=4.5.2' site --include='*.html' | sort || true
+          echo '--- any site-shell refs ---'
+          grep -RIl 'site-shell.js?v=' site --include='*.html' | sort || true
+          echo '--- direct retail-first refs ---'
+          grep -RIn 'retail-first.css?v=' site --include='*.html' | sort || true
+          echo '--- retail route source markers ---'
+          grep -RIl 'sok-static-product.js\|sok-product-page' site --include='*.html' | sort || true
