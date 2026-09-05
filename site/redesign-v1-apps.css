@@ -1,0 +1,79 @@
+/* Elevation UpScales visual redesign v1 — public application surfaces.
+   Presentation only: Solar Builder, Start a Project, Checkout, Marketplace and service flows. */
+
+/* Solar Builder */
+html.eus-redesign-v1 body.solar-builder-page{background:#02080d;color:#e9f0f4}
+html.eus-redesign-v1 .builder-intro{position:relative;padding:64px 0 52px;border-bottom:1px solid rgba(22,200,255,.2);background:linear-gradient(92deg,rgba(2,9,14,.98),rgba(3,18,27,.9) 55%,rgba(2,12,18,.46)),url('/assets/solar/solar-hero-desktop.webp') center/cover no-repeat!important}
+html.eus-redesign-v1 .builder-intro h1{max-width:720px;margin:.25rem 0 .65rem;font-size:clamp(2.7rem,5vw,5.2rem);font-weight:900;line-height:.96}
+html.eus-redesign-v1 .builder-intro h1 span{color:#16c8ff!important}
+html.eus-redesign-v1 .builder-lead{max-width:700px;color:#d3e1e7!important}
+html.eus-redesign-v1 .builder-blueprint{border:1px solid rgba(22,200,255,.27)!important;border-radius:14px!important;background:rgba(3,15,23,.82)!important;box-shadow:0 24px 60px rgba(0,0,0,.34),inset 0 0 40px rgba(22,200,255,.035)!important;backdrop-filter:blur(8px)}
+html.eus-redesign-v1 .builder-blueprint-head span,html.eus-redesign-v1 .solar-visual-card__kicker{color:#55dcff!important}
+html.eus-redesign-v1 .builder-trust{border-bottom:1px solid rgba(22,200,255,.14);background:#041019!important}
+html.eus-redesign-v1 .builder-trust-grid article{border-color:rgba(22,200,255,.18)!important;background:#07151f!important}
+html.eus-redesign-v1 .builder-trust-grid article>span{color:#001018!important;background:#16c8ff!important}
+html.eus-redesign-v1 .solar-visual-guide{background:linear-gradient(180deg,#06131c,#02080d)!important}
+html.eus-redesign-v1 .solar-visual-card{border-color:rgba(22,200,255,.18)!important;background:linear-gradient(150deg,#091a25,#041019)!important;box-shadow:0 18px 44px rgba(0,0,0,.25)!important}
+html.eus-redesign-v1 .solar-builder{background:#02080d!important}
+html.eus-redesign-v1 .solar-app-hud{border:1px solid rgba(22,200,255,.26)!important;border-radius:13px!important;background:linear-gradient(135deg,#071a26,#031019)!important;box-shadow:0 22px 52px rgba(0,0,0,.3)!important}
+html.eus-redesign-v1 .solar-app-stage__track{background:rgba(255,255,255,.08)!important}
+html.eus-redesign-v1 .solar-app-stage__track i{background:linear-gradient(90deg,#0aaee4,#55dcff)!important;box-shadow:0 0 14px rgba(22,200,255,.35)}
+html.eus-redesign-v1 .solar-energy-flow article{border-color:rgba(22,200,255,.14)!important;background:#06151f!important}
+html.eus-redesign-v1 .solar-system-fit{border-color:rgba(22,200,255,.22)!important;background:rgba(22,200,255,.045)!important}
+html.eus-redesign-v1 .builder-progress{border-color:rgba(22,200,255,.17)!important;background:#05121b!important}
+html.eus-redesign-v1 .builder-progress button{color:#aebfca!important;background:transparent!important}
+html.eus-redesign-v1 .builder-progress button.is-active,html.eus-redesign-v1 .builder-progress button[aria-current="step"]{color:#f7fbfd!important;background:rgba(22,200,255,.08)!important}
+html.eus-redesign-v1 .builder-progress button span{border-color:rgba(22,200,255,.34)!important;color:#55dcff!important}
+html.eus-redesign-v1 .builder-step,html.eus-redesign-v1 .builder-summary,html.eus-redesign-v1 .builder-loads,html.eus-redesign-v1 .power-planner-controls{border-color:rgba(22,200,255,.18)!important;background:linear-gradient(155deg,#081925,#041019)!important;box-shadow:0 18px 42px rgba(0,0,0,.24)!important}
+html.eus-redesign-v1 .power-profile-grid button,html.eus-redesign-v1 .builder-check-grid label{border-color:rgba(22,200,255,.18)!important;color:#e2edf2!important;background:#06151f!important}
+html.eus-redesign-v1 .power-profile-grid button:hover,html.eus-redesign-v1 .power-profile-grid button.is-active,html.eus-redesign-v1 .builder-check-grid label:has(input:checked){border-color:#16c8ff!important;background:rgba(22,200,255,.08)!important}
+html.eus-redesign-v1 .mobile-build-bar{border-color:rgba(22,200,255,.2)!important;background:#04131d!important}
+
+/* Start a Project */
+html.eus-redesign-v1 body.start-project-page{background:#02080d;color:#e9f0f4}
+html.eus-redesign-v1 .sap-hero{padding:58px 0 48px;border-bottom:1px solid rgba(22,200,255,.18);background:linear-gradient(105deg,rgba(2,9,14,.98),rgba(4,19,28,.92)),radial-gradient(circle at 80% 20%,rgba(22,200,255,.12),transparent 30%)!important}
+html.eus-redesign-v1 .sap-hero h1{max-width:780px;font-size:clamp(2.6rem,4.8vw,4.7rem);font-weight:900;line-height:.98}
+html.eus-redesign-v1 .sap-hero h1 span{color:#55dcff!important}
+html.eus-redesign-v1 .sap-hero aside{border-color:rgba(22,200,255,.22)!important;background:#07151f!important;box-shadow:0 18px 44px rgba(0,0,0,.25)!important}
+html.eus-redesign-v1 .sap-trust span{border-color:rgba(22,200,255,.24)!important;color:#bfe7f2!important;background:rgba(22,200,255,.05)!important}
+html.eus-redesign-v1 .sap-solar-fast-track{border-color:rgba(22,200,255,.26)!important;background:linear-gradient(90deg,rgba(22,200,255,.08),rgba(22,200,255,.025))!important}
+html.eus-redesign-v1 .sap-shell{padding:44px 0 70px;background:linear-gradient(180deg,#041019,#02080d)!important}
+html.eus-redesign-v1 .sap-progress{border-color:rgba(22,200,255,.16)!important;background:#05131c!important}
+html.eus-redesign-v1 .sap-progress span{color:#91a6b1!important}
+html.eus-redesign-v1 .sap-progress span.is-active{color:#f8fbfd!important}
+html.eus-redesign-v1 .sap-progress span.is-active::before{background:#16c8ff!important;box-shadow:0 0 12px rgba(22,200,255,.4)}
+html.eus-redesign-v1 .sap-step{border:1px solid rgba(22,200,255,.18)!important;border-radius:14px!important;background:linear-gradient(155deg,#081925,#041019)!important;box-shadow:0 22px 50px rgba(0,0,0,.28)!important}
+html.eus-redesign-v1 .sap-state-choice,html.eus-redesign-v1 .sap-intent-card,html.eus-redesign-v1 .sap-emergency-choice,html.eus-redesign-v1 .handyman-service-card{border-color:rgba(22,200,255,.18)!important;color:#e6f0f4!important;background:#06151f!important}
+html.eus-redesign-v1 .sap-state-choice:hover,html.eus-redesign-v1 .sap-state-choice.is-selected,html.eus-redesign-v1 .sap-intent-card:hover,html.eus-redesign-v1 .sap-intent-card.is-selected,html.eus-redesign-v1 .sap-emergency-choice:hover{border-color:#16c8ff!important;background:rgba(22,200,255,.075)!important}
+html.eus-redesign-v1 .sap-state-choice span,html.eus-redesign-v1 .sap-intent-card span{color:#55dcff!important}
+html.eus-redesign-v1 .sap-location-card,html.eus-redesign-v1 .sap-emergency-panel,html.eus-redesign-v1 .sap-emergency-callout{border-color:rgba(22,200,255,.2)!important;background:#06151f!important}
+
+/* Checkout: presentation only, existing PayPal and authoritative commerce behavior untouched. */
+html.eus-redesign-v1 body.eus-checkout-page{background:linear-gradient(180deg,#04111a,#02080d)!important;color:#e9f0f4}
+html.eus-redesign-v1 .eus-checkout-header{border-bottom-color:rgba(22,200,255,.24)!important;background:rgba(2,10,16,.95)!important}
+html.eus-redesign-v1 .eus-checkout-back{color:#a9dfee!important}
+html.eus-redesign-v1 .eus-checkout-main{max-width:1180px;margin:0 auto;padding-top:40px!important;padding-bottom:72px!important}
+html.eus-redesign-v1 .eus-checkout-heading{padding-bottom:20px;border-bottom:1px solid rgba(22,200,255,.14)}
+html.eus-redesign-v1 .eus-checkout-eyebrow{color:#55dcff!important}
+html.eus-redesign-v1 .eus-checkout-trust{border-color:rgba(22,200,255,.25)!important;background:rgba(22,200,255,.05)!important}
+html.eus-redesign-v1 .eus-checkout-layout{gap:22px!important}
+html.eus-redesign-v1 .eus-checkout-product-panel,html.eus-redesign-v1 .eus-checkout-form-panel,html.eus-redesign-v1 .eus-checkout-summary{border-color:rgba(22,200,255,.18)!important;border-radius:14px!important;background:linear-gradient(155deg,#081925,#041019)!important;box-shadow:0 22px 50px rgba(0,0,0,.27)!important}
+html.eus-redesign-v1 .eus-checkout-image-frame{background:radial-gradient(circle at center,rgba(22,200,255,.07),transparent 45%),#07131c!important}
+html.eus-redesign-v1 .eus-checkout-trust strong{color:#f7fbfd!important}
+
+/* Marketplace and service pages: shared premium visual language without changing flow. */
+html.eus-redesign-v1 .marketplace-hero,html.eus-redesign-v1 .services-hero,html.eus-redesign-v1 .service-hero,html.eus-redesign-v1 .work-hero{border-bottom:1px solid rgba(22,200,255,.18)!important;background:linear-gradient(110deg,#031019,#071b27)!important}
+html.eus-redesign-v1 .marketplace-toolbar,html.eus-redesign-v1 .marketplace-filters,html.eus-redesign-v1 .listing-filters,html.eus-redesign-v1 .service-panel{border-color:rgba(22,200,255,.18)!important;background:#06151f!important}
+html.eus-redesign-v1 .listing-card,html.eus-redesign-v1 .marketplace-card{overflow:hidden;border-color:rgba(22,200,255,.18)!important;border-radius:12px!important;background:linear-gradient(155deg,#081925,#041019)!important;box-shadow:0 18px 42px rgba(0,0,0,.25)!important}
+html.eus-redesign-v1 .listing-card:hover,html.eus-redesign-v1 .marketplace-card:hover{border-color:rgba(22,200,255,.48)!important}
+
+@media(max-width:900px){
+  html.eus-redesign-v1 .builder-intro-grid{grid-template-columns:1fr!important}
+  html.eus-redesign-v1 .builder-blueprint{margin-top:18px}
+}
+@media(max-width:680px){
+  html.eus-redesign-v1 .builder-intro,html.eus-redesign-v1 .sap-hero{padding:42px 0 36px}
+  html.eus-redesign-v1 .solar-energy-flow{overflow-x:auto}
+  html.eus-redesign-v1 .sap-step{padding:18px!important}
+  html.eus-redesign-v1 .eus-checkout-main{padding-inline:14px!important}
+}
