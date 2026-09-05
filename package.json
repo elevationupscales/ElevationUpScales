@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/shared-foundation.test.mjs",
+    "check": "node --check src/worker/response.js && node --check src/shared/html.js && node --check src/shared/validation.js && node --check src/shared/solar-sanitizers.js"
+  }
+}
