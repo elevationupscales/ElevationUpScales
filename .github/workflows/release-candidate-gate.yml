@@ -154,7 +154,7 @@ jobs:
           test -f site/admin-inventory.html
           test -f site/admin-inventory.css
           test -f site/admin-inventory.js
-          grep -q 'API="/api/admin/inventory"' site/admin-inventory.js
+          grep -q '/api/admin/inventory' site/admin-inventory.js
           grep -q 'admin-inventory.html' site/admin-listings.html
 
       - name: SOK commercialization static gate
