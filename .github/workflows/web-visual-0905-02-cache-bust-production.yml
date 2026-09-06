@@ -1,0 +1,160 @@
+name: WEB-VISUAL-0905-02 Cache Bust Production
+
+on:
+  push:
+    branches:
+      - control/web-visual-0905-02-cache-bust-production-20260905
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: web-visual-0905-02-cache-bust-production
+  cancel-in-progress: false
+
+env:
+  PARENT_SHA: 37e6f88a490af4ec62ebe7a0c5d88b7ae38df2c4
+  HOTFIX_SHA: b8300a0060dba7a690d17bde7a995bcc591184fb
+  PROD: https://elevationupscales.com
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: b8300a0060dba7a690d17bde7a995bcc591184fb
+          fetch-depth: 0
+
+      - name: Assert exact promoted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main hotfix/web-visual-0905-02-retail-css-cache-bust --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$HOTFIX_SHA"
+          test "$(git rev-parse origin/main)" = "$HOTFIX_SHA"
+          test "$(git rev-parse origin/hotfix/web-visual-0905-02-retail-css-cache-bust)" = "$HOTFIX_SHA"
+          test "$(git rev-list --count "$PARENT_SHA".."$HOTFIX_SHA")" = 1
+          echo exact_source=PASS
+
+      - name: Final static and commerce regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          echo final_static_regression=PASS
+
+      - id: deploy
+        name: Deploy exact hotfix to Cloudflare production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable and canonical production
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          test -n "$base"
+          for target in "$base" "$PROD"; do
+            for route in / /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /sok-order.html /rv-store /lithium-batteries /hawaii-lithium-batteries /product /checkout /store; do
+              code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$target$route")
+              echo "$target$route=$code"
+              test "$code" = "200"
+            done
+          done
+          curl -sS -L --fail "$PROD/sok-batteries" -o /tmp/sok.html
+          grep -q 'site-shell.js?v=4.9.0' /tmp/sok.html
+          curl -sS -L --fail "$PROD/site-shell.js?v=4.9.0" -o /tmp/shell.js
+          grep -q '/retail-first.css?v=5.3.0' /tmp/shell.js
+          echo production_cache_keys=PASS
+
+      - name: Safe production PayPal config and quote smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sS -L --fail "$PROD/api/store-checkout/config" > /tmp/config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/config.json'))
+          assert data.get('ok') is True
+          assert data.get('environment') == 'live'
+          assert data.get('credentialsConfigured') is True
+          assert data.get('checkoutEnabled') is True
+          assert bool(data.get('clientId'))
+          print('paypal_live_config=PASS')
+          PY
+          cat > /tmp/request.json <<'JSON'
+          {"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":""}
+          JSON
+          code=$(curl -sS -L -H "Origin: $PROD" -H 'Content-Type: application/json' -H 'Accept: application/json' --data @/tmp/request.json -o /tmp/quote.json -w '%{http_code}' "$PROD/api/store-checkout/quote")
+          test "$code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/quote.json'))
+          assert data.get('ok') is True
+          assert int(data.get('totalCents') or 0) > 0
+          print('production_quote=PASS')
+          print('paypal_order_created=NO')
+          print('capture_called=NO')
+          PY
+
+      - name: Browser verify storefront header consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+          cat > verify.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base='https://elevationupscales.com';
+          const browser=await chromium.launch({headless:true});
+          for (const [mode,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+            for (const path of ['/sok-batteries','/sok/sk12v100pc/','/rv-store','/lithium-batteries','/checkout/']) {
+              const context=await browser.newContext({viewport});
+              const page=await context.newPage();
+              const res=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:45000});
+              if(!res||res.status()!==200) throw new Error(`${mode} ${path} ${res?.status()}`);
+              await page.waitForTimeout(2500);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} overflow ${overflow}`);
+              const brand=page.locator('.eus-brand>img').first();
+              if(!(await brand.count())) throw new Error(`${mode} ${path} brand missing`);
+              const state=await brand.evaluate(el=>({content:getComputedStyle(el).content,fit:getComputedStyle(el).objectFit,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height}));
+              if(!String(state.content).includes('storefront-wordmark')) throw new Error(`${mode} ${path} storefront wordmark missing`);
+              const links=await page.locator('link[data-retail-shell]').evaluateAll(ls=>ls.map(l=>l.href));
+              if(path!=='/sok/sk12v100pc/' && !links.some(x=>x.includes('retail-first.css?v=5.3.0'))) throw new Error(`${mode} ${path} fresh retail css missing`);
+              await context.close();
+            }
+          }
+          await browser.close();
+          console.log('production_header_consistency=PASS');
+          NODE
+          node verify.mjs
+
+      - name: Production receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo '### WEB-VISUAL-0905-02 cache-bust hotfix — PRODUCTION PASS'
+            echo "- Hotfix: $HOTFIX_SHA"
+            echo "- Main: $(git ls-remote origin refs/heads/main | cut -f1)"
+            echo "- Immutable deployment: $BASE"
+            echo '- Static/commerce: PASS'
+            echo '- Canonical route smoke: PASS'
+            echo '- Retail cache keys: PASS'
+            echo '- Desktop/mobile header consistency: PASS'
+            echo '- PayPal live config + quote: PASS'
+            echo '- PayPal order/capture: NOT PERFORMED'
+          } >> "$GITHUB_STEP_SUMMARY"
