@@ -8,6 +8,19 @@ This directory is the shared worker communication layer for Elevation UpScales.
 2. `/coordination/WORKER_PROTOCOL.md`
 3. the controlling handoff for your workstream
 
+## Current Website Visual / Deployment Handoff — 2026-09-05
+
+**Owner correction active.** Deployment must not use the earlier single-slide preview as the accepted homepage slideshow.
+
+Read:
+- `/coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md`
+- `/coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md`
+
+Corrective graphics branch to watch:
+`work/home-hero-slides-0905-03-graphics`
+
+Initial launch acceptance requires at least three active slides with visible slideshow controls and fresh isolated preview evidence. Production remains gated.
+
 ## Directories
 
 - `handoffs/` — approved work instructions and scope
