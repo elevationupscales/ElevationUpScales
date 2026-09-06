@@ -60,18 +60,8 @@ jobs:
           from pathlib import Path
           p = Path('site/_headers')
           s = p.read_text()
-          old = '''/assets/*
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-  CDN-Cache-Control: public, max-age=2592000
-'''
-          new = '''/assets/*
-  Cache-Control: no-cache, no-store, must-revalidate
-  CDN-Cache-Control: no-cache, no-store, must-revalidate
-
-/home-hero-slides.json
-  Cache-Control: no-cache, no-store, must-revalidate
-  CDN-Cache-Control: no-cache, no-store, must-revalidate
-'''
+          old = "/assets/*\n  Cache-Control: public, max-age=86400, stale-while-revalidate=604800\n  CDN-Cache-Control: public, max-age=2592000\n"
+          new = "/assets/*\n  Cache-Control: no-cache, no-store, must-revalidate\n  CDN-Cache-Control: no-cache, no-store, must-revalidate\n\n/home-hero-slides.json\n  Cache-Control: no-cache, no-store, must-revalidate\n  CDN-Cache-Control: no-cache, no-store, must-revalidate\n"
           if old not in s:
               raise SystemExit('expected asset cache block not found')
           p.write_text(s.replace(old, new, 1))
