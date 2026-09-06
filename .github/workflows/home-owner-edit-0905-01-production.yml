@@ -1,0 +1,215 @@
+name: HOME-OWNER-EDIT-0905-01 Production
+
+on:
+  push:
+    branches:
+      - control/home-owner-edit-0905-01-production-20260905
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: home-owner-edit-0905-01-production
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: b8300a0060dba7a690d17bde7a995bcc591184fb
+  CANDIDATE_SHA: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+  PROD: https://elevationupscales.com
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+          fetch-depth: 0
+
+      - name: Assert exact promoted source and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse origin/main)" = "$CANDIDATE_SHA"
+          mapfile -t files < <(git diff --name-only "$BASE_SHA".."$CANDIDATE_SHA" | sort)
+          expected=$'site/index.html\nsite/shipping-logistics-services.html\nsite/sitemap.xml\nsite/what-we-do.html'
+          actual=$(printf '%s\n' "${files[@]}")
+          printf '%s\n' "${files[@]}"
+          test "$actual" = "$expected"
+          grep -q 'Shop by Category\.' site/index.html
+          ! grep -qi 'Start with what you need' site/index.html
+          grep -q 'Elevated Logistics for Product Supply Lines' site/index.html
+          ! grep -qi 'We Handle the Logistics' site/index.html
+          ! grep -qi 'Built Around SOK' site/index.html
+          ! grep -qi 'Built from experience' site/index.html
+          ! grep -qi 'When the product is not the whole job' site/index.html
+          grep -q 'Use Solar System Builder' site/index.html
+          grep -q 'Home &amp; RV Services' site/index.html
+          grep -q 'Shipping &amp; Logistics Services' site/index.html
+          grep -q 'id="home-rv-services"' site/what-we-do.html
+          grep -q '>Coming Soon<' site/shipping-logistics-services.html
+          echo exact_source_scope=PASS
+
+      - name: Final static and commerce regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          echo final_static_commerce=PASS
+
+      - id: deploy
+        name: Deploy exact candidate to Cloudflare production
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke immutable and canonical production
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          immutable="${BASE%/}"
+          test -n "$immutable"
+          for target in "$immutable" "$PROD"; do
+            for route in / /what-we-do /home-services /rv-services /solar-services /shipping-logistics-services /store /rv-store /lithium-batteries /sok-batteries /checkout; do
+              code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$target$route")
+              echo "$target$route=$code"
+              test "$code" = "200"
+            done
+          done
+          curl -sS -L --fail "$PROD/" -o /tmp/home.html
+          grep -q 'Shop by Category\.' /tmp/home.html
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/home.html
+          grep -q 'Use Solar System Builder' /tmp/home.html
+          grep -q 'Home &amp; RV Services' /tmp/home.html
+          grep -q 'Shipping &amp; Logistics Services' /tmp/home.html
+          ! grep -qi 'Start with what you need' /tmp/home.html
+          ! grep -qi 'We Handle the Logistics' /tmp/home.html
+          ! grep -qi 'Built Around SOK' /tmp/home.html
+          ! grep -qi 'Built from experience' /tmp/home.html
+          ! grep -qi 'When the product is not the whole job' /tmp/home.html
+          curl -sS -L --fail "$PROD/what-we-do" -o /tmp/services.html
+          grep -q 'id="home-rv-services"' /tmp/services.html
+          grep -q 'href="/home-services"' /tmp/services.html
+          grep -q 'href="/rv-services"' /tmp/services.html
+          curl -sS -L --fail "$PROD/shipping-logistics-services" -o /tmp/logistics.html
+          grep -q 'Shipping &amp; Logistics Services' /tmp/logistics.html
+          grep -q 'Coming Soon' /tmp/logistics.html
+          sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$PROD/api/admin/sync" || true)
+          test "$sync_code" = "401"
+          runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$PROD/sync-admin-runtime.js" || true)
+          test "$runtime_code" = "404"
+          echo production_route_security=PASS
+
+      - name: Safe production PayPal config and quote smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sS -L --fail "$PROD/api/store-checkout/config" -o /tmp/config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/config.json'))
+          assert data.get('ok') is True
+          assert data.get('environment') == 'live'
+          assert data.get('credentialsConfigured') is True
+          assert data.get('checkoutEnabled') is True
+          assert bool(data.get('clientId'))
+          print('paypal_live_config=PASS')
+          PY
+          cat > /tmp/request.json <<'JSON'
+          {"source":"apparel","id":"black-and-gold-signature-t-shirt","quantity":1,"variantId":""}
+          JSON
+          code=$(curl -sS -L \
+            -H "Origin: $PROD" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data @/tmp/request.json \
+            -o /tmp/quote.json \
+            -w '%{http_code}' \
+            "$PROD/api/store-checkout/quote")
+          test "$code" = "200"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/quote.json'))
+          assert data.get('ok') is True
+          assert int(data.get('unitPriceCents') or 0) > 0
+          assert int(data.get('totalCents') or 0) > 0
+          print('production_quote=PASS')
+          print('unit_price_cents='+str(data.get('unitPriceCents')))
+          print('shipping_cents='+str(data.get('shippingCents')))
+          print('total_cents='+str(data.get('totalCents')))
+          print('paypal_order_created=NO')
+          print('capture_called=NO')
+          print('funds_moved=NO')
+          PY
+
+      - name: Desktop and mobile production visual gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+          cat > verify-production.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base='https://elevationupscales.com';
+          const browser=await chromium.launch({headless:true});
+          for (const [mode,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+            for (const path of ['/','/what-we-do','/shipping-logistics-services']) {
+              const context=await browser.newContext({viewport});
+              const page=await context.newPage();
+              const response=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:60000});
+              if(!response || response.status()!==200) throw new Error(`${mode} ${path} status ${response?.status()}`);
+              await page.waitForTimeout(2200);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} overflow ${overflow}`);
+              const bad=await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{const r=i.getBoundingClientRect();const s=getComputedStyle(i);return r.width>2&&s.display!=='none'&&s.visibility!=='hidden'&&(!i.complete||i.naturalWidth===0)}).map(i=>i.currentSrc||i.src));
+              if(bad.length) throw new Error(`${mode} ${path} broken ${bad.join(',')}`);
+              if(path==='/') {
+                const text=(await page.locator('body').innerText()).toLowerCase();
+                for(const required of ['shop by category.','elevated logistics for product supply lines','use solar system builder','home & rv services','shipping & logistics services']) if(!text.includes(required)) throw new Error(`${mode} missing ${required}`);
+                for(const removed of ['start with what you need','we handle the logistics','built around sok','built from experience','when the product is not the whole job']) if(text.includes(removed)) throw new Error(`${mode} stale ${removed}`);
+              }
+              if(path==='/what-we-do') {
+                const card=page.locator('#home-rv-services');
+                if(!(await card.count())) throw new Error(`${mode} home-rv anchor missing`);
+                if(!(await card.locator('a[href="/home-services"]').count()) || !(await card.locator('a[href="/rv-services"]').count())) throw new Error(`${mode} combined service paths missing`);
+              }
+              if(path==='/shipping-logistics-services') {
+                const main=(await page.locator('main').innerText()).toLowerCase();
+                if(!main.includes('shipping & logistics services') || !main.includes('coming soon')) throw new Error(`${mode} coming-soon content missing`);
+              }
+              await context.close();
+            }
+          }
+          await browser.close();
+          console.log('production_desktop_mobile=PASS');
+          NODE
+          node verify-production.mjs
+
+      - name: Production receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo '### HOME-OWNER-EDIT-0905-01 — PRODUCTION PASS'
+            echo "- Candidate: $CANDIDATE_SHA"
+            echo "- GitHub main: $(git ls-remote origin refs/heads/main | cut -f1)"
+            echo "- Immutable deployment: $BASE"
+            echo '- Exact owner scope: PASS'
+            echo '- Static/commerce: PASS'
+            echo '- Canonical/immutable route security: PASS'
+            echo '- Desktop/mobile: PASS'
+            echo '- PayPal live config + quote: PASS'
+            echo '- PayPal order/capture/funds: NOT PERFORMED'
+          } >> "$GITHUB_STEP_SUMMARY"
