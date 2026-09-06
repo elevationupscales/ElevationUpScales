@@ -1,0 +1,1 @@
+Wiring checkpoint: preserve HOME-HERO-SLIDES-0905-05 CSS/JS as base files, then make the existing /home-hero-slides.css and /home-hero-slides.js URLs act as lightweight loaders for the isolated storefront-reference-v2 presentation layer. No backend contracts change.
