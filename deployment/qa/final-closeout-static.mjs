@@ -10,7 +10,7 @@ const order = read("site/sok-order.html");
 const orderJs = read("site/sok-order.js");
 const analytics = read("site/home-commerce.js");
 
-assert.ok(home.includes("Lithium Power Supply<br><span>and Logistics</span>"), "final hero copy missing");
+assert.ok(home.includes("Lithium Energy<br><span>for RV Life.</span>"), "final hero copy missing");
 for (const source of [home, logistics, hawaii, sok]) {
   assert.equal(source.toLowerCase().includes("start with what you need"), false, "removed owner copy returned");
 }
