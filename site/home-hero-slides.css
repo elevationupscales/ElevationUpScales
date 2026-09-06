@@ -824,6 +824,7 @@ body.retail-store-shell h1,body.retail-store-shell h2,body.retail-store-shell h3
 .reference-sok-brand{top:8px!important;left:43%!important;width:min(390px,48%)!important}
 .reference-sok-partnership{position:absolute;top:105px;left:43%;z-index:4;width:min(390px,48%);margin:0;color:#dceef2;font-size:.65rem;font-weight:760;letter-spacing:.13em;text-align:center;text-transform:uppercase;text-shadow:0 2px 10px #021017}
 .reference-sok-partnership span{color:var(--ref-cyan);padding:0 6px}
+.reference-storefront-hero .reference-authorized{display:none!important}
 .reference-product--12v{left:1%!important;bottom:14px!important;width:48%!important;height:51%!important}
 .reference-product--48v{right:-1%!important;bottom:5px!important;width:51%!important;height:57%!important}
 .reference-product img{padding:0 8px 28px!important;object-fit:contain!important}
