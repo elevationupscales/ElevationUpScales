@@ -1,0 +1,2 @@
+home-hero-slides.css => home-hero-slides-base.css + storefront-reference-shell-v2.css
+home-hero-slides.js => home-hero-slides-base.js + storefront-reference-shell-v2.js
