@@ -4,7 +4,7 @@
 
 **Authority:** newest accepted production state + newest explicit owner/management decision. Older handoffs are historical when superseded.
 
-**Last status update:** 2026-09-05 — Homepage marketing slideshow owner correction is active in the canonical coordination plane; the earlier single-slide preview is superseded and production remains unchanged pending a corrected multi-slide release candidate.
+**Last status update:** 2026-09-06 — `STOREFRONT-REFERENCE-0906-02` is production PASS. Accepted homepage/storefront application SHA is `f9afa86bad443bc9eb47c785964b3012488570b6`; production deployment `https://14f79e49.elevationupscales.pages.dev`; rollback baseline preserved.
 
 ---
 
@@ -20,44 +20,57 @@ Return parent/result SHA, changed files/schema, preview/production URLs, tests/r
 
 ---
 
-# Homepage Marketing Slideshow — Owner Correction — 2026-09-05
+# Homepage / Storefront Reference — Production Accepted — 2026-09-06
 
-**State:** CORRECTIVE VISUAL CANDIDATE REQUIRED / PRODUCTION UNCHANGED
+**State:** PRODUCTION PASS / ACCEPTED
 
-The owner has replaced the failed broad hardcoded homepage redesign path with a reusable **1640 × 624 landscape marketing slideshow**.
+The owner replaced the failed broad hardcoded redesign path with a reusable landscape marketing/slideshow lane and then authorized deployment of the finished reference storefront implementation.
 
-Controlling decision:
+Controlling durable decision:
 `coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md`
 
-Deployment handoff:
-`coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md`
+Accepted production application:
+`f9afa86bad443bc9eb47c785964b3012488570b6`
 
-### Important correction
+Source branch:
+`work/storefront-reference-final-0906-02-home-performance`
 
-The earlier `HOME-HERO-SLIDES-0905-02` preview is **not accepted for release**. It contained only one active slide, and the runtime correctly hid slideshow controls when only one slide was active. That made the preview look like a static banner and did not satisfy owner visual acceptance.
+Preview verification:
+- workflow `STOREFRONT-REFERENCE-0906-02 Visual Completion`
+- run `34052120312` — PASS
+- preview `https://365c8cb4.elevationupscales.pages.dev`
+- alias `https://storefront-reference-0906-02.elevationupscales.pages.dev`
+- true desktop evidence 1536×1024 — PASS
+- true mobile evidence 390×844 — PASS
+- header wordmark asset — PASS
+- rendered slideshow/reference integration — PASS
+- canonical QA / website-integrity / SOK smoke — PASS
 
-The corrected owner acceptance contract is:
+Production verification:
+- workflow `STOREFRONT-REFERENCE-0906-02 Production Deploy`
+- run `34052628263` — PASS
+- deployment `https://14f79e49.elevationupscales.pages.dev`
+- production routes / protected-runtime smoke — PASS
+- public domain `https://elevationupscales.com` reachable after release
 
-- first slide is the approved local `OFF-GRID POWER • SUPPLY • LOGISTICS` storefront wordmark;
-- initial launch contains at least **three active slides**;
-- previous/next controls, pagination and pause control render when multiple slides are active;
-- auto-rotation is active except under reduced-motion/user-pause conditions;
-- rendered preview interaction must be tested, not merely file existence;
-- desktop/mobile presentation must remain usable;
-- commerce, SOK, Hawaii, checkout and protected runtime behavior must remain unchanged.
+Rollback baseline:
+`baseline-2026-09-06-pre-storefront-reference-final-production`
+→ `df5012cfe33976c85d491933fc31d24b2f7445a4`
 
-Corrective visual workstream:
-`work/home-hero-slides-0905-03-graphics`
+Accepted production application baseline:
+`baseline-2026-09-06-storefront-reference-final-production`
+→ `f9afa86bad443bc9eb47c785964b3012488570b6`
 
-A corrected isolated preview on candidate `b97bd0e749fbc91c763f2602217517e597f16d62` passed rendered-DOM interaction and full preview regression at:
-`https://31ecf67f.elevationupscales.pages.dev`
+Production receipt:
+`coordination/receipts/2026-09-06-storefront-reference-final-production.md`
 
-Stable preview alias:
-`https://home-hero-slides-0905-03-pre.elevationupscales.pages.dev`
+The existing B- owner fallback branch remains untouched.
 
-Because this Master Status update advances repository `main`, Deployment must **not** promote that earlier tested branch SHA directly. Visual must rebuild/rebase the exact application delta from the new current `main`, rerun the isolated slideshow workflow, and hand Deployment the resulting current-lineage candidate.
-
-Production promotion remains controlled and has **not** been performed by the Visual/Graphics Worker.
+Storefront visual contract remains:
+- reusable landscape marketing/slideshow surface rather than reopening the abandoned broad redesign path;
+- approved `OFF-GRID POWER • SUPPLY • LOGISTICS` storefront identity on power/commerce surfaces;
+- dark premium power/supply/logistics presentation with cyan/white accents;
+- SOK, Hawaii, checkout, commerce, Catalog, Admin and runtime protections remain independent of visual merchandising.
 
 ---
 
@@ -65,13 +78,19 @@ Production promotion remains controlled and has **not** been performed by the Vi
 
 **State:** PRODUCTION ACCEPTED / CONTROLLED RELEASES
 
-**Accepted Doba CSV Sync production application baseline:** `0d1d17487a934119f0f8e9a044f636b8fe142784`
+**Accepted production application:** `f9afa86bad443bc9eb47c785964b3012488570b6`
 
-**Accepted production deployment:** `https://76ad440e.elevationupscales.pages.dev`
+**Accepted production deployment:** `https://14f79e49.elevationupscales.pages.dev`
 
 **Production domain:** `https://elevationupscales.com`
 
-**Accepted rollback:** `baseline-2026-08-28-doba-csv-sync`
+**Accepted rollback:** `baseline-2026-09-06-pre-storefront-reference-final-production`
+
+**Accepted production application baseline:** `baseline-2026-09-06-storefront-reference-final-production`
+
+**Latest production receipt:** `coordination/receipts/2026-09-06-storefront-reference-final-production.md`
+
+**Accepted Doba CSV Sync production application baseline:** `0d1d17487a934119f0f8e9a044f636b8fe142784`
 
 **Doba production receipt:** `coordination/receipts/2026-08-28-doba-csv-sync-production.md`
 
@@ -270,11 +289,12 @@ Do not mix Portal code/auth/deployment into Website/Admin scope unless explicitl
 - `ELEVATION_4_3_MASTER_STATUS.md` — current truth
 - `coordination/WORKER_PROTOCOL.md` — worker start/finish
 - `coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md` — controlling homepage slideshow decision
-- `coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md` — current visual/deployment handoff
+- `coordination/receipts/2026-09-06-storefront-reference-final-production.md` — latest storefront production closeout
+- `coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md` — historical corrective visual/deployment handoff
 - `coordination/handoffs/2026-08-28-final-admin-operating-system-listing-sync.md` — accepted Admin architecture lineage
 - `coordination/handoffs/2026-08-28-doba-csv-sync-post-deployment.md` — Doba CSV implementation handoff
 - `coordination/decisions/DEC-006-doba-csv-sync-source-of-truth.md` — durable Doba CSV decision
-- `coordination/receipts/2026-08-28-doba-csv-sync-production.md` — production closeout evidence
+- `coordination/receipts/2026-08-28-doba-csv-sync-production.md` — Doba production closeout evidence
 - `coordination/receipts/` — completed evidence
 
 Master Coordination owns conflict resolution.
