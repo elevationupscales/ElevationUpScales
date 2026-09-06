@@ -1,0 +1,129 @@
+name: STOREFRONT-STABILIZATION-0906 Production
+
+on:
+  push:
+    branches:
+      - control/storefront-stabilization-sweep-0906-production
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: storefront-stabilization-0906-production
+  cancel-in-progress: false
+
+env:
+  EXPECTED_MAIN: 0560b52ceea2c3867e38ed9b223111bc6c673653
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout exact production source
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Enforce exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(git rev-parse HEAD)"
+          echo "main=$current"
+          test "$current" = "$EXPECTED_MAIN"
+      - name: Canonical QA
+        run: npm run qa
+      - name: Stabilization static contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'Hawaii lithium shipping is reviewed by exact product or SKU' site/terms.html
+          ! grep -Fq 'current customer freight price is $99 per actual battery' site/terms.html
+          ! grep -q '>Coming Soon<' site/what-we-do.html
+          grep -q 'Product-supply logistics, freight review, Hawaii and Alaska destination support' site/what-we-do.html
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke exact deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /product?id=sok-sk12v100pc\&store=lithium /product?id=EUS-CAT-B9BEAF9D\&store=rv /terms /what-we-do /shipping-logistics-services /lithium-batteries /hawaii-lithium-batteries /rv-store /start-a-project /solar-project /marketplace /checkout/; do
+            code=$(curl -sS -L --retry 8 --retry-all-errors -o /tmp/out -w '%{http_code}' "$base$route")
+            echo "$route => $code"
+            test "$code" = 200
+          done
+          curl -fsSL "$base/terms" | grep -q 'Hawaii lithium shipping is reviewed by exact product or SKU'
+          ! curl -fsSL "$base/terms" | grep -Fq 'current customer freight price is $99 per actual battery'
+          curl -fsSL "$base/what-we-do" | grep -q 'Product-supply logistics, freight review, Hawaii and Alaska destination support'
+          ! curl -fsSL "$base/what-we-do" | grep -q '>Coming Soon<'
+          npm run qa:preview -- "$base"
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Browser product-detail production validation
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1280,height:900}});
+          async function check(url, lithium){
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+            await page.waitForFunction(()=>{
+              const d=document.querySelector('[data-product-detail]');
+              const u=document.querySelector('[data-product-unavailable]');
+              return (d && d.hidden===false) || (u && u.hidden===false);
+            },null,{timeout:20000});
+            const s=await page.evaluate(()=>({detail:document.querySelector('[data-product-detail]')?.hidden,unavailable:document.querySelector('[data-product-unavailable]')?.hidden,retailer:document.querySelector('[data-lithium-retailer]')?.hidden,freight:document.querySelector('[data-lithium-freight-link]')?.hidden}));
+            if(s.detail!==false || s.unavailable!==true) throw new Error('product unavailable regression');
+            if(lithium && (s.retailer!==false || s.freight!==false)) throw new Error('lithium UI missing');
+            if(!lithium && (s.retailer!==true || s.freight!==true)) throw new Error('lithium UI leaked to RV');
+          }
+          await check(`${base}/product?id=sok-sk12v100pc&store=lithium`,true);
+          await check(`${base}/product?id=EUS-CAT-B9BEAF9D&store=rv`,false);
+          await browser.close();
+          NODE
+      - name: Smoke public production domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          public='https://elevationupscales.com'
+          for attempt in $(seq 1 12); do
+            if curl -fsSL --retry 3 --retry-all-errors "$public/terms" -o /tmp/terms && grep -q 'Hawaii lithium shipping is reviewed by exact product or SKU' /tmp/terms; then break; fi
+            test "$attempt" -lt 12
+            sleep 5
+          done
+          ! grep -Fq 'current customer freight price is $99 per actual battery' /tmp/terms
+          curl -fsSL "$public/what-we-do" | grep -q 'Product-supply logistics, freight review, Hawaii and Alaska destination support'
+          ! curl -fsSL "$public/what-we-do" | grep -q '>Coming Soon<'
+          for route in / /terms /what-we-do /shipping-logistics-services /lithium-batteries /hawaii-lithium-batteries /rv-store /start-a-project /solar-project /marketplace /checkout/; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors -o /tmp/public.out -w '%{http_code}' "$public$route")
+            echo "$public$route => $code"
+            test "$code" = 200
+          done
+      - name: Production summary
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### STOREFRONT-STABILIZATION-0906 — PRODUCTION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Product-detail runtime verified; Hawaii Terms and stale logistics copy corrected.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public production smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
