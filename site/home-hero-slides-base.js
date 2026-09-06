@@ -1,1 +1,414 @@
-/* Preserved HOME-HERO-SLIDES-0905-05 runtime. The active loader lives at /home-hero-slides.js. */
+(() => {
+  'use strict';
+
+  const root = document.querySelector('[data-home-hero-slides]');
+  if (!root) return;
+
+  const source = root.getAttribute('data-slides-src') || '/home-hero-slides.json';
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+  let slides = [];
+  let index = 0;
+  let timer = 0;
+  let rotationMs = 7000;
+  let pausedByUser = false;
+  let pointerStartX = null;
+
+  const clearTimer = () => {
+    if (timer) window.clearTimeout(timer);
+    timer = 0;
+  };
+
+  const shouldRotate = () => slides.length > 1 && !reduceMotion && !pausedByUser && !document.hidden;
+
+  const schedule = () => {
+    clearTimer();
+    if (!shouldRotate()) return;
+    timer = window.setTimeout(() => show(index + 1, true), rotationMs);
+  };
+
+  const applyTracking = (el, item, valueSuffix = '') => {
+    if (!el || !item) return;
+    if (item.event) el.dataset.eusEvent = item.event;
+    if (item.value) el.dataset.eusValue = valueSuffix ? `${item.value}-${valueSuffix}` : item.value;
+  };
+
+  const makeAction = (label, href, primary, item, valueSuffix = '') => {
+    if (!label || !href) return null;
+    const a = document.createElement('a');
+    a.className = `button ${primary ? 'retail-primary' : 'retail-secondary'} home-hero-reference__action`;
+    a.href = href;
+    a.textContent = label;
+    applyTracking(a, item, valueSuffix);
+    return a;
+  };
+
+  const setPauseButtonState = () => {
+    const button = root.querySelector('[data-home-hero-pause]');
+    if (!button) return;
+    button.setAttribute('aria-pressed', pausedByUser ? 'true' : 'false');
+    button.setAttribute('aria-label', pausedByUser ? 'Resume slideshow' : 'Pause slideshow');
+    button.innerHTML = pausedByUser
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>';
+  };
+
+  const updateStatus = () => {
+    root.dataset.activeSlide = String(index + 1);
+    root.querySelectorAll('[data-home-hero-dot]').forEach((dot, i) => {
+      dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+    });
+    const count = root.querySelector('[data-home-hero-count]');
+    if (count) count.textContent = `${index + 1} / ${slides.length}`;
+  };
+
+  const show = (nextIndex, fromTimer = false) => {
+    if (!slides.length) return;
+    index = ((nextIndex % slides.length) + slides.length) % slides.length;
+    slides.forEach((slide, i) => {
+      const active = i === index;
+      slide.el.classList.toggle('is-active', active);
+      slide.el.setAttribute('aria-hidden', active ? 'false' : 'true');
+      if (active) slide.el.removeAttribute('inert');
+      else slide.el.setAttribute('inert', '');
+    });
+    updateStatus();
+    if (!fromTimer) clearTimer();
+    schedule();
+  };
+
+  const appendBrand = (parent, item) => {
+    if (!item.brandImage) return;
+    const img = document.createElement('img');
+    img.className = 'home-hero-reference__brand';
+    img.src = item.brandImage;
+    img.alt = 'Elevation UpScales, Inc.';
+    img.loading = 'eager';
+    img.decoding = 'async';
+    parent.appendChild(img);
+  };
+
+  const appendActions = (parent, item) => {
+    const actions = document.createElement('div');
+    actions.className = 'home-hero-reference__actions';
+    const primary = makeAction(item.ctaLabel, item.href, true, item, 'primary');
+    const secondary = makeAction(item.secondaryCtaLabel, item.secondaryHref, false, item, 'secondary');
+    if (primary) actions.appendChild(primary);
+    if (secondary) actions.appendChild(secondary);
+    if (actions.childElementCount) parent.appendChild(actions);
+  };
+
+  const makeReferenceIdentity = (item, i) => {
+    const el = document.createElement('article');
+    el.className = 'home-hero-slide home-hero-slide--reference home-hero-slide--identity';
+    el.dataset.homeHeroSlide = item.id || `slide-${i + 1}`;
+    el.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    if (i !== 0) el.setAttribute('inert', '');
+    if (item.background) el.style.background = item.background;
+    if (item.backgroundImage) el.style.setProperty('--home-hero-reference-bg', `url("${item.backgroundImage}")`);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'home-hero-reference__backdrop';
+    el.appendChild(backdrop);
+
+    const inner = document.createElement('div');
+    inner.className = 'home-hero-reference home-hero-reference--identity';
+
+    const brand = document.createElement('img');
+    brand.className = 'home-hero-reference__identity-mark';
+    brand.src = item.image;
+    brand.alt = item.alt || 'Elevation UpScales, Inc.';
+    brand.loading = 'eager';
+    brand.decoding = 'async';
+    inner.appendChild(brand);
+
+    if (item.headline) {
+      const line = document.createElement('p');
+      line.className = 'home-hero-reference__identity-line';
+      line.textContent = item.headline;
+      inner.appendChild(line);
+    }
+    appendActions(inner, item);
+    el.appendChild(inner);
+    return { el, item };
+  };
+
+  const makeReferencePartnership = (item, i) => {
+    const el = document.createElement('article');
+    el.className = 'home-hero-slide home-hero-slide--reference home-hero-slide--partnership';
+    el.dataset.homeHeroSlide = item.id || `slide-${i + 1}`;
+    el.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    if (i !== 0) el.setAttribute('inert', '');
+    if (item.background) el.style.background = item.background;
+    if (item.backgroundImage) el.style.setProperty('--home-hero-reference-bg', `url("${item.backgroundImage}")`);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'home-hero-reference__backdrop';
+    el.appendChild(backdrop);
+
+    const inner = document.createElement('div');
+    inner.className = 'home-hero-reference home-hero-reference--partnership';
+
+    const copy = document.createElement('div');
+    copy.className = 'home-hero-reference__copy';
+    appendBrand(copy, item);
+    if (item.eyebrow) {
+      const p = document.createElement('p');
+      p.className = 'home-hero-reference__eyebrow';
+      p.textContent = item.eyebrow;
+      copy.appendChild(p);
+    }
+    if (item.headline) {
+      const h2 = document.createElement('h2');
+      h2.className = 'home-hero-reference__headline';
+      h2.textContent = item.headline;
+      copy.appendChild(h2);
+    }
+    if (item.body) {
+      const p = document.createElement('p');
+      p.className = 'home-hero-reference__body';
+      p.textContent = item.body;
+      copy.appendChild(p);
+    }
+    if (Array.isArray(item.capabilities) && item.capabilities.length) {
+      const caps = document.createElement('div');
+      caps.className = 'home-hero-reference__capabilities';
+      item.capabilities.forEach((text) => {
+        const span = document.createElement('span');
+        span.textContent = text;
+        caps.appendChild(span);
+      });
+      copy.appendChild(caps);
+    }
+    appendActions(copy, item);
+    inner.appendChild(copy);
+
+    const products = document.createElement('div');
+    products.className = 'home-hero-reference__products';
+    (Array.isArray(item.products) ? item.products : []).forEach((product) => {
+      if (!product?.image || !product?.href) return;
+      const a = document.createElement('a');
+      a.className = 'home-hero-reference__product';
+      a.href = product.href;
+      a.setAttribute('aria-label', `View ${product.model || 'SOK battery'}`);
+      const img = document.createElement('img');
+      img.src = product.image;
+      img.alt = product.model ? `SOK ${product.model}` : 'SOK battery';
+      img.loading = i < 2 ? 'eager' : 'lazy';
+      img.decoding = 'async';
+      a.appendChild(img);
+      const label = document.createElement('span');
+      label.innerHTML = `<strong>${product.model || ''}</strong><small>${product.use || ''}</small>`;
+      a.appendChild(label);
+      products.appendChild(a);
+    });
+    inner.appendChild(products);
+    el.appendChild(inner);
+    return { el, item };
+  };
+
+  const makeReferenceProduct = (item, i) => {
+    const el = document.createElement('article');
+    el.className = 'home-hero-slide home-hero-slide--reference home-hero-slide--product';
+    el.dataset.homeHeroSlide = item.id || `slide-${i + 1}`;
+    el.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    if (i !== 0) el.setAttribute('inert', '');
+    if (item.background) el.style.background = item.background;
+    if (item.backgroundImage) el.style.setProperty('--home-hero-reference-bg', `url("${item.backgroundImage}")`);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'home-hero-reference__backdrop';
+    el.appendChild(backdrop);
+
+    const inner = document.createElement('div');
+    inner.className = 'home-hero-reference home-hero-reference--product';
+
+    const copy = document.createElement('div');
+    copy.className = 'home-hero-reference__copy';
+    appendBrand(copy, item);
+    if (item.eyebrow) {
+      const p = document.createElement('p');
+      p.className = 'home-hero-reference__eyebrow';
+      p.textContent = item.eyebrow;
+      copy.appendChild(p);
+    }
+    if (item.headline) {
+      const h2 = document.createElement('h2');
+      h2.className = 'home-hero-reference__headline home-hero-reference__headline--model';
+      h2.textContent = item.headline;
+      copy.appendChild(h2);
+    }
+    if (item.body) {
+      const p = document.createElement('p');
+      p.className = 'home-hero-reference__body';
+      p.textContent = item.body;
+      copy.appendChild(p);
+    }
+    appendActions(copy, item);
+    inner.appendChild(copy);
+
+    const productLink = document.createElement('a');
+    productLink.className = 'home-hero-reference__featured-product';
+    productLink.href = item.href || '/sok-batteries';
+    productLink.setAttribute('aria-label', `View ${item.headline || 'featured SOK battery'}`);
+    applyTracking(productLink, item, 'image');
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.alt || '';
+    img.loading = i < 2 ? 'eager' : 'lazy';
+    img.decoding = 'async';
+    productLink.appendChild(img);
+    inner.appendChild(productLink);
+    el.appendChild(inner);
+    return { el, item };
+  };
+
+  const makeStandardSlide = (item, i) => {
+    const el = document.createElement('article');
+    el.className = 'home-hero-slide';
+    el.dataset.homeHeroSlide = item.id || `slide-${i + 1}`;
+    el.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    if (i !== 0) el.setAttribute('inert', '');
+    if (item.background) el.style.background = item.background;
+
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.alt || '';
+    img.width = Number(item.width) || 1640;
+    img.height = Number(item.height) || 624;
+    img.loading = i < 2 ? 'eager' : 'lazy';
+    img.decoding = 'async';
+    img.fetchPriority = i === 0 ? 'high' : 'auto';
+    if (item.fit === 'cover' || item.fit === 'contain') img.style.objectFit = item.fit;
+    if (typeof item.objectPosition === 'string') img.style.objectPosition = item.objectPosition;
+    img.addEventListener('error', () => el.classList.add('has-media-error'));
+    el.appendChild(img);
+    return { el, item };
+  };
+
+  const makeSlide = (item, i) => {
+    if (item.layout === 'reference-identity') return makeReferenceIdentity(item, i);
+    if (item.layout === 'reference-partnership') return makeReferencePartnership(item, i);
+    if (item.layout === 'reference-product') return makeReferenceProduct(item, i);
+    return makeStandardSlide(item, i);
+  };
+
+  const renderControls = (viewport) => {
+    if (slides.length <= 1) {
+      root.dataset.controlsReady = 'false';
+      return;
+    }
+    const controls = document.createElement('div');
+    controls.className = 'home-hero-slides__controls';
+    controls.innerHTML = `
+      <button class="home-hero-slides__button home-hero-slides__button--prev" type="button" data-home-hero-prev aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="home-hero-slides__button home-hero-slides__button--next" type="button" data-home-hero-next aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>`;
+    root.appendChild(controls);
+
+    const status = document.createElement('div');
+    status.className = 'home-hero-slides__status';
+    const dots = document.createElement('div');
+    dots.className = 'home-hero-slides__dots';
+    dots.setAttribute('aria-label', 'Choose marketing slide');
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'home-hero-slides__dot';
+      dot.dataset.homeHeroDot = String(i);
+      dot.setAttribute('aria-label', `Show slide ${i + 1}`);
+      dot.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+      dot.addEventListener('click', () => show(i));
+      dots.appendChild(dot);
+    });
+    status.appendChild(dots);
+
+    const count = document.createElement('span');
+    count.className = 'home-hero-slides__count';
+    count.dataset.homeHeroCount = '';
+    count.setAttribute('aria-live', 'polite');
+    status.appendChild(count);
+
+    const pause = document.createElement('button');
+    pause.type = 'button';
+    pause.className = 'home-hero-slides__pause';
+    pause.dataset.homeHeroPause = '';
+    pause.addEventListener('click', () => {
+      pausedByUser = !pausedByUser;
+      setPauseButtonState();
+      schedule();
+    });
+    status.appendChild(pause);
+    root.appendChild(status);
+
+    root.querySelector('[data-home-hero-prev]')?.addEventListener('click', () => show(index - 1));
+    root.querySelector('[data-home-hero-next]')?.addEventListener('click', () => show(index + 1));
+
+    viewport.addEventListener('pointerdown', (event) => { pointerStartX = event.clientX; }, { passive: true });
+    viewport.addEventListener('pointerup', (event) => {
+      if (pointerStartX === null) return;
+      const delta = event.clientX - pointerStartX;
+      pointerStartX = null;
+      if (Math.abs(delta) < 45) return;
+      show(index + (delta < 0 ? 1 : -1));
+    }, { passive: true });
+
+    root.dataset.controlsReady = 'true';
+    setPauseButtonState();
+  };
+
+  const fail = (message) => {
+    root.classList.add('is-ready', 'has-error');
+    root.dataset.slideshowReady = 'false';
+    const error = document.createElement('div');
+    error.className = 'home-hero-slides__error';
+    error.textContent = message;
+    root.appendChild(error);
+  };
+
+  fetch(source, { cache: 'no-store', credentials: 'same-origin' })
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then((config) => {
+      rotationMs = Math.max(4500, Number(config.rotationMs) || 7000);
+      const items = Array.isArray(config.slides)
+        ? config.slides.filter((item) => item && item.active !== false && typeof item.image === 'string' && item.image.trim() !== '')
+        : [];
+      if (!items.length) throw new Error('No active slides');
+
+      const viewport = document.createElement('div');
+      viewport.className = 'home-hero-slides__viewport';
+      viewport.dataset.homeHeroSlidesViewport = '';
+      viewport.setAttribute('aria-live', 'off');
+
+      slides = items.map(makeSlide);
+      slides.forEach((slide) => viewport.appendChild(slide.el));
+      root.appendChild(viewport);
+      root.dataset.slideCount = String(slides.length);
+      root.dataset.referenceSlides = String(items.filter((item) => String(item.layout || '').startsWith('reference-')).length);
+      root.classList.add('is-ready');
+      renderControls(viewport);
+      show(0);
+      root.dataset.slideshowReady = 'true';
+
+      root.addEventListener('mouseenter', clearTimer);
+      root.addEventListener('mouseleave', schedule);
+      root.addEventListener('focusin', clearTimer);
+      root.addEventListener('focusout', schedule);
+      root.addEventListener('keydown', (event) => {
+        if (slides.length <= 1) return;
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          show(index - 1);
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          show(index + 1);
+        }
+      });
+      document.addEventListener('visibilitychange', schedule);
+    })
+    .catch((error) => {
+      console.error('Homepage slideshow failed to initialize', error);
+      fail('Featured marketing is temporarily unavailable.');
+    });
+})();
