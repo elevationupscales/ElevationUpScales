@@ -815,7 +815,7 @@ body.retail-store-shell h1,body.retail-store-shell h2,body.retail-store-shell h3
   font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif!important;
   font-stretch:normal!important;
 }
-body.reference-storefront-home{overflow-x:clip}
+html:has(body.reference-storefront-home),body.reference-storefront-home{max-width:100%;overflow-x:hidden}
 .reference-storefront-hero h1{font-size:clamp(3rem,5vw,4.85rem)!important;font-weight:820!important;line-height:.96!important;letter-spacing:-.045em!important;text-transform:none!important}
 .reference-storefront-hero h1 span{color:#fff!important;font-weight:760!important}
 .reference-storefront-hero__lead{max-width:650px!important;font-size:1rem!important;line-height:1.62!important}
