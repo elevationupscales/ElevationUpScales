@@ -1,0 +1,97 @@
+name: STOREFRONT-STABILIZATION-0906 Diagnostic
+
+on:
+  push:
+    branches:
+      - work/storefront-stabilization-sweep-0906-01
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Canonical QA
+        run: npm run qa
+      - name: Deploy isolated diagnostic preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=storefront-stabilization-0906-diagnostic
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Inspect catalog APIs
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsSL "$base/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          curl -fsSL "$base/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          for (const [name,path,samples] of [
+            ['lithium','/tmp/lithium.json',['sok-sk12v100pc']],
+            ['rv','/tmp/rv.json',['EUS-CAT-B9BEAF9D','D010277TCB2-470279']]
+          ]) {
+            const data=JSON.parse(fs.readFileSync(path,'utf8'));
+            const rows=Array.isArray(data.products)?data.products:[];
+            console.log(name,'count=',rows.length,'ids=',rows.slice(0,12).map(x=>x.id));
+            for (const sample of samples) console.log(name,sample,'match=',rows.find(x=>String(x.id)===sample)||null);
+          }
+          NODE
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Browser product-detail diagnostic
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1280,height:900}});
+          const cases=[
+            {name:'sok',url:`${base}/product?id=sok-sk12v100pc&store=lithium`},
+            {name:'rv-public-id',url:`${base}/product?id=EUS-CAT-B9BEAF9D&store=rv`},
+            {name:'rv-catalog-id',url:`${base}/product?id=D010277TCB2-470279&store=rv`}
+          ];
+          for (const c of cases) {
+            const errors=[]; page.removeAllListeners('console'); page.removeAllListeners('pageerror');
+            page.on('console',m=>{if(m.type()==='error')errors.push('console:'+m.text())});
+            page.on('pageerror',e=>errors.push('pageerror:'+e.message));
+            await page.goto(c.url,{waitUntil:'networkidle'});
+            await page.waitForTimeout(500);
+            const state=await page.evaluate(()=>({
+              title:document.querySelector('[data-product-title]')?.textContent?.trim(),
+              detailHidden:document.querySelector('[data-product-detail]')?.hidden,
+              unavailableHidden:document.querySelector('[data-product-unavailable]')?.hidden,
+              status:document.querySelector('[data-product-status]')?.textContent?.trim(),
+              lithiumRetailerHidden:document.querySelector('[data-lithium-retailer]')?.hidden,
+              lithiumFreightHidden:document.querySelector('[data-lithium-freight-link]')?.hidden,
+              bodyText:document.body.innerText.slice(0,1800)
+            }));
+            console.log('\nCASE',c.name,c.url,JSON.stringify(state,null,2),'errors=',errors);
+          }
+          await browser.close();
+          NODE
+      - name: Record diagnostic summary
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### STOREFRONT STABILIZATION DIAGNOSTIC COMPLETE' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'No production deployment performed.' >> "$GITHUB_STEP_SUMMARY"
