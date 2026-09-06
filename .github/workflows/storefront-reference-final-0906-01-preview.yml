@@ -1,0 +1,137 @@
+name: STOREFRONT-REFERENCE-FINAL-0906-01 Preview
+
+on:
+  push:
+    branches:
+      - work/storefront-reference-final-deploy-0906-01
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: storefront-reference-final-0906-01-preview
+  cancel-in-progress: false
+
+env:
+  EXPECTED_PARENT: df5012cfe33976c85d491933fc31d24b2f7445a4
+
+jobs:
+  validate-preview-evidence:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Enforce clean lineage and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          test "$(git rev-parse origin/main)" = "$EXPECTED_PARENT"
+          git merge-base --is-ancestor "$EXPECTED_PARENT" HEAD
+          changed="$(git diff --name-only "$EXPECTED_PARENT"...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/index\.html|site/home-hero-slides\.(css|js|json)|site/assets/brand/storefront-wordmark\.webp|site/labor-day-promo\.(css|js)|\.github/workflows/storefront-reference-final-0906-01-preview\.yml|\.github/workflows/storefront-reference-final-0906-01-production\.yml|coordination/releases/storefront-reference-final-0906-01\.trigger)$' || true)"
+          test -z "$unexpected"
+      - name: Source and repository QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/home-hero-slides.js
+          node --check site/labor-day-promo.js
+          node -e "const c=require('./site/home-hero-slides.json'); if(c.slides.filter(s=>s.active!==false).length<4) process.exit(1); if(c.slides.some(s=>String(s.backgroundImage||'').includes('homepage-option-2-lithium-solar.webp'))) process.exit(2)"
+          grep -q 'data-home-hero-slides' site/index.html
+          grep -q 'reference-storefront-hero' site/home-hero-slides.css
+          grep -q 'solar-hero-desktop.webp' site/labor-day-promo.css
+          grep -q 'eus-labor-day-banner-slot' site/labor-day-promo.css
+          npm run qa
+          git diff --check
+          git diff --exit-code
+      - name: Deploy isolated final preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=storefront-reference-final-0906-01-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Preview route and protected-runtime regression
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          npm run qa:preview -- "$base"
+          for route in / /lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /hawaii-lithium-batteries /rv-store /checkout/ /start-a-project /solar-project; do
+            code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          admin=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base/api/admin/sync" || true)
+          test "$admin" = "401"
+          runtime=$(curl -sS -o /tmp/runtime -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
+          test "$runtime" = "404"
+      - name: Capture exact owner visual evidence
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+          mkdir -p visual-evidence
+          BASE="${BASE%/}" node --input-type=module - <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const base=process.env.BASE;
+          const browser=await chromium.launch({headless:true});
+          const out={};
+          for (const [name,viewport] of Object.entries({desktop:{width:1536,height:1024},mobile:{width:390,height:844}})) {
+            const page=await browser.newPage({viewport});
+            await page.goto(`${base}/`,{waitUntil:'networkidle',timeout:60000});
+            await page.waitForSelector('[data-reference-flagship]',{state:'visible',timeout:15000});
+            await page.waitForSelector('[data-reference-solutions]',{state:'visible',timeout:15000});
+            await page.waitForTimeout(1500);
+            const m=await page.evaluate(()=>({
+              bodyWidth:document.body.scrollWidth,viewportWidth:innerWidth,viewportHeight:innerHeight,
+              flagship:Boolean(document.querySelector('[data-reference-flagship]')),
+              trust:Boolean(document.querySelector('[data-reference-trust]')),
+              solutions:document.querySelectorAll('.reference-solution-card').length,
+              promoVisible:[...document.querySelectorAll('.eus-labor-day-banner,.eus-labor-day-banner-slot')].some(el=>{const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&el.getBoundingClientRect().height>1}),
+              h1:document.querySelector('[data-reference-flagship] h1')?.innerText||'',
+              heroHeight:Math.round(document.querySelector('[data-reference-flagship]')?.getBoundingClientRect().height||0)
+            }));
+            if(m.bodyWidth>m.viewportWidth+4) throw new Error(`${name} horizontal overflow`);
+            if(!m.flagship||!m.trust||m.solutions!==7) throw new Error(`${name} composition incomplete`);
+            if(m.promoVisible) throw new Error(`${name} Labor Day promo still occupies first screen`);
+            if(name==='desktop' && (m.heroHeight<420||m.heroHeight>475)) throw new Error(`desktop flagship height ${m.heroHeight} misses reference fold`);
+            const brand=await page.locator('.reference-header-wordmark').evaluate(img=>({complete:img.complete,w:img.naturalWidth,h:img.naturalHeight}));
+            if(!brand.complete||brand.w!==1200||brand.h!==360) throw new Error(`${name} wordmark invalid ${JSON.stringify(brand)}`);
+            out[name]={...m,brand};
+            await page.screenshot({path:`visual-evidence/${name}-viewport.png`,fullPage:false});
+            await page.screenshot({path:`visual-evidence/${name}-full.png`,fullPage:true});
+            await page.close();
+          }
+          await browser.close();
+          fs.writeFileSync('visual-evidence/evidence.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out,null,2));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storefront-reference-final-0906-01-evidence
+          path: visual-evidence/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Receipt
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### STOREFRONT-REFERENCE-FINAL-0906-01 — PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Desktop evidence: 1536x1024' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Mobile evidence: 390x844' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production: NOT YET PROMOTED' >> "$GITHUB_STEP_SUMMARY"

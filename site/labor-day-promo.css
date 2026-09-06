@@ -1,7 +1,31 @@
-.eus-labor-day-banner{border-bottom:1px solid rgba(212,175,85,.35);background:linear-gradient(90deg,#17130b,#090909);color:#fff}.eus-labor-day-banner__inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-block:11px}.eus-labor-day-banner__inner>div{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.eus-labor-day-banner strong{color:#f0cf78;font-size:.95rem;letter-spacing:.02em}.eus-labor-day-banner span,.eus-labor-day-banner p{margin:0;color:#e1dbcf;font-size:.82rem;line-height:1.45}.eus-labor-day-banner code{padding:2px 6px;border:1px solid rgba(240,207,120,.35);border-radius:5px;background:#070707;color:#fff;font:inherit;font-weight:800}@media(max-width:760px){.eus-labor-day-banner__inner{align-items:flex-start;flex-direction:column;gap:5px}.eus-labor-day-banner__inner>div{align-items:flex-start;flex-direction:column;gap:3px}}
-
-.eus-labor-day-banner-slot{display:block;min-height:64px;background:linear-gradient(90deg,#17130b,#090909);contain:layout paint}
-.eus-labor-day-banner-slot[hidden]{display:none}
-.eus-labor-day-banner-slot .eus-labor-day-banner{min-height:64px}
-.eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:64px}
-@media(max-width:760px){.eus-labor-day-banner-slot,.eus-labor-day-banner-slot .eus-labor-day-banner{min-height:88px}.eus-labor-day-banner-slot .eus-labor-day-banner__inner{min-height:88px}}
+/* STOREFRONT-REFERENCE-FINAL-0906-01 — owner literal composition correction. Presentation only. */
+.eus-labor-day-banner-slot,.eus-labor-day-banner{display:none!important;min-height:0!important;height:0!important;overflow:hidden!important}
+.reference-storefront-hero{min-height:445px!important}
+.reference-storefront-hero__scene{background:linear-gradient(90deg,rgba(0,5,9,.98) 0%,rgba(0,8,13,.89) 27%,rgba(2,15,23,.32) 57%,rgba(0,6,10,.42) 100%),linear-gradient(180deg,rgba(0,0,0,.01),rgba(0,6,10,.18) 64%,rgba(0,6,10,.78)),url('/assets/solar/solar-hero-desktop.webp') center 48%/cover no-repeat!important;filter:saturate(1.08) contrast(1.04) brightness(.9)!important}
+.reference-storefront-hero__inner{min-height:445px!important;padding:20px 0 0!important;grid-template-columns:minmax(470px,.96fr) minmax(570px,1.04fr)!important}
+.reference-storefront-hero__copy{padding:8px 0 18px!important}
+.reference-storefront-hero h1{font-size:clamp(3.55rem,5.55vw,5.55rem)!important;line-height:.86!important;max-width:620px!important}
+.reference-storefront-hero h1 span{margin-top:8px!important}
+.reference-storefront-hero__lead{margin-top:14px!important;max-width:560px!important;font-size:1rem!important}
+.reference-storefront-hero__actions{margin-top:18px!important;gap:13px!important}
+.reference-storefront-hero__actions .button{min-height:48px!important;padding:12px 24px!important;font-size:.92rem!important}
+.reference-usecases{margin-top:18px!important}
+.reference-usecases a{min-height:68px!important;padding:7px 12px!important}
+.reference-usecase__icon{font-size:1.55rem!important}
+.reference-storefront-hero__visual{min-height:415px!important}
+.reference-sok-brand{top:18px!important;left:43%!important;width:285px!important}
+.reference-sok-brand strong{font-size:4.45rem!important}
+.reference-sok-brand span{margin-top:8px!important;font-size:.88rem!important}
+.reference-sok-brand small{margin-top:9px!important}
+.reference-rack{top:-24px!important;right:-22px!important;width:245px!important;height:445px!important;opacity:.68!important;filter:brightness(.68) contrast(1.1) saturate(.9) drop-shadow(0 20px 24px rgba(0,0,0,.55))!important}
+.reference-product--12v{width:230px!important;height:188px!important;left:5%!important;bottom:8px!important}
+.reference-product--48v{width:382px!important;height:258px!important;right:8%!important;bottom:-4px!important}
+.reference-product span{bottom:7%!important;min-width:142px!important;padding:6px 11px!important}
+.reference-authorized{right:0!important;bottom:5px!important;width:145px!important;padding:7px 6px!important}
+.reference-authorized img{width:118px!important;height:38px!important}
+.reference-trust-strip__item{min-height:72px!important}
+.reference-solutions{padding:16px 0 18px!important}
+.reference-solutions__head{margin-bottom:11px!important}
+.reference-solution-card{min-height:208px!important}
+.reference-storefront-home .home-sok::before{background:url('/assets/solar/solar-hero-desktop.webp') center 48%/cover no-repeat!important;filter:saturate(.95) brightness(.43) contrast(1.08)!important}
+@media(max-width:999px){.eus-labor-day-banner-slot,.eus-labor-day-banner{display:none!important}.reference-storefront-hero__scene{background:linear-gradient(180deg,rgba(0,6,10,.5),rgba(0,6,10,.88)),url('/assets/solar/solar-hero-mobile.webp') center/cover no-repeat!important}}

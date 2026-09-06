@@ -1,0 +1,97 @@
+name: STOREFRONT-REFERENCE-FINAL-0906-01 Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - coordination/releases/storefront-reference-final-0906-01.trigger
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: storefront-reference-final-0906-01-production
+  cancel-in-progress: false
+
+jobs:
+  validate-deploy-smoke:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Validate final release source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f coordination/releases/storefront-reference-final-0906-01.trigger
+          test -f site/home-hero-slides.css
+          test -f site/home-hero-slides.js
+          test -f site/home-hero-slides.json
+          test -f site/assets/brand/storefront-wordmark.webp
+          node --check site/home-hero-slides.js
+          node --check site/labor-day-promo.js
+          node -e "const c=require('./site/home-hero-slides.json'); if(c.slides.filter(s=>s.active!==false).length<4) process.exit(1); if(c.slides.some(s=>String(s.backgroundImage||'').includes('homepage-option-2-lithium-solar.webp'))) process.exit(2)"
+          grep -q 'data-home-hero-slides' site/index.html
+          grep -q 'reference-storefront-hero' site/home-hero-slides.css
+          grep -q 'solar-hero-desktop.webp' site/labor-day-promo.css
+          npm run qa
+          git diff --check
+          git diff --exit-code
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Immutable deployment smoke
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          npm run qa:preview -- "$base"
+          for route in / /lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /hawaii-lithium-batteries /rv-store /checkout/ /start-a-project /solar-project /shipping-logistics-services; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'data-home-hero-slides' /tmp/home.html
+          curl -sS -L --fail "$base/home-hero-slides.css?v=1.0.0" -o /tmp/hero.css
+          grep -q 'reference-storefront-hero' /tmp/hero.css
+          curl -sS -L --fail "$base/labor-day-promo.css?v=4.4.2" -o /tmp/final-override.css
+          grep -q 'solar-hero-desktop.webp' /tmp/final-override.css
+          admin=$(curl -sS -o /tmp/admin -w '%{http_code}' "$base/api/admin/sync" || true)
+          test "$admin" = "401"
+          runtime=$(curl -sS -o /tmp/runtime -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
+          test "$runtime" = "404"
+      - name: Canonical propagation smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          canonical='https://elevationupscales.com'
+          ok=0
+          for i in $(seq 1 12); do
+            if curl -sS -L --fail "$canonical/" -o /tmp/canonical.html && grep -q 'data-home-hero-slides' /tmp/canonical.html; then ok=1; break; fi
+            sleep 10
+          done
+          test "$ok" = "1"
+          curl -sS -L --fail "$canonical/labor-day-promo.css?v=4.4.2" -o /tmp/canonical-final.css
+          grep -q 'solar-hero-desktop.webp' /tmp/canonical-final.css
+          for route in /lithium-batteries /sok-batteries /hawaii-lithium-batteries /rv-store /checkout/ /start-a-project; do curl -sS -L --fail "$canonical$route" -o /dev/null; done
+      - name: Final receipt
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### STOREFRONT-REFERENCE-FINAL-0906-01 — PRODUCTION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source main: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Protected commerce/runtime: unchanged by release scope' >> "$GITHUB_STEP_SUMMARY"
