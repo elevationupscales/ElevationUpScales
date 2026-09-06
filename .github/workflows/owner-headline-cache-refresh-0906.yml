@@ -1,0 +1,130 @@
+name: OWNER-HEADLINE-0906 Fresh Preview
+
+on:
+  push:
+    branches:
+      - control/owner-headline-cache-refresh-0906
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: owner-headline-cache-refresh-0906
+  cancel-in-progress: false
+
+env:
+  EXPECTED_MAIN: 4148741a89fa3cbaba17685b085137281364ba63
+
+jobs:
+  fresh-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Enforce exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(git rev-parse HEAD)"
+          echo "main=$current"
+          test "$current" = "$EXPECTED_MAIN"
+
+      - name: Apply owner headline to preview only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('site/index.html')
+          s = p.read_text()
+          old = '<h1 id="reference-flagship-title">Power Beyond<br><span>the Grid.</span></h1>'
+          new = '<h1 id="reference-flagship-title">Lithium Power Supply<br><span>&amp; Shipping Logistics</span></h1>'
+          if old not in s:
+              raise SystemExit('expected Power Beyond headline not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          grep -q 'Lithium Power Supply' site/index.html
+          grep -q 'Shipping Logistics' site/index.html
+
+      - name: Disable preview asset caching
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('site/_headers')
+          s = p.read_text()
+          old = '''/assets/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  CDN-Cache-Control: public, max-age=2592000
+'''
+          new = '''/assets/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+
+/home-hero-slides.json
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-cache, no-store, must-revalidate
+'''
+          if old not in s:
+              raise SystemExit('expected asset cache block not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+
+      - name: Canonical QA before preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+
+      - name: Deploy fresh uncached preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=owner-headline-cache-refresh-0906
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Preview smoke and image checks
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'Lithium Power Supply' /tmp/home.html
+          grep -q 'Shipping Logistics' /tmp/home.html
+          for asset in \
+            /assets/hero/storefront-tropical-logistics-v3.webp \
+            /assets/brand/storefront-wordmark.webp \
+            /assets/brands/sok/sk12v100pc/home-hero.webp \
+            /assets/brands/sok/sk48v100n/home-crop.webp \
+            /assets/brands/sok/48v-battery-cabinet/hero.webp \
+            /assets/brands/sok/sok-wordmark-home-transparent.webp; do
+            code=$(curl -sS -L --retry 5 --retry-all-errors -o /tmp/asset.bin -w '%{http_code}' "$base$asset")
+            echo "$asset=$code bytes=$(wc -c </tmp/asset.bin)"
+            test "$code" = "200"
+            test "$(wc -c </tmp/asset.bin)" -gt 1000
+          done
+          curl -sSI "$base/assets/brand/storefront-wordmark.webp" | tr -d '\r' | grep -i '^cache-control:.*no-cache'
+          npm run qa:preview -- "$base"
+
+      - name: Receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### OWNER-HEADLINE-0906 — FRESH PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source main: $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Headline: Lithium Power Supply & Shipping Logistics' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preview asset cache: disabled' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production: unchanged by this workflow' >> "$GITHUB_STEP_SUMMARY"
