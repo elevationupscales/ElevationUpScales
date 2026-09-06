@@ -1,0 +1,84 @@
+name: FINAL-CLOSEOUT-0906 Preview
+
+on:
+  push:
+    branches:
+      - work/final-closeout-copy-logistics-hawaii-analytics-0906
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: final-closeout-0906-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Confirm exact workflow candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "candidate=$GITHUB_SHA"
+      - name: Canonical QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/final-closeout-static.mjs
+      - name: Deploy isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=final-closeout-0906-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Focused closeout preview smoke
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsSL "$base/" -o /tmp/home.html
+          grep -q 'Lithium Power Supply' /tmp/home.html
+          grep -q 'and Logistics' /tmp/home.html
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/home.html
+          ! grep -qi 'Start with what you need' /tmp/home.html
+          grep -q 'Alaska Logistics' /tmp/home.html
+          curl -fsSL "$base/shipping-logistics-services" -o /tmp/logistics.html
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/logistics.html
+          grep -q 'id="alaska"' /tmp/logistics.html
+          grep -q 'Hawaii' /tmp/logistics.html
+          ! grep -q 'Coming Soon' /tmp/logistics.html
+          curl -fsSL "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q 'SK12V100PC' /tmp/hawaii.html
+          grep -q 'SK48V100N' /tmp/hawaii.html
+          grep -q 'intent=hawaii' /tmp/hawaii.html
+          ! grep -q 'data-hawaii-request-form' /tmp/hawaii.html
+          curl -fsSL "$base/sok-batteries" -o /tmp/sok.html
+          grep -q 'Hawaii, Alaska and commercial support' /tmp/sok.html
+          curl -fsSL "$base/sok-order.html?sku=SK12V100PC&intent=hawaii&state=HI" -o /tmp/order.html
+          grep -q 'SOK Purchase Options' /tmp/order.html
+          curl -fsSL "$base/api/store-products" >/tmp/products.json
+          npm run qa:preview -- "$base"
+      - name: Summary
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### FINAL-CLOSEOUT-0906 PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hero: Lithium Power Supply and Logistics' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Logistics/Hawaii/Alaska/analytics closeout: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production: unchanged by preview workflow' >> "$GITHUB_STEP_SUMMARY"
