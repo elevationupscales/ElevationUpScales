@@ -1,0 +1,1 @@
+Stop creating checkpoint files. Next action is loader wiring through existing file replacements.
