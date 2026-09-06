@@ -1,0 +1,91 @@
+name: STOREFRONT-REFERENCE-0906-02 Production Deploy
+
+on:
+  push:
+    branches:
+      - control/storefront-reference-final-production-0906
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: storefront-reference-final-production-0906
+  cancel-in-progress: false
+
+env:
+  EXPECTED_MAIN: f9afa86bad443bc9eb47c785964b3012488570b6
+
+jobs:
+  production:
+    name: validate-deploy-and-smoke
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out production main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Enforce exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(git rev-parse HEAD)"
+          echo "main=$current"
+          test "$current" = "$EXPECTED_MAIN"
+          git diff --check
+
+      - name: Canonical QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --exit-code
+
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke deployed application
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /admin /admin-store-orders /admin-inventory /admin-listings /admin-analytics /admin-system; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'data-home-hero-slides' /tmp/home.html
+          curl -sS -L --fail "$base/home-hero-slides.json" -o /tmp/slides.json
+          curl -sS -L --fail "$base/home-hero-slides.js?v=1.1.0" -o /tmp/slides.js
+          curl -sS -L --fail "$base/home-hero-slides.css?v=1.1.0" -o /tmp/slides.css
+          grep -q 'reference-storefront-hero' /tmp/slides.js
+          grep -q 'reference-solutions__grid' /tmp/slides.css
+          curl -sS -L --fail "$base/assets/brand/storefront-wordmark.webp" -o /tmp/wordmark.webp
+          test "$(wc -c </tmp/wordmark.webp)" -gt 1000
+          sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
+          test "$sync_code" = "401"
+          runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
+          test "$runtime_code" = "404"
+
+      - name: Production receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### STOREFRONT-REFERENCE-0906-02 — PRODUCTION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production smoke: PASS' >> "$GITHUB_STEP_SUMMARY"
