@@ -1,7 +1,7 @@
 # FINAL-CLOSEOUT-0906 — Production Receipt
 
 **Date:** 2026-09-06  
-**Status:** PRODUCTION PASS / CLOSEOUT
+**Status:** PRODUCTION PASS / CLOSEOUT / GMAIL RECEIPT SENT
 
 ## Release lineage
 
@@ -60,12 +60,19 @@ Production smoke confirmed HTTP `200` for homepage, logistics, Hawaii lithium, L
 
 No release change was made to supplier cost, MAP, protected pricing controls, inventory truth, Doba source refresh, PayPal runtime, Catalog source-of-truth architecture, private carrier/dangerous-goods operations, Marketplace ownership, Admin/Portal architecture, or production data/schema. Destination pages do not override exact-SKU, supplier, inventory, MAP, carrier, dangerous-goods or Hawaii route controls.
 
+## Gmail release receipt
+
+- Recipient: `elevationupscales@gmail.com`
+- Subject: `Elevation UpScales — Final Storefront Closeout Production PASS — 2026-09-06`
+- Gmail message ID: `1a078375efe78766`
+- Result: SENT
+
 ## Rollback
 
 If rollback is required, restore `baseline-2026-09-06-pre-final-copy-logistics-hawaii-analytics-production` (`8441d81053a336eeb92ffbd1df26cc1b17ecf7f4`) through the controlled release workflow.
 
 ## Disposition
 
-**FINAL APPROVED STOREFRONT CLOSEOUT: PRODUCTION PASS.**
+**FINAL APPROVED STOREFRONT CLOSEOUT: PRODUCTION PASS / GMAIL RECEIPT SENT / CLOSED.**
 
 The application release is complete. Subsequent repository commits that only add this receipt, Master Status updates, management mirrors or email evidence are documentation-only and do not change the deployed application source `4d2ed6e7970549a4a0587e5580b7a759fdfc3a71`.
