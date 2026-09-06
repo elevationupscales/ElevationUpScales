@@ -1,0 +1,108 @@
+name: HOMEPAGE-OWNER-REVISION-0906-03
+
+on:
+  push:
+    branches:
+      - work/homepage-owner-revision-0906-03
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: homepage-owner-revision-0906-03-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Validate exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 9b9f8c62378b2a085e9849dca8e7fd53c04bfa28 HEAD
+          npm run qa
+          grep -q 'Lithium Energy<br><span>for RV Life.</span>' site/index.html
+          grep -q 'Power supply does not stop at the shoreline.' site/index.html
+          grep -q 'Premium SOK Energy Products' site/index.html
+          test -s site/assets/hero/hawaii-ocean-freight-v1.webp
+          test "$(jq '[.slides[]|select(.active==true)]|length' site/home-hero-slides.json)" -ge 8
+          ! grep -q 'Real Support\|Talk to a real person' site/index.html site/home-hero-slides.js
+          git diff --check
+      - name: Deploy isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=homepage-owner-revision-0906-03-pre
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install browser harness
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Browser homepage verification
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          async function verify(width,height){
+            const page=await browser.newPage({viewport:{width,height}});
+            await page.goto(`${base}/`,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForSelector('[data-reference-flagship]',{timeout:15000});
+            await page.locator('[data-home-commerce]').scrollIntoViewIfNeeded();
+            await page.waitForSelector('[data-home-products="lithium"] .home-product-card',{timeout:20000});
+            const state=await page.evaluate(()=>({
+              title:document.querySelector('#reference-flagship-title')?.innerText.trim(),
+              lead:document.querySelector('.reference-storefront-hero__lead')?.innerText.trim(),
+              partnership:document.querySelector('.reference-sok-partnership')?.innerText.trim(),
+              solutions:document.querySelectorAll('.reference-solution-card').length,
+              slides:document.querySelectorAll('.home-hero-slide').length,
+              lithium:document.querySelectorAll('[data-home-products="lithium"] .home-product-card').length,
+              rv:document.querySelectorAll('[data-home-products="rv"] .home-product-card').length,
+              support:document.querySelector('[data-reference-trust]')?.innerText||'',
+              footerLinks:document.querySelectorAll('.reference-footer a').length,
+              overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+            }));
+            if(state.title!=='Lithium Energy\nfor RV Life.'||!state.lead.startsWith('RV batteries are our primary product focus.')) throw new Error(`hero mismatch ${JSON.stringify(state)}`);
+            if(!state.partnership.toLowerCase().includes('premium sok energy products')||state.solutions!==7||state.slides<8) throw new Error(`merchandising mismatch ${JSON.stringify(state)}`);
+            if(/real support|real person/.test(state.support.toLowerCase())||!state.support.toLowerCase().includes('support')) throw new Error(`support wording mismatch ${JSON.stringify(state)}`);
+            if(state.lithium<4||state.rv<4||state.footerLinks<12||state.overflow>1) throw new Error(`layout/catalog mismatch ${JSON.stringify(state)}`);
+            await page.screenshot({path:`/tmp/home-${width}.png`,fullPage:true});
+            await page.close();
+          }
+          await verify(1440,1000);
+          await verify(390,844);
+          await browser.close();
+          NODE
+      - name: Preview smoke
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsSL "$base/" -o /tmp/home.html
+          grep -q 'Lithium Energy' /tmp/home.html
+          curl -fsSL "$base/home-hero-slides.json?v=1.2.0" -o /tmp/slides.json
+          test "$(jq '[.slides[]|select(.active==true)]|length' /tmp/slides.json)" -ge 8
+          npm run qa:preview -- "$base"
+      - name: Preview receipt
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### HOMEPAGE OWNER REVISION — PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Desktop and mobile homepage checks passed. Production unchanged.' >> "$GITHUB_STEP_SUMMARY"

@@ -93,25 +93,26 @@
       <div class="reference-storefront-hero__scene" aria-hidden="true"></div>
       <div class="container reference-storefront-hero__inner">
         <div class="reference-storefront-hero__copy">
-          <p class="reference-storefront-hero__eyebrow">ELEVATION UPSCALES <span aria-hidden="true">|</span> AUTHORIZED SOK ENERGY DEALER</p>
-          <h1 id="reference-flagship-title">Power Beyond<br><span>the Grid.</span></h1>
-          <p class="reference-storefront-hero__lead">Off-grid power, supply and logistics for RV, solar, backup power and harder-to-serve markets.</p>
+          <p class="reference-storefront-hero__eyebrow">RV BATTERY SUPPLY <span aria-hidden="true">|</span> AUTHORIZED SOK ENERGY DEALER</p>
+          <h1 id="reference-flagship-title">Lithium Energy<br><span>for RV Life.</span></h1>
+          <p class="reference-storefront-hero__lead"><strong>RV batteries are our primary product focus.</strong> Shop SOK lithium systems with clear purchase options, system support and destination logistics for RV, solar, backup power and harder-to-serve markets.</p>
           <div class="reference-storefront-hero__actions">
-            <a class="button retail-primary reference-storefront-hero__primary" href="/lithium-batteries" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Explore Power Solutions <span aria-hidden="true">→</span></a>
+            <a class="button retail-primary reference-storefront-hero__primary" href="/lithium-batteries" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Shop RV Batteries <span aria-hidden="true">→</span></a>
             <a class="button retail-secondary" href="/start-a-project" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-project">Start a Project</a>
           </div>
           <nav class="reference-usecases" aria-label="Power solution shortcuts">
-            <a href="/lithium-batteries"><span class="reference-usecase__icon" aria-hidden="true">ϟ</span><span>Lithium<br>Batteries</span></a>
-            <a href="/solar-project"><span class="reference-usecase__icon" aria-hidden="true">▦</span><span>Solar &amp;<br>Off-Grid</span></a>
-            <a href="/rv-store"><span class="reference-usecase__icon" aria-hidden="true">▭</span><span>RV &amp;<br>Outdoor</span></a>
-            <a href="/sok-batteries"><span class="reference-usecase__icon" aria-hidden="true">⌂</span><span>Backup<br>Power</span></a>
-            <a href="/sok-batteries"><span class="reference-usecase__icon" aria-hidden="true">▥</span><span>Commercial<br>Solutions</span></a>
-            <a href="/hawaii-lithium-batteries"><span class="reference-usecase__icon" aria-hidden="true">◉</span><span>Hawaii<br>Logistics</span></a>
+            <a href="/lithium-batteries"><span class="reference-usecase__icon" aria-hidden="true">12V</span><span>RV<br>Batteries</span></a>
+            <a href="/solar-project"><span class="reference-usecase__icon" aria-hidden="true">PV</span><span>Solar &amp;<br>Off-Grid</span></a>
+            <a href="/rv-store"><span class="reference-usecase__icon" aria-hidden="true">RV</span><span>RV &amp;<br>Outdoor</span></a>
+            <a href="/sok-batteries"><span class="reference-usecase__icon" aria-hidden="true">48V</span><span>Backup<br>Power</span></a>
+            <a href="/sok-batteries"><span class="reference-usecase__icon" aria-hidden="true">B2B</span><span>Commercial<br>Supply</span></a>
+            <a href="/hawaii-lithium-batteries"><span class="reference-usecase__icon" aria-hidden="true">HI</span><span>Destination<br>Logistics</span></a>
           </nav>
         </div>
 
         <div class="reference-storefront-hero__visual" aria-label="SOK lithium battery systems">
           <img class="reference-sok-brand" src="/assets/brands/sok/sok-wordmark-home-transparent.webp" alt="SOK Battery" width="620" height="190">
+          <p class="reference-sok-partnership">Authorized Dealer <span>•</span> Premium SOK Energy Products</p>
           <a class="reference-product reference-product--12v" href="/sok/sk12v100pc/" aria-label="View SOK SK12V100PC"><img src="/assets/brands/sok/sk12v100pc/home-hero.webp" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900" fetchpriority="high" decoding="async"><span><b>SK12V100PC</b><small>12.8V 100Ah</small></span></a>
           <a class="reference-product reference-product--48v" href="/sok/sk48v100n/" aria-label="View SOK SK48V100N"><img src="/assets/brands/sok/48v-battery-cabinet/hero.webp" alt="SOK 48V rack storage cabinet" width="500" height="500" decoding="async"><span><b>SK48V100N</b><small>51.2V 100Ah rack platform</small></span></a>
           <div class="reference-authorized"><img src="/assets/brand/storefront-wordmark.webp" alt="Elevation UpScales, Inc." width="430" height="150"><span>AUTHORIZED DEALER</span></div>
@@ -126,9 +127,9 @@
     trust.dataset.referenceTrust = "true";
     trust.setAttribute("aria-label", "Elevation customer support highlights");
     trust.innerHTML = `
-      <div class="reference-trust-strip__item"><span class="reference-trust-strip__icon" aria-hidden="true">◇</span><div><strong>Trusted Brands</strong><span>Premium power solutions from SOK and more.</span></div></div>
-      <a class="reference-trust-strip__item" href="/hawaii-lithium-batteries"><span class="reference-trust-strip__icon" aria-hidden="true">▱</span><div><strong>Hawaii Ready</strong><span>Logistics support for harder-to-serve markets.</span></div></a>
-      <a class="reference-trust-strip__item" href="tel:+12088134998"><span class="reference-trust-strip__icon" aria-hidden="true">◌</span><div><strong>Real Support</strong><span>Talk to a real person. 208-813-4998</span></div></a>`;
+      <div class="reference-trust-strip__item"><span class="reference-trust-strip__icon" aria-hidden="true">SOK</span><div><strong>Authorized Battery Supply</strong><span>SOK systems for RV, solar and backup power.</span></div></div>
+      <a class="reference-trust-strip__item" href="/hawaii-lithium-batteries"><span class="reference-trust-strip__icon" aria-hidden="true">HI</span><div><strong>Hawaii &amp; Alaska</strong><span>Controlled destination and freight review.</span></div></a>
+      <a class="reference-trust-strip__item" href="tel:+12088134998"><span class="reference-trust-strip__icon" aria-hidden="true">TEL</span><div><strong>Support</strong><span>Call Elevation: 208-813-4998</span></div></a>`;
     hero.insertAdjacentElement("afterend", trust);
   }
 
@@ -146,13 +147,13 @@
       <div class="container">
         <div class="reference-solutions__head"><h2 id="reference-solutions-title">Shop by <span>Solution</span></h2><div class="reference-solutions__rail"><span>Real Power for Real Life</span><i></i><a href="/rv-store">View All Products →</a></div></div>
         <div class="reference-solutions__grid">
-          <article class="reference-solution-card" style="--solution-image:url('/assets/brands/sok/sk12v100pc/home-hero.webp')"><div><h3>Lithium Batteries</h3><p>Reliable power for any application.</p><a href="/lithium-batteries">Shop Batteries →</a></div></article>
-          <article class="reference-solution-card" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp')"><div><h3>SOK Battery Systems</h3><p>12V, 24V &amp; 48V systems.</p><a href="/sok-batteries">Shop SOK →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v100pc/home-hero.webp');--solution-size:contain;--solution-position:center 28%;--solution-color:#eef3f4"><div><h3>Lithium Batteries</h3><p>12V lithium energy for RV and mobile systems.</p><a href="/lithium-batteries">Shop Batteries →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>SOK Battery Systems</h3><p>12V, 24V &amp; 48V systems.</p><a href="/sok-batteries">Shop SOK →</a></div></article>
           <article class="reference-solution-card" style="--solution-image:url('/assets/solar/solar-hero-desktop.webp')"><div><h3>Solar &amp; Off-Grid</h3><p>Build your energy independence.</p><a href="/solar-project">Shop Solar →</a></div></article>
-          <article class="reference-solution-card" style="--solution-image:url('/assets/elevation-lithium-social-card.webp')"><div><h3>Hawaii Power &amp; Logistics</h3><p>Battery shipping made simpler.</p><a href="/hawaii-lithium-batteries">Learn More →</a></div></article>
-          <article class="reference-solution-card" style="--solution-image:url('/assets/hero-galaxy-rv.webp')"><div><h3>RV &amp; Outdoor</h3><p>Gear for the journey.</p><a href="/rv-store">Shop RV &amp; Outdoor →</a></div></article>
-          <article class="reference-solution-card" style="--solution-image:url('/assets/brands/sok/sk48v100n/home-crop.webp')"><div><h3>Backup Power</h3><p>Keep what matters running.</p><a href="/sok-batteries">Shop Backup Power →</a></div></article>
-          <article class="reference-solution-card" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp')"><div><h3>Commercial Power</h3><p>Scalable power solutions.</p><a href="/sok-batteries">Shop Commercial →</a></div></article>
+          <article class="reference-solution-card" style="--solution-image:url('/assets/hero/hawaii-ocean-freight-v1.webp');--solution-position:center"><div><h3>Hawaii Power &amp; Logistics</h3><p>Battery freight matched to product and destination.</p><a href="/hawaii-lithium-batteries">Learn More →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v206h/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#edf1f2"><div><h3>RV &amp; Outdoor</h3><p>Current batteries and gear for the journey.</p><a href="/rv-store">Shop RV &amp; Outdoor →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>Backup Power</h3><p>Keep what matters running.</p><a href="/sok-batteries">Shop Backup Power →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk48v100n/home-crop.webp');--solution-size:contain;--solution-position:center 20%;--solution-color:#eef2f3"><div><h3>Commercial Power</h3><p>Scalable power solutions.</p><a href="/sok-batteries">Shop Commercial →</a></div></article>
         </div>
       </div>`;
 

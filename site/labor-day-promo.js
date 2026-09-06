@@ -21,8 +21,8 @@
       if(!response.ok||promo.active!==true){if(slot){slot.hidden=true;slot.setAttribute("aria-hidden","true");}return;}
       const banner=document.createElement("section");
       banner.className="eus-labor-day-banner";
-      banner.setAttribute("aria-label","Labor Day promotion");
-      banner.innerHTML=`<div class="container eus-labor-day-banner__inner"><div><strong>${esc(promo.headline||"Labor Day Sale — 25% Off")}</strong><span>Use <code>${esc(promo.couponCode||"LABORDAY25")}</code> on eligible Elevation merchandise.</span></div><p>${esc(promo.disclosure||"25% off eligible Elevation merchandise. Shipping and exclusions apply.")}</p></div>`;
+      banner.setAttribute("aria-label","Current promotion");
+      banner.innerHTML=`<div class="container eus-labor-day-banner__inner"><span class="eus-promo-kicker">CURRENT OFFER</span><div><strong>${esc(promo.headline||"Current Elevation Offer")}</strong><span>Use <code>${esc(promo.couponCode||"")}</code> on eligible Elevation merchandise.</span></div><p>${esc(promo.disclosure||"Offer applies only to eligible Elevation merchandise. Shipping and exclusions apply.")}</p></div>`;
       slot.hidden=false;slot.removeAttribute("aria-hidden");slot.replaceChildren(banner);slot.dataset.promoReady="true";
     }catch(_){if(slot){slot.hidden=true;slot.setAttribute("aria-hidden","true");}}
   }

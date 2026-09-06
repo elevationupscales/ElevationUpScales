@@ -806,3 +806,47 @@
   .reference-product--48v{width:215px;height:185px}
   .reference-rack{right:-110px;width:220px}
 }
+
+/* Owner revision 0906-03: readable retail typography, RV-first merchandising, and denser shopping. */
+body.retail-home h1,body.retail-home h2,body.retail-home h3,
+body.retail-home .button,body.retail-home .eyebrow,body.retail-home .retail-eyebrow,
+body.retail-home .eus-nav-trigger,body.retail-home .eus-nav-link,
+body.retail-store-shell h1,body.retail-store-shell h2,body.retail-store-shell h3{
+  font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif!important;
+  font-stretch:normal!important;
+}
+html:has(body.reference-storefront-home),body.reference-storefront-home{max-width:100%;overflow-x:hidden}
+.reference-storefront-hero h1{font-size:clamp(3rem,5vw,4.85rem)!important;font-weight:820!important;line-height:.96!important;letter-spacing:-.045em!important;text-transform:none!important}
+.reference-storefront-hero h1 span{color:#fff!important;font-weight:760!important}
+.reference-storefront-hero__lead{max-width:650px!important;font-size:1rem!important;line-height:1.62!important}
+.reference-storefront-hero__lead strong{display:block;margin-bottom:4px;color:#fff;font-size:1.08em;font-weight:800}
+.reference-usecase__icon{display:grid!important;place-items:center;width:auto!important;min-width:38px;height:28px;border:1px solid rgba(5,199,242,.7);border-radius:4px;background:rgba(5,199,242,.08);color:#73e9ff!important;font-size:.64rem!important;font-weight:900;letter-spacing:.05em;line-height:1!important}
+.reference-usecases a{gap:9px!important}
+.reference-sok-brand{top:8px!important;left:43%!important;width:min(390px,48%)!important}
+.reference-sok-partnership{position:absolute;top:105px;left:43%;z-index:4;width:min(390px,48%);margin:0;color:#dceef2;font-size:.65rem;font-weight:760;letter-spacing:.13em;text-align:center;text-transform:uppercase;text-shadow:0 2px 10px #021017}
+.reference-sok-partnership span{color:var(--ref-cyan);padding:0 6px}
+.reference-storefront-hero .reference-authorized{display:none!important}
+.reference-product--12v{left:1%!important;bottom:14px!important;width:48%!important;height:51%!important}
+.reference-product--48v{right:-1%!important;bottom:5px!important;width:51%!important;height:57%!important}
+.reference-product img{padding:0 8px 28px!important;object-fit:contain!important}
+.reference-product span{left:50%!important;right:auto!important;bottom:2px!important;transform:translateX(-50%);min-width:138px!important;width:max-content!important;max-width:90%;padding:5px 10px!important;border:1px solid rgba(5,199,242,.28)!important;border-radius:4px!important;background:rgba(2,15,21,.78)!important;box-shadow:none!important;backdrop-filter:blur(5px);text-align:center}
+.reference-product span b{font-size:.68rem!important;letter-spacing:.07em}.reference-product span small{font-size:.55rem!important}
+.reference-trust-strip__icon{display:grid;place-items:center;min-width:44px;height:30px;border:1px solid rgba(5,199,242,.56);border-radius:4px;color:#70e8ff!important;font-size:.62rem!important;font-weight:900;letter-spacing:.05em}
+.reference-solution-card{background-color:var(--solution-color,#06141c)!important;background-image:linear-gradient(180deg,rgba(1,8,12,.02) 15%,rgba(1,8,12,.9) 72%),var(--solution-image)!important;background-size:var(--solution-size,cover)!important;background-position:var(--solution-position,center)!important;background-repeat:no-repeat!important}
+.reference-solution-card--product{background-image:linear-gradient(180deg,rgba(1,8,12,0) 25%,rgba(1,8,12,.94) 76%),var(--solution-image)!important}
+.reference-solution-card>div{background:linear-gradient(180deg,transparent,rgba(1,8,12,.88) 30%)!important}
+.reference-storefront-home .retail-logistics{padding:clamp(64px,8vw,98px) 0!important;background:#031016!important}
+.reference-storefront-home .retail-logistics::before{background-image:url('/assets/hero/hawaii-ocean-freight-v1.webp')!important;background-position:center!important;opacity:.48!important;filter:saturate(.9) contrast(1.05)!important;transform:scale(1.02)!important}
+.reference-storefront-home .retail-logistics::after{background:linear-gradient(90deg,#031016 0%,rgba(3,16,22,.96) 38%,rgba(3,16,22,.72) 70%,rgba(3,16,22,.55))!important}
+.retail-logistics__copy{padding:26px;border:1px solid rgba(5,199,242,.2);background:rgba(2,12,17,.78);backdrop-filter:blur(7px)}
+.retail-logistics__copy h2{max-width:650px;font-size:clamp(2rem,4vw,3.5rem)!important;line-height:1.02!important}
+.retail-logistics__lead{font-size:.95rem!important}.retail-logistics__path{display:grid;grid-template-columns:repeat(4,1fr);margin-top:22px;border-block:1px solid rgba(5,199,242,.2)}
+.retail-logistics__path span{padding:12px 8px;color:#c8d8dd;font-size:.68rem;font-weight:700;text-transform:uppercase}.retail-logistics__path b{display:block;color:var(--ref-cyan);font-size:.58rem;letter-spacing:.12em}
+.retail-logistics__lane{background:rgba(2,13,18,.84)!important;backdrop-filter:blur(6px)}
+.retail-feature-band__copy h2{margin:.3rem 0 .75rem;font-size:clamp(1.8rem,3.4vw,3rem)!important;line-height:1.08!important}.retail-feature-band__copy .retail-hero__actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+.retail-services{background:linear-gradient(180deg,#061317,#030b0f)!important}.retail-services__head{max-width:720px;margin-bottom:24px}.retail-services__head h2{margin:.25rem 0 .5rem;font-size:clamp(1.8rem,3vw,2.8rem)!important}.retail-services__head>p:last-child{color:#a9bcc3!important}.retail-support-card{position:relative;overflow:hidden;transition:border-color .2s ease,transform .2s ease}.retail-support-card:hover{transform:translateY(-2px);border-color:rgba(5,199,242,.45)}.retail-support-card small{display:block;margin-bottom:10px;color:var(--ref-cyan);font-size:.58rem;font-weight:900;letter-spacing:.14em}
+.reference-footer{border-top:1px solid rgba(5,199,242,.22)!important;background:#02080b!important}.reference-footer .footer-grid{display:grid!important;grid-template-columns:1.35fr .8fr .9fr 1fr!important;gap:30px!important;align-items:start!important}.reference-footer .footer-brand{align-items:flex-start!important}.reference-footer .footer-brand p{margin:.45rem 0!important;color:#c5d4d9!important}.reference-footer .footer-brand span{display:block;max-width:310px;color:#718994;font-size:.7rem;line-height:1.5}.reference-footer__links,.reference-footer .footer-contact{display:flex!important;align-items:flex-start!important;flex-direction:column!important;gap:8px!important}.reference-footer__links strong,.reference-footer .footer-contact strong{margin-bottom:4px;color:#fff;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase}.reference-footer__links a,.reference-footer .footer-contact a:not(.button){color:#9eb1b8!important;font-size:.76rem;text-decoration:none}.reference-footer__links a:hover,.reference-footer .footer-contact a:hover{color:var(--ref-cyan)!important}.reference-footer .footer-contact .button{margin-top:8px}.reference-footer .copyright{grid-column:1/-1!important;margin:4px 0 0!important;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);color:#718994!important;font-size:.7rem!important}
+.home-hero-slides__label span{font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif!important;font-weight:800!important;letter-spacing:.05em!important}.home-hero-reference__featured-product{padding:20px!important}.home-hero-reference__featured-product img{width:100%!important;height:100%!important;max-height:310px!important;object-fit:contain!important}.home-hero-slides__arrow{width:44px!important;height:58px!important;border:1px solid rgba(5,199,242,.45)!important;border-radius:6px!important;background:rgba(2,14,20,.84)!important;color:#7cecff!important;box-shadow:0 0 20px rgba(5,199,242,.12)!important}
+
+@media(max-width:1000px){.reference-footer .footer-grid{grid-template-columns:1fr 1fr!important}.reference-footer .copyright{grid-column:1/-1!important}.reference-sok-partnership{top:95px}.retail-logistics__path{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.reference-storefront-hero h1{font-size:clamp(2.65rem,13vw,4rem)!important;line-height:.94!important}.reference-sok-brand{top:4px!important;left:38%!important;width:220px!important}.reference-sok-partnership{top:66px;left:38%;width:220px;font-size:.48rem;letter-spacing:.08em}.reference-product--12v{left:0!important;width:47%!important;height:54%!important}.reference-product--48v{right:0!important;width:54%!important;height:59%!important}.reference-product span{min-width:108px!important;padding:4px 7px!important}.reference-usecases{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important;overflow:visible!important}.reference-usecases a{min-width:0!important}.retail-logistics__copy{padding:20px}.retail-logistics__path{grid-template-columns:1fr 1fr}.reference-footer .footer-grid{grid-template-columns:1fr!important}.reference-footer .copyright{grid-column:1!important}.retail-feature-band__copy .retail-hero__actions{display:grid}}

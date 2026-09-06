@@ -56,7 +56,7 @@
       host.innerHTML='<p class="home-commerce-empty">Current products are temporarily unavailable. Shop the full store for current availability.</p>';
       return;
     }
-    host.innerHTML=rows.slice(0,4).map(card).join("");
+    host.innerHTML=rows.slice(0,6).map(card).join("");
   }
 
   root.addEventListener("click",(event)=>{

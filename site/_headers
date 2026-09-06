@@ -121,6 +121,9 @@
 /privacy
   Cache-Control: public, max-age=0, must-revalidate
 
+/terms
+  Cache-Control: no-cache, no-store, must-revalidate
+
 /admin-listings
   Cache-Control: no-cache, no-store, must-revalidate
   X-Robots-Tag: noindex, nofollow, noarchive
