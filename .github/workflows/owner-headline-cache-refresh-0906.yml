@@ -44,13 +44,12 @@ jobs:
           p = Path('site/index.html')
           s = p.read_text()
           old = '<h1 id="reference-flagship-title">Power Beyond<br><span>the Grid.</span></h1>'
-          new = '<h1 id="reference-flagship-title">Lithium Power Supply<br><span>&amp; Shipping Logistics</span></h1>'
+          new = '<h1 id="reference-flagship-title">Lithium <span>Energy</span></h1>'
           if old not in s:
               raise SystemExit('expected Power Beyond headline not found')
           p.write_text(s.replace(old, new, 1))
           PY
-          grep -q 'Lithium Power Supply' site/index.html
-          grep -q 'Shipping Logistics' site/index.html
+          grep -q 'Lithium <span>Energy</span>' site/index.html
 
       - name: Disable preview asset caching
         shell: bash
@@ -90,8 +89,7 @@ jobs:
           set -euo pipefail
           base="${BASE%/}"
           curl -sS -L --fail "$base/" -o /tmp/home.html
-          grep -q 'Lithium Power Supply' /tmp/home.html
-          grep -q 'Shipping Logistics' /tmp/home.html
+          grep -q 'Lithium <span>Energy</span>' /tmp/home.html
           for asset in \
             /assets/hero/storefront-tropical-logistics-v3.webp \
             /assets/brand/storefront-wordmark.webp \
@@ -115,6 +113,6 @@ jobs:
           echo '### OWNER-HEADLINE-0906 — FRESH PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Source main: $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
-          echo 'Headline: Lithium Power Supply & Shipping Logistics' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Headline: Lithium Energy' >> "$GITHUB_STEP_SUMMARY"
           echo 'Preview asset cache: disabled' >> "$GITHUB_STEP_SUMMARY"
           echo 'Production: unchanged by this workflow' >> "$GITHUB_STEP_SUMMARY"
