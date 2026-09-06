@@ -1,0 +1,70 @@
+name: HOME-OWNER-EDIT-0905-01 Visual Recheck
+
+on:
+  push:
+    branches:
+      - control/home-owner-edit-0905-01-visual-recheck-20260905
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_SHA: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+  PREVIEW: https://d7ff0d39.elevationupscales.pages.dev
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+      - name: Verify exact source and browser presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+          cat > verify-home.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.PREVIEW.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          for (const [mode,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+            for (const path of ['/','/what-we-do','/shipping-logistics-services']) {
+              const context=await browser.newContext({viewport});
+              const page=await context.newPage();
+              const response=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:60000});
+              if(!response || response.status()!==200) throw new Error(`${mode} ${path} status ${response?.status()}`);
+              await page.waitForTimeout(2200);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} overflow ${overflow}`);
+              const bad=await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{const r=i.getBoundingClientRect();const s=getComputedStyle(i);return r.width>2&&s.display!=='none'&&s.visibility!=='hidden'&&(!i.complete||i.naturalWidth===0)}).map(i=>i.currentSrc||i.src));
+              if(bad.length) throw new Error(`${mode} ${path} broken ${bad.join(',')}`);
+              if(path==='/') {
+                const text=(await page.locator('body').innerText()).toLowerCase();
+                for(const required of ['shop by category.','elevated logistics for product supply lines','use solar system builder','home & rv services','shipping & logistics services']) if(!text.includes(required)) throw new Error(`${mode} missing ${required}`);
+                for(const removed of ['start with what you need','we handle the logistics','built around sok','built from experience','when the product is not the whole job']) if(text.includes(removed)) throw new Error(`${mode} stale ${removed}`);
+              }
+              if(path==='/what-we-do') {
+                if(!(await page.locator('#home-rv-services').count())) throw new Error(`${mode} home-rv anchor missing`);
+                const card=page.locator('#home-rv-services');
+                if(!(await card.locator('a[href="/home-services"]').count()) || !(await card.locator('a[href="/rv-services"]').count())) throw new Error(`${mode} combined service paths missing`);
+              }
+              if(path==='/shipping-logistics-services') {
+                const main=(await page.locator('main').innerText()).toLowerCase();
+                if(!main.includes('shipping & logistics services') || !main.includes('coming soon')) throw new Error(`${mode} coming-soon content missing`);
+              }
+              await context.close();
+            }
+          }
+          await browser.close();
+          console.log('desktop_mobile_visual=PASS');
+          NODE
+          node verify-home.mjs
+      - name: Receipt
+        run: |
+          echo '### HOME-OWNER-EDIT-0905-01 — VISUAL RECHECK PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "- Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Preview: $PREVIEW" >> "$GITHUB_STEP_SUMMARY"
+          echo '- Desktop/mobile: PASS' >> "$GITHUB_STEP_SUMMARY"
