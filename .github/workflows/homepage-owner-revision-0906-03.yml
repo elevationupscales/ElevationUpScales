@@ -61,6 +61,7 @@ jobs:
             const page=await browser.newPage({viewport:{width,height}});
             await page.goto(`${base}/`,{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForSelector('[data-reference-flagship]',{timeout:15000});
+            await page.locator('[data-home-commerce]').scrollIntoViewIfNeeded();
             await page.waitForSelector('[data-home-products="lithium"] .home-product-card',{timeout:20000});
             const state=await page.evaluate(()=>({
               title:document.querySelector('#reference-flagship-title')?.innerText.trim(),
