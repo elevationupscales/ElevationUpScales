@@ -1,0 +1,117 @@
+name: HOME-HERO-SLIDES-0905-06 Mobile Evidence
+
+on:
+  push:
+    branches:
+      - work/home-hero-slides-0905-06-mobile-evidence
+
+permissions:
+  contents: read
+
+env:
+  BASE: https://e89b242b.elevationupscales.pages.dev
+  APPLICATION_CANDIDATE: 83f2761750cf975f54ae91aed31c52ffee349e55
+
+jobs:
+  capture-true-viewports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out evidence-only continuation
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify application candidate lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$APPLICATION_CANDIDATE" HEAD
+          changed="$(git diff --name-only "$APPLICATION_CANDIDATE"...HEAD)"
+          printf '%s\n' "$changed"
+          test "$changed" = ".github/workflows/home-hero-slides-0905-06-mobile-evidence.yml"
+
+      - name: Install browser visual harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+
+      - name: Capture true 1536x1024 and 390x844 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p visual-evidence
+          node --input-type=module - <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+
+          const base = process.env.BASE.replace(/\/$/, '');
+          const browser = await chromium.launch({ headless: true });
+          const evidence = {};
+
+          async function capture(name, viewport, fullPageName) {
+            const page = await browser.newPage({ viewport });
+            await page.goto(`${base}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+            await page.waitForFunction(() => document.body?.dataset?.referenceShellReady === 'true', null, { timeout: 15000 });
+            await page.waitForSelector('[data-reference-flagship]', { state: 'visible' });
+            await page.waitForSelector('[data-reference-solutions]', { state: 'visible' });
+            await page.waitForTimeout(2500);
+
+            const markers = await page.evaluate(() => ({
+              title: document.title,
+              flagship: Boolean(document.querySelector('[data-reference-flagship]')),
+              trust: Boolean(document.querySelector('[data-reference-trust]')),
+              solutions: document.querySelectorAll('.reference-solution-card').length,
+              carouselReady: document.querySelector('[data-home-hero-slides]')?.dataset?.slideshowReady,
+              h1: document.querySelector('[data-reference-flagship] h1')?.innerText || '',
+              bodyWidth: document.body.scrollWidth,
+              viewportWidth: window.innerWidth,
+              viewportHeight: window.innerHeight,
+              devicePixelRatio: window.devicePixelRatio
+            }));
+
+            if (markers.viewportWidth !== viewport.width || markers.viewportHeight !== viewport.height) {
+              throw new Error(`${name} viewport mismatch: expected ${viewport.width}x${viewport.height}, got ${markers.viewportWidth}x${markers.viewportHeight}`);
+            }
+            if (!markers.flagship || !markers.trust || markers.solutions !== 7 || markers.carouselReady !== 'true') {
+              throw new Error(`${name} visual markers incomplete`);
+            }
+            if (markers.bodyWidth > markers.viewportWidth + 4) {
+              throw new Error(`${name} horizontal overflow: ${markers.bodyWidth} > ${markers.viewportWidth}`);
+            }
+
+            evidence[name] = markers;
+            await page.screenshot({ path: `visual-evidence/${name}-viewport.png`, fullPage: false });
+            await page.screenshot({ path: `visual-evidence/${fullPageName}`, fullPage: true });
+            await page.close();
+          }
+
+          await capture('desktop-1536x1024', { width: 1536, height: 1024 }, 'desktop-full.png');
+          await capture('mobile-390x844', { width: 390, height: 844 }, 'mobile-full.png');
+          await browser.close();
+
+          if (evidence['desktop-1536x1024'].viewportWidth !== 1536) throw new Error('Desktop evidence width is not 1536');
+          if (evidence['mobile-390x844'].viewportWidth !== 390) throw new Error('Mobile evidence width is not 390');
+
+          fs.writeFileSync('visual-evidence/evidence.json', JSON.stringify(evidence, null, 2));
+          console.log(JSON.stringify(evidence, null, 2));
+          NODE
+
+      - name: Upload corrected visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-hero-slides-0905-06-true-viewport-evidence
+          path: visual-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Evidence receipt
+        shell: bash
+        run: |
+          echo '### HOME-HERO-SLIDES-0905-06 — TRUE VIEWPORT EVIDENCE' >> "$GITHUB_STEP_SUMMARY"
+          echo "Application candidate: $APPLICATION_CANDIDATE" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview under test: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Desktop viewport: 1536×1024 required and asserted' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Mobile viewport: 390×844 required and asserted' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
