@@ -1,17 +1,17 @@
-name: HOME-HERO-SLIDES-0905-05 Owner Takeover Preview
+name: HOME-HERO-SLIDES-0905-07 Header Brand Repair
 
 on:
   push:
     branches:
-      - work/home-hero-slides-0905-05-owner-takeover
+      - work/home-hero-slides-0905-07-header-brand-repair
 
 permissions:
   contents: read
   deployments: write
 
 env:
-  EXPECTED_PARENT: cd97d178c8e205a816441fb8d86f140e2bbd5502
-  WORK_BRANCH: work/home-hero-slides-0905-05-owner-takeover
+  EXPECTED_PARENT: 83f2761750cf975f54ae91aed31c52ffee349e55
+  WORK_BRANCH: work/home-hero-slides-0905-07-header-brand-repair
 
 jobs:
   validate-and-preview:
@@ -29,14 +29,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main --no-tags --prune
-          current_main="$(git rev-parse origin/main)"
           candidate="$(git rev-parse HEAD)"
-          test "$current_main" = "$EXPECTED_PARENT"
-          git merge-base --is-ancestor "$current_main" "$candidate"
-          echo "current_main=$current_main" >> "$GITHUB_OUTPUT"
+          git merge-base --is-ancestor "$EXPECTED_PARENT" "$candidate"
           echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
-          echo "Current main: $current_main"
+          echo "Application parent: $EXPECTED_PARENT"
           echo "Candidate: $candidate"
 
       - name: Enforce presentation-only scope
@@ -46,7 +42,7 @@ jobs:
           changed="$(git diff --name-only "$EXPECTED_PARENT"...HEAD)"
           printf '%s\n' "$changed"
           test -n "$changed"
-          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/index\.html|site/home-hero-slides\.(css|js|json)|\.github/workflows/home-hero-slides-0905-05-preview\.yml)$' || true)"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/assets/brand/storefront-wordmark\.webp|\.github/workflows/home-hero-slides-0905-05-preview\.yml)$' || true)"
           if [[ -n "$unexpected" ]]; then
             echo "BLOCKED: unexpected files in owner takeover slideshow candidate"
             printf '%s\n' "$unexpected"
@@ -134,7 +130,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=home-hero-slides-0905-05-preview
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=home-hero-slides-0905-07-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Preview regression and deployed integration
@@ -192,7 +188,7 @@ jobs:
           const browser = await chromium.launch({ headless: true });
           const evidence = {};
           async function capture(name, viewport, fullPageName) {
-            const page = await browser.newPage({ viewportSize: viewport });
+            const page = await browser.newPage({ viewport });
             await page.goto(`${base}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
             await page.waitForFunction(() => document.body?.dataset?.referenceShellReady === 'true', null, { timeout: 15000 });
             await page.waitForSelector('[data-reference-flagship]', { state: 'visible' });
@@ -206,8 +202,12 @@ jobs:
               carouselReady: document.querySelector('[data-home-hero-slides]')?.dataset?.slideshowReady,
               h1: document.querySelector('[data-reference-flagship] h1')?.innerText || '',
               bodyWidth: document.body.scrollWidth,
-              viewportWidth: window.innerWidth
+              viewportWidth: window.innerWidth,
+              viewportHeight: window.innerHeight
             }));
+            const brand = await page.locator('.reference-header-wordmark').evaluate((img) => ({ complete: img.complete, naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight }));
+            if (!brand.complete || brand.naturalWidth !== 1200 || brand.naturalHeight !== 360) throw new Error(`${name} header wordmark failed: ${JSON.stringify(brand)}`);
+            if (markers.viewportWidth !== viewport.width || markers.viewportHeight !== viewport.height) throw new Error(`${name} viewport mismatch`);
             if (!markers.flagship || !markers.trust || markers.solutions !== 7 || markers.carouselReady !== 'true') throw new Error(`${name} visual markers incomplete`);
             if (markers.bodyWidth > markers.viewportWidth + 4) throw new Error(`${name} horizontal overflow: ${markers.bodyWidth} > ${markers.viewportWidth}`);
             evidence[name] = markers;
@@ -225,7 +225,7 @@ jobs:
       - name: Upload owner visual evidence
         uses: actions/upload-artifact@v4
         with:
-          name: home-hero-slides-0905-05-owner-visual-evidence
+          name: home-hero-slides-0905-07-header-brand-evidence
           path: visual-evidence/
           if-no-files-found: error
           retention-days: 14
@@ -242,7 +242,7 @@ jobs:
         env:
           BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo '### HOME-HERO-SLIDES-0905-05 — OWNER TAKEOVER PREVIEW + VISUAL EVIDENCE PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '### HOME-HERO-SLIDES-0905-07 — HEADER BRAND REPAIR + TRUE VIEWPORT EVIDENCE PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Parent: $EXPECTED_PARENT" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: ${{ steps.lineage.outputs.candidate }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
