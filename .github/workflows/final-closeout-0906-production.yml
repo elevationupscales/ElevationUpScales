@@ -1,0 +1,106 @@
+name: FINAL-CLOSEOUT-0906 Production
+
+on:
+  push:
+    branches:
+      - control/final-closeout-0906-production
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: final-closeout-0906-production
+  cancel-in-progress: false
+
+env:
+  EXPECTED_MAIN: 4d2ed6e7970549a4a0587e5580b7a759fdfc3a71
+  TESTED_APP: e69306360ac854d658e93101951c260d88ad1a11
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout exact production source
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Enforce exact source and application identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(git rev-parse HEAD)"
+          echo "main=$current"
+          test "$current" = "$EXPECTED_MAIN"
+          test -z "$(git diff --name-only "$TESTED_APP" "$current" -- site deployment/qa/WEBSITE_ANALYTICS_EVENT_MAP.md deployment/qa/web-com-analytics-static.mjs deployment/qa/final-closeout-static.mjs .github/workflows/final-closeout-0906-preview.yml)"
+      - name: Final canonical QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/final-closeout-static.mjs
+      - name: Deploy production
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke exact production deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          check200(){ url="$1"; code=$(curl -sS -L --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/check.out -w '%{http_code}' "$url"); echo "$url => $code"; test "$code" = 200; }
+          for route in / /shipping-logistics-services /hawaii-lithium-batteries /lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ '/sok-order.html?sku=SK12V100PC&intent=hawaii&state=HI' '/sok-order.html?sku=SK12V100PC&intent=purchase_options&state=AK' /rv-store /store /checkout/; do check200 "$base$route"; done
+          curl -fsSL --retry 8 --retry-all-errors "$base/" -o /tmp/home.html
+          grep -q 'Lithium Power Supply' /tmp/home.html
+          grep -q 'and Logistics' /tmp/home.html
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/home.html
+          ! grep -qi 'Start with what you need' /tmp/home.html
+          grep -q 'Alaska Logistics' /tmp/home.html
+          curl -fsSL --retry 8 --retry-all-errors "$base/shipping-logistics-services" -o /tmp/logistics.html
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/logistics.html
+          grep -q 'id="alaska"' /tmp/logistics.html
+          ! grep -q 'Coming Soon' /tmp/logistics.html
+          curl -fsSL --retry 8 --retry-all-errors "$base/hawaii-lithium-batteries" -o /tmp/hawaii.html
+          grep -q 'SK12V100PC' /tmp/hawaii.html
+          grep -q 'SK48V100N' /tmp/hawaii.html
+          grep -q 'intent=hawaii' /tmp/hawaii.html
+          ! grep -q 'data-hawaii-request-form' /tmp/hawaii.html
+          npm run qa:preview -- "$base"
+      - name: Smoke public production domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          public='https://elevationupscales.com'
+          for attempt in $(seq 1 12); do
+            if curl -fsSL --retry 3 --retry-all-errors "$public/" -o /tmp/public-home.html && grep -q 'Lithium Power Supply' /tmp/public-home.html && grep -q 'and Logistics' /tmp/public-home.html; then break; fi
+            test "$attempt" -lt 12
+            sleep 5
+          done
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/public-home.html
+          ! grep -qi 'Start with what you need' /tmp/public-home.html
+          for route in /shipping-logistics-services /hawaii-lithium-batteries /sok-batteries /sok/sk12v100pc/ /sok/sk48v100n/ /rv-store /store /checkout/; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors -o /tmp/public.out -w '%{http_code}' "$public$route")
+            echo "$public$route => $code"
+            test "$code" = 200
+          done
+          curl -fsSL "$public/shipping-logistics-services" | grep -q 'id="alaska"'
+          curl -fsSL "$public/hawaii-lithium-batteries" | grep -q 'intent=hawaii'
+      - name: Production summary
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### FINAL-CLOSEOUT-0906 — PRODUCTION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Production source: $EXPECTED_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tested application: $TESTED_APP" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public: https://elevationupscales.com' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hero/logistics/Hawaii/Alaska/analytics: PASS' >> "$GITHUB_STEP_SUMMARY"
