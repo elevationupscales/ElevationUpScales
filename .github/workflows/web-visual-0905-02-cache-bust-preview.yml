@@ -144,7 +144,10 @@ jobs:
                 if(!expectsWordmark&&has) throw new Error(`${mode} ${path} storefront wordmark leaked into Apparel`);
                 if(expectsWordmark&&(mark.fit!=='contain'||mark.w<120||mark.h<35||mark.h>100)) throw new Error(`${mode} ${path} wordmark geometry ${JSON.stringify(mark)}`);
               }
-              if(name!=='home'&&name!=='apparel'){
+              const allRetailCss=await page.locator('link[rel="stylesheet"]').evaluateAll(ls=>ls.map(l=>l.href).filter(x=>x.includes('retail-first.css')));
+              if(name==='sok-order'){
+                if(!allRetailCss.some(x=>x.includes('retail-first.css?v=5.2.0')||x.includes('retail-first.css?v=5.3.0'))) throw new Error(`${mode} ${path} current retail CSS missing: ${allRetailCss.join(',')}`);
+              } else if(name!=='home'&&name!=='apparel'){
                 const retailLinks=await page.locator('link[data-retail-shell]').evaluateAll(ls=>ls.map(l=>l.href));
                 if(!retailLinks.some(x=>x.includes('retail-first.css?v=5.3.0'))) throw new Error(`${mode} ${path} fresh retail CSS key missing: ${retailLinks.join(',')}`);
               }
@@ -168,7 +171,7 @@ jobs:
                 }
               }
               await page.screenshot({path:`hotfix-preview-evidence/${name}-${mode}.png`,fullPage:true});
-              checks.push({mode,path,expectsWordmark,overflow,badVisibleImages:bad.length});
+              checks.push({mode,path,expectsWordmark,overflow,badVisibleImages:bad.length,retailCss:allRetailCss});
               await context.close();
             }
           }
