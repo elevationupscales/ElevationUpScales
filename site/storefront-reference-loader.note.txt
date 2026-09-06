@@ -1,0 +1,1 @@
+0905-06 loads the preserved HOME-HERO-SLIDES-0905-05 CSS/JS first, then the isolated storefront-reference-v2 presentation layer. Delete the v2 assets and restore the fallback branch to revert the experiment.
