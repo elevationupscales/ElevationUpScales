@@ -4,7 +4,7 @@
 
 **Authority:** newest accepted production state + newest explicit owner/management decision. Older handoffs are historical when superseded.
 
-**Last status update:** 2026-08-28 — Final Admin Operating System is accepted in production and Doba CSV Sync is deployed/verified as the official Doba source-refresh process.
+**Last status update:** 2026-09-05 — Homepage marketing slideshow owner correction is active in the canonical coordination plane; the earlier single-slide preview is superseded and production remains unchanged pending a corrected multi-slide release candidate.
 
 ---
 
@@ -17,6 +17,47 @@
 
 ## Worker Finish
 Return parent/result SHA, changed files/schema, preview/production URLs, tests/regressions, anomalies/deferred work, data-migration result, rollback baseline and next action. Update Master Status or provide an exact merge block.
+
+---
+
+# Homepage Marketing Slideshow — Owner Correction — 2026-09-05
+
+**State:** CORRECTIVE VISUAL CANDIDATE REQUIRED / PRODUCTION UNCHANGED
+
+The owner has replaced the failed broad hardcoded homepage redesign path with a reusable **1640 × 624 landscape marketing slideshow**.
+
+Controlling decision:
+`coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md`
+
+Deployment handoff:
+`coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md`
+
+### Important correction
+
+The earlier `HOME-HERO-SLIDES-0905-02` preview is **not accepted for release**. It contained only one active slide, and the runtime correctly hid slideshow controls when only one slide was active. That made the preview look like a static banner and did not satisfy owner visual acceptance.
+
+The corrected owner acceptance contract is:
+
+- first slide is the approved local `OFF-GRID POWER • SUPPLY • LOGISTICS` storefront wordmark;
+- initial launch contains at least **three active slides**;
+- previous/next controls, pagination and pause control render when multiple slides are active;
+- auto-rotation is active except under reduced-motion/user-pause conditions;
+- rendered preview interaction must be tested, not merely file existence;
+- desktop/mobile presentation must remain usable;
+- commerce, SOK, Hawaii, checkout and protected runtime behavior must remain unchanged.
+
+Corrective visual workstream:
+`work/home-hero-slides-0905-03-graphics`
+
+A corrected isolated preview on candidate `b97bd0e749fbc91c763f2602217517e597f16d62` passed rendered-DOM interaction and full preview regression at:
+`https://31ecf67f.elevationupscales.pages.dev`
+
+Stable preview alias:
+`https://home-hero-slides-0905-03-pre.elevationupscales.pages.dev`
+
+Because this Master Status update advances repository `main`, Deployment must **not** promote that earlier tested branch SHA directly. Visual must rebuild/rebase the exact application delta from the new current `main`, rerun the isolated slideshow workflow, and hand Deployment the resulting current-lineage candidate.
+
+Production promotion remains controlled and has **not** been performed by the Visual/Graphics Worker.
 
 ---
 
@@ -228,6 +269,8 @@ Do not mix Portal code/auth/deployment into Website/Admin scope unless explicitl
 
 - `ELEVATION_4_3_MASTER_STATUS.md` — current truth
 - `coordination/WORKER_PROTOCOL.md` — worker start/finish
+- `coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md` — controlling homepage slideshow decision
+- `coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md` — current visual/deployment handoff
 - `coordination/handoffs/2026-08-28-final-admin-operating-system-listing-sync.md` — accepted Admin architecture lineage
 - `coordination/handoffs/2026-08-28-doba-csv-sync-post-deployment.md` — Doba CSV implementation handoff
 - `coordination/decisions/DEC-006-doba-csv-sync-source-of-truth.md` — durable Doba CSV decision
