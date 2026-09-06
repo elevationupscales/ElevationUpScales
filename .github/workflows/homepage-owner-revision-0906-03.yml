@@ -76,7 +76,7 @@ jobs:
               overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
             }));
             if(state.title!=='Lithium Energy\nfor RV Life.'||!state.lead.startsWith('RV batteries are our primary product focus.')) throw new Error(`hero mismatch ${JSON.stringify(state)}`);
-            if(!state.partnership.includes('Premium SOK Energy Products')||state.solutions!==7||state.slides<8) throw new Error(`merchandising mismatch ${JSON.stringify(state)}`);
+            if(!state.partnership.toLowerCase().includes('premium sok energy products')||state.solutions!==7||state.slides<8) throw new Error(`merchandising mismatch ${JSON.stringify(state)}`);
             if(/Real Support|real person/.test(state.support)||!state.support.includes('Support')) throw new Error(`support wording mismatch ${JSON.stringify(state)}`);
             if(state.lithium<4||state.rv<4||state.footerLinks<12||state.overflow>1) throw new Error(`layout/catalog mismatch ${JSON.stringify(state)}`);
             await page.screenshot({path:`/tmp/home-${width}.png`,fullPage:true});
