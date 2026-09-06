@@ -34,9 +34,9 @@ for (const route of [
 ]) {
   assert.ok(home.includes(`href=\"${route}\"`) || home.includes(`href=\"${route}?`), `retail homepage missing ${route}`);
 }
-assert.ok(home.includes('href="#logistics"'), "homepage must expose Freight & Logistics from primary retail navigation");
-assert.ok(home.includes("retail-shop-menu"), "homepage must use the retail-first Shop menu");
-assert.ok(home.includes("retail-more-menu"), "homepage must retain a quieter More menu for non-shopping destinations");
+assert.ok(home.includes('href="#logistics"') || home.includes('href="/shipping-logistics-services"'), "homepage must expose Freight & Logistics from primary retail navigation");
+assert.ok(home.includes("retail-shop-menu") || /reference-nav-menu[^>]*><summary[^>]*>Shop/.test(home), "homepage must use the retail-first Shop menu");
+assert.ok(home.includes("retail-more-menu") || home.includes("reference-nav-menu--company"), "homepage must retain a quieter company/menu layer for non-shopping destinations");
 assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain available as a secondary support path");
 assert.ok(home.includes('href="/marketplace"'), "Marketplace route must remain available at the last layer");
 
@@ -44,7 +44,7 @@ const navStart = home.indexOf('<nav class="eus-nav"');
 const navEnd = home.indexOf('</nav>', navStart);
 const navBlock = home.slice(navStart, navEnd);
 const marketplaceIndex = navBlock.indexOf('href="/marketplace"');
-const moreIndex = navBlock.indexOf("retail-more-menu");
+const moreIndex = Math.max(navBlock.indexOf("retail-more-menu"), navBlock.indexOf("reference-nav-menu--company"));
 assert.ok(moreIndex >= 0 && marketplaceIndex > moreIndex, "Marketplace must live inside the secondary More menu, not as a primary retail destination");
 assert.equal(/<a class="eus-nav-link" href="\/marketplace/.test(navBlock), false, "Marketplace must not be a top-level homepage nav link");
 
