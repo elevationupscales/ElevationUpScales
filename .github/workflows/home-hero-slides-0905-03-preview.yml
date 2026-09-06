@@ -1,0 +1,202 @@
+name: HOME-HERO-SLIDES-0905-03 Preview
+
+on:
+  push:
+    branches:
+      - work/home-hero-slides-0905-03-graphics
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: home-hero-slides-0905-03-preview
+  cancel-in-progress: false
+
+env:
+  EXPECTED_PARENT: c55841fae2cb23975e2ad8173438b3f80013cb19
+  WORK_BRANCH: work/home-hero-slides-0905-03-graphics
+
+jobs:
+  validate-and-preview:
+    name: validate-render-and-preview
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out corrected slideshow candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Enforce canonical coordination parent
+        id: lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          current_main="$(git rev-parse origin/main)"
+          candidate="$(git rev-parse HEAD)"
+          test "$current_main" = "$EXPECTED_PARENT"
+          git merge-base --is-ancestor "$current_main" "$candidate"
+          echo "current_main=$current_main" >> "$GITHUB_OUTPUT"
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+          echo "Current main: $current_main"
+          echo "Candidate: $candidate"
+
+      - name: Enforce slideshow-only application scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only "$EXPECTED_PARENT"...HEAD)"
+          printf '%s\n' "$changed"
+          test -n "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/index\.html|site/home-hero-slides\.(css|js|json)|\.github/workflows/home-hero-slides-0905-03-preview\.yml|coordination/receipts/2026-09-05-homepage-marketing-slideshow-0905-03-visual-receipt\.md)$' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "BLOCKED: unexpected files in corrected slideshow candidate"
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+
+      - name: Validate slideshow source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/home-hero-slides.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const cfg = JSON.parse(fs.readFileSync('site/home-hero-slides.json', 'utf8'));
+          if (cfg.schemaVersion !== 1) throw new Error('Unexpected slideshow schemaVersion');
+          const active = Array.isArray(cfg.slides) ? cfg.slides.filter((s) => s && s.active !== false) : [];
+          if (active.length < 3) throw new Error(`Initial owner acceptance requires >=3 active slides; found ${active.length}`);
+          if (active[0].image !== '/assets/brand/storefront-wordmark.webp') throw new Error('Approved storefront wordmark must remain first active slide');
+          if (!(Number(cfg.rotationMs) >= 4500)) throw new Error('Rotation interval is missing or too short');
+          for (const slide of active) {
+            if (!slide.image || !slide.alt) throw new Error(`Slide ${slide.id || '(unnamed)'} missing image/alt`);
+            if (slide.image.startsWith('/')) {
+              const local = `site${slide.image}`;
+              if (!fs.existsSync(local)) throw new Error(`Missing local slide asset: ${local}`);
+            }
+          }
+          NODE
+          grep -q 'home-hero-slides.css?v=1.0.0' site/index.html
+          grep -q 'home-hero-slides.js?v=1.0.0' site/index.html
+          grep -q 'data-home-hero-slides' site/index.html
+          grep -q 'data-slides-src="/home-hero-slides.json"' site/index.html
+          ! grep -q '<section class="retail-hero"' site/index.html
+          grep -q 'root.dataset.slideCount' site/home-hero-slides.js
+          grep -q 'root.dataset.controlsReady' site/home-hero-slides.js
+          grep -q 'home-hero-slide__content' site/home-hero-slides.css
+          grep -q 'home-hero-slides__dot' site/home-hero-slides.css
+          git diff --check
+
+      - name: Canonical committed-source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --exit-code
+
+      - name: Install DOM integration harness
+        shell: bash
+        run: npm install --no-save --package-lock=false jsdom@26
+
+      - name: Execute slideshow rendered-DOM integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { JSDOM } from 'jsdom';
+          const html = fs.readFileSync('site/index.html', 'utf8');
+          const config = JSON.parse(fs.readFileSync('site/home-hero-slides.json', 'utf8'));
+          const script = fs.readFileSync('site/home-hero-slides.js', 'utf8');
+          const dom = new JSDOM(html, { url: 'https://preview.local/', runScripts: 'outside-only', pretendToBeVisual: true });
+          dom.window.matchMedia = () => ({ matches: false });
+          dom.window.fetch = async () => ({ ok: true, json: async () => config });
+          dom.window.eval(script);
+          await new Promise((resolve) => setTimeout(resolve, 80));
+          const root = dom.window.document.querySelector('[data-home-hero-slides]');
+          if (!root) throw new Error('Slideshow root not rendered');
+          if (root.dataset.slideshowReady !== 'true') throw new Error('Slideshow did not initialize');
+          if (Number(root.dataset.slideCount) < 3) throw new Error('Rendered slide count is below owner requirement');
+          if (root.dataset.controlsReady !== 'true') throw new Error('Slideshow controls did not render');
+          if (!root.querySelector('[data-home-hero-prev]') || !root.querySelector('[data-home-hero-next]')) throw new Error('Previous/next controls missing');
+          if (root.querySelectorAll('[data-home-hero-dot]').length !== Number(root.dataset.slideCount)) throw new Error('Pagination count mismatch');
+          if (!root.querySelector('[data-home-hero-pause]')) throw new Error('Pause control missing');
+          const before = root.dataset.activeSlide;
+          root.querySelector('[data-home-hero-next]').click();
+          const after = root.dataset.activeSlide;
+          if (before === after) throw new Error('Next control did not advance active slide');
+          const active = root.querySelector('.home-hero-slide.is-active');
+          if (!active) throw new Error('No active slide after control interaction');
+          dom.window.close();
+          console.log('Rendered slideshow DOM: PASS');
+          NODE
+          git diff --exit-code
+
+      - name: Deploy isolated corrected slideshow preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=home-hero-slides-0905-03-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Preview regression and deployed slideshow integration
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          npm run qa:preview -- "$base"
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'data-home-hero-slides' /tmp/home.html
+          curl -sS -L --fail "$base/home-hero-slides.json" -o /tmp/slides.json
+          node -e "const c=require('/tmp/slides.json'); const a=c.slides.filter(s=>s&&s.active!==false); if(a.length<3) process.exit(1); if(a[0].image!=='/assets/brand/storefront-wordmark.webp') process.exit(1)"
+          curl -sS -L --fail "$base/home-hero-slides.js?v=1.0.0" -o /tmp/slides.js
+          curl -sS -L --fail "$base/home-hero-slides.css?v=1.0.0" -o /tmp/slides.css
+          grep -q 'root.dataset.controlsReady' /tmp/slides.js
+          grep -q 'home-hero-slide__content' /tmp/slides.css
+          BASE="$base" node --input-type=module - <<'NODE'
+          import { JSDOM } from 'jsdom';
+          const base = process.env.BASE;
+          const html = await fetch(`${base}/`).then((r) => { if (!r.ok) throw new Error(`home ${r.status}`); return r.text(); });
+          const cfg = await fetch(`${base}/home-hero-slides.json`).then((r) => { if (!r.ok) throw new Error(`json ${r.status}`); return r.json(); });
+          const script = await fetch(`${base}/home-hero-slides.js?v=1.0.0`).then((r) => { if (!r.ok) throw new Error(`js ${r.status}`); return r.text(); });
+          const dom = new JSDOM(html, { url: `${base}/`, runScripts: 'outside-only', pretendToBeVisual: true });
+          dom.window.matchMedia = () => ({ matches: false });
+          dom.window.fetch = async () => ({ ok: true, json: async () => cfg });
+          dom.window.eval(script);
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          const root = dom.window.document.querySelector('[data-home-hero-slides]');
+          if (root?.dataset.slideshowReady !== 'true') throw new Error('Deployed slideshow did not initialize');
+          if (Number(root.dataset.slideCount) < 3) throw new Error('Deployed slide count below owner requirement');
+          if (root.dataset.controlsReady !== 'true') throw new Error('Deployed controls did not render');
+          const before = root.dataset.activeSlide;
+          root.querySelector('[data-home-hero-next]').click();
+          if (root.dataset.activeSlide === before) throw new Error('Deployed next control did not advance');
+          dom.window.close();
+          console.log('Deployed rendered slideshow DOM: PASS');
+          NODE
+
+      - name: Candidate immutability
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          test "$(git rev-parse HEAD)" = "${{ steps.lineage.outputs.candidate }}"
+
+      - name: Corrected visual preview receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### HOME-HERO-SLIDES-0905-03 — PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Parent: $EXPECTED_PARENT" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: ${{ steps.lineage.outputs.candidate }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Active slides: 3+' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Rendered controls/pagination interaction: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "editorNote": "Homepage marketing lane. Add, remove, reorder, or disable slide objects here without rewriting homepage HTML. Creative target: 1640x624 landscape / Facebook-cover style. Keep important text and logos inside the central safe area. Initial launch intentionally keeps at least three active slides so slideshow behavior is visible during owner review.",
+  "rotationMs": 7000,
+  "slides": [
+    {
+      "id": "storefront-identity-2026-09-05",
+      "active": true,
+      "image": "/assets/brand/storefront-wordmark.webp",
+      "alt": "Elevation UpScales Inc. — Off-Grid Power, Supply, Logistics",
+      "width": 2048,
+      "height": 682,
+      "fit": "contain",
+      "objectPosition": "center center",
+      "background": "#000000"
+    },
+    {
+      "id": "lithium-off-grid-2026-09-05",
+      "active": true,
+      "image": "/assets/homepage-option-2-lithium-solar.webp",
+      "alt": "Lithium battery and solar equipment for RV and off-grid power",
+      "width": 1640,
+      "height": 624,
+      "fit": "cover",
+      "objectPosition": "center center",
+      "background": "#061217",
+      "eyebrow": "LITHIUM • SOLAR • OFF-GRID",
+      "headline": "Power systems built around real use.",
+      "body": "Shop lithium batteries and off-grid power paths for RV, backup and remote systems.",
+      "ctaLabel": "Shop Lithium",
+      "href": "/lithium-batteries",
+      "event": "homepage_product_detail_open",
+      "value": "slideshow-lithium"
+    },
+    {
+      "id": "rv-outdoor-2026-09-05",
+      "active": true,
+      "image": "/assets/hero-galaxy-rv.webp",
+      "alt": "RV and outdoor travel scene for Elevation UpScales RV and Outdoor store",
+      "width": 1640,
+      "height": 624,
+      "fit": "cover",
+      "objectPosition": "center center",
+      "background": "#02080b",
+      "eyebrow": "RV & OUTDOOR",
+      "headline": "Built for the road, camp and worksite.",
+      "body": "Browse practical RV, camping and outdoor gear for travel and off-grid use.",
+      "ctaLabel": "Shop RV & Outdoor",
+      "href": "/rv-store",
+      "event": "homepage_product_detail_open",
+      "value": "slideshow-rv-outdoor"
+    }
+  ]
+}
