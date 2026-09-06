@@ -1,0 +1,177 @@
+name: HOME-OWNER-EDIT-0905-01 Preview Gate
+
+on:
+  push:
+    branches:
+      - control/home-owner-edit-0905-01-preview-20260905
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  BASE_SHA: b8300a0060dba7a690d17bde7a995bcc591184fb
+  CANDIDATE_SHA: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+          fetch-depth: 0
+
+      - name: Exact scope and owner-copy gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git fetch origin "$BASE_SHA" --no-tags || true
+          mapfile -t files < <(git diff --name-only "$BASE_SHA".."$CANDIDATE_SHA" | sort)
+          printf '%s\n' "${files[@]}"
+          expected=$'site/index.html\nsite/shipping-logistics-services.html\nsite/sitemap.xml\nsite/what-we-do.html'
+          actual=$(printf '%s\n' "${files[@]}")
+          test "$actual" = "$expected"
+          grep -q 'Shop by Category\.' site/index.html
+          ! grep -qi 'Start with what you need' site/index.html
+          grep -q 'Elevated Logistics for Product Supply Lines' site/index.html
+          ! grep -qi 'We Handle the Logistics' site/index.html
+          ! grep -qi 'Built Around SOK' site/index.html
+          ! grep -qi 'Built from experience' site/index.html
+          ! grep -qi 'When the product is not the whole job' site/index.html
+          grep -q 'Use Solar System Builder' site/index.html
+          grep -q 'Home &amp; RV Services' site/index.html
+          grep -q '/what-we-do#home-rv-services' site/index.html
+          grep -q 'Shipping &amp; Logistics Services' site/index.html
+          grep -q 'id="home-rv-services"' site/what-we-do.html
+          grep -q 'href="/home-services"' site/what-we-do.html
+          grep -q 'href="/rv-services"' site/what-we-do.html
+          grep -q '/shipping-logistics-services' site/what-we-do.html
+          grep -q '<h1 id="shipping-logistics-title">Shipping &amp; Logistics Services</h1>' site/shipping-logistics-services.html
+          grep -q '>Coming Soon<' site/shipping-logistics-services.html
+          grep -q 'shipping-logistics-services' site/sitemap.xml
+          echo owner_scope=PASS
+
+      - name: Canonical static and commerce QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          node deployment/qa/web-com-commerce-regression.mjs
+          git diff --check
+          echo static_commerce=PASS
+
+      - id: deploy
+        name: Deploy isolated preview
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=elevationupscales --branch=home-owner-edit-0905-01-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Route and security smoke
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /what-we-do /home-services /rv-services /solar-services /shipping-logistics-services /store /rv-store /lithium-batteries /sok-batteries /checkout; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'Shop by Category\.' /tmp/home.html
+          grep -q 'Elevated Logistics for Product Supply Lines' /tmp/home.html
+          grep -q 'Use Solar System Builder' /tmp/home.html
+          ! grep -qi 'Start with what you need' /tmp/home.html
+          ! grep -qi 'Built Around SOK' /tmp/home.html
+          ! grep -qi 'Built from experience' /tmp/home.html
+          ! grep -qi 'When the product is not the whole job' /tmp/home.html
+          curl -sS -L --fail "$base/shipping-logistics-services" -o /tmp/logistics.html
+          grep -q 'Shipping &amp; Logistics Services' /tmp/logistics.html
+          grep -q 'Coming Soon' /tmp/logistics.html
+          sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
+          test "$sync_code" = "401"
+          runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
+          test "$runtime_code" = "404"
+          echo route_security=PASS
+
+      - name: Preview payment boundary
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -sS -L --fail "$base/api/store-checkout/config" -o /tmp/config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/config.json'))
+          assert data.get('ok') is True
+          assert data.get('checkoutEnabled') is not True
+          assert not data.get('clientId')
+          print('preview_payment_boundary=PASS')
+          print('order_created=NO')
+          print('capture_called=NO')
+          PY
+
+      - name: Desktop and mobile visual gate
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install chromium
+          cat > verify-home.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE.replace(/\/$/,'');
+          const browser=await chromium.launch({headless:true});
+          for (const [mode,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+            for (const path of ['/','/what-we-do','/shipping-logistics-services']) {
+              const context=await browser.newContext({viewport});
+              const page=await context.newPage();
+              const response=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:60000});
+              if(!response || response.status()!==200) throw new Error(`${mode} ${path} status ${response?.status()}`);
+              await page.waitForTimeout(2200);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+              if(overflow>3) throw new Error(`${mode} ${path} overflow ${overflow}`);
+              const bad=await page.locator('img').evaluateAll(imgs=>imgs.filter(i=>{const r=i.getBoundingClientRect();const s=getComputedStyle(i);return r.width>2&&s.display!=='none'&&s.visibility!=='hidden'&&(!i.complete||i.naturalWidth===0)}).map(i=>i.currentSrc||i.src));
+              if(bad.length) throw new Error(`${mode} ${path} broken ${bad.join(',')}`);
+              if(path==='/') {
+                const text=await page.locator('body').innerText();
+                for(const required of ['Shop by Category.','Elevated Logistics for Product Supply Lines','Use Solar System Builder','Home & RV Services','Shipping & Logistics Services']) if(!text.includes(required)) throw new Error(`${mode} missing ${required}`);
+                for(const removed of ['Start with what you need','We Handle the Logistics','Built Around SOK','Built from experience','When the product is not the whole job']) if(text.toLowerCase().includes(removed.toLowerCase())) throw new Error(`${mode} stale ${removed}`);
+              }
+              if(path==='/shipping-logistics-services') {
+                const main=(await page.locator('main').innerText()).trim();
+                if(!main.includes('Shipping & Logistics Services') || !main.includes('Coming Soon')) throw new Error(`${mode} coming-soon content missing`);
+              }
+              await context.close();
+            }
+          }
+          await browser.close();
+          console.log('desktop_mobile_visual=PASS');
+          NODE
+          node verify-home.mjs
+
+      - name: Receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo '### HOME-OWNER-EDIT-0905-01 — PREVIEW PASS'
+            echo "- Candidate: $CANDIDATE_SHA"
+            echo "- Preview: $BASE"
+            echo '- Exact owner scope: PASS'
+            echo '- Static/commerce: PASS'
+            echo '- Route/security: PASS'
+            echo '- Desktop/mobile: PASS'
+            echo '- Preview payment boundary: PASS'
+            echo '- PayPal order/capture: NOT PERFORMED'
+          } >> "$GITHUB_STEP_SUMMARY"
