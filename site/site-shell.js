@@ -19,11 +19,9 @@
 
   const SHOP_LINKS = Object.freeze([
     ["/lithium-batteries", "Lithium Batteries", "12V, 24V and 48V LiFePO4 for RV, solar and off-grid power"],
-    ["/sok-batteries", "SOK Energy", "Authorized SOK Energy Dealer · batteries, chargers and accessories"],
+    ["/sok-batteries", "SOK Battery Systems", "Authorized SOK Energy Dealer · batteries, chargers and accessories"],
     ["/rv-store", "RV & Outdoor", "RV essentials, camping, travel and practical outdoor equipment"],
-    ["/hawaii-lithium-batteries", "Hawaii Power & Logistics", "Battery availability and destination-specific freight review"],
     ["/store", "Elevation Gear", "Apparel, hats and current Elevation releases"],
-    ["/collector", "Collector Series", "Explore current collector releases"],
   ]);
 
   function randomId() {
@@ -362,38 +360,67 @@
 
   function installRetailStoreShell() {
     const path = location.pathname.replace(/\/+$/, "") || "/";
-    const retailRoute = path === "/store" || path === "/rv-store" || path === "/lithium-batteries" || path === "/sok-batteries" || path === "/hawaii-lithium-batteries" || path === "/collector" || path === "/checkout" || path === "/product" || path.startsWith("/sok/");
-    if (!retailRoute || document.body.classList.contains("retail-home")) return;
-    document.body.classList.add("retail-store-shell");
-    if (!document.querySelector('link[data-retail-shell]')) {
+    const retailRoute = path === "/store" || path === "/rv-store" || path === "/lithium-batteries" || path === "/sok-batteries" || path === "/hawaii-lithium-batteries" || path === "/collector" || path === "/checkout" || path === "/product" || path === "/marketplace" || path.startsWith("/sok/");
+    if (document.body.classList.contains("retail-home")) return;
+    document.body.classList.add("reference-global-shell");
+    if (retailRoute) document.body.classList.add("retail-store-shell");
+    if (retailRoute && !document.querySelector('link[data-retail-shell]')) {
       const style = document.createElement("link");
       style.rel = "stylesheet";
-      style.href = "/retail-first.css?v=5.3.0";
+      style.href = "/retail-first.css?v=5.4.0";
       style.dataset.retailShell = "true";
       document.head.append(style);
     }
     const header = document.querySelector(".eus-header");
-    const nav = header?.querySelector(".eus-nav");
-    if (!header || !nav) return;
-    const tagline = header.querySelector(".eus-wordmark__tagline");
-    if (tagline) tagline.textContent = "Lithium • Logistics • Off-Grid Power";
-    header.querySelector(".eus-project-trigger--direct")?.remove();
-    nav.setAttribute("aria-label", "Primary shopping navigation");
-    nav.innerHTML = `
-      <details class="eus-menu eus-menu--shop"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>
-      <a class="eus-nav-link" href="/lithium-batteries">Lithium</a>
-      <a class="eus-nav-link" href="/sok-batteries">SOK Energy</a>
-      <a class="eus-nav-link" href="/rv-store">RV & Outdoor</a>
-      <a class="eus-nav-link" href="/solar-project">Off-Grid Power</a>
-      <a class="eus-nav-link" href="/hawaii-lithium-batteries">Freight & Logistics</a>
-      <details class="eus-menu retail-more-menu"><summary class="eus-nav-trigger">More <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-        <a href="/solar-services"><span><strong>Power & Solar Services</strong><small>Planning, troubleshooting and off-grid project support</small></span></a>
-        <a href="/rv-services"><span><strong>RV Services</strong><small>Repair, restoration, inspections and upgrades</small></span></a>
-        <a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or complete-system project support</small></span></a>
-        <a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics, projects and field experience</small></span></a>
-        <a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth opportunities</small></span></a>
-        <a href="/marketplace"><span><strong>Marketplace</strong><small>Local listings and community inventory</small></span></a>
-      </div></details>`;
+    const inner = header?.querySelector(".eus-header__inner");
+    if (!header || !inner) return;
+    inner.innerHTML = `
+      <a class="eus-brand" href="/" aria-label="Elevation UpScales, Inc. home"><img class="reference-header-wordmark" src="/assets/brand/storefront-wordmark.webp" alt="Elevation UpScales, Inc." width="430" height="150"></a>
+      <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
+      <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Power <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
+          <a href="/lithium-batteries"><span><strong>Lithium Batteries</strong><small>12V, 24V and 48V power</small></span></a>
+          <a href="/sok-batteries"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy Dealer</small></span></a>
+          <a href="/solar-project"><span><strong>Solar & Off-Grid</strong><small>Build around real power needs</small></span></a>
+          <a href="/hawaii-lithium-batteries"><span><strong>Hawaii Power</strong><small>Availability and freight review</small></span></a>
+        </div></details>
+        <details class="eus-menu eus-menu--shop reference-nav-menu"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Projects <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
+          <a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or project support</small></span></a>
+          <a href="/solar-project"><span><strong>Solar System Builder</strong><small>Plan your power system</small></span></a>
+        </div></details>
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Services <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
+          <a href="/shipping-logistics-services"><span><strong>Freight & Logistics</strong><small>Hawaii, Alaska and destination support</small></span></a>
+          <a href="/what-we-do#home-rv-services"><span><strong>Home & RV Services</strong><small>Repair, restoration and upgrades</small></span></a>
+          <a href="/solar-services"><span><strong>Power & Solar Services</strong><small>Planning and troubleshooting</small></span></a>
+        </div></details>
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Company <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
+          <a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics and projects</small></span></a>
+          <a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth</small></span></a>
+          <a href="/marketplace"><span><strong>Marketplace</strong><small>Independent local and community listings</small></span></a>
+        </div></details>
+      </nav>
+      ${retailRoute ? '<form class="reference-global-search" data-global-search role="search"><label class="sr-only" for="global-site-search">Search products</label><input id="global-site-search" name="q" type="search" autocomplete="off" placeholder="Search products…"><button type="submit" aria-label="Search">⌕</button></form>' : ""}
+      <a class="button button-primary reference-global-cta" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="header">Start a Project</a>`;
+
+    const search = inner.querySelector("[data-global-search]");
+    search?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = String(new FormData(search).get("q") || "").trim();
+      if (!query) return;
+      const lower = query.toLowerCase();
+      const destination = /sok|battery|lithium|12v|24v|48v|lifepo4/.test(lower) ? "/lithium-batteries" : /marketplace|used|rv for sale|vehicle/.test(lower) ? "/marketplace" : "/rv-store";
+      location.assign(`${destination}?q=${encodeURIComponent(query)}`);
+    });
+  }
+
+  function installGlobalFooter() {
+    if (document.body.classList.contains("retail-home")) return;
+    const footer = document.querySelector(".site-footer");
+    if (!footer) return;
+    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Off-Grid Power • Supply • Logistics<br>Elevation Catalog and independent Marketplace</p></div></div><div class="footer-contact"><a href="/lithium-batteries">Lithium Batteries</a><a href="/sok-batteries">SOK Battery Systems</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/marketplace">Marketplace</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
+    const year = footer.querySelector("#year");
+    if (year) year.textContent = String(new Date().getFullYear());
   }
 
   function installNavigation() {
@@ -477,5 +504,6 @@
   applyStartProjectPresentation();
   installSupportAndContactAnalytics(analytics);
   installRetailStoreShell();
+  installGlobalFooter();
   installNavigation();
 })();

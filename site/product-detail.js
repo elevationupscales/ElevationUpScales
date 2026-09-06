@@ -23,12 +23,39 @@
   const specsEl = document.querySelector("[data-product-specs]");
   const relatedSection = document.querySelector("[data-related-section]");
   const relatedHost = document.querySelector("[data-related-products]");
-  const lithiumRetailer = document.querySelector("[data-lithium-retailer]");
-  const lithiumFreightLink = document.querySelector("[data-lithium-freight-link]");
+  let lithiumRetailer = document.querySelector("[data-lithium-retailer]");
+  let lithiumFreightLink = document.querySelector("[data-lithium-freight-link]");
   const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   const fallbackImage = "/assets/logo.webp";
   let galleryImages = [];
   let galleryIndex = 0;
+
+  function ensureLithiumContext(isSok = false) {
+    const summary = document.querySelector(".product-summary");
+    const actions = summary?.querySelector(".product-actions");
+    if (!summary || !actions) return;
+    if (!lithiumRetailer) {
+      lithiumRetailer = document.createElement("p");
+      lithiumRetailer.className = "product-retailer-trust";
+      lithiumRetailer.dataset.lithiumRetailer = "true";
+      const label = document.createElement("strong");
+      lithiumRetailer.append(label);
+      actions.before(lithiumRetailer);
+    }
+    lithiumRetailer.querySelector("strong").textContent = isSok ? "AUTHORIZED SOK ENERGY DEALER" : "LITHIUM & OUTDOOR DEALER";
+    lithiumRetailer.hidden = false;
+    if (!lithiumFreightLink) {
+      lithiumFreightLink = document.createElement("a");
+      lithiumFreightLink.className = "product-freight-link";
+      lithiumFreightLink.dataset.lithiumFreightLink = "true";
+      lithiumFreightLink.href = "/hawaii-lithium-batteries";
+      actions.before(lithiumFreightLink);
+    }
+    lithiumFreightLink.textContent = "Hawaii Logistics Available — review destination options →";
+    lithiumFreightLink.hidden = false;
+  }
+
+  if (hintedStore === "lithium") ensureLithiumContext(/^sok-/i.test(requestedId));
 
   function plainText(value, max = 7000) {
     const raw = String(value ?? "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n");
@@ -272,8 +299,11 @@
       return;
     }
     const lithiumProduct = sectionFor(product) === "lithium";
-    if (lithiumRetailer) lithiumRetailer.hidden = !lithiumProduct;
-    if (lithiumFreightLink) lithiumFreightLink.hidden = !lithiumProduct;
+    if (lithiumProduct) ensureLithiumContext(/^sok-/i.test(clean(product?.id || product?.sku, 160)) || /\bSOK\b/i.test(clean(product?.title || product?.name, 500)));
+    else {
+      lithiumRetailer?.remove(); lithiumRetailer = null;
+      lithiumFreightLink?.remove(); lithiumFreightLink = null;
+    }
     categoryEl.textContent = displayCategory(product); titleEl.textContent = title; priceEl.textContent = money.format(Number(product.priceCents) / 100);
     shippingEl.textContent = shipping.label; shippingEl.className = `product-shipping ${shipping.className}`;
     const purchase = purchaseUrl(product);
