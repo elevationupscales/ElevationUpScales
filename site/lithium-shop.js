@@ -278,6 +278,8 @@
   }
 
   function init() {
+    const initialQuery = String(new URLSearchParams(location.search).get("q") || "").trim();
+    if (initialQuery && search) { search.value = initialQuery; state.query = initialQuery; }
     if (grid.dataset.prerendered === "true" && grid.children.length) {
       if (hawaiiMode) { hydrateDeferredImages(grid); syncHawaiiStatuses(); }
       hydrateAndRender();

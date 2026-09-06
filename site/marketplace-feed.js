@@ -261,5 +261,7 @@
       const response=await fetch('/api/marketplace/listings',{headers:{Accept:'application/json'},cache:'no-store'}); const data=await response.json().catch(()=>({})); if(!response.ok)throw new Error(data.error||'Listings are unavailable.'); listings=data.listings||[]; render();
     } catch(error) { console.warn('Marketplace listings could not be loaded:',error); if(resultCount)resultCount.textContent='0'; if(emptyState){emptyState.hidden=false; emptyState.querySelector('h3').textContent='Marketplace listings could not be loaded.'; emptyState.querySelector('p').textContent='Refresh the page or try again shortly.';} }
   };
+  const initialQuery = String(new URLSearchParams(location.search).get('q') || '').trim();
+  if (initialQuery && searchInput) searchInput.value = initialQuery;
   updateSavedCount(); syncHero(); load();
 })();

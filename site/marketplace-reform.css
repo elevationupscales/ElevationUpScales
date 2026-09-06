@@ -358,6 +358,7 @@
 }
 
 .marketplace-empty-state p { color: var(--market-muted); }
+.marketplace-empty-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
 
 /* Seller tools are separated from the listing feed. */
 .marketplace-seller-hub {
