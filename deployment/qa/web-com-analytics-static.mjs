@@ -25,6 +25,7 @@ const requiredClientEvents = [
   "hawaii_options_open",
   "commercial_review_route",
   "checkout_start",
+  "start_project_open",
 ];
 for (const event of requiredClientEvents) {
   assert.equal(SITE_INTENT_CLIENT_EVENT_TYPES.has(event), true, `client analytics allowlist missing ${event}`);
@@ -62,7 +63,18 @@ assert.equal(collection.includes('track("sok_catalog_search",query||'), false, "
 const product = fs.readFileSync("site/sok-static-product.js", "utf8");
 for (const event of ["sok_product_view", "sok_related_product_open", "sok_media_view", "purchase_options_open"]) assert.ok(product.includes(event));
 
-const home = fs.readFileSync("site/home-commerce.js", "utf8");
-for (const event of ["homepage_logistics_capability_view", "homepage_logistics_route", "homepage_product_buy_open", "homepage_product_detail_open"]) assert.ok(home.includes(event));
+const homeRuntime = fs.readFileSync("site/home-commerce.js", "utf8");
+for (const event of ["homepage_logistics_capability_view", "homepage_logistics_route", "homepage_product_buy_open", "homepage_product_detail_open"]) assert.ok(homeRuntime.includes(event));
+assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static redesigned logistics block must record a capability view");
 
-console.log("WEB-COM-0905-01 storefront analytics contract: PASS");
+const home = fs.readFileSync("site/index.html", "utf8");
+assert.ok(home.includes("Lithium Power Supply"));
+assert.ok(home.includes("and Logistics"));
+assert.ok(home.includes("Elevated Logistics for Product Supply Lines"));
+assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");
+assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK12V100PC"'), "homepage SK12V100PC analytics missing");
+assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK48V100N"'), "homepage SK48V100N analytics missing");
+assert.ok(home.includes('data-eus-value="alaska"'), "homepage Alaska logistics route analytics missing");
+assert.equal(home.toLowerCase().includes("start with what you need"), false, "removed owner copy returned to homepage");
+
+console.log("WEB-COM-0906 storefront analytics redesign reconciliation: PASS");
