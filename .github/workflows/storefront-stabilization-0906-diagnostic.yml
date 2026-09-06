@@ -24,23 +24,35 @@ jobs:
         run: |
           set -euo pipefail
           grep -q 'Hawaii lithium shipping is reviewed by exact product or SKU' site/terms.html
-          ! grep -q 'current customer freight price is $99 per actual battery' site/terms.html
+          ! grep -Fq 'current customer freight price is $99 per actual battery' site/terms.html
           ! grep -q '>Coming Soon<' site/what-we-do.html
           grep -q 'Product-supply logistics, freight review, Hawaii and Alaska destination support' site/what-we-do.html
           python - <<'PY'
           import pathlib,re,sys
-          bad=[]; found=[]
+          bad=[]; found=[]; dynamic=[]
+          allowed='2088134998'
           for p in pathlib.Path('site').rglob('*'):
               if not p.is_file() or p.suffix.lower() not in {'.html','.js','.css','.json','.md','.txt'}: continue
               try: text=p.read_text(errors='ignore')
               except Exception: continue
-              for m in re.finditer(r'sms:[^\s"\'<>]+',text,re.I):
-                  raw=m.group(0); digits=''.join(re.findall(r'\d',raw))
-                  found.append((str(p),raw))
-                  if len(digits)>=10 and digits[-10:]!='2088134998': bad.append((str(p),raw))
-          print('SMS targets:',found)
+              for m in re.finditer(r'sms:[^\s"\'<>`]+',text,re.I):
+                  raw=m.group(0)
+                  destination=raw[4:].split('?',1)[0]
+                  digits=''.join(re.findall(r'\d',destination))
+                  found.append((str(p),destination))
+                  if digits and len(digits)>=10 and digits[-10:]!=allowed:
+                      bad.append((str(p),destination))
+              if 'sms:${' in text or 'sms:'+'${' in text:
+                  dynamic.append(str(p))
+          print('Static SMS destinations:',found)
+          print('Dynamic SMS source files:',dynamic)
           if bad:
-              print('BAD SMS TARGETS:',bad,file=sys.stderr); sys.exit(1)
+              print('BAD SMS DESTINATIONS:',bad,file=sys.stderr); sys.exit(1)
+          # Dynamic builders are allowed only when the source also carries the approved destination or derives from listing/contact data rather than a hard-coded alternate owner number.
+          for rel in dynamic:
+              text=pathlib.Path(rel).read_text(errors='ignore')
+              if rel.endswith('solar-builder.js') and '12088134998' not in text:
+                  print('solar-builder dynamic SMS lacks approved destination',file=sys.stderr); sys.exit(1)
           PY
       - name: Deploy isolated diagnostic preview
         id: deploy
@@ -120,7 +132,7 @@ jobs:
           set -euo pipefail
           base="${BASE%/}"
           curl -fsSL "$base/terms" | grep -q 'Hawaii lithium shipping is reviewed by exact product or SKU'
-          ! curl -fsSL "$base/terms" | grep -q 'current customer freight price is $99 per actual battery'
+          ! curl -fsSL "$base/terms" | grep -Fq 'current customer freight price is $99 per actual battery'
           curl -fsSL "$base/what-we-do" | grep -q 'Product-supply logistics, freight review, Hawaii and Alaska destination support'
           ! curl -fsSL "$base/what-we-do" | grep -q '>Coming Soon<'
           npm run qa:preview -- "$base"
