@@ -91,6 +91,15 @@ Public production returned HTTP `200` for the homepage, Terms, What We Do, Shipp
 
 No sweep change was made to supplier cost, MAP, protected pricing controls, inventory truth, Doba source refresh, PayPal runtime, Catalog source-of-truth architecture, SOK product records, private carrier/dangerous-goods operations, Marketplace ownership, Admin/Portal architecture or production database/schema.
 
+## Management / owner closeout
+
+The owner/management Google feed was updated with the authorized sweep and the final production result.
+
+Final Gmail production receipt:
+- recipient: `elevationupscales@gmail.com`
+- subject: `PRODUCTION RECEIPT — Storefront Stabilization Sweep 0906 PASS`
+- Gmail message ID: `1a078834177a9aeb`
+
 ## Rollback
 
 If rollback is required, restore `baseline-2026-09-06-pre-storefront-stabilization-sweep` (`c0b64d3563e052f50d3ca29feccac38fb0bb888a`) through the controlled release path.
