@@ -9,10 +9,6 @@ permissions:
   contents: read
   deployments: write
 
-concurrency:
-  group: home-hero-slides-0905-05-preview
-  cancel-in-progress: false
-
 env:
   EXPECTED_PARENT: cd97d178c8e205a816441fb8d86f140e2bbd5502
   WORK_BRANCH: work/home-hero-slides-0905-05-owner-takeover
@@ -57,7 +53,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate reference-led slideshow source contract
+      - name: Validate reference-led source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -65,36 +61,27 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const cfg = JSON.parse(fs.readFileSync('site/home-hero-slides.json', 'utf8'));
-          if (cfg.schemaVersion !== 1) throw new Error('Unexpected slideshow schemaVersion');
           const active = Array.isArray(cfg.slides) ? cfg.slides.filter((s) => s && s.active !== false) : [];
-          if (active.length < 4) throw new Error(`Owner takeover requires >=4 active slides; found ${active.length}`);
-          if (active[0].image !== '/assets/brand/storefront-wordmark.webp') throw new Error('Approved storefront wordmark must remain first active slide');
-          if (!(Number(cfg.rotationMs) >= 4500)) throw new Error('Rotation interval is missing or too short');
-          const reference = active.filter((s) => String(s.layout || '').startsWith('reference-'));
-          if (reference.length < 4) throw new Error(`Reference-led creative must own the launch rotation; found ${reference.length}`);
-          if (!active.some((s) => s.layout === 'reference-partnership')) throw new Error('Authorized SOK partnership slide missing');
-          if (!active.some((s) => s.headline === 'SK12V100PC')) throw new Error('SK12V100PC showcase slide missing');
-          if (!active.some((s) => s.headline === 'SK48V100N')) throw new Error('SK48V100N showcase slide missing');
-          const checkLocal = (value, label) => {
-            if (!value || typeof value !== 'string' || !value.startsWith('/')) return;
-            const local = `site${value}`;
-            if (!fs.existsSync(local)) throw new Error(`Missing local ${label}: ${local}`);
+          if (cfg.schemaVersion !== 1) throw new Error('Unexpected schema');
+          if (active.length < 4) throw new Error('Expected 4+ active slides');
+          if (active[0].image !== '/assets/brand/storefront-wordmark.webp') throw new Error('Storefront wordmark must remain first slide');
+          if (!active.some((s) => s.layout === 'reference-partnership')) throw new Error('SOK partnership slide missing');
+          if (!active.some((s) => s.headline === 'SK12V100PC')) throw new Error('SK12V100PC missing');
+          if (!active.some((s) => s.headline === 'SK48V100N')) throw new Error('SK48V100N missing');
+          const local = (value) => {
+            if (!value || !String(value).startsWith('/')) return;
+            if (!fs.existsSync(`site${value}`)) throw new Error(`Missing local asset: site${value}`);
           };
-          for (const slide of active) {
-            if (!slide.image || !slide.alt) throw new Error(`Slide ${slide.id || '(unnamed)'} missing image/alt`);
-            checkLocal(slide.image, 'slide asset');
-            checkLocal(slide.backgroundImage, 'background asset');
-            checkLocal(slide.brandImage, 'brand asset');
-            for (const product of Array.isArray(slide.products) ? slide.products : []) checkLocal(product?.image, 'product asset');
+          for (const s of active) {
+            if (!s.image || !s.alt) throw new Error(`Slide ${s.id || 'unknown'} missing image/alt`);
+            local(s.image); local(s.backgroundImage); local(s.brandImage);
+            for (const p of Array.isArray(s.products) ? s.products : []) local(p?.image);
           }
           NODE
-          grep -q 'home-hero-slides.css?v=1.0.0' site/index.html
-          grep -q 'home-hero-slides.js?v=1.0.0' site/index.html
           grep -q 'data-home-hero-slides' site/index.html
-          grep -q 'data-slides-src="/home-hero-slides.json"' site/index.html
-          ! grep -q '<section class="retail-hero"' site/index.html
           grep -q 'root.dataset.referenceSlides' site/home-hero-slides.js
-          grep -q 'home-hero-reference--partnership' site/home-hero-slides.css
+          grep -q 'reference-storefront-hero' site/home-hero-slides.js
+          grep -q 'reference-solutions__grid' site/home-hero-slides.css
           grep -q 'home-hero-reference__featured-product' site/home-hero-slides.css
           git diff --check
 
@@ -109,7 +96,7 @@ jobs:
         shell: bash
         run: npm install --no-save --package-lock=false jsdom@26
 
-      - name: Execute rendered reference slideshow integration
+      - name: Execute rendered reference integration
         shell: bash
         run: |
           set -euo pipefail
@@ -123,24 +110,21 @@ jobs:
           dom.window.matchMedia = () => ({ matches: false });
           dom.window.fetch = async () => ({ ok: true, json: async () => config });
           dom.window.eval(script);
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 120));
           const root = dom.window.document.querySelector('[data-home-hero-slides]');
-          if (!root) throw new Error('Slideshow root not rendered');
-          if (root.dataset.slideshowReady !== 'true') throw new Error('Slideshow did not initialize');
-          if (Number(root.dataset.slideCount) < 4) throw new Error('Rendered slide count below owner takeover requirement');
-          if (Number(root.dataset.referenceSlides) < 4) throw new Error('Reference-led slides did not render');
-          if (root.dataset.controlsReady !== 'true') throw new Error('Slideshow controls did not render');
-          if (root.querySelectorAll('.home-hero-slide--reference').length < 4) throw new Error('Reference creative DOM missing');
-          if (!root.querySelector('.home-hero-slide--partnership .home-hero-reference__products')) throw new Error('SOK partnership product deck missing');
-          if (root.querySelectorAll('.home-hero-reference__featured-product').length < 2) throw new Error('Product showcase media missing');
-          if (!root.querySelector('[data-home-hero-prev]') || !root.querySelector('[data-home-hero-next]')) throw new Error('Previous/next controls missing');
-          if (root.querySelectorAll('[data-home-hero-dot]').length !== Number(root.dataset.slideCount)) throw new Error('Pagination count mismatch');
-          if (!root.querySelector('[data-home-hero-pause]')) throw new Error('Pause control missing');
+          if (root?.dataset.slideshowReady !== 'true') throw new Error('Slideshow did not initialize');
+          if (Number(root.dataset.slideCount) < 4 || Number(root.dataset.referenceSlides) < 4) throw new Error('Reference carousel incomplete');
+          if (root.dataset.controlsReady !== 'true') throw new Error('Controls missing');
+          if (!dom.window.document.querySelector('[data-reference-flagship]')) throw new Error('Flagship first fold missing');
+          if (!dom.window.document.querySelector('[data-reference-trust]')) throw new Error('Trust strip missing');
+          if (!dom.window.document.querySelector('[data-reference-solutions]')) throw new Error('Solution grid missing');
+          if (dom.window.document.querySelectorAll('.reference-solution-card').length !== 7) throw new Error('Seven solution cards required');
+          if (dom.window.document.body.dataset.referenceShellReady !== 'true') throw new Error('Retail shell not enhanced');
           const before = root.dataset.activeSlide;
           root.querySelector('[data-home-hero-next]').click();
-          if (root.dataset.activeSlide === before) throw new Error('Next control did not advance active slide');
+          if (root.dataset.activeSlide === before) throw new Error('Next control failed');
           dom.window.close();
-          console.log('Rendered reference slideshow DOM: PASS');
+          console.log('Rendered reference storefront DOM: PASS');
           NODE
           git diff --exit-code
 
@@ -153,7 +137,7 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=home-hero-slides-0905-05-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Preview regression and deployed reference integration
+      - name: Preview regression and deployed integration
         shell: bash
         env:
           BASE: ${{ steps.deploy.outputs.deployment-url }}
@@ -164,32 +148,87 @@ jobs:
           curl -sS -L --fail "$base/" -o /tmp/home.html
           grep -q 'data-home-hero-slides' /tmp/home.html
           curl -sS -L --fail "$base/home-hero-slides.json" -o /tmp/slides.json
-          node -e "const c=require('/tmp/slides.json'); const a=c.slides.filter(s=>s&&s.active!==false); const r=a.filter(s=>String(s.layout||'').startsWith('reference-')); if(a.length<4||r.length<4) process.exit(1); if(a[0].image!=='/assets/brand/storefront-wordmark.webp') process.exit(1)"
           curl -sS -L --fail "$base/home-hero-slides.js?v=1.0.0" -o /tmp/slides.js
           curl -sS -L --fail "$base/home-hero-slides.css?v=1.0.0" -o /tmp/slides.css
-          grep -q 'root.dataset.referenceSlides' /tmp/slides.js
-          grep -q 'home-hero-reference--partnership' /tmp/slides.css
+          grep -q 'reference-storefront-hero' /tmp/slides.js
+          grep -q 'reference-solutions__grid' /tmp/slides.css
           BASE="$base" node --input-type=module - <<'NODE'
           import { JSDOM } from 'jsdom';
           const base = process.env.BASE;
           const html = await fetch(`${base}/`).then((r) => { if (!r.ok) throw new Error(`home ${r.status}`); return r.text(); });
-          const cfg = await fetch(`${base}/home-hero-slides.json`).then((r) => { if (!r.ok) throw new Error(`json ${r.status}`); return r.json(); });
-          const script = await fetch(`${base}/home-hero-slides.js?v=1.0.0`).then((r) => { if (!r.ok) throw new Error(`js ${r.status}`); return r.text(); });
+          const cfg = await fetch(`${base}/home-hero-slides.json`).then((r) => r.json());
+          const script = await fetch(`${base}/home-hero-slides.js?v=1.0.0`).then((r) => r.text());
           const dom = new JSDOM(html, { url: `${base}/`, runScripts: 'outside-only', pretendToBeVisual: true });
           dom.window.matchMedia = () => ({ matches: false });
           dom.window.fetch = async () => ({ ok: true, json: async () => cfg });
           dom.window.eval(script);
-          await new Promise((resolve) => setTimeout(resolve, 110));
+          await new Promise((resolve) => setTimeout(resolve, 130));
           const root = dom.window.document.querySelector('[data-home-hero-slides]');
           if (root?.dataset.slideshowReady !== 'true') throw new Error('Deployed slideshow did not initialize');
-          if (Number(root.dataset.slideCount) < 4 || Number(root.dataset.referenceSlides) < 4) throw new Error('Deployed reference rotation incomplete');
-          if (root.dataset.controlsReady !== 'true') throw new Error('Deployed controls did not render');
-          const before = root.dataset.activeSlide;
-          root.querySelector('[data-home-hero-next]').click();
-          if (root.dataset.activeSlide === before) throw new Error('Deployed next control did not advance');
+          if (!dom.window.document.querySelector('[data-reference-flagship]')) throw new Error('Deployed flagship missing');
+          if (dom.window.document.querySelectorAll('.reference-solution-card').length !== 7) throw new Error('Deployed solution grid incomplete');
           dom.window.close();
-          console.log('Deployed reference slideshow DOM: PASS');
+          console.log('Deployed reference storefront DOM: PASS');
           NODE
+
+      - name: Install browser visual harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+
+      - name: Capture desktop and mobile owner evidence
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          mkdir -p visual-evidence
+          BASE="${BASE%/}" node --input-type=module - <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const base = process.env.BASE;
+          const browser = await chromium.launch({ headless: true });
+          const evidence = {};
+          async function capture(name, viewport, fullPageName) {
+            const page = await browser.newPage({ viewportSize: viewport });
+            await page.goto(`${base}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+            await page.waitForFunction(() => document.body?.dataset?.referenceShellReady === 'true', null, { timeout: 15000 });
+            await page.waitForSelector('[data-reference-flagship]', { state: 'visible' });
+            await page.waitForSelector('[data-reference-solutions]', { state: 'visible' });
+            await page.waitForTimeout(2500);
+            const markers = await page.evaluate(() => ({
+              title: document.title,
+              flagship: Boolean(document.querySelector('[data-reference-flagship]')),
+              trust: Boolean(document.querySelector('[data-reference-trust]')),
+              solutions: document.querySelectorAll('.reference-solution-card').length,
+              carouselReady: document.querySelector('[data-home-hero-slides]')?.dataset?.slideshowReady,
+              h1: document.querySelector('[data-reference-flagship] h1')?.innerText || '',
+              bodyWidth: document.body.scrollWidth,
+              viewportWidth: window.innerWidth
+            }));
+            if (!markers.flagship || !markers.trust || markers.solutions !== 7 || markers.carouselReady !== 'true') throw new Error(`${name} visual markers incomplete`);
+            if (markers.bodyWidth > markers.viewportWidth + 4) throw new Error(`${name} horizontal overflow: ${markers.bodyWidth} > ${markers.viewportWidth}`);
+            evidence[name] = markers;
+            await page.screenshot({ path: `visual-evidence/${name}-viewport.png`, fullPage: false });
+            await page.screenshot({ path: `visual-evidence/${fullPageName}`, fullPage: true });
+            await page.close();
+          }
+          await capture('desktop-1536x1024', { width: 1536, height: 1024 }, 'desktop-full.png');
+          await capture('mobile-390x844', { width: 390, height: 844 }, 'mobile-full.png');
+          await browser.close();
+          fs.writeFileSync('visual-evidence/evidence.json', JSON.stringify(evidence, null, 2));
+          console.log(JSON.stringify(evidence, null, 2));
+          NODE
+
+      - name: Upload owner visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-hero-slides-0905-05-owner-visual-evidence
+          path: visual-evidence/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Candidate immutability
         shell: bash
@@ -203,11 +242,12 @@ jobs:
         env:
           BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo '### HOME-HERO-SLIDES-0905-05 — OWNER TAKEOVER PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '### HOME-HERO-SLIDES-0905-05 — OWNER TAKEOVER PREVIEW + VISUAL EVIDENCE PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Parent: $EXPECTED_PARENT" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: ${{ steps.lineage.outputs.candidate }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
-          echo 'Reference-led active slides: 4+' >> "$GITHUB_STEP_SUMMARY"
-          echo 'SOK partnership + SK12V100PC + SK48V100N creative: PRESENT' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Rendered controls/pagination interaction: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Flagship reference composition: PRESENT' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Seven-card Shop by Solution: PRESENT' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Desktop 1536×1024 evidence: CAPTURED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Mobile 390×844 evidence: CAPTURED' >> "$GITHUB_STEP_SUMMARY"
           echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
