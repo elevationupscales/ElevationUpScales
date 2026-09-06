@@ -1,0 +1,150 @@
+name: HOME-HERO-SLIDES-0905-02 Preview
+
+on:
+  push:
+    branches:
+      - work/home-hero-slides-0905-02-graphics
+    paths:
+      - site/index.html
+      - site/home-hero-slides.css
+      - site/home-hero-slides.js
+      - site/home-hero-slides.json
+      - coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md
+      - .github/workflows/home-hero-slides-0905-02-preview.yml
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: home-hero-slides-0905-02-preview
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EXPECTED_PARENT: fb6f741b2b05ae04a7894f889eccbc55362bb15c
+      WORK_BRANCH: work/home-hero-slides-0905-02-graphics
+    steps:
+      - name: Check out visual candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Enforce Deployment baseline lineage
+        id: lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          current_main="$(git rev-parse origin/main)"
+          candidate="$(git rev-parse HEAD)"
+          test "$current_main" = "$EXPECTED_PARENT"
+          git merge-base --is-ancestor "$current_main" "$candidate"
+          echo "current_main=$current_main" >> "$GITHUB_OUTPUT"
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+          echo "Current main: $current_main"
+          echo "Candidate: $candidate"
+
+      - name: Enforce slideshow-only application scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only "$EXPECTED_PARENT"...HEAD)"
+          printf '%s\n' "$changed"
+          test -n "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/index\.html|site/home-hero-slides\.(css|js|json)|coordination/decisions/DEC-009-homepage-marketing-slideshow-lane\.md|\.github/workflows/home-hero-slides-0905-02-preview\.yml)$' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "BLOCKED: unexpected files in visual candidate"
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+
+      - name: Validate slideshow contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/home-hero-slides.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const cfg = JSON.parse(fs.readFileSync('site/home-hero-slides.json', 'utf8'));
+          if (cfg.schemaVersion !== 1) throw new Error('Unexpected slideshow schemaVersion');
+          if (!Array.isArray(cfg.slides) || cfg.slides.length < 1) throw new Error('At least one slide is required');
+          const active = cfg.slides.filter((s) => s && s.active !== false);
+          if (!active.length) throw new Error('At least one active slide is required');
+          for (const slide of active) {
+            if (!slide.image || typeof slide.image !== 'string') throw new Error('Active slide missing image');
+            if (!slide.alt || typeof slide.alt !== 'string') throw new Error('Active slide missing alt text');
+          }
+          const first = active[0];
+          if (first.image !== '/assets/brand/storefront-wordmark.webp') {
+            throw new Error('Initial owner-approved storefront creative is not first active slide');
+          }
+          NODE
+          grep -q 'home-hero-slides.css?v=1.0.0' site/index.html
+          grep -q 'home-hero-slides.js?v=1.0.0' site/index.html
+          grep -q 'data-home-hero-slides' site/index.html
+          grep -q 'data-slides-src="/home-hero-slides.json"' site/index.html
+          ! grep -q '<section class="retail-hero"' site/index.html
+          test -f site/assets/brand/storefront-wordmark.webp
+          git diff --check
+
+      - name: Canonical committed-source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --exit-code
+
+      - name: Deploy isolated slideshow preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=home-hero-slides-0905-02-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Preview regression and slideshow smoke
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          npm run qa:preview -- "$base"
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'data-home-hero-slides' /tmp/home.html
+          grep -q '/home-hero-slides.json' /tmp/home.html
+          curl -sS -L --fail "$base/home-hero-slides.css?v=1.0.0" -o /tmp/slides.css
+          grep -q 'aspect-ratio:1640 / 624' /tmp/slides.css
+          curl -sS -L --fail "$base/home-hero-slides.js?v=1.0.0" -o /tmp/slides.js
+          grep -q 'data-home-hero-slides' /tmp/slides.js
+          curl -sS -L --fail "$base/home-hero-slides.json" -o /tmp/slides.json
+          node -e "const c=require('/tmp/slides.json'); if(!c.slides?.length) process.exit(1)"
+          code="$(curl -sS -L -o /tmp/wordmark.webp -w '%{http_code}' "$base/assets/brand/storefront-wordmark.webp")"
+          test "$code" = "200"
+          test -s /tmp/wordmark.webp
+
+      - name: Candidate immutability
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          test "$(git rev-parse HEAD)" = "${{ steps.lineage.outputs.candidate }}"
+
+      - name: Visual preview receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### HOME-HERO-SLIDES-0905-02 — PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Parent: $EXPECTED_PARENT" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: ${{ steps.lineage.outputs.candidate }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Creative: owner-approved storefront wordmark' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Format: 1640×624 landscape / Facebook-cover style' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Marketing rotation: data-driven from /home-hero-slides.json' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production promotion: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
