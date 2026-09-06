@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "editorNote": "Homepage marketing lane. Add, remove, reorder, or disable slide objects here without rewriting homepage HTML. Creative target: 1640x624 landscape / Facebook-cover style. Keep important text and logos inside the central safe area.",
+  "rotationMs": 8000,
+  "slides": [
+    {
+      "id": "storefront-identity-2026-09-05",
+      "active": true,
+      "image": "/assets/brand/storefront-wordmark.webp",
+      "alt": "Elevation UpScales Inc. — Off-Grid Power, Supply, Logistics",
+      "width": 2048,
+      "height": 682,
+      "fit": "contain",
+      "objectPosition": "center center",
+      "background": "#000000"
+    }
+  ]
+}
