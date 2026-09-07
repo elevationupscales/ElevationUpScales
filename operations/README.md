@@ -24,6 +24,8 @@ Email may still be used when the work itself requires reading or sending an actu
 
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery, Lithium Store, RV/Outdoor Store, Lower-48 ecommerce, Hawaii/Alaska specialized shipping, paid-order recovery, prepurchase, and freight-agreement operating rules.
 - [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — controlling specialized-logistics pricing architecture separating Elevation product-sale / supplier-referral sales from standalone third-party logistics facilitation, including shipment-size tiers, quote construction, route confidentiality, and protected-rate-card boundaries.
+- [`SUPPLIER_LOGISTICS_GROWTH.md`](./SUPPLIER_LOGISTICS_GROWTH.md) — supplier/commercial lead model covering dealer/wholesale, dropship, product sourcing, Hawaii/Alaska fulfillment, supplier referrals, and third-party logistics opportunity qualification.
+- [`COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md`](./COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md) — public-safe deployment contract for adding Supplier / Commercial Leads to the existing Command Center Leads area while preserving the existing customer/Solar leads subsystem and protected-data boundaries.
 - [`shopify-manager/SHOPIFY_MANAGER.md`](./shopify-manager/SHOPIFY_MANAGER.md) — dedicated Shopify / Shopify POS / Doba / SOK ecommerce management lane for Peter Torres and the Shopify Manager.
 
 ## Public-repository protection
@@ -43,13 +45,13 @@ The active repository SOP may reference the existence or status of protected evi
 
 ## Worker rule
 
-Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alaska, purchase-agreement, fulfillment, specialized-logistics pricing, or management behavior:
+Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alaska, purchase-agreement, fulfillment, specialized-logistics pricing, supplier/commercial lead behavior, or management behavior:
 
 1. read this file;
-2. read the applicable `/operations/` SOP or manager file;
+2. read the applicable `/operations/` SOP, growth model, deployment contract, or manager file;
 3. read the logistics pricing model when pricing or quoting is involved;
-4. inspect current application source when website behavior is involved;
-5. preserve protected pricing/MAP, payment, safety, customer-data and compliance boundaries;
+4. inspect current application source when website or Command Center behavior is involved;
+5. preserve protected pricing/MAP, payment, safety, customer-data, supplier-data and compliance boundaries;
 6. do not use Gmail-era management records as an active source;
 7. reconcile any new verified operational fact or owner direction into the appropriate GitHub operations record when it materially changes current work.
 
