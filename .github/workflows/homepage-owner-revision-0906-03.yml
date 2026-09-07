@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Apply owner logistics headline correction
+      - name: Apply owner logistics-first copy correction
         shell: bash
         run: |
           set -euo pipefail
@@ -29,12 +29,27 @@ jobs:
           from pathlib import Path
           p = Path('site/index.html')
           s = p.read_text()
-          old = '<h1 id="reference-flagship-title">Lithium Energy<br><span>for RV Life.</span></h1>'
-          new = '<h1 id="reference-flagship-title">Lithium Energy Supply<br><span>And Shipping Logistics</span></h1>'
-          if old in s:
-              p.write_text(s.replace(old, new, 1))
-          elif new not in s:
-              raise SystemExit('expected hero headline state not found')
+          replacements = {
+            '<p class="reference-storefront-hero__eyebrow">RV BATTERY SUPPLY <span aria-hidden="true">|</span> AUTHORIZED SOK ENERGY DEALER</p>':
+              '<p class="reference-storefront-hero__eyebrow">LITHIUM BATTERY SUPPLY <span aria-hidden="true">|</span> HAWAII &amp; ALASKA SHIPPING LOGISTICS</p>',
+            '<h1 id="reference-flagship-title">Lithium Energy<br><span>for RV Life.</span></h1>':
+              '<h1 id="reference-flagship-title">Lithium Energy Supply<br><span>And Shipping Logistics</span></h1>',
+            '<p class="reference-storefront-hero__lead"><strong>RV batteries are our primary product focus.</strong> Shop SOK lithium systems with clear purchase options, system support and destination logistics for RV, solar, backup power and harder-to-serve markets.</p>':
+              '<p class="reference-storefront-hero__lead"><strong>Battery shipping to Hawaii and Alaska is a core Elevation focus.</strong> Lithium energy supply, SOK purchase options and destination logistics for RV, solar, backup power, commercial systems and harder-to-serve markets.</p>',
+            '>Shop RV Batteries <span aria-hidden="true">→</span></a>':
+              '>Explore Power Solutions <span aria-hidden="true">→</span></a>',
+            '<span>RV<br>Batteries</span>':
+              '<span>Lithium<br>Batteries</span>',
+          }
+          changed = False
+          for old, new in replacements.items():
+            if old in s:
+              s = s.replace(old, new, 1)
+              changed = True
+            elif new not in s:
+              raise SystemExit(f'expected copy state not found: {old[:80]}')
+          if changed:
+            p.write_text(s)
           PY
       - name: Validate exact candidate
         shell: bash
@@ -43,7 +58,14 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 9b9f8c62378b2a085e9849dca8e7fd53c04bfa28 HEAD
           npm run qa
+          grep -q 'LITHIUM BATTERY SUPPLY' site/index.html
+          grep -q 'HAWAII &amp; ALASKA SHIPPING LOGISTICS' site/index.html
           grep -q 'Lithium Energy Supply<br><span>And Shipping Logistics</span>' site/index.html
+          grep -q 'Battery shipping to Hawaii and Alaska is a core Elevation focus.' site/index.html
+          grep -q 'Explore Power Solutions' site/index.html
+          ! grep -q 'RV batteries are our primary product focus.' site/index.html
+          ! grep -q 'Shop RV Batteries' site/index.html
+          ! grep -q 'for RV Life.' site/index.html
           grep -q 'Power supply does not stop at the shoreline.' site/index.html
           grep -q 'Premium SOK Energy Products' site/index.html
           test -s site/assets/hero/hawaii-ocean-freight-v1.webp
@@ -80,7 +102,9 @@ jobs:
             await page.waitForSelector('[data-home-products="lithium"] .home-product-card',{timeout:20000});
             const state=await page.evaluate(()=>({
               title:document.querySelector('#reference-flagship-title')?.innerText.trim(),
+              eyebrow:document.querySelector('.reference-storefront-hero__eyebrow')?.innerText.trim(),
               lead:document.querySelector('.reference-storefront-hero__lead')?.innerText.trim(),
+              primary:document.querySelector('.reference-storefront-hero__primary')?.innerText.trim(),
               partnership:document.querySelector('.reference-sok-partnership')?.innerText.trim(),
               solutions:document.querySelectorAll('.reference-solution-card').length,
               slides:document.querySelectorAll('.home-hero-slide').length,
@@ -90,7 +114,10 @@ jobs:
               footerLinks:document.querySelectorAll('.reference-footer a').length,
               overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
             }));
-            if(state.title!=='Lithium Energy Supply\nAnd Shipping Logistics'||!state.lead.startsWith('RV batteries are our primary product focus.')) throw new Error(`hero mismatch ${JSON.stringify(state)}`);
+            if(state.title!=='Lithium Energy Supply\nAnd Shipping Logistics') throw new Error(`headline mismatch ${JSON.stringify(state)}`);
+            if(!state.eyebrow.includes('LITHIUM BATTERY SUPPLY')||!state.eyebrow.includes('HAWAII & ALASKA SHIPPING LOGISTICS')) throw new Error(`eyebrow mismatch ${JSON.stringify(state)}`);
+            if(!state.lead.startsWith('Battery shipping to Hawaii and Alaska is a core Elevation focus.')) throw new Error(`lead mismatch ${JSON.stringify(state)}`);
+            if(!state.primary.startsWith('EXPLORE POWER SOLUTIONS')) throw new Error(`cta mismatch ${JSON.stringify(state)}`);
             if(!state.partnership.toLowerCase().includes('premium sok energy products')||state.solutions!==7||state.slides<8) throw new Error(`merchandising mismatch ${JSON.stringify(state)}`);
             if(/real support|real person/.test(state.support.toLowerCase())||!state.support.toLowerCase().includes('support')) throw new Error(`support wording mismatch ${JSON.stringify(state)}`);
             if(state.lithium<4||state.rv<4||state.footerLinks<12||state.overflow>1) throw new Error(`layout/catalog mismatch ${JSON.stringify(state)}`);
@@ -111,6 +138,8 @@ jobs:
           curl -fsSL "$base/" -o /tmp/home.html
           grep -q 'Lithium Energy Supply' /tmp/home.html
           grep -q 'And Shipping Logistics' /tmp/home.html
+          grep -q 'Hawaii and Alaska is a core Elevation focus' /tmp/home.html
+          ! grep -q 'RV batteries are our primary product focus' /tmp/home.html
           curl -fsSL "$base/home-hero-slides.json?v=1.2.0" -o /tmp/slides.json
           test "$(jq '[.slides[]|select(.active==true)]|length' /tmp/slides.json)" -ge 8
           npm run qa:preview -- "$base"
@@ -118,12 +147,13 @@ jobs:
         env:
           BASE: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo '### HOMEPAGE OWNER REVISION — PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '### HOMEPAGE OWNER REVISION — LOGISTICS-FIRST PREVIEW PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
-          echo 'Hero copy: Lithium Energy Supply And Shipping Logistics' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hero: Lithium Energy Supply And Shipping Logistics' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Positioning: lithium battery supply + Hawaii/Alaska shipping logistics' >> "$GITHUB_STEP_SUMMARY"
           echo 'Desktop and mobile homepage checks passed. Production unchanged.' >> "$GITHUB_STEP_SUMMARY"
-      - name: Persist owner headline correction
+      - name: Persist owner logistics-first copy correction
         shell: bash
         run: |
           set -euo pipefail
@@ -133,5 +163,5 @@ jobs:
           git config user.name 'elevationupscales'
           git config user.email 'caseymyoung@gmail.com'
           git add site/index.html
-          git commit -m 'fix(home): restore logistics hero copy'
+          git commit -m 'fix(home): restore logistics-first owner copy'
           git push origin HEAD:work/homepage-owner-revision-0906-03
