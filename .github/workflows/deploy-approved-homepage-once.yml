@@ -1,0 +1,117 @@
+name: One-shot approved homepage production deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-approved-homepage-once.yml'
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-pages-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.event.head_commit.message == 'ops: one-shot production deploy approved homepage'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Validate approved production source
+        run: |
+          set -euo pipefail
+          for file in \
+            site/index.html site/_worker.js site/_routes.json \
+            site/admin.html site/admin-command-center.js site/admin-overview.js \
+            site/admin-catalog.html site/admin-products-final.js site/admin-inventory.html \
+            site/admin-channels.html site/admin-channels.js site/admin-system.html site/admin-system.js \
+            site/admin-store-orders.html site/admin-lithium-shipping.html site/admin-analytics.html \
+            site/sync-admin-runtime.js site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js \
+            site/store.html site/rv-store.html site/rv-store.js site/rv-ebay-catalog.js \
+            site/lithium-batteries.html site/hawaii-lithium-batteries.html site/checkout/index.html \
+            site/start-a-project.html site/solar-project.html; do
+            test -f "$file"
+          done
+          grep -q 'Products & Listings' site/admin-catalog.html
+          grep -q 'Channels & Sync' site/admin-channels.html
+          grep -q 'System / QA' site/admin-system.html
+          grep -q 'Shipping & Logistics' site/admin-lithium-shipping.html
+          grep -q '/api/admin/sync' site/_worker.js
+          grep -q '/api/sync/run' site/_worker.js
+          grep -q '/sync-admin-runtime.js' site/_routes.json
+          grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
+          grep -q 'elevation-catalog' site/rv-store.js
+          ! grep -q 'fallbackCatalog' site/rv-store.js
+          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/hawaii-lithium-batteries.html
+          grep -q 'Secure checkout' site/checkout/index.html
+          grep -q 'Stage 1 of 7' site/solar-project.html
+          grep -q '208-813-4998' site/index.html
+          grep -q 'Lithium Power Solutions' site/index.html
+          grep -q 'Supply Logistics &amp; Ocean Freight' site/index.html
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
+          git diff --check
+      - name: Block secrets and oversized artifacts
+        run: |
+          set -euo pipefail
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          ! grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke deployed application
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /store /rv-store /marketplace /lithium-batteries /hawaii-lithium-batteries /checkout /start-a-project /solar-project /admin /admin-catalog /admin-inventory /admin-channels /admin-store-orders /admin-lithium-shipping /admin-analytics /admin-system; do
+            code=$(curl -sS -L --retry 6 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/" -o /tmp/home.html
+          grep -q 'Lithium Power Solutions' /tmp/home.html
+          grep -q 'Supply Logistics &amp; Ocean Freight' /tmp/home.html
+          curl -sS -L --fail "$base/admin-catalog" -o /tmp/admin-catalog.html
+          grep -q 'Products & Listings' /tmp/admin-catalog.html
+          curl -sS -L --fail "$base/admin-channels" -o /tmp/admin-channels.html
+          grep -q 'Channels & Sync' /tmp/admin-channels.html
+          curl -sS -L --fail "$base/admin-system" -o /tmp/admin-system.html
+          grep -q 'System / QA' /tmp/admin-system.html
+          curl -sS -L --fail "$base/rv-store.js" -o /tmp/rv-store.js
+          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
+          sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
+          scheduler_code=$(curl -sS -o /tmp/scheduled.json -w '%{http_code}' -X POST "$base/api/sync/run" -H 'Content-Type: application/json' --data '{"target":"all","runId":"deploy-gate-unauthorized"}' || true)
+          runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
+          echo "protected /api/admin/sync=$sync_code"
+          echo "protected /api/sync/run=$scheduler_code"
+          echo "protected /sync-admin-runtime.js=$runtime_code"
+          test "$sync_code" != "200"
+          test "$scheduler_code" != "200"
+          test "$runtime_code" != "200"
+      - name: Receipt
+        run: |
+          echo '### Elevation Pages deployment — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Target: production' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
