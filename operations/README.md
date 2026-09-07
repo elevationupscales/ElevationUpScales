@@ -17,6 +17,23 @@ For current operational work:
 
 Do not reconstruct current policy from old Gmail drafts, old management feeds, prior chat summaries, or historical coordination files when a current operations file exists.
 
+## Manager Git access directive
+
+Managers and manager-linked ChatGPT workspaces may use GitHub to stay synchronized with current Elevation operating information, subject to the following restricted access boundary:
+
+- The designated manager control file is `/operations/README.md`.
+- Managers may **read** the designated manager control file at start/resume and whenever current operating direction may have changed.
+- Managers may **edit only `/operations/README.md`** for management-control updates, cross-manager status notes, source-of-truth pointers, or owner-directed management directives.
+- Manager access does **not** authorize edits to application code, workflows, deployment files, SOPs, pricing models, historical coordination records, or any other repository file.
+- Managers may read other `/operations/` documents that `/operations/README.md` identifies as controlling references when needed to understand current policy, but those documents remain read-only to manager chats unless Casey explicitly grants a separate named write scope.
+- Any repository write outside `/operations/README.md` requires a separate owner-authorized work item and the appropriate worker/deployment lane.
+- This restriction applies even when the connected GitHub account technically has broader repository permissions.
+- Public-repository protection rules remain controlling: never place supplier costs, raw inventory, private correspondence, customer data, credentials, private carrier quotes, non-public compliance packets, or private commercial terms in the manager file.
+
+Manager operating sequence:
+
+**READ `/operations/README.md` → FOLLOW ITS CURRENT CONTROL POINTERS → RECONCILE OWNER DIRECTION → UPDATE `/operations/README.md` ONLY WHEN MANAGEMENT STATE MATERIALLY CHANGES → LEAVE ALL OTHER REPOSITORY WRITES TO THE AUTHORIZED WORKER LANE.**
+
 ## Current controlling SOP
 
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery, Lithium Store, RV/Outdoor Store, Lower-48 ecommerce, Hawaii/Alaska specialized shipping, paid-order recovery, prepurchase, and freight-agreement operating rules.
