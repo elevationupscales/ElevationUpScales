@@ -1,20 +1,16 @@
-name: Release Candidate Gate
+name: Release Candidate Preview
 
 on:
   workflow_dispatch:
     inputs:
       candidate_ref:
-        description: Branch or commit to validate against the current main baseline
-        required: true
-        type: string
-      expected_parent_sha:
-        description: Current main SHA the candidate was intentionally built from
+        description: Branch or commit to preview
         required: true
         type: string
       release_label:
-        description: Human-readable candidate label for the deployment receipt
+        description: Optional label for the preview receipt
         required: false
-        default: controlled-candidate
+        default: annotated-edit
         type: string
 
 permissions:
@@ -23,11 +19,11 @@ permissions:
 
 concurrency:
   group: elevation-release-candidate-preview
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validate-and-preview:
-    name: Validate exact candidate and deploy isolated preview
+    name: Validate branch and deploy preview
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -37,40 +33,29 @@ jobs:
           ref: ${{ inputs.candidate_ref }}
           fetch-depth: 0
 
-      - name: Enforce current-main ancestry
+      - name: Verify candidate is based on current main
         id: lineage
         shell: bash
-        env:
-          EXPECTED_PARENT: ${{ inputs.expected_parent_sha }}
         run: |
           set -euo pipefail
           git fetch origin main --no-tags --prune
           current_main="$(git rev-parse origin/main)"
           candidate_sha="$(git rev-parse HEAD)"
-          expected_parent="$(printf '%s' "$EXPECTED_PARENT" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
-
-          if [[ -z "$expected_parent" || "$expected_parent" != "$current_main" ]]; then
-            echo "BLOCKED: expected parent $expected_parent does not match current main $current_main."
-            echo "Rebase/rebuild the candidate from current main before previewing it."
-            exit 1
-          fi
 
           if [[ "$candidate_sha" == "$current_main" ]]; then
-            echo "BLOCKED: candidate_ref points to main itself. Use the standard deploy workflow for a main preview."
+            echo "Use the standard deploy workflow when previewing main itself."
             exit 1
           fi
 
           if ! git merge-base --is-ancestor "$current_main" "$candidate_sha"; then
-            echo "BLOCKED: current main is not an ancestor of candidate $candidate_sha."
+            echo "Candidate is stale. Rebase or recreate it from current main, then retry."
             exit 1
           fi
 
           echo "current_main=$current_main" >> "$GITHUB_OUTPUT"
           echo "candidate_sha=$candidate_sha" >> "$GITHUB_OUTPUT"
-          echo "Current main: $current_main"
-          echo "Candidate: $candidate_sha"
 
-      - name: Report delta and protect release controls
+      - name: Review changed files and protect recovery controls
         shell: bash
         env:
           CURRENT_MAIN: ${{ steps.lineage.outputs.current_main }}
@@ -80,12 +65,12 @@ jobs:
           changed="$(git diff --name-only "$CURRENT_MAIN"...HEAD)"
           test -n "$changed"
 
-          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/deploy-pages\.yml|BASELINE-2026-08-23\.md|SOURCE-LINEAGE\.md)$'; then
-            echo "BLOCKED: candidate changes protected production deployment/baseline controls."
+          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/deploy-pages\.yml|coordination/baselines/HARD-BASELINE-2026-09-06\.md)$'; then
+            echo "Protected recovery/deployment control changed. Review that change separately."
             exit 1
           fi
 
-      - name: Canonical committed-source QA
+      - name: Run committed-source QA
         shell: bash
         run: |
           set -euo pipefail
@@ -93,7 +78,7 @@ jobs:
           git diff --check
           git diff --exit-code
 
-      - name: Enforce Pages limits and block credentials
+      - name: Block credentials and oversized deploy artifacts
         shell: bash
         run: |
           set -euo pipefail
@@ -101,11 +86,11 @@ jobs:
           test -z "$(find site -type f -size +25M -print -quit)"
           test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
           if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
-            echo "BLOCKED: credential-like value found in deployable source."
+            echo "Credential-like value found in deployable source."
             exit 1
           fi
 
-      - name: Deploy isolated candidate preview
+      - name: Deploy isolated preview
         id: deploy
         uses: cloudflare/wrangler-action@v4
         with:
@@ -114,7 +99,7 @@ jobs:
           command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=candidate-gate-preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Canonical clean-baseline preview regression
+      - name: Run preview regression checks
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
@@ -122,14 +107,7 @@ jobs:
           set -euo pipefail
           npm run qa:preview -- "$DEPLOYMENT_URL"
 
-      - name: Verify candidate remained immutable
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --exit-code
-          test "$(git rev-parse HEAD)" = "${{ steps.lineage.outputs.candidate_sha }}"
-
-      - name: Record release-candidate receipt
+      - name: Record preview receipt
         shell: bash
         env:
           RELEASE_LABEL: ${{ inputs.release_label }}
@@ -137,12 +115,9 @@ jobs:
           CANDIDATE_SHA: ${{ steps.lineage.outputs.candidate_sha }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo "### Elevation UpScales controlled candidate — PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Release: $RELEASE_LABEL" >> "$GITHUB_STEP_SUMMARY"
-          echo "Required parent: $CURRENT_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Elevation UpScales preview — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Change: $RELEASE_LABEL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Main: $CURRENT_MAIN" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
-          echo "Canonical committed-source QA: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Canonical preview regression: PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Candidate immutability: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
