@@ -14,6 +14,7 @@ concurrency:
   group: elevation-pages-production
   cancel-in-progress: false
 
+# Retry after synchronizing the stale homepage wording assertion in analytics QA.
 jobs:
   validate:
     runs-on: ubuntu-latest
