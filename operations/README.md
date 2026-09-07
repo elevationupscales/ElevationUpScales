@@ -20,6 +20,7 @@ Do not reconstruct current policy from old Gmail drafts, old management feeds, p
 ## Current controlling SOP
 
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery, Lithium Store, RV/Outdoor Store, Lower-48 ecommerce, Hawaii/Alaska specialized shipping, paid-order recovery, prepurchase, and freight-agreement operating rules.
+- [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — controlling specialized-logistics pricing architecture separating Elevation product-sale / supplier-referral sales from standalone third-party logistics facilitation, including shipment-size tiers, quote construction, route confidentiality, and protected-rate-card boundaries.
 
 ## Public-repository protection
 
@@ -38,12 +39,13 @@ The active repository SOP may reference the existence of protected supplier evid
 
 ## Worker rule
 
-Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alaska, purchase-agreement, or fulfillment behavior:
+Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alaska, purchase-agreement, fulfillment, or specialized-logistics pricing behavior:
 
 1. read this file;
 2. read the applicable operations SOP;
-3. inspect current application source;
-4. preserve protected pricing/MAP, payment, safety, customer-data and compliance boundaries;
-5. do not revive a conflicting Gmail-era rule unless Casey explicitly directs it.
+3. read the logistics pricing model when pricing or quoting is involved;
+4. inspect current application source;
+5. preserve protected pricing/MAP, payment, safety, customer-data and compliance boundaries;
+6. do not revive a conflicting Gmail-era rule unless Casey explicitly directs it.
 
 Operational complexity should remain behind the customer experience wherever possible.
