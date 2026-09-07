@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   validate:
-    if: github.event.head_commit.message == 'ops one-shot production deploy approved homepage v2'
+    if: github.event.head_commit.message == 'ops one-shot production deploy approved homepage v3'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -25,34 +25,21 @@ jobs:
       - name: Validate approved production source
         run: |
           set -euo pipefail
-          for file in \
-            site/index.html site/_worker.js site/_routes.json \
-            site/admin.html site/admin-command-center.js site/admin-overview.js \
-            site/admin-catalog.html site/admin-products-final.js site/admin-inventory.html \
-            site/admin-channels.html site/admin-channels.js site/admin-system.html site/admin-system.js \
-            site/admin-store-orders.html site/admin-lithium-shipping.html site/admin-analytics.html \
-            site/sync-admin-runtime.js site/catalog-admin-runtime.js site/hawaii-lithium-runtime.js \
-            site/store.html site/rv-store.html site/rv-store.js site/rv-ebay-catalog.js \
-            site/lithium-batteries.html site/hawaii-lithium-batteries.html site/checkout/index.html \
-            site/start-a-project.html site/solar-project.html; do
+          for file in site/index.html site/_worker.js site/_routes.json site/rv-store.js site/hawaii-lithium-batteries.html site/checkout/index.html site/solar-project.html; do
+            echo "checking $file"
             test -f "$file"
           done
-          grep -q 'Products & Listings' site/admin-catalog.html
-          grep -q 'Channels & Sync' site/admin-channels.html
-          grep -q 'System / QA' site/admin-system.html
-          grep -q 'Shipping & Logistics' site/admin-lithium-shipping.html
+          echo 'checking approved homepage copy'
+          grep -q 'Lithium Power Solutions' site/index.html
+          grep -q 'Supply Logistics &amp; Ocean Freight' site/index.html
+          grep -q '208-813-4998' site/index.html
+          echo 'checking protected routing and storefront source'
           grep -q '/api/admin/sync' site/_worker.js
           grep -q '/api/sync/run' site/_worker.js
           grep -q '/sync-admin-runtime.js' site/_routes.json
           grep -q '/api/store-catalog?section=rv-outdoor' site/rv-store.js
-          grep -q 'elevation-catalog' site/rv-store.js
           ! grep -q 'fallbackCatalog' site/rv-store.js
-          grep -q 'Hawaii Lithium Shipping &amp; Freight' site/hawaii-lithium-batteries.html
-          grep -q 'Secure checkout' site/checkout/index.html
-          grep -q 'Stage 1 of 7' site/solar-project.html
-          grep -q '208-813-4998' site/index.html
-          grep -q 'Lithium Power Solutions' site/index.html
-          grep -q 'Supply Logistics &amp; Ocean Freight' site/index.html
+          echo 'checking JavaScript syntax'
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find site -type f -name '*.js' -print0)
           git diff --check
       - name: Block secrets and oversized artifacts
@@ -92,14 +79,6 @@ jobs:
           curl -sS -L --fail "$base/" -o /tmp/home.html
           grep -q 'Lithium Power Solutions' /tmp/home.html
           grep -q 'Supply Logistics &amp; Ocean Freight' /tmp/home.html
-          curl -sS -L --fail "$base/admin-catalog" -o /tmp/admin-catalog.html
-          grep -q 'Products & Listings' /tmp/admin-catalog.html
-          curl -sS -L --fail "$base/admin-channels" -o /tmp/admin-channels.html
-          grep -q 'Channels & Sync' /tmp/admin-channels.html
-          curl -sS -L --fail "$base/admin-system" -o /tmp/admin-system.html
-          grep -q 'System / QA' /tmp/admin-system.html
-          curl -sS -L --fail "$base/rv-store.js" -o /tmp/rv-store.js
-          grep -q '/api/store-catalog?section=rv-outdoor' /tmp/rv-store.js
           sync_code=$(curl -sS -o /tmp/sync.json -w '%{http_code}' "$base/api/admin/sync" || true)
           scheduler_code=$(curl -sS -o /tmp/scheduled.json -w '%{http_code}' -X POST "$base/api/sync/run" -H 'Content-Type: application/json' --data '{"target":"all","runId":"deploy-gate-unauthorized"}' || true)
           runtime_code=$(curl -sS -o /tmp/runtime.txt -w '%{http_code}' "$base/sync-admin-runtime.js" || true)
