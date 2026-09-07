@@ -1,0 +1,32 @@
+name: Verify production homepage once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-production-homepage-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event.head_commit.message == 'ops verify production homepage once'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify custom production domain
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 18); do
+            url="https://elevationupscales.com/?deploy_verify=${GITHUB_SHA}-${attempt}"
+            code=$(curl -sS -L --retry 3 --retry-all-errors --retry-delay 2 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -o /tmp/home.html -w '%{http_code}' "$url" || true)
+            echo "attempt=$attempt status=$code"
+            if [ "$code" = "200" ] && grep -q 'Lithium Power Solutions' /tmp/home.html && grep -q 'Supply Logistics &amp; Ocean Freight' /tmp/home.html && grep -q '208-813-4998' /tmp/home.html; then
+              echo 'Production custom domain serves the approved homepage.'
+              exit 0
+            fi
+            grep -Eo 'Lithium (Power Solutions|Energy Supply)' /tmp/home.html | head -1 || true
+            sleep 5
+          done
+          echo 'Production custom domain did not serve approved homepage within verification window.'
+          exit 1
