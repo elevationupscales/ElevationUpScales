@@ -2,6 +2,27 @@
  * Scoped to the current homepage. Visual changes only; commerce, routing and runtime logic unchanged.
  */
 
+/* Resilient storefront brand treatment: show the approved storefront wordmark
+ * whether the runtime shell supplies text or an older/broken image node. */
+.reference-storefront-home .eus-brand{
+  position:relative;
+  width:235px!important;
+  min-width:235px!important;
+  max-width:235px!important;
+  min-height:60px;
+  overflow:hidden;
+}
+.reference-storefront-home .eus-brand>.reference-header-brand-text,
+.reference-storefront-home .eus-brand>img.reference-header-wordmark{
+  display:none!important;
+}
+.reference-storefront-home .eus-brand::before{
+  content:"";
+  display:block;
+  width:100%;
+  height:58px;
+  background:url('/assets/brand/storefront-wordmark.webp') left center/contain no-repeat;
+}
 .reference-storefront-home .reference-header-brand-text{
   display:grid;
   align-content:center;
@@ -27,12 +48,14 @@
   letter-spacing:.14em;
   text-transform:uppercase;
 }
-.reference-storefront-home .eus-brand{
-  width:235px!important;
-  min-width:235px!important;
-  max-width:235px!important;
-}
 
+/* Slightly open the hero overlay so the Hawaii scene reads more clearly. */
+.reference-storefront-hero__scene{
+  background:
+    linear-gradient(90deg,rgba(0,5,9,.94) 0%,rgba(0,8,13,.84) 29%,rgba(2,15,23,.3) 58%,rgba(0,6,10,.42) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.01),rgba(0,6,10,.18) 64%,rgba(0,6,10,.78)),
+    url('/assets/hero/storefront-tropical-logistics-v3.webp') center 44%/cover no-repeat!important;
+}
 .reference-storefront-hero h1{
   max-width:760px!important;
   font-size:clamp(3rem,4.65vw,4.7rem)!important;
@@ -80,32 +103,34 @@
   transform:translateY(-1px);
 }
 
+/* Move the SOK relationship mark up and make the verified product pair the visual center. */
 .reference-sok-brand{
-  top:14px!important;
+  top:-8px!important;
   left:50%!important;
-  width:min(455px,58%)!important;
+  width:min(470px,60%)!important;
   transform:translateX(-50%)!important;
 }
 .reference-sok-partnership{
-  top:112px!important;
+  top:78px!important;
   left:50%!important;
-  width:min(455px,64%)!important;
+  width:min(500px,68%)!important;
   transform:translateX(-50%);
   font-size:.62rem!important;
   letter-spacing:.11em!important;
 }
 .reference-product--12v{
-  left:-1%!important;
-  bottom:8px!important;
-  width:52.8%!important;
-  height:56%!important;
+  left:0!important;
+  bottom:-4px!important;
+  width:55%!important;
+  height:62%!important;
 }
 .reference-product--48v{
-  right:-2%!important;
-  bottom:0!important;
-  width:53.6%!important;
-  height:60%!important;
+  right:-1%!important;
+  bottom:-6px!important;
+  width:56%!important;
+  height:66%!important;
 }
+.reference-authorized{display:none!important}
 
 .reference-trust-strip{
   gap:0;
@@ -138,6 +163,48 @@
   margin-top:5px!important;
   color:#adc3cd!important;
   font-size:.7rem!important;
+}
+
+/* Owner wording: Lithium Power Solutions. Remove the decorative rail slogan entirely. */
+.reference-solutions h2{
+  font-size:0!important;
+  white-space:nowrap;
+}
+.reference-solutions h2::before{
+  content:"Lithium Power ";
+  color:#fff;
+  font-size:clamp(2rem,3vw,2.8rem);
+  line-height:.95;
+  letter-spacing:-.04em;
+}
+.reference-solutions h2::after{
+  content:"Solutions";
+  color:var(--ref-cyan);
+  font-size:clamp(2rem,3vw,2.8rem);
+  line-height:.95;
+  letter-spacing:-.04em;
+}
+.reference-solutions__rail{
+  grid-template-columns:1fr auto!important;
+}
+.reference-solutions__rail>span{display:none!important}
+
+/* Owner wording for the fourth logistics checkpoint. */
+.reference-storefront-home .retail-logistics__path span:nth-child(4){
+  display:flex!important;
+  flex-direction:column;
+  justify-content:center;
+  font-size:0!important;
+}
+.reference-storefront-home .retail-logistics__path span:nth-child(4) b{
+  font-size:.68rem!important;
+}
+.reference-storefront-home .retail-logistics__path span:nth-child(4)::after{
+  content:"Tracking Info";
+  font-size:.72rem;
+  line-height:1.15;
+  font-weight:800;
+  text-transform:uppercase;
 }
 
 .reference-storefront-home .retail-logistics__copy h2{
@@ -210,21 +277,21 @@
 
 @media(max-width:1050px){
   .reference-usecases{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-  .reference-sok-brand{width:min(420px,54%)!important}
-  .reference-sok-partnership{width:min(420px,58%)!important}
+  .reference-sok-brand{width:min(430px,56%)!important}
+  .reference-sok-partnership{width:min(450px,62%)!important}
 }
 @media(max-width:760px){
-  .reference-storefront-home .eus-brand{width:190px!important;min-width:190px!important;max-width:190px!important}
-  .reference-storefront-home .reference-header-brand-text strong{font-size:1.42rem}
-  .reference-storefront-home .reference-header-brand-text b{font-size:.9rem}
-  .reference-storefront-home .reference-header-brand-text small{font-size:.38rem}
+  .reference-storefront-home .eus-brand{width:190px!important;min-width:190px!important;max-width:190px!important;min-height:52px}
+  .reference-storefront-home .eus-brand::before{height:50px}
   .reference-storefront-hero h1{font-size:clamp(2.55rem,12vw,3.8rem)!important}
   .reference-usecases{grid-template-columns:1fr 1fr!important}
-  .reference-sok-brand{top:2px!important;left:50%!important;width:235px!important}
-  .reference-sok-partnership{top:66px!important;left:50%!important;width:260px!important;font-size:.48rem!important}
-  .reference-product--12v{left:-2%!important;width:50%!important;height:56%!important}
-  .reference-product--48v{right:-2%!important;width:55%!important;height:60%!important}
+  .reference-sok-brand{top:-4px!important;left:50%!important;width:245px!important}
+  .reference-sok-partnership{top:58px!important;left:50%!important;width:280px!important;font-size:.48rem!important}
+  .reference-product--12v{left:-1%!important;width:52%!important;height:59%!important;bottom:-2px!important}
+  .reference-product--48v{right:-1%!important;width:56%!important;height:63%!important;bottom:-4px!important}
   .reference-trust-strip__item{padding:14px 20px!important}
   .reference-trust-strip__item::before{left:20px}
   .reference-storefront-home .retail-feature-band__copy{padding:26px!important}
+  .reference-solutions h2::before,
+  .reference-solutions h2::after{font-size:clamp(1.8rem,9vw,2.55rem)}
 }
