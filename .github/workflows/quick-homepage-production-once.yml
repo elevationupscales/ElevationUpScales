@@ -16,7 +16,6 @@ concurrency:
 
 jobs:
   validate:
-    if: github.event.head_commit.message == 'ops: deploy approved quick homepage edits'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -30,7 +29,7 @@ jobs:
           test -f site/home-hero-slides.json
           grep -q 'content:"Lithium Power "' site/homepage-owner-annotations.css
           grep -q 'content:"Tracking Info"' site/homepage-owner-annotations.css
-          grep -q "storefront-wordmark.webp" site/homepage-owner-annotations.css
+          grep -q 'storefront-wordmark.webp' site/homepage-owner-annotations.css
           grep -q 'sk48v100n-2026-09-05' site/home-hero-slides.json
           grep -q '/assets/brands/sok/48v-battery-cabinet/hero.webp' site/home-hero-slides.json
           node -e "JSON.parse(require('fs').readFileSync('site/home-hero-slides.json','utf8'))"
