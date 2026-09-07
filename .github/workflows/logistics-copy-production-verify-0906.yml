@@ -1,0 +1,33 @@
+name: LOGISTICS-COPY-PRODUCTION-VERIFY-0906
+
+on:
+  push:
+    branches:
+      - diagnostic/logistics-copy-production-verify-0906
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Inspect protected and public production responses
+        shell: bash
+        run: |
+          set -euo pipefail
+          for base in https://62219757.elevationupscales.pages.dev https://elevationupscales.com; do
+            echo "BASE=$base"
+            for route in /api/admin/overview /sync-admin-runtime.js; do
+              code=$(curl -sS -L --retry 3 --retry-all-errors -o /tmp/body.txt -w '%{http_code}' "$base$route" || true)
+              echo "$route HTTP=$code bytes=$(wc -c </tmp/body.txt)"
+              head -c 300 /tmp/body.txt | tr '\n' ' ' || true
+              echo
+            done
+            curl -fsSL "$base/?verify=logistics-copy-0906-$(date +%s)" -o /tmp/home.html
+            grep -q 'Lithium Energy Supply' /tmp/home.html
+            grep -q 'And Shipping Logistics' /tmp/home.html
+            grep -q 'Battery shipping to Hawaii and Alaska is a core Elevation focus.' /tmp/home.html
+            ! grep -q 'RV batteries are our primary product focus.' /tmp/home.html
+          done
