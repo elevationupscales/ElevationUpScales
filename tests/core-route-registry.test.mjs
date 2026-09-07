@@ -5,7 +5,7 @@ import {
   matchCoreRoute,
 } from "../src/core-route-registry.js";
 
-assert.equal(CORE_ROUTE_REGISTRY.length, 37);
+assert.equal(CORE_ROUTE_REGISTRY.length, 38);
 
 assert.equal(matchCoreRoute("/api/health")?.handler, "handleHealth");
 assert.equal(
@@ -28,6 +28,10 @@ assert.equal(
   matchCoreRoute("/api/admin/listings/abc")?.handler,
   "handleAdminListings",
 );
+assert.equal(
+  matchCoreRoute("/api/admin/supplier-leads/sup_1/action")?.handler,
+  "handleAdminSupplierLeads",
+);
 assert.deepEqual(
   {
     domain: matchCoreRoute("/api/store-products")?.domain,
@@ -45,6 +49,7 @@ for (const required of [
   "admin-auth",
   "analytics",
   "leads",
+  "supplier-leads",
   "marketplace",
   "inventory",
   "solar",

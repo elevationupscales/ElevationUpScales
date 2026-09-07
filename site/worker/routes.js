@@ -18,6 +18,7 @@ export const ADMIN_LISTINGS_PATH = "/api/admin/listings";
 export const ADMIN_MARKETPLACE_ISSUES_PATH = "/api/admin/marketplace-issues";
 export const ADMIN_OPERATIONS_PATH = "/api/admin/operations";
 export const ADMIN_LEADS_PATH = "/api/admin/leads";
+export const ADMIN_SUPPLIER_LEADS_PATH = "/api/admin/supplier-leads";
 export const ADMIN_MARKETPLACE_FOLLOWUPS_PATH = "/api/admin/marketplace-followups";
 export const ADMIN_QA_TOKEN_PATH = "/api/admin/qa-token";
 export const MARKETPLACE_QA_VALIDATE_PATH = "/api/marketplace/qa-validate";

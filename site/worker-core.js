@@ -17,6 +17,7 @@ import {
   ADMIN_MARKETPLACE_ISSUES_PATH,
   ADMIN_OPERATIONS_PATH,
   ADMIN_LEADS_PATH,
+  ADMIN_SUPPLIER_LEADS_PATH,
   ADMIN_MARKETPLACE_FOLLOWUPS_PATH,
   ADMIN_QA_TOKEN_PATH,
   MARKETPLACE_QA_VALIDATE_PATH,
@@ -43,6 +44,7 @@ import { handleAdminMarketAnalytics } from "./worker/domains/analytics-reporting
 import { handleRetiredLegacyMarketplaceImport, handleStoreProductsCompatibility } from "./worker/domains/compatibility.js";
 import { handleAdminInventory, handlePublicInventory } from "./worker/domains/inventory.js";
 import { handleAdminLeads, handleAdminOpportunities, handleProjectCapture, handleProjectClassify, handleProjectContactRequest, handleProjectFollowUpRequest, handleProjectHandymanPhotos, handleProjectSubmit } from "./worker/domains/leads.js";
+import { handleAdminSupplierLeads } from "./worker/domains/supplier-leads.js";
 import { handleAdminListings, handleAdminMarketplaceFollowups, handleAdminMarketplaceIssues, handleMarketplaceContact, handleMarketplaceHealth, handleMarketplaceImage, handleMarketplaceIssueReport, handleMarketplacePublicListings, handleMarketplaceQaValidate, handleMarketplaceShare, handleMarketplaceSubmit } from "./worker/domains/marketplace.js";
 import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
 import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
@@ -86,6 +88,7 @@ export default {
     if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
     if (url.pathname === SOLAR_QA_VALIDATE_PATH) return handleSolarQaValidate(request, env);
     if (url.pathname === ADMIN_LEADS_PATH || url.pathname.startsWith(`${ADMIN_LEADS_PATH}/`)) return handleAdminLeads(request, env, url.pathname);
+    if (url.pathname === ADMIN_SUPPLIER_LEADS_PATH || url.pathname.startsWith(`${ADMIN_SUPPLIER_LEADS_PATH}/`)) return handleAdminSupplierLeads(request, env, url.pathname);
     if (url.pathname === ADMIN_MARKETPLACE_FOLLOWUPS_PATH || url.pathname.startsWith(`${ADMIN_MARKETPLACE_FOLLOWUPS_PATH}/`)) return handleAdminMarketplaceFollowups(request, env, url.pathname);
     if (url.pathname === MARKETPLACE_QA_VALIDATE_PATH) return handleMarketplaceQaValidate(request, env);
     if (url.pathname === ADMIN_QA_TOKEN_PATH) return handleAdminQaToken(request, env);

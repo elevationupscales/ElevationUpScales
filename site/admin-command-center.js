@@ -37,6 +37,7 @@
       ["Shipping & Hawaii", "/admin-lithium-shipping", "shipping"],
       ["Marketplace", "/admin-listings#marketplace", "marketplace"],
       ["Solar", "/admin-listings#solar", "solar"],
+      ["Supplier Leads", "/admin-listings#supplier-leads", "leads"],
       ["Portal Handoffs", "/admin-listings#leads", "portal"],
     ]],
     ["Performance & System", [
