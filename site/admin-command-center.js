@@ -27,6 +27,7 @@
       ["Leads", "/admin-listings#leads", "leads"],
     ]],
     ["Commerce", [
+      ["Commerce Logistics", "/admin-commerce-logistics", "commerce-logistics"],
       ["Catalog & Products", "/admin-catalog", "products"],
       ["Inventory", "/admin-inventory", "inventory"],
       ["Channels & Sync", "/admin-channels", "channels"],
@@ -85,6 +86,7 @@
 
     if (path === "/admin") return "overview";
     if (path.includes("admin-store-orders")) return "orders";
+    if (path.includes("admin-commerce-logistics")) return "commerce-logistics";
     if (path.includes("admin-lithium-shipping")) return "shipping";
     if (path.includes("admin-catalog")) return "products";
     if (path.includes("admin-inventory")) return "inventory";
