@@ -19,6 +19,10 @@ Homepage styles:
 
 Important: some homepage markup is runtime-generated. If an annotation points to the header, solution grid, or slideshow, inspect `home-hero-slides.js` before changing duplicated-looking HTML.
 
+Known no-visual cleanup debt found in the September 6 sweep:
+- `site/home-hero-slides.js` still contains a dormant `buildFlagshipHero()` fallback with older hero wording. The current static homepage already has `data-reference-flagship`, so the fallback returns immediately today. Do not treat that dormant copy as the current owner-approved homepage source.
+- `site/index.html` contains the real homepage `<h1>` plus a second screen-reader-only `<h1>` inside the slideshow placeholder. This is semantic cleanup debt, not a visible layout defect.
+
 ## Shared non-home header/footer
 - `site/site-shell.js` — runtime shell, navigation, support dialog, analytics, non-home retail header/footer
 - `site/site-shell.css`
