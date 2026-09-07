@@ -1,34 +1,12 @@
-# Elevation 4.3 Coordination Control Plane
+# Historical Coordination Records
 
-This directory is the shared worker communication layer for Elevation UpScales.
+This directory contains prior handoffs, receipts, decisions, and management-era records.
 
-## Read First
+For normal website coding, this directory is **not** the coding control plane and should not be loaded by default.
 
-1. `/ELEVATION_4_3_MASTER_STATUS.md`
-2. `/coordination/WORKER_PROTOCOL.md`
-3. the controlling handoff for your workstream
+Current coding entry points:
+- `/AGENTS.md`
+- `/CODING-WORKFLOW.md`
+- `/ANNOTATION-MAP.md`
 
-## Current Website Visual / Deployment Handoff — 2026-09-05
-
-**Owner correction active.** Deployment must not use the earlier single-slide preview as the accepted homepage slideshow.
-
-Read:
-- `/coordination/decisions/DEC-009-homepage-marketing-slideshow-lane.md`
-- `/coordination/handoffs/2026-09-05-homepage-marketing-slideshow-corrective-deployment-handoff.md`
-
-Corrective graphics branch to watch:
-`work/home-hero-slides-0905-03-graphics`
-
-Initial launch acceptance requires at least three active slides with visible slideshow controls and fresh isolated preview evidence. Production remains gated.
-
-## Directories
-
-- `handoffs/` — approved work instructions and scope
-- `receipts/` — completed audit/deployment/verification evidence
-- `decisions/` — durable business/system decisions that future workers must preserve
-
-## Rule
-
-Chats may provide context, but this repository control plane is the canonical cross-worker coordination record for implementation work.
-
-If a chat and this control plane conflict, use the newest explicit owner/management decision and update the control plane so the next worker receives the corrected state.
+Use files in this directory only when the owner explicitly requests historical investigation, rollback forensics, or a specific legacy workstream that depends on one of these records.

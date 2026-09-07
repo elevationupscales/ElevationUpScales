@@ -1,6 +1,0 @@
-build=3.11.30-store-navigation-repair
-source_commit=b0ca1184cb166c84078c3979355d4d3092ad1127
-deployment_url=https://f791d532.elevationupscales.pages.dev
-workflow_run=32651361114
-deployed_at=2026-08-23T16:21:01Z
-status=success
