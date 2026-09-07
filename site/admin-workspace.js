@@ -11,6 +11,7 @@
 
   const viewLabels = {
     projects: "Leads",
+    suppliers: "Supplier Leads",
     solar: "Solar Activity",
     marketplace: "Listings",
     followup: "Marketplace Follow-Up",
@@ -22,12 +23,12 @@
     display_all: "Full Console",
   };
   const navGroups = [
-    { label: "Work", views: ["projects", "solar", "marketplace", "followup", "work"] },
+    { label: "Work", views: ["projects", "suppliers", "solar", "marketplace", "followup", "work"] },
     { label: "Insights", views: ["overview", "analytics"] },
     { label: "Administration", views: ["system", "table", "display_all"] },
   ];
-  const viewShortLabels = { projects:"LD", solar:"SO", marketplace:"MK", followup:"FU", work:"WW", overview:"OV", analytics:"AN", system:"QA", table:"AR", display_all:"FC" };
-  const viewHashes = { projects:"leads", solar:"solar", marketplace:"marketplace", followup:"marketplace-follow-up", work:"work-with-us", overview:"overview", analytics:"analytics", system:"system", table:"all-records", display_all:"full-console" };
+  const viewShortLabels = { projects:"LD", suppliers:"SL", solar:"SO", marketplace:"MK", followup:"FU", work:"WW", overview:"OV", analytics:"AN", system:"QA", table:"AR", display_all:"FC" };
+  const viewHashes = { projects:"leads", suppliers:"supplier-leads", solar:"solar", marketplace:"marketplace", followup:"marketplace-follow-up", work:"work-with-us", overview:"overview", analytics:"analytics", system:"system", table:"all-records", display_all:"full-console" };
   const hashViews = Object.fromEntries(Object.entries(viewHashes).map(([view, hash]) => [hash, view]));
   const navCountSources = { projects:"opp-count-projects", solar:"signal-action-required", marketplace:"summary-pending", followup:"followup-metric-needed", system:"summary-issues" };
 
@@ -38,6 +39,7 @@
   const command = topChildren.find((el) => el.classList.contains("admin-command-actions"));
   const ownerSignals = topChildren.find((el) => el.classList.contains("admin-owner-signals"));
   const opportunity = $("opportunity-workspace");
+  const supplierLeads = $("supplier-leads-workspace");
   const solarLeads = topChildren.find((el) => el.classList.contains("admin-leads-workspace"));
   const solarInsights = topChildren.find((el) => el.classList.contains("admin-lead-insights"));
   const followup = $("marketplace-followup-registry");
@@ -78,13 +80,14 @@
   const nav = $("eus-admin-view-nav");
   const navToggle = $("eus-admin-nav-toggle");
 
-  const allSections = [statusStrip, priority, command, summary, ownerSignals, opportunity, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
+  const allSections = [statusStrip, priority, command, summary, ownerSignals, opportunity, supplierLeads, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
   allSections.forEach((el) => content.appendChild(el));
-  const displayAllSections = [statusStrip, command, summary, ownerSignals, opportunity, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
+  const displayAllSections = [statusStrip, command, summary, ownerSignals, opportunity, supplierLeads, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
 
   const viewSections = {
     overview: [statusStrip, command],
     projects: [opportunity],
+    suppliers: [supplierLeads],
     analytics: [ownerSignals],
     solar: [solarLeads, solarInsights],
     marketplace: [priority, summary, marketplace],
@@ -98,6 +101,7 @@
   const viewDescriptions = {
     overview: "Daily operating view: what needs attention, active leads, conversion pulse and contact actions.",
     projects: "The working Lead queue for Home, RV, Solar and Outside Area project opportunities.",
+    suppliers: "Supplier, vendor and logistics relationship queue. Kept separate from customer and Solar leads.",
     analytics: "Read-only owner analytics: website demand, conversion, customer intent and Marketplace activity without becoming another work queue.",
     solar: "Solar-specific Builder activity, intent and follow-up support; submitted project opportunities remain in the main Leads queue.",
     marketplace: "Marketplace listing operations remain separate from Leads / Opportunities.",
