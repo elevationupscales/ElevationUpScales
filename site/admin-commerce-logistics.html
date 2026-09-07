@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#070707">
+<title>Commerce Logistics | Elevation UpScales, Inc.</title>
+<link rel="stylesheet" href="/styles.css?v=3.5.0">
+<link rel="stylesheet" href="/admin-command-center.css?v=5.0.0" data-eus-command-center-css>
+<link rel="stylesheet" href="/admin-commerce-logistics.css?v=1.0.0">
+<script defer src="/admin-command-center.js?v=5.0.0"></script>
+<script defer src="/admin-commerce-logistics.js?v=1.0.0"></script>
+</head>
+<body class="admin-framework-page commerce-logistics-page">
+<main class="eus-admin-page">
+<section class="eus-admin-auth" id="commerce-logistics-auth" hidden>
+<span class="eus-admin-kicker">Protected Commerce</span>
+<h2>Admin session required</h2>
+<p>Sign in through the Admin Command Center to manage supplier, channel, and fulfillment intake.</p>
+<a class="eus-admin-button eus-admin-button--primary" href="/admin">Open Admin Login</a>
+</section>
+
+<section id="commerce-logistics-dashboard" hidden>
+<header class="eus-admin-page__head">
+<div>
+<span class="eus-admin-kicker">Commerce Operations</span>
+<h1>Commerce Logistics</h1>
+<p>Connect supplier sources, product records, sales channels, fulfillment providers, and order logistics without creating competing sources of truth.</p>
+</div>
+<div class="eus-admin-actions">
+<a class="eus-admin-button eus-admin-button--primary" href="/admin-store-orders">Open Orders</a>
+<a class="eus-admin-button" href="/admin-channels">Channels &amp; Sync</a>
+<a class="eus-admin-button" href="/admin-lithium-shipping">Lithium Shipping</a>
+<button class="eus-admin-button" id="commerce-logistics-refresh" type="button">Refresh</button>
+</div>
+</header>
+
+<p class="eus-admin-statusline" id="commerce-logistics-status" aria-live="polite">Loading commerce logistics foundation…</p>
+
+<section class="commerce-control-banner">
+<div>
+<span class="eus-admin-kicker">Current Source Priority</span>
+<strong>Doba is the primary inventory source for TikTok Shop and eBay.</strong>
+<p>CJ Dropshipping is a separate supplier source. TikTok and eBay are sales channels—not suppliers. CSV and URL intake creates review records only.</p>
+</div>
+<ul>
+<li>No automatic publishing</li>
+<li>No automatic price or inventory writes</li>
+<li>No API connection assumed from a mapped product</li>
+</ul>
+</section>
+
+<section class="eus-section">
+<div class="eus-section__head">
+<div>
+<span class="eus-admin-kicker">Growing Foundation</span>
+<h2>One product path, separate operating roles</h2>
+<p>Each platform is assigned one clear role before catalog or order data moves.</p>
+</div>
+</div>
+<div class="commerce-flow" aria-label="Commerce operating flow">
+<article><span>1</span><strong>Supplier Sources</strong><p>Doba · CJ · SOK</p></article>
+<b aria-hidden="true">→</b>
+<article><span>2</span><strong>Elevation Catalog</strong><p>Commercial truth, SKU mapping, price and readiness</p></article>
+<b aria-hidden="true">→</b>
+<article><span>3</span><strong>Sales Channels</strong><p>Website · Shopify · eBay · TikTok Shop</p></article>
+<b aria-hidden="true">→</b>
+<article><span>4</span><strong>Order Logistics</strong><p>Provider order, freight path, tracking, customer completion</p></article>
+</div>
+</section>
+
+<section class="eus-section">
+<div class="eus-section__head">
+<div>
+<span class="eus-admin-kicker">Platform Registry</span>
+<h2>Sources, stores, channels, and providers</h2>
+<p>Add future platforms through the same role-based intake contract instead of building another disconnected manager.</p>
+</div>
+</div>
+<div class="commerce-platform-grid" id="commerce-platform-grid"></div>
+</section>
+
+<section class="eus-section" id="commerce-intake">
+<div class="eus-section__head">
+<div>
+<span class="eus-admin-kicker">Controlled Intake</span>
+<h2>CSV or product URL upload</h2>
+<p>Preview first, then stage into the protected review queue. Applying an intake does not publish, change prices, change inventory, place a supplier order, or activate an integration.</p>
+</div>
+<div class="eus-admin-actions">
+<button class="eus-admin-button" id="commerce-download-template" type="button">Download CSV Template</button>
+</div>
+</div>
+
+<div class="commerce-intake-grid">
+<label>Platform
+<select id="commerce-platform"></select>
+</label>
+<label>Input method
+<select id="commerce-input-mode">
+<option value="csv">CSV Upload</option>
+<option value="url">Product / Listing URL</option>
+</select>
+</label>
+<label class="commerce-file-field">CSV file
+<input id="commerce-csv-file" type="file" accept=".csv,text/csv">
+</label>
+<label class="commerce-url-field" hidden>Product or listing URL
+<input id="commerce-product-url" type="url" placeholder="https://…">
+</label>
+<label class="commerce-url-field" hidden>SKU or external ID <small>optional</small>
+<input id="commerce-url-sku" maxlength="180" placeholder="Supplier SKU or listing ID">
+</label>
+<label class="commerce-url-field" hidden>Working title <small>optional</small>
+<input id="commerce-url-title" maxlength="300" placeholder="Product name for review queue">
+</label>
+</div>
+
+<div class="commerce-intake-actions">
+<button class="eus-admin-button eus-admin-button--primary" id="commerce-preview" type="button">Preview Intake</button>
+<button class="eus-admin-button" id="commerce-stage" type="button" disabled>Stage Review Records</button>
+</div>
+<div class="eus-callout" id="commerce-intake-help"></div>
+<div class="eus-callout" id="commerce-doba-route" hidden>
+<strong>Doba CSV remains the primary supplier-source workflow.</strong>
+<p>Use its existing exact-SKU, cost, stock, fingerprint, preview, and controlled apply protections.</p>
+<a class="eus-admin-button eus-admin-button--primary" href="/admin-channels#doba-csv-sync">Open Doba CSV Sync</a>
+</div>
+
+<section id="commerce-preview-panel" hidden>
+<div class="eus-section__head commerce-preview-head">
+<div><span class="eus-admin-kicker">Preview</span><h3 id="commerce-preview-title">Intake preview</h3><p id="commerce-preview-message"></p></div>
+</div>
+<div class="eus-metric-grid" id="commerce-preview-metrics"></div>
+<div class="eus-admin-table-wrap">
+<table class="eus-admin-table">
+<thead><tr><th>Row</th><th>Product / SKU</th><th>External ID</th><th>Price / Cost</th><th>Qty</th><th>Routing</th><th>Review</th></tr></thead>
+<tbody id="commerce-preview-table"><tr><td colspan="7">Choose a platform and preview a CSV or URL.</td></tr></tbody>
+</table>
+</div>
+</section>
+</section>
+
+<section class="eus-section">
+<div class="eus-section__head">
+<div>
+<span class="eus-admin-kicker">Review Queue</span>
+<h2>Recent staged intake</h2>
+<p>These records still require catalog matching, supplier verification, fulfillment review, and channel authorization.</p>
+</div>
+</div>
+<div class="eus-admin-table-wrap">
+<table class="eus-admin-table">
+<thead><tr><th>Platform</th><th>Product</th><th>Role</th><th>Input</th><th>Status</th><th>Updated</th><th>Open</th></tr></thead>
+<tbody id="commerce-candidates"><tr><td colspan="7">No staged intake loaded.</td></tr></tbody>
+</table>
+</div>
+</section>
+
+<section class="commerce-next-actions">
+<article><span>Orders</span><strong>Paid order fulfillment</strong><p>Use Store Orders for supplier ordering, tracking, holds, refunds, and completion.</p><a href="/admin-store-orders">Open Orders →</a></article>
+<article><span>Source truth</span><strong>Doba inventory refresh</strong><p>Use the dedicated Doba workflow for authoritative supplier CSV reconciliation.</p><a href="/admin-channels#doba-csv-sync">Open Doba Sync →</a></article>
+<article><span>Lithium</span><strong>SOK and specialized freight</strong><p>Use Lithium Shipping for product qualification, routes, batches, and Hawaii/Alaska operations.</p><a href="/admin-lithium-shipping">Open Lithium Shipping →</a></article>
+</section>
+</section>
+</main>
+</body>
+</html>
