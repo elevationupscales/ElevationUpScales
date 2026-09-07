@@ -68,9 +68,9 @@ for (const event of ["homepage_logistics_capability_view", "homepage_logistics_r
 assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static redesigned logistics block must record a capability view");
 
 const home = fs.readFileSync("site/index.html", "utf8");
-assert.ok(home.includes("Lithium Energy Supply"));
-assert.ok(home.includes("And Shipping Logistics"));
-assert.ok(home.includes("Power supply does not stop at the shoreline."));
+assert.ok(home.includes("Lithium Power Solutions"));
+assert.ok(home.includes("Supply Logistics &amp; Ocean Freight"));
+assert.ok(home.includes("Battery Freight for Hawaii &amp; Alaska."));
 assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK12V100PC"'), "homepage SK12V100PC analytics missing");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK48V100N"'), "homepage SK48V100N analytics missing");
