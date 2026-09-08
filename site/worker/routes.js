@@ -35,5 +35,6 @@ export const ADMIN_OPPORTUNITIES_PATH = "/api/admin/opportunities";
 export const ADMIN_MARKET_ANALYTICS_PATH = "/api/admin/market-analytics";
 export const ADMIN_SOLAR_QA_TOKEN_PATH = "/api/admin/solar-qa-token";
 export const ADMIN_INVENTORY_PATH = "/api/admin/inventory";
+export const ADMIN_SOK_STOCK_PATH = "/api/admin/sok-stock";
 export const PUBLIC_INVENTORY_PATH = "/api/store-inventory";
 export const SOLAR_QA_VALIDATE_PATH = "/api/solar/qa-validate";
