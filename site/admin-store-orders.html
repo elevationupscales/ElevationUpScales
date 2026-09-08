@@ -12,20 +12,21 @@
 <link href="/admin-store-orders.css?v=3.11.42" rel="stylesheet">
 <link href="/admin-command-center.css?v=5.2.0" rel="stylesheet" data-eus-command-center-css>
 <script defer src="/admin-command-center.js?v=5.2.0"></script>
-<script defer src="/admin-store-orders.js?v=4.3.1"></script>
+<script defer src="/admin-store-orders.js?v=4.4.0"></script>
 </head>
 <body class="admin-framework-page admin-store-orders-page">
 <main class="admin-shell">
 <header class="admin-shell__header">
-<div><p class="eyebrow">Elevation UpScales, Inc. · Store Operations</p><h1>Store Orders</h1><p class="admin-subhead">Paid website orders, buyer shipping details, supplier fulfillment, and tracking.</p></div>
+<div><p class="eyebrow">Elevation UpScales, Inc. · Store Operations</p><h1>Store Orders</h1><p class="admin-subhead">Paid website orders → supplier PO → supplier release → tracking → shipped → complete.</p></div>
 <div class="admin-header-actions"><a class="button button-outline" href="/admin-listings">Mission Control</a><a class="button button-outline" href="/admin-commerce-logistics">Commerce Logistics</a><a class="button button-outline" href="/admin-catalog">Catalog Manager</a><a class="button button-outline" href="/admin-inventory.html">Inventory</a><button class="button button-outline" id="orders-refresh" type="button">Refresh</button></div>
 </header>
 <section class="orders-auth" id="orders-auth" hidden><p class="eyebrow">Admin Login Required</p><h2>Open Mission Control to sign in.</h2><p>This order workspace uses the same protected Mission Control session.</p><a class="button button-primary" href="/admin-listings">Go to Mission Control</a></section>
 <section id="orders-dashboard" hidden>
 <section class="orders-summary" aria-label="Order summary">
 <article><span>Paid</span><strong id="orders-count-paid">0</strong></article>
-<article class="is-attention"><span>Needs Order</span><strong id="orders-count-pending">0</strong></article>
-<article><span>Ordered from Supplier</span><strong id="orders-count-supplier">0</strong></article>
+<article class="is-attention"><span>Prepare Supplier Order</span><strong id="orders-count-pending">0</strong></article>
+<article><span>PO Submitted</span><strong id="orders-count-supplier">0</strong></article>
+<article><span>Supplier Paid / Released</span><strong id="orders-count-released">0</strong></article>
 <article><span>Shipped</span><strong id="orders-count-shipped">0</strong></article>
 <article><span>Completed</span><strong id="orders-count-completed">0</strong></article>
 <article class="is-attention"><span>Hold / Issue</span><strong id="orders-count-hold">0</strong></article>
@@ -33,9 +34,9 @@
 </section>
 <section class="orders-workspace">
 <div class="orders-toolbar">
-<label>Sales channel<select id="orders-source-filter"><option value="all">All channels</option><option value="apparel">Website · Apparel</option><option value="rv">Website · RV &amp; Outdoor</option><option value="shopify">Shopify</option><option value="ebay">eBay</option><option value="tiktok">TikTok Shop</option><option value="fourthwall">Fourthwall</option></select></label>
-<label>Status<select id="orders-status-filter"><option value="all">All</option><option value="fulfillment_pending">Needs Order</option><option value="supplier_ordered">Ordered from Supplier</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="hold_issue">Hold / Issue</option><option value="refund_needed">Refund Needed</option><option value="refunded">Refunded</option></select></label>
-<label class="orders-search">Search<input id="orders-search" type="search" placeholder="Order, customer, SKU, product, tracking"></label>
+<label>Sales channel<select id="orders-source-filter"><option value="all">All channels</option><option value="apparel">Website · Apparel</option><option value="rv">Website · RV &amp; Outdoor</option><option value="lithium">Website · Lithium</option><option value="shopify">Shopify</option><option value="ebay">eBay</option><option value="tiktok">TikTok Shop</option><option value="fourthwall">Fourthwall</option></select></label>
+<label>Status<select id="orders-status-filter"><option value="all">All</option><option value="fulfillment_pending">Prepare Supplier Order</option><option value="supplier_ordered">PO Submitted</option><option value="supplier_released">Supplier Paid / Released</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="hold_issue">Hold / Issue</option><option value="refund_needed">Refund Needed</option><option value="refunded">Refunded</option></select></label>
+<label class="orders-search">Search<input id="orders-search" type="search" placeholder="Order, customer, supplier, SKU, product, tracking"></label>
 </div>
 <p class="orders-status" id="orders-status" aria-live="polite">Loading store orders…</p>
 <div class="orders-layout">
@@ -50,11 +51,11 @@
 <section><h3>Supplier</h3><pre id="order-supplier">—</pre><p id="order-supplier-cost">—</p><p id="order-source-url">—</p></section>
 </div>
 <form id="order-fulfillment-form" class="orders-fulfillment-form">
-<label>Fulfillment Status<select id="order-fulfillment-status" required><option value="fulfillment_pending">Needs Order</option><option value="supplier_ordered">Ordered from Supplier</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="hold_issue">Hold / Issue</option><option value="refund_needed">Refund Needed</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option></select></label>
-<label>Supplier Order / Reference<input id="order-supplier-id" maxlength="160"></label>
+<label>Fulfillment Status<select id="order-fulfillment-status" required><option value="fulfillment_pending">Prepare Supplier Order</option><option value="supplier_ordered">PO Submitted</option><option value="supplier_released">Supplier Paid / Released</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="hold_issue">Hold / Issue</option><option value="refund_needed">Refund Needed</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option></select></label>
+<label>Supplier Order / PO Reference<input id="order-supplier-id" maxlength="160"></label>
 <label>Carrier<input id="order-carrier" maxlength="120"></label>
 <label>Tracking Number<input id="order-tracking" maxlength="180"></label>
-<label class="orders-notes">Fulfillment Notes<textarea id="order-notes" maxlength="2000" rows="5" placeholder="Doba order notes, issue details, customer updates, etc."></textarea></label>
+<label class="orders-notes">Fulfillment Notes<textarea id="order-notes" maxlength="2000" rows="5" placeholder="Supplier handoff, payment/release, tracking, issue, or customer update notes."></textarea></label>
 <div><button class="button button-primary" type="submit">Save Order</button></div>
 <p id="order-save-status" aria-live="polite"></p>
 </form>
