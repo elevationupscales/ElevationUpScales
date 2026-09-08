@@ -72,9 +72,9 @@
     if (path === "/admin") return "overview";
     if (path.includes("admin-store-orders")) return "orders";
     if (path.includes("admin-catalog") || path.includes("admin-commerce-pricing") || path.includes("admin-promotion")) return "products";
-    if (path.includes("admin-inventory")) return "inventory";
+    if (path.includes("admin-inventory") || path.includes("admin-sok")) return "inventory";
     if (path.includes("admin-channels") || path.includes("admin-commerce-logistics")) return "channels";
-    if (path.includes("admin-lithium-shipping") || path.includes("admin-sok")) return "shipping";
+    if (path.includes("admin-lithium-shipping")) return "shipping";
     if (path.includes("admin-analytics")) return "analytics";
     if (path.includes("admin-system")) return "system";
     if (path.includes("admin-listings")) return "leads";

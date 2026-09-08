@@ -23,6 +23,7 @@ Email may still be used when the work itself requires reading or sending an actu
 ## Current controlling SOP
 
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery, Lithium Store, RV/Outdoor Store, Lower-48 ecommerce, Hawaii/Alaska specialized shipping, paid-order recovery, prepurchase, and freight-agreement operating rules.
+- [`SOK_STOCK_WORKFLOW.md`](./SOK_STOCK_WORKFLOW.md) — protected exact-SKU supplier stock verification for the complete SOK catalog, including preview/apply controls and the separation between stock observations and public commerce decisions.
 - [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — controlling specialized-logistics pricing architecture separating Elevation product-sale / supplier-referral sales from standalone third-party logistics facilitation, including shipment-size tiers, quote construction, route confidentiality, and protected-rate-card boundaries.
 - [`SUPPLIER_LOGISTICS_GROWTH.md`](./SUPPLIER_LOGISTICS_GROWTH.md) — supplier/commercial lead model covering dealer/wholesale, dropship, product sourcing, Hawaii/Alaska fulfillment, supplier referrals, and third-party logistics opportunity qualification.
 - [`SUPPLIER_LEADS_LIVE_MAP.md`](./SUPPLIER_LEADS_LIVE_MAP.md) — current public-safe 56-record supplier/commercial lead tree, priorities, contacted/waiting state, draft-only controls, solar/inverter targets, dropship targets, Hawaii/Alaska opportunity lanes, and next-account direction.

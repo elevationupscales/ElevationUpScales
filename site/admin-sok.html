@@ -1,1 +1,90 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>SOK Operations | Elevation UpScales</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/admin-catalog.css"><link rel="stylesheet" href="/admin-sok.css"><script defer src="/admin-sok.js"></script><script defer src="/admin-sok-availability.js?v=4.6.1"></script></head><body class="admin-framework-page"><main class="sok-shell"><header><div><p class="eyebrow">PRIMARY AUTHORIZED BATTERY PARTNER</p><h1>SOK Operations</h1><p>Controlled manufacturer-direct battery lane. Supplier, freight and margin data stays internal.</p></div><nav><a class="button button-outline" href="/admin-lithium-shipping.html">Shipping & Logistics</a><a class="button button-outline" href="/admin-catalog.html">Catalog</a></nav></header><section id="sok-login"><h2>Admin sign-in required</h2><form id="sok-login-form"><label>Email<input name="email" type="email" required value="elevationupscales@gmail.com"></label><label>Password<input name="password" type="password" required></label><button class="button button-primary">Sign In</button><p id="sok-login-status"></p></form></section><section id="sok-dashboard" hidden><div class="sok-summary"><article><span>Status</span><strong id="sok-status">—</strong></article><article><span>Anchor SKU</span><strong id="sok-anchor">—</strong></article><article><span>Hawaii Standard Limit</span><strong id="sok-limit">—</strong></article></div><h2>Approved SOK SKU Operating Records</h2><div id="sok-products" class="sok-grid"></div><h2>Freight Profiles</h2><div id="sok-profiles" class="sok-grid"></div><h2>Order / PO Safeguards</h2><div id="sok-orders" class="sok-grid"></div><h2>R&amp;R Commercial Research</h2><div id="sok-research" class="sok-grid"></div><p id="sok-status-line" role="status"></p></section><section id="sok-availability-admin"><p>Loading SOK availability controls…</p></section></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#070707">
+<title>SOK Stock &amp; Operations | Elevation UpScales</title>
+<link rel="stylesheet" href="/styles.css?v=3.5.0">
+<link rel="stylesheet" href="/admin-command-center.css?v=5.1.0" data-eus-command-center-css>
+<link rel="stylesheet" href="/admin-sok.css?v=5.2.0">
+<script defer src="/admin-command-center.js?v=5.1.0"></script>
+<script defer src="/admin-sok.js?v=5.2.0"></script>
+<script defer src="/admin-sok-availability.js?v=5.2.0"></script>
+</head>
+<body class="admin-framework-page sok-admin-page">
+<main class="sok-shell">
+<header>
+<div>
+<p class="eyebrow">INVENTORY · AUTHORIZED SOK ENERGY DEALER</p>
+<h1>SOK Stock &amp; Operations</h1>
+<p>Verify supplier stock for the exact SOK catalog. Stock is an order-planning input and never changes public availability, MAP, checkout, or freight rules by itself.</p>
+</div>
+<nav>
+<a class="button button-outline" href="/admin-inventory">Inventory</a>
+<a class="button button-outline" href="/admin-catalog">Products &amp; Listings</a>
+<a class="button button-outline" href="/admin-lithium-shipping">Shipping &amp; Logistics</a>
+</nav>
+</header>
+
+<section id="sok-login">
+<h2>Admin sign-in required</h2>
+<form id="sok-login-form">
+<label>Email<input name="email" type="email" required value="elevationupscales@gmail.com" autocomplete="username"></label>
+<label>Password<input name="password" type="password" required autocomplete="current-password"></label>
+<button class="button button-primary">Sign In</button>
+<p id="sok-login-status" role="status"></p>
+</form>
+</section>
+
+<section id="sok-dashboard" hidden>
+<section aria-labelledby="sok-stock-heading">
+<div class="sok-section-head">
+<div><p class="eyebrow">PRIMARY WORKFLOW</p><h2 id="sok-stock-heading">Supplier Stock Review</h2><p>Exact SKU → verify quantity and date → preview → apply to the protected stock record. Customer-facing decisions remain separate.</p></div>
+<button class="button button-outline" id="sok-refresh" type="button">Refresh</button>
+</div>
+<div class="sok-summary" id="sok-stock-summary">
+<article><span>Approved SKUs</span><strong id="sok-stock-total">—</strong></article>
+<article><span>Verified Stock</span><strong id="sok-stock-current">—</strong></article>
+<article><span>Needs Recheck</span><strong id="sok-stock-recheck">—</strong></article>
+<article><span>Out of Stock</span><strong id="sok-stock-out">—</strong></article>
+</div>
+<div class="sok-stock-tools">
+<label>Search<input id="sok-stock-search" type="search" placeholder="SKU or product"></label>
+<label>Status<select id="sok-stock-filter"><option value="all">All stock states</option><option value="unverified">Needs verification</option><option value="stale">Recheck required</option><option value="in_stock">Verified stock</option><option value="out_of_stock">Out of stock</option></select></label>
+<button class="button button-outline" id="sok-template" type="button">Download CSV Template</button>
+</div>
+<div class="sok-stock-import">
+<label>Stock CSV or pasted rows
+<input id="sok-stock-file" type="file" accept=".csv,text/csv">
+<textarea id="sok-stock-paste" rows="5" placeholder="sku,supplier_inventory,last_supplier_verified&#10;SK12V100H,24,2026-09-08"></textarea>
+</label>
+<div class="sok-stock-import__actions">
+<button class="button button-primary" id="sok-stock-preview" type="button">Preview Stock Update</button>
+<button class="button button-outline" id="sok-stock-apply" type="button" disabled>Apply Verified Stock</button>
+<p id="sok-stock-status" role="status">No stock update staged.</p>
+</div>
+<div id="sok-stock-preview-panel" hidden></div>
+</div>
+<div class="sok-stock-table-wrap">
+<table class="sok-stock-table">
+<thead><tr><th>SKU / Product</th><th>Type</th><th>Supplier Qty</th><th>Verified</th><th>State</th><th>Next Action</th></tr></thead>
+<tbody id="sok-products"><tr><td colspan="6">Loading SOK stock roster…</td></tr></tbody>
+</table>
+</div>
+</section>
+
+<details class="sok-advanced">
+<summary>Advanced SOK shipping, PO and availability controls</summary>
+<div class="sok-summary sok-advanced-summary"><article><span>Operating Status</span><strong id="sok-status">—</strong></article><article><span>Anchor SKU</span><strong id="sok-anchor">—</strong></article><article><span>Hawaii Standard Limit</span><strong id="sok-limit">—</strong></article></div>
+<h2>Freight Profiles</h2><div id="sok-profiles" class="sok-grid"></div>
+<h2>Order / PO Safeguards</h2><div id="sok-orders" class="sok-grid"></div>
+<h2>R&amp;R Commercial Research</h2><div id="sok-research" class="sok-grid"></div>
+<section id="sok-availability-admin"><p>Loading SOK availability controls…</p></section>
+</details>
+<p id="sok-status-line" role="status"></p>
+</section>
+</main>
+</body>
+</html>
