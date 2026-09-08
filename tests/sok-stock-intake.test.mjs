@@ -24,6 +24,12 @@ test("template and parser preserve blank quantity as unknown and zero as zero", 
   assert.deepEqual(valid.flatMap(r=>r.errors), []);
 });
 
+test("bounded input rejects oversized payloads", () => {
+  const parsed = parseStockText(`${SOK_STOCK_TEMPLATE}${"X".repeat(64)}`, {maxBytes:32});
+  assert.equal(parsed.rows.length, 0);
+  assert.match(parsed.errors[0], /exceeds 32 bytes/);
+});
+
 test("unknown, duplicate, negative, fractional and future evidence are rejected", () => {
   const parsed = parseStockText(`${SOK_STOCK_TEMPLATE}NOPE,1,2026-09-08\nSKU-A,1,2026-09-08\nSKU-A,-1,2026-09-08\nSKU-B,1.5,2026-09-09\n`);
   const rows = validateStockRows(parsed.rows, roster, {today:"2026-09-08"});
