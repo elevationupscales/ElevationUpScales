@@ -18,3 +18,11 @@ document.querySelectorAll("[data-text-location]").forEach((link) => {
 
 const year = document.querySelector("#year");
 if (year) year.textContent = String(new Date().getFullYear());
+
+if (!document.querySelector('script[data-eus-trust-repair]')) {
+  const trustRepair = document.createElement("script");
+  trustRepair.src = "/trust-repair-runtime.js?v=1.0.0";
+  trustRepair.defer = true;
+  trustRepair.dataset.eusTrustRepair = "true";
+  document.head.append(trustRepair);
+}

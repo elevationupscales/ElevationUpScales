@@ -139,3 +139,11 @@
       grid.innerHTML='<p>Current SOK purchase options could not be loaded. Please try again or email casey@elevationupscales.com.</p>';
     });
 })();
+
+if(!document.querySelector('script[data-eus-trust-repair]')){
+  const trustRepair=document.createElement("script");
+  trustRepair.src="/trust-repair-runtime.js?v=1.0.0";
+  trustRepair.defer=true;
+  trustRepair.dataset.eusTrustRepair="true";
+  document.head.append(trustRepair);
+}

@@ -27,4 +27,12 @@
     }catch(_){if(slot){slot.hidden=true;slot.setAttribute("aria-hidden","true");}}
   }
   load();
+
+  if(!document.querySelector('script[data-eus-trust-repair]')){
+    const trustRepair=document.createElement("script");
+    trustRepair.src="/trust-repair-runtime.js?v=1.0.0";
+    trustRepair.defer=true;
+    trustRepair.dataset.eusTrustRepair="true";
+    document.head.append(trustRepair);
+  }
 })();
