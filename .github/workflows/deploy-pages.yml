@@ -14,29 +14,54 @@ on:
         required: false
         default: ""
         type: string
+  push:
+    branches:
+      - production-deploy
 
 permissions:
   contents: read
   deployments: write
 
 concurrency:
-  group: elevation-pages-${{ inputs.target }}
+  group: elevation-pages-${{ github.event_name == 'push' && 'production' || inputs.target }}
   cancel-in-progress: false
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.target.outputs.target }}
     steps:
       - uses: actions/checkout@v6
         with:
           ref: main
-      - name: Require production confirmation
-        if: ${{ inputs.target == 'production' }}
+      - name: Resolve deployment target
+        id: target
+        env:
+          REQUESTED_TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            test "$GITHUB_REF_NAME" = "production-deploy"
+            echo 'target=production' >> "$GITHUB_OUTPUT"
+          else
+            case "$REQUESTED_TARGET" in
+              preview|production) echo "target=$REQUESTED_TARGET" >> "$GITHUB_OUTPUT" ;;
+              *) echo "Unsupported deployment target: $REQUESTED_TARGET" >&2; exit 1 ;;
+            esac
+          fi
+      - name: Require production authorization
+        if: ${{ steps.target.outputs.target == 'production' }}
         env:
           CONFIRM: ${{ inputs.production_confirmation }}
         run: |
           set -euo pipefail
-          test "$(printf '%s' "$CONFIRM" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')" = "DEPLOY"
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            test "$GITHUB_REF_NAME" = "production-deploy"
+            test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
+          else
+            test "$(printf '%s' "$CONFIRM" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')" = "DEPLOY"
+          fi
       - name: Validate final production architecture
         run: |
           set -euo pipefail
@@ -89,7 +114,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ inputs.target == 'production' && 'main' || 'github-preview' }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ needs.validate.outputs.target == 'production' && 'main' || 'github-preview' }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - name: Smoke deployed application
         env:
@@ -119,6 +144,6 @@ jobs:
       - name: Receipt
         run: |
           echo '### Elevation Pages deployment — PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo "Target: ${{ inputs.target }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Target: ${{ needs.validate.outputs.target }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
