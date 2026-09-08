@@ -6,17 +6,17 @@ Repository: `elevationupscales/ElevationUpScales`
 
 Verified source `main`: `aaba50212b7243325db3207b5be35d05fb0da15a`
 
-Active handoff branch: `work/sok-stock-intake-v1`
+Active release branch: `release/sok-stock-management-sop-0908`
 
-Production promotion: deployment worker only
+Release direction: owner authorized direct production deployment after efficiency sweep and explicitly authorized publishing the public-safe management SOP/release fixes to the currently public repository.
 
 ## Fast takeover
 
-1. Read `/AGENTS.md`, `/CODING-WORKFLOW.md`, and this file only.
+1. Read `/AGENTS.md`, `/CODING-WORKFLOW.md`, `/operations/README.md`, `/operations/MANAGEMENT_OPERATING_SOP.md`, and this file.
 2. Fetch current `main`; current Git wins over the recorded SHA above.
 3. Inspect the active branch and compare it to current `main` before continuing.
 4. Continue only the owner's newest explicit scope.
-5. Do not merge or deploy a build-worker branch without the separate release step.
+5. Use permanent repository preview/deploy workflows; do not create a one-off deployment workflow.
 
 ## Current accepted state
 
@@ -28,11 +28,13 @@ Production promotion: deployment worker only
 - SOK dropship/order controls are released. Current Shopify operating truth is in `/operations/shopify-manager/SHOPIFY_MANAGER.md`.
 - Current Shopify records report nine active SOK Online Store products with MAP controls; do not hardcode that count into stock tooling.
 - SOK preorder/backorder, MAP, quantity review, Hawaii/Alaska, payment, lithium and fulfillment controls remain independent from supplier-stock verification.
-- Never commit raw supplier inventory, dealer cost, private correspondence, private freight terms, customer data, credentials or compliance packets.
+- `/operations/MANAGEMENT_OPERATING_SOP.md` is the shared management execution/efficiency standard. Manager-specific SOPs remain subordinate to the owner and shared operating rules.
+- Gmail management feeds/drafts are retired as an active control system. GitHub `/operations/` remains the active management source.
+- The repository is currently public. A future plan to make it private does not relax present public-data protection.
 
-## Current candidate — SOK Stock Intake V1
+## Release candidate — SOK Stock Intake V1 + Management SOP
 
-Branch: `work/sok-stock-intake-v1`
+Branch: `release/sok-stock-management-sop-0908`
 
 Parent: `aaba50212b7243325db3207b5be35d05fb0da15a`
 
@@ -46,18 +48,20 @@ Scope implemented:
 - Explicit confirmed apply limited to `eus_sok_product_ops.supplier_inventory` and `last_supplier_verified`.
 - Preview fingerprint plus `updated_at` optimistic guard prevents stale-preview overwrites.
 - Older evidence and same-date conflicting quantity are rejected.
-- `eus_sok_events` stores row events and import receipts; repeated confirmed apply returns the existing receipt instead of duplicating writes.
+- Each successful stock-field mutation and its `supplier_stock_verified` audit event execute in one D1 batch transaction so an audit failure cannot leave an unaudited stock mutation.
+- `eus_sok_events` stores import receipts; repeated confirmed apply returns the existing receipt instead of duplicating writes.
 - Partial imports leave omitted SKUs unchanged.
+- Canonical route registry now owns `/api/admin/sok-stock` and its protected child routes.
+- Shared management SOP adds source-of-truth order, commercial priority, manager separation, reuse-first execution, proportional QA, public-data protection and efficiency rules.
 - No schema, binding, secret, auth/session, checkout, PayPal, public availability, pricing, MAP, freight, Shopify inventory-writer, Doba, leads, supplier-ordering or Portal changes.
 
-## Candidate verification
+## Verification before production workflow
 
-Targeted behavior tests: **PASS — 8/8**.
-
-Covered:
+SOK stock behavior tests: **9 cases defined** covering:
 
 - unauthorized/cross-origin mutation policy;
 - missing quantity versus explicit zero;
+- bounded input size;
 - unknown/duplicate SKU and invalid quantity/date rejection;
 - preview purity and partial-import omission behavior;
 - older/same-date conflicting evidence protection;
@@ -65,23 +69,18 @@ Covered:
 - freshness states;
 - accurate partial-write failure result.
 
-JavaScript syntax checks: **PASS** for new/modified development modules checked locally.
+Route-registry parity test now includes the protected SOK stock route and `sok-stock` domain.
 
-Changed-file whitespace check: **PASS** on the locally authored candidate files.
+The permanent production workflow is the release gate for this direct-deployment instruction. It runs full `npm run qa`, `git diff --check`, secret/artifact checks, deploys Cloudflare Pages, runs deployment smoke checks and then checks the canonical production domain.
 
-Full `npm run qa`: **PENDING RC WORKFLOW**.
+## Exact release action
 
-Isolated preview: **PENDING RC WORKFLOW**.
-
-Reason: the available GitHub connection can inspect Actions and re-run existing jobs but does not expose `workflow_dispatch`, so the permanent `.github/workflows/release-candidate-gate.yml` cannot be started from this worker without changing protected workflow behavior. Do not create or modify a deployment workflow to bypass that gate.
-
-## Exact next action
-
-1. Reconfirm current `main` still descends from `aaba50212b7243325db3207b5be35d05fb0da15a` with no conflicting SOK stock code.
-2. Dispatch the existing **Release Candidate Preview** workflow with `candidate_ref=work/sok-stock-intake-v1`.
-3. Require full `npm run qa`, `git diff --check`, isolated Cloudflare preview and preview regression checks to PASS.
-4. Review the SOK Stock form on desktop/mobile using synthetic test input only; do not apply real supplier counts during release QA.
-5. If all RC gates pass, hand to the separate release worker for merge/deployment authorization.
+1. Reconfirm current `main` still equals or cleanly precedes this release candidate with no conflicting commerce code.
+2. Fast-forward `main` to the release candidate only if lineage remains clean.
+3. Advance `production-deploy` to the exact same SHA to trigger the permanent **Deploy Elevation UpScales** workflow.
+4. Require the workflow's QA, Cloudflare deployment, deployed-app smoke and canonical-domain smoke to PASS.
+5. Do not apply real supplier stock counts during release verification.
+6. Record the resulting production SHA/receipt and continue normal management work from the deployed `main`.
 
 ## Permanent boundaries
 
@@ -91,16 +90,16 @@ Reason: the available GitHub connection can inspect Actions and re-run existing 
 - Do not promise ordinary parcel delivery for Hawaii lithium.
 - Catalog remains the product master; supplier inventory is not physical On Hand; Marketplace remains separate from Elevation Catalog.
 - Portal handoff remains manual export only unless separately authorized.
-- Build workers stop before production merge/deployment. Deployment is owned by another worker.
+- Never commit raw supplier inventory, dealer cost, private correspondence, private freight terms, customer data, credentials or non-public compliance packets while this repository remains public.
 
 ## Required finish receipt
 
 Return:
 
 - parent `main` SHA;
-- branch and candidate SHA;
+- release branch and production SHA;
 - changed files;
-- targeted/full QA and preview results;
+- targeted/full QA and deployment results;
 - schema/protected-boundary status;
 - blocker or deferred item;
 - exact next action;
