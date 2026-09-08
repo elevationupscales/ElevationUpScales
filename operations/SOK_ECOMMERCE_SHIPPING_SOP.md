@@ -1,7 +1,7 @@
 # Elevation UpScales — SOK / Ecommerce / Specialized Shipping SOP
 
 **Status: ACTIVE / CONTROLLING**  
-**Version: 2.0 — 2026-09-07**  
+**Version: 2.1 — 2026-09-07**  
 **Owner: Casey Young**
 
 ## Purpose
@@ -432,33 +432,156 @@ Different products may use parcel, LTL, forwarding, terminal delivery or dangero
 
 ---
 
-## 17. Public / private information boundary
+## 17. Logistics asset-protection and disclosure boundary
 
-### Customer-facing information may include
+Elevation's working logistics network, route knowledge and fulfillment methods are commercial assets.
 
-- product
-- retail price
-- specifications
-- shipping lane
-- estimated/preliminary freight
-- purchase/freight agreement
-- required customer intake
-- prepurchase state
-- status / tracking
-- final freight reconciliation policy
+The system may use that information internally to execute orders, but information must be disclosed on a **minimum-necessary basis**.
 
-### Never expose through public repository or storefront without explicit approval
+### 17.1 Internal deployment / authorized admin may know
 
-- supplier/dealer cost
-- internal margin
-- raw supplier inventory
-- private supplier correspondence
-- private supplier payment terms
-- private carrier quotes
-- internal hazmat negotiations
-- protected routing logic
-- private compliance packets
-- customer personal data
+Authorized internal systems and managers may use protected operational details when necessary to execute or troubleshoot a shipment, including:
+
+- exact working carrier / forwarder;
+- primary, secondary and backup route identity;
+- exact route-specific acceptance requirements;
+- carrier-issued lithium / HazMat checklists;
+- route-specific state-of-charge or capacity review rules;
+- booking / quote reference;
+- origin terminal and handoff instructions;
+- receiving / storage / final-mile partner identity;
+- carrier-specific labels / documentation instructions;
+- route timing, cutoff, consolidation and sailing intelligence;
+- internal route-selection logic;
+- private carrier pricing and accessorial structures;
+- internal margin / coordination economics;
+- protected shipment evidence and carrier correspondence.
+
+This information belongs behind an authorized operational boundary. It must not be exposed merely because the application has access to it.
+
+### 17.2 Customer invoices / receipts — strict minimum disclosure
+
+Invoices, receipts, payment requests and freight-reconciliation invoices should normally show only what the customer needs to understand and pay the transaction, such as:
+
+- Elevation order / invoice number;
+- customer name and billing/shipping information as required;
+- product / SKU or customer-appropriate product description;
+- quantity;
+- retail product price;
+- customer-facing shipping / freight charge;
+- separately disclosed Elevation shipping / handling / logistics coordination charge when applicable;
+- taxes / authorized fees;
+- amount paid / balance due;
+- high-level shipping status or tracking information when appropriate;
+- plain-English note that specialized freight may involve qualified third-party transportation providers.
+
+Invoices and receipts must **not** expose, unless legally or operationally required for that exact transaction:
+
+- freight carrier / forwarder identity;
+- backup carrier or alternate route identity;
+- raw carrier buy rate;
+- quote number or booking reference;
+- freight markup / internal margin;
+- terminal addresses used only as internal handoff points;
+- receiving / storage partner identity;
+- private final-mile partner identity;
+- carrier-specific HazMat checklist details;
+- exact carrier acceptance thresholds;
+- dangerous-goods preparation playbook;
+- internal labels / paperwork instructions;
+- supplier warehouse process beyond what the customer must know;
+- supplier/dealer cost;
+- internal PO / payment terms;
+- route-selection logic;
+- internal operational notes;
+- private carrier or supplier correspondence.
+
+Customer-facing documents should sell and document **Elevation's product + shipping/logistics service**, not reveal how to reconstruct Elevation's logistics network.
+
+### 17.3 Customer-facing website / email / support disclosure
+
+Customer communications may explain:
+
+- that specialized freight is required;
+- that Elevation coordinates qualified transportation resources;
+- the customer-facing freight amount or estimate;
+- pickup vs delivery method;
+- timing/status;
+- required customer actions;
+- tracking / release instructions when necessary;
+- final freight reconciliation.
+
+Do not volunteer route architecture, carrier comparison, internal carrier requirements, private rates, supplier-side preparation methods or the identity of unnecessary intermediaries.
+
+### 17.4 Supplier / SOK disclosure — origin preparation only
+
+SOK or another supplier should receive only the information necessary to prepare and release the specific shipment, including as applicable:
+
+- exact model / SKU and quantity;
+- required manufacturer documents for that exact model;
+- battery condition requirements;
+- state-of-charge requirement when applicable to the selected shipment;
+- physical packaging / securement requirements the supplier is being asked to perform;
+- required origin-side marks / labels;
+- required shipper-side forms / certifications;
+- required preparation photos / evidence;
+- the specific origin handoff destination or booking instruction when SOK must physically tender the freight there.
+
+Do not disclose to SOK merely for background or convenience:
+
+- Elevation's complete carrier network;
+- alternate / backup carriers;
+- private carrier rates or quote comparisons;
+- internal margin;
+- receiving-network strategy;
+- unrelated Hawaii warehouse / delivery partners;
+- route-selection logic;
+- other customers' shipment information;
+- broader protected logistics intelligence not required for SOK to perform the shipment.
+
+### 17.5 Freight carrier / receiving-provider disclosure
+
+A carrier, forwarder, terminal, warehouse or receiving provider may receive the shipment data necessary to quote, accept, move, store, release or deliver the exact freight, including required DG/product/customer information.
+
+Do not provide unrelated supplier commercial terms, other carrier quotes, backup route intelligence, internal margin or broader customer/business records.
+
+### 17.6 Public repository boundary
+
+Never expose through public Git, storefront, public documentation or unrestricted deployment artifacts without explicit approval:
+
+- supplier/dealer cost;
+- internal margin;
+- raw supplier inventory;
+- private supplier correspondence;
+- private supplier payment terms;
+- private carrier identities tied to Elevation's working route network when commercially sensitive;
+- private carrier quotes / rates;
+- quote / booking references;
+- exact carrier-specific thresholds or proprietary route playbooks;
+- origin terminal / protected handoff network;
+- private receiving / storage partner identities and terms;
+- backup carrier identities;
+- internal route-comparison / selection logic;
+- internal HazMat negotiations;
+- carrier-issued non-public checklists / compliance packets;
+- customer personal data;
+- protected shipment evidence.
+
+Public Git may retain generic workflow states and data-field requirements necessary to build the system without publishing the underlying route intelligence.
+
+### 17.7 Disclosure test
+
+Before information leaves the protected operational boundary, ask:
+
+1. **Does this recipient need this exact detail to perform their role?**
+2. **Would removing this detail prevent the transaction or shipment from being completed?**
+3. **Could this detail help an outside party reconstruct Elevation's supplier, carrier, receiving or pricing network?**
+
+If the recipient does not need the detail, do not disclose it.
+
+Default rule:
+
+**INTERNAL SYSTEM KNOWS → EXTERNAL PARTY RECEIVES ONLY WHAT IT NEEDS.**
 
 ---
 
