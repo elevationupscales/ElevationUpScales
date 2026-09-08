@@ -63,6 +63,12 @@ assert.match(client, /elevation-\$\{item\.id\}-intake-template\.csv/);
 assert.match(client, /will not publish products/);
 assert.match(worker, /\/api\/admin\/commerce-intake/);
 assert.match(worker, /handleCommerceIntakeAdminApi/);
-assert.match(commandCenter, /Commerce Logistics/);
+
+// Commerce Logistics remains available as a compatibility/secondary tool, but
+// Release B intentionally removes it from the permanent top-level Admin rail.
+assert.match(commandCenter, /Channels & Sync/);
+assert.match(commandCenter, /admin-commerce-logistics/);
+assert.match(commandCenter, /admin-commerce-logistics[^\n]*return "channels"/);
+assert.doesNotMatch(commandCenter, /\["Commerce Logistics",\s*"\/admin-commerce-logistics"/);
 
 console.log("Commerce logistics static QA passed.");
