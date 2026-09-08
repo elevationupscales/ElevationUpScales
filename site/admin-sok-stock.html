@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#070707">
+  <title>SOK Stock | Elevation UpScales</title>
+  <link rel="stylesheet" href="/styles.css?v=3.5.0">
+  <link rel="stylesheet" href="/admin-catalog.css?v=4.3.1">
+  <link rel="stylesheet" href="/admin-command-center.css?v=5.2.0" data-eus-command-center-css>
+  <link rel="stylesheet" href="/admin-sok-stock.css?v=1.0.0">
+  <script defer src="/admin-command-center.js?v=5.2.0"></script>
+  <script defer src="/admin-sok-stock.js?v=1.0.0"></script>
+</head>
+<body class="admin-framework-page sok-stock-page">
+<main class="admin-shell sok-stock-shell">
+  <header class="admin-shell__header sok-stock-header">
+    <div>
+      <p class="eyebrow">Products · SOK Stock</p>
+      <h1>SOK Stock</h1>
+      <p class="admin-subhead">Verify supplier stock without changing physical On Hand, Shopify inventory, checkout, pricing, freight, or purchase modes.</p>
+    </div>
+    <nav class="admin-header-actions" aria-label="SOK stock navigation">
+      <a class="button button-outline" href="/admin-catalog.html">Products</a>
+      <a class="button button-outline" href="/admin-sok.html">SOK Operations</a>
+    </nav>
+  </header>
+
+  <section class="admin-login" id="sok-stock-login">
+    <div><p class="eyebrow">Admin Login</p><h2>Sign in to SOK Stock</h2><p>Uses the existing signed Admin session.</p></div>
+    <form id="sok-stock-login-form" action="/api/admin/login" method="post">
+      <label>Email<input autocomplete="username" name="email" required type="email" placeholder="elevationupscales@gmail.com"></label>
+      <label>Password<input autocomplete="current-password" name="password" required type="password"></label>
+      <button class="button button-primary" type="submit">Sign In</button>
+      <p class="catalog-status" id="sok-stock-login-status" role="status"></p>
+    </form>
+  </section>
+
+  <section id="sok-stock-dashboard" hidden>
+    <section class="catalog-summary" aria-label="SOK stock summary">
+      <article><span>Approved SKUs</span><strong id="stock-count-total">—</strong></article>
+      <article><span>Current</span><strong id="stock-count-current">—</strong></article>
+      <article><span>Stale</span><strong id="stock-count-stale">—</strong></article>
+      <article><span>Unverified</span><strong id="stock-count-unverified">—</strong></article>
+    </section>
+
+    <section class="catalog-panel">
+      <div class="admin-section-head">
+        <div><p class="eyebrow">Current SOK roster</p><h2>Supplier verification status</h2><p class="admin-muted">Blank supplier quantity is shown as <strong>Unverified</strong>, never zero or “In stock.”</p></div>
+        <div class="catalog-tools">
+          <label>Search<input id="stock-search" type="search" placeholder="SKU or model"></label>
+          <label>Status<select id="stock-filter"><option value="all">All</option><option value="CURRENT">Current</option><option value="CURRENT_ZERO">Current · zero</option><option value="STALE">Stale</option><option value="UNVERIFIED">Unverified</option></select></label>
+          <button class="button button-outline" id="stock-refresh" type="button">Refresh</button>
+        </div>
+      </div>
+      <div class="admin-table-scroll"><table class="catalog-table"><thead><tr><th>SKU / Model</th><th>Supplier quantity</th><th>Verified</th><th>Status</th><th>Next action</th></tr></thead><tbody id="stock-body"><tr><td colspan="5">Loading SOK stock…</td></tr></tbody></table></div>
+      <details class="stock-details"><summary>Technical boundaries</summary><p>Writes are limited to the SOK supplier quantity and supplier verification date. Catalog remains the product master. Physical On Hand, Shopify inventory, checkout, MAP, shipping/freight, public availability, purchase modes, leads, Doba, and supplier ordering are not changed here.</p></details>
+    </section>
+
+    <section class="catalog-panel" id="stock-intake-panel">
+      <div class="admin-section-head"><div><p class="eyebrow">Upload / Paste</p><h2>Prepare a stock verification</h2><p class="admin-muted">CSV columns: <code>sku,supplier_quantity,verified_date</code>. Quantity may be blank to remain unknown. Zero is an explicit verified value.</p></div><a class="button button-outline" id="stock-template" href="/api/admin/sok-stock/template">Download CSV Template</a></div>
+      <div class="stock-input-grid">
+        <label>Upload CSV<input id="stock-file" type="file" accept=".csv,text/csv,text/plain"></label>
+        <label class="stock-wide">Paste CSV<textarea id="stock-paste" rows="10" spellcheck="false" placeholder="sku,supplier_quantity,verified_date&#10;SK12V100PC,12,2026-09-08"></textarea></label>
+      </div>
+      <div class="catalog-form-actions"><button class="button button-primary" id="stock-preview" type="button">Preview Changes</button><button class="button button-outline" id="stock-clear" type="button">Clear</button><span class="catalog-status" id="stock-intake-status" role="status"></span></div>
+    </section>
+
+    <section class="catalog-panel" id="stock-preview-panel" hidden>
+      <div class="admin-section-head"><div><p class="eyebrow">Preview Changes</p><h2>Review before applying</h2><p class="admin-muted" id="stock-preview-summary">Nothing has been written.</p></div></div>
+      <div class="admin-table-scroll"><table class="catalog-table compact"><thead><tr><th>State</th><th>SKU</th><th>Before</th><th>After</th><th>Row result</th></tr></thead><tbody id="stock-preview-body"></tbody></table></div>
+      <div class="stock-confirm-box">
+        <label><input id="stock-confirm" type="checkbox"> I reviewed these exact SOK stock fields and confirm this apply.</label>
+        <button class="button button-primary" id="stock-apply" type="button" disabled>Confirm & Apply</button>
+      </div>
+    </section>
+
+    <section class="catalog-panel" id="stock-receipt-panel" hidden aria-live="polite">
+      <div class="admin-section-head"><div><p class="eyebrow">Receipt</p><h2 id="stock-receipt-title">Stock receipt</h2><p class="admin-muted" id="stock-receipt-summary"></p></div></div>
+      <pre class="stock-receipt" id="stock-receipt"></pre>
+    </section>
+  </section>
+</main>
+</body>
+</html>
