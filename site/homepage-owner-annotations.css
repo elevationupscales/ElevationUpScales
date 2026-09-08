@@ -109,6 +109,8 @@
   left:50%!important;
   width:min(470px,60%)!important;
   transform:translateX(-50%)!important;
+  isolation:isolate!important;
+  mix-blend-mode:normal!important;
 }
 .reference-sok-partnership{
   top:78px!important;
@@ -130,7 +132,23 @@
   width:56%!important;
   height:66%!important;
 }
-.reference-authorized{display:none!important}
+/* Emergency trust repair: the Elevation sub-logo must never share the SOK hero lockup.
+ * Keep Elevation identity in the page header; keep the hero product mark purely SOK. */
+.reference-storefront-hero__visual>.reference-authorized,
+.reference-storefront-hero__visual>.reference-authorized *,
+.reference-authorized{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
 
 .reference-trust-strip{
   gap:0;
