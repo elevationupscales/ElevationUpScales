@@ -1,8 +1,11 @@
 # Command Center Ecommerce Foundation Checkpoint
 
-Date: 2026-09-08  
-Branch: `work/command-center-ecommerce-foundation-0908`  
-Foundation commit: `2dd1dac478d43672cd87d4cead59fdbf4988a9a1`  
+Date: 2026-09-08
+
+Branch: `work/command-center-ecommerce-foundation-0908`
+
+Foundation commit: `2dd1dac478d43672cd87d4cead59fdbf4988a9a1`
+
 Status: development checkpoint; stop before merge or deployment
 
 ## Completed in this pass
