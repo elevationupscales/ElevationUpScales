@@ -94,6 +94,88 @@ Make the website capable of selling SOK products without Elevation holding inven
 - Tracking and supplier order reference can be written back to the order.
 - Returns/warranty remain operational exceptions, not a separate large system.
 
+### Verified supplier workflow requirements from correspondence
+
+The build should explicitly support the current manual SOK operating process so the owner does not need to reopen supplier email during each order.
+
+#### Supplier-order packet
+
+The current supplier workflow accepts a manual PO. The order record should therefore be able to generate or expose a supplier-order packet containing at minimum:
+
+- consignee/customer name;
+- customer contact phone;
+- shipping address;
+- exact SOK model;
+- quantity;
+- internal Elevation order reference;
+- supplier-order status;
+- supplier tracking/reference when returned.
+
+Do not expose dealer cost or private supplier terms in customer-facing views or public Git.
+
+#### Supplier fulfillment states
+
+The operating sequence should distinguish these states rather than collapsing them into one generic “processing” state:
+
+**Paid → Prepare Supplier Order → PO Submitted → Supplier Invoice/Release Pending → Supplier Released → Tracking Received → Shipped → Complete**
+
+The implementation does not need to automate supplier payment or ordering yet; it needs to make the next manual action obvious.
+
+#### Processing expectations
+
+The current supplier process supports:
+
+- manual PO submission while the dealer portal is still under construction;
+- no fixed daily order cutoff;
+- shipment typically on the next business day after supplier release/payment confirmation;
+- tracking normally returned the same day the order ships.
+
+Command Center should therefore surface exceptions such as:
+
+- PO not submitted after payment;
+- supplier release still pending;
+- expected tracking not received after shipment/release;
+- customer tracking not yet surfaced.
+
+#### Inventory freshness
+
+Until a live dealer portal/feed exists, supplier inventory is currently provided through periodic spreadsheet updates.
+
+Products should therefore track:
+
+- last inventory confirmation date/time;
+- source of the inventory confirmation;
+- freshness state such as Current / Aging / Stale;
+- whether checkout may continue, requires review, or must pause when stock confirmation becomes stale.
+
+Do not store raw supplier inventory counts in public Git.
+
+#### Customer-visible shipment behavior
+
+Current supplier correspondence confirms:
+
+- dealer/wholesale pricing should not be exposed to the end customer;
+- normal continental-U.S. fulfillment is distinct from Hawaii/Alaska specialized shipping;
+- the supplier brand may appear on the shipping label.
+
+The customer experience should not promise anonymous/unbranded shipment. It should instead avoid exposing wholesale pricing and should accurately represent that supplier-branded fulfillment may occur.
+
+#### Cancellation/change handling
+
+Orders need an explicit pre-shipment change/cancellation exception path. The system should surface a manual action to contact the supplier before shipment rather than treating a change request as automatically approved.
+
+#### Warranty / quality-return handling
+
+For supplier-confirmed product-quality issues, the workflow should support:
+
+**Issue reported → supplier review → return label/pickup arranged → replacement or refund → order exception closed**
+
+Customer-support notes should preserve the supplier case/reference and outcome without exposing private supplier correspondence publicly.
+
+#### Product/media source
+
+Until a packaged dealer media feed exists, approved product media/specification sourcing may rely on current supplier website assets and supplier-provided manuals/specifications, subject to the existing authorization/MAP controls.
+
 ## Phase 2 — Build the Hawaii order-first lane
 
 ### Goal
@@ -117,6 +199,65 @@ Accept and qualify Hawaii demand without requiring Elevation to own a warehouse 
 → Honolulu receiving  
 → pickup / local delivery / outer-island routing  
 → completion.
+
+### Verified Hawaii receiving / warehouse requirements from correspondence
+
+The Hawaii Logistics workspace should preserve enough structured information to qualify receiving/storage providers without reopening email threads.
+
+For a warehouse/receiving review, the protected shipment profile should be able to represent:
+
+- manufacturer;
+- exact model;
+- voltage;
+- watt-hours;
+- dimensions;
+- weight;
+- SDS;
+- UN38.3 test summary;
+- confirmation that batteries are new, undamaged, non-defective, and properly packaged/labeled;
+- expected initial unit/pallet volume;
+- expected recurring monthly volume when known;
+- pallet dimensions, weight, and units per pallet;
+- expected storage duration;
+- maximum expected inventory;
+- estimated customer-order frequency;
+- typical order size;
+- destination/delivery areas;
+- will-call pickup need;
+- local delivery need;
+- neighbor/outer-island delivery need;
+- returns/damaged-battery process;
+- requested program start date;
+- expected program duration.
+
+These fields are not all required from the customer at checkout. They belong to the internal Logistics qualification profile and should be populated progressively as the program becomes real.
+
+### Receiving capability states
+
+The Logistics lane should distinguish between:
+
+- receiving provider under review;
+- receiving approved for new lithium;
+- storage approved;
+- customer will-call approved;
+- local delivery approved;
+- outer-island forwarding approved;
+- used-lithium prohibited / unsupported;
+- rate/contract pending;
+- inactive / rejected.
+
+Do not publish receiving partner names, rates, private warehouse terms, or private correspondence in public Git.
+
+### First-order destination completion
+
+The Hawaii workflow should not stop at “arrived Honolulu.” It must complete through one of the supported terminal states:
+
+- customer will-call released;
+- local delivery complete;
+- outer-island movement complete;
+- exception / return / damage resolution complete.
+
+The build should preserve proof/status of receiving handoff and final customer release.
 
 ### No-go rules
 
@@ -162,6 +303,15 @@ Add/confirm a SOK fulfillment state that makes the owner sequence obvious:
 
 Keep the existing order table as source of truth. Do not create a second order database.
 
+Orders should also support the operational exceptions verified above:
+
+- pre-shipment change/cancellation request;
+- supplier release pending;
+- tracking overdue;
+- supplier quality-return / warranty case;
+- replacement pending;
+- refund pending.
+
 ### Products
 
 Add/confirm:
@@ -181,6 +331,15 @@ Replace technical clutter with one first-order Hawaii checklist:
 
 Technical DG/carrier details remain behind the operating status and are shown only when needed.
 
+The Logistics record should also support:
+
+- origin handoff status;
+- receiving-provider qualification status;
+- storage status when used;
+- will-call / local-delivery / outer-island method;
+- final customer release status;
+- damaged/return exception status.
+
 ### Today
 
 Surface only actionable exceptions:
@@ -190,7 +349,9 @@ Surface only actionable exceptions:
 - tracking overdue;
 - Hawaii order awaiting route qualification;
 - Hawaii order ready for SOK preparation package;
-- SOK warehouse confirmation overdue.
+- SOK warehouse confirmation overdue;
+- Hawaii receiving approval/rate still pending on an active order;
+- final customer release/delivery overdue.
 
 ## Deployment sequence
 
@@ -214,7 +375,10 @@ Release A is ready only when:
 - captured SOK orders enter Command Center Orders;
 - exact supplier SKU/model is preserved;
 - owner can prepare the supplier order from the order record;
+- the order record contains the supplier-required consignee/contact/address/model/quantity fields;
 - tracking can be recorded and surfaced;
+- supplier fulfillment exceptions can be surfaced without reopening Gmail;
+- inventory freshness is visible;
 - MAP protections remain intact;
 - no customer/supplier private data is added to public Git.
 
@@ -223,6 +387,7 @@ Release B is ready only when:
 - Hawaii cannot bypass review gates;
 - the first-order checklist is tied to exact SKU, quantity and route;
 - SOK preparation requirements can be generated/read without exposing private carrier rates;
+- receiving qualification can capture the required battery/volume/storage/delivery information;
 - payment is not collected when shipment remains unqualified;
 - the workflow clearly ends in Hawaii pickup/delivery completion.
 
@@ -233,5 +398,6 @@ Release B is ready only when:
 3. Audit all currently sellable SOK catalog items for exact identity, MAP state, availability freshness and checkout readiness.
 4. Build the smallest missing SOK order-management controls only.
 5. Build the Hawaii first-order checklist/status flow immediately after the dropship release candidate is clean.
-6. Use the next real Hawaii inquiry/order to complete the exact preparation package for Kam/SOK.
-7. Do not wait for warehouse inventory financing before shipping these foundational system improvements.
+6. Add the verified receiving-qualification fields to the protected Logistics workflow, not to customer checkout.
+7. Use the next real Hawaii inquiry/order to complete the exact preparation package for Kam/SOK.
+8. Do not wait for warehouse inventory financing before shipping these foundational system improvements.
