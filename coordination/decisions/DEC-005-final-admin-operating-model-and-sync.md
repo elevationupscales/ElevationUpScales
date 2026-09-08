@@ -38,7 +38,20 @@ Admin consolidation releases follow:
 
 **current main → focused work branch → code → QA → diff check → isolated preview when available → management approval → merge → production deploy → live verification → receipt → new accepted baseline**
 
-Release A retires Marketplace active operations and simplifies Command Center / Leads navigation. Release B consolidates commerce navigation and presentation without changing protected commerce business rules. Shipping/SOK simplification and destructive dead-code cleanup remain later releases.
+### Release A — Command Center cleanup + Marketplace retirement
+- retire Marketplace active Admin/public surfaces;
+- preserve historical Marketplace D1/R2 data;
+- remove Marketplace aggregation from routine Admin operations;
+- reduce the Leads workspace to customer leads, Supplier Growth, Solar, and Work With Us views;
+- remove duplicate Overview, Analytics, System / QA, All Records, and Full Console navigation from the Leads workspace.
+
+### Release B — Commerce consolidation
+- keep only Products & Listings, Inventory, and Channels & Sync as top-level commerce workspaces;
+- treat Commerce Pricing and Promotions as secondary Products & Listings tools;
+- treat Commerce Logistics/source-provider configuration as a secondary Channels & Sync tool;
+- do not change product truth, supplier truth, pricing rules, inventory ownership, channel writer ownership, checkout, or fulfillment behavior.
+
+Release A and Release B may be promoted together when the combined diff remains limited to presentation/routing plus Marketplace retirement and all protected system boundaries remain unchanged. Shipping/SOK simplification and destructive dead-code cleanup remain later releases.
 
 ## Catalog / sync rule
 Catalog remains the product master. Sync-state records are relationship/health records and must not become a second product database.
