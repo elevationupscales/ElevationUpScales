@@ -30,90 +30,91 @@ Never place dealer/wholesale cost, raw supplier inventory, private supplier corr
 
 Operate a dropship-first Shopify catalog supporting Elevation's RV, outdoor, off-grid, lithium and marketplace business while preserving MAP, supplier, fulfillment and management boundaries.
 
-## SOK supplier approval — verified 2026-09-08
+## SOK supplier / brand-use verification — 2026-09-08
 
-SOK confirmed the current dropship workflow and publication support:
+Verified supplier facts support the current Shopify SOK program:
 
-- dealer orders may be submitted directly to Kam by email using PDF POs while the dealer portal is under construction;
-- required order fields are consignee name, phone, shipping address, model and quantity;
-- current free-shipping pricing covers normal residential/commercial delivery in the continental U.S., excluding Hawaii and Alaska;
-- dealer/wholesale cost is not displayed to customers;
-- SOK appears on the shipping label;
-- after payment, normal flow is PO received → invoice → payment → next-business-day shipment → tracking shared;
-- product-quality returns/RMA are handled by SOK with return label and replacement/refund workflow;
-- weekly inventory lists are available until the new live dealer inventory system launches;
-- SOK expressly authorized use of images, descriptions, videos, specs and manuals from the SOK website;
-- resale prices must match SOK website pricing / MAP and no additional coupon or discount is permitted.
+- SOK is working with Elevation through its dealer-partnership / dropship workflow.
+- Dealer orders may currently be submitted by email using PDF purchase orders while the dealer portal is under construction.
+- Standard dropship pricing/service covers eligible continental-U.S. residential and commercial addresses; Hawaii and Alaska are excluded from that standard Shopify offer.
+- Dealer/wholesale cost is not displayed to customers.
+- SOK supplies tracking after shipment and handles product-quality return/RMA replacement/refund workflow.
+- SOK authorized Elevation to use the SOK brand logo and authorized use of official SOK website images, descriptions, videos, specs and manuals for listings.
+- SOK requires resale pricing to follow its current website/MAP and does not authorize additional coupons or discounts on MAP-controlled products.
 
-## SOK Shopify launch receipt — 2026-09-08
+Shopify product records now carry internal `Brand-Media-Authorized`, `MAP-Controlled`, `MAP-Verified`, `No-Discount`, and audit-verification tags. Each SOK product also carries internal `elevation.brand_authorization` and `elevation.authorization_verified_on` metafields.
 
-Owner directed immediate completion and publication of the SOK Shopify drafts with strict MAP compliance, customer-friendly titles and photos on all listings.
+Do not publicly claim a broader formal certification such as `Authorized Dealer` unless SOK supplies that exact designation in writing. The current internal record states the narrower verified facts: dealer/dropship relationship plus brand/media-use authorization and MAP control.
 
-### Launch result
+## SOK full listing audit and Online Store publication — 2026-09-08
 
-**9 SOK products switched from DRAFT to ACTIVE.**  
-**Bulk status result: 9 succeeded / 0 failed.**
+Owner directed a SKU-by-SKU verification, strict MAP check, removal of promotional carryover, brand-authorization recording and publication when verified.
 
-All nine were post-launch verified as ACTIVE in Shopify with featured product media and exact MAP pricing.
+### Result
 
-### Active SOK catalog and MAP
+- **9 / 9 SOK products passed current MAP verification.**
+- **9 / 9 SOK products are ACTIVE.**
+- **9 / 9 are confirmed in Shopify's Online Store publication record.**
+- **0 active Shopify discounts were present at final audit.**
+- **0 compare-at prices remain on the SOK variants.**
+- **0 selling plans are attached to the SOK products.**
+- **Each SOK product has exactly one READY product image.**
+- No `Buy More & Save`, quantity-discount banner, compare-at-sale presentation, or other SOK-site promotional treatment was carried into Elevation Shopify.
+- No supplier inventory was invented. Products without verified Shopify sellable availability remain unavailable rather than being forced oversellable.
 
-1. **Premium 12V 100Ah Group 24 LiFePO4 Battery — SK12V100PC** — **$319**
+### Verified active catalog / current MAP
+
+1. **Premium 12V 100Ah Bluetooth LiFePO4 Battery — SK12V100PC** — **$319**
 2. **Premium 12V 100Ah Heated LiFePO4 Battery — SK12V100H** — **$369**
 3. **Premium 12V 206Ah Heated LiFePO4 Battery — SK12V206H** — **$749**
-4. **Premium 12V 206Ah Heated LiFePO4 Battery — SK12V206PH** — **$750**
+4. **Premium Marine Grade 12V 206Ah Heated LiFePO4 Battery — SK12V206PH** — **$750**
 5. **Premium 12V 280Ah Heated LiFePO4 Battery — SK12V280H** — **$999**
-6. **Premium 12V 314Ah Heated LiFePO4 Battery — SK12V314PH** — **$1,099**
+6. **Premium 12V 314Ah Heated LiFePO4 Battery with Victron CAN — SK12V314PH** — **$1,099** — supplier currently presents this model as pre-order with an expected ship timing around September 20, 2026; Shopify copy must preserve that availability warning until supplier status changes.
 7. **Premium 24V 100Ah LiFePO4 Battery — SK24V100** — **$751**
-8. **Premium 24V 150Ah Heated LiFePO4 Battery — SK24V150PH** — **$1,149**
+8. **Premium 24V 150Ah Heated LiFePO4 Battery with Victron CAN — SK24V150PH** — **$1,149**
 9. **Premium 51.2V 100Ah 5.12kWh Rack LiFePO4 Battery — SK48V100N** — **$1,199**
 
-### MAP controls applied
+### Listing corrections made during verification
 
-- exact current MAP prices enforced;
-- compare-at prices cleared on the launch pass;
-- existing `MAP-Verified` / `No-Discount` controls preserved;
-- no additional coupon or markdown introduced;
-- supplier cost remains protected and is not exposed publicly.
+- **SK12V100PC:** customer title and copy aligned to the current SOK page: 12V 100Ah, Bluetooth, clear sealed enclosure, serviceable design, current published electrical/size/warranty data. The unverified `Group 24` title wording was removed.
+- **SK12V100H:** Bluetooth, built-in heater, smart BMS, serviceable design, discharge information, weight and warranty aligned to current SOK product information.
+- **SK12V206H:** Bluetooth, built-in heater, smart BMS, serviceable design, discharge information, weight and warranty aligned to current SOK product information.
+- **SK12V206PH:** title now identifies the current SOK marine-grade model; sealed enclosure, heater, BMS, series/parallel support, discharge information, weight and warranty aligned to current SOK product information.
+- **SK12V280H:** unsupported `aluminum case` wording was removed; Bluetooth, heater, BMS, serviceability, discharge information, weight and warranty were aligned to current SOK product information.
+- **SK12V314PH:** Victron CAN, Bluetooth 5.1, self-heating, IP67, fire-suppression feature, discharge information and weight were aligned to current SOK information; current supplier pre-order / expected-ship warning was added.
+- **SK24V100:** unsupported Bluetooth wording/tag was removed; serviceable design, smart BMS, discharge information, weight and warranty were aligned to the current SOK page.
+- **SK24V150PH:** Victron CAN, Bluetooth 5.1, self-heating, IP67, fire-suppression feature, discharge information and weight were aligned to current SOK information.
+- **SK48V100N:** copy was tightened to current official facts: 51.2V nominal / 100Ah / 5.12kWh, smart BMS, 100W heater, pre-charge circuit, RS485/CANBus, rack mounting, warranty and stated cycle-life conditions. Earlier unverified Bluetooth-OTA/app-protocol claims were removed.
 
-### Media controls applied
+### Title standard
 
-- SK12V100PC and SK48V100N already had Shopify-hosted product imagery;
-- official SOK website images were uploaded to Shopify and applied to SK12V100H, SK12V206H, SK12V206PH, SK24V100, SK12V280H, SK12V314PH and SK24V150PH;
-- post-launch Shopify verification shows featured media for all nine active SOK products.
+Customer-facing SOK titles use:
 
-### Title cleanup applied
+**Premium → voltage/capacity → key verified feature/form factor → exact SOK model number**
 
-Customer-facing SOK titles now use this standard:
+Do not lead customer-facing titles with `SOK`; preserve `SOK Battery` as vendor/brand and keep the exact model number for traceability.
 
-**Premium → voltage/capacity → key feature/form factor → exact SOK model number**
+## SOK MAP / promotion controls going forward
 
-Do not lead customer-facing titles with `SOK`; preserve SOK as the vendor/brand and preserve the exact model number at the end for traceability.
-
-## Current Shopify state after SOK launch
-
-- SOK ACTIVE: **9**
-- SOK launch failures: **0**
-- Peter's non-lithium practice products remain separate from this SOK launch and should continue through their own Doba/source verification gates.
-
-## SOK operating controls going forward
-
-- Never advertise below current SOK MAP.
-- No automatic discount, compare-at sale treatment, coupon, free gift or promotional mechanism may reduce effective advertised price below MAP without written SOK authorization.
-- Recheck SOK retail/MAP before material price changes or campaigns.
-- Keep Lower-48 normal dropship and Hawaii/Alaska specialized logistics separate unless the applicable fulfillment route is operationally supported.
-- Keep current weekly inventory reconciliation in the operational workflow until SOK's live dealer inventory system is available.
-- Do not expose protected supplier cost or private commercial terms.
+- Recheck current SOK public retail/MAP before any future price change, campaign or new listing.
+- Never advertise below current SOK MAP without written SOK authorization.
+- Do not apply automatic discounts, compare-at sale treatments, coupons, free gifts, quantity discounts or promotional mechanisms to MAP-controlled SOK products without written approval.
+- Do not copy SOK-site `Buy More & Save` or other promotional banners into Elevation Shopify unless separately approved in writing for Elevation.
+- Default SOK product media presentation is clean product imagery; avoid promotional graphics unless specifically approved.
+- Keep Lower-48 standard dealer dropship and Hawaii/Alaska specialized logistics separate.
+- Do not fabricate supplier inventory or force overselling when current sellable availability is not verified.
+- Reconcile supplier availability updates as they arrive.
+- Do not expose supplier cost or protected commercial terms.
 
 ## Peter workflow
 
-Peter may use the Shopify Manager for catalog review, product edits, collections, inventory/status checks, Doba candidate review, publication-readiness review, and Shopify/POS operating support.
+Peter may use the Shopify Manager for catalog review, product edits, collections, inventory/status checks, Doba candidate review, publication-readiness review, Shopify/POS operating support and recurring MAP/content audits.
 
 ## NOW
 
-- Monitor the nine live SOK listings for storefront presentation, checkout behavior and MAP integrity.
-- Keep SOK discounting locked down.
-- Reconcile weekly SOK inventory updates into the operating workflow without exposing raw protected inventory publicly.
+- Monitor the nine published SOK Online Store listings for presentation, checkout behavior, availability, MAP integrity and supplier availability changes.
+- Keep SOK promotions/discounting locked down.
+- Update SK12V314PH availability copy when SOK changes it from pre-order/release status.
 - Continue verification on Peter's non-lithium Doba practice drafts separately.
 
 ## Protected scope
