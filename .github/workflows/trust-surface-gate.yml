@@ -1,0 +1,126 @@
+name: Trust Surface Repair Gate
+
+on:
+  push:
+    branches:
+      - 'work/trust-repair-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-trust-surface-repair
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    name: Validate trust repairs and deploy isolated preview
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out repair candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify current-main lineage and narrow scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --prune
+          current_main="$(git rev-parse origin/main)"
+          candidate="$(git rev-parse HEAD)"
+          git merge-base --is-ancestor "$current_main" "$candidate"
+          changed="$(git diff --name-only "$current_main"...HEAD)"
+          printf '%s\n' "$changed"
+          test -n "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/trust-repair-runtime\.js|site/script\.js|site/labor-day-promo\.js|site/checkout/index\.html|site/sok-batteries\.js|\.github/workflows/trust-surface-gate\.yml)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected trust-repair scope:" >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+          echo "CURRENT_MAIN=$current_main" >> "$GITHUB_ENV"
+          echo "CANDIDATE_SHA=$candidate" >> "$GITHUB_ENV"
+
+      - name: Run canonical QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+          git diff --exit-code
+
+      - name: Assert trust repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/trust-repair-runtime.js
+          node --check site/script.js
+          node --check site/labor-day-promo.js
+          node --check site/sok-batteries.js
+          test -f site/assets/brands/sok/sk48v100n/home-crop.webp
+          grep -q 'sk48v100n/home-crop.webp' site/trust-repair-runtime.js
+          grep -q 'confirmed Honolulu terminal / pickup location' site/checkout/index.html
+          ! grep -qi 'our Honolulu warehouse / pickup location' site/checkout/index.html
+          ! grep -qi 'Labor Day coupon' site/checkout/index.html
+          grep -q 'Promotion code' site/checkout/index.html
+          grep -q 'OFF-GRID POWER • SUPPLY • LOGISTICS' site/checkout/index.html
+          grep -q 'Show all published products' site/trust-repair-runtime.js
+          grep -q '18 curated batteries' site/trust-repair-runtime.js || grep -q 'shown >= 18' site/trust-repair-runtime.js
+          grep -q 'trust-repair-runtime.js' site/script.js
+          grep -q 'trust-repair-runtime.js' site/labor-day-promo.js
+          grep -q 'trust-repair-runtime.js' site/sok-batteries.js
+          ! grep -Rqi 'Licensed Lithium Battery Retailer' site/checkout site/trust-repair-runtime.js
+
+      - name: Deploy isolated trust preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=trust-repair-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run preview regression suite
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "${BASE%/}"
+
+      - name: Smoke trust surfaces
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          curl -fsSL "$base/" -o /tmp/home.html
+          curl -fsSL "$base/lithium-batteries" -o /tmp/lithium.html
+          curl -fsSL "$base/sok-batteries" -o /tmp/sok.html
+          curl -fsSL "$base/checkout/" -o /tmp/checkout.html
+          curl -fsSL "$base/trust-repair-runtime.js" -o /tmp/trust.js
+          curl -fsSL "$base/assets/brands/sok/sk48v100n/home-crop.webp" -o /tmp/sk48.webp
+          grep -q 'Promotion code' /tmp/checkout.html
+          grep -q 'confirmed Honolulu terminal / pickup location' /tmp/checkout.html
+          ! grep -qi 'Labor Day coupon' /tmp/checkout.html
+          ! grep -qi 'our Honolulu warehouse / pickup location' /tmp/checkout.html
+          grep -q 'Show all published products' /tmp/trust.js
+          grep -q 'sk48v100n/home-crop.webp' /tmp/trust.js
+          test -s /tmp/sk48.webp
+
+      - name: Preview receipt
+        shell: bash
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### Elevation trust repair preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Main parent: $CURRENT_MAIN" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Trust repairs: Honolulu wording, SK48 product identity, retail branding guard, lithium curation, promotion cleanup.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production promotion: NOT PERFORMED BY THIS WORKFLOW' >> "$GITHUB_STEP_SUMMARY"
