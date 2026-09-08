@@ -27,5 +27,24 @@ section[aria-labelledby="signal-marketplace-heading"],
 .admin-system-grid>div:has(#system-marketplace-email),
 .admin-qa-buttons button[data-qa-category]{display:none!important}
 
+/* Release A navigation consolidation: Leads page is a Leads workspace only.
+   Overview, Analytics, System / QA and dense Full Console live in the canonical
+   Admin rail and no longer appear as a second competing navigation system. */
+[data-admin-view="overview"],
+[data-admin-view="analytics"],
+[data-admin-view="system"],
+[data-admin-view="table"],
+[data-admin-view="display_all"]{display:none!important}
+#eus-admin-view-nav .eus-admin-nav-group:nth-child(2),
+#eus-admin-view-nav .eus-admin-nav-group:nth-child(3){display:none!important}
+.eus-admin-workspace-nav__head div span{font-size:0}
+.eus-admin-workspace-nav__head div span::after{content:"LEADS";font-size:.62rem}
+.eus-admin-workspace-nav__head div strong{font-size:0}
+.eus-admin-workspace-nav__head div strong::after{content:"Lead Views";font-size:.95rem}
+.eus-admin-workspace-nav__note strong{font-size:0}
+.eus-admin-workspace-nav__note strong::after{content:"One lead workspace.";font-size:.7rem}
+.eus-admin-workspace-nav__note span{font-size:0}
+.eus-admin-workspace-nav__note span::after{content:"Customer, supplier, solar and Work With Us views stay separate.";font-size:.65rem}
+
 @media(max-width:1000px){.admin-signal-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.admin-signal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
