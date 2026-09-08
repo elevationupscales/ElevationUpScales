@@ -21,24 +21,39 @@
   });
 
   const NAV = Object.freeze([
-    ["Operate", [
-      ["Overview", "/admin", "overview"],
-      ["Orders & Fulfillment", "/admin-store-orders", "orders"],
-      ["Leads", "/admin-listings#leads", "leads"],
-    ]],
-    ["Commerce", [
-      ["Products & Listings", "/admin-catalog", "products"],
-      ["Inventory", "/admin-inventory", "inventory"],
-      ["Channels & Sync", "/admin-channels", "channels"],
-    ]],
-    ["Logistics", [
-      ["Shipping & Logistics", "/admin-lithium-shipping", "shipping"],
-    ]],
-    ["Performance & System", [
-      ["Analytics", "/admin-analytics", "analytics"],
-      ["System / QA", "/admin-system", "system"],
-    ]],
+    ["Today", "/admin", "today"],
+    ["Orders", "/admin-store-orders", "orders"],
+    ["Products", "/admin-catalog", "products"],
+    ["Leads", "/admin-listings#leads", "leads"],
+    ["Logistics", "/admin-lithium-shipping", "logistics"],
+    ["System", "/admin-system", "system"],
   ]);
+
+  const CONTEXT_NAV = Object.freeze({
+    products: [
+      ["Catalog", "/admin-catalog"],
+      ["Inventory & Sourcing", "/admin-inventory"],
+      ["Channels & Sync", "/admin-channels"],
+      ["Imports", "/admin-commerce-logistics"],
+      ["Pricing", "/admin-commerce-pricing"],
+      ["Promotions", "/admin-promotion"],
+    ],
+    leads: [
+      ["Customer Leads", "/admin-listings#leads"],
+      ["Supplier Growth", "/admin-listings#supplier-leads"],
+      ["Solar", "/admin-listings#solar"],
+      ["Work With Us", "/admin-listings#work-with-us"],
+      ["Portal-ready", "/admin-listings#portal-ready"],
+    ],
+    logistics: [
+      ["Shipping Queue", "/admin-lithium-shipping"],
+      ["SOK Operations", "/admin-sok"],
+    ],
+    system: [
+      ["Health & QA", "/admin-system"],
+      ["Analytics", "/admin-analytics"],
+    ],
+  });
 
   const text = (value) => String(value ?? "").trim();
   const money = (cents) => new Intl.NumberFormat("en-US", {
@@ -69,14 +84,11 @@
 
   function currentKey() {
     const path = location.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
-    if (path === "/admin") return "overview";
+    if (path === "/admin") return "today";
     if (path.includes("admin-store-orders")) return "orders";
-    if (path.includes("admin-catalog") || path.includes("admin-commerce-pricing") || path.includes("admin-promotion")) return "products";
-    if (path.includes("admin-inventory")) return "inventory";
-    if (path.includes("admin-channels") || path.includes("admin-commerce-logistics")) return "channels";
-    if (path.includes("admin-lithium-shipping") || path.includes("admin-sok")) return "shipping";
-    if (path.includes("admin-analytics")) return "analytics";
-    if (path.includes("admin-system")) return "system";
+    if (path.includes("admin-catalog") || path.includes("admin-inventory") || path.includes("admin-channels") || path.includes("admin-commerce-logistics") || path.includes("admin-commerce-pricing") || path.includes("admin-promotion")) return "products";
+    if (path.includes("admin-lithium-shipping") || path.includes("admin-sok")) return "logistics";
+    if (path.includes("admin-analytics") || path.includes("admin-system")) return "system";
     if (path.includes("admin-listings")) return "leads";
     return "";
   }
@@ -94,6 +106,20 @@
     link.href = "/admin-command-center.css?v=5.1.0";
     link.dataset.eusCommandCenterCss = "1";
     document.head.append(link);
+  }
+
+  function syncContextActive(context) {
+    if (!context) return;
+    const currentPath = location.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
+    const currentHash = location.hash || "";
+    context.querySelectorAll("a").forEach((link) => {
+      const target = new URL(link.href, location.origin);
+      const targetPath = target.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
+      const active = targetPath === currentPath && (!target.hash || target.hash === currentHash);
+      link.classList.toggle("is-active", active);
+      if (active) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
   }
 
   function installShell() {
@@ -115,11 +141,9 @@
         <img src="/assets/logo-mark.webp" alt="">
         <span><strong>Elevation Operations</strong><small>Situation · Priority · Action</small></span>
       </a>
-      ${NAV.map(([group, items]) => `
-        <section class="eus-admin-nav-group">
-          <strong>${group}</strong>
-          ${items.map(([name, url, key]) => `<a href="${url}"${key === active ? ' class="is-active" aria-current="page"' : ""}>${name}</a>`).join("")}
-        </section>`).join("")}
+      <nav class="eus-admin-primary-nav" aria-label="Command Center">
+        ${NAV.map(([name, url, key]) => `<a href="${url}"${key === active ? ' class="is-active" aria-current="page"' : ""}>${name}</a>`).join("")}
+      </nav>
       <div class="eus-admin-rail__foot">Elevation UpScales, Inc.<br><a href="/">Open public website</a></div>`;
 
     const mobile = document.createElement("div");
@@ -130,7 +154,18 @@
     holder.className = "eus-admin-main";
     main.parentNode.insertBefore(app, main);
     app.append(rail, holder);
-    holder.append(mobile, main);
+    holder.append(mobile);
+    const contextItems = CONTEXT_NAV[active] || [];
+    if (contextItems.length) {
+      const context = document.createElement("nav");
+      context.className = "eus-admin-context-nav";
+      context.setAttribute("aria-label", `${active} tools`);
+      context.innerHTML = contextItems.map(([name, url]) => `<a href="${url}">${name}</a>`).join("");
+      holder.append(context);
+      syncContextActive(context);
+      window.addEventListener("hashchange", () => syncContextActive(context));
+    }
+    holder.append(main);
 
     mobile.querySelector("[data-eus-admin-menu]")?.addEventListener("click", () => app.classList.toggle("is-nav-open"));
     rail.addEventListener("click", (event) => {
@@ -311,7 +346,7 @@
       ["Listings out of sync", snapshot.sync?.ok ? numberValue(syncCounts.outOfSync) : null, "Channel/source relationships needing review.", "/admin-channels", "is-warning", 58],
       ["Supplier rechecks", shipping.supplierRechecks, "Lithium supplier availability needs a fresh check.", "/admin-lithium-shipping", "is-warning", 55],
       ["Customer confirmations", shipping.confirmations, "Hawaii batch lines waiting on customer approval.", "/admin-lithium-shipping", "is-warning", 50],
-      ["Portal handoffs ready", handoffReady, "Qualified project records ready for Technician Portal handoff.", "/admin-listings#leads", "", 45],
+      ["Portal handoffs ready", handoffReady, "Qualified project records ready for Technician Portal handoff.", "/admin-listings#portal-ready", "", 45],
       ["Doba CSV snapshot", snapshot.doba?.ok && !doba.latestSuccessfulImport ? 1 : 0, doba.latestSuccessfulImport ? "A successful supplier import is recorded." : "No successful supplier snapshot import is recorded.", "/admin-channels#doba-csv-sync", "is-warning", 40],
     ].map(([label, count, note, href, kind, weight]) => ({ label, count, note, href, kind, weight }));
 
@@ -319,7 +354,7 @@
     const programs = [
       { label: "Solar", value: snapshot.operations?.ok ? `${numberValue(signals.solarLeadCreated)} leads` : "N/A", note: snapshot.operations?.ok ? `${numberValue(signals.solarCompletedSubmitted)} completed/submitted builds` : "Solar signal unavailable", href: "/admin-listings#solar", kind: "" },
       { label: "Supplier Growth", value: "LEADS", note: "Supplier relationships are tracked inside Leads, not as a separate operating system.", href: "/admin-listings#supplier-leads", kind: "" },
-      { label: "Technician Portal", value: inPortal === null ? "N/A" : `${inPortal} in portal`, note: handoffReady === null ? "Opportunity data unavailable" : `${handoffReady} handoff ready · ${wonNotPortal} won not in portal`, href: "/admin-listings#leads", kind: handoffReady ? "is-warning" : "" },
+      { label: "Technician Portal", value: inPortal === null ? "N/A" : `${inPortal} in portal`, note: handoffReady === null ? "Opportunity data unavailable" : `${handoffReady} handoff ready · ${wonNotPortal} won not in portal`, href: "/admin-listings#portal-ready", kind: handoffReady ? "is-warning" : "" },
       { label: "Lead Core", value: snapshot.operations?.ok ? (health.leadCore === "ok" ? "HEALTHY" : upperState(health.leadCore)) : "N/A", note: snapshot.operations?.ok ? `Backend ${upperState(health.backend)} · Notifications ${upperState(health.notifications)}` : "Operations health unavailable", href: "/admin-system", kind: health.leadCore === "ok" ? "is-good" : "is-warning" },
     ];
 

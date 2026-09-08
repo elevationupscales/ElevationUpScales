@@ -7,30 +7,15 @@
 
   const STORAGE_VIEW = "eus-admin-workspace-view-v2";
   const STORAGE_PRESENTATION = "eus-admin-workspace-presentation-v1";
-  const STORAGE_NAV = "eus-admin-workspace-nav-v1";
-
   const viewLabels = {
-    projects: "Leads",
-    suppliers: "Supplier Leads",
-    solar: "Solar Activity",
-    marketplace: "Listings",
-    followup: "Marketplace Follow-Up",
+    projects: "Customer Leads",
+    suppliers: "Supplier Growth",
+    solar: "Solar",
     work: "Work With Us",
-    overview: "Daily Overview",
-    analytics: "Analytics",
-    system: "System / QA",
-    table: "All Records",
-    display_all: "Full Console",
+    portal: "Portal-ready",
   };
-  const navGroups = [
-    { label: "Work", views: ["projects", "suppliers", "solar", "marketplace", "followup", "work"] },
-    { label: "Insights", views: ["overview", "analytics"] },
-    { label: "Administration", views: ["system", "table", "display_all"] },
-  ];
-  const viewShortLabels = { projects:"LD", suppliers:"SL", solar:"SO", marketplace:"MK", followup:"FU", work:"WW", overview:"OV", analytics:"AN", system:"QA", table:"AR", display_all:"FC" };
-  const viewHashes = { projects:"leads", suppliers:"supplier-leads", solar:"solar", marketplace:"marketplace", followup:"marketplace-follow-up", work:"work-with-us", overview:"overview", analytics:"analytics", system:"system", table:"all-records", display_all:"full-console" };
+  const viewHashes = { projects:"leads", suppliers:"supplier-leads", solar:"solar", work:"work-with-us", portal:"portal-ready" };
   const hashViews = Object.fromEntries(Object.entries(viewHashes).map(([view, hash]) => [hash, view]));
-  const navCountSources = { projects:"opp-count-projects", solar:"signal-action-required", marketplace:"summary-pending", followup:"followup-metric-needed", system:"summary-issues" };
 
   const topChildren = [...dashboard.children];
   const statusStrip = $("eus-overview-status-strip");
@@ -50,23 +35,10 @@
   const frame = document.createElement("div");
   frame.className = "eus-admin-workspace-frame";
   frame.innerHTML = `
-    <aside class="eus-admin-workspace-nav" aria-label="Control Center views">
-      <div class="eus-admin-workspace-nav__head">
-        <div><span>CONTROL CENTER</span><strong>Workspace</strong></div>
-        <button type="button" id="eus-admin-nav-toggle" aria-label="Collapse workspace navigation" title="Collapse navigation">‹</button>
-      </div>
-      <nav id="eus-admin-view-nav">
-        ${navGroups.map((group) => `<section class="eus-admin-nav-group" aria-label="${group.label}"><strong>${group.label}</strong>${group.views.map((key) => `<button type="button" data-admin-view="${key}" data-short="${viewShortLabels[key]}"><span>${viewLabels[key]}</span>${navCountSources[key] ? `<small data-admin-nav-count="${navCountSources[key]}" hidden></small>` : ""}</button>`).join("")}</section>`).join("")}
-      </nav>
-      <div class="eus-admin-workspace-nav__note">
-        <strong>One record system.</strong>
-        <span>Views organize existing records only.</span>
-      </div>
-    </aside>
     <div class="eus-admin-workspace-main">
       <header class="eus-admin-view-head">
-        <div><span class="eyebrow">Authenticated Workspace</span><h2 id="eus-admin-view-title">Overview</h2></div>
-        <p id="eus-admin-view-description">What needs attention and where the business stands.</p>
+        <div><span class="eyebrow">Leads</span><h2 id="eus-admin-view-title">Customer Leads</h2></div>
+        <p id="eus-admin-view-description">Each lead type has one clear operating lane.</p>
       </header>
       <div id="eus-admin-view-controls" class="eus-admin-view-controls" hidden></div>
       <div id="eus-admin-view-content"></div>
@@ -77,39 +49,24 @@
   const controls = $("eus-admin-view-controls");
   const title = $("eus-admin-view-title");
   const description = $("eus-admin-view-description");
-  const nav = $("eus-admin-view-nav");
-  const navToggle = $("eus-admin-nav-toggle");
+  const nav = null;
 
   const allSections = [statusStrip, priority, command, summary, ownerSignals, opportunity, supplierLeads, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
   allSections.forEach((el) => content.appendChild(el));
-  const displayAllSections = [statusStrip, command, summary, ownerSignals, opportunity, supplierLeads, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
-
   const viewSections = {
-    overview: [statusStrip, command],
     projects: [opportunity],
     suppliers: [supplierLeads],
-    analytics: [ownerSignals],
     solar: [solarLeads, solarInsights],
-    marketplace: [priority, summary, marketplace],
     work: [opportunity],
-    followup: [followup],
-    table: [opportunity],
-    system: [system, lower],
-    display_all: displayAllSections,
+    portal: [opportunity],
   };
 
   const viewDescriptions = {
-    overview: "Daily operating view: what needs attention, active leads, conversion pulse and contact actions.",
-    projects: "The working Lead queue for Home, RV, Solar and Outside Area project opportunities.",
-    suppliers: "Supplier, vendor and logistics relationship queue. Kept separate from customer and Solar leads.",
-    analytics: "Read-only owner analytics: website demand, conversion, customer intent and Marketplace activity without becoming another work queue.",
-    solar: "Solar-specific Builder activity, intent and follow-up support; submitted project opportunities remain in the main Leads queue.",
-    marketplace: "Marketplace listing operations remain separate from Leads / Opportunities.",
+    projects: "Customer requests for Home, RV, lithium and general projects. Solar Builder activity stays in its own lane.",
+    suppliers: "Supplier and dropshipping relationships only. This is separate from customer and Solar leads.",
+    solar: "Solar Builder activity, intent and follow-up. Do not mix these records with lithium battery leads.",
     work: "Affiliate, Marketing, Technician and Growth opportunities remain separate from customer Leads.",
-    followup: "Marketplace customer follow-up using the existing protected manual Gmail workflow.",
-    table: "Dense Lead and Work With Us operating view over the same records.",
-    system: "Submission reliability, system health, recent management activity and controlled QA.",
-    display_all: "All existing Control Center sections in one continuous management view.",
+    portal: "Qualified or won customer leads waiting for the existing manual Portal handoff.",
   };
 
   const initialHashView = hashViews[String(location.hash || "").replace(/^#/, "")];
@@ -171,8 +128,9 @@
     const primaryStatus = ensurePrimaryStatusControl();
     const tools = opportunity.querySelector(".admin-section-head .admin-table-tools");
 
-    if (view === "projects") {
+    if (view === "projects" || view === "portal") {
       setSelect("opp-family-filter", "projects");
+      setSelect("opp-portal-filter", view === "portal" ? "handoff_ready" : "all");
       if (familyFilter) familyFilter.closest("label").hidden = true;
       if (projectFilter) projectFilter.closest("label").hidden = true;
       if (marketFilter) marketFilter.closest("label").hidden = false;
@@ -220,6 +178,10 @@
       if (eyebrow) eyebrow.textContent = "Leads";
       if (heading) heading.textContent = "Lead Queue";
       if (blurb) blurb.textContent = "One working queue for Home, RV, Solar and Outside Area project leads. Next Action is the operating priority.";
+    } else if (view === "portal") {
+      if (eyebrow) eyebrow.textContent = "Portal-ready";
+      if (heading) heading.textContent = "Portal Handoff Queue";
+      if (blurb) blurb.textContent = "Qualified or won customer leads that still need the existing manual Portal handoff.";
     } else if (view === "work") {
       if (eyebrow) eyebrow.textContent = "Work With Us";
       if (heading) heading.textContent = "Growth Opportunities";
@@ -403,7 +365,7 @@
   }
 
   function setView(view, options = {}) {
-    if (!viewLabels[view]) view = "overview";
+    if (!viewLabels[view]) view = "projects";
     currentView = view;
     currentPage = 1;
     safeStorageSet(STORAGE_VIEW, view);
@@ -425,13 +387,10 @@
     title.textContent = viewLabels[view];
     description.textContent = viewDescriptions[view] || "";
 
-    if (["projects", "work", "table"].includes(view)) {
+    if (["projects", "work", "portal"].includes(view)) {
       configureOpportunityScope(view);
       buildOpportunityControls();
       queueOpportunityApply();
-    } else if (view === "display_all") {
-      configureOpportunityScope(view);
-      destroyOpportunityControls();
     } else {
       destroyOpportunityControls();
     }
@@ -693,7 +652,7 @@
   }
 
   function applyOpportunityPresentation() {
-    if (processingRows || !opportunity || !["projects", "work", "table"].includes(currentView)) return;
+    if (processingRows || !opportunity || !["projects", "work", "portal"].includes(currentView)) return;
     const body = $("opp-table-body");
     if (!body) return;
 
@@ -732,7 +691,7 @@
 
       const visible = metas.filter((meta) => meta.visible);
       let pageItems = visible;
-      if (currentView === "projects") {
+      if (currentView === "projects" || currentView === "portal") {
         const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
         currentPage = Math.min(Math.max(1, currentPage), totalPages);
         const start = (currentPage - 1) * PAGE_SIZE;
@@ -757,7 +716,7 @@
 
       const existingSummary = $("opp-table-summary");
       if (existingSummary) {
-        if (currentView === "projects") {
+        if (currentView === "projects" || currentView === "portal") {
           const first = visible.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
           const last = visible.length ? Math.min(currentPage * PAGE_SIZE, visible.length) : 0;
           existingSummary.textContent = `${first}–${last} of ${visible.length} Lead${visible.length === 1 ? "" : "s"} · 10 per page`;
@@ -830,20 +789,6 @@
       node.hidden = !Number.isFinite(value) || value <= 0;
       node.textContent = Number.isFinite(value) && value > 99 ? "99+" : String(Math.max(0, value || 0));
     });
-  }
-
-  navToggle?.addEventListener("click", () => {
-    frame.classList.toggle("is-nav-collapsed");
-    const collapsed = frame.classList.contains("is-nav-collapsed");
-    navToggle.textContent = collapsed ? "›" : "‹";
-    navToggle.setAttribute("aria-label", collapsed ? "Expand workspace navigation" : "Collapse workspace navigation");
-    navToggle.title = collapsed ? "Expand navigation" : "Collapse navigation";
-    safeStorageSet(STORAGE_NAV, collapsed ? "collapsed" : "expanded");
-  });
-
-  if (safeStorageGet(STORAGE_NAV) === "collapsed") {
-    frame.classList.add("is-nav-collapsed");
-    if (navToggle) { navToggle.textContent = "›"; navToggle.setAttribute("aria-label", "Expand workspace navigation"); navToggle.title = "Expand navigation"; }
   }
 
   ["opp-project-filter", "opp-market-filter", "opp-rep-filter", "opp-portal-filter", "opp-wwu-filter"].forEach((id) => {

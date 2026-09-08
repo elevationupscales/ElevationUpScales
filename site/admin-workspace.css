@@ -2,7 +2,7 @@
    UI/navigation layer only. Existing authentication, APIs, record state and metrics remain authoritative. */
 
 #admin-dashboard > .eus-admin-workspace-frame{margin-top:12px}
-.eus-admin-workspace-frame{display:grid;grid-template-columns:210px minmax(0,1fr);gap:16px;align-items:start}
+.eus-admin-workspace-frame{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
 .eus-admin-workspace-nav{position:sticky;top:10px;border:1px solid rgba(255,255,255,.11);border-radius:14px;background:#090909;padding:10px;min-width:0}
 .eus-admin-workspace-nav__head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 4px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
 .eus-admin-workspace-nav__head div{display:flex;flex-direction:column;gap:2px;min-width:0}
