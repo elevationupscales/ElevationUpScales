@@ -1,0 +1,61 @@
+name: SOK Dropship RC Branch QA
+
+on:
+  push:
+    branches:
+      - qa/sok-dropship-order-foundation-0908
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  validate-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: qa/sok-dropship-order-foundation-0908
+          fetch-depth: 0
+      - name: Verify candidate runtime matches RC
+        run: |
+          set -euo pipefail
+          git diff --exit-code ee88dfbbbdd34e2b9a536b4c191a15f82d88caad -- site package.json deployment/qa/sok-dropship-order-static.mjs
+      - name: Run full QA
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+      - name: Deploy isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=sok-dropship-rc-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke SOK order workspace
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /lithium-batteries /checkout /admin-store-orders; do
+            code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 2 -o /tmp/page.html -w '%{http_code}' "$base$route")
+            echo "$route=$code"
+            test "$code" = "200"
+          done
+          curl -sS -L --fail "$base/admin-store-orders" -o /tmp/orders.html
+          grep -q 'Prepare Supplier Order' /tmp/orders.html
+          grep -q 'Supplier Paid / Released' /tmp/orders.html
+          api_code=$(curl -sS -o /tmp/orders-api.json -w '%{http_code}' "$base/api/admin/store-orders" || true)
+          test "$api_code" = "401"
+      - name: Receipt
+        env:
+          PREVIEW: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo '### SOK Dropship RC Preview — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate: ee88dfbbbdd34e2b9a536b4c191a15f82d88caad' >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $PREVIEW" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment: NOT PERFORMED' >> "$GITHUB_STEP_SUMMARY"
