@@ -62,6 +62,7 @@ const redirects = fs.readFileSync("site/_redirects", "utf8");
 assert.ok(redirects.includes("/solar-services.html /solar-services 301"), "canonical Solar Services redirect must remain intact");
 assert.ok(redirects.includes("/marketplace /store 301"), "retired Marketplace must redirect to the active Store");
 assert.ok(redirects.includes("/make-a-listing /store 301"), "retired seller intake must redirect to the active Store");
+assert.ok(redirects.includes("/report-an-issue /store 301"), "retired Marketplace issue report must redirect to the active Store");
 assert.ok(redirects.includes("/list-an-rv /rv-store 301"), "retired RV seller intake must redirect to the RV Store");
 
 // Release C: retired public routes stay out of discovery while server redirects remain authoritative.
@@ -91,6 +92,8 @@ for (const retiredFile of [
   "site/list-a-vehicle/index.html",
   "site/list-an-rv/index.html",
   "site/list-used-gear/index.html",
+  "site/report-an-issue.html",
+  "site/report-an-issue/index.html",
 ]) {
   assert.equal(fs.existsSync(retiredFile), false, `deprecated Marketplace front-end asset still present: ${retiredFile}`);
 }
