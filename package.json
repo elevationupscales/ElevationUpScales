@@ -9,11 +9,12 @@
     "qa:annotation": "npm run qa:fast",
     "qa:commerce": "node deployment/qa/web-com-commerce-regression.mjs",
     "qa:commerce-logistics": "node deployment/qa/commerce-logistics-static.mjs",
+    "qa:sok-dropship": "node deployment/qa/sok-dropship-order-static.mjs",
     "qa:supplier-leads": "node deployment/qa/supplier-leads-static.mjs",
     "qa:command-center": "node deployment/qa/command-center-workflow-static.mjs",
     "qa:analytics": "node deployment/qa/web-com-analytics-static.mjs",
     "qa:navigation": "node deployment/qa/web-com-navigation-static.mjs",
-    "qa": "npm run qa:fast && npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:commerce-logistics && npm run qa:supplier-leads && npm run qa:command-center && npm run qa:analytics && npm run qa:navigation",
+    "qa": "npm run qa:fast && npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:commerce-logistics && npm run qa:sok-dropship && npm run qa:supplier-leads && npm run qa:command-center && npm run qa:analytics && npm run qa:navigation",
     "qa:preview": "bash deployment/qa/clean-baseline-preview.sh"
   },
   "dependencies": {
