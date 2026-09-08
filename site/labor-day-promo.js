@@ -13,6 +13,15 @@
     if(header)header.insertAdjacentElement("afterend",slot);else document.body.prepend(slot);
     return slot;
   }
+  function retireMarketplaceAffordances(){
+    const path=(location.pathname.replace(/\/+$/,"")||"/");
+    if(path!=="/store"&&path!=="/rv-store")return;
+    document.querySelectorAll(".eus-menu--marketplace").forEach((node)=>node.remove());
+    document.querySelectorAll('header a[href="/marketplace"],header a[href^="/marketplace#"],header a[href="/make-a-listing"],footer a[href="/marketplace"],footer a[href^="/marketplace#"],footer a[href="/make-a-listing"]').forEach((node)=>node.remove());
+    document.querySelectorAll(".footer-brand p").forEach((node)=>{
+      node.textContent=node.textContent.replace(/\s*•\s*Outdoor Marketplace\s*/g," ").replace(/Elevation Catalog and independent Marketplace/g,"Elevation Catalog, power systems and logistics").trim();
+    });
+  }
   async function load(){
     const slot=ensureSlot();
     try{
@@ -26,6 +35,7 @@
       slot.hidden=false;slot.removeAttribute("aria-hidden");slot.replaceChildren(banner);slot.dataset.promoReady="true";
     }catch(_){if(slot){slot.hidden=true;slot.setAttribute("aria-hidden","true");}}
   }
+  retireMarketplaceAffordances();
   load();
 
   if(!document.querySelector('script[data-eus-trust-repair]')){
