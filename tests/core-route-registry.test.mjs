@@ -5,7 +5,7 @@ import {
   matchCoreRoute,
 } from "../src/core-route-registry.js";
 
-assert.equal(CORE_ROUTE_REGISTRY.length, 38);
+assert.equal(CORE_ROUTE_REGISTRY.length, 39);
 
 assert.equal(matchCoreRoute("/api/health")?.handler, "handleHealth");
 assert.equal(
@@ -23,6 +23,10 @@ assert.equal(
 assert.equal(
   matchCoreRoute("/api/admin/inventory/item-1")?.handler,
   "handleAdminInventory",
+);
+assert.equal(
+  matchCoreRoute("/api/admin/sok-stock/preview")?.handler,
+  "handleSokStockAdminApi",
 );
 assert.equal(
   matchCoreRoute("/api/admin/listings/abc")?.handler,
@@ -52,6 +56,7 @@ for (const required of [
   "supplier-leads",
   "marketplace",
   "inventory",
+  "sok-stock",
   "solar",
   "compatibility",
 ]) {
