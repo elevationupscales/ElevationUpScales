@@ -418,6 +418,7 @@ async function quoteRv(raw, env) {
   const config = await getPromotionConfig(env);
   const priced = pricingForProduct(product, config);
   const availability = entry.sokAvailability || null;
+  const sokDirect = entry.sok === true;
   const actualBattery = source==="lithium" && isActualLithiumBattery(product);
   if (destinationState && blockedStates.includes(destinationState) && !(actualBattery && ["HI","AK"].includes(destinationState))) return {ok:false,status:409,...fallback,error:"This Doba item is not available for the selected shipping state"};
   const qty = quantity(raw?.quantity);
@@ -438,7 +439,7 @@ async function quoteRv(raw, env) {
   const hawaiiPickupFreightCents = hawaiiFreight ? Number(ruleResult?.shippingCents||0) : 0;
   let shippingCents;
   if (hawaiiFreight) shippingCents = hawaiiStatus?.customerState === "shipping_available" ? Number(ruleResult?.shippingCents||0) : 0;
-  else if (actualBattery) shippingCents = Number(ruleResult?.shippingCents||0);
+  else if (actualBattery) shippingCents = sokDirect ? Number(entry.shippingCents||0) : Number(ruleResult?.shippingCents||0);
   else {
     const shippingPerCatalogItem = Number.parseInt(String(entry.shippingCents ?? ""),10);
     if (!Number.isInteger(shippingPerCatalogItem) || shippingPerCatalogItem < 0) return {ok:false,status:409,error:"Doba shipping is not available for this item"};
@@ -446,7 +447,7 @@ async function quoteRv(raw, env) {
   }
   const rule = ruleResult?.rule || null;
   const shippingRule = rule ? {
-    id:rule.id,version:rule.version,region:rule.region,method:rule.method,calculation:rule.calculation,rateCents:rule.rateCents,
+    id:rule.id,version:rule.version,region:rule.region,method:sokDirect&&!hawaiiFreight?"SOK supplier-paid standard shipping":rule.method,calculation:sokDirect&&!hawaiiFreight?"included_in_map":rule.calculation,rateCents:sokDirect&&!hawaiiFreight?0:rule.rateCents,
     quoteRequired:rule.quoteRequired,pickupOnly:rule.pickupOnly,residentialAllowed:rule.residentialAllowed,
     customerLabel:rule.customerLabel,timingMessage:rule.timingMessage,appliedShippingCents:shippingCents,resolvedAt:new Date().toISOString()
   } : null;
@@ -457,7 +458,7 @@ async function quoteRv(raw, env) {
     unitPriceCents,listMerchandiseCents,discountCents:coupon.discountCents,merchandiseCents:coupon.merchandiseCents,shippingCents,totalCents:coupon.merchandiseCents+shippingCents,
     couponCode:coupon.couponCode,couponPercent:coupon.couponPercent,promotion:priced.promotion,shippingRule,
     variantId:"",variantName:"",variants:[],physical:true,
-    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?Number(rule?.rateCents||0):0},
+    battery:{actualBattery,batteryUnitsPerItem,shippingPerBatteryCents:actualBattery?(sokDirect&&!hawaiiFreight?0:Number(rule?.rateCents||0)):0},
     ...(hawaiiFreight?{hawaii:{customerState:hawaiiStatus?.customerState||"review_required",statusLabel:hawaiiStatus?.label||"Freight Review Required",customerFreightPerBatteryCents:Number.isInteger(Number(rule?.rateCents))?Number(rule.rateCents):null,preferredConsolidationUnits:Number(rule?.preferredConsolidationQuantity||3),warehousePickupOnly:Boolean(rule?.pickupOnly??true),pickupLocationLabel:"Honolulu warehouse / freight-terminal pickup location",merchandiseAfterCouponCents:coupon.merchandiseCents,pickupFreightCents:hawaiiPickupFreightCents,pickupPriceCents:coupon.merchandiseCents+hawaiiPickupFreightCents,requiresReservation:(hawaiiStatus?.customerState||"review_required")!=="shipping_available",paymentAllowed:(hawaiiStatus?.customerState||"review_required")==="shipping_available",finalMileQuoteRequired:true,finalMileMessage:"Need delivery from our Honolulu pickup location to your home, business or another address? Contact Elevation for a delivery quote.",supportPhone:"208-813-4998",supportEmail:"casey@elevationupscales.com",timing:rule?.timingMessage||"Honolulu warehouse / freight-terminal pickup. Shipment timing is estimated and not guaranteed.",requestUrl}}:{}),
     doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };

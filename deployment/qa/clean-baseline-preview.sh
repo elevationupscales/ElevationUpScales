@@ -86,11 +86,20 @@ for route in \
   /api/admin/operations \
   /api/admin/inventory \
   /api/admin/leads \
-  /api/admin/listings \
   /api/admin/market-analytics \
   /api/admin/sync; do
   check_status 401 "$route"
 done
+
+check_status 200 /api/admin/listings
+LISTINGS_FILE=/tmp/eus-clean-baseline-response node - <<'NODE'
+const fs = require('fs');
+const payload = JSON.parse(fs.readFileSync(process.env.LISTINGS_FILE, 'utf8'));
+if (payload.ok !== true || payload.retired !== true || payload.count !== 0 || !Array.isArray(payload.listings) || payload.listings.length !== 0) {
+  throw new Error('Retired Marketplace listings endpoint contract failed');
+}
+console.log('Retired Marketplace listings endpoint: PASS');
+NODE
 
 for route in \
   /worker-core.js \
@@ -114,6 +123,7 @@ echo "HEAD /api/store-products => 200"
 
 bash deployment/qa/sok-commercialization-preview.sh "$base"
 bash deployment/qa/sok-full-line-preview.sh "$base"
+bash deployment/qa/sok-direct-dropship-preview.sh "$base"
 bash deployment/qa/website-integrity-preview.sh "$base"
 
 echo "clean-baseline-preview.sh: PASS"

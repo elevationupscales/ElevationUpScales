@@ -20,6 +20,7 @@ for (const token of [
   "Supplier Paid / Released",
   "supplierSku",
   "Supplier SKU / model",
+  "Inventory confirmation at checkout",
 ]) assert.ok(client.includes(token), `SOK order client contract missing ${token}`);
 
 for (const token of [
