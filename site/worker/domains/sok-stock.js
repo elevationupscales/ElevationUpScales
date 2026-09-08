@@ -125,15 +125,19 @@ async function applyImport(request, db, adminEmail) {
 
   const stamp = now();
   const execution = await executeStockMutations(plan, async (mutation) => {
-    const result = await db.prepare(`UPDATE eus_sok_product_ops
-      SET supplier_inventory=?,last_supplier_verified=?,updated_at=?,updated_by=?
-      WHERE upper(sku)=? AND updated_at=?
-        AND (last_supplier_verified='' OR substr(last_supplier_verified,1,10)<=?)`)
-      .bind(mutation.supplierQuantity, mutation.verifiedDate, stamp, adminEmail, mutation.sku, mutation.expectedUpdatedAt, mutation.verifiedDate).run();
-    if (Number(result?.meta?.changes || 0) !== 1) return result;
-    await db.prepare(`INSERT INTO eus_sok_events (id,entity_type,entity_id,action,details_json,actor,created_at)
-      VALUES (?,?,?,?,?,?,?)`).bind(`SOK-EVT-${crypto.randomUUID()}`, "product", mutation.sku, "supplier_stock_verified",
-        JSON.stringify({ previewId, supplierQuantity: mutation.supplierQuantity, verifiedDate: mutation.verifiedDate, fields: ["supplier_inventory", "last_supplier_verified"] }), adminEmail, stamp).run();
+    const eventId = `SOK-EVT-${crypto.randomUUID()}`;
+    const details = JSON.stringify({ previewId, supplierQuantity: mutation.supplierQuantity, verifiedDate: mutation.verifiedDate, fields: ["supplier_inventory", "last_supplier_verified"] });
+    const statements = [
+      db.prepare(`UPDATE eus_sok_product_ops
+        SET supplier_inventory=?,last_supplier_verified=?,updated_at=?,updated_by=?
+        WHERE upper(sku)=? AND updated_at=?
+          AND (last_supplier_verified='' OR substr(last_supplier_verified,1,10)<=?)`)
+        .bind(mutation.supplierQuantity, mutation.verifiedDate, stamp, adminEmail, mutation.sku, mutation.expectedUpdatedAt, mutation.verifiedDate),
+      db.prepare(`INSERT INTO eus_sok_events (id,entity_type,entity_id,action,details_json,actor,created_at)
+        SELECT ?,?,?,?,?,?,? WHERE changes()=1`)
+        .bind(eventId, "product", mutation.sku, "supplier_stock_verified", details, adminEmail, stamp),
+    ];
+    const [result] = await db.batch(statements);
     return result;
   });
 
@@ -158,7 +162,7 @@ export async function handleSokStockAdminApi(request, env, pathname) {
     if (pathname === "/api/admin/sok-stock" && request.method === "GET") return jsonResponse(await stockSnapshot(db));
     if (pathname === "/api/admin/sok-stock/template" && request.method === "GET") {
       const roster = await currentRoster(db);
-      return new Response(templateFor(roster), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": "attachment; filename=Elevation-SOK-stock-template.csv", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } });
+      return new Response(templateFor(roster), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": "attachment; filename=Elevation-SOK-stock-template.csv", "Cache-Control": "no-store", "X-Content-Type-Options":"nosniff" } });
     }
     if (pathname === "/api/admin/sok-stock/preview" && request.method === "POST") return previewImport(request, db);
     if (pathname === "/api/admin/sok-stock/apply" && request.method === "POST") return applyImport(request, db, session.email);
