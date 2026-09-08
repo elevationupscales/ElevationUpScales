@@ -5,111 +5,61 @@ import {
   cleanString,
   isValidEmail,
   HEALTH_PATH,
-  DEFAULT_MARKETPLACE_EMAIL_TO,
   requireAdmin,
-  marketplaceSubmissionIssueRecord,
   solarLeadOperationsSchemaStatus,
   analyticsPath,
 } from "../core-context.js";
 import { handleHealth } from "./system.js";
 
-
 async function handleAdminOperations(request, env) {
   const auth = await requireAdmin(request, env);
   if (auth.response) return auth.response;
-  if (request.method !== "GET" && request.method !== "HEAD") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
+  }
 
+  // Marketplace is retired from active operations. MARKETPLACE_DB remains the
+  // historical/website-event store, but Marketplace listing tables are no
+  // longer queried by the routine Command Center refresh path.
   let d1 = env.MARKETPLACE_DB ? "configured" : "unconfigured";
-  let r2 = env.LISTING_IMAGES ? "configured" : "unconfigured";
+  const r2 = "retired";
   let leadsDb = env.LEADS_DB ? "configured" : "unconfigured";
   let leadTableRetrieval = "unknown";
   let leadAdminRetrieval = "unknown";
   let leadSchemaReady = "unknown";
   let leadActivityReady = "unknown";
   let leadSchemaMissing = [];
-  let counts = {}, recent24h = 0, lastSuccess = null, lastFailure = null, recentActions = [];
-  let unresolvedIssues = 0, failedUploads = 0;
-  let totalListingViews = 0, listingViews24h = 0;
-  let marketplaceSellerContactsByListing = {};
-  let marketplaceListingInterestsByListing = {};
-  let businessSignals = { contactAttempts:0, followUpActions:0, callActions:0, textActions:0, emailActions:0, submittedLeads:0, contactActionSources:[], analyticsCollection:"unavailable", sellerContactAttempts:0, buyerContactRate:0, listingInterests:0, builderEntries:0, powerSnapshotViews:0, reviewOpens:0, submittedSolarLeads:0, builderLeadConversion:0, homeProjectInterest:0, rvProjectInterest:0, solarProjectInterest:0, submissionFailures:0, highIntentLeads:0, actionRequired:0, followUpsDue:0 };
+
+  const businessSignals = {
+    contactAttempts: 0,
+    followUpActions: 0,
+    callActions: 0,
+    textActions: 0,
+    emailActions: 0,
+    submittedLeads: 0,
+    contactActionSources: [],
+    analyticsCollection: "unavailable",
+    sellerContactAttempts: 0,
+    buyerContactRate: 0,
+    listingInterests: 0,
+    builderEntries: 0,
+    powerSnapshotViews: 0,
+    reviewOpens: 0,
+    submittedSolarLeads: 0,
+    builderLeadConversion: 0,
+    homeProjectInterest: 0,
+    rvProjectInterest: 0,
+    solarProjectInterest: 0,
+    submissionFailures: 0,
+    highIntentLeads: 0,
+    actionRequired: 0,
+    followUpsDue: 0,
+  };
 
   if (env.MARKETPLACE_DB) {
     try {
       await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok").first();
       d1 = "ok";
-      const countResult = await env.MARKETPLACE_DB.prepare("SELECT status, COUNT(*) AS count FROM marketplace_listings GROUP BY status").all();
-      counts = Object.fromEntries((countResult.results || []).map((row) => [String(row.status), Number(row.count) || 0]));
-      const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const recent = await env.MARKETPLACE_DB.prepare("SELECT COUNT(*) AS count FROM marketplace_listings WHERE created_at>=?").bind(cutoff).first();
-      recent24h = Number(recent?.count) || 0;
-      try {
-        const attempts = await env.MARKETPLACE_DB.prepare("SELECT COUNT(*) AS count FROM marketplace_events WHERE event_type='seller_submit_start' AND created_at>=?").bind(cutoff).first();
-        counts.submit_attempts_24h = Number(attempts?.count) || 0;
-      } catch (_) { counts.submit_attempts_24h = 0; }
-      try {
-        const viewTotals = await env.MARKETPLACE_DB.prepare(`SELECT
-          COUNT(*) AS total_views,
-          SUM(CASE WHEN first_seen>=? THEN 1 ELSE 0 END) AS views_24h
-          FROM (
-            SELECT e.listing_id, e.session_hash, MIN(e.created_at) AS first_seen
-            FROM marketplace_events e
-            INNER JOIN marketplace_listings l ON l.id=e.listing_id
-            WHERE e.event_type='listing_open' AND e.listing_id IS NOT NULL AND e.listing_id<>''
-            GROUP BY e.listing_id, e.session_hash
-          )`).bind(cutoff).first();
-        totalListingViews = Number(viewTotals?.total_views) || 0;
-        listingViews24h = Number(viewTotals?.views_24h) || 0;
-      } catch (error) {
-        console.error(JSON.stringify({ event: "admin_listing_view_totals_error", message: error instanceof Error ? error.message : String(error) }));
-        totalListingViews = 0;
-        listingViews24h = 0;
-      }
-      try {
-        const sellerMetricRows = await env.MARKETPLACE_DB.prepare(`SELECT listing_id,
-          SUM(had_contact) AS seller_contact_attempts,
-          SUM(had_view) AS listing_view_sessions
-          FROM (
-            SELECT listing_id, session_hash,
-              MAX(CASE WHEN event_type IN ('contact_call','contact_text') THEN 1 ELSE 0 END) AS had_contact,
-              MAX(CASE WHEN event_type='listing_open' THEN 1 ELSE 0 END) AS had_view
-            FROM marketplace_events
-            WHERE listing_id IS NOT NULL AND listing_id<>''
-              AND session_hash IS NOT NULL AND session_hash<>''
-              AND event_type IN ('listing_open','contact_call','contact_text')
-            GROUP BY listing_id, session_hash
-          )
-          GROUP BY listing_id`).all();
-        marketplaceSellerContactsByListing = Object.fromEntries((sellerMetricRows.results || []).map((row) => {
-          const contacts = Math.max(0, Number(row.seller_contact_attempts) || 0);
-          const views = Math.max(0, Number(row.listing_view_sessions) || 0);
-          return [String(row.listing_id || ''), { sellerContactAttempts: contacts, buyerContactRate: views > 0 ? Math.round((contacts / views) * 1000) / 10 : 0 }];
-        }).filter(([listingId]) => listingId));
-      } catch (error) {
-        console.error(JSON.stringify({ event: "admin_seller_contact_metrics_error", message: error instanceof Error ? error.message : String(error) }));
-        marketplaceSellerContactsByListing = {};
-      }
-      try {
-        const interestRows = await env.MARKETPLACE_DB.prepare(`SELECT listing_id,
-          COUNT(*) AS interest_count,
-          MAX(last_interest) AS most_recent_interest
-          FROM (
-            SELECT listing_id, session_hash, MAX(created_at) AS last_interest
-            FROM marketplace_events
-            WHERE event_type='contact_reveal'
-              AND listing_id IS NOT NULL AND listing_id<>''
-              AND session_hash IS NOT NULL AND session_hash<>''
-            GROUP BY listing_id, session_hash
-          )
-          GROUP BY listing_id`).all();
-        marketplaceListingInterestsByListing = Object.fromEntries((interestRows.results || []).map((row) => [String(row.listing_id || ''), {
-          listingInterests: Math.max(0, Number(row.interest_count) || 0),
-          mostRecentInterest: cleanString(row.most_recent_interest, 80),
-        }]).filter(([listingId]) => listingId));
-      } catch (error) {
-        console.error(JSON.stringify({ event: "admin_listing_interest_metrics_error", message: error instanceof Error ? error.message : String(error) }));
-        marketplaceListingInterestsByListing = {};
-      }
       try {
         const signalRow = await env.MARKETPLACE_DB.prepare(`SELECT
           SUM(CASE WHEN event_type='contact_click' AND event_value IN ('call','text','email') THEN 1 ELSE 0 END) AS contact_attempts,
@@ -131,109 +81,63 @@ async function handleAdminOperations(request, env) {
           COUNT(DISTINCT CASE WHEN event_type='project_type_selected' AND event_value='rv' THEN session_hash END) AS rv_interest,
           COUNT(DISTINCT CASE WHEN event_type='project_type_selected' AND event_value='solar' THEN session_hash END) AS solar_interest
           FROM eus_site_events`).first();
-        businessSignals.contactAttempts=Number(signalRow?.contact_attempts)||0;
-        businessSignals.followUpActions=Number(signalRow?.follow_up_actions)||0;
-        businessSignals.callActions=Number(signalRow?.call_actions)||0;
-        businessSignals.textActions=Number(signalRow?.text_actions)||0;
-        businessSignals.emailActions=Number(signalRow?.email_actions)||0;
-        businessSignals.analyticsCollection="ok";
-        try {
-          const sourceRows = await env.MARKETPLACE_DB.prepare(`SELECT
-              event_value AS method,
-              page,
-              COALESCE(NULLIF(json_extract(details_json, '$.cta_id'), ''), 'legacy/unattributed') AS cta_id,
-              COALESCE(NULLIF(json_extract(details_json, '$.build'), ''), '') AS event_build,
-              COUNT(*) AS count,
-              COUNT(DISTINCT session_hash) AS unique_sessions
-            FROM eus_site_events
-            WHERE event_type='contact_click' AND event_value IN ('call','text','email')
-            GROUP BY event_value, page, cta_id, event_build
-            ORDER BY count DESC, page ASC, cta_id ASC
-            LIMIT 18`).all();
-          businessSignals.contactActionSources=(sourceRows.results||[]).map((row)=>({
-            method:cleanString(row.method,20),
-            page:analyticsPath(row.page||"/"),
-            ctaId:cleanString(row.cta_id,120)||"legacy/unattributed",
-            build:cleanString(row.event_build,100),
-            count:Math.max(0,Number(row.count)||0),
-            uniqueSessions:Math.max(0,Number(row.unique_sessions)||0)
-          }));
-        } catch (error) { console.error(JSON.stringify({event:"admin_contact_action_sources_error",message:error instanceof Error?error.message:String(error)})); }
-        businessSignals.builderEntries=Number(signalRow?.builder_entries)||0;
-        businessSignals.solarBuilderOpened=Number(signalRow?.solar_builder_opened)||0;
-        businessSignals.solarContactCaptured=Number(signalRow?.solar_contact_captured)||0;
-        businessSignals.solarLeadCreated=Number(signalRow?.solar_lead_created)||0;
-        businessSignals.solarBuildStarted=Number(signalRow?.solar_build_started)||0;
-        businessSignals.solarReviewOpened=Number(signalRow?.solar_review_opened)||0;
-        businessSignals.solarCompletedSubmitted=Number(signalRow?.solar_completed_submitted)||0;
-        businessSignals.powerSnapshotViews=Number(signalRow?.snapshot_views)||0;
-        businessSignals.reviewOpens=Number(signalRow?.review_opens)||0;
-        const trackedLeads=Number(signalRow?.tracked_solar_leads)||0;
-        businessSignals.builderLeadConversion=businessSignals.builderEntries>0?Math.round((trackedLeads/businessSignals.builderEntries)*1000)/10:0;
-        businessSignals.homeProjectInterest=Number(signalRow?.home_interest)||0;
-        businessSignals.rvProjectInterest=Number(signalRow?.rv_interest)||0;
-        businessSignals.solarProjectInterest=Number(signalRow?.solar_interest)||0;
-        const sellerIntent = await env.MARKETPLACE_DB.prepare(`SELECT
-          COALESCE(SUM(had_contact),0) AS seller_contact_attempts,
-          COALESCE(SUM(had_view),0) AS listing_view_sessions,
-          COALESCE(SUM(CASE WHEN had_contact=1 AND had_view=1 THEN 1 ELSE 0 END),0) AS contacted_view_sessions
-          FROM (
-            SELECT listing_id, session_hash,
-              MAX(CASE WHEN event_type IN ('contact_call','contact_text') THEN 1 ELSE 0 END) AS had_contact,
-              MAX(CASE WHEN event_type='listing_open' THEN 1 ELSE 0 END) AS had_view
-            FROM marketplace_events
-            WHERE listing_id IS NOT NULL AND listing_id<>''
-              AND session_hash IS NOT NULL AND session_hash<>''
-              AND event_type IN ('listing_open','contact_call','contact_text')
-            GROUP BY listing_id, session_hash
-          )`).first();
-        businessSignals.sellerContactAttempts=Math.max(0,Number(sellerIntent?.seller_contact_attempts)||0);
-        const sellerViews=Math.max(0,Number(sellerIntent?.listing_view_sessions)||0);
-        const contactedViews=Math.max(0,Number(sellerIntent?.contacted_view_sessions)||0);
-        businessSignals.buyerContactRate=sellerViews>0?Math.round((contactedViews/sellerViews)*1000)/10:0;
-        const interestSignal = await env.MARKETPLACE_DB.prepare(`SELECT COUNT(*) AS count FROM (
-          SELECT listing_id, session_hash FROM marketplace_events
-          WHERE event_type='contact_reveal' AND listing_id IS NOT NULL AND listing_id<>'' AND session_hash IS NOT NULL AND session_hash<>''
-          GROUP BY listing_id, session_hash
-        )`).first();
-        businessSignals.listingInterests=Math.max(0,Number(interestSignal?.count)||0);
-        const failureSignal=await env.MARKETPLACE_DB.prepare("SELECT COUNT(*) AS count FROM marketplace_admin_log WHERE action='submission_failure'").first();
-        businessSignals.submissionFailures=Number(failureSignal?.count)||0;
+
+        businessSignals.contactAttempts = Number(signalRow?.contact_attempts) || 0;
+        businessSignals.followUpActions = Number(signalRow?.follow_up_actions) || 0;
+        businessSignals.callActions = Number(signalRow?.call_actions) || 0;
+        businessSignals.textActions = Number(signalRow?.text_actions) || 0;
+        businessSignals.emailActions = Number(signalRow?.email_actions) || 0;
+        businessSignals.analyticsCollection = "ok";
+        businessSignals.builderEntries = Number(signalRow?.builder_entries) || 0;
+        businessSignals.solarBuilderOpened = Number(signalRow?.solar_builder_opened) || 0;
+        businessSignals.solarContactCaptured = Number(signalRow?.solar_contact_captured) || 0;
+        businessSignals.solarLeadCreated = Number(signalRow?.solar_lead_created) || 0;
+        businessSignals.solarBuildStarted = Number(signalRow?.solar_build_started) || 0;
+        businessSignals.solarReviewOpened = Number(signalRow?.solar_review_opened) || 0;
+        businessSignals.solarCompletedSubmitted = Number(signalRow?.solar_completed_submitted) || 0;
+        businessSignals.powerSnapshotViews = Number(signalRow?.snapshot_views) || 0;
+        businessSignals.reviewOpens = Number(signalRow?.review_opens) || 0;
+        const trackedLeads = Number(signalRow?.tracked_solar_leads) || 0;
+        businessSignals.builderLeadConversion = businessSignals.builderEntries > 0
+          ? Math.round((trackedLeads / businessSignals.builderEntries) * 1000) / 10
+          : 0;
+        businessSignals.homeProjectInterest = Number(signalRow?.home_interest) || 0;
+        businessSignals.rvProjectInterest = Number(signalRow?.rv_interest) || 0;
+        businessSignals.solarProjectInterest = Number(signalRow?.solar_interest) || 0;
       } catch (error) {
-        console.error(JSON.stringify({event:"admin_business_signal_error",message:error instanceof Error?error.message:String(error)}));
+        console.error(JSON.stringify({ event: "admin_business_signal_error", message: error instanceof Error ? error.message : String(error) }));
       }
-      const successRow = await env.MARKETPLACE_DB.prepare("SELECT id, reference, category, created_at FROM marketplace_listings ORDER BY created_at DESC LIMIT 1").first();
-      if (successRow) lastSuccess = { id: successRow.id, reference: successRow.reference, category: successRow.category, createdAt: successRow.created_at };
 
-      const failureRows = await env.MARKETPLACE_DB.prepare("SELECT id, listing_id, details, created_at FROM marketplace_admin_log WHERE action='submission_failure' ORDER BY created_at DESC LIMIT 100").all();
-      const resolutionRows = await env.MARKETPLACE_DB.prepare("SELECT listing_id FROM marketplace_admin_log WHERE action='submission_issue_resolved' ORDER BY created_at DESC LIMIT 200").all();
-      const resolved = new Set((resolutionRows.results || []).map((row) => String(row.listing_id || "")));
-      const parsedIssues = (failureRows.results || []).map(marketplaceSubmissionIssueRecord);
-      const open = parsedIssues.filter((issue) => !resolved.has(`submission-issue:${issue.issueId}`));
-      unresolvedIssues = open.length;
-      failedUploads = open.filter((issue) => issue.stage === "image_storage" || issue.r2Status === "failed" || issue.uploadStatus === "failed").length;
-      lastFailure = parsedIssues[0] || null;
-
-      const activity = await env.MARKETPLACE_DB.prepare(`SELECT l.action, l.admin_email, l.details, l.created_at, l.listing_id, m.reference
-        FROM marketplace_admin_log l LEFT JOIN marketplace_listings m ON m.id=l.listing_id
-        WHERE l.action IN ('approve','reject','request_changes','unpublish','mark_sold','restore_pending','edit','delete')
-        ORDER BY l.created_at DESC LIMIT 16`).all();
-      const labels = { approve: "Approved", reject: "Rejected", request_changes: "Changes requested", unpublish: "Unpublished", mark_sold: "Marked sold", restore_pending: "Returned to pending", edit: "Edited", delete: "Deleted" };
-      recentActions = (activity.results || []).map((row) => ({ action: row.action, actionLabel: labels[row.action] || row.action, listingId: row.listing_id, reference: row.reference || "", details: row.details || "", createdAt: row.created_at }));
+      try {
+        const sourceRows = await env.MARKETPLACE_DB.prepare(`SELECT
+          event_value AS method,
+          page,
+          COALESCE(NULLIF(json_extract(details_json, '$.cta_id'), ''), 'legacy/unattributed') AS cta_id,
+          COALESCE(NULLIF(json_extract(details_json, '$.build'), ''), '') AS event_build,
+          COUNT(*) AS count,
+          COUNT(DISTINCT session_hash) AS unique_sessions
+          FROM eus_site_events
+          WHERE event_type='contact_click' AND event_value IN ('call','text','email')
+          GROUP BY event_value, page, cta_id, event_build
+          ORDER BY count DESC, page ASC, cta_id ASC
+          LIMIT 18`).all();
+        businessSignals.contactActionSources = (sourceRows.results || []).map((row) => ({
+          method: cleanString(row.method, 20),
+          page: analyticsPath(row.page || "/"),
+          ctaId: cleanString(row.cta_id, 120) || "legacy/unattributed",
+          build: cleanString(row.event_build, 100),
+          count: Math.max(0, Number(row.count) || 0),
+          uniqueSessions: Math.max(0, Number(row.unique_sessions) || 0),
+        }));
+      } catch (error) {
+        console.error(JSON.stringify({ event: "admin_contact_action_sources_error", message: error instanceof Error ? error.message : String(error) }));
+      }
     } catch (error) {
       d1 = "error";
       console.error(JSON.stringify({ event: "admin_operations_d1_error", message: error instanceof Error ? error.message : String(error) }));
     }
   }
-  if (env.LISTING_IMAGES) {
-    try {
-      if (typeof env.LISTING_IMAGES.list === "function") await env.LISTING_IMAGES.list({ limit: 1 });
-      r2 = "ok";
-    } catch (error) {
-      r2 = "error";
-      console.error(JSON.stringify({ event: "admin_operations_r2_error", message: error instanceof Error ? error.message : String(error) }));
-    }
-  }
+
   if (env.LEADS_DB) {
     try {
       await env.LEADS_DB.prepare("SELECT 1 AS ok").first();
@@ -242,13 +146,17 @@ async function handleAdminOperations(request, env) {
       leadTableRetrieval = "ok";
       try {
         const submittedLeadSignal = await env.LEADS_DB.prepare("SELECT COUNT(*) AS count FROM project_opportunities WHERE intake_status='submitted'").first();
-        businessSignals.submittedLeads=Math.max(0,Number(submittedLeadSignal?.count)||0);
-      } catch (error) { console.error(JSON.stringify({event:"admin_submitted_leads_signal_error",message:error instanceof Error?error.message:String(error)})); }
+        businessSignals.submittedLeads = Math.max(0, Number(submittedLeadSignal?.count) || 0);
+      } catch (error) {
+        console.error(JSON.stringify({ event: "admin_submitted_leads_signal_error", message: error instanceof Error ? error.message : String(error) }));
+      }
+
       const leadSchema = await solarLeadOperationsSchemaStatus(env.LEADS_DB);
       leadSchemaReady = leadSchema.columnsReady ? "ok" : "migration_required";
       leadActivityReady = leadSchema.activityReady ? "ok" : "migration_required";
       leadSchemaMissing = leadSchema.missing || [];
       leadAdminRetrieval = leadSchema.ready ? "ok" : "migration_required";
+
       if (leadSchema.ready) {
         try {
           const leadSignal = await env.LEADS_DB.prepare(`SELECT
@@ -257,12 +165,15 @@ async function handleAdminOperations(request, env) {
             SUM(CASE WHEN p.opportunity_status NOT IN ('won','lost','closed') AND p.next_action IS NOT NULL AND p.next_action<>'' AND p.next_action<>'No Action' THEN 1 ELSE 0 END) AS action_required,
             SUM(CASE WHEN p.opportunity_status NOT IN ('won','lost','closed') AND p.next_action IS NOT NULL AND p.next_action<>'' AND p.next_action<>'No Action' AND s.next_action_due_at IS NOT NULL AND s.next_action_due_at<>'' AND s.next_action_due_at<=? THEN 1 ELSE 0 END) AS followups_due
             FROM solar_leads s
-            JOIN project_opportunities p ON p.reference=s.reference AND lower(p.project_family)='solar'`).bind(new Date(Date.now()+24*60*60*1000).toISOString()).first();
-          businessSignals.submittedSolarLeads=Number(leadSignal?.submitted_total)||0;
-          businessSignals.highIntentLeads=Number(leadSignal?.high_intent)||0;
-          businessSignals.actionRequired=Number(leadSignal?.action_required)||0;
-          businessSignals.followUpsDue=Number(leadSignal?.followups_due)||0;
-        } catch (error) { console.error(JSON.stringify({event:"admin_lead_signal_error",message:error instanceof Error?error.message:String(error)})); }
+            JOIN project_opportunities p ON p.reference=s.reference AND lower(p.project_family)='solar'`)
+            .bind(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()).first();
+          businessSignals.submittedSolarLeads = Number(leadSignal?.submitted_total) || 0;
+          businessSignals.highIntentLeads = Number(leadSignal?.high_intent) || 0;
+          businessSignals.actionRequired = Number(leadSignal?.action_required) || 0;
+          businessSignals.followUpsDue = Number(leadSignal?.followups_due) || 0;
+        } catch (error) {
+          console.error(JSON.stringify({ event: "admin_lead_signal_error", message: error instanceof Error ? error.message : String(error) }));
+        }
       }
     } catch (error) {
       leadsDb = "error";
@@ -273,6 +184,7 @@ async function handleAdminOperations(request, env) {
       console.error(JSON.stringify({ event: "admin_operations_leads_d1_error", message: error instanceof Error ? error.message : String(error) }));
     }
   }
+
   let publicHealth = "unknown";
   let publicHealthServices = {};
   try {
@@ -285,25 +197,65 @@ async function handleAdminOperations(request, env) {
   }
 
   const emailTransport = Boolean((env.EMAIL && typeof env.EMAIL.send === "function") || (env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_EMAIL_API_TOKEN));
-  const marketplaceNotifications = Boolean(isValidEmail(cleanString(env.MARKETPLACE_EMAIL_TO || DEFAULT_MARKETPLACE_EMAIL_TO, 180)) && isValidEmail(cleanString(env.MARKETPLACE_EMAIL_FROM || env.SOLAR_EMAIL_FROM, 180)) && emailTransport) ? "configured" : "unconfigured";
-  const solarNotifications = Boolean(isValidEmail(cleanString(env.SOLAR_EMAIL_TO || DEFAULT_SOLAR_EMAIL_TO, 180)) && isValidEmail(cleanString(env.SOLAR_EMAIL_FROM, 180)) && emailTransport) ? "configured" : "unconfigured";
-  const notifications = marketplaceNotifications === "configured" && solarNotifications === "configured" ? "configured" : "attention";
-  const backend = d1 === "ok" && r2 === "ok" ? "ok" : "degraded";
+  const marketplaceNotifications = "retired";
+  const solarNotifications = Boolean(
+    isValidEmail(cleanString(env.SOLAR_EMAIL_TO || DEFAULT_SOLAR_EMAIL_TO, 180)) &&
+    isValidEmail(cleanString(env.SOLAR_EMAIL_FROM, 180)) &&
+    emailTransport
+  ) ? "configured" : "unconfigured";
+  const notifications = solarNotifications === "configured" ? "configured" : "attention";
+  const backend = d1 === "ok" ? "ok" : "degraded";
   const leadCore = leadsDb === "ok" && leadTableRetrieval === "ok" && leadSchemaReady === "ok" && leadActivityReady === "ok" && leadAdminRetrieval === "ok" ? "ok" : "degraded";
   const coreOperational = backend === "ok" && leadCore === "ok";
+
   const health = {
     status: coreOperational ? (notifications === "configured" && publicHealth === "ok" ? "ok" : "operational") : "degraded",
     reason: leadCore !== "ok" && (leadSchemaReady === "migration_required" || leadActivityReady === "migration_required")
       ? "v3.3.7 lead migration is required; legacy Solar storage may still be available."
       : (coreOperational && notifications !== "configured" ? "Notifications require attention; lead storage is healthy." : ""),
-    publicHealth, publicHealthServices, backend, d1, r2, leadsDb, leadTableRetrieval, leadAdminRetrieval, leadSchemaReady, leadActivityReady, leadSchemaMissing, leadCore,
-    notifications, marketplaceNotifications, solarNotifications, build: OPERATIONS_BUILD,
+    publicHealth,
+    publicHealthServices,
+    backend,
+    d1,
+    r2,
+    leadsDb,
+    leadTableRetrieval,
+    leadAdminRetrieval,
+    leadSchemaReady,
+    leadActivityReady,
+    leadSchemaMissing,
+    leadCore,
+    notifications,
+    marketplaceNotifications,
+    solarNotifications,
+    marketplaceRetired: true,
+    build: OPERATIONS_BUILD,
   };
-  const summary = { pending: Number(counts.pending_review) || 0, published: Number(counts.published) || 0, unresolvedIssues, failedUploads, recent24h, totalListingViews, listingViews24h };
-  const response = jsonResponse({ ok: true, summary, health, signals: businessSignals, marketplaceSellerContactsByListing, marketplaceListingInterestsByListing, lastSuccess, lastFailure, recentActions });
+
+  const summary = {
+    pending: 0,
+    published: 0,
+    unresolvedIssues: 0,
+    failedUploads: 0,
+    recent24h: 0,
+    totalListingViews: 0,
+    listingViews24h: 0,
+    marketplaceRetired: true,
+  };
+
+  const response = jsonResponse({
+    ok: true,
+    summary,
+    health,
+    signals: businessSignals,
+    marketplaceSellerContactsByListing: {},
+    marketplaceListingInterestsByListing: {},
+    lastSuccess: null,
+    lastFailure: null,
+    recentActions: [],
+    marketplaceRetired: true,
+  });
   return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
 }
 
-export {
-  handleAdminOperations
-};
+export { handleAdminOperations };
