@@ -35,7 +35,29 @@ Close when:
 - first-order receiving/release workflow is documented;
 - the partner is either activated or rejected.
 
-## 3. PayPal business onboarding / checkout support
+## 3. Hawaii low-voltage handling / sample-forwarder path
+
+**Status:** ACTIVE QUALIFICATION  
+**Priority:** High
+
+A separate Hawaii commercial partner has expressed interest in storing and handling Elevation's low-voltage consumer inventory, potentially supporting walk-in retail from Elevation-owned stock, and exploring sample-shipment cost through an established battery forwarder.
+
+Do not treat this as confirmed standalone-LiFePO4 acceptance or as carrier approval. The partner's established 48V / high-voltage supplier relationships are outside the intended scope and should not be disrupted.
+
+Next action:
+- confirm whether standalone low-voltage LiFePO4 batteries are included in the handling offer;
+- identify the accepting forwarder/carrier path for a narrow SOK sample shipment;
+- obtain exact receiving, packaging, labeling, documentation, signer/responsibility and tender requirements;
+- confirm receiving/storage/customer-release commercial structure outside public Git;
+- reconcile qualified route facts into `SOK_HAWAII_FIRST_ORDER_READINESS.md`.
+
+Close when:
+- standalone-lithium scope is confirmed or rejected;
+- a sample forwarder path is qualified or rejected;
+- the partner's operating role is documented;
+- the lane is either activated for a first-order test or removed from active qualification.
+
+## 4. PayPal business onboarding / checkout support
 
 **Status:** ACTIVE  
 **Priority:** High
@@ -52,7 +74,7 @@ Close when:
 - checkout remains verified healthy;
 - any required follow-up is documented in Git.
 
-## 4. Shopify first-wave product publishing
+## 5. Shopify first-wave product publishing
 
 **Status:** EXECUTION PREP  
 **Priority:** High
@@ -75,7 +97,7 @@ Lower-margin candidate products remain draft-only until shipping/fees are proven
 
 Close each SKU only after its supplier, shipping, content, media, spec, and margin checks are complete.
 
-## 5. SOK product media expansion
+## 6. SOK product media expansion
 
 **Status:** OUTREACH PREP  
 **Priority:** High
