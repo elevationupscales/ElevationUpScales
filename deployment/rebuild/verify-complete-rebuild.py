@@ -57,9 +57,9 @@ for expected in [
 require('from "./worker/routes.js"' in worker_core, "worker-core must import canonical Worker routes directly")
 require('from "./routes.js"' in core_context, "core-context must reuse canonical Worker routes")
 route_exports = re.findall(r'^export const ([A-Z0-9_]+_PATH|[A-Z0-9_]+_PREFIX)\s*=', routes, re.MULTILINE)
-require(len(route_exports) == 37, f"expected 37 canonical Worker route constants, found {len(route_exports)}")
+require(len(route_exports) == 38, f"expected 38 canonical Worker route constants, found {len(route_exports)}")
 registry_rows = re.findall(r'\{\s*match:\s*"[^"]+",\s*path:\s*"[^"]+",\s*domain:\s*"[^"]+",\s*handler:\s*"[^"]+",\s*access:\s*"[^"]+"', registry)
-require(len(registry_rows) == 38, f"expected 38 Worker route registry rows, found {len(registry_rows)}")
+require(len(registry_rows) == 39, f"expected 39 Worker route registry rows, found {len(registry_rows)}")
 
 # Business handlers belong to domain modules, not worker-core.
 require("async function handle" not in worker_core, "worker-core regained business handler implementations")
