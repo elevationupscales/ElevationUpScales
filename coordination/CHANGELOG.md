@@ -1,18 +1,11 @@
-# Elevation 4.3 Coordination Changelog
+# Coordination Changelog
 
-## 2026-08-28 — Control Plane Established
+## 2026-09-07 — Command Center consolidation A+B
+- Marketplace retired from active Admin/public operations; historical D1/R2 records preserved.
+- Admin owner navigation consolidated to nine permanent workspaces.
+- Leads page reduced to customer, supplier, solar, and Work With Us lead views.
+- Pricing/Promotions and Commerce Logistics remain secondary tools under Products & Listings / Channels & Sync rather than top-level managers.
+- Protected product, pricing, inventory, checkout, PayPal, SOK, Hawaii/Alaska freight, lead-routing, Cloudflare binding, and secret contracts remain unchanged.
 
-Created the persistent cross-worker coordination structure:
-
-- root Master Status
-- Worker Protocol
-- onboarding guide
-- status-update template
-- handoff template
-- verification receipt template
-- decision template
-- core system-boundary decision
-- repository communication decision
-- Hawaii Phase 2 active handoff pointer
-
-No public website application behavior was intentionally changed by this coordination setup.
+## 2026-09-06 — Recovery workflow reset
+- Hard recovery baseline and annotation-first coding workflow established.
