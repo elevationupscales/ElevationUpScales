@@ -1,0 +1,1 @@
+Production live-sales smoke trigger for 2026-09-08. This diagnostic branch workflow checks live PayPal configuration and a server-authoritative quote only. It does not create or capture a PayPal order.
