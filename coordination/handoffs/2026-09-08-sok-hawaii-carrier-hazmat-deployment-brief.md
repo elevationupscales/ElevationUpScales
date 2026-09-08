@@ -1,65 +1,96 @@
-# Deployment Brief — SOK Hawaii Carrier Packaging / HazMat Requirements
+# Deployment Brief — SOK Hawaii Packaging / HazMat Workflow
 
 **Date:** 2026-09-08  
 **Branch:** `plan/sok-order-first-growth-workflow-0908`  
-**Status:** DEPLOYMENT INPUT / DO NOT DEPLOY BY THIS FILE ALONE
+**Status:** DEPLOYMENT INPUT / PROTECTED LOGISTICS BOUNDARY
 
 ## Deployment manager — required read
 
-The Hawaii order-first build now has a verified carrier-requirements source:
+The Hawaii order-first build has verified route-specific carrier requirements behind the operating model.
+
+Required source files:
 
 - `operations/SOK_HAWAII_CARRIER_PACKAGING_HAZMAT_REQUIREMENTS.md`
 - `operations/SOK_ORDER_FIRST_GROWTH_WORKFLOW_PLAN.md`
 
-These requirements were extracted from actual freight-company correspondence and the June 2026 Pasha Hawaii Lithium Battery Shipment Checklist supplied to Elevation through the freight forwarder, plus SOK-specific forwarder quote stipulations.
+The deployment manager should implement the **workflow gates and protected data model**, not reproduce Elevation's carrier network or carrier-specific playbook in public source code.
 
 ## Material build additions
 
-Release B — Hawaii Order-First Foundation must be able to represent these carrier-specific gates:
+Release B — Hawaii Order-First Foundation must represent these protected readiness gates:
 
+- internal route qualified;
 - carrier checklist current;
 - exact SDS ready;
 - UN38.3 / 38.3 report ready;
 - UN number / Wh / battery data ready;
-- state of charge confirmed for the selected route;
+- state of charge verified against selected route profile;
 - battery condition accepted;
-- strong outer packaging confirmed;
-- non-metallic inner packaging confirmed where required;
+- outer packaging confirmed;
+- inner packaging confirmed where required;
 - short-circuit protection confirmed;
-- separation from conductive materials confirmed;
-- securement / blocking / bracing confirmed;
-- packaging and blocking/bracing photos ready;
-- high-capacity additional-carrier review complete where required;
+- conductive-material separation confirmed where required;
+- securement / blocking / bracing confirmed where required;
+- packaging evidence ready where required;
+- additional-carrier review complete where required;
 - SOK preparation package sent;
 - SOK warehouse confirmation received;
 - booking documents ready;
 - freight accepted / handoff ready.
 
-## Verified route-specific details that must not be lost
+## Protected route-profile principle
 
-For the supplied Pasha Hawaii container-service checklist:
+Exact carrier-specific acceptance values and documents are intentionally omitted from this public deployment brief.
 
-- SOC must be 20%–50%; outside that range is a terminal rejection condition.
-- Damaged, defective, recalled, and unsealed lithium batteries are not accepted under the normal route.
-- Packaging must prevent short circuit and movement.
-- Strong outer packaging is required.
-- Non-metallic inner packaging completely enclosing batteries is required by the supplied checklist.
-- Batteries must be separated from conductive materials.
-- Packages must be blocked/braced within the container.
-- Packaging and blocking/bracing photos must accompany the checklist.
-- Lithium-ion batteries above 5 kWh per battery require additional review and written carrier approval before booking.
-- The freight-forwarder SOK quotes additionally require SDS + lithium checklist at booking and require freight to be safe for ocean transport/forklift handling.
+The system should support protected route profiles capable of holding or referencing current requirements without publishing them in source code. Examples include:
 
-## Privacy boundary
+- route-specific state-of-charge acceptance;
+- capacity/configuration review thresholds;
+- packaging details;
+- evidence/photo requirements;
+- booking-document requirements;
+- container/load limits;
+- carrier-specific marks or labels;
+- current written-approval requirements.
 
-Do not place private freight rates, quote totals, payment terms, customer PII, or protected commercial correspondence in the deployment UI or public Git.
+Carrier acceptance remains controlling and must be revalidated before a real shipment.
+
+## Supplier information boundary
+
+SOK should receive only the preparation information needed to execute the specific shipment at origin:
+
+- manufacturer-document requests needed for the exact SKU;
+- battery condition requirements;
+- state-of-charge requirement when applicable;
+- physical packaging/securement requirements SOK is being asked to perform;
+- required origin-side marks/labels or paperwork for that shipment;
+- required preparation evidence/photos when applicable.
+
+Do not disclose the broader Elevation carrier network, alternate routes, quote references, rate structure, receiving network, route-selection logic, or other internal logistics intelligence unless a specific operational need requires it.
+
+## Privacy / commercial-asset boundary
+
+Do not place in public Git, deployment UI visible to unauthorized users, customer-facing pages, or routine supplier outreach:
+
+- carrier identities tied to Elevation's working route network;
+- private carrier checklists/documents;
+- exact carrier-specific thresholds that reveal the working route playbook;
+- freight rates or accessorial structures;
+- quote / booking references;
+- origin terminal or detailed handoff routing;
+- Hawaii receiving/storage partner identities and private terms;
+- backup carrier identities;
+- internal route-comparison or carrier-selection logic;
+- customer PII.
 
 ## Deployment interpretation
 
-These are not universal lithium rules. The build must bind the requirements to the selected route/carrier profile and allow the checklist to be refreshed when carrier policy changes.
+The application should make the owner's next action obvious without revealing protected logistics intelligence.
 
-**Do not hard-code one carrier's rules globally across every Hawaii/Alaska lithium route.**
+**Do not hard-code one carrier's rules globally. Do not expose the carrier playbook merely to make the workflow self-contained.**
 
-## Acceptance impact
+Release B should instead know that an exact order is:
 
-Release B should not be considered operationally complete if the owner still needs to reopen historical freight emails/PDFs to determine whether an exact shipment is packaging/HazMat ready.
+**ROUTE QUALIFIED → REQUIREMENTS CURRENT → SOK PREP READY → SOK CONFIRMED → BOOKING READY → FREIGHT ACCEPTED**
+
+with detailed requirements stored/referenced only inside the protected operational boundary.
