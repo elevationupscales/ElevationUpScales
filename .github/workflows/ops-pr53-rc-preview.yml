@@ -1,0 +1,84 @@
+name: PR53 Release Candidate Preview
+
+on:
+  push:
+    branches:
+      - ops/rc-preview-pr53-0908
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-release-candidate-preview
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out fixed candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 4d2d966a448f25e17749f208873f4aa5b1b1376b
+          fetch-depth: 0
+
+      - name: Verify candidate and lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "4d2d966a448f25e17749f208873f4aa5b1b1376b"
+          test "$(git rev-parse HEAD^{tree})" = "508a6939f7e1b05ecba0ab9b913cc54b50e627f9"
+          git merge-base --is-ancestor cdd438f4db6420ea35ffdc719058e0602e1b3343 HEAD
+          git diff --name-status cdd438f4db6420ea35ffdc719058e0602e1b3343...HEAD
+
+      - name: Run committed-source QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa
+          git diff --check
+          git diff --exit-code
+
+      - name: Block credentials and oversized artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
+          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
+            echo "Credential-like value found in deployable source."
+            exit 1
+          fi
+
+      - name: Deploy isolated preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=candidate-gate-preview
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run preview regression checks
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "$DEPLOYMENT_URL"
+
+      - name: Record preview receipt
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "### Elevation UpScales preview — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Change: sok-direct-dropship-activation-a2" >> "$GITHUB_STEP_SUMMARY"
+          echo "Main: cdd438f4db6420ea35ffdc719058e0602e1b3343" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: 4d2d966a448f25e17749f208873f4aa5b1b1376b" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tree: 508a6939f7e1b05ecba0ab9b913cc54b50e627f9" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
