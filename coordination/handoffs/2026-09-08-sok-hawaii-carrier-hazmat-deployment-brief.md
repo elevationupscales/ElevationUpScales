@@ -12,8 +12,9 @@ Required source files:
 
 - `operations/SOK_HAWAII_CARRIER_PACKAGING_HAZMAT_REQUIREMENTS.md`
 - `operations/SOK_ORDER_FIRST_GROWTH_WORKFLOW_PLAN.md`
+- `operations/SOK_ECOMMERCE_SHIPPING_SOP.md` — controlling asset-protection/disclosure boundary on `main`
 
-The deployment manager should implement the **workflow gates and protected data model**, not reproduce Elevation's carrier network or carrier-specific playbook in public source code.
+The deployment manager may implement and use the internal operational detail needed to execute shipments. The system must **not automatically leak that internal detail into invoices, receipts, customer emails, storefront responses, exports, PDFs, or ordinary customer-visible order views**.
 
 ## Material build additions
 
@@ -38,6 +39,62 @@ Release B — Hawaii Order-First Foundation must represent these protected readi
 - booking documents ready;
 - freight accepted / handoff ready.
 
+## Internal data may be available to authorized deployment/admin
+
+The protected operational layer may know or reference, when needed:
+
+- exact carrier / forwarder;
+- route identity and route-specific requirements;
+- booking and quote references;
+- origin / terminal / handoff information;
+- receiving / storage / final-mile provider identity;
+- carrier checklists and exact acceptance values;
+- carrier-specific marks / labels / documents;
+- route timing / scheduling / consolidation information;
+- private freight rates and accessorials;
+- alternate routes and internal route-selection logic.
+
+These fields are operational assets. Access to them does not mean they are safe for downstream customer outputs.
+
+## Invoice / receipt / customer-output redaction boundary
+
+Invoice, receipt, payment-request, customer PDF, customer email and customer-visible order serializers must use an **allowlist**, not a dump of the internal logistics object.
+
+Customer-facing financial documents may normally include:
+
+- Elevation order / invoice number;
+- customer-required billing/shipping data;
+- product description / SKU as appropriate;
+- quantity;
+- retail product price;
+- customer-facing freight / shipping amount;
+- separately disclosed Elevation shipping / handling / logistics coordination fee when applicable;
+- taxes / authorized fees;
+- amount paid / balance due;
+- customer-appropriate tracking or release information when required.
+
+They must exclude by default:
+
+- internal carrier / forwarder identity;
+- alternate / backup route identity;
+- raw carrier buy rate;
+- carrier quote / booking reference;
+- internal freight markup / margin;
+- protected terminal / handoff address;
+- receiving / storage partner identity unless the customer specifically needs that location to receive or collect the shipment;
+- private final-mile partner identity unless operationally required for the customer's delivery;
+- carrier-specific HazMat checklist details;
+- exact carrier acceptance thresholds;
+- internal dangerous-goods preparation steps;
+- supplier cost / dealer cost;
+- supplier private payment terms;
+- internal supplier PO/payment notes;
+- route-selection logic;
+- protected carrier / supplier correspondence;
+- internal operational notes.
+
+If a receiving location or provider must be revealed for customer pickup, expose only the minimum pickup/release information required for that order — not the broader relationship, rate structure or network context.
+
 ## Protected route-profile principle
 
 Exact carrier-specific acceptance values and documents are intentionally omitted from this public deployment brief.
@@ -59,20 +116,22 @@ Carrier acceptance remains controlling and must be revalidated before a real shi
 
 SOK should receive only the preparation information needed to execute the specific shipment at origin:
 
+- exact SKU / quantity required to execute the order;
 - manufacturer-document requests needed for the exact SKU;
 - battery condition requirements;
 - state-of-charge requirement when applicable;
 - physical packaging/securement requirements SOK is being asked to perform;
 - required origin-side marks/labels or paperwork for that shipment;
-- required preparation evidence/photos when applicable.
+- required preparation evidence/photos when applicable;
+- the exact handoff/booking instruction only when SOK must physically tender the shipment there.
 
-Do not disclose the broader Elevation carrier network, alternate routes, quote references, rate structure, receiving network, route-selection logic, or other internal logistics intelligence unless a specific operational need requires it.
+Do not disclose the broader Elevation carrier network, alternate routes, quote comparisons, rate structure, receiving network, route-selection logic, or other internal logistics intelligence unless a specific operational need requires it.
 
 ## Privacy / commercial-asset boundary
 
-Do not place in public Git, deployment UI visible to unauthorized users, customer-facing pages, or routine supplier outreach:
+Do not place in public Git, deployment UI visible to unauthorized users, customer-facing pages, invoice outputs, or routine supplier outreach:
 
-- carrier identities tied to Elevation's working route network;
+- carrier identities tied to Elevation's working route network when commercially sensitive;
 - private carrier checklists/documents;
 - exact carrier-specific thresholds that reveal the working route playbook;
 - freight rates or accessorial structures;
@@ -81,7 +140,16 @@ Do not place in public Git, deployment UI visible to unauthorized users, custome
 - Hawaii receiving/storage partner identities and private terms;
 - backup carrier identities;
 - internal route-comparison or carrier-selection logic;
-- customer PII.
+- customer PII outside the required transaction context.
+
+## Implementation rule
+
+Use separate internal and external representations.
+
+**INTERNAL LOGISTICS RECORD** may contain protected execution detail.  
+**CUSTOMER OUTPUT MODEL** must contain only explicitly approved customer-facing fields.
+
+Do not create invoices, PDFs, emails or receipts by serializing the internal shipment record directly.
 
 ## Deployment interpretation
 
