@@ -79,7 +79,7 @@
         ${badges?`<div class="sok-card__usecases" aria-label="Common uses">${badges}</div>`:""}
         <p class="sok-card__price${Number(product.priceCents)>0?"":" sok-card__price--options"}">${esc(price)}</p>
         <p>${esc(product.description||"")}</p>
-        <div class="sok-card__actions"><a class="button button-primary" data-sok-action="purchase-options" href="${esc(primary)}">${esc(primaryLabel)}</a><a class="button button-outline" data-sok-action="view-product" href="${esc(detail)}">View Product</a></div>
+        <div class="sok-card__actions"><a class="button button-primary" data-sok-action="${product.paymentEligible===true?"direct-checkout":"purchase-options"}" href="${esc(primary)}">${esc(primaryLabel)}</a><a class="button button-outline" data-sok-action="view-product" href="${esc(detail)}">View Product</a></div>
         <div class="sok-card__links"><a data-sok-action="product" href="/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=product">Ask About Product</a><a data-sok-action="commercial" href="${esc(product.commercialUrl)}">Commercial / Volume</a>${hawaii}${literature}</div>
       </div>
     </article>`;
@@ -123,6 +123,7 @@
     if(action==="view-product")track("sok_product_open",sku,{stage:"collection"});
     else if(action==="commercial")track("commercial_review_route",sku,{stage:"collection"});
     else if(action==="hawaii")track("hawaii_options_open",sku,{stage:"collection"});
+    else if(action==="direct-checkout")track("direct_checkout_open",sku,{stage:"collection"});
     else track("purchase_options_open",sku,{stage:"collection",intent:action});
   });
 

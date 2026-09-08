@@ -124,6 +124,7 @@
     if(action==="media")track("sok_media_view",{mediaIndex:link.dataset.sokMediaIndex||""});
     else if(action==="hawaii")track("hawaii_options_open",{stage:"product-page"});
     else if(action==="commercial")track("commercial_review_route",{stage:"product-page"});
+    else if(action==="direct-checkout")track("direct_checkout_open",{stage:"product-page"});
     else track("purchase_options_open",{stage:"product-page",intent:action});
   });
 

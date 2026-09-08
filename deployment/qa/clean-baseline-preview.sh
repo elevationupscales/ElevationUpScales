@@ -114,6 +114,7 @@ echo "HEAD /api/store-products => 200"
 
 bash deployment/qa/sok-commercialization-preview.sh "$base"
 bash deployment/qa/sok-full-line-preview.sh "$base"
+bash deployment/qa/sok-direct-dropship-preview.sh "$base"
 bash deployment/qa/website-integrity-preview.sh "$base"
 
 echo "clean-baseline-preview.sh: PASS"

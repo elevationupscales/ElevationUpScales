@@ -66,7 +66,8 @@ function actionsMarkup(product){
   const po=`/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=purchase_options`;
   const commercial=`/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=commercial`;
   const inquiry=`/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=product`;
-  const primary=product.publicPurchaseMode==="COMMERCIAL_ONLY"?`<a class="button button-primary" data-sok-page-action="commercial" href="${commercial}">Request Commercial Pricing</a>`:`<a class="button button-primary" data-sok-page-action="purchase-options" href="${po}">See Purchase Options</a>`;
+  const direct=product.paymentEligible===true;
+  const primary=product.publicPurchaseMode==="COMMERCIAL_ONLY"?`<a class="button button-primary" data-sok-page-action="commercial" href="${commercial}">Request Commercial Pricing</a>`:`<a class="button button-primary" data-sok-page-action="${direct?"direct-checkout":"purchase-options"}" href="${esc(direct?product.purchaseUrl:po)}">${esc(direct?(product.commerceCta||"Buy Now"):"See Purchase Options")}</a>`;
   const hawaii=product.batteryRelevant?`<a class="button button-outline" data-sok-page-action="hawaii" href="/sok-order.html?sku=${encodeURIComponent(product.sku)}&intent=hawaii&state=HI">Check Hawaii Availability</a>`:"";
   return `<div class="sok-product-actions">${primary}<a class="button button-outline" data-sok-page-action="email" href="${inquiry}">Email Us About This Product</a><a class="button button-outline" data-sok-page-action="commercial" href="${commercial}">Request Commercial Pricing</a>${hawaii}</div><p class="sok-public-email">Public inquiry destination: ${PUBLIC_EMAIL}</p>`;
 }
