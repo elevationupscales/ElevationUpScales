@@ -103,20 +103,31 @@
   transform:translateY(-1px);
 }
 
-/* Move the SOK relationship mark up and make the verified product pair the visual center. */
+/* Make the verified SOK mark + product pair the visual center. */
 .reference-sok-brand{
   top:-8px!important;
   left:50%!important;
   width:min(470px,60%)!important;
   transform:translateX(-50%)!important;
+  isolation:isolate!important;
+  mix-blend-mode:normal!important;
 }
-.reference-sok-partnership{
-  top:78px!important;
-  left:50%!important;
-  width:min(500px,68%)!important;
-  transform:translateX(-50%);
-  font-size:.62rem!important;
-  letter-spacing:.11em!important;
+/* Emergency trust repair: do not mix secondary dealer branding into the SOK lockup. */
+.reference-sok-partnership,
+.reference-storefront-hero__visual>.reference-authorized,
+.reference-storefront-hero__visual>.reference-authorized *,
+.reference-authorized{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
 }
 .reference-product--12v{
   left:0!important;
@@ -130,7 +141,6 @@
   width:56%!important;
   height:66%!important;
 }
-.reference-authorized{display:none!important}
 
 .reference-trust-strip{
   gap:0;
@@ -278,7 +288,6 @@
 @media(max-width:1050px){
   .reference-usecases{grid-template-columns:repeat(3,minmax(0,1fr))!important}
   .reference-sok-brand{width:min(430px,56%)!important}
-  .reference-sok-partnership{width:min(450px,62%)!important}
 }
 @media(max-width:760px){
   .reference-storefront-home .eus-brand{width:190px!important;min-width:190px!important;max-width:190px!important;min-height:52px}
@@ -286,7 +295,6 @@
   .reference-storefront-hero h1{font-size:clamp(2.55rem,12vw,3.8rem)!important}
   .reference-usecases{grid-template-columns:1fr 1fr!important}
   .reference-sok-brand{top:-4px!important;left:50%!important;width:245px!important}
-  .reference-sok-partnership{top:58px!important;left:50%!important;width:280px!important;font-size:.48rem!important}
   .reference-product--12v{left:-1%!important;width:52%!important;height:59%!important;bottom:-2px!important}
   .reference-product--48v{right:-1%!important;width:56%!important;height:63%!important;bottom:-4px!important}
   .reference-trust-strip__item{padding:14px 20px!important}
