@@ -21,15 +21,15 @@ jobs:
       - name: Check out fixed candidate
         uses: actions/checkout@v6
         with:
-          ref: 4d2d966a448f25e17749f208873f4aa5b1b1376b
+          ref: 0f1d0d0ee4e0f657c51a74ed71055892cb63b3ab
           fetch-depth: 0
 
       - name: Verify candidate and lineage
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "4d2d966a448f25e17749f208873f4aa5b1b1376b"
-          test "$(git rev-parse HEAD^{tree})" = "508a6939f7e1b05ecba0ab9b913cc54b50e627f9"
+          test "$(git rev-parse HEAD)" = "0f1d0d0ee4e0f657c51a74ed71055892cb63b3ab"
+          test "$(git rev-parse HEAD^{tree})" = "0ccba017b62376cc6b2ce5ebd6d14fd4e715f7da"
           git merge-base --is-ancestor cdd438f4db6420ea35ffdc719058e0602e1b3343 HEAD
           git diff --name-status cdd438f4db6420ea35ffdc719058e0602e1b3343...HEAD
 
@@ -78,7 +78,7 @@ jobs:
           echo "### Elevation UpScales preview — PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Change: sok-direct-dropship-activation-a2" >> "$GITHUB_STEP_SUMMARY"
           echo "Main: cdd438f4db6420ea35ffdc719058e0602e1b3343" >> "$GITHUB_STEP_SUMMARY"
-          echo "Candidate: 4d2d966a448f25e17749f208873f4aa5b1b1376b" >> "$GITHUB_STEP_SUMMARY"
-          echo "Tree: 508a6939f7e1b05ecba0ab9b913cc54b50e627f9" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidate: 0f1d0d0ee4e0f657c51a74ed71055892cb63b3ab" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tree: 0ccba017b62376cc6b2ce5ebd6d14fd4e715f7da" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Production promotion: NOT PERFORMED" >> "$GITHUB_STEP_SUMMARY"
