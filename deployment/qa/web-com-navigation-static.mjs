@@ -64,4 +64,35 @@ assert.ok(redirects.includes("/marketplace /store 301"), "retired Marketplace mu
 assert.ok(redirects.includes("/make-a-listing /store 301"), "retired seller intake must redirect to the active Store");
 assert.ok(redirects.includes("/list-an-rv /rv-store 301"), "retired RV seller intake must redirect to the RV Store");
 
-console.log("WEB-VISUAL-0907-RETIRE-MARKETPLACE navigation contract: PASS");
+// Release C: retired public routes stay out of discovery while server redirects remain authoritative.
+const sitemap = fs.readFileSync("site/sitemap.xml", "utf8");
+for (const retiredRoute of ["/marketplace", "/make-a-listing"]) {
+  assert.equal(sitemap.includes(`elevationupscales.com${retiredRoute}`), false, `retired route remains in sitemap: ${retiredRoute}`);
+}
+
+// Release D: remove only retired Marketplace public front-end assets. Historical D1/R2 data and Worker compatibility remain untouched.
+for (const retiredFile of [
+  "site/marketplace.html",
+  "site/make-a-listing.html",
+  "site/marketplace-feed.js",
+  "site/marketplace-listing.js",
+  "site/marketplace-listing.css",
+  "site/marketplace-reform.css",
+  "site/marketplace-analytics.js",
+  "site/list-a-bicycle.html",
+  "site/list-a-boat.html",
+  "site/list-a-motorcycle.html",
+  "site/list-a-vehicle.html",
+  "site/list-an-rv.html",
+  "site/list-used-gear.html",
+  "site/list-a-bicycle/index.html",
+  "site/list-a-boat/index.html",
+  "site/list-a-motorcycle/index.html",
+  "site/list-a-vehicle/index.html",
+  "site/list-an-rv/index.html",
+  "site/list-used-gear/index.html",
+]) {
+  assert.equal(fs.existsSync(retiredFile), false, `deprecated Marketplace front-end asset still present: ${retiredFile}`);
+}
+
+console.log("WEB-VISUAL-0907-RETIRE-MARKETPLACE C+D navigation contract: PASS");
