@@ -1,5 +1,5 @@
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
-const ORDER_STATUSES = new Set(["pending", "paid", "fulfillment_pending", "supplier_ordered", "shipped", "completed", "hold_issue", "refund_needed", "refunded", "cancelled"]);
+const ORDER_STATUSES = new Set(["pending", "paid", "fulfillment_pending", "supplier_ordered", "supplier_released", "shipped", "completed", "hold_issue", "refund_needed", "refunded", "cancelled"]);
 
 const JSON_HEADERS = Object.freeze({
   "Cache-Control": "no-store",
@@ -40,27 +40,37 @@ async function ensureOrderOpsSchema(env) {
 }
 function parseJson(value) { try { const parsed = JSON.parse(value || "{}"); return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}; } catch (_) { return {}; } }
 function normalizedStatus(row) { const stored = clean(row?.fulfillment_status, 40).toLowerCase(); if (ORDER_STATUSES.has(stored) && stored !== "pending") return stored; return clean(row?.payment_status, 40).toLowerCase() === "completed" ? "fulfillment_pending" : (ORDER_STATUSES.has(stored) ? stored : "pending"); }
+function sokSkuFromProductId(productId) { const id = clean(productId, 180); return /^sok-/i.test(id) ? id.replace(/^sok-/i, "").toUpperCase() : ""; }
+function normalizedSupplier(row, rawSupplier) {
+  const supplier = { ...rawSupplier };
+  const sokSku = sokSkuFromProductId(row?.product_id);
+  const supplierSku = clean(supplier.supplierSku || supplier.skuId || sokSku, 180);
+  const isSok = Boolean(sokSku) || /^sok(?: energy)?$/i.test(clean(supplier.supplierName || supplier.supplier, 120));
+  const supplierName = clean(supplier.supplierName || supplier.supplier || (isSok ? "SOK Energy" : ((supplier.itemNo || supplier.skuId) ? "Doba" : "")), 120);
+  return { ...supplier, ...(supplierName ? { supplierName } : {}), ...(supplierSku ? { supplierSku } : {}), ...(isSok ? { supplier: "sok", supplierName: "SOK Energy", supplierSku: supplierSku || sokSku } : {}) };
+}
 function orderRecord(row) {
-  const customer = parseJson(row.customer_json); const shipping = parseJson(row.shipping_json); const supplier = parseJson(row.supplier_json);
+  const customer = parseJson(row.customer_json); const shipping = parseJson(row.shipping_json); const rawSupplier = parseJson(row.supplier_json); const supplier = normalizedSupplier(row, rawSupplier);
   return {
     id: clean(row.id, 120), source: clean(row.source, 30), productId: clean(row.product_id, 180), productName: clean(row.product_name, 260), variantId: clean(row.variant_id, 180), variantName: clean(row.variant_name, 220),
     quantity: Number(row.quantity || 0), unitPriceCents: Number(row.unit_price_cents || 0), merchandiseCents: Number(row.merchandise_cents || 0), shippingCents: Number(row.shipping_cents || 0), totalCents: Number(row.total_cents || 0),
     customer, shipping, supplier, paypalOrderId: clean(row.paypal_order_id, 100), paypalCaptureId: clean(row.paypal_capture_id, 100), paymentStatus: clean(row.payment_status, 40).toLowerCase(), fulfillmentStatus: normalizedStatus(row),
     supplierOrderId: clean(row.supplier_order_id, 160), trackingNumber: clean(row.tracking_number, 180), carrier: clean(row.carrier, 120), fulfillmentNotes: clean(row.fulfillment_notes, 2000),
-    elevationSku: clean(row.elevation_sku || supplier.skuId, 180), supplierCostCents: Number(row.supplier_cost_cents || 0), sourceUrl: clean(row.catalog_source_url, 700),
+    elevationSku: clean(row.elevation_sku || supplier.supplierSku || supplier.skuId, 180), supplierCostCents: Number(row.supplier_cost_cents || 0), sourceUrl: clean(row.catalog_source_url, 700),
     createdAt: clean(row.created_at, 50), paidAt: clean(row.paid_at, 50), updatedAt: clean(row.updated_at, 50), refundedAt: clean(row.refunded_at, 50),
   };
 }
-function counts(orders) { const result = { total: orders.length, paid: 0, fulfillment_pending: 0, supplier_ordered: 0, shipped: 0, completed: 0, hold_issue: 0, refund_needed: 0, refunded: 0 }; for (const order of orders) { if (order.paymentStatus === "completed") result.paid += 1; if (Object.hasOwn(result, order.fulfillmentStatus)) result[order.fulfillmentStatus] += 1; } return result; }
+function counts(orders) { const result = { total: orders.length, paid: 0, fulfillment_pending: 0, supplier_ordered: 0, supplier_released: 0, shipped: 0, completed: 0, hold_issue: 0, refund_needed: 0, refunded: 0 }; for (const order of orders) { if (order.paymentStatus === "completed") result.paid += 1; if (Object.hasOwn(result, order.fulfillmentStatus)) result[order.fulfillmentStatus] += 1; } return result; }
+
+const ORDER_SELECT = `SELECT o.*, i.sku AS elevation_sku, i.cost_cents AS supplier_cost_cents, i.source_url AS catalog_source_url
+      FROM eus_store_orders o
+      LEFT JOIN eus_inventory_items i ON lower(i.sku)=lower(COALESCE(json_extract(o.supplier_json,'$.supplierSku'),json_extract(o.supplier_json,'$.skuId')))`;
 
 async function listOrders(request, env) {
   const auth = await requireAdmin(request, env); if (auth.response) return auth.response;
   if (request.method !== "GET" && request.method !== "HEAD") return json({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
   if (!await ensureOrderOpsSchema(env)) return json({ error: "Store order storage is not configured" }, 503);
-  const rows = await env.MARKETPLACE_DB.prepare(`SELECT o.*, i.sku AS elevation_sku, i.cost_cents AS supplier_cost_cents, i.source_url AS catalog_source_url
-      FROM eus_store_orders o
-      LEFT JOIN eus_inventory_items i ON lower(i.sku)=lower(json_extract(o.supplier_json,'$.skuId'))
-      ORDER BY COALESCE(o.paid_at, o.created_at) DESC LIMIT 500`).all().catch(async () => env.MARKETPLACE_DB.prepare("SELECT * FROM eus_store_orders ORDER BY COALESCE(paid_at, created_at) DESC LIMIT 500").all());
+  const rows = await env.MARKETPLACE_DB.prepare(`${ORDER_SELECT} ORDER BY COALESCE(o.paid_at, o.created_at) DESC LIMIT 500`).all().catch(async () => env.MARKETPLACE_DB.prepare("SELECT * FROM eus_store_orders ORDER BY COALESCE(paid_at, created_at) DESC LIMIT 500").all());
   const orders = (rows.results || []).map(orderRecord); const payload = { ok: true, orders, counts: counts(orders), admin: auth.session.email };
   return request.method === "HEAD" ? new Response(null, { status: 200, headers: JSON_HEADERS }) : json(payload);
 }
@@ -76,7 +86,7 @@ async function updateOrder(request, env, id) {
   const result = await env.MARKETPLACE_DB.prepare(`UPDATE eus_store_orders SET fulfillment_status=?, supplier_order_id=?, tracking_number=?, carrier=?, fulfillment_notes=?, updated_at=?, refunded_at=COALESCE(?, refunded_at) WHERE id=?`)
     .bind(status, supplierOrderId, trackingNumber, carrier, fulfillmentNotes, now, refundedAt, orderId).run();
   if (!Number(result?.meta?.changes || 0)) return json({ error: "Store order not found" }, 404);
-  const row = await env.MARKETPLACE_DB.prepare(`SELECT o.*, i.sku AS elevation_sku, i.cost_cents AS supplier_cost_cents, i.source_url AS catalog_source_url FROM eus_store_orders o LEFT JOIN eus_inventory_items i ON lower(i.sku)=lower(json_extract(o.supplier_json,'$.skuId')) WHERE o.id=? LIMIT 1`).bind(orderId).first().catch(() => env.MARKETPLACE_DB.prepare("SELECT * FROM eus_store_orders WHERE id=? LIMIT 1").bind(orderId).first());
+  const row = await env.MARKETPLACE_DB.prepare(`${ORDER_SELECT} WHERE o.id=? LIMIT 1`).bind(orderId).first().catch(() => env.MARKETPLACE_DB.prepare("SELECT * FROM eus_store_orders WHERE id=? LIMIT 1").bind(orderId).first());
   return json({ ok: true, order: orderRecord(row), updatedBy: auth.session.email });
 }
 
