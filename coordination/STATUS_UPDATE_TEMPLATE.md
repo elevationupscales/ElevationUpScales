@@ -1,18 +1,24 @@
-# Elevation 4.3 — Master Status Update Block
+# Status Update Template
 
-Use this when a worker cannot directly update `/ELEVATION_4_3_MASTER_STATUS.md`.
+**Baseline:** `<current main SHA>`  
+**Branch:** `<work branch>`  
+**Candidate:** `<candidate SHA>`
 
-**Workstream:**  
-**Previous state:**  
-**New state:**  
-**Authoritative SHA:**  
-**Production state:**  
-**Controlling handoff:**  
-**Completed:**  
-**Blockers / anomalies:**  
-**Deferred:**  
-**Rollback reference:**  
-**Next action:**  
-**Parked work still untouched:** yes / no
+## Changed
+- concise scope summary
 
-Master Coordination should merge the accepted block into the Master Status file.
+## Protected boundaries
+- confirm product/pricing/inventory/checkout/PayPal/SOK/freight/lead-routing/bindings/secrets unchanged unless explicitly authorized
+
+## Validation
+- diff review
+- JavaScript/static checks
+- `npm run qa` when runner is available
+- isolated preview when available
+
+## Deployment
+- management approval
+- merge to current `main`
+- production deploy from current `main`
+- live smoke verification
+- production receipt / new accepted baseline
