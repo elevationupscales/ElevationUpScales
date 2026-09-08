@@ -58,15 +58,15 @@ All nine were post-launch verified as ACTIVE in Shopify with featured product me
 
 ### Active SOK catalog and MAP
 
-1. **SOK 12V 100Ah Group 24 LiFePO4 Battery — SK12V100PC** — **$319**
-2. **SOK 12V 100Ah Heated LiFePO4 Battery — SK12V100H** — **$369**
-3. **SOK 12V 206Ah Heated LiFePO4 Battery — SK12V206H** — **$749**
-4. **SOK 12V 206Ah Heated LiFePO4 Battery — SK12V206PH** — **$750**
-5. **SOK 12V 280Ah Heated LiFePO4 Battery — SK12V280H** — **$999**
-6. **SOK 12V 314Ah Heated LiFePO4 Battery — SK12V314PH** — **$1,099**
-7. **SOK 24V 100Ah LiFePO4 Battery — SK24V100** — **$751**
-8. **SOK 24V 150Ah Heated LiFePO4 Battery — SK24V150PH** — **$1,149**
-9. **SOK 51.2V 100Ah 5.12kWh Rack LiFePO4 Battery — SK48V100N** — **$1,199**
+1. **Premium 12V 100Ah Group 24 LiFePO4 Battery — SK12V100PC** — **$319**
+2. **Premium 12V 100Ah Heated LiFePO4 Battery — SK12V100H** — **$369**
+3. **Premium 12V 206Ah Heated LiFePO4 Battery — SK12V206H** — **$749**
+4. **Premium 12V 206Ah Heated LiFePO4 Battery — SK12V206PH** — **$750**
+5. **Premium 12V 280Ah Heated LiFePO4 Battery — SK12V280H** — **$999**
+6. **Premium 12V 314Ah Heated LiFePO4 Battery — SK12V314PH** — **$1,099**
+7. **Premium 24V 100Ah LiFePO4 Battery — SK24V100** — **$751**
+8. **Premium 24V 150Ah Heated LiFePO4 Battery — SK24V150PH** — **$1,149**
+9. **Premium 51.2V 100Ah 5.12kWh Rack LiFePO4 Battery — SK48V100N** — **$1,199**
 
 ### MAP controls applied
 
@@ -84,7 +84,11 @@ All nine were post-launch verified as ACTIVE in Shopify with featured product me
 
 ### Title cleanup applied
 
-Customer-facing titles were standardized around brand → voltage/capacity → key feature/form factor → model number.
+Customer-facing SOK titles now use this standard:
+
+**Premium → voltage/capacity → key feature/form factor → exact SOK model number**
+
+Do not lead customer-facing titles with `SOK`; preserve SOK as the vendor/brand and preserve the exact model number at the end for traceability.
 
 ## Current Shopify state after SOK launch
 
