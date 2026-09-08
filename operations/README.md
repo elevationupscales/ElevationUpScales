@@ -28,6 +28,7 @@ Email may still be used when the work itself requires reading or sending an actu
 - [`SUPPLIER_LEADS_LIVE_MAP.md`](./SUPPLIER_LEADS_LIVE_MAP.md) — current public-safe 56-record supplier/commercial lead tree, priorities, contacted/waiting state, draft-only controls, solar/inverter targets, dropship targets, Hawaii/Alaska opportunity lanes, and next-account direction.
 - [`DROPSHIP_VENDOR_OUTREACH_STANDARD.md`](./DROPSHIP_VENDOR_OUTREACH_STANDARD.md) — controlling first-outreach tone/structure for dropshipping vendors based on the 2026-09-07 Renogy dealer/ecommerce email, with the current Elevation signature standard.
 - [`COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md`](./COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md) — public-safe deployment contract for adding Supplier / Commercial Leads to the existing Command Center Leads area while preserving the existing customer/Solar leads subsystem and protected-data boundaries.
+- [`COMMAND_CENTER_ECOMMERCE_WORKFLOW_PLAN.md`](./COMMAND_CENTER_ECOMMERCE_WORKFLOW_PLAN.md) — controlling development plan for consolidating the Admin into one six-area ecommerce operating system, redesigning the Leads family, completing intake/order/logistics workflows, and retiring duplicate presentation layers without weakening protected backend controls.
 - [`shopify-manager/SHOPIFY_MANAGER.md`](./shopify-manager/SHOPIFY_MANAGER.md) — dedicated Shopify / Shopify POS / Doba / SOK ecommerce management lane for Peter Torres and the Shopify Manager.
 
 ## Public-repository protection
