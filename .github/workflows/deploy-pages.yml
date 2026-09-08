@@ -96,9 +96,18 @@ jobs:
         run: |
           set -euo pipefail
           npm run qa:preview -- "${BASE%/}"
+      - name: Smoke canonical production domain
+        if: ${{ needs.validate.outputs.target == 'production' }}
+        run: |
+          set -euo pipefail
+          sleep 10
+          npm run qa:preview -- https://elevationupscales.com
       - name: Receipt
         run: |
           echo '### Elevation Pages deployment — PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Target: ${{ needs.validate.outputs.target }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           echo "Deployment: ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.validate.outputs.target }}" = "production" ]; then
+            echo 'Canonical: https://elevationupscales.com — PASS' >> "$GITHUB_STEP_SUMMARY"
+          fi
