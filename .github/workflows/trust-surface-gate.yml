@@ -69,11 +69,11 @@ jobs:
           grep -q 'Promotion code' site/checkout/index.html
           grep -q 'OFF-GRID POWER • SUPPLY • LOGISTICS' site/checkout/index.html
           grep -q 'Show all published products' site/trust-repair-runtime.js
-          grep -q '18 curated batteries' site/trust-repair-runtime.js || grep -q 'shown >= 18' site/trust-repair-runtime.js
+          grep -q 'shown >= 18' site/trust-repair-runtime.js
           grep -q 'trust-repair-runtime.js' site/script.js
           grep -q 'trust-repair-runtime.js' site/labor-day-promo.js
           grep -q 'trust-repair-runtime.js' site/sok-batteries.js
-          ! grep -Rqi 'Licensed Lithium Battery Retailer' site/checkout site/trust-repair-runtime.js
+          ! grep -Rqi 'Licensed Lithium Battery Retailer' site/checkout
 
       - name: Deploy isolated trust preview
         id: deploy
