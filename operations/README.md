@@ -14,16 +14,17 @@ For current operational work:
 2. Current files under `/operations/` control the active operating procedure and management state.
 3. Current application source under `main` controls website behavior.
 4. **GitHub is the only active management/work source.**
-5. **Do not use Gmail management drafts, Gmail management feeds, or Gmail management records for active work, task intake, status, decision-making, workflow control, or management reconciliation.** Gmail is historical/archive evidence only.
+5. **Do not use Gmail management drafts, Gmail management feeds, recovery snapshots, or old Gmail management records for active work, task intake, status, decision-making, workflow control, or management reconciliation.** Gmail recovery snapshots are cold emergency evidence only and are read only under `DISASTER_RECOVERY_SOP.md`. Ordinary Gmail remains available for actual external business correspondence.
 6. Historical files under `/coordination/` are evidence / rollback / prior-decision records unless a current `/operations/` document explicitly incorporates them.
 
-Do not reconstruct current policy from Gmail drafts, Gmail management feeds, prior chat summaries, or historical coordination files when a current `/operations/` document exists.
+Do not reconstruct current policy from Gmail drafts, Gmail recovery snapshots, prior chat summaries, or historical coordination files when current Git state is available and consistent.
 
 Email may still be used when the work itself requires reading or sending an actual external business email, but email content does not become active management direction unless the resulting verified fact or owner decision is reconciled into GitHub `/operations/` control.
 
 ## Current controlling SOP
 
 - [`MANAGEMENT_OPERATING_SOP.md`](./MANAGEMENT_OPERATING_SOP.md) — shared management execution standard covering source-of-truth order, business priority, manager separation, efficient worktree execution, proportional QA, reuse-first development, public-data protection and common metrics.
+- [`DISASTER_RECOVERY_SOP.md`](./DISASTER_RECOVERY_SOP.md) — recovery-only procedure for worker/session failure, interrupted exact-SHA releases, temporary GitHub loss, Git checkpoint discipline and Gmail cold recovery snapshots.
 - [`MAIN_INBOX_MANAGER_SOP.md`](./MAIN_INBOX_MANAGER_SOP.md) — controlling actual-business-inbox standard covering customer-first prioritization, active supplier and freight correspondence, recipient safety, sending authority, thread preservation, streamlined vendor questions, protected commercial information, and public-safe management synchronization.
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery, Lithium Store, RV/Outdoor Store, Lower-48 ecommerce, Hawaii/Alaska specialized shipping, paid-order recovery, prepurchase, and freight-agreement operating rules.
 - [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — controlling specialized-logistics pricing architecture separating Elevation product-sale / supplier-referral sales from standalone third-party logistics facilitation, including shipment-size tiers, quote construction, route confidentiality, and protected-rate-card boundaries.
@@ -59,13 +60,14 @@ Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alas
 1. read this file;
 2. read `MANAGEMENT_OPERATING_SOP.md` for shared management execution and efficiency rules;
 3. read `MAIN_INBOX_MANAGER_SOP.md` when handling the actual business inbox or external business correspondence;
-4. read only the applicable `/operations/` SOP, growth model, live lead map, outreach standard, deployment contract, or manager file needed for the assigned scope;
-5. read the logistics pricing model when pricing or quoting is involved;
-6. inspect current application source when website or Command Center behavior is involved;
-7. preserve protected pricing/MAP, payment, safety, customer-data, supplier-data and compliance boundaries;
-8. do not use Gmail-era management records as an active source;
-9. reconcile any new verified operational fact or owner direction into the appropriate GitHub operations record when it materially changes current work;
-10. reuse existing storage, routes, auth, parsing, receipts, UI shells and permanent deployment workflows before building replacements;
-11. use proportional QA during iteration, then full release QA before preview, merge or production deployment.
+4. read `DISASTER_RECOVERY_SOP.md` only when recovery mode is actually triggered or when changing continuity/release-recovery behavior;
+5. read only the applicable `/operations/` SOP, growth model, live lead map, outreach standard, deployment contract, or manager file needed for the assigned scope;
+6. read the logistics pricing model when pricing or quoting is involved;
+7. inspect current application source when website or Command Center behavior is involved;
+8. preserve protected pricing/MAP, payment, safety, customer-data, supplier-data and compliance boundaries;
+9. do not use Gmail-era management records or Gmail recovery snapshots as an active source;
+10. reconcile any new verified operational fact or owner direction into the appropriate GitHub operations record when it materially changes current work;
+11. reuse existing storage, routes, auth, parsing, receipts, UI shells and permanent deployment workflows before building replacements;
+12. use proportional QA during iteration, then full release QA before preview, merge or production deployment.
 
 Operational complexity should remain behind the customer experience wherever possible. New software should be built only when it materially improves selling, quoting, fulfillment, product discovery, repeat purchasing, or the reliability of those workflows.
