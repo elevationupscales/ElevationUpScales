@@ -29,6 +29,8 @@ A Hawaii-side receiving/storage partner has responded positively and described a
 
 Protected commercial pricing and partner-specific terms remain outside public Git.
 
+**Correspondence control:** the current follow-up has already been sent. Any earlier unsent draft for the same response is stale and must not be sent. Await the partner's reply before sending another follow-up unless materially new information requires a new response.
+
 Next action:
 - receive confirmation of current capability for new standalone LiFePO4 inventory;
 - confirm receiving/documentation and release procedures;
@@ -44,12 +46,14 @@ Close when:
 
 ## 3. Hawaii low-voltage handling / sample-forwarder path
 
-**Status:** ACTIVE QUALIFICATION  
+**Status:** ACTIVE QUALIFICATION / REPLY DRAFT PENDING OWNER REVIEW  
 **Priority:** High
 
 A separate Hawaii commercial partner has expressed interest in storing and handling Elevation's low-voltage consumer inventory, potentially supporting walk-in retail from Elevation-owned stock, and exploring sample-shipment cost through an established battery forwarder.
 
 Do not treat this as confirmed standalone-LiFePO4 acceptance or as carrier approval. The partner's established 48V / high-voltage supplier relationships are outside the intended scope and should not be disrupted.
+
+**Correspondence control:** one current reply draft exists and remains unsent pending owner review. Do not create or send a second partner reply in parallel. If management changes the response, update or supersede the existing draft rather than creating a duplicate-send risk.
 
 Next action:
 - confirm whether standalone low-voltage LiFePO4 batteries are included in the handling offer;
@@ -135,3 +139,5 @@ Close when:
 ## Control rule
 
 **TRACK UNTIL CLOSED.** New email facts become active management state only after reconciliation into Git. Gmail remains correspondence-only; Git remains the management source of truth.
+
+**NO DOUBLE SEND.** Before any external send, verify the current thread for already-sent correspondence and current unsent drafts. When a response has already been sent, stale drafts for the same response must not be sent. When a valid draft is pending owner review, update or supersede that draft rather than creating a parallel outbound response.
