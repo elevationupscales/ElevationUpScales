@@ -19,6 +19,16 @@
 /privacy.html /privacy 301
 /store.html /store 301
 
+# Universal retail consolidation. Preserve legacy URLs while routing them into one catalog.
+/lithium-batteries /store?department=lithium-batteries 301
+/lithium-batteries/ /store?department=lithium-batteries 301
+/lithium-batteries.html /store?department=lithium-batteries 301
+/rv-store /store?department=rv-outdoor 301
+/rv-store/ /store?department=rv-outdoor 301
+/rv-store.html /store?department=rv-outdoor 301
+/kingboss-batteries/ /kingboss-batteries 308
+/kingboss-batteries.html /kingboss-batteries 301
+
 # Marketplace retirement: route shoppers to active commerce surfaces.
 /marketplace /store 301
 /marketplace/ /store 301
@@ -29,9 +39,9 @@
 /report-an-issue /store 301
 /report-an-issue/ /store 301
 /report-an-issue.html /store 301
-/list-an-rv /rv-store 301
-/list-an-rv/ /rv-store 301
-/list-an-rv.html /rv-store 301
+/list-an-rv /store?department=rv-outdoor 301
+/list-an-rv/ /store?department=rv-outdoor 301
+/list-an-rv.html /store?department=rv-outdoor 301
 /list-a-vehicle /store 301
 /list-a-vehicle/ /store 301
 /list-a-vehicle.html /store 301
@@ -49,7 +59,7 @@
 /list-used-gear.html /store 301
 /sell /store 301
 /sell-a-vehicle /store 301
-/sell-an-rv /rv-store 301
+/sell-an-rv /store?department=rv-outdoor 301
 /sell-a-car /store 301
 /sell-a-truck /store 301
 /list-a-car /store 301
@@ -60,12 +70,12 @@
 /cars /store 301
 /trucks /store 301
 /cars-trucks /store 301
-/rv /rv-store 301
-/rv/ /rv-store 301
-/rv.html /rv-store 301
-/rvs /rv-store 301
-/rvs/ /rv-store 301
-/rvs.html /rv-store 301
+/rv /store?department=rv-outdoor 301
+/rv/ /store?department=rv-outdoor 301
+/rv.html /store?department=rv-outdoor 301
+/rvs /store?department=rv-outdoor 301
+/rvs/ /store?department=rv-outdoor 301
+/rvs.html /store?department=rv-outdoor 301
 
 /collector.html /collector 301
 /start-a-project.html /start-a-project 301
@@ -85,6 +95,6 @@
 /rv-project.html /start-a-project?type=rv&source=legacy-route 302
 /technician.html /technician 301
 
-/outdoor-store /rv-store 301
-/rv-outdoor-store /rv-store 301
-/shop/rv /rv-store 301
+/outdoor-store /store?department=rv-outdoor 301
+/rv-outdoor-store /store?department=rv-outdoor 301
+/shop/rv /store?department=rv-outdoor 301
