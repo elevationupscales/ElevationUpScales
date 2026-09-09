@@ -82,13 +82,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          npm run qa:secrets
           test "$(find site -type f | wc -l)" -le 20000
           test -z "$(find site -type f -size +25M -print -quit)"
-          test -z "$(find site -type f \( -name '.env' -o -name '.env.*' -o -name '.dev.vars' -o -name '.dev.vars.*' -o -name '*.pem' -o -name '*.key' -o -name '*.zip' \) -print -quit)"
-          if grep -RIqE '(cfat_[A-Za-z0-9_-]+|github_pat_[A-Za-z0-9_]+|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' site src; then
-            echo "Credential-like value found in deployable source."
-            exit 1
-          fi
 
       - name: Deploy isolated preview
         id: deploy
