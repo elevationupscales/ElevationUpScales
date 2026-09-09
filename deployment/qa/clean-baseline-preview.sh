@@ -68,17 +68,9 @@ for (const [key, expected] of [
   ['marketplaceImages', 'configured'],
   ['siteAnalyticsD1', 'ok'],
 ]) {
-  if (services[key] !== expected) {
-    throw new Error(`Core health regression ${key}: ${services[key]} expected ${expected}`);
-  }
+  if (services[key] !== expected) throw new Error(`Core health regression ${key}: ${services[key]} expected ${expected}`);
 }
-if (
-  payload.status === 'degraded' &&
-  services.marketplaceNotifications === 'configured' &&
-  services.solarNotifications === 'configured'
-) {
-  throw new Error('Unexplained degraded health');
-}
+if (payload.status === 'degraded' && services.marketplaceNotifications === 'configured' && services.solarNotifications === 'configured') throw new Error('Unexplained degraded health');
 console.log('Accepted health contract: PASS');
 NODE
 
@@ -91,28 +83,21 @@ for route in \
   check_status 401 "$route"
 done
 
-gmail_qa_auth_code=$(curl -sS \
-  -o /tmp/eus-gmail-qa-auth-response \
-  --write-out '%{http_code}' \
-  -X POST \
-  -H "Origin: $base" \
-  -H 'Content-Type: application/json' \
-  --data '{}' \
-  "$base/api/admin/gmail-provider-qa" || true)
-echo "CHECK POST /api/admin/gmail-provider-qa => $gmail_qa_auth_code (expected 401)"
-if [[ "$gmail_qa_auth_code" != "401" ]]; then
-  head -c 800 /tmp/eus-gmail-qa-auth-response || true
-  echo
-  exit 1
-fi
+for qa_route in /api/admin/gmail-provider-qa /api/admin/email-role-qa; do
+  qa_code=$(curl -sS -o /tmp/eus-mail-qa-auth-response --write-out '%{http_code}' -X POST -H "Origin: $base" -H 'Content-Type: application/json' --data '{}' "$base$qa_route" || true)
+  echo "CHECK POST $qa_route => $qa_code (expected 401)"
+  if [[ "$qa_code" != "401" ]]; then
+    head -c 800 /tmp/eus-mail-qa-auth-response || true
+    echo
+    exit 1
+  fi
+done
 
 check_status 200 /api/admin/listings
 LISTINGS_FILE=/tmp/eus-clean-baseline-response node - <<'NODE'
 const fs = require('fs');
 const payload = JSON.parse(fs.readFileSync(process.env.LISTINGS_FILE, 'utf8'));
-if (payload.ok !== true || payload.retired !== true || payload.count !== 0 || !Array.isArray(payload.listings) || payload.listings.length !== 0) {
-  throw new Error('Retired Marketplace listings endpoint contract failed');
-}
+if (payload.ok !== true || payload.retired !== true || payload.count !== 0 || !Array.isArray(payload.listings) || payload.listings.length !== 0) throw new Error('Retired Marketplace listings endpoint contract failed');
 console.log('Retired Marketplace listings endpoint: PASS');
 NODE
 
@@ -123,14 +108,15 @@ for route in \
   /worker/domains/compatibility.js \
   /worker/shared/gmail-mail-provider.js \
   /worker/shared/gmail-provider-qa.js \
+  /worker/shared/email-role-routing.js \
+  /worker/shared/email-role-surfaces.js \
   /sok-full-line-runtime.js \
   /sok-full-line-data.js \
   /sync-admin-runtime.js; do
   check_status 404 "$route"
 done
 
-head_code=$(curl -sS -I --retry 8 --retry-all-errors --retry-delay 2 \
-  -o /tmp/eus-store-products-head --write-out '%{http_code}' "$base/api/store-products" || true)
+head_code=$(curl -sS -I --retry 8 --retry-all-errors --retry-delay 2 -o /tmp/eus-store-products-head --write-out '%{http_code}' "$base/api/store-products" || true)
 if [[ "$head_code" != "200" ]]; then
   echo "HEAD /api/store-products => $head_code (expected 200)" >&2
   exit 1

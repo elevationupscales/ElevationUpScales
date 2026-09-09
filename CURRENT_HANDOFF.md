@@ -1,106 +1,52 @@
 # Elevation UpScales — Current Worker Handoff
 
-Updated: 2026-09-08
+Updated: 2026-09-09
 
 Repository: `elevationupscales/ElevationUpScales`
 
-Verified source `main`: `aaba50212b7243325db3207b5be35d05fb0da15a`
+Verified base `main`: `bd270a08dfc5309787baa322f8037a0863230e70`
 
-Active release branch: `release/sok-stock-management-sop-0908`
+Active branch: `work/email-role-routing-0909`
 
-Release direction: owner authorized direct production deployment after efficiency sweep and explicitly authorized publishing the public-safe management SOP/release fixes to the currently public repository.
+Purpose: centralize business role email routing, preserve authenticated Gmail delivery, add safe customer acknowledgements where useful, route existing public email surfaces by intent, and prepare protected production lane QA.
 
-## Fast takeover
+## Durable gate log
 
-1. Read `/AGENTS.md`, `/CODING-WORKFLOW.md`, `/operations/README.md`, `/operations/MANAGEMENT_OPERATING_SOP.md`, and this file.
-2. Fetch current `main`; current Git wins over the recorded SHA above.
-3. Inspect the active branch and compare it to current `main` before continuing.
-4. Continue only the owner's newest explicit scope.
-5. Use permanent repository preview/deploy workflows; do not create a one-off deployment workflow.
+- **Gate 1 — PASS / SAVED** `b93f56a95566c76567b54466f40dd1d2d4b6c743` — central five-role resolver; project/Solar→Sales; Work With Us→Owner.
+- **Gate 2 — PASS / SAVED** `31165ad5704bbf65d56ddb9deca575da7a7233e7` — record-first Solar/Work With Us acknowledgements; protected role QA.
+- **Gate 3 — PASS / SAVED** `0d28fcd727c7c755aed4670038aa73d71dab0417` — public email surfaces by customer intent without redesign/clutter.
+- **Gate 4 — PASS / SAVED** `c9aa46f7c8f7453cb17381997fd3d171401d86b7` — final smoke/live-role workflow and handoff.
+- **QA repair — PASS / SAVED** `79c6c04372c747dcbd55843734768bbe933b5f6a` — preserved the Gmail-provider invariant that `system.js` never parses caller JSON by isolating role-QA request parsing in its own protected domain module.
 
-## Current accepted state
+## Final pre-merge QA
 
-- The simplified Command Center foundation is released: six primary destinations are Today, Orders, Products, Leads, Logistics, and System.
-- Leads are separated into Customer Leads, Supplier Growth, Solar, Work With Us, and Portal-ready. Supplier, customer, Solar, and lithium activity must not be mixed.
-- Commerce Logistics is released. Doba is the primary inventory/supplier source for TikTok Shop and eBay; CJ Dropshipping remains a separate supplier.
-- Shopify, eBay, and TikTok are sales channels. Printful and SpreadConnect are fulfillment providers. Fourthwall is a hybrid storefront/provider.
-- Catalog remains the product master. Supplier stock is not physical Elevation On Hand.
-- SOK dropship/order controls are released. Current Shopify operating truth is in `/operations/shopify-manager/SHOPIFY_MANAGER.md`.
-- Current Shopify records report nine active SOK Online Store products with MAP controls; do not hardcode that count into stock tooling.
-- SOK preorder/backorder, MAP, quantity review, Hawaii/Alaska, payment, lithium and fulfillment controls remain independent from supplier-stock verification.
-- `/operations/MANAGEMENT_OPERATING_SOP.md` is the shared management execution/efficiency standard. Manager-specific SOPs remain subordinate to the owner and shared operating rules.
-- Gmail management feeds/drafts are retired as an active control system. GitHub `/operations/` remains the active management source.
-- The repository is currently public. A future plan to make it private does not relax present public-data protection.
+Pull Request: **#63**
 
-## Release candidate — SOK Stock Intake V1 + Management SOP
+Pull Request QA run: `34312029282`
 
-Branch: `release/sok-stock-management-sop-0908`
+- focused email-role tests: PASS
+- Gmail provider regression: PASS
+- canonical `npm run qa`: PASS
+- `git diff --check`: PASS
+- repository credential/secret scan: PASS
 
-Parent: `aaba50212b7243325db3207b5be35d05fb0da15a`
+## Protected boundaries
 
-Scope implemented:
+No schema, binding, secret, authentication/session, checkout, PayPal, SOK ordering, pricing, freight-calculation, supplier ownership, or Portal behavior is intentionally changed.
 
-- Products → SOK Stock workspace with search and freshness filter.
-- Dynamic roster from current exact-match SOK operating records; no hardcoded product count.
-- Internal supplier quantity, verification date, freshness/status and next action.
-- Missing quantity displays as `Unverified`; verified zero remains distinct from missing.
-- Protected CSV template, upload/paste, server-side validation and before/after preview.
-- Explicit confirmed apply limited to `eus_sok_product_ops.supplier_inventory` and `last_supplier_verified`.
-- Preview fingerprint plus `updated_at` optimistic guard prevents stale-preview overwrites.
-- Older evidence and same-date conflicting quantity are rejected.
-- Each successful stock-field mutation and its `supplier_stock_verified` audit event execute in one D1 batch transaction so an audit failure cannot leave an unaudited stock mutation.
-- `eus_sok_events` stores import receipts; repeated confirmed apply returns the existing receipt instead of duplicating writes.
-- Partial imports leave omitted SKUs unchanged.
-- Canonical route registry now owns `/api/admin/sok-stock` and its protected child routes.
-- Shared management SOP adds source-of-truth order, commercial priority, manager separation, reuse-first execution, proportional QA, public-data protection and efficiency rules.
-- No schema, binding, secret, auth/session, checkout, PayPal, public availability, pricing, MAP, freight, Shopify inventory-writer, Doba, leads, supplier-ordering or Portal changes.
+The repository remains public. No OAuth values, refresh tokens, client secrets, customer PII, supplier pricing, carrier rates, or private commercial information belong in this handoff.
 
-## Verification before production workflow
+## Execution note
 
-SOK stock behavior tests: **9 cases defined** covering:
+The current runtime could not create a local checkout because outbound DNS to GitHub was unavailable. Durable state is saved on the named GitHub branch in meaningful commits; GitHub CI is the execution environment for canonical tests.
 
-- unauthorized/cross-origin mutation policy;
-- missing quantity versus explicit zero;
-- bounded input size;
-- unknown/duplicate SKU and invalid quantity/date rejection;
-- preview purity and partial-import omission behavior;
-- older/same-date conflicting evidence protection;
-- stale preview fingerprinting and duplicate-apply idempotency;
-- freshness states;
-- accurate partial-write failure result.
+## Exact next action
 
-Route-registry parity test now includes the protected SOK stock route and `sok-stock` domain.
+1. Re-resolve `main`; merge PR #63 only if lineage remains clean and the final PR head is green.
+2. Deploy exact merged `main` through the normal `production-deploy` workflow.
+3. Trigger `qa/gmail-provider-live-20260908` at that exact production SHA.
+4. Verify the controlled Gmail provider message plus owner/sales/orders/logistics/support synthetic lane messages in Gmail Sent.
+5. Verify Inbox copies for each role alias to prove Cloudflare inbound routing where configured.
+6. Require post-send exact-deployment and canonical-domain smoke PASS.
 
-The permanent production workflow is the release gate for this direct-deployment instruction. It runs full `npm run qa`, `git diff --check`, secret/artifact checks, deploys Cloudflare Pages, runs deployment smoke checks and then checks the canonical production domain.
-
-## Exact release action
-
-1. Reconfirm current `main` still equals or cleanly precedes this release candidate with no conflicting commerce code.
-2. Fast-forward `main` to the release candidate only if lineage remains clean.
-3. Advance `production-deploy` to the exact same SHA to trigger the permanent **Deploy Elevation UpScales** workflow.
-4. Require the workflow's QA, Cloudflare deployment, deployed-app smoke and canonical-domain smoke to PASS.
-5. Do not apply real supplier stock counts during release verification.
-6. Record the resulting production SHA/receipt and continue normal management work from the deployed `main`.
-
-## Permanent boundaries
-
-- No database schema or production-data changes without separate approval.
-- Preserve checkout, PayPal, pricing, freight, Cloudflare bindings, secrets, auth and sessions.
-- Preserve SOK MAP, availability, purchase-mode, lithium, Hawaii and Alaska controls.
-- Do not promise ordinary parcel delivery for Hawaii lithium.
-- Catalog remains the product master; supplier inventory is not physical On Hand; Marketplace remains separate from Elevation Catalog.
-- Portal handoff remains manual export only unless separately authorized.
-- Never commit raw supplier inventory, dealer cost, private correspondence, private freight terms, customer data, credentials or non-public compliance packets while this repository remains public.
-
-## Required finish receipt
-
-Return:
-
-- parent `main` SHA;
-- release branch and production SHA;
-- changed files;
-- targeted/full QA and deployment results;
-- schema/protected-boundary status;
-- blocker or deferred item;
-- exact next action;
-- merge/deployment state.
+HANDOFF STATUS: **PRE-MERGE QA PASS — READY FOR DEPLOYMENT WORKFLOW**

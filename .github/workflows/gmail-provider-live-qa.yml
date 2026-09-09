@@ -58,7 +58,6 @@ jobs:
             -H 'Content-Type: application/json' \
             --data '{}' \
             https://elevationupscales.com/api/admin/gmail-provider-qa)"
-          rm -f /tmp/eus-gmail-qa-oidc-token
           HTTP_CODE="$code" node - <<'NODE'
           const fs = require('fs');
           const payload = JSON.parse(fs.readFileSync('/tmp/eus-gmail-qa-response.json', 'utf8'));
@@ -73,6 +72,39 @@ jobs:
           console.log(`Message ID: ${payload.messageId}`);
           NODE
           rm -f /tmp/eus-gmail-qa-response.json
+
+      - name: Execute one synthetic QA send for each email role
+        id: role_qa
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/eus-gmail-qa-oidc-token)"
+          for role in owner sales orders logistics support; do
+            response="/tmp/eus-email-role-${role}.json"
+            code="$(curl -sS \
+              -o "$response" \
+              -w '%{http_code}' \
+              -X POST \
+              -H 'Origin: https://elevationupscales.com' \
+              -H "Authorization: Bearer $token" \
+              -H 'Content-Type: application/json' \
+              --data "{\"role\":\"$role\"}" \
+              https://elevationupscales.com/api/admin/email-role-qa)"
+            ROLE="$role" HTTP_CODE="$code" RESPONSE="$response" node - <<'NODE'
+          const fs = require('fs');
+          const role = process.env.ROLE;
+          const code = Number(process.env.HTTP_CODE || 0);
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE, 'utf8'));
+          if (code !== 200 || payload.ok !== true || payload.role !== role || !payload.messageId) {
+            console.error(`Email role QA failed: role=${role}; HTTP ${code}; category=${payload.category || 'unknown'}; error=${payload.error || 'unknown'}`);
+            process.exit(1);
+          }
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Role ${role}: PASS — Message ID ${payload.messageId}\n`);
+          console.log(`Role ${role}: PASS — Message ID ${payload.messageId}`);
+          NODE
+            rm -f "$response"
+          done
+          rm -f /tmp/eus-gmail-qa-oidc-token
 
       - name: Discover exact latest Cloudflare production deployment
         id: cloudflare
@@ -131,9 +163,10 @@ jobs:
           MESSAGE_ID: ${{ steps.gmail_qa.outputs.message_id }}
           DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment_url }}
         run: |
-          echo '### Gmail Provider Live QA — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '### Gmail Provider + Role Routing Live QA — PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
-          echo "Message ID: $MESSAGE_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "Provider Message ID: $MESSAGE_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Role lanes: owner, sales, orders, logistics, support — PASS' >> "$GITHUB_STEP_SUMMARY"
           echo "Deployment smoke: $DEPLOYMENT_URL — PASS" >> "$GITHUB_STEP_SUMMARY"
           echo 'Canonical: https://elevationupscales.com — PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'Notification health: configured — PASS' >> "$GITHUB_STEP_SUMMARY"

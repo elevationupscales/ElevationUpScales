@@ -25,6 +25,7 @@ import {
   createSolarQaToken,
   verifySolarQaToken,
 } from "../core-context.js";
+import { sendCustomerAcknowledgement } from "../shared/email-role-routing.js";
 
 
 async function handleSolarNotification(request, env, ctx) {
@@ -56,9 +57,10 @@ async function handleSolarNotification(request, env, ctx) {
     else if(eventType==="review_opened")await recordSolarFunnelStage(env,{...funnelDetails,eventType:"solar_review_opened",eventValue:"review_opened"},request).catch(()=>{});
     else if(eventType==="lead_submitted"){await recordSolarFunnelStage(env,{...funnelDetails,eventType:"solar_completed_submitted",eventValue:"completed_submitted"},request).catch(()=>{});await recordSiteEvent(env,{eventType:"lead_submitted",eventValue:cleanString(raw?.build?.package,120).toLowerCase(),sessionId:analyticsSessionId,reference,page,details:{package:cleanString(raw?.build?.package,120),classification:build.classification,source:"Solar Builder",build:OPERATIONS_BUILD}},{serverConfirmed:true,request}).catch(error=>console.error(JSON.stringify({event:"solar_lead_intent_tracking_error",reference,message:error instanceof Error?error.message:String(error)})));}
   }
-  if(eventType==="builder_progress")return jsonResponse({ok:true,reference,stored:true,emailDelivered:false,ownerNotification:{status:"not_requested"},stage:opportunityStore.stage});
+  if(eventType==="builder_progress")return jsonResponse({ok:true,reference,stored:true,emailDelivered:false,ownerNotification:{status:"not_requested"},customerAcknowledgement:{status:"not_requested"},stage:opportunityStore.stage});
   const spec=solarOwnerNotificationSpec({reference,eventType,contact:effectiveContact,build,stageLabel:solarBuilderStage(eventType).label}),ownerNotification=await scheduleOwnerLeadNotification(env,ctx,spec);
-  return jsonResponse({ok:true,reference,stored:true,emailDelivered:ownerNotification.status==="sent",notificationQueued:["scheduled","sent","deduped"].includes(ownerNotification.status),ownerNotification,stage:opportunityStore.stage},eventType==="builder_started"?201:200);
+  const customerAcknowledgement=eventType==="lead_submitted"?await sendCustomerAcknowledgement(env,"sales",{recipientEmail:effectiveContact.email,recipientName:effectiveContact.name,reference,subject:`Elevation Solar Request Received — ${reference}`,nextStep:"Our sales team will review the submitted system request and contact you if additional information is needed."}):{status:"not_requested"};
+  return jsonResponse({ok:true,reference,stored:true,emailDelivered:ownerNotification.status==="sent",notificationQueued:["scheduled","sent","deduped"].includes(ownerNotification.status),ownerNotification,customerAcknowledgement,stage:opportunityStore.stage},eventType==="builder_started"?201:200);
 }
 
 async function handleAdminSolarQaToken(request,env){const auth=await requireAdmin(request,env);if(auth.response)return auth.response;if(request.method!=="POST")return jsonResponse({error:"Method not allowed"},405,{Allow:"POST"});if(!sameOriginRequest(request))return jsonResponse({error:"Cross-origin request denied"},403);return jsonResponse({ok:true,...await createSolarQaToken(env)})}

@@ -18,7 +18,6 @@ import {
   githubActionsGmailQaAuthorized,
 } from "../shared/gmail-provider-qa.js";
 
-
 async function handleAdminQaToken(request, env) {
   const auth = await requireAdmin(request, env);
   if (auth.response) return auth.response;
@@ -67,19 +66,9 @@ async function handleAdminGmailProviderQa(request, env) {
   try {
     const providerResult = await env.EMAIL.send(message);
     const messageId = cleanString(providerResult?.messageId, 240);
-    if (!messageId) {
-      return jsonResponse({ ok: false, error: "Gmail provider QA did not return a message ID", category: "provider_error" }, 502);
-    }
+    if (!messageId) return jsonResponse({ ok: false, error: "Gmail provider QA did not return a message ID", category: "provider_error" }, 502);
     await cache.put(rateKey, new Response("sent", { headers: { "Cache-Control": `max-age=${GMAIL_PROVIDER_QA_RATE_LIMIT_SECONDS}` } }));
-    return jsonResponse({
-      ok: true,
-      provider: "gmail-api",
-      messageId,
-      threadId: cleanString(providerResult?.threadId, 240) || null,
-      subject: GMAIL_PROVIDER_QA_SUBJECT,
-      timestamp,
-      recipient: "MAIL_FROM",
-    }, 200);
+    return jsonResponse({ ok: true, provider: "gmail-api", messageId, threadId: cleanString(providerResult?.threadId, 240) || null, subject: GMAIL_PROVIDER_QA_SUBJECT, timestamp, recipient: "MAIL_FROM" }, 200);
   } catch (error) {
     const category = gmailProviderQaErrorCategory(error);
     const status = category === "provider_limited" ? 429 : category === "template_error" ? 500 : 502;
@@ -91,12 +80,8 @@ async function handleHealth(request, env) {
   if (request.method !== "GET" && request.method !== "HEAD") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
   let marketplaceDb = "unconfigured";
   if (env.MARKETPLACE_DB) {
-    try {
-      await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok").first();
-      marketplaceDb = "ok";
-    } catch (_) {
-      marketplaceDb = "error";
-    }
+    try { await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok").first(); marketplaceDb = "ok"; }
+    catch (_) { marketplaceDb = "error"; }
   }
   const marketplaceEmailConfigured = Boolean(
     isValidEmail(cleanString(env.MARKETPLACE_EMAIL_TO || DEFAULT_MARKETPLACE_EMAIL_TO, 180)) &&
@@ -110,21 +95,13 @@ async function handleHealth(request, env) {
   );
   let leadsDb = "unconfigured";
   if (env.LEADS_DB) {
-    try {
-      await env.LEADS_DB.prepare("SELECT 1 AS ok").first();
-      leadsDb = "ok";
-    } catch (_) {
-      leadsDb = "error";
-    }
+    try { await env.LEADS_DB.prepare("SELECT 1 AS ok").first(); leadsDb = "ok"; }
+    catch (_) { leadsDb = "error"; }
   }
   let siteAnalyticsD1 = "unconfigured";
   if (env.MARKETPLACE_DB) {
-    try {
-      await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok FROM eus_site_events LIMIT 1").first();
-      siteAnalyticsD1 = "ok";
-    } catch (_) {
-      siteAnalyticsD1 = "error";
-    }
+    try { await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok FROM eus_site_events LIMIT 1").first(); siteAnalyticsD1 = "ok"; }
+    catch (_) { siteAnalyticsD1 = "error"; }
   }
   const siteAnalyticsEngine = env.SITE_ANALYTICS && typeof env.SITE_ANALYTICS.writeDataPoint === "function" ? "configured" : "disabled_deferred";
   const legacyAnalyticsEngine = env.ANALYTICS && typeof env.ANALYTICS.writeDataPoint === "function" ? "configured" : "unconfigured";
@@ -146,15 +123,12 @@ async function handleHealth(request, env) {
     },
     note: "D1 eus_site_events is the active first-party analytics store. Analytics Engine is intentionally deferred; notification status confirms configuration only, not inbox delivery.",
   };
-  const response = jsonResponse(payload, healthy ? 200 : 503, {
-    "X-EUS-Operations-Build": OPERATIONS_BUILD,
-    "X-EUS-Monitoring": "health",
-    "X-Robots-Tag": "noindex, nofollow, noarchive",
-  });
+  const response = jsonResponse(payload, healthy ? 200 : 503, { "X-EUS-Operations-Build": OPERATIONS_BUILD, "X-EUS-Monitoring": "health", "X-Robots-Tag": "noindex, nofollow, noarchive" });
   return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
 }
 
 export {
+  gmailQaAuthorization,
   handleAdminGmailProviderQa,
   handleAdminQaToken,
   handleHealth
