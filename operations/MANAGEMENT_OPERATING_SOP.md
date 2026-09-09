@@ -133,6 +133,46 @@ Management status should answer:
 
 Avoid duplicating old narrative when a current state and next action are sufficient.
 
+## Evening Briefing cadence
+
+Use an **Evening Briefing** as the normal management recap for Casey and Peter when material work has occurred.
+
+The briefing is a reporting layer, not a management source of truth. It must summarize the current GitHub `/operations/` state and verified current application/deployment state; it must not recreate the retired Gmail management-feed system.
+
+Cadence:
+
+- **Preferred:** one concise Evening Briefing on active workdays when material changes occurred.
+- **Minimum standard:** at least one Evening Briefing per week whenever the company has active management, supplier, ecommerce, logistics or deployment work.
+- If no material change occurred, do not manufacture activity; a short no-material-change note is sufficient when a scheduled briefing is still expected.
+
+The Evening Briefing should normally cover only material items from the current period:
+
+- website / Admin / ecommerce features completed or deployed;
+- checkout, payment, order-notification or customer-experience changes;
+- supplier / vendor approvals and onboarding progress;
+- catalog, inventory-source, MAP/channel, media-packet and fulfillment-readiness progress;
+- SOK and complementary-vendor developments;
+- Hawaii / Alaska freight, receiving and logistics progress;
+- important customer, B2B or partnership opportunities;
+- major QA / deployment results;
+- blockers, risks and decisions requiring Casey or Peter;
+- the next highest-value actions.
+
+Keep the briefing concise and managerial. Do not paste raw commits, long diffs, private correspondence, dealer costs, raw supplier inventory, private freight rates, customer PII, credentials or protected commercial terms.
+
+When an Evening Briefing is emailed, it is ordinary management correspondence only. The authoritative work state remains GitHub `/operations/` and current `main`.
+
+Recommended structure:
+
+**EVENING BRIEFING — [DATE]**
+
+**Today / This Period** — material completed work and decisions.  
+**Website / Ecommerce** — deployed features and customer-flow changes.  
+**Vendors / Supply** — approvals, onboarding, catalog/media/inventory readiness.  
+**Logistics** — Hawaii/Alaska/freight/receiving progress.  
+**Commercial** — B2B, partnerships and meaningful demand signals.  
+**Open / Next** — blockers, approvals and next priority actions.
+
 ## Management separation
 
 Keep these lanes separate unless an explicit task requires a controlled handoff:
