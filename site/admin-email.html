@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#070707">
+  <title>Email Operations | Elevation UpScales, Inc.</title>
+  <link rel="stylesheet" href="/styles.css?v=3.5.0">
+  <link rel="stylesheet" href="/admin-command-center.css?v=5.2.0" data-eus-command-center-css>
+  <script defer src="/admin-command-center.js?v=5.2.0"></script>
+  <script defer src="/admin-email.js?v=1.0.0"></script>
+</head>
+<body class="admin-framework-page">
+  <main class="eus-admin-page">
+    <section class="eus-admin-auth" id="email-auth" hidden>
+      <span class="eus-admin-kicker">Protected Email Operations</span>
+      <h2>Admin session required</h2>
+      <p>Open the Admin Command Center and sign in to manage business email workflows.</p>
+      <a class="eus-admin-button eus-admin-button--primary" href="/admin">Open Admin Login</a>
+    </section>
+
+    <section id="email-dashboard" hidden>
+      <header class="eus-admin-page__head">
+        <div>
+          <span class="eus-admin-kicker">System · Email</span>
+          <h1>Email Operations</h1>
+          <p>Role routing, customer messages, order communication, and internal alerts. Credentials and OAuth values are never displayed here.</p>
+        </div>
+        <div class="eus-admin-actions">
+          <a class="eus-admin-button" href="/admin-system">System / QA</a>
+          <button class="eus-admin-button eus-admin-button--primary" id="email-refresh" type="button">Refresh</button>
+        </div>
+      </header>
+
+      <p class="eus-admin-statusline" id="email-status">Loading email workflow state…</p>
+
+      <section class="eus-section">
+        <div class="eus-section__head"><div><span class="eus-admin-kicker">Provider & Roles</span><h2>Current mail system</h2></div></div>
+        <div class="eus-metric-grid" id="email-metrics"></div>
+        <div class="eus-admin-table-wrap">
+          <table class="eus-admin-table">
+            <thead><tr><th>Role</th><th>Routing address</th><th>Current use</th></tr></thead>
+            <tbody id="email-role-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="eus-section">
+        <div class="eus-section__head"><div><span class="eus-admin-kicker">Automation Map</span><h2>Workflow coverage</h2><p>Automatic means the business event triggers mail without requiring a separate manual email step.</p></div></div>
+        <div class="eus-admin-table-wrap">
+          <table class="eus-admin-table">
+            <thead><tr><th>Workflow</th><th>Mode</th><th>Role</th><th>Trigger</th></tr></thead>
+            <tbody id="email-workflow-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="eus-section">
+        <div class="eus-section__head"><div><span class="eus-admin-kicker">Customer Communication</span><h2>Send role-based email</h2><p>The authenticated Gmail identity remains the actual sender. The selected Elevation role becomes the Reply-To lane.</p></div></div>
+        <form id="email-customer-form" class="eus-admin-form">
+          <div class="eus-admin-form-grid">
+            <label><span>Role</span><select id="email-role" required><option value="support">Support</option><option value="sales">Sales</option><option value="orders">Orders</option><option value="logistics">Logistics</option><option value="owner">Owner / Strategic</option></select></label>
+            <label><span>Recipient email</span><input id="email-recipient" type="email" autocomplete="email" required></label>
+            <label><span>Recipient name</span><input id="email-recipient-name" maxlength="180"></label>
+            <label><span>Reference</span><input id="email-reference" maxlength="120" placeholder="Order or lead reference"></label>
+            <label class="eus-admin-form-wide"><span>Subject</span><input id="email-subject" maxlength="300" required></label>
+            <label class="eus-admin-form-wide"><span>Message</span><textarea id="email-message" rows="7" maxlength="6000" required></textarea></label>
+          </div>
+          <div class="eus-admin-actions"><button class="eus-admin-button eus-admin-button--primary" type="submit">Send Email</button></div>
+        </form>
+      </section>
+
+      <section class="eus-section">
+        <div class="eus-section__head"><div><span class="eus-admin-kicker">Orders</span><h2>Send approved order template</h2><p>Templates read customer/order data from the stored order record. Customer email addresses are not entered manually here.</p></div></div>
+        <form id="email-order-form" class="eus-admin-form">
+          <div class="eus-admin-form-grid">
+            <label><span>Order reference</span><input id="email-order-reference" maxlength="120" placeholder="EUS-STORE-YYYYMMDD-XXXXXXXX" required></label>
+            <label><span>Template</span><select id="email-order-template" required><option value="order_confirmation">Order confirmation</option><option value="shipping_update">Shipping update</option><option value="order_attention">Order review / problem notice</option><option value="refund_update">Refund update</option></select></label>
+          </div>
+          <div class="eus-admin-actions"><button class="eus-admin-button eus-admin-button--primary" type="submit">Send Order Email</button></div>
+        </form>
+      </section>
+
+      <section class="eus-section">
+        <div class="eus-section__head"><div><span class="eus-admin-kicker">Internal Operations</span><h2>Send role alert</h2><p>Sends a fixed internal-operations notice to the selected Elevation role lane.</p></div></div>
+        <form id="email-alert-form" class="eus-admin-form">
+          <div class="eus-admin-form-grid">
+            <label><span>Role</span><select id="email-alert-role" required><option value="logistics">Logistics</option><option value="orders">Orders</option><option value="sales">Sales</option><option value="support">Support</option><option value="owner">Owner / Strategic</option></select></label>
+            <label><span>Reference</span><input id="email-alert-reference" maxlength="120"></label>
+            <label class="eus-admin-form-wide"><span>Subject</span><input id="email-alert-subject" maxlength="300" required></label>
+            <label class="eus-admin-form-wide"><span>Message</span><textarea id="email-alert-message" rows="5" maxlength="5000" required></textarea></label>
+          </div>
+          <div class="eus-admin-actions"><button class="eus-admin-button eus-admin-button--primary" type="submit">Send Internal Alert</button></div>
+        </form>
+      </section>
+
+      <div class="eus-callout" id="email-future"></div>
+    </section>
+  </main>
+</body>
+</html>
