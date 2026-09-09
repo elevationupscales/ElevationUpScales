@@ -49,6 +49,10 @@ function gmailConfigured(env) {
   );
 }
 
+export function gmailMailProviderConfigured(env) {
+  return gmailConfigured(env);
+}
+
 async function accessToken(env, forceRefresh = false) {
   if (!forceRefresh && tokenCache.accessToken && tokenCache.expiresAt > Date.now() + 30_000) {
     return tokenCache.accessToken;
