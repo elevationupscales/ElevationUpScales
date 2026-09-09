@@ -109,6 +109,22 @@ jobs:
           set -euo pipefail
           npm run qa:preview -- https://elevationupscales.com
 
+      - name: Confirm notification health contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://elevationupscales.com/api/health -o /tmp/eus-health.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/eus-health.json', 'utf8'));
+          const services = payload.services || {};
+          for (const key of ['marketplaceNotifications', 'solarNotifications']) {
+            if (services[key] !== 'configured') throw new Error(`${key} is ${services[key] || 'missing'}, expected configured`);
+          }
+          console.log('Notification health configuration: PASS');
+          NODE
+          rm -f /tmp/eus-health.json
+
       - name: Final live QA receipt
         shell: bash
         env:
@@ -120,3 +136,4 @@ jobs:
           echo "Message ID: $MESSAGE_ID" >> "$GITHUB_STEP_SUMMARY"
           echo "Deployment smoke: $DEPLOYMENT_URL — PASS" >> "$GITHUB_STEP_SUMMARY"
           echo 'Canonical: https://elevationupscales.com — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Notification health: configured — PASS' >> "$GITHUB_STEP_SUMMARY"
