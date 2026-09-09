@@ -110,6 +110,43 @@ Reuse existing routes, storage, auth, parsing, receipts, UI shells and deploymen
 
 Do not create duplicate product masters, duplicate lead systems, duplicate logistics records or competing rolling handoffs. Extend the existing owner when possible.
 
+### Proportional controls — do not turn the SOP into friction
+
+Controls must be proportional to the lane being activated.
+
+**BLOCK THE UNSAFE OR UNVERIFIED LANE, NOT THE ENTIRE VENDOR / PRODUCT WHEN ANOTHER LANE IS ALREADY SAFE.**
+
+Examples:
+
+- missing Hawaii DG documents block Hawaii freight pricing, not a verified Lower-48 sale;
+- an unverified marketplace permission blocks that marketplace, not the approved Elevation website;
+- missing pallet data blocks pallet quoting, not ordinary parcel fulfillment;
+- incomplete lifestyle media blocks merchandising enrichment, not code work when approved product facts and sellable media already exist.
+
+Vendor-facing simplicity is a management responsibility. Do not make a supplier complete Elevation's internal checklist if the same facts are already available through the supplier's approved portal, dealer package, feed, policy, price sheet or prior response.
+
+Prefer:
+
+**VENDOR PORTAL / PACKAGE → ELEVATION NORMALIZATION → WEBSITE / ADMIN / OPERATIONS**
+
+over:
+
+**VENDOR → REPEAT EVERY FACT MANUALLY → MULTIPLE INTERNAL COPIES**
+
+Use the lightest onboarding tier that safely supports the intended business. Escalate to deeper SOK-style qualification only when repeat B2B, project supply, stocking, reseller structures, Hawaii/DG freight or other complex operations actually require it.
+
+Do not build a custom Elevation supplier portal just because the framework can support one. Use vendor portals and the current Elevation Admin/catalog infrastructure first. Build additional supplier-platform software only when vendor count, update frequency, order volume or manager workload clearly justifies it.
+
+### Minimum safe progress beats perfect paperwork
+
+Management should distinguish:
+
+- **required now to sell safely**;
+- **required later for a planned lane**;
+- **useful enrichment**.
+
+Get enough verified information to activate the safe lane, then learn from real orders and enrich the profile. Do not delay revenue-generating work merely to complete fields that have no current operational use.
+
 ### Test proportionally
 
 - During focused code iteration, run the narrowest relevant behavior tests and fast QA.
