@@ -91,6 +91,21 @@ for route in \
   check_status 401 "$route"
 done
 
+gmail_qa_auth_code=$(curl -sS \
+  -o /tmp/eus-gmail-qa-auth-response \
+  --write-out '%{http_code}' \
+  -X POST \
+  -H "Origin: $base" \
+  -H 'Content-Type: application/json' \
+  --data '{}' \
+  "$base/api/admin/gmail-provider-qa" || true)
+echo "CHECK POST /api/admin/gmail-provider-qa => $gmail_qa_auth_code (expected 401)"
+if [[ "$gmail_qa_auth_code" != "401" ]]; then
+  head -c 800 /tmp/eus-gmail-qa-auth-response || true
+  echo
+  exit 1
+fi
+
 check_status 200 /api/admin/listings
 LISTINGS_FILE=/tmp/eus-clean-baseline-response node - <<'NODE'
 const fs = require('fs');
@@ -106,6 +121,8 @@ for route in \
   /worker/core-context.js \
   /worker/domains/admin-auth.js \
   /worker/domains/compatibility.js \
+  /worker/shared/gmail-mail-provider.js \
+  /worker/shared/gmail-provider-qa.js \
   /sok-full-line-runtime.js \
   /sok-full-line-data.js \
   /sync-admin-runtime.js; do
