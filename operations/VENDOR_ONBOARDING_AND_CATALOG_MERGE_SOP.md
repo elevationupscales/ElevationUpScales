@@ -1,494 +1,432 @@
 # Elevation UpScales — Vendor Onboarding and Catalog Merge SOP
 
 **Status: ACTIVE / CONTROLLING**  
-**Version: 2.0**  
+**Version: 2.1**  
 **Effective: 2026-09-09**  
 **Owner: Casey Young**  
 **Scope: manufacturers, distributors, wholesalers, authorized dealers, dropship suppliers, strategic product vendors, and supplier relationships being merged into Elevation ecommerce / operations**
 
 ## Purpose
 
-Create one repeatable standard for moving a supplier from commercial approval into a reliable operating vendor and a code-ready catalog source.
+Create one repeatable onboarding standard without making every vendor complete a SOK-sized qualification package before Elevation can do business with them.
 
-The benchmark is the operating depth developed through the SOK relationship: account approval alone was not enough. Elevation also established product truth, pricing/MAP, inventory freshness, order mechanics, fulfillment, warranty/RMA, manufacturer-approved media, and — separately for Hawaii / Alaska or other specialized battery freight — the exact shipment facts and transport documentation required by the selected freight route.
+SOK remains the benchmark for a deeply integrated strategic supplier, but **SOK-level depth is not the minimum requirement for every vendor**.
 
-Core distinction:
+Core rule:
 
-**APPROVED VENDOR ≠ CATALOG-READY VENDOR ≠ NORMAL-FULFILLMENT-READY VENDOR ≠ SPECIALIZED-SHIPPING-READY VENDOR ≠ PROVEN VENDOR**
+**COLLECT ONLY WHAT IS NEEDED FOR THE SALES / FULFILLMENT LANE BEING ACTIVATED, THEN ENRICH THE VENDOR PROFILE AS THE RELATIONSHIP GROWS.**
 
-Normal ecommerce progression:
+Vendor-facing simplicity matters. Elevation should absorb the internal complexity instead of making the vendor learn our SOP.
 
-**COMMERCIAL APPROVAL → VENDOR MASTER → SKU DATA → MEDIA PACKET → INVENTORY SOURCE → CHANNEL / MAP RULES → ORDER FLOW → NORMAL FULFILLMENT → CATALOG MERGE → FIRST ORDER → ACTUALS → REVALIDATE**
+Use this normal progression:
 
-Specialized freight is a separate qualification layered onto the applicable SKU:
+**COMMERCIAL APPROVAL → MINIMUM VENDOR PROFILE → SKU / MEDIA / PRICE / STOCK SOURCE → NORMAL FULFILLMENT → CODE / CATALOG MERGE → FIRST ORDER → ENRICH PROFILE → REPEAT**
 
-**EXACT SKU → PACKED SHIPMENT PROFILE → CARRIER-REQUIRED TRANSPORT DOCUMENTS → ORIGIN PREPARATION → ROUTE ACCEPTANCE → EXACT FREIGHT PRICE → CUSTOMER OPTION**
+Specialized freight remains a separate overlay:
 
-A missing Hawaii / specialized-freight packet does **not** by itself prevent an otherwise qualified product from entering the regular store when the supplier can reliably fulfill that SKU through its approved normal shipping lane.
+**EXACT SKU → PACKED PROFILE → CARRIER-REQUIRED DOCUMENTS → ROUTE ACCEPTANCE → EXACT FREIGHT PRICE → CUSTOMER OPTION**
 
----
-
-## 1. SOK benchmark
-
-SOK remains the benchmark for how completely Elevation should understand a strategically important vendor.
-
-The useful operating information established with SOK includes:
-
-- direct commercial / dealer relationship status;
-- authorized resale expectations and MAP rules;
-- manufacturer-approved product media / content rights;
-- SKU-level pricing source;
-- SKU-level inventory source and update cadence;
-- exact ship-from warehouse;
-- order-submission process and required fields;
-- payment / invoice / release sequence;
-- normal processing and tracking sequence;
-- dropship / blind-ship / customer-paperwork treatment where applicable;
-- Lower-48 fulfillment boundary;
-- Hawaii / Alaska separation from normal parcel fulfillment;
-- return, warranty and RMA path;
-- packed carton facts where freight matters;
-- case / pallet / mixed-pallet facts where applicable;
-- model-specific lithium transport documents for SKUs being qualified for specialized freight;
-- origin warehouse capability for marks, labels, securement, photos and shipper paperwork where required;
-- inventory-feed / dealer-portal transition path;
-- referral / market-development opportunity where commercially appropriate.
-
-The lesson is **not** that every new vendor must reproduce every SOK freight capability before its products can be sold. The lesson is that Elevation must collect every fact required for each actual sales, catalog and fulfillment lane being activated.
+A missing Hawaii / DG / pallet / project-pricing item blocks only the lane that requires it. It does **not** automatically block the vendor or the normal Lower-48 store.
 
 ---
 
-## 2. Vendor onboarding states
+## 1. Proportional onboarding tiers
 
-Use these states:
+Assign the lightest tier that safely supports the intended relationship. A vendor may move upward later.
 
-**DISCOVERED** — potential fit identified.
+### Tier 1 — STANDARD / PORTAL-LED VENDOR
 
-**CONTACTED** — commercial outreach sent.
+Use when Elevation mainly needs normal ecommerce products from a vendor that already provides an adequate dealer portal, catalog, feed or normal fulfillment program.
 
-**ACCOUNT REVIEW** — vendor is reviewing Elevation or requested business documents.
+Typical examples:
 
-**COMMERCIAL APPROVED** — vendor approved Elevation for a defined dealer / wholesale / reseller / dropship relationship.
+- normal Lower-48 ecommerce;
+- vendor-managed dropship program;
+- straightforward wholesale ordering;
+- catalog/feed supplier;
+- products without specialized freight requirements.
 
-**VENDOR DATA PENDING** — approval exists but operating information is incomplete.
+Minimum onboarding should normally establish:
 
-**SKU QUALIFICATION** — product identity, stock source, pricing/channel rules, media and fulfillment facts are being verified.
+- Elevation's approved relationship / channel;
+- exact SKU or manufacturer model identity;
+- approved product / media source;
+- price / MAP source;
+- inventory or sellability source;
+- normal order / fulfillment method;
+- return / warranty source.
 
-**CODE READY** — the development merge packet and approved media packet are complete enough to begin catalog code work safely.
+If a vendor portal already contains these answers, **portal access is the answer**. Do not make the vendor restate information Elevation can reliably read from the approved portal.
 
-**CATALOG READY** — the product record is complete enough for approved publication.
+### Tier 2 — STRATEGIC DIRECT VENDOR
 
-**NORMAL FULFILLMENT READY** — normal order, payment, shipment, tracking and warranty workflow is understood for the applicable standard sales region.
+Use when the relationship is expected to support repeat B2B, project supply, direct manufacturer purchasing, richer catalog integration, stocking, larger orders or recurring replenishment.
 
-**SPECIALIZED SHIPPING PENDING** — the SKU may be sellable through normal fulfillment, but Hawaii / Alaska / freight / DG pricing still requires route qualification.
+Add as applicable:
 
-**SPECIALIZED SHIPPING READY** — exact shipment facts, required transport evidence and freight-route acceptance support the specialized lane.
-
-**LIVE** — approved SKUs are active in the applicable sales channel/lane.
-
-**PROVEN** — at least one real order completed successfully and actuals were recorded.
-
-**REVALIDATE** — material product, pricing, inventory, channel, fulfillment or route information is stale or changed.
-
-Do not hold a valid Lower-48 catalog merge merely because a separate Hawaii freight qualification is pending.
-
----
-
-## 3. Relationship type must be explicit
-
-Record what Elevation is actually approved to do:
-
-- authorized dealer / reseller;
-- wholesale purchasing;
-- dropship / direct-to-customer fulfillment;
-- distributor purchasing;
-- marketplace-authorized resale;
-- project / volume purchasing;
-- local pickup / will-call;
-- supplier referral relationship;
-- strategic logistics relationship;
-- stocking / replenishment relationship;
-- other defined structure.
-
-Do not infer one permission from another. Wholesale approval does not automatically mean dropship approval, marketplace approval, downstream reseller permission, or specialized Hawaii shipping approval.
-
----
-
-## 4. Vendor master — required operating information
-
-Capture the applicable account-level facts before calling the relationship operational.
-
-### Identity / contacts
-
-- legal / operating company name;
-- brand name(s);
-- primary account manager;
-- order-submission contact / portal;
-- inventory-data contact / source;
-- warehouse / logistics contact where useful;
-- warranty / RMA contact or process;
-- media / dealer-assets contact or portal;
-- compliance / dangerous-goods contact when specialized regulated freight is being qualified;
-- ship-from warehouse location(s);
-- support hours / time zone where operationally useful.
-
-### Commercial account
-
-- Elevation account / dealer status;
-- authorized relationship type;
-- reseller / tax-document requirements;
-- opening order / MOQ;
-- case / pallet / volume rules;
-- pricing source and version/effective date;
-- project / volume pricing process;
-- payment methods and timing;
-- cancellation / change process;
-- order cutoff if any;
-- normal processing expectation.
-
-Dealer costs, negotiated terms and private payment details remain protected and must not be committed to the public repository.
-
-### Channel rules
-
-Establish as applicable before publication:
-
-- MAP / UMAP / minimum advertised price;
-- MSRP / retail reference;
-- coupon / promotion restrictions;
-- approved website resale;
-- approved marketplaces;
-- prohibited marketplaces;
-- geographic restrictions;
-- downstream reseller rules;
-- trademark / logo rules;
-- product-content / media permissions.
-
-If a channel is not confirmed, mark it **CHANNEL PENDING** rather than assuming permission.
-
----
-
-## 5. SKU merge packet — required product truth
-
-Catalog merge is product-level, not just vendor-level.
-
-For each SKU/model being activated, obtain or verify as applicable:
-
-### Identity
-
-- supplier SKU;
-- manufacturer model / part number;
-- UPC / EAN / GTIN where available;
-- product title;
-- brand;
-- product family/category;
-- variant attributes;
-- current / future / discontinued state.
-
-Supplier SKU and manufacturer model must be linked clearly enough that inventory, pricing, warranty and freight facts cannot attach to the wrong item.
-
-### Customer-facing product facts
-
-- manufacturer-approved description/source;
-- core specifications;
-- product dimensions;
-- net weight;
-- included items;
-- verified compatible accessories where applicable;
-- warranty summary/source;
-- manuals / installation documentation;
-- approved media source.
-
-Do not invent compatibility, included components, performance claims or technical specifications.
-
-### Pricing / channel fields
-
-- retail / MAP source;
-- dealer / wholesale pricing source — protected;
-- promotional rules;
-- quantity / project pricing path;
-- effective date/source version;
-- revalidation trigger.
-
-### Normal fulfillment fields
-
-- normal ship-from warehouse;
-- supplier-supported shipping region;
-- parcel / LTL / other normal fulfillment mode where known;
-- packed dimensions / gross weight when needed for fulfillment logic;
-- case quantity where relevant;
-- pallet quantity/profile where relevant;
-- dropship eligibility;
+- account manager / order contact;
+- project / volume pricing path;
+- opening order / MOQ / quantity tiers;
+- inventory refresh cadence or feed;
+- approved media library;
+- dropship / direct-to-customer rules;
 - freight-forwarder delivery eligibility;
-- order submission method;
-- processing/tracking expectation;
-- warranty / return path.
+- packing-slip / blind-ship treatment;
+- cancellation / change process;
+- stronger warranty / RMA workflow;
+- case / pallet information when commercially useful;
+- referral / market-development opportunity where appropriate.
+
+### Tier 3 — COMPLEX / SPECIALIZED SUPPLY
+
+Use only where the lane actually requires deeper control, such as:
+
+- Hawaii / Alaska lithium freight;
+- dangerous goods;
+- pallet / container movements;
+- local warehousing / stocking;
+- downstream reseller programs;
+- introduced-account protection;
+- large commercial / project orders;
+- supplier + logistics + local-node structures.
+
+Add the exact shipment, compliance, warehouse, pallet, route, receiving and commercial controls required by the specific program.
+
+**SOK is primarily the Tier 3 benchmark. Kingboss may be Tier 2 for normal store integration while individual Hawaii battery SKUs enter Tier 3 qualification separately.**
 
 ---
 
-## 6. Manufacturer media packet — CODE START GATE
+## 2. Vendor-facing communication standard
 
-A manufacturer-approved **media packet is a core onboarding deliverable and a high-priority prerequisite for efficient code/catalog work**.
+Do not send vendors our entire internal checklist unless their role genuinely requires it.
 
-For each product family or SKU being merged, request the best available approved source for:
+Prefer one concise request built around what is missing for the next business step.
 
-- primary/hero product image;
-- alternate product angles;
-- detail / feature images;
-- dimension / diagram images when manufacturer-approved;
-- lifestyle/application images when available;
-- product videos when available;
-- brand/logo assets approved for dealer use;
-- product descriptions / feature copy;
-- specification sheets;
+Operating rules:
+
+- ask once for a current dealer / wholesale catalog, portal or source package when that can answer many questions at once;
+- accept portal access, a dealer dashboard, approved website source, API/feed, shared folder or current price/media package instead of asking the vendor to manually restate the same data;
+- do not repeat questions already answered in the vendor's application, portal, price sheet, policy, prior email or dealer documentation;
+- group related questions into one onboarding response where practical;
+- distinguish **required now** from **useful later**;
+- explain the business reason when asking for unusual information;
+- do not make specialized Hawaii freight documents appear to be a prerequisite for ordinary Lower-48 sales when they are not;
+- do not require a vendor to understand Elevation's internal product states, code gates or data model.
+
+Internal team owns the translation:
+
+**VENDOR SOURCE → ELEVATION NORMALIZED PROFILE → WEBSITE / ADMIN / OPERATIONS**
+
+---
+
+## 3. Minimum vendor profile
+
+Before Elevation treats a newly approved vendor as ready for normal integration, capture only the applicable minimum:
+
+### Account
+
+- legal / operating vendor name;
+- brand(s);
+- Elevation relationship type;
+- approved sales channel(s);
+- price / MAP source;
+- primary ordering path or portal;
+- normal supported shipping region;
+- return / warranty source.
+
+### Product
+
+For each activated SKU/model:
+
+- supplier SKU and/or manufacturer model;
+- product title / family;
+- verified core specifications;
+- approved product-content/media source;
+- customer-safe price rule;
+- current inventory / sellability source;
+- normal fulfillment state.
+
+Everything else is **progressive enrichment** unless the actual lane needs it now.
+
+---
+
+## 4. Manufacturer media packet — HIGH PRIORITY, NOT AN ARTIFICIAL BLOCKER
+
+Manufacturer-approved media remains important because it prevents development from wasting time guessing product presentation or scraping unsupported assets.
+
+Request the best available source for:
+
+- hero product images;
+- alternate/detail images;
+- diagrams / feature graphics;
+- lifestyle images when available;
+- videos when available;
+- approved descriptions / feature copy;
+- specifications / spec sheets;
 - manuals / installation guides;
-- warranty documents or customer-safe warranty source;
-- model/SKU mapping for every media asset when filenames are not self-explanatory.
+- warranty material;
+- brand / logo assets;
+- SKU/model-to-media mapping when needed.
 
-Preferred delivery order:
+Preferred source order:
 
-1. manufacturer/dealer media download or asset package;
-2. manufacturer dealer portal;
-3. manufacturer-provided shared folder/feed;
-4. manufacturer website content explicitly authorized for dealer reuse;
-5. Elevation-created original media based only on verified product facts.
-
-**Do not scrape unsupported assets, remove watermarks, infer media rights from account approval, or invent missing product images/specifications.**
+1. dealer media portal / download;
+2. manufacturer shared folder or feed;
+3. manufacturer-provided package;
+4. manufacturer website explicitly authorized for dealer reuse;
+5. Elevation-created original media based on verified product facts.
 
 ### Code-start rule
 
-Development should not waste time rebuilding or guessing vendor product presentation while the authoritative media is still obtainable from the manufacturer.
+Do **not** wait for a perfect media library when the first products already have enough approved material to build safely.
 
-Before large-scale catalog code work starts, the merge owner should provide development with:
+A SKU may begin code work when development has:
 
-**SKU MAP + PRODUCT DATA + APPROVED MEDIA PACKET/SOURCE + PRICE/MAP RULE + INVENTORY SOURCE + NORMAL FULFILLMENT STATE**
+**EXACT SKU/MODEL + VERIFIED CORE FACTS + AT LEAST ONE APPROVED SELLABLE IMAGE + PRICE/MAP SOURCE + STOCK/SELLABILITY SOURCE + NORMAL FULFILLMENT STATE**
 
-A single SKU may begin code work with a smaller media set if it has at least one approved sellable hero image plus the verified product facts needed for that page. Broader merchandising can continue as additional approved media arrives.
+Additional lifestyle media, videos, diagrams and richer merchandising can be added later.
 
-Media incompleteness should produce a clear **MEDIA PENDING** state, not unauthorized scraping or invented assets.
+Use **MEDIA PENDING** for enrichment rather than blocking an otherwise valid product.
+
+Never scrape unsupported assets, remove watermarks or invent product claims.
 
 ---
 
-## 7. Supplier inventory truth and freshness
+## 5. Inventory truth — keep it simple
 
 Supplier inventory must never be represented as Elevation physical **On Hand**.
 
 Use:
 
-**SOURCE → VERIFIED TIME → SKU STOCK SIGNAL → CUSTOMER SELLABILITY → EXPIRATION / RECHECK**
+**SOURCE → VERIFIED TIME / SOURCE VERSION → CUSTOMER SELLABILITY → RECHECK WHEN STALE**
 
-### Authoritative inventory source
-
-Record one or more approved sources:
+Acceptable authoritative sources include:
 
 - API;
 - dealer portal;
-- supplier website only if vendor confirms it is authoritative;
-- scheduled CSV / Excel / feed;
+- supplier feed / CSV / spreadsheet;
 - account-manager inventory sheet;
-- manual supplier confirmation;
-- PO allocation/reservation.
+- supplier website when confirmed as authoritative;
+- manual confirmation;
+- PO allocation / reservation.
 
-Every imported supplier stock fact needs a verified timestamp or source-version date.
+Elevation does **not** need a raw unit count from every vendor before catalog work can start. If the approved portal reliably reports in-stock / out-of-stock / preorder status, that may be enough for normal ecommerce.
 
-Raw stock quantities are protected supplier data. Public systems should expose only customer-safe sellability.
+Customer-safe states:
 
-### Customer-safe states
+- **AVAILABLE**
+- **MANUAL CONFIRMATION**
+- **PREORDER / FUTURE**
+- **UNAVAILABLE**
+- **DISCONTINUED / RETIRED**
 
-**AVAILABLE** — source is current and SKU can normally be sold through the approved workflow.
+When the source becomes stale or uncertain, downgrade to **MANUAL CONFIRMATION** rather than blocking the whole vendor.
 
-**MANUAL CONFIRMATION** — likely available, but stock/fulfillment must be rechecked before accepting the order.
-
-**PREORDER / FUTURE** — future availability exists but current stock is not normal sellable inventory.
-
-**UNAVAILABLE** — current source indicates no sellable stock or supplier cannot fulfill the approved lane.
-
-**DISCONTINUED / RETIRED** — no normal new orders.
-
-Set the expected refresh cadence during onboarding. When the source becomes stale, downgrade customer sellability to **MANUAL CONFIRMATION** until reverified.
+Raw supplier counts remain protected.
 
 ---
 
-## 8. Order-submission and normal fulfillment contract
+## 6. Channel / pricing rules
 
-Before activating normal checkout, establish as applicable:
+Before publishing a SKU on a channel, know the rule for that channel.
 
-- PO / portal / API / email / spreadsheet order method;
-- required order fields;
-- consignee requirements;
-- payment / invoice / release sequence;
-- processing expectation;
+Capture as applicable:
+
+- own-website authorization;
+- marketplace authorization / restrictions;
+- MAP / UMAP / advertised-price rule;
+- MSRP / retail reference;
+- coupon / promotion restrictions;
+- geographic restrictions;
+- downstream reseller restrictions where relevant.
+
+**Block the unverified channel, not the entire product.**
+
+Example: a Renogy SKU may be eligible for ElevationUpScales.com while third-party marketplaces remain prohibited.
+
+Dealer / wholesale costs and private commercial terms remain protected.
+
+---
+
+## 7. Normal order / fulfillment readiness
+
+Before enabling normal checkout for a SKU, establish enough of the supplier workflow to fulfill the order reliably.
+
+Minimum as applicable:
+
+- order / PO / portal method;
+- required customer / consignee fields;
+- payment / acceptance step;
+- normal processing expectation;
 - tracking return path;
-- dropship capability;
+- supported shipping region;
+- dropship authorization if used;
+- return / warranty / RMA source.
+
+Useful later, but not always a Day-1 blocker:
+
 - blind-ship / packing-slip branding;
-- dealer-cost privacy on customer paperwork;
-- cancellation/change window;
-- damaged-in-transit process;
-- return process;
-- warranty/replacement/refund process;
-- RMA responsibility;
-- customer-support handoff.
+- detailed cancellation window;
+- address-change procedure;
+- case / pallet profile;
+- dedicated warehouse contact;
+- advanced project-price procedure.
 
 Operating rule:
 
-**CUSTOMER ORDER → ELEVATION VALIDATES → SUPPLIER ORDER/PO → PAYMENT/ACCEPTANCE → SUPPLIER RELEASE → TRACKING → DELIVERY → ACTUALS**
+**CUSTOMER ORDER → ELEVATION VALIDATES → SUPPLIER ORDER → ACCEPTANCE / PAYMENT → RELEASE → TRACKING → DELIVERY → ACTUALS**
 
-Do not automate supplier ordering until the manual workflow is understood well enough to reproduce safely.
-
----
-
-## 9. Specialized freight / lithium qualification — SEPARATE FROM REGULAR STORE MERGE
-
-Transport documentation and dangerous-goods qualification primarily matter when Elevation is creating a specialized route that the supplier's normal shipping process does not cover — especially Hawaii lithium freight and similar difficult-destination moves.
-
-An otherwise catalog-ready product may be sold through the regular store under the supplier's approved normal fulfillment lane while specialized freight remains **PENDING**.
-
-For a SKU that Elevation wants to price through a specialized battery freight partner, obtain the exact facts the carrier/forwarder requires, which may include:
-
-- manufacturer model / part number linkage;
-- packed carton dimensions and gross weight;
-- chemistry;
-- nominal voltage / capacity / watt-hours;
-- model-specific SDS / MSDS;
-- UN38.3 test summary;
-- applicable UN identification / shipping description where required;
-- state-of-charge information where required;
-- package / terminal protection facts;
-- marks / labels available at origin;
-- pallet / mixed-pallet configuration where applicable;
-- shipper/declaration responsibility;
-- origin warehouse preparation capability;
-- final packaging/securement photos where required by the route.
-
-Apply `SHIPPING_SUPPLIER_QUALIFICATION_STANDARD.md` to the actual freight provider.
-
-Broad commercial certifications such as CE / FCC / RoHS / UL may be useful for product/channel requirements but do not substitute for carrier-required battery transport evidence.
-
-### Supplier communication standard
-
-When asking a vendor for lithium transport information, explain the business reason clearly:
-
-**Elevation can place the item into its regular approved store/fulfillment workflow without making Hawaii freight a prerequisite. To make Hawaii specialized shipping available and obtain exact customer freight pricing, Elevation's freight partners require exact-model shipment facts and, when requested, SDS/MSDS, UN38.3 and related DG information.**
-
-This keeps normal ecommerce onboarding moving while building the harder-destination capability in parallel.
+First understand the manual process. Automate only after it is proven useful.
 
 ---
 
-## 10. Activation gates
+## 8. Catalog / code activation states
 
-### Gate A — CODE READY
+### CODE READY
 
-Required to start efficient implementation:
+Enough information exists to begin implementation safely:
 
-- exact SKU/model map;
+- approved vendor/channel relationship;
+- exact SKU/model;
 - verified core product facts;
-- approved media packet/source or at least approved hero media for the first SKU;
-- retail/MAP rule;
-- inventory source;
-- normal fulfillment state;
-- vendor/channel authorization.
+- approved hero media/source;
+- price/MAP source;
+- stock/sellability source;
+- normal fulfillment state.
 
-### Gate B — CATALOG / NORMAL SELLABILITY READY
+### LIVE — NORMAL FULFILLMENT
 
-Gate A plus:
+Code Ready plus:
 
-- current stock state/freshness rule;
-- price source;
-- warranty/return path;
-- supported normal shipping region;
-- ordering/fulfillment workflow sufficient for the intended checkout path.
+- current customer-safe availability;
+- valid customer price;
+- supported destination/region;
+- order method;
+- return/warranty path.
 
-### Gate C — DROPSHIP READY
+### LIVE — MANUAL CONFIRMATION
 
-Gate B plus:
+Use when the product can be marketed but stock, project pricing or fulfillment must be reconfirmed before payment/order acceptance.
 
-- explicit dropship authorization;
-- required customer/order fields;
-- payment/release sequence;
-- customer-paperwork treatment;
-- tracking flow.
+### SPECIALIZED SHIPPING PENDING
 
-### Gate D — SPECIALIZED SHIPPING READY
+Normal store may remain live, but Hawaii / Alaska / DG / freight pricing is not yet qualified.
 
-Gate B plus:
+### SPECIALIZED SHIPPING READY
 
-- exact packed shipment profile;
-- carrier-required transport documents;
+The exact SKU has the route-specific shipment facts, required transport documents, carrier/forwarder acceptance and current quote basis needed for the customer option.
+
+### PROVEN
+
+At least one real order completed and actuals have been recorded.
+
+---
+
+## 9. Specialized freight / lithium — separate overlay
+
+Transport documents and dangerous-goods qualification primarily apply when Elevation is building a specialized route beyond the supplier's normal shipping service, especially Hawaii lithium freight.
+
+For the exact SKUs being qualified, obtain only what the freight partner actually requires, which may include:
+
+- manufacturer model linkage;
+- packed carton dimensions / gross weight;
+- chemistry / voltage / capacity / watt-hours;
+- SDS / MSDS;
+- UN38.3 test summary;
+- applicable UN / shipping description;
+- state of charge where required;
+- terminal / package protection facts;
+- marks / labels;
+- pallet information where applicable;
+- shipper/declaration responsibility;
 - origin preparation capability;
-- route-specific carrier/forwarder acceptance;
-- destination receiving/delivery path where applicable;
-- exact or current quote basis for the customer option.
+- packaging / securement photos where required.
 
-A SKU can be **LIVE — NORMAL FULFILLMENT / SPECIALIZED SHIPPING PENDING**.
+Apply `SHIPPING_SUPPLIER_QUALIFICATION_STANDARD.md` to the actual freight route.
 
----
+Supplier-facing explanation:
 
-## 11. Development / ecommerce merge handoff
+**Normal U.S. store integration can proceed under the vendor's normal approved fulfillment. For Hawaii freight options, our freight partners need the exact battery profile and carrier-required transport documents so we can obtain exact acceptance and pricing.**
 
-Before handing a vendor to website/catalog development, prepare one normalized merge packet:
-
-**VENDOR → RELATIONSHIP → CHANNEL RULES → SKU MASTER → MEDIA PACKET → PRICE SOURCE → INVENTORY SOURCE/FRESHNESS → NORMAL FULFILLMENT → WARRANTY → CUSTOMER SELLABILITY → SPECIALIZED SHIPPING STATE**
-
-For each SKU, development must be able to determine:
-
-- exact product/model;
-- approved channels;
-- authoritative title/spec/media source;
-- price/MAP rule;
-- current sellability;
-- inventory freshness;
-- normal ship-from/fulfillment lane;
-- supplier order method;
-- warranty/return path;
-- whether Hawaii/Alaska specialized shipping is READY, PENDING or NOT APPLICABLE.
-
-If normal fulfillment is verified but specialized freight is pending, the system should keep normal checkout available where appropriate and route unsupported destinations to the specialized shipping review rather than blocking the entire SKU.
+Do not request a broad DG package for products or lanes that do not need one.
 
 ---
 
-## 12. First-order proof
+## 10. Development / portal handoff — pointer based
 
-Configuration is not proof.
+Development should not receive a giant duplicated vendor dossier.
 
-For each strategically important vendor / fulfillment lane, use a controlled first order and record protected actuals as applicable:
+Provide a compact normalized merge packet with pointers to authoritative sources:
 
-- SKU / quantity;
-- inventory state at order time;
-- supplier order method;
-- payment/acceptance timing;
-- processing/tracking timing;
-- packing/branding result;
-- delivery/freight result;
-- warranty/exception issues;
-- changes needed to the vendor profile.
+**VENDOR + RELATIONSHIP + SKU/MODEL + CHANNEL + MEDIA SOURCE + PRICE/MAP SOURCE + INVENTORY SOURCE + NORMAL FULFILLMENT STATE + WARRANTY SOURCE + SPECIALIZED SHIPPING STATE**
 
-Then update the profile so the next order is easier.
+The packet may point to a vendor portal, approved feed, media library, internal protected record or manufacturer source instead of copying every field into multiple systems.
 
-**MANUAL FIRST → ACTUALS → REPEATABLE PROFILE → AUTOMATION**
+Development should be able to answer:
 
----
+- what exact product is this?
+- may we sell it here?
+- where do approved product facts/media come from?
+- what price rule applies?
+- is it currently sellable or manual-confirmation?
+- how is it normally fulfilled?
+- what is the warranty/return source?
+- is specialized shipping READY, PENDING or NOT APPLICABLE?
 
-## 13. Revalidation triggers
+### Portal philosophy
 
-Revalidate when:
+Do not build a custom Elevation vendor portal merely because the SOP can describe one.
 
-- pricing/MAP changes;
-- channel permission changes;
-- inventory-feed cadence fails;
-- product/model changes;
-- warehouse origin changes;
-- normal shipping terms change;
-- order/dropship workflow changes;
-- warranty/return policy changes;
-- MOQ/quantity structure changes;
-- media permissions/source changes;
-- transport documents or specialized-route requirements change;
-- a real order exposes a mismatch.
+For now, prefer:
 
-Do not leave stale supplier assumptions embedded in the website.
+**VENDOR'S EXISTING PORTAL / FEED → ELEVATION INTERNAL NORMALIZATION → CURRENT ADMIN / CATALOG SYSTEM**
+
+Build additional supplier-portal software only when vendor count, update frequency, order volume or manual workload clearly justifies it.
+
+The SOP is intentionally capable of supporting a larger future supplier platform, but current onboarding should remain lightweight.
 
 ---
 
-## 14. Public / private data boundary
+## 11. First-order proof and progressive enrichment
+
+Do not treat configuration as proof.
+
+After a strategically important vendor goes live, use the first real order to validate what actually matters:
+
+- stock signal accuracy;
+- order method;
+- payment / acceptance timing;
+- processing / tracking timing;
+- packing / branding outcome where relevant;
+- delivery result;
+- warranty / exception path if encountered.
+
+Then enrich the vendor profile based on actual operating value.
+
+**MINIMUM SAFE PROFILE → SELL / TEST → ACTUALS → ENRICH → AUTOMATE ONLY WHEN WORTH IT**
+
+---
+
+## 12. Revalidation
+
+Revalidate only the affected fields when something changes:
+
+- price / MAP;
+- channel permission;
+- inventory source;
+- model / SKU;
+- warehouse / shipping region;
+- fulfillment workflow;
+- warranty / return policy;
+- MOQ / quantity structure;
+- media rights/source;
+- specialized route or compliance requirement.
+
+Do not force a full vendor re-onboarding because one field changed.
+
+---
+
+## 13. Public / private boundary
 
 This repository is public.
 
@@ -502,36 +440,24 @@ Do not commit:
 - private customer data;
 - private supplier correspondence;
 - non-public compliance packets;
-- protected freight rates / route intelligence;
+- private freight rates / route intelligence;
 - private commercial contract terms.
 
-Public SOPs may document required fields, states and workflows. Protected systems hold actual costs, raw inventory, private documents and evidence.
+Public SOPs may document fields, states and workflows. Protected systems hold the actual private values and evidence.
 
 ---
 
-## 15. New-vendor completion checklist
+## 14. Vendor completion rule
 
-Before calling a vendor fully operational, confirm the applicable items:
+A vendor is not required to reach Tier 3 before being useful.
 
-- commercial relationship approved;
-- relationship type documented;
-- channel permissions verified;
-- MAP/pricing rule verified;
-- SKU/model mapping complete;
-- product specifications verified;
-- **manufacturer-approved media packet/source obtained and mapped to SKUs;**
-- inventory source and refresh cadence established;
-- customer-safe sellability mapping established;
-- normal ship-from origin verified;
-- order submission process verified;
-- payment/release/tracking process verified;
-- returns/warranty/RMA verified;
-- dropship workflow verified if used;
-- normal store fulfillment state established;
-- specialized freight tracked separately as READY/PENDING/NOT APPLICABLE;
-- packed shipment facts and carrier-required transport documents obtained when exact specialized freight pricing is being activated;
-- first real order completed or vendor remains **LIVE / NOT YET PROVEN**.
+Call the vendor operational for the lane that is actually proven:
+
+- **LIVE — NORMAL STORE** when normal ecommerce requirements are satisfied;
+- **LIVE — MANUAL CONFIRMATION** when manual verification is intentionally part of the process;
+- **LIVE — SPECIALIZED SHIPPING** only for exact SKUs/routes that have been separately qualified;
+- **PROVEN** after real-order actuals validate the workflow.
 
 ## Operating principle
 
-**GET THE ACCOUNT → GET THE SKU DATA → GET THE MEDIA → VERIFY STOCK → VERIFY THE CHANNEL → VERIFY NORMAL FULFILLMENT → START THE CODE MERGE → QUALIFY SPECIALIZED FREIGHT IN PARALLEL → PROVE WITH A REAL ORDER → KEEP IT CURRENT.**
+**MAKE IT EASY FOR THE VENDOR → USE THEIR PORTAL / SOURCE → CAPTURE ONLY WHAT WE NEED → START SELLING WHEN THE LANE IS SAFE → QUALIFY HARDER LANES IN PARALLEL → LEARN FROM REAL ORDERS → ADD COMPLEXITY ONLY WHEN IT PAYS.**
