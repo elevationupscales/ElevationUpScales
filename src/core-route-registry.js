@@ -38,6 +38,7 @@ export const CORE_ROUTE_REGISTRY = Object.freeze([
   { match: "exact", path: "/api/admin/market-analytics", domain: "analytics-reporting", handler: "handleAdminMarketAnalytics", access: "admin" },
   { match: "exact", path: "/api/admin/opportunities", domain: "leads", handler: "handleAdminOpportunities", access: "admin-mixed" },
   { match: "exact", path: "/api/admin/solar-qa-token", domain: "solar", handler: "handleAdminSolarQaToken", access: "admin-write" },
+  { match: "exact", path: "/api/admin/gmail-provider-qa", domain: "system", handler: "handleAdminGmailProviderQa", access: "admin-write" },
 
   { match: "exact", path: "/api/store-inventory", domain: "inventory", handler: "handlePublicInventory", access: "public" },
   { match: "prefix-or-exact", path: "/api/admin/inventory", domain: "inventory", handler: "handleAdminInventory", access: "admin-mixed" },
