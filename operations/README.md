@@ -2,7 +2,7 @@
 
 **Status: ACTIVE / CONTROLLING**  
 **Effective: 2026-09-07**  
-**Management SOP reconciled: 2026-09-08**
+**Management SOP reconciled: 2026-09-09**
 
 This directory is the active repository-based source of truth for current Elevation UpScales ecommerce, supplier-fulfillment, shipping, logistics, and management operating rules that are safe to store in this public repository.
 
@@ -24,6 +24,7 @@ Email may still be used when the work itself requires reading or sending an actu
 ## Current controlling SOP
 
 - [`MANAGEMENT_OPERATING_SOP.md`](./MANAGEMENT_OPERATING_SOP.md) — shared management execution standard covering source-of-truth order, business priority, manager separation, efficient worktree execution, proportional QA, reuse-first development, public-data protection and common metrics.
+- [`MAIN_INBOX_MANAGER_SOP.md`](./MAIN_INBOX_MANAGER_SOP.md) — controlling actual-business-inbox standard covering customer-first prioritization, active supplier and freight correspondence, recipient safety, sending authority, thread preservation, streamlined vendor questions, protected commercial information, and public-safe management synchronization.
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery, Lithium Store, RV/Outdoor Store, Lower-48 ecommerce, Hawaii/Alaska specialized shipping, paid-order recovery, prepurchase, and freight-agreement operating rules.
 - [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — controlling specialized-logistics pricing architecture separating Elevation product-sale / supplier-referral sales from standalone third-party logistics facilitation, including shipment-size tiers, quote construction, route confidentiality, and protected-rate-card boundaries.
 - [`SUPPLIER_LOGISTICS_GROWTH.md`](./SUPPLIER_LOGISTICS_GROWTH.md) — supplier/commercial lead model covering dealer/wholesale, dropship, product sourcing, Hawaii/Alaska fulfillment, supplier referrals, and third-party logistics opportunity qualification.
@@ -53,17 +54,18 @@ The active repository SOP may reference the existence or status of protected evi
 
 ## Worker rule
 
-Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alaska, purchase-agreement, fulfillment, specialized-logistics pricing, supplier/commercial lead behavior, or management behavior:
+Before changing SOK, lithium, RV/outdoor ecommerce, shipping-option, Hawaii/Alaska, purchase-agreement, fulfillment, specialized-logistics pricing, supplier/commercial lead behavior, inbox correspondence behavior, or management behavior:
 
 1. read this file;
 2. read `MANAGEMENT_OPERATING_SOP.md` for shared management execution and efficiency rules;
-3. read only the applicable `/operations/` SOP, growth model, live lead map, outreach standard, deployment contract, or manager file needed for the assigned scope;
-4. read the logistics pricing model when pricing or quoting is involved;
-5. inspect current application source when website or Command Center behavior is involved;
-6. preserve protected pricing/MAP, payment, safety, customer-data, supplier-data and compliance boundaries;
-7. do not use Gmail-era management records as an active source;
-8. reconcile any new verified operational fact or owner direction into the appropriate GitHub operations record when it materially changes current work;
-9. reuse existing storage, routes, auth, parsing, receipts, UI shells and permanent deployment workflows before building replacements;
-10. use proportional QA during iteration, then full release QA before preview, merge or production deployment.
+3. read `MAIN_INBOX_MANAGER_SOP.md` when handling the actual business inbox or external business correspondence;
+4. read only the applicable `/operations/` SOP, growth model, live lead map, outreach standard, deployment contract, or manager file needed for the assigned scope;
+5. read the logistics pricing model when pricing or quoting is involved;
+6. inspect current application source when website or Command Center behavior is involved;
+7. preserve protected pricing/MAP, payment, safety, customer-data, supplier-data and compliance boundaries;
+8. do not use Gmail-era management records as an active source;
+9. reconcile any new verified operational fact or owner direction into the appropriate GitHub operations record when it materially changes current work;
+10. reuse existing storage, routes, auth, parsing, receipts, UI shells and permanent deployment workflows before building replacements;
+11. use proportional QA during iteration, then full release QA before preview, merge or production deployment.
 
 Operational complexity should remain behind the customer experience wherever possible. New software should be built only when it materially improves selling, quoting, fulfillment, product discovery, repeat purchasing, or the reliability of those workflows.
