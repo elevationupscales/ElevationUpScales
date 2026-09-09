@@ -23,7 +23,16 @@ routes = read(WORKER / "routes.js")
 compat = read(DOMAINS / "compatibility.js")
 registry = read(ROOT / "src" / "core-route-registry.js")
 
-required_shared = [WORKER / "shared" / "response.js",WORKER / "shared" / "html.js",WORKER / "shared" / "validation.js",WORKER / "shared" / "solar-sanitizers.js"]
+required_shared = [
+    WORKER / "shared" / "response.js",
+    WORKER / "shared" / "html.js",
+    WORKER / "shared" / "validation.js",
+    WORKER / "shared" / "solar-sanitizers.js",
+    WORKER / "shared" / "gmail-mail-provider.js",
+    WORKER / "shared" / "gmail-provider-qa.js",
+    WORKER / "shared" / "email-role-routing.js",
+    WORKER / "shared" / "email-role-surfaces.js",
+]
 for path in required_shared: read(path)
 
 retired_prep = [ROOT / "src" / "worker" / "response.js",ROOT / "src" / "shared" / "html.js",ROOT / "src" / "shared" / "validation.js",ROOT / "src" / "shared" / "solar-sanitizers.js"]
