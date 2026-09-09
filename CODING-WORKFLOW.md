@@ -57,3 +57,18 @@ These are permanent safeguards, not management blockers:
 
 ## Recovery
 If a future change causes a serious regression, compare against `hardbaseline/2026-09-06-production` first. Restore only the affected area when possible instead of rolling back unrelated newer work.
+
+## Worker exact-SHA release (#68)
+
+After this workflow is merged, use **Worker Exact-SHA Release** (`worker-release-deploy.yml`) from `main`:
+
+**APPROVED SHA → RUN PREVIEW → VERIFY PASS RECEIPT → RUN PRODUCTION SAME SHA → VERIFY CANONICAL PASS → POST ONE CLOSEOUT RECEIPT**
+
+- Preview inputs: `expected_sha=<approved full current main SHA>`, `target=preview`.
+- Wait for that run to finish successfully. Actions writes `elevation/worker-preview` on that SHA only after QA, secrets/artifact checks and exact deployment smoke pass.
+- Production inputs: the same `expected_sha`, `target=production`, `production_confirmation=DEPLOY`. Actions verifies the latest preview status and its successful same-SHA workflow run, then checks exact deployment and canonical-domain smoke.
+- If main advances, review/approve its new SHA and preview again. Both stages check main initially and immediately before deployment; deployed bytes always come from the supplied SHA. A concurrent main update after the final check cannot change the checked-out deployment bytes.
+- Use the Actions summary as the receipt; do not reread passing logs or rerun unchanged deterministic tests manually. On failure read only the failed step. Post one START, one DONE, and one BLOCKED comment only if management action is required.
+- Existing `production-deploy` push deployment is a legacy path, not a substitute for this same-SHA gate. It deploys checked-out main and does not establish worker preview evidence. Existing controls remain for separately authorized recovery; do not advance that branch during this protocol.
+- Both targets reuse the existing production environment for credentials/approvals; preview deploys only to `worker-exact-preview`. The shared production concurrency group serializes release runs with legacy production runs.
+- This workflow must first land on main through PR QA. It does not approve unrelated work in #66 or recover private source files in #67. Keep protected information out of Git.
