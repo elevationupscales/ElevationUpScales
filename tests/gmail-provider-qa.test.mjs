@@ -1,19 +1,43 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
+  GMAIL_PROVIDER_QA_OIDC_AUDIENCE,
+  GMAIL_PROVIDER_QA_OIDC_ISSUER,
+  GMAIL_PROVIDER_QA_REF,
+  GMAIL_PROVIDER_QA_REPOSITORY,
   GMAIL_PROVIDER_QA_SUBJECT,
-  GMAIL_PROVIDER_QA_TOKEN_EXPIRES_AT,
-  GMAIL_PROVIDER_QA_TOKEN_SHA256,
+  GMAIL_PROVIDER_QA_WORKFLOW_PATH,
   buildGmailProviderQaMessage,
   gmailProviderQaErrorCategory,
-  temporaryGmailQaTokenAuthorized,
+  githubActionsGmailQaAuthorized,
+  validateGithubActionsQaClaims,
 } from "../site/worker/shared/gmail-provider-qa.js";
 
 assert.equal(GMAIL_PROVIDER_QA_SUBJECT, "Elevation Gmail Production Provider QA");
-assert.match(GMAIL_PROVIDER_QA_TOKEN_SHA256, /^[a-f0-9]{64}$/);
-assert.ok(Date.parse(GMAIL_PROVIDER_QA_TOKEN_EXPIRES_AT) > Date.parse("2026-09-09T03:30:00Z"));
-assert.equal(await temporaryGmailQaTokenAuthorized("definitely-not-the-deployment-token", Date.parse("2026-09-09T04:00:00Z")), false);
-assert.equal(await temporaryGmailQaTokenAuthorized("anything", Date.parse("2026-09-10T00:00:00Z")), false);
+
+const nowMs = Date.parse("2026-09-09T04:00:00Z");
+const nowSeconds = Math.floor(nowMs / 1000);
+const validClaims = {
+  iss: GMAIL_PROVIDER_QA_OIDC_ISSUER,
+  aud: GMAIL_PROVIDER_QA_OIDC_AUDIENCE,
+  repository: GMAIL_PROVIDER_QA_REPOSITORY,
+  ref: GMAIL_PROVIDER_QA_REF,
+  event_name: "push",
+  environment: "production",
+  workflow_ref: `${GMAIL_PROVIDER_QA_REPOSITORY}/${GMAIL_PROVIDER_QA_WORKFLOW_PATH}@${GMAIL_PROVIDER_QA_REF}`,
+  sha: "a".repeat(40),
+  iat: nowSeconds,
+  nbf: nowSeconds - 10,
+  exp: nowSeconds + 300,
+};
+
+assert.deepEqual(validateGithubActionsQaClaims(validClaims, nowMs), { ok: true, sha: "a".repeat(40) });
+assert.equal(validateGithubActionsQaClaims({ ...validClaims, repository: "someone/else" }, nowMs).ok, false);
+assert.equal(validateGithubActionsQaClaims({ ...validClaims, ref: "refs/heads/main" }, nowMs).ok, false);
+assert.equal(validateGithubActionsQaClaims({ ...validClaims, environment: "preview" }, nowMs).ok, false);
+assert.equal(validateGithubActionsQaClaims({ ...validClaims, aud: "wrong-audience" }, nowMs).ok, false);
+assert.equal(validateGithubActionsQaClaims({ ...validClaims, exp: nowSeconds - 120 }, nowMs).ok, false);
+assert.equal((await githubActionsGmailQaAuthorized("not-a-jwt", { fetchImpl: async () => { throw new Error("must not fetch"); }, nowMs })).ok, false);
 
 const timestamp = "2026-09-09T04:00:00.000Z";
 const message = buildGmailProviderQaMessage({ MAIL_FROM: "elevationupscales@gmail.com" }, { timestamp, commit: "abc123" });
@@ -33,7 +57,7 @@ const systemSource = fs.readFileSync(new URL("../site/worker/domains/system.js",
 assert.match(systemSource, /handleAdminGmailProviderQa/);
 assert.match(systemSource, /sameOriginRequest\(request\)/);
 assert.match(systemSource, /requireAdmin\(request, env\)/);
-assert.match(systemSource, /temporaryGmailQaTokenAuthorized/);
+assert.match(systemSource, /githubActionsGmailQaAuthorized/);
 assert.match(systemSource, /gmailMailProviderConfigured\(env\)/);
 assert.match(systemSource, /env\.EMAIL\.send\(message\)/);
 assert.match(systemSource, /caches\.default/);
