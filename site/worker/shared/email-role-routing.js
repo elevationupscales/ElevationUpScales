@@ -14,6 +14,14 @@ const ROLE_ENV_KEYS = Object.freeze({
   support: "EMAIL_SUPPORT",
 });
 
+const ROLE_LABELS = Object.freeze({
+  owner: "Owner / Strategic",
+  sales: "Sales",
+  orders: "Orders",
+  logistics: "Logistics",
+  support: "Support",
+});
+
 const NOTIFICATION_OVERRIDE_KEYS = new Set([
   "OWNER_LEAD_EMAIL_TO",
   "SOLAR_EMAIL_TO",
@@ -57,5 +65,67 @@ export function roleForNotificationPath(pathname) {
   return "support";
 }
 
+export function buildCustomerAcknowledgement(env, role, input = {}) {
+  const roleKey = normalizeEmailRole(role);
+  const recipientEmail = clean(input.recipientEmail, 320).toLowerCase();
+  const fromEmail = clean(env?.MAIL_FROM, 320).toLowerCase();
+  const reference = clean(input.reference, 120);
+  const subject = clean(input.subject, 300);
+  const nextStep = clean(input.nextStep, 800);
+  if (!validEmail(recipientEmail) || !validEmail(fromEmail) || !reference || !subject || !nextStep) return null;
+  const replyTo = resolveEmailRole(env, roleKey);
+  return {
+    from: { email: fromEmail, name: "Elevation UpScales" },
+    to: { email: recipientEmail, name: clean(input.recipientName, 160) || recipientEmail },
+    replyTo,
+    subject,
+    text: [
+      "We received your request.",
+      "",
+      `Reference: ${reference}`,
+      nextStep,
+      "",
+      `Questions can be sent to ${replyTo}.`,
+      "",
+      "This confirmation does not promise inventory, freight acceptance, compatibility, pricing, availability, or a delivery date. Those items require separate review when applicable.",
+    ].join("\n"),
+  };
+}
+
+export async function sendCustomerAcknowledgement(env, role, input = {}) {
+  const message = buildCustomerAcknowledgement(env, role, input);
+  if (!message || !env?.EMAIL || typeof env.EMAIL.send !== "function") return { status: "not_configured", messageId: "" };
+  try {
+    const result = await env.EMAIL.send(message);
+    return { status: "sent", messageId: clean(result?.messageId, 240), replyTo: message.replyTo };
+  } catch (error) {
+    return { status: "failed", messageId: "", errorCode: clean(error?.code, 80) || "provider_error" };
+  }
+}
+
+export function buildEmailRoleQaMessage(env, role, { timestamp = new Date().toISOString(), commit = "" } = {}) {
+  const roleKey = normalizeEmailRole(role);
+  const fromEmail = clean(env?.MAIL_FROM, 320).toLowerCase();
+  const roleAddress = resolveEmailRole(env, roleKey);
+  if (!validEmail(fromEmail) || !validEmail(roleAddress)) return null;
+  return {
+    from: { email: fromEmail, name: "Elevation UpScales" },
+    to: { email: roleAddress, name: `Elevation ${ROLE_LABELS[roleKey]}` },
+    replyTo: roleAddress,
+    subject: `Elevation Email Role QA — ${roleKey.toUpperCase()}`,
+    text: [
+      "Elevation UpScales internal email-role routing QA.",
+      "",
+      `Role: ${roleKey}`,
+      `Role address: ${roleAddress}`,
+      `Production commit: ${clean(commit, 120) || "unavailable"}`,
+      `Timestamp: ${clean(timestamp, 80)}`,
+      "",
+      "This is synthetic internal QA traffic. No reply or action is required.",
+    ].join("\n"),
+  };
+}
+
 export const EMAIL_ROLE_DEFAULTS = ROLE_DEFAULTS;
 export const EMAIL_ROLE_ENV_KEYS = ROLE_ENV_KEYS;
+export const EMAIL_ROLE_LABELS = ROLE_LABELS;

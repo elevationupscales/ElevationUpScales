@@ -21,6 +21,7 @@ import {
   ADMIN_MARKETPLACE_FOLLOWUPS_PATH,
   ADMIN_QA_TOKEN_PATH,
   ADMIN_GMAIL_PROVIDER_QA_PATH,
+  ADMIN_EMAIL_ROLE_QA_PATH,
   MARKETPLACE_QA_VALIDATE_PATH,
   MARKETPLACE_REPORT_ISSUE_PATH,
   ADMIN_IMPORT_LEGACY_PATH,
@@ -50,7 +51,7 @@ import { handleAdminSupplierLeads } from "./worker/domains/supplier-leads.js";
 import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
 import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
 import { handleSokStockAdminApi } from "./worker/domains/sok-stock.js";
-import { handleAdminGmailProviderQa, handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
+import { handleAdminEmailRoleQa, handleAdminGmailProviderQa, handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
 import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
 import { withEmailRole } from "./worker/shared/email-role-routing.js";
 
@@ -95,8 +96,6 @@ export default {
     if (url.pathname === PROJECT_SUBMIT_PATH) return handleProjectSubmit(request, withEmailRole(env, "sales"), ctx);
     if (url.pathname === WORK_WITH_US_SUBMIT_PATH) return handleWorkWithUsSubmit(request, withEmailRole(env, "owner"), ctx);
 
-    // Marketplace soft retirement: historical D1/R2 data stays untouched, while
-    // public submission/contact paths and active admin operations are disabled.
     if (url.pathname === MARKETPLACE_PUBLIC_PATH) return retiredJson(request, { ok: true, listings: [], count: 0 }, 200);
     if (url.pathname === MARKETPLACE_SUBMIT_PATH) return retiredJson(request, { ok: false, error: "Marketplace submissions are retired. Use the Elevation Store." }, 410);
     if (url.pathname.startsWith(MARKETPLACE_IMAGE_PREFIX)) return retiredJson(request, { ok: false, error: "Marketplace images are retired." }, 410);
@@ -113,6 +112,7 @@ export default {
     if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
     if (url.pathname === ADMIN_GMAIL_PROVIDER_QA_PATH) return handleAdminGmailProviderQa(request, env);
+    if (url.pathname === ADMIN_EMAIL_ROLE_QA_PATH) return handleAdminEmailRoleQa(request, env);
     if (url.pathname === PUBLIC_INVENTORY_PATH) return handlePublicInventory(request, env);
     if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
     if (url.pathname === ADMIN_SOK_STOCK_PATH || url.pathname.startsWith(`${ADMIN_SOK_STOCK_PATH}/`)) return handleSokStockAdminApi(request, env, url.pathname);

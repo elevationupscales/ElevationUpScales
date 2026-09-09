@@ -39,6 +39,7 @@ export const CORE_ROUTE_REGISTRY = Object.freeze([
   { match: "exact", path: "/api/admin/opportunities", domain: "leads", handler: "handleAdminOpportunities", access: "admin-mixed" },
   { match: "exact", path: "/api/admin/solar-qa-token", domain: "solar", handler: "handleAdminSolarQaToken", access: "admin-write" },
   { match: "exact", path: "/api/admin/gmail-provider-qa", domain: "system", handler: "handleAdminGmailProviderQa", access: "admin-write" },
+  { match: "exact", path: "/api/admin/email-role-qa", domain: "system", handler: "handleAdminEmailRoleQa", access: "admin-write" },
 
   { match: "exact", path: "/api/store-inventory", domain: "inventory", handler: "handlePublicInventory", access: "public" },
   { match: "prefix-or-exact", path: "/api/admin/inventory", domain: "inventory", handler: "handleAdminInventory", access: "admin-mixed" },
@@ -64,12 +65,7 @@ export function matchCoreRoute(pathname) {
   for (const route of CORE_ROUTE_REGISTRY) {
     if (route.match === "exact" && pathname === route.path) return route;
     if (route.match === "prefix" && pathname.startsWith(route.path)) return route;
-    if (
-      route.match === "prefix-or-exact" &&
-      (pathname === route.path || pathname.startsWith(`${route.path}/`))
-    ) {
-      return route;
-    }
+    if (route.match === "prefix-or-exact" && (pathname === route.path || pathname.startsWith(`${route.path}/`))) return route;
   }
   return null;
 }
