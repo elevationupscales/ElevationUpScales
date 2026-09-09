@@ -1,0 +1,122 @@
+name: Gmail Provider Live QA
+
+on:
+  push:
+    branches:
+      - qa/gmail-provider-live-20260908
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: elevation-gmail-provider-live-qa
+  cancel-in-progress: false
+
+jobs:
+  verify-live-provider:
+    name: Verify production Gmail provider
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Require trigger SHA to equal current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
+
+      - name: Request GitHub Actions OIDC token
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=elevation-gmail-provider-qa" \
+            -o /tmp/eus-gmail-qa-oidc.json
+          token="$(node -e 'const fs=require("fs"); const v=JSON.parse(fs.readFileSync("/tmp/eus-gmail-qa-oidc.json","utf8")).value; if(!v) process.exit(2); process.stdout.write(v)')"
+          echo "::add-mask::$token"
+          printf '%s' "$token" > /tmp/eus-gmail-qa-oidc-token
+          rm -f /tmp/eus-gmail-qa-oidc.json
+
+      - name: Execute one controlled production Gmail send
+        id: gmail_qa
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS \
+            -o /tmp/eus-gmail-qa-response.json \
+            -w '%{http_code}' \
+            -X POST \
+            -H 'Origin: https://elevationupscales.com' \
+            -H "Authorization: Bearer $(cat /tmp/eus-gmail-qa-oidc-token)" \
+            -H 'Content-Type: application/json' \
+            --data '{}' \
+            https://elevationupscales.com/api/admin/gmail-provider-qa)"
+          rm -f /tmp/eus-gmail-qa-oidc-token
+          HTTP_CODE="$code" node - <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/eus-gmail-qa-response.json', 'utf8'));
+          const code = Number(process.env.HTTP_CODE || 0);
+          if (code !== 200 || payload.ok !== true || !payload.messageId) {
+            console.error(`Gmail provider QA failed: HTTP ${code}; category=${payload.category || 'unknown'}; error=${payload.error || 'unknown'}`);
+            process.exit(1);
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `message_id=${String(payload.messageId).replace(/[\r\n]/g, '')}\n`);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Live Gmail provider send: PASS\nMessage ID: ${payload.messageId}\n`);
+          console.log('Live Gmail provider send: PASS');
+          console.log(`Message ID: ${payload.messageId}`);
+          NODE
+          rm -f /tmp/eus-gmail-qa-response.json
+
+      - name: Discover exact latest Cloudflare production deployment
+        id: cloudflare
+        shell: bash
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+        run: |
+          set -euo pipefail
+          test -n "$CF_API_TOKEN"
+          test -n "$CF_ACCOUNT_ID"
+          test -n "$CF_PROJECT"
+          curl -fsSL \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT/deployments?env=production&per_page=1" \
+            -o /tmp/eus-pages-deployments.json
+          deployment_url="$(node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("/tmp/eus-pages-deployments.json","utf8")); const u=p?.result?.[0]?.url; if(!p?.success || !u) process.exit(2); process.stdout.write(u)')"
+          rm -f /tmp/eus-pages-deployments.json
+          echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
+          echo "Latest production deployment: $deployment_url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post-send smoke exact deployment
+        shell: bash
+        env:
+          BASE: ${{ steps.cloudflare.outputs.deployment_url }}
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- "${BASE%/}"
+
+      - name: Post-send smoke canonical production domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run qa:preview -- https://elevationupscales.com
+
+      - name: Final live QA receipt
+        shell: bash
+        env:
+          MESSAGE_ID: ${{ steps.gmail_qa.outputs.message_id }}
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment_url }}
+        run: |
+          echo '### Gmail Provider Live QA — PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Message ID: $MESSAGE_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment smoke: $DEPLOYMENT_URL — PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical: https://elevationupscales.com — PASS' >> "$GITHUB_STEP_SUMMARY"
