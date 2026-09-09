@@ -10,7 +10,6 @@ import {
   createMarketplaceQaToken,
 } from "../core-context.js";
 import { gmailMailProviderConfigured } from "../shared/gmail-mail-provider.js";
-import { buildEmailRoleQaMessage, normalizeEmailRole, resolveEmailRole } from "../shared/email-role-routing.js";
 import {
   GMAIL_PROVIDER_QA_RATE_LIMIT_SECONDS,
   GMAIL_PROVIDER_QA_SUBJECT,
@@ -18,8 +17,6 @@ import {
   gmailProviderQaErrorCategory,
   githubActionsGmailQaAuthorized,
 } from "../shared/gmail-provider-qa.js";
-
-const EMAIL_ROLE_QA_ROLES = new Set(["owner", "sales", "orders", "logistics", "support"]);
 
 async function handleAdminQaToken(request, env) {
   const auth = await requireAdmin(request, env);
@@ -69,19 +66,9 @@ async function handleAdminGmailProviderQa(request, env) {
   try {
     const providerResult = await env.EMAIL.send(message);
     const messageId = cleanString(providerResult?.messageId, 240);
-    if (!messageId) {
-      return jsonResponse({ ok: false, error: "Gmail provider QA did not return a message ID", category: "provider_error" }, 502);
-    }
+    if (!messageId) return jsonResponse({ ok: false, error: "Gmail provider QA did not return a message ID", category: "provider_error" }, 502);
     await cache.put(rateKey, new Response("sent", { headers: { "Cache-Control": `max-age=${GMAIL_PROVIDER_QA_RATE_LIMIT_SECONDS}` } }));
-    return jsonResponse({
-      ok: true,
-      provider: "gmail-api",
-      messageId,
-      threadId: cleanString(providerResult?.threadId, 240) || null,
-      subject: GMAIL_PROVIDER_QA_SUBJECT,
-      timestamp,
-      recipient: "MAIL_FROM",
-    }, 200);
+    return jsonResponse({ ok: true, provider: "gmail-api", messageId, threadId: cleanString(providerResult?.threadId, 240) || null, subject: GMAIL_PROVIDER_QA_SUBJECT, timestamp, recipient: "MAIL_FROM" }, 200);
   } catch (error) {
     const category = gmailProviderQaErrorCategory(error);
     const status = category === "provider_limited" ? 429 : category === "template_error" ? 500 : 502;
@@ -89,44 +76,12 @@ async function handleAdminGmailProviderQa(request, env) {
   }
 }
 
-async function handleAdminEmailRoleQa(request, env) {
-  if (request.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "POST" });
-  if (!sameOriginRequest(request)) return jsonResponse({ error: "Cross-origin request denied" }, 403);
-  const authorization = await gmailQaAuthorization(request, env);
-  if (!authorization.ok) return authorization.response;
-  if (!gmailMailProviderConfigured(env) || !env.EMAIL || typeof env.EMAIL.send !== "function") return jsonResponse({ ok: false, error: "Email role QA is not configured", category: "provider_unconfigured" }, 503);
-  let body = {};
-  try { body = await request.json(); } catch (_) { return jsonResponse({ ok: false, error: "Invalid email role QA request" }, 400); }
-  const role = normalizeEmailRole(body?.role);
-  if (!EMAIL_ROLE_QA_ROLES.has(cleanString(body?.role, 40).toLowerCase())) return jsonResponse({ ok: false, error: "Invalid email role" }, 400);
-  const cache = caches.default;
-  const rateKey = new Request(`https://rate-limit.invalid/admin/email-role-qa/${role}`, { method: "GET" });
-  if (await cache.match(rateKey)) return jsonResponse({ ok: false, error: "Email role QA rate limit reached", category: "provider_limited" }, 429, { "Retry-After": "86400" });
-  const timestamp = new Date().toISOString();
-  const message = buildEmailRoleQaMessage(env, role, { timestamp, commit: authorization.commitSha });
-  if (!message) return jsonResponse({ ok: false, error: "Email role QA message is not configured", category: "provider_unconfigured" }, 503);
-  try {
-    const providerResult = await env.EMAIL.send(message);
-    const messageId = cleanString(providerResult?.messageId, 240);
-    if (!messageId) return jsonResponse({ ok: false, error: "Email role QA did not return a message ID", category: "provider_error" }, 502);
-    await cache.put(rateKey, new Response("sent", { headers: { "Cache-Control": "max-age=86400" } }));
-    return jsonResponse({ ok: true, provider: "gmail-api", role, messageId, threadId: cleanString(providerResult?.threadId, 240) || null, timestamp, recipient: resolveEmailRole(env, role), replyTo: resolveEmailRole(env, role) }, 200);
-  } catch (error) {
-    const category = gmailProviderQaErrorCategory(error);
-    return jsonResponse({ ok: false, error: "Email role QA failed", category }, category === "provider_limited" ? 429 : 502);
-  }
-}
-
 async function handleHealth(request, env) {
   if (request.method !== "GET" && request.method !== "HEAD") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
   let marketplaceDb = "unconfigured";
   if (env.MARKETPLACE_DB) {
-    try {
-      await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok").first();
-      marketplaceDb = "ok";
-    } catch (_) {
-      marketplaceDb = "error";
-    }
+    try { await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok").first(); marketplaceDb = "ok"; }
+    catch (_) { marketplaceDb = "error"; }
   }
   const marketplaceEmailConfigured = Boolean(
     isValidEmail(cleanString(env.MARKETPLACE_EMAIL_TO || DEFAULT_MARKETPLACE_EMAIL_TO, 180)) &&
@@ -140,21 +95,13 @@ async function handleHealth(request, env) {
   );
   let leadsDb = "unconfigured";
   if (env.LEADS_DB) {
-    try {
-      await env.LEADS_DB.prepare("SELECT 1 AS ok").first();
-      leadsDb = "ok";
-    } catch (_) {
-      leadsDb = "error";
-    }
+    try { await env.LEADS_DB.prepare("SELECT 1 AS ok").first(); leadsDb = "ok"; }
+    catch (_) { leadsDb = "error"; }
   }
   let siteAnalyticsD1 = "unconfigured";
   if (env.MARKETPLACE_DB) {
-    try {
-      await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok FROM eus_site_events LIMIT 1").first();
-      siteAnalyticsD1 = "ok";
-    } catch (_) {
-      siteAnalyticsD1 = "error";
-    }
+    try { await env.MARKETPLACE_DB.prepare("SELECT 1 AS ok FROM eus_site_events LIMIT 1").first(); siteAnalyticsD1 = "ok"; }
+    catch (_) { siteAnalyticsD1 = "error"; }
   }
   const siteAnalyticsEngine = env.SITE_ANALYTICS && typeof env.SITE_ANALYTICS.writeDataPoint === "function" ? "configured" : "disabled_deferred";
   const legacyAnalyticsEngine = env.ANALYTICS && typeof env.ANALYTICS.writeDataPoint === "function" ? "configured" : "unconfigured";
@@ -176,16 +123,12 @@ async function handleHealth(request, env) {
     },
     note: "D1 eus_site_events is the active first-party analytics store. Analytics Engine is intentionally deferred; notification status confirms configuration only, not inbox delivery.",
   };
-  const response = jsonResponse(payload, healthy ? 200 : 503, {
-    "X-EUS-Operations-Build": OPERATIONS_BUILD,
-    "X-EUS-Monitoring": "health",
-    "X-Robots-Tag": "noindex, nofollow, noarchive",
-  });
+  const response = jsonResponse(payload, healthy ? 200 : 503, { "X-EUS-Operations-Build": OPERATIONS_BUILD, "X-EUS-Monitoring": "health", "X-Robots-Tag": "noindex, nofollow, noarchive" });
   return request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response;
 }
 
 export {
-  handleAdminEmailRoleQa,
+  gmailQaAuthorization,
   handleAdminGmailProviderQa,
   handleAdminQaToken,
   handleHealth
