@@ -33,7 +33,7 @@ Close when:
 **Status:** FOLLOW-UP SENT / AWAITING OPERATING QUALIFICATION  
 **Priority:** High
 
-A Hawaii-side receiving/storage partner has responded positively and described a prior comparable receiving/storage/release model. Elevation has now sent a follow-up to qualify the current operating structure for new standalone LiFePO4 inventory, inbound receiving, storage, customer/installer release, delivery, documentation, handling limits, claims procedure, and account/onboarding requirements.
+A Hawaii-side receiving/storage partner has responded positively and described a prior comparable receiving/storage/release model. Elevation has sent a follow-up to qualify the current operating structure for new standalone LiFePO4 inventory, inbound receiving, storage, customer/installer release, delivery, documentation, handling limits, claims procedure, and account/onboarding requirements.
 
 Protected commercial pricing and partner-specific terms remain outside public Git.
 
@@ -52,28 +52,41 @@ Close when:
 - first-order receiving/release workflow is documented;
 - the partner is either activated or rejected.
 
-## 3. Hawaii low-voltage handling / sample-forwarder path
+## 3. Hawaii low-voltage retail / sample-forwarder path
 
-**Status:** ACTIVE QUALIFICATION / REPLY DRAFT PENDING OWNER REVIEW  
+**Status:** SOK COMMERCIAL BOUNDARY CONFIRMED / PARTNER + FORWARDER QUALIFICATION PENDING  
 **Priority:** High
 
-A separate Hawaii commercial partner has expressed interest in storing and handling Elevation's low-voltage consumer inventory, potentially supporting walk-in retail from Elevation-owned stock, and exploring sample-shipment cost through an established battery forwarder.
+A Hawaii commercial partner has expressed interest in storing and handling Elevation's low-voltage consumer inventory, potentially supporting walk-in retail from Elevation-owned stock, purchasing selected units from Elevation, and exploring sample-shipment cost through an established battery forwarder.
 
-Do not treat this as confirmed standalone-LiFePO4 acceptance or as carrier approval. The partner's established 48V / high-voltage supplier relationships are outside the intended scope and should not be disrupted.
+SOK has now confirmed the upstream commercial rules needed for this path:
 
-**Correspondence control:** one current reply draft exists and remains unsent pending owner review. Do not create or send a second partner reply in parallel. If management changes the response, update or supersede the existing draft rather than creating a duplicate-send risk.
+- Elevation may wholesale SOK products to a downstream Hawaii retailer;
+- the retailer may buy through Elevation without a separate SOK approval for this structure;
+- downstream advertised pricing must remain at or above SOK MAP;
+- the preferred warranty/RMA relationship path is retailer → Elevation → SOK;
+- appropriate Hawaii referrals continue to come to Elevation even when a local partner holds inventory;
+- SOK can release a single low-voltage starter unit from Chino for the planned proof movement under its current small-quantity pickup structure.
+
+This means the upstream SOK resale-permission gate is no longer blocking the partner conversation.
+
+Do not treat the Hawaii partner as confirmed standalone-LiFePO4 acceptance or as carrier approval. The partner's established 48V / high-voltage supplier relationships are outside the intended scope and should not be disrupted.
+
+**Correspondence control:** one current R&R reply draft exists, has been updated with the verified SOK rules and one-unit proof-release status, and remains unsent pending owner review. Do not create or send a second partner reply in parallel.
 
 Next action:
-- confirm whether standalone low-voltage LiFePO4 batteries are included in the handling offer;
-- identify the accepting forwarder/carrier path for a narrow SOK sample shipment;
+- confirm whether new standalone low-voltage LiFePO4 batteries are included in the partner's handling offer;
+- confirm fulfillment-only vs reseller-only vs hybrid preference;
+- identify an accepting forwarder/carrier path for 1 × SK12V100PC;
 - obtain exact receiving, packaging, labeling, documentation, signer/responsibility and tender requirements;
 - confirm receiving/storage/customer-release commercial structure outside public Git;
+- build the protected landed-cost/vendor-pricing model from verified actual inputs;
 - reconcile qualified route facts into `SOK_HAWAII_FIRST_ORDER_READINESS.md`.
 
 Close when:
 - standalone-lithium scope is confirmed or rejected;
 - a sample forwarder path is qualified or rejected;
-- the partner's operating role is documented;
+- the partner's operating role and commercial structure are documented;
 - the lane is either activated for a first-order test or removed from active qualification.
 
 ## 4. Additional Hawaii lithium storage / warehouse option
@@ -101,23 +114,25 @@ Close when:
 
 ## 5. Hawaii freight-route qualification
 
-**Status:** MULTI-ROUTE REVIEW ACTIVE / NO FINAL ACCEPTANCE  
+**Status:** MULTI-ROUTE REVIEW ACTIVE / LOW-VOLTAGE PROOF SUPPLIER RELEASE CONFIRMED / NO FINAL CARRIER ACCEPTANCE  
 **Priority:** High
 
-Current carrier/forwarder qualification advanced on multiple paths:
+Current carrier/forwarder qualification has advanced on multiple paths:
 
-- a fresh exact single-unit terminal-to-terminal quote was received for one current SOK rack-battery profile;
+- a fresh exact single-unit terminal-to-terminal hazardous-goods quote was received for a current SOK rack-battery profile;
 - another provider is reviewing the battery details with its logistics team and will return corrected hazardous-material charges;
-- a separate ocean/FCL inquiry was routed internally to the provider's Hawaii team for review.
+- a separate ocean/FCL inquiry was routed internally to the provider's Hawaii team for review;
+- SOK has confirmed supplier-side release for the selected one-unit low-voltage proof candidate.
 
 Private carrier identities, rates, quote references, and protected route details remain outside public Git.
 
-**A quote, internal routing, or hazmat-charge review does not by itself establish dangerous-goods acceptance or shipment release.**
+**A supplier release, quote, internal routing, or hazmat-charge review does not by itself establish dangerous-goods acceptance or shipment release.**
 
 Next action:
-- obtain current written exact-SKU acceptance on the best candidate route;
-- obtain the route-specific packaging, marking, labeling, paperwork, signer/responsibility and tender requirements;
-- reconcile only qualified route facts into `SOK_HAWAII_FIRST_ORDER_READINESS.md`;
+- obtain current written exact-SKU acceptance for 1 × SK12V100PC on the best candidate proof route;
+- obtain route-specific packaging, marking, labeling, paperwork, signer/offeror responsibility and tender requirements;
+- confirm Hawaii receiving/release destination for the proof;
+- build actual landed-cost economics before owner approval;
 - do not double-send to providers that have already acknowledged and are actively reviewing the request.
 
 Close when:
@@ -150,7 +165,7 @@ Close when:
 **Status:** APPLICATION PREP / OWNER REVIEW REQUIRED  
 **Priority:** High
 
-The Renogy partner application has been filled in internally to the extent possible and returned for Casey to review. Required supporting business documents and owner-level attestations still need final review before anything is submitted externally.
+The Renogy partner application has been filled in internally and returned for Casey to review. Required supporting business documents and owner-level attestations still need final review before anything is submitted externally.
 
 Known channel boundary: the proposed relationship is for Elevation's own website/direct channel and must preserve Renogy's stated third-party-marketplace restriction.
 
@@ -186,54 +201,105 @@ Close when:
 
 ## 9. Shopify first-wave product publishing
 
-**Status:** EXECUTION PREP  
+**Status:** EXECUTION PREP / FOUR CLEANUP SKUS REMAIN DRAFT / ONE SOURCE VERIFICATION OPEN  
 **Priority:** High
 
-Current first-wave publishing order:
+Peter reports that four of the current five cleanup products have updated titles, descriptions, supplier images, and pricing while remaining safely in draft.
 
-1. Solar panel cable connectors
-2. 20W 12V solar battery charger with MPPT
-3. 50W mono solar battery charger with MPPT
+One current product remains blocked because the exact supplier record, supplier SKU/product match, verified images/specifications, current cost/shipping, and applicable pricing rules have not yet been verified.
 
-Primary remaining gates:
+Primary publishing gates remain:
 - current supplier stock/freshness;
 - actual dropship shipping cost/service;
 - returns/fulfillment details;
 - final spec/compatibility verification;
 - complete product descriptions where needed;
-- adequate product media/images.
+- adequate product media/images;
+- exact supplier/source mapping before publishing supplier-specific claims.
 
-Lower-margin candidate products remain draft-only until shipping/fees are proven workable.
+Lower-margin or source-uncertain products remain draft-only until shipping/fees and source truth are proven workable.
 
 Close each SKU only after its supplier, shipping, content, media, spec, and margin checks are complete.
 
 ## 10. SOK product media expansion
 
-**Status:** REQUEST SENT / WAITING ON SOK  
+**Status:** PARTIAL MEDIA RECEIVED / PRODUCT IMAGE COLLECTION PENDING  
 **Priority:** High
 
-Elevation sent SOK a dedicated marketing-media request for a broader manufacturer-approved media set and channel-use guidance. Most current SOK catalog listings still have only one primary usable product image, so the objective remains to improve presentation without scraping, inventing, or using unapproved media.
+SOK responded to Elevation's marketing-media request and supplied approved brand/logo material plus current manual/spec resources. SOK also stated that it is collecting the requested product images and will send them separately.
 
-Request covers, where available:
+The remaining objective is to improve SKU presentation without scraping, inventing, or using unapproved media.
+
+Still needed where available:
 - multiple high-resolution product angles;
 - connection/terminal/detail photos;
 - installation/application/lifestyle imagery;
 - 48V rack/cabinet/system imagery;
 - approved feature/spec graphics;
-- current brochures, spec sheets, and manuals;
-- SOK logos/brand assets;
 - short product videos or dealer-approved video assets;
-- a dealer media folder/feed if one exists;
-- clear channel-use permission or restrictions for Elevation website, Shopify, social media, eBay, TikTok Shop, and other marketplaces.
+- clear channel-use restrictions where they differ by website, Shopify, social, eBay, TikTok Shop, or other marketplace.
 
 Public SOK storefront reference:
 `https://elevationupscales.com/sok-batteries`
 
+Do not chase the product-image request while SOK is actively collecting the material.
+
 Close when:
-- SOK replies;
-- approved media is received/linked;
+- the image/media set is received or SOK confirms no additional assets are available;
 - channel-use boundaries are documented;
 - media is assigned SKU-by-SKU without unsupported claims or duplication.
+
+## 11. VEVOR direct-channel supplier qualification
+
+**Status:** COMMERCIAL OPTIONS RECEIVED / CHANNEL BOUNDARY CONFIRMED / VOLUME RESPONSE PENDING  
+**Priority:** Medium-High
+
+VEVOR's business-development team provided current dropship and bulk-purchase collaboration options and stated that U.S.-warehouse fulfillment is available.
+
+Current public-safe channel boundary:
+- Elevation may develop the relationship for its own independent website/direct channel;
+- VEVOR is not currently granting authorization for major third-party marketplaces identified in its response;
+- tax-exempt purchasing requires the applicable exemption documentation;
+- VEVOR asked Elevation to indicate anticipated purchasing volume before choosing the commercial path.
+
+Private discount percentages, commercial thresholds, and other supplier terms remain outside public Git.
+
+Next action:
+- do not invent or commit purchasing volume;
+- determine whether the first use case is direct-site dropship or a defined bulk purchase;
+- verify exact SKU/source mapping for any VEVOR-branded product before publishing or repricing;
+- keep marketplace-restricted VEVOR products off unauthorized channels;
+- provide tax-exemption documentation only through the appropriate verified VEVOR relationship path when required.
+
+Close when:
+- the approved direct-channel operating model is selected;
+- tax/account setup is complete where needed;
+- SKU/source mapping, fulfillment, returns, pricing rules, and inventory workflow are verified;
+- first controlled order proves the process or VEVOR is kept as a backup/rejected.
+
+## 12. Paid marketplace order tracking exception
+
+**Status:** CUSTOMER ESCALATION / TRACKING NOT YET VERIFIED  
+**Priority:** Immediate
+
+A paid marketplace customer reported that several days have passed without tracking progress on an order.
+
+A Gmail search did not surface a matching supplier shipment/tracking confirmation from the information presently available in correspondence.
+
+Do not place the customer name, address, order number, or other PII in this repository.
+
+Next action:
+- identify the exact supplier/source order tied to the marketplace sale;
+- verify whether the order was actually submitted, accepted, shipped, delayed, canceled, or otherwise blocked;
+- obtain valid tracking or an accurate fulfillment status;
+- respond to the customer promptly through the marketplace once the status is verified;
+- if fulfillment has failed, use the applicable recovery/refund process rather than allowing the order to age silently.
+
+Close when:
+- verified fulfillment/tracking status is known;
+- the customer has been accurately updated;
+- the order is moving or has been properly recovered/refunded;
+- the root cause is captured in the order workflow if a process failure occurred.
 
 ## Control rule
 
