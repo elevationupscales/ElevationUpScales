@@ -20,6 +20,7 @@ import {
   ADMIN_SUPPLIER_LEADS_PATH,
   ADMIN_MARKETPLACE_FOLLOWUPS_PATH,
   ADMIN_QA_TOKEN_PATH,
+  ADMIN_GMAIL_PROVIDER_QA_PATH,
   MARKETPLACE_QA_VALIDATE_PATH,
   MARKETPLACE_REPORT_ISSUE_PATH,
   ADMIN_IMPORT_LEGACY_PATH,
@@ -49,7 +50,7 @@ import { handleAdminSupplierLeads } from "./worker/domains/supplier-leads.js";
 import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
 import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
 import { handleSokStockAdminApi } from "./worker/domains/sok-stock.js";
-import { handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
+import { handleAdminGmailProviderQa, handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
 import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
 
 const RETIRED_HEADERS = {
@@ -110,6 +111,7 @@ export default {
     if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
     if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
+    if (url.pathname === ADMIN_GMAIL_PROVIDER_QA_PATH) return handleAdminGmailProviderQa(request, env);
     if (url.pathname === PUBLIC_INVENTORY_PATH) return handlePublicInventory(request, env);
     if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
     if (url.pathname === ADMIN_SOK_STOCK_PATH || url.pathname.startsWith(`${ADMIN_SOK_STOCK_PATH}/`)) return handleSokStockAdminApi(request, env, url.pathname);
