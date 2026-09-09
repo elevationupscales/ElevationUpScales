@@ -32,6 +32,7 @@ required_shared = [
     WORKER / "shared" / "gmail-provider-qa.js",
     WORKER / "shared" / "email-role-routing.js",
     WORKER / "shared" / "email-role-surfaces.js",
+    WORKER / "shared" / "email-workflows.js",
 ]
 for path in required_shared: read(path)
 
@@ -45,9 +46,9 @@ for expected in ["../site/worker/shared/response.js","../site/worker/shared/html
 require('from "./worker/routes.js"' in worker_core, "worker-core must import canonical Worker routes directly")
 require('from "./routes.js"' in core_context, "core-context must reuse canonical Worker routes")
 route_exports = re.findall(r'^export const ([A-Z0-9_]+_PATH|[A-Z0-9_]+_PREFIX)\s*=', routes, re.MULTILINE)
-require(len(route_exports) == 40, f"expected 40 canonical Worker route constants, found {len(route_exports)}")
+require(len(route_exports) == 42, f"expected 42 canonical Worker route constants, found {len(route_exports)}")
 registry_rows = re.findall(r'\{\s*match:\s*"[^"]+",\s*path:\s*"[^"]+",\s*domain:\s*"[^"]+",\s*handler:\s*"[^"]+",\s*access:\s*"[^"]+"', registry)
-require(len(registry_rows) == 41, f"expected 41 Worker route registry rows, found {len(registry_rows)}")
+require(len(registry_rows) == 43, f"expected 43 Worker route registry rows, found {len(registry_rows)}")
 
 require("async function handle" not in worker_core, "worker-core regained business handler implementations")
 require("import * as core" not in worker_core, "worker-core regained whole-context namespace import")
@@ -59,6 +60,8 @@ for path in sorted(DOMAINS.glob("*.js")):
 require("handleStoreProductsCompatibility" in worker_core, "worker-core lost store-products compatibility dispatch")
 require("handleStoreProductsCompatibility" in compat, "compatibility domain lost store-products handler")
 require('domain: "compatibility", handler: "handleStoreProductsCompatibility"' in registry, "route registry lost final store-products ownership")
+require("handleAdminEmailOperations" in worker_core, "worker-core lost Email Operations admin dispatch")
+require("handleOrderConfirmation" in worker_core, "worker-core lost paid-order confirmation dispatch")
 
 front_worker = read(SITE / "_worker.js")
 route_config = read(SITE / "_routes.json")
@@ -73,5 +76,6 @@ print("verify-complete-rebuild.py: PASS")
 print("  Worker domains: explicit named dependencies")
 print("  Worker shared runtime: single deployed implementation")
 print("  Worker route contracts: canonical ownership")
+print("  Email Operations workflow: routed and protected")
 print("  Compatibility Catalog route: domain-owned")
 print("  Runtime protection: enforced")

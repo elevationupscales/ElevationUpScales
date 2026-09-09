@@ -42,6 +42,7 @@ for route in \
   /admin-listings \
   /admin-analytics \
   /admin-system \
+  /admin-email \
   /admin-command-center.css \
   /api/store-products; do
   check_status 200 "$route"
@@ -79,6 +80,7 @@ for route in \
   /api/admin/inventory \
   /api/admin/leads \
   /api/admin/market-analytics \
+  /api/admin/email-operations \
   /api/admin/sync; do
   check_status 401 "$route"
 done
@@ -93,6 +95,22 @@ for qa_route in /api/admin/gmail-provider-qa /api/admin/email-role-qa; do
   fi
 done
 
+email_send_code=$(curl -sS -o /tmp/eus-email-operations-auth-response --write-out '%{http_code}' -X POST -H "Origin: $base" -H 'Content-Type: application/json' --data '{"action":"customer_message"}' "$base/api/admin/email-operations/send" || true)
+echo "CHECK POST /api/admin/email-operations/send => $email_send_code (expected 401)"
+if [[ "$email_send_code" != "401" ]]; then
+  head -c 800 /tmp/eus-email-operations-auth-response || true
+  echo
+  exit 1
+fi
+
+confirmation_code=$(curl -sS -o /tmp/eus-order-confirmation-response --write-out '%{http_code}' -X POST -H "Origin: $base" -H 'Content-Type: application/json' --data '{"reference":"NOT-A-REAL-ORDER"}' "$base/api/email-workflows/order-confirmation" || true)
+echo "CHECK POST /api/email-workflows/order-confirmation invalid reference => $confirmation_code (expected 400)"
+if [[ "$confirmation_code" != "400" ]]; then
+  head -c 800 /tmp/eus-order-confirmation-response || true
+  echo
+  exit 1
+fi
+
 check_status 200 /api/admin/listings
 LISTINGS_FILE=/tmp/eus-clean-baseline-response node - <<'NODE'
 const fs = require('fs');
@@ -106,10 +124,12 @@ for route in \
   /worker/core-context.js \
   /worker/domains/admin-auth.js \
   /worker/domains/compatibility.js \
+  /worker/domains/email-operations.js \
   /worker/shared/gmail-mail-provider.js \
   /worker/shared/gmail-provider-qa.js \
   /worker/shared/email-role-routing.js \
   /worker/shared/email-role-surfaces.js \
+  /worker/shared/email-workflows.js \
   /sok-full-line-runtime.js \
   /sok-full-line-data.js \
   /sync-admin-runtime.js; do

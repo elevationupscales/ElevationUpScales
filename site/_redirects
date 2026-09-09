@@ -5,6 +5,8 @@
 /admin/ /admin 308
 /admin.html /admin 301
 /admin-analytics.html /admin-analytics 301
+/admin-email/ /admin-email 308
+/admin-email.html /admin-email 301
 /admin-channels.html /admin-channels 301
 /admin-promotion.html /admin-promotion 301
 /admin-listings/ /admin-listings 308
