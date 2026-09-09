@@ -44,6 +44,40 @@ Important boundary:
 
 Before treating this path as qualified, Elevation must confirm in writing whether standalone low-voltage LiFePO4 is included, the exact receiving/handling scope, the accepting forwarder/carrier requirements, dangerous-goods documentation and packaging expectations, and the commercial receiving/storage/release structure.
 
+A separate Hawaii receiving/storage option is also advancing. Its operations team believes it can generally support the program, but lithium storage may require additional warehouse safety measures. The provider requested exact-model SDS/UN38.3 review materials and raised possible longer-term commercial commitment or approved third-party-warehouse structures if facility changes are required.
+
+Important boundary:
+
+- this is **not final lithium-storage acceptance**;
+- no minimum commitment, long-term agreement, alternate warehouse, or other commercial obligation is authorized;
+- exact site capability, safety requirements, receiving/release workflow, and commercial structure still require written qualification and owner review.
+
+## Current freight-route qualification
+
+Multiple transportation paths remain active and have advanced, but **none is the controlling first route until current written exact-SKU acceptance and execution requirements are complete**.
+
+Current public-safe status:
+
+- a fresh exact single-unit terminal-to-terminal quote has been received for one current SOK rack-battery profile;
+- another provider is reviewing the exact battery information with its logistics team and is expected to return corrected hazardous-material charges;
+- a separate ocean/FCL inquiry has been routed internally to the provider's Hawaii team for commercial and dangerous-goods review.
+
+These signals improve the route matrix but do not by themselves establish acceptance.
+
+**QUOTE / INTERNAL REVIEW / RATE RESPONSE ≠ DG ACCEPTANCE ≠ SHIPMENT RELEASE.**
+
+Before selecting the first route, Elevation still needs the accepting provider's written exact-model scope and the route-specific:
+
+- packaging and pallet requirements;
+- securement requirements;
+- lithium / dangerous-goods marks and labels;
+- documentation and checklist requirements;
+- shipper / signer responsibility allocation;
+- tender and origin-handoff procedure;
+- destination receiving / terminal / delivery procedure.
+
+Providers that have already acknowledged an active review should not receive duplicate follow-ups unless materially new information requires one.
+
 ## Operating sequence
 
 For the first Hawaii order, use:
