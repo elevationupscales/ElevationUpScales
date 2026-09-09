@@ -1,7 +1,7 @@
 # Elevation UpScales — Shared Management Operating SOP
 
 **Status: ACTIVE / CONTROLLING**  
-**Effective: 2026-09-08**  
+**Effective: 2026-09-09**  
 **Owner: Casey Young**
 
 ## Purpose
@@ -17,7 +17,7 @@ Use this order of authority:
 3. Current application source under `main` for actual website/runtime behavior.
 4. Historical coordination files only when a current task specifically requires historical evidence.
 
-GitHub `/operations/` is the active management/work source. Gmail management drafts, feeds and records are retired as a control system and may be used only as historical evidence or to read/send actual external business email when the task itself requires it.
+GitHub `/operations/` is the active management/work source. Gmail management drafts, feeds and records are retired as a control system. Ordinary Gmail remains the business-correspondence layer when a task requires reading or sending actual external email. Any Gmail copies of management/release state are cold emergency-recovery evidence only and may be consulted only under `DISASTER_RECOVERY_SOP.md` when Git state is unavailable, unclear after an interruption, or materially inconsistent.
 
 When a verified external fact materially changes an active workstream, reconcile the public-safe result into the appropriate `/operations/` file instead of leaving current management state trapped in email or chat.
 
@@ -96,7 +96,7 @@ Keep installation, engineered design and regulated work within appropriate profe
 
 ### Keep context small
 
-Read only the current controlling files needed for the assigned scope. Do not reconstruct the old management system, old release packets, historical handoffs or retired Gmail management feeds unless the task specifically requires historical investigation.
+Read only the current controlling files needed for the assigned scope. Do not reconstruct the old management system, old release packets, historical handoffs or retired Gmail management feeds unless the task specifically requires declared recovery or historical investigation.
 
 ### Execute the requested worktree
 
@@ -156,7 +156,7 @@ Get enough verified information to activate the safe lane, then learn from real 
 
 ### Reuse permanent deployment workflows
 
-Do not create one-off deployment workflows or bypass permanent release gates. Use the repository's existing preview and production deployment paths.
+Do not create one-off deployment workflows or bypass permanent release gates. For normal website production, use the repository's Worker Exact-SHA Release preview → same-SHA production gate after approved work reaches current `main`. Legacy push deployment remains recovery-only unless Casey explicitly authorizes a different path.
 
 ### Keep management updates actionable
 
@@ -197,7 +197,7 @@ The Evening Briefing should normally cover only material items from the current 
 
 Keep the briefing concise and managerial. Do not paste raw commits, long diffs, private correspondence, dealer costs, raw supplier inventory, private freight rates, customer PII, credentials or protected commercial terms.
 
-When an Evening Briefing is emailed, it is ordinary management correspondence only. The authoritative work state remains GitHub `/operations/` and current `main`.
+When an Evening Briefing is emailed, it is ordinary management correspondence only. The authoritative work state remains GitHub `/operations/` and current `main`; an Evening Briefing is not a disaster-recovery snapshot unless it is separately created under the recovery SOP.
 
 Recommended structure:
 
