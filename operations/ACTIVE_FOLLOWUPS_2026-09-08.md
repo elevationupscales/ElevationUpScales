@@ -6,19 +6,27 @@
 
 This file tracks current action items that must remain visible until closed. It intentionally excludes private identity documents, supplier costs, carrier rates, private partner pricing, customer PII, credentials, and other protected commercial/logistics details.
 
-## 1. Doba order verification hold
+## 1. Doba order / verification control
 
-**Status:** ACTION REQUIRED / ORDER AT RISK  
-**Priority:** Highest
+**Status:** ORDER CLOSED / REFUND ISSUED / NO CURRENT VERIFICATION REPLY REQUIRED  
+**Priority:** High
 
-A current Doba order is under a security/verification hold. Required verification materials must be handled outside Git and submitted only through the appropriate Doba support/verification channel.
+The affected Doba order is no longer pending release. Doba confirmed that the supplier closed the order because the destination address type could not be serviced and that the paid amount was refunded.
 
-**Do not place identity, EIN, billing-address evidence, or other verification documents in this repository.**
+Separately, Doba's verification team confirmed that previously requested verification materials had already been submitted and instructed Elevation not to send another response at this time.
+
+**Do not place identity, EIN, billing-address evidence, order/customer details, or other verification documents in this repository. Do not resend verification documents unless Doba specifically requests them.**
+
+Next action:
+- confirm the refund is reflected in the commerce/payment workflow;
+- make sure the downstream customer/order record is closed or otherwise handled correctly;
+- preserve a future-order address-serviceability check before submitting Doba orders;
+- monitor account verification status and respond only if Doba requests additional action.
 
 Close when:
-- verification is accepted or Doba confirms no further submission is required;
-- the affected order is released for normal processing;
-- fulfillment status is confirmed in the commerce workflow.
+- refund and downstream order closure are confirmed;
+- no unresolved customer obligation remains;
+- any continuing Doba account-verification requirement is separately identified and controlled.
 
 ## 2. Hawaii receiving / fulfillment partner
 
@@ -68,7 +76,98 @@ Close when:
 - the partner's operating role is documented;
 - the lane is either activated for a first-order test or removed from active qualification.
 
-## 4. PayPal business onboarding / checkout support
+## 4. Additional Hawaii lithium storage / warehouse option
+
+**Status:** POSITIVE OPERATIONS RESPONSE / OWNER DECISION + DOCUMENT PACKAGE PENDING  
+**Priority:** High
+
+An additional logistics provider reports that its operations team believes it can generally support Elevation's Hawaii program. Lithium battery storage may require additional warehouse safety measures.
+
+The provider asked whether Elevation would consider either a longer-term/minimum commercial commitment if facility investment is required or use of an approved third-party warehouse if the current facility is not suitable. It also requested the SDS and UN38.3 summaries for both starter battery models for operational review.
+
+This is **not final warehouse acceptance** and no commercial commitment has been authorized.
+
+Next action:
+- owner review of the proposed commercial/warehouse paths before any commitment;
+- determine whether to provide the exact-model SDS/UN38.3 review package;
+- obtain written confirmation of the actual receiving/storage scope, site, safety requirements, release process, and commercial structure;
+- keep any private rates, minimums, facility details, and contract terms outside public Git.
+
+Close when:
+- a specific receiving/storage site is accepted or rejected;
+- lithium handling scope and document requirements are confirmed;
+- any commercial commitment receives owner approval;
+- the option is activated or removed from active qualification.
+
+## 5. Hawaii freight-route qualification
+
+**Status:** MULTI-ROUTE REVIEW ACTIVE / NO FINAL ACCEPTANCE  
+**Priority:** High
+
+Current carrier/forwarder qualification advanced on multiple paths:
+
+- a fresh exact single-unit terminal-to-terminal quote was received for one current SOK rack-battery profile;
+- another provider is reviewing the battery details with its logistics team and will return corrected hazardous-material charges;
+- a separate ocean/FCL inquiry was routed internally to the provider's Hawaii team for review.
+
+Private carrier identities, rates, quote references, and protected route details remain outside public Git.
+
+**A quote, internal routing, or hazmat-charge review does not by itself establish dangerous-goods acceptance or shipment release.**
+
+Next action:
+- obtain current written exact-SKU acceptance on the best candidate route;
+- obtain the route-specific packaging, marking, labeling, paperwork, signer/responsibility and tender requirements;
+- reconcile only qualified route facts into `SOK_HAWAII_FIRST_ORDER_READINESS.md`;
+- do not double-send to providers that have already acknowledged and are actively reviewing the request.
+
+Close when:
+- primary, secondary and backup route roles are either qualified or rejected for the intended shipment profiles;
+- the first-order route has written acceptance and executable instructions.
+
+## 6. Additional battery supplier B2B qualification
+
+**Status:** B2B CHANNEL APPROVED / TRANSPORT DOCUMENTATION STILL OPEN  
+**Priority:** Medium-High
+
+An additional battery supplier reports that Elevation's business application is approved for its B2B wholesale channel and that U.S. warehouse inventory is available for wholesale fulfillment.
+
+The supplier also described broader certification-package availability under bulk-order conditions. This does **not** answer Elevation's exact transport-document request for the specific battery SKU under review and does not establish shipment readiness.
+
+Next action:
+- obtain exact manufacturer/model linkage for the intended SKU;
+- obtain model-specific SDS/MSDS and UN38.3 documentation;
+- confirm dangerous-goods packaging and shipping data for the exact product;
+- confirm applicable wholesale/MOQ/fulfillment structure outside public Git before any order;
+- do not infer transport compliance from unrelated product certifications.
+
+Close when:
+- exact product identity and transport documents are verified;
+- commercial terms are internally acceptable;
+- the supplier is activated for a defined gap or kept as a backup/rejected.
+
+## 7. Renogy dealer onboarding
+
+**Status:** APPLICATION PREP / OWNER REVIEW REQUIRED  
+**Priority:** High
+
+The Renogy partner application has been filled in internally to the extent possible and returned for Casey to review. Required supporting business documents and owner-level attestations still need final review before anything is submitted externally.
+
+Known channel boundary: the proposed relationship is for Elevation's own website/direct channel and must preserve Renogy's stated third-party-marketplace restriction.
+
+**Correspondence control:** do not send a duplicate introduction or application. The existing Renogy relationship thread is the active correspondence path.
+
+Next action:
+- Casey reviews and completes remaining application fields/attestations;
+- verify required supporting business documents are current and appropriate;
+- owner approves the final application package before external submission;
+- after approval, document dealer pricing, dropship, media, warranty/return and channel rules without exposing private commercial terms.
+
+Close when:
+- application is submitted with owner approval;
+- Renogy approves or declines the account;
+- resulting operating/channel rules are reconciled into Git.
+
+## 8. PayPal business onboarding / checkout support
 
 **Status:** ACTIVE  
 **Priority:** High
@@ -85,7 +184,7 @@ Close when:
 - checkout remains verified healthy;
 - any required follow-up is documented in Git.
 
-## 5. Shopify first-wave product publishing
+## 9. Shopify first-wave product publishing
 
 **Status:** EXECUTION PREP  
 **Priority:** High
@@ -108,7 +207,7 @@ Lower-margin candidate products remain draft-only until shipping/fees are proven
 
 Close each SKU only after its supplier, shipping, content, media, spec, and margin checks are complete.
 
-## 6. SOK product media expansion
+## 10. SOK product media expansion
 
 **Status:** REQUEST SENT / WAITING ON SOK  
 **Priority:** High
