@@ -22,12 +22,19 @@ Close when:
 
 ## 2. Hawaii receiving / fulfillment partner
 
-**Status:** ACTIVE PARTNER QUALIFICATION  
+**Status:** FOLLOW-UP SENT / AWAITING OPERATING QUALIFICATION  
 **Priority:** High
 
-A Hawaii-side receiving/storage partner has responded positively and is confirming its current operating/pricing structure for receiving, short-term storage, customer release/pickup, Oahu delivery, and inter-island movement.
+A Hawaii-side receiving/storage partner has responded positively and described a prior comparable receiving/storage/release model. Elevation has now sent a follow-up to qualify the current operating structure for new standalone LiFePO4 inventory, inbound receiving, storage, customer/installer release, delivery, documentation, handling limits, claims procedure, and account/onboarding requirements.
 
 Protected commercial pricing and partner-specific terms remain outside public Git.
+
+Next action:
+- receive confirmation of current capability for new standalone LiFePO4 inventory;
+- confirm receiving/documentation and release procedures;
+- confirm account/onboarding requirements;
+- internally evaluate protected commercial terms;
+- hold the planned discussion with the partner if needed to close operating gaps.
 
 Close when:
 - current capability is confirmed for new lithium inventory;
@@ -99,12 +106,12 @@ Close each SKU only after its supplier, shipping, content, media, spec, and marg
 
 ## 6. SOK product media expansion
 
-**Status:** OUTREACH PREP  
+**Status:** REQUEST SENT / WAITING ON SOK  
 **Priority:** High
 
-Most current SOK catalog listings have only one primary usable product image. Elevation needs a broader manufacturer-approved media set so the SOK line can be presented professionally without scraping, inventing, or using unapproved media.
+Elevation sent SOK a dedicated marketing-media request for a broader manufacturer-approved media set and channel-use guidance. Most current SOK catalog listings still have only one primary usable product image, so the objective remains to improve presentation without scraping, inventing, or using unapproved media.
 
-Request from SOK should cover, where available:
+Request covers, where available:
 - multiple high-resolution product angles;
 - connection/terminal/detail photos;
 - installation/application/lifestyle imagery;
