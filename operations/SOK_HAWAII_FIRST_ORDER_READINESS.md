@@ -21,6 +21,14 @@ SOK has also confirmed route-support capabilities that include exact-model SDS/M
 
 This moves the Hawaii program from general capability planning into **first-order execution readiness**.
 
+### Correspondence control
+
+One current SOK freight-thread reply draft exists and remains **unsent pending owner review**. It is intended to consolidate the remaining supplier-side questions needed before the first proof movement, including the downstream Hawaii retail structure, qualification-release availability, applicable stocking/fulfillment basis, shipper-identity clarification, and later-model shipment-profile gaps.
+
+**Do not create or send a second SOK freight-thread reply in parallel.** Any new verified information must be folded into the existing draft or explicitly supersede it before an external send.
+
+SOK is **not** waiting on another generic lithium-preparation checklist. Elevation already sent the general preparation checklist and SOK answered it. The next pallet, packaging, marking, labeling, paperwork, and handoff instructions must be shipment-specific and tied to the exact SKU, quantity, and accepting transportation path.
+
 ## Current Hawaii-side qualification
 
 A Hawaii-side commercial partner has expressed interest in storing and handling Elevation's **low-voltage consumer inventory** and may also support walk-in retail from Elevation-owned stock.
