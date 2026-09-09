@@ -134,6 +134,7 @@
     app.className = "eus-admin-app";
     const rail = document.createElement("aside");
     rail.className = "eus-admin-rail";
+    rail.id = "eus-admin-rail";
     rail.setAttribute("aria-label", "Elevation Admin navigation");
     const active = currentKey();
     rail.innerHTML = `
@@ -148,7 +149,7 @@
 
     const mobile = document.createElement("div");
     mobile.className = "eus-admin-mobile-bar";
-    mobile.innerHTML = '<button type="button" data-eus-admin-menu aria-label="Open admin navigation">☰</button><strong>Elevation Operations</strong><a class="eus-admin-button" href="/admin">Overview</a>';
+    mobile.innerHTML = '<button type="button" data-eus-admin-menu aria-label="Open admin navigation" aria-controls="eus-admin-rail" aria-expanded="false">☰</button><strong>Elevation Operations</strong><a class="eus-admin-button" href="/admin">Overview</a>';
 
     const holder = document.createElement("div");
     holder.className = "eus-admin-main";
@@ -167,12 +168,25 @@
     }
     holder.append(main);
 
-    mobile.querySelector("[data-eus-admin-menu]")?.addEventListener("click", () => app.classList.toggle("is-nav-open"));
+    const menuButton = mobile.querySelector("[data-eus-admin-menu]");
+    const setNavOpen = (open) => {
+      app.classList.toggle("is-nav-open", open);
+      menuButton?.setAttribute("aria-expanded", String(open));
+      if (menuButton) menuButton.setAttribute("aria-label", open ? "Close admin navigation" : "Open admin navigation");
+    };
+
+    menuButton?.addEventListener("click", () => setNavOpen(!app.classList.contains("is-nav-open")));
     rail.addEventListener("click", (event) => {
-      if (event.target.closest("a") && innerWidth <= 820) app.classList.remove("is-nav-open");
+      if (event.target.closest("a") && innerWidth <= 820) setNavOpen(false);
+    });
+    holder.addEventListener("click", (event) => {
+      if (innerWidth <= 820 && app.classList.contains("is-nav-open") && !event.target.closest("[data-eus-admin-menu]")) setNavOpen(false);
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") app.classList.remove("is-nav-open");
+      if (event.key === "Escape" && app.classList.contains("is-nav-open")) {
+        setNavOpen(false);
+        menuButton?.focus();
+      }
     });
   }
 
@@ -210,7 +224,7 @@
   }
 
   function leadActions(projects = []) {
-    const active = (Array.isArray(projects) ? projects : []).filter((project) => !["lost", "closed"].includes(text(project.pipelineStatus || project.status).toLowerCase()));
+    const active = (Array.isArray(projects) ? projects : []).filter((project) => !["won", "lost", "closed"].includes(text(project.pipelineStatus || project.status).toLowerCase()));
     return {
       new: active.filter((project) => text(project.pipelineStatus || project.status).toLowerCase() === "new").length,
       unassigned: active.filter((project) => !text(project.assignedRepresentative)).length,
@@ -225,10 +239,11 @@
 
   function catalogActions(data = {}) {
     const products = Array.isArray(data.products) ? data.products : [];
+    const backendReview = Number(data.counts?.needsReview);
     return {
       total: products.length,
       published: products.filter((product) => product.publishStatus === "published").length,
-      review: products.filter((product) => product.publishStatus === "hold" || Boolean(product.reviewState)).length,
+      review: Number.isFinite(backendReview) ? backendReview : products.filter((product) => product.publishStatus === "hold" || product.shippingStatus !== "verified" || Boolean(product.reviewState)).length,
       drafts: products.filter((product) => product.publishStatus === "draft").length,
       noPrice: products.filter((product) => !(Number(product.priceCents) > 0)).length,
       noImage: products.filter((product) => !text(product.primaryImage) && !(Array.isArray(product.images) && product.images.length)).length,
