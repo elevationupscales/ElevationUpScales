@@ -13,10 +13,9 @@ import { gmailMailProviderConfigured } from "../shared/gmail-mail-provider.js";
 import {
   GMAIL_PROVIDER_QA_RATE_LIMIT_SECONDS,
   GMAIL_PROVIDER_QA_SUBJECT,
-  GMAIL_PROVIDER_QA_TOKEN_HEADER,
   buildGmailProviderQaMessage,
   gmailProviderQaErrorCategory,
-  temporaryGmailQaTokenAuthorized,
+  githubActionsGmailQaAuthorized,
 } from "../shared/gmail-provider-qa.js";
 
 
@@ -30,9 +29,14 @@ async function handleAdminQaToken(request, env) {
 
 async function gmailQaAuthorization(request, env) {
   const auth = await requireAdmin(request, env);
-  if (!auth.response) return { ok: true, mode: "admin" };
-  const temporaryToken = request.headers.get(GMAIL_PROVIDER_QA_TOKEN_HEADER) || "";
-  if (await temporaryGmailQaTokenAuthorized(temporaryToken)) return { ok: true, mode: "temporary-deployment-qa" };
+  if (!auth.response) return { ok: true, mode: "admin", commitSha: "" };
+
+  const authorization = cleanString(request.headers.get("Authorization"), 12000);
+  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
+  if (bearer) {
+    const oidc = await githubActionsGmailQaAuthorized(bearer);
+    if (oidc.ok) return { ok: true, mode: "github-actions-oidc", commitSha: oidc.sha || "" };
+  }
   return { ok: false, response: auth.response };
 }
 
@@ -59,7 +63,7 @@ async function handleAdminGmailProviderQa(request, env) {
   }
 
   const timestamp = new Date().toISOString();
-  const message = buildGmailProviderQaMessage(env, { timestamp });
+  const message = buildGmailProviderQaMessage(env, { timestamp, commit: authorization.commitSha });
   try {
     const providerResult = await env.EMAIL.send(message);
     const messageId = cleanString(providerResult?.messageId, 240);
