@@ -50,6 +50,7 @@ import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
 import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
 import { handleSokStockAdminApi } from "./worker/domains/sok-stock.js";
 import { handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
+import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
 
 const RETIRED_HEADERS = {
   "Cache-Control": "no-store",
@@ -73,6 +74,7 @@ function retiredAdminCollection(request, kind) {
 
 export default {
   async fetch(request, env, ctx) {
+    env = withGmailMailProvider(env);
     const url = new URL(request.url);
 
     if (url.pathname === SOLAR_NOTIFY_PATH) {
