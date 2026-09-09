@@ -22,6 +22,8 @@ import {
   ADMIN_QA_TOKEN_PATH,
   ADMIN_GMAIL_PROVIDER_QA_PATH,
   ADMIN_EMAIL_ROLE_QA_PATH,
+  ADMIN_EMAIL_OPERATIONS_PATH,
+  EMAIL_ORDER_CONFIRMATION_PATH,
   MARKETPLACE_QA_VALIDATE_PATH,
   MARKETPLACE_REPORT_ISSUE_PATH,
   ADMIN_IMPORT_LEGACY_PATH,
@@ -45,6 +47,7 @@ import { handleAdminOperations } from "./worker/domains/admin-overview.js";
 import { handleSiteEvent } from "./worker/domains/analytics.js";
 import { handleAdminMarketAnalytics } from "./worker/domains/analytics-reporting.js";
 import { handleRetiredLegacyMarketplaceImport, handleStoreProductsCompatibility } from "./worker/domains/compatibility.js";
+import { handleAdminEmailOperations, handleOrderConfirmation } from "./worker/domains/email-operations.js";
 import { handleAdminEmailRoleQa } from "./worker/domains/email-role-qa.js";
 import { handleAdminInventory, handlePublicInventory } from "./worker/domains/inventory.js";
 import { handleAdminLeads, handleAdminOpportunities, handleProjectCapture, handleProjectClassify, handleProjectContactRequest, handleProjectFollowUpRequest, handleProjectHandymanPhotos, handleProjectSubmit } from "./worker/domains/leads.js";
@@ -70,6 +73,7 @@ export default {
     if (url.pathname === MARKETPLACE_HEALTH_PATH) return retiredJson(request, { ok: true, status: "retired" }, 200);
     if (url.pathname === MARKETPLACE_EVENT_PATH) return new Response(null, { status: 204, headers: RETIRED_HEADERS });
     if (url.pathname === SITE_EVENT_PATH || url.pathname === LEGACY_SITE_EVENT_PATH) return handleSiteEvent(request, env);
+    if (url.pathname === EMAIL_ORDER_CONFIRMATION_PATH) return handleOrderConfirmation(request, withEmailRole(env, "orders"));
     if (url.pathname === PROJECT_CLASSIFY_PATH) return handleProjectClassify(request);
     if (url.pathname === PROJECT_CAPTURE_PATH) return handleProjectCapture(request, withEmailRole(env, "sales"), ctx);
     if (url.pathname === PROJECT_CONTACT_REQUEST_PATH) return handleProjectContactRequest(request, withEmailRole(env, "sales"), ctx);
@@ -93,6 +97,7 @@ export default {
     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
     if (url.pathname === ADMIN_GMAIL_PROVIDER_QA_PATH) return handleAdminGmailProviderQa(request, env);
     if (url.pathname === ADMIN_EMAIL_ROLE_QA_PATH) return handleAdminEmailRoleQa(request, env);
+    if (url.pathname === ADMIN_EMAIL_OPERATIONS_PATH || url.pathname.startsWith(`${ADMIN_EMAIL_OPERATIONS_PATH}/`)) return handleAdminEmailOperations(request, env, url.pathname);
     if (url.pathname === PUBLIC_INVENTORY_PATH) return handlePublicInventory(request, env);
     if (url.pathname === ADMIN_INVENTORY_PATH || url.pathname.startsWith(`${ADMIN_INVENTORY_PATH}/`)) return handleAdminInventory(request, env, url.pathname);
     if (url.pathname === ADMIN_SOK_STOCK_PATH || url.pathname.startsWith(`${ADMIN_SOK_STOCK_PATH}/`)) return handleSokStockAdminApi(request, env, url.pathname);
