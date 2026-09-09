@@ -1,3 +1,6 @@
+import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
+import { sendInternalRoleAlert, sendOrderWorkflowMessage } from "./worker/shared/email-workflows.js";
+
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const ORDER_STATUSES = new Set(["pending", "paid", "fulfillment_pending", "supplier_ordered", "supplier_released", "shipped", "completed", "hold_issue", "refund_needed", "refunded", "cancelled"]);
 
@@ -66,6 +69,42 @@ const ORDER_SELECT = `SELECT o.*, i.sku AS elevation_sku, i.cost_cents AS suppli
       FROM eus_store_orders o
       LEFT JOIN eus_inventory_items i ON lower(i.sku)=lower(COALESCE(json_extract(o.supplier_json,'$.supplierSku'),json_extract(o.supplier_json,'$.skuId')))`;
 
+async function getOrderRow(env, orderId) {
+  return env.MARKETPLACE_DB.prepare(`${ORDER_SELECT} WHERE o.id=? LIMIT 1`).bind(orderId).first()
+    .catch(() => env.MARKETPLACE_DB.prepare("SELECT * FROM eus_store_orders WHERE id=? LIMIT 1").bind(orderId).first());
+}
+
+async function runEmailWorkflow(env, previous, order) {
+  if (!order) return { status: "not_requested" };
+  const previousStatus = previous?.fulfillmentStatus || "";
+  const statusChanged = previousStatus !== order.fulfillmentStatus;
+  const trackingChanged = clean(previous?.trackingNumber, 180) !== clean(order.trackingNumber, 180) || clean(previous?.carrier, 120) !== clean(order.carrier, 120);
+  if (!statusChanged && !trackingChanged) return { status: "not_requested" };
+
+  const mailEnv = withGmailMailProvider(env);
+  if (order.fulfillmentStatus === "shipped" && (statusChanged || trackingChanged)) {
+    return { workflow: "shipping_update", ...(await sendOrderWorkflowMessage(mailEnv, "shipping_update", order)) };
+  }
+  if (statusChanged && ["hold_issue", "refund_needed"].includes(order.fulfillmentStatus)) {
+    return { workflow: "order_attention", ...(await sendOrderWorkflowMessage(mailEnv, "order_attention", order)) };
+  }
+  if (statusChanged && order.fulfillmentStatus === "refunded") {
+    return { workflow: "refund_update", ...(await sendOrderWorkflowMessage(mailEnv, "refund_update", order)) };
+  }
+  if (statusChanged && ["supplier_ordered", "supplier_released"].includes(order.fulfillmentStatus)) {
+    const supplierLabel = clean(order.supplier?.supplierName || order.supplier?.supplier || "supplier", 120);
+    return {
+      workflow: "internal_logistics_alert",
+      ...(await sendInternalRoleAlert(mailEnv, "logistics", {
+        reference: order.id,
+        subject: `Elevation Fulfillment Update — ${order.id}`,
+        body: `Order ${order.id} moved to ${order.fulfillmentStatus.replaceAll("_", " ")}. Supplier: ${supplierLabel}. Review fulfillment and tracking requirements in Orders.`,
+      })),
+    };
+  }
+  return { status: "not_requested" };
+}
+
 async function listOrders(request, env) {
   const auth = await requireAdmin(request, env); if (auth.response) return auth.response;
   if (request.method !== "GET" && request.method !== "HEAD") return json({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" });
@@ -81,13 +120,17 @@ async function updateOrder(request, env, id) {
   if (!sameOriginRequest(request)) return json({ error: "Cross-origin request denied" }, 403);
   if (!await ensureOrderOpsSchema(env)) return json({ error: "Store order storage is not configured" }, 503);
   const orderId = clean(id, 120); if (!/^EUS-STORE-\d{8}-[A-F0-9]{8}$/.test(orderId)) return json({ error: "Invalid store order reference" }, 400);
+  const previousRow = await getOrderRow(env, orderId); if (!previousRow) return json({ error: "Store order not found" }, 404);
+  const previous = orderRecord(previousRow);
   const body = await request.json().catch(() => ({})); const status = clean(body.fulfillmentStatus, 40).toLowerCase(); if (!ORDER_STATUSES.has(status)) return json({ error: "Invalid fulfillment status" }, 400);
   const supplierOrderId = clean(body.supplierOrderId, 160); const trackingNumber = clean(body.trackingNumber, 180); const carrier = clean(body.carrier, 120); const fulfillmentNotes = clean(body.fulfillmentNotes, 2000); const now = new Date().toISOString(); const refundedAt = status === "refunded" ? now : null;
   const result = await env.MARKETPLACE_DB.prepare(`UPDATE eus_store_orders SET fulfillment_status=?, supplier_order_id=?, tracking_number=?, carrier=?, fulfillment_notes=?, updated_at=?, refunded_at=COALESCE(?, refunded_at) WHERE id=?`)
     .bind(status, supplierOrderId, trackingNumber, carrier, fulfillmentNotes, now, refundedAt, orderId).run();
   if (!Number(result?.meta?.changes || 0)) return json({ error: "Store order not found" }, 404);
-  const row = await env.MARKETPLACE_DB.prepare(`${ORDER_SELECT} WHERE o.id=? LIMIT 1`).bind(orderId).first().catch(() => env.MARKETPLACE_DB.prepare("SELECT * FROM eus_store_orders WHERE id=? LIMIT 1").bind(orderId).first());
-  return json({ ok: true, order: orderRecord(row), updatedBy: auth.session.email });
+  const row = await getOrderRow(env, orderId);
+  const order = orderRecord(row);
+  const emailWorkflow = await runEmailWorkflow(env, previous, order);
+  return json({ ok: true, order, updatedBy: auth.session.email, emailWorkflow });
 }
 
 export async function handleStoreOrdersAdminApi(request, env, pathname) {
