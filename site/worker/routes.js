@@ -21,6 +21,7 @@ export const ADMIN_LEADS_PATH = "/api/admin/leads";
 export const ADMIN_SUPPLIER_LEADS_PATH = "/api/admin/supplier-leads";
 export const ADMIN_MARKETPLACE_FOLLOWUPS_PATH = "/api/admin/marketplace-followups";
 export const ADMIN_QA_TOKEN_PATH = "/api/admin/qa-token";
+export const ADMIN_GMAIL_PROVIDER_QA_PATH = "/api/admin/gmail-provider-qa";
 export const MARKETPLACE_QA_VALIDATE_PATH = "/api/marketplace/qa-validate";
 export const MARKETPLACE_REPORT_ISSUE_PATH = "/api/marketplace/report-issue";
 export const ADMIN_IMPORT_LEGACY_PATH = "/api/admin/import-legacy";
