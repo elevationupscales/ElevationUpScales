@@ -54,6 +54,7 @@ import { handleSokStockAdminApi } from "./worker/domains/sok-stock.js";
 import { handleAdminEmailRoleQa, handleAdminGmailProviderQa, handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
 import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
 import { withEmailRole } from "./worker/shared/email-role-routing.js";
+import { rewritePublicEmailRoleSurface } from "./worker/shared/email-role-surfaces.js";
 
 const RETIRED_HEADERS = {
   "Cache-Control": "no-store",
@@ -67,9 +68,7 @@ function retiredJson(request, payload, status = 410) {
 }
 
 function retiredAdminCollection(request, kind) {
-  if (request.method !== "GET" && request.method !== "HEAD") {
-    return retiredJson(request, { ok: false, error: "Marketplace operations are retired." }, 410);
-  }
+  if (request.method !== "GET" && request.method !== "HEAD") return retiredJson(request, { ok: false, error: "Marketplace operations are retired." }, 410);
   if (kind === "listings") return retiredJson(request, { ok: true, listings: [], count: 0 }, 200);
   if (kind === "issues") return retiredJson(request, { ok: true, issues: [], count: 0 }, 200);
   return retiredJson(request, { ok: true, followups: [], records: [], metrics: {} }, 200);
@@ -80,10 +79,7 @@ export default {
     env = withGmailMailProvider(env);
     const url = new URL(request.url);
 
-    if (url.pathname === SOLAR_NOTIFY_PATH) {
-      return handleSolarNotification(request, withEmailRole(env, "sales"), ctx);
-    }
-
+    if (url.pathname === SOLAR_NOTIFY_PATH) return handleSolarNotification(request, withEmailRole(env, "sales"), ctx);
     if (url.pathname === HEALTH_PATH) return handleHealth(request, env);
     if (url.pathname === MARKETPLACE_HEALTH_PATH) return retiredJson(request, { ok: true, status: "retired" }, 200);
     if (url.pathname === MARKETPLACE_EVENT_PATH) return new Response(null, { status: 204, headers: RETIRED_HEADERS });
@@ -124,9 +120,9 @@ export default {
     if (url.pathname === ADMIN_QA_TOKEN_PATH) return handleAdminQaToken(request, env);
     if (url.pathname === ADMIN_MARKETPLACE_ISSUES_PATH) return retiredAdminCollection(request, "issues");
     if (url.pathname === ADMIN_LISTINGS_PATH || url.pathname.startsWith(`${ADMIN_LISTINGS_PATH}/`)) return retiredAdminCollection(request, "listings");
-
     if (url.pathname === "/api/store-products") return handleStoreProductsCompatibility(request);
 
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    return rewritePublicEmailRoleSurface(assetResponse, url.pathname, env);
   },
 };
