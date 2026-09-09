@@ -52,6 +52,7 @@ import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate
 import { handleSokStockAdminApi } from "./worker/domains/sok-stock.js";
 import { handleAdminGmailProviderQa, handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
 import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
+import { withEmailRole } from "./worker/shared/email-role-routing.js";
 
 const RETIRED_HEADERS = {
   "Cache-Control": "no-store",
@@ -79,7 +80,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === SOLAR_NOTIFY_PATH) {
-      return handleSolarNotification(request, env, ctx);
+      return handleSolarNotification(request, withEmailRole(env, "sales"), ctx);
     }
 
     if (url.pathname === HEALTH_PATH) return handleHealth(request, env);
@@ -87,12 +88,12 @@ export default {
     if (url.pathname === MARKETPLACE_EVENT_PATH) return new Response(null, { status: 204, headers: RETIRED_HEADERS });
     if (url.pathname === SITE_EVENT_PATH || url.pathname === LEGACY_SITE_EVENT_PATH) return handleSiteEvent(request, env);
     if (url.pathname === PROJECT_CLASSIFY_PATH) return handleProjectClassify(request);
-    if (url.pathname === PROJECT_CAPTURE_PATH) return handleProjectCapture(request, env, ctx);
-    if (url.pathname === PROJECT_CONTACT_REQUEST_PATH) return handleProjectContactRequest(request, env, ctx);
-    if (url.pathname === PROJECT_FOLLOWUP_REQUEST_PATH) return handleProjectFollowUpRequest(request, env, ctx);
+    if (url.pathname === PROJECT_CAPTURE_PATH) return handleProjectCapture(request, withEmailRole(env, "sales"), ctx);
+    if (url.pathname === PROJECT_CONTACT_REQUEST_PATH) return handleProjectContactRequest(request, withEmailRole(env, "sales"), ctx);
+    if (url.pathname === PROJECT_FOLLOWUP_REQUEST_PATH) return handleProjectFollowUpRequest(request, withEmailRole(env, "sales"), ctx);
     if (url.pathname === PROJECT_HANDYMAN_PHOTOS_PATH) return handleProjectHandymanPhotos(request, env);
-    if (url.pathname === PROJECT_SUBMIT_PATH) return handleProjectSubmit(request, env, ctx);
-    if (url.pathname === WORK_WITH_US_SUBMIT_PATH) return handleWorkWithUsSubmit(request, env, ctx);
+    if (url.pathname === PROJECT_SUBMIT_PATH) return handleProjectSubmit(request, withEmailRole(env, "sales"), ctx);
+    if (url.pathname === WORK_WITH_US_SUBMIT_PATH) return handleWorkWithUsSubmit(request, withEmailRole(env, "owner"), ctx);
 
     // Marketplace soft retirement: historical D1/R2 data stays untouched, while
     // public submission/contact paths and active admin operations are disabled.
