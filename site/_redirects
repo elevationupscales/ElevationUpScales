@@ -39,9 +39,10 @@
 /report-an-issue /store 301
 /report-an-issue/ /store 301
 /report-an-issue.html /store 301
-/list-an-rv /store?department=rv-outdoor 301
-/list-an-rv/ /store?department=rv-outdoor 301
-/list-an-rv.html /store?department=rv-outdoor 301
+# Preserve the retired RV seller intake contract; /rv-store then canonically consolidates into the universal RV department.
+/list-an-rv /rv-store 301
+/list-an-rv/ /rv-store 301
+/list-an-rv.html /rv-store 301
 /list-a-vehicle /store 301
 /list-a-vehicle/ /store 301
 /list-a-vehicle.html /store 301
