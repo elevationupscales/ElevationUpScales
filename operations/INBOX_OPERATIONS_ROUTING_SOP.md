@@ -10,7 +10,9 @@ Use automated inbox workers as an **operations sensor and dispatcher**, not as a
 
 The operating model is:
 
-**INBOX WORKER FINDS → CLASSIFIES → ROUTES → OPERATIONS DECIDES WHEN A DECISION IS ACTUALLY NEEDED → SPECIALIST EXECUTES → WORKER WATCHES FOR REPLY → OPERATIONS RECORDS RESULT**
+**INBOX WORKER FINDS → CLASSIFIES → ROUTES → COMPANY OPERATIONS MANAGER DECIDES / ROUTES WHEN A DECISION IS ACTUALLY NEEDED → SPECIALIST EXECUTES → WORKER WATCHES FOR REPLY → COMPANY OPERATIONS RECORDS RESULT**
+
+Throughout this SOP, references to **Operations** or **OPERATIONS DECIDES** mean the **Company Operations Manager decides / routes** within company-operational scope.
 
 Gmail remains correspondence. GitHub `/operations/` and current workstream issues remain the public-safe management/source-of-truth layer.
 
@@ -43,7 +45,7 @@ The inbox worker should not jump directly from a detected email to a code, Shopi
 
 ## Fast path — do not create unnecessary decisions
 
-Not every material email requires an Operations decision or a new GitHub issue.
+Not every material email requires a Company Operations Manager decision or a new GitHub issue.
 
 Use **NO DECISION NEEDED — WORKSTREAM UPDATE** when the message only supplies expected factual progress and does not require a new commercial, safety, payment, customer-resolution, shipment, pricing or production decision.
 
@@ -60,9 +62,9 @@ For these cases:
 
 Do not create a new `OPS INTAKE` item merely to acknowledge progress.
 
-Create an Operations intake only when there is a real decision, blocker, exception, conflict, risk, commitment or missing authority.
+Create a Company Operations intake only when there is a real decision, blocker, exception, conflict, risk, commitment or missing authority.
 
-Customer/order money-at-risk issues should be escalated immediately to the owning customer/order lane and owner as needed; do not delay urgent resolution by waiting for a generic Operations intake cycle.
+Customer/order money-at-risk issues should be escalated immediately to the owning customer/order lane and owner as needed; do not delay urgent resolution by waiting for a generic Company Operations intake cycle.
 
 Once a thread has an exact active workstream, keep future material updates on that workstream until it closes unless the issue genuinely moves into a different ownership lane.
 
@@ -72,7 +74,7 @@ Once a thread has an exact active workstream, keep future material updates on th
 
 Do not turn old coordination/review issues into permanent catch-all Operations inboxes.
 
-If no correct active issue exists **and a decision is actually required**, create a narrow public-safe Operations intake item using:
+If no correct active issue exists **and a decision is actually required**, create a narrow public-safe Company Operations intake item using:
 
 `OPS INTAKE — <Company / Topic> — <Decision Needed>`
 
@@ -149,7 +151,7 @@ Keep owner/manager alerts short enough to understand quickly:
 
 Example:
 
-`R&R | confirmed receiving capability for the proposed low-voltage proof movement | removes one destination blocker | Operations decision: APPROVE FOR PROOF MOVEMENT / HOLD / REJECT.`
+`R&R | confirmed receiving capability for the proposed low-voltage proof movement | removes one destination blocker | Company Operations Manager decision: APPROVE FOR PROOF MOVEMENT / HOLD / REJECT.`
 
 For no-decision updates:
 
@@ -159,11 +161,11 @@ Do not make Casey review every detected message. Surface only material changes, 
 
 ## Execution handoff
 
-After Operations decides, send the decision to the correct execution lane.
+After the Company Operations Manager decides / routes, send the decision to the correct execution lane.
 
 Examples:
 
-**EMAIL DETECTED → OPS REVIEW → APPROVE FOR PROOF MOVEMENT → LOGISTICS EXECUTES → ACTUALS RECORDED → WORKSTREAM CLOSED / ADVANCED**
+**EMAIL DETECTED → COMPANY OPERATIONS REVIEW → APPROVE FOR PROOF MOVEMENT → LOGISTICS EXECUTES → ACTUALS RECORDED → WORKSTREAM CLOSED / ADVANCED**
 
 **SUPPLIER APPROVAL EMAIL → VENDOR ONBOARDING REVIEW → APPROVE TO PROCEED → CATALOG / DEV EXECUTES VERIFIED INTAKE → STORE STATE UPDATED**
 
