@@ -54,6 +54,7 @@ import { handleAdminLeads, handleAdminOpportunities, handleProjectCapture, handl
 import { handleAdminSupplierLeads } from "./worker/domains/supplier-leads.js";
 import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
 import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
+import { handleShopifyOrderBridge, SHOPIFY_PAID_WEBHOOK_PATH, SHOPIFY_RECONCILE_PATH } from "./worker/domains/shopify-orders.js";
 import { handleSokStockAdminApi } from "./worker/domains/sok-stock.js";
 import { handleAdminGmailProviderQa, handleAdminQaToken, handleHealth } from "./worker/domains/system.js";
 import { withGmailMailProvider } from "./worker/shared/gmail-mail-provider.js";
@@ -74,6 +75,7 @@ export default {
     if (url.pathname === MARKETPLACE_EVENT_PATH) return new Response(null, { status: 204, headers: RETIRED_HEADERS });
     if (url.pathname === SITE_EVENT_PATH || url.pathname === LEGACY_SITE_EVENT_PATH) return handleSiteEvent(request, env);
     if (url.pathname === EMAIL_ORDER_CONFIRMATION_PATH) return handleOrderConfirmation(request, withEmailRole(env, "orders"));
+    if (url.pathname === SHOPIFY_PAID_WEBHOOK_PATH || url.pathname === SHOPIFY_RECONCILE_PATH) return handleShopifyOrderBridge(request, env, url.pathname);
     if (url.pathname === PROJECT_CLASSIFY_PATH) return handleProjectClassify(request);
     if (url.pathname === PROJECT_CAPTURE_PATH) return handleProjectCapture(request, withEmailRole(env, "sales"), ctx);
     if (url.pathname === PROJECT_CONTACT_REQUEST_PATH) return handleProjectContactRequest(request, withEmailRole(env, "sales"), ctx);
