@@ -17,11 +17,28 @@ Both sides use the same authority order:
 
 1. Casey / Owner's newest explicit direction.
 2. `operations/MANAGEMENT_OPERATING_SOP.md`.
-3. Current controlling `/operations/` records for the assigned lane.
-4. Verified live business/platform/vendor state.
-5. Historical handoffs only when needed to resolve an actual gap.
+3. `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`.
+4. Current controlling `/operations/` records for the assigned lane.
+5. Verified live business/platform/vendor state.
+6. Historical handoffs only when needed to resolve an actual gap.
 
 Peter's team must not rebuild or fork company policy. Company Operations must not restart work Peter has already verified and returned cleanly.
+
+## Internal confidentiality / IP / terms-of-use control
+
+All Company Materials exchanged between Company Operations, Peter, Peter's AI workers, contractors, managers, or other authorized recipients are subject to `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`.
+
+Company Materials may be used only for authorized Elevation UpScales business purposes. They may not be copied, distributed, republished, commercialized, incorporated into another business system, or reused for another person or organization without prior express written permission from Elevation UpScales, Inc., except where applicable law provides otherwise.
+
+Every newly generated internal ZIP, AI continuity package, worker packet, or cross-GPT file handoff must include at its root:
+
+- `00_READ_FIRST_TERMS_OF_USE.txt` using `operations/ZIP_TERMS_OF_USE_NOTICE_TEMPLATE.txt`;
+- a current copy of `INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`;
+- a README statement that downloading, accessing, opening, extracting, retaining, or using the package after receiving the notice constitutes acknowledgment and acceptance of the package terms to the fullest extent permitted by law.
+
+If the recipient does not accept the terms, the recipient must not download, open, extract, retain, or use the materials and should delete or return them.
+
+No protected credentials, tax documents, customer PII, banking records, private supplier pricing, private freight rates, API keys, authentication artifacts, or other protected records may be placed in a public Git-tracked handoff merely to satisfy this rule.
 
 ## Communication loop
 
@@ -52,7 +69,7 @@ Peter's AI team may maintain and improve its own working SOP based on verified e
 
 When Peter's team changes its own SOP:
 
-1. preserve the shared Management SOP and this Cross-GPT SOP as the parent baseline;
+1. preserve the shared Management SOP, Internal Worker Confidentiality/IP/File-Use Policy, and this Cross-GPT SOP as the parent baseline;
 2. record only lane-specific additions, clarifications, or lessons learned;
 3. return the changed section or concise delta to Company Operations;
 4. Company Operations reconciles any material company-wide rule into the controlling `/operations/` state when appropriate;
@@ -158,7 +175,7 @@ Peter's AI team should create one recurring **flexible evening** task inside Pet
 
 Task instruction:
 
-> Review the newest owner-approved Company Operations baseline and the current Peter execution deltas. Update Peter's working Ecommerce & Vendor Operations SOP only with verified lane-specific changes. Preserve the Shared Management Operating SOP and Cross-GPT Communication SOP as parent controls. Move genuinely WAITING/HOLD items to the end of the worktree and continue the highest-priority unblocked action. Do not modify website/runtime Git or deployment state unless Casey's owner-side chat has explicitly approved that exact development scope. Return a concise sync receipt with COMPLETED / CURRENT STATE / SOP DELTA / BLOCKER / NEXT / OWNER GATE.
+> Review the newest owner-approved Company Operations baseline and the current Peter execution deltas. Update Peter's working Ecommerce & Vendor Operations SOP only with verified lane-specific changes. Preserve the Shared Management Operating SOP, Cross-GPT Communication SOP, and Internal Worker Confidentiality/IP/File-Use Policy as parent controls. Move genuinely WAITING/HOLD items to the end of the worktree and continue the highest-priority unblocked action. Ensure every new internal Elevation ZIP or worker handoff embeds the required `00_READ_FIRST_TERMS_OF_USE.txt` notice and current internal policy. Do not modify website/runtime Git or deployment state unless Casey's owner-side chat has explicitly approved that exact development scope. Return a concise sync receipt with COMPLETED / CURRENT STATE / SOP DELTA / BLOCKER / NEXT / OWNER GATE.
 
 The task is a Peter-side project hygiene/sync task, not authorization for website development, vendor sends, financial commitments, or owner-level actions.
 
@@ -168,4 +185,4 @@ The repository is public. Never place credentials, customer PII, private vendor 
 
 ## Operating result
 
-**ONE BASELINE → TWO AI WORK ENVIRONMENTS → DELTA-BASED SYNC → PRIORITY BY UNBLOCKED VALUE → HOLD MOVES TO END → WEBSITE GIT REMAINS OWNER-GATED**
+**ONE BASELINE → TWO AI WORK ENVIRONMENTS → DELTA-BASED SYNC → PRIORITY BY UNBLOCKED VALUE → HOLD MOVES TO END → COMPANY MATERIALS REMAIN PROTECTED → WEBSITE GIT REMAINS OWNER-GATED**
