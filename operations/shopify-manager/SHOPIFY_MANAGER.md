@@ -1,25 +1,25 @@
-# Elevation UpScales — Shopify Manager
+# Elevation UpScales — Shopify Operations Worker
 
-**Status: ACTIVE / MANAGER-SPECIFIC**  
+**Status: ACTIVE / WORKER-SPECIFIC**  
 **Effective: 2026-09-07**  
-**Last reconciled: 2026-09-08**  
+**Last reconciled: 2026-09-09**  
 **Work ID: ECOM-SHOPIFY-0905-01**  
 **Owner: Casey Young**  
 **Human Ecommerce Manager: Peter Torres**  
-**AI Manager: Shopify Manager**
+**AI Role: Shopify Operations Worker**
 
 ## Purpose
 
-Dedicated management record for the Shopify / Shopify POS / Doba / SOK ecommerce lane.
+Dedicated execution record for the Shopify / Shopify POS / Doba / SOK ecommerce lane under Company Operations. Peter Torres remains the Human Ecommerce Manager. The Shopify Operations Worker executes routed ecommerce work and returns lane state / evidence to Company Operations; it is not an independent management source or owner of overall company operational state.
 
 ## Active management-source rule
 
 GitHub `/operations/` is the active management/work source. Gmail management feeds are historical/archive only. External business email may supply verified operational facts that are reconciled here.
 
-## Git access — Shopify Manager only
+## Git access — Shopify Operations Worker only
 
 - READ `/operations/README.md` and relevant current `/operations/` references.
-- EDIT only `/operations/shopify-manager/SHOPIFY_MANAGER.md` for normal Shopify Manager updates.
+- EDIT only `/operations/shopify-manager/SHOPIFY_MANAGER.md` for normal routed Shopify Operations Worker updates.
 - DO NOT edit code, workflows, deployment files, global SOPs, pricing models, historical coordination files, or other manager files without a separate owner-authorized work item.
 
 ## Public repository protection
@@ -108,7 +108,9 @@ Do not lead customer-facing titles with `SOK`; preserve `SOK Battery` as vendor/
 
 ## Peter workflow
 
-Peter may use the Shopify Manager for catalog review, product edits, collections, inventory/status checks, Doba candidate review, publication-readiness review, Shopify/POS operating support and recurring MAP/content audits.
+Peter may use the Shopify Operations Worker for catalog review, product edits, collections, inventory/status checks, Doba candidate review, publication-readiness review, Shopify/POS operating support and recurring MAP/content audits.
+
+The Shopify Operations Worker performs only routed execution. Material lane state, blockers, and evidence return to Company Operations and Peter as the Human Ecommerce Manager rather than becoming a separate management source.
 
 ## NOW
 
@@ -119,7 +121,7 @@ Peter may use the Shopify Manager for catalog review, product edits, collections
 
 ## Protected scope
 
-Do not from this manager lane:
+Do not from this worker lane:
 
 - edit production website code;
 - deploy website changes;
@@ -130,4 +132,4 @@ Do not from this manager lane:
 - expose protected supplier/customer information;
 - commit company funds without Casey's approval.
 
-END SHOPIFY MANAGER FILE
+END SHOPIFY OPERATIONS WORKER FILE
