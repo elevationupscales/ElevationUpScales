@@ -33,6 +33,9 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
 - **SOK Energy — PRIMARY / ACTIVE AUTHORIZED SUPPLIER**
   - Anchor battery relationship for ecommerce, dropship, Hawaii/Alaska exact-SKU fulfillment, supplier-referral orders and lithium logistics.
   - Do not prospect as a new lead.
+  - SOK has explicitly confirmed Elevation may accept preorders/backorders for temporarily out-of-stock models. Supplier stock is reserved/locked only after SOK payment is confirmed; SOK will provide restock timing, and urgent orders may be prepaid to lock future stock.
+  - SOK has explicitly welcomed Elevation taking an active customer-warranty role. Lower-48 warranty workflow should be proven first; Hawaii warranty remains a separate controlled operating lane. Supplier replenishment of approved replacement parts/units into later Elevation orders is supplier-supported in principle and must not be presented publicly as an unconditional service guarantee.
+  - SOK has delivered product-image media in addition to previously supplied logo/manual/specification material; reconcile those assets through the existing SOK catalog/media lane rather than creating a new project.
   - Current Hawaii proof-shipment state belongs in `SOK_HAWAII_FIRST_ORDER_READINESS.md` and `ACTIVE_FOLLOWUPS_2026-09-08.md`.
 
 ### 02 — Existing Relationship / Do Not Prospect — 1
@@ -45,14 +48,16 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
 ### 03 — Active Qualification / Onboarding — 3
 
 - **Renogy — A+ / TOP PRIORITY VENDOR**
-  - State: **APPLICATION PREP / OWNER REVIEW REQUIRED**.
-  - Existing relationship thread is active; do not send a duplicate introduction/application.
+  - State: **APPLICATION SUBMITTED / WAITING ON RENOGY**.
+  - Owner-signed application package has already been submitted; do not recreate or resend preparation work.
   - Direct-channel dealer/dropship opportunity for solar panels, kits, MPPT, DC-DC, inverter/chargers, monitoring, wiring and accessories.
   - Preserve Renogy's verified third-party-marketplace boundary.
 
 - **VEVOR — A / STRATEGIC EXISTING PRODUCT LINE**
   - State: **OWNER APPROVED TO PROCEED / DIRECT-WEBSITE DROPSHIPPING / ONBOARDING IN PROGRESS**.
   - Operations is authorized to proceed with VEVOR PRO registration, tax-exemption setup, Master Catalog feed reconciliation, and eligible direct-site publication.
+  - VEVOR's latest onboarding instruction is to enter company registration information directly during VEVOR PRO membership registration and submit the tax-exemption certificate through the account workflow.
+  - VEVOR additionally stated that a tax-free-state shipping address is required for its tax-exemption treatment; treat that as supplier onboarding guidance to verify operationally, not as a general tax-law statement.
   - Selling price must not be below VEVOR's current selling price.
   - Approved channel: ElevationUpScales.com / Shopify direct-site sales only.
   - Amazon, Walmart, eBay, and other third-party marketplaces remain blocked unless VEVOR later provides written authorization.
@@ -60,9 +65,10 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - No additional owner gate is required for routine onboarding/catalog execution; escalate only binding terms, unusual financial commitments, or material policy changes.
 
 - **Kingboss — EXISTING CONTACT / LITHIUM SUPPLY + COMPLIANCE**
-  - State: **FOLLOW-UP SENT / QUALIFICATION OPEN**.
-  - Existing relationship predates the supplier-lead map; do not treat as a clean-new lead.
-  - Current qualification includes wholesale/B2B structure, U.S. inventory/ship-from points, exact product identity and transport-document support.
+  - State: **B2B APPROVED / ONBOARDING WAITING**.
+  - B2B wholesale relationship has been approved; remaining dependency is the supplier onboarding package/data.
+  - Existing relationship predates the supplier-lead map; do not treat as a clean-new lead or restart generic qualification.
+  - Current onboarding still needs the supplier-provided information required to operationalize product identity, U.S. inventory/ship-from points, compliance support, and commercial fulfillment.
   - SOK remains the primary battery relationship; use Kingboss only for defined commercial/product/logistics value.
 
 ### 04 — Contacted / Waiting — 21
