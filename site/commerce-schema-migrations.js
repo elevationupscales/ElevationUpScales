@@ -1,4 +1,4 @@
-export const COMMERCE_SCHEMA_VERSION = "2026.09.03.1";
+export const COMMERCE_SCHEMA_VERSION = "2026.09.10.1";
 
 const MIGRATIONS = [
   {
@@ -87,7 +87,75 @@ const MIGRATIONS = [
       `UPDATE eus_shipping_rules SET certainty_state='REVIEW REQUIRED' WHERE region='AK'`,
     ],
   },
-
+  {
+    id: "2026-09-10-shopify-order-bridge-v1",
+    description: "Provider-neutral Shopify paid-order bridge and normalized order items",
+    statements: [
+      `CREATE TABLE IF NOT EXISTS eus_store_order_external (
+        order_id TEXT PRIMARY KEY,
+        sales_channel TEXT NOT NULL,
+        external_order_id TEXT NOT NULL,
+        external_order_number TEXT NOT NULL DEFAULT '',
+        shop_domain TEXT NOT NULL DEFAULT '',
+        financial_status TEXT NOT NULL DEFAULT '',
+        currency TEXT NOT NULL DEFAULT 'USD',
+        subtotal_cents INTEGER NOT NULL DEFAULT 0,
+        shipping_cents INTEGER NOT NULL DEFAULT 0,
+        tax_cents INTEGER NOT NULL DEFAULT 0,
+        discount_cents INTEGER NOT NULL DEFAULT 0,
+        total_paid_cents INTEGER NOT NULL DEFAULT 0,
+        external_created_at TEXT,
+        external_paid_at TEXT,
+        webhook_id TEXT NOT NULL DEFAULT '',
+        event_id TEXT NOT NULL DEFAULT '',
+        source_reference TEXT NOT NULL DEFAULT '',
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        UNIQUE(sales_channel,shop_domain,external_order_id)
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_eus_store_order_external_channel ON eus_store_order_external(sales_channel,external_order_number)`,
+      `CREATE TABLE IF NOT EXISTS eus_store_order_items (
+        id TEXT PRIMARY KEY,
+        order_id TEXT NOT NULL,
+        line_index INTEGER NOT NULL,
+        external_line_item_id TEXT NOT NULL DEFAULT '',
+        external_product_id TEXT NOT NULL DEFAULT '',
+        external_variant_id TEXT NOT NULL DEFAULT '',
+        elevation_sku TEXT NOT NULL DEFAULT '',
+        supplier TEXT NOT NULL DEFAULT '',
+        supplier_display TEXT NOT NULL DEFAULT '',
+        supplier_sku TEXT NOT NULL DEFAULT '',
+        product_title TEXT NOT NULL,
+        variant_title TEXT NOT NULL DEFAULT '',
+        quantity INTEGER NOT NULL,
+        unit_price_cents INTEGER NOT NULL,
+        line_total_cents INTEGER NOT NULL,
+        source TEXT NOT NULL DEFAULT '',
+        fulfillment_context_json TEXT NOT NULL DEFAULT '{}',
+        created_at TEXT NOT NULL,
+        UNIQUE(order_id,line_index)
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_eus_store_order_items_order ON eus_store_order_items(order_id,line_index)`,
+      `CREATE INDEX IF NOT EXISTS idx_eus_store_order_items_supplier ON eus_store_order_items(supplier,supplier_sku)`,
+      `CREATE TABLE IF NOT EXISTS eus_shopify_webhook_receipts (
+        webhook_id TEXT PRIMARY KEY,
+        event_id TEXT NOT NULL DEFAULT '',
+        topic TEXT NOT NULL,
+        shop_domain TEXT NOT NULL,
+        external_order_id TEXT NOT NULL DEFAULT '',
+        order_id TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL,
+        attempt_count INTEGER NOT NULL DEFAULT 1,
+        last_error TEXT NOT NULL DEFAULT '',
+        received_at TEXT NOT NULL,
+        processed_at TEXT,
+        updated_at TEXT NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_eus_shopify_webhook_event ON eus_shopify_webhook_receipts(event_id,shop_domain)`,
+      `CREATE INDEX IF NOT EXISTS idx_eus_shopify_webhook_order ON eus_shopify_webhook_receipts(external_order_id,shop_domain)`,
+    ],
+  },
 ];
 
 let schemaPromise = null;
