@@ -1,0 +1,14 @@
+ELEVATION UPSCALES, INC. — CONFIDENTIAL / PROPRIETARY FILE NOTICE
+
+This file or package and its contents contain confidential, proprietary, and/or intellectual-property materials of Elevation UpScales, Inc. They are provided solely for authorized Elevation UpScales business purposes.
+
+No portion may be copied, reproduced, distributed, disclosed, published, transferred, commercialized, incorporated into another business system, or reused for another person or organization without prior express written permission from Elevation UpScales, Inc.
+
+BY DOWNLOADING, ACCESSING, OPENING, EXTRACTING, RETAINING, OR USING THIS FILE OR PACKAGE AFTER RECEIVING THIS NOTICE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS OF USE AND THE ELEVATION UPSCALES, INC. INTERNAL WORKER CONFIDENTIALITY, INTELLECTUAL PROPERTY & FILE-USE POLICY.
+
+If you do not agree to these terms, do not download, open, extract, retain, or use the materials and promptly delete or return them.
+
+Unauthorized use, copying, disclosure, distribution, or competitive misuse is prohibited. All rights reserved.
+
+Controlling policy:
+operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md
