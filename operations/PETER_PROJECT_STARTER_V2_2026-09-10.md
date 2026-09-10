@@ -21,7 +21,7 @@ Replacement package:
 Replacement SHA256:
 `c97f30cc835a45dd45f517d27950261bc86762527924062285d593b45fd125f5`
 
-The live Git record may contain newer owner priority/synchronization direction than the original V2 ZIP. Current Git control now includes `operations/CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md`; Peter's working project should reconcile to that live baseline rather than rebuilding from the older ZIP.
+The live Git record may contain newer owner priority/synchronization direction than the original V2 ZIP. Current Git control now includes `operations/CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md` and `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`; Peter's working project should reconcile to that live baseline rather than rebuilding from the older ZIP.
 
 ## Project Structure
 
@@ -46,10 +46,27 @@ Peter's project uses the same parent baseline as Company Operations:
 1. Casey's newest explicit owner direction;
 2. `operations/MANAGEMENT_OPERATING_SOP.md`;
 3. `operations/CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md`;
-4. current controlling `/operations/` lane records;
-5. verified live platform/vendor/account facts.
+4. `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`;
+5. current controlling `/operations/` lane records;
+6. verified live platform/vendor/account facts.
 
 Peter's ChatGPT Project is an execution environment, not a separate company operating system. ZIP packages are human handoff snapshots and never override newer owner direction or newer controlling Git state.
+
+## Internal Confidentiality / IP / File-Use Control
+
+Peter and every routed human or AI-assisted worker are subject to `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md` for all Company Materials.
+
+Company Materials may be used only for authorized Elevation UpScales business purposes and may not be copied, distributed, republished, commercialized, incorporated into another business system, or reused for an outside person or organization without prior express written permission from Elevation UpScales, Inc., subject to applicable law and protected legal rights.
+
+All future internal ZIPs, project handoffs, worker packets, AI continuity packages, and other downloadable Elevation packages must embed:
+
+- `00_READ_FIRST_TERMS_OF_USE.txt` at the ZIP/package root using `operations/ZIP_TERMS_OF_USE_NOTICE_TEMPLATE.txt`;
+- a current copy of `INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`;
+- a short README statement that downloading, accessing, opening, extracting, retaining, or using the package after receipt of the notice constitutes acknowledgment and acceptance of the package terms to the fullest extent permitted by law.
+
+If the recipient does not accept the terms, the recipient must not download, open, extract, retain, or use the package and should delete or return it.
+
+Do not put passwords, MFA codes, API keys, customer PII, private supplier pricing, private freight rates, tax forms, IDs, or other protected records into a Git-tracked handoff or public repository.
 
 ## Cross-GPT Communication Loop
 
@@ -141,7 +158,7 @@ Peter's AI team should create one recurring **flexible evening** task named:
 
 Task instruction:
 
-> Review the newest owner-approved Company Operations baseline and current Peter execution deltas. Update Peter's working Ecommerce & Vendor Operations SOP only with verified lane-specific changes. Preserve `MANAGEMENT_OPERATING_SOP.md` and `CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md` as parent controls. Move genuine WAITING/HOLD items to the end of the worktree by priority and continue the highest-priority unblocked action. Do not modify website/runtime Git, branches, PRs, or deployment state unless Casey's owner-side chat explicitly approved that exact development scope. Return a concise sync receipt with COMPLETED / CURRENT STATE / SOP DELTA / BLOCKER / NEXT / OWNER GATE.
+> Review the newest owner-approved Company Operations baseline and current Peter execution deltas. Update Peter's working Ecommerce & Vendor Operations SOP only with verified lane-specific changes. Preserve `MANAGEMENT_OPERATING_SOP.md`, `CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md`, and `INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md` as parent controls. Move genuine WAITING/HOLD items to the end of the worktree by priority and continue the highest-priority unblocked action. Ensure every newly generated internal Elevation ZIP or worker handoff embeds `00_READ_FIRST_TERMS_OF_USE.txt` plus the current internal confidentiality/IP/file-use policy. Do not modify website/runtime Git, branches, PRs, or deployment state unless Casey's owner-side chat explicitly approved that exact development scope. Return a concise sync receipt with COMPLETED / CURRENT STATE / SOP DELTA / BLOCKER / NEXT / OWNER GATE.
 
 This scheduled task is Peter-side project hygiene and synchronization only. It does not authorize external vendor sends, financial commitments, website development, or production changes.
 
@@ -152,6 +169,7 @@ This scheduled task is Peter-side project hygiene and synchronization only. It d
 - Peter returns concise delta state rather than recreating the entire management history.
 - Company Operations / OS PM records material shared-state changes into Git.
 - Do not create a competing Peter management repository unless Casey explicitly authorizes it.
+- Every new internal ZIP/handoff package must embed the required file-use notice and current internal confidentiality/IP/file-use policy.
 
 ## Peter Team → Company Operations Sync Requirement
 
