@@ -14,6 +14,7 @@ This record **heavily simplifies and replaces the Peter-specific workflow, chat 
 Parent company controls remain in force:
 
 - Casey's newest explicit owner direction;
+- `operations/CURRENT_WORK_BOARD.md` for the current global work order and unresolved work state;
 - `operations/MANAGEMENT_OPERATING_SOP.md`;
 - `operations/CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md`;
 - `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`;
@@ -27,12 +28,11 @@ That is the normal workflow.
 
 ## Current work order
 
-1. **VEVOR — #1 ACTIVE PRIORITY.** Continue the existing VEVOR PRO/account/feed/direct-site product activation work.
-2. **TikTok second appeal / withdrawal restoration — NEXT.** Move here as soon as the current executable VEVOR block is complete or VEVOR reaches a true external wait state.
-3. **Paid customer problem — interrupt only when immediate action is actually required.** Resolve or isolate it, then return to the active priority.
-4. **Routine eBay cleanup — AFTER VEVOR and TikTok.**
-5. **Renogy — WAITING on external review. Do not chase during the normal review window.**
-6. Other vendors or projects are worked only when Company Operations routes them or the higher item is genuinely waiting.
+The canonical current work order is `operations/CURRENT_WORK_BOARD.md`.
+
+Peter should execute the highest-priority Peter-owned row that has a real next action. Do not maintain a second rolling priority board in this file.
+
+As of this reconciliation, the board preserves the current owner direction that **VEVOR is first and the TikTok second appeal / withdrawal-restoration follows next**, while a real paid-customer problem may interrupt when immediate action is required. If Casey or the canonical board later changes that order, the newer direction controls without requiring this Peter control file to be rewritten.
 
 Within VEVOR, Peter does not need to rebuild strategy. Execute the existing approved direct-site model: verify account state, complete tax-exemption setup when available, capture the supplier feed, reconcile useful products, follow VEVOR's selling-price floor, keep unapproved third-party marketplaces blocked, and establish the normal order/fulfillment path.
 
@@ -74,6 +74,8 @@ Do not use a large gate system for Peter's normal work.
 - If an external dependency blocks the task, record it once, move the item to WAITING, and start the next assigned item.
 - Do not open parallel side projects while the current task is executable.
 
+The global board may use priority labels for management ordering; Peter does not need to reproduce that taxonomy in routine chat.
+
 ## Reporting format
 
 Peter's normal update should be short:
@@ -94,7 +96,7 @@ Shared public-safe management truth remains:
 
 Peter should not turn Git access into a work blocker:
 
-- If the repo is visible, read only the relevant current control file(s) needed for the task and execute.
+- If the repo is visible, read only `CURRENT_WORK_BOARD.md` plus the relevant current control file(s) needed for the task and execute.
 - If the repo is not visible, report **GIT BLOCKED — REPO NOT VISIBLE** once and continue from the newest Peter master package and direct Company Operations instructions.
 - Do not send passwords, MFA codes, tokens, recovery codes, or credentials.
 - Peter's AI team is **READ / PROPOSE** for website-development Git unless Casey explicitly approves the exact write/development scope.
@@ -113,7 +115,4 @@ Every new internal Elevation ZIP must still include the required terms-of-use no
 
 Peter's job is not to manage the management system.
 
-**ONE TASK → EXECUTE → REPORT RESULT → NEXT TASK.**
-
-Current #1: **VEVOR.**  
-Next: **TikTok second appeal / withdrawal restoration.**
+**ONE CANONICAL WORK BOARD → ONE TASK → EXECUTE → REPORT RESULT → NEXT TASK.**

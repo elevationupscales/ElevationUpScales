@@ -6,7 +6,7 @@
 
 This is the single current public-safe operating map for supplier, vendor, dropship, sourcing, Hawaii/Alaska fulfillment, referral, and specialized-logistics lead work.
 
-**Use this file for current supplier status.** Dated draft queues and outbound-status files are historical receipts after their changes are reconciled here; they must not be mentally merged with this map to determine current state.
+**Use this file for current supplier status.** Global company priority and unresolved work-item state are controlled by `CURRENT_WORK_BOARD.md`. Dated draft queues and outbound-status files are historical receipts after their changes are reconciled here; they must not be mentally merged with this map to determine current state.
 
 ## Privacy boundary
 
@@ -36,7 +36,7 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - SOK has explicitly confirmed Elevation may accept preorders/backorders for temporarily out-of-stock models. Supplier stock is reserved/locked only after SOK payment is confirmed; SOK will provide restock timing, and urgent orders may be prepaid to lock future stock.
   - SOK has explicitly welcomed Elevation taking an active customer-warranty role. Lower-48 warranty workflow should be proven first; Hawaii warranty remains a separate controlled operating lane. Supplier replenishment of approved replacement parts/units into later Elevation orders is supplier-supported in principle and must not be presented publicly as an unconditional service guarantee.
   - SOK has delivered product-image media in addition to previously supplied logo/manual/specification material; reconcile those assets through the existing SOK catalog/media lane rather than creating a new project.
-  - Current Hawaii proof-shipment state belongs in `SOK_HAWAII_FIRST_ORDER_READINESS.md` and `ACTIVE_FOLLOWUPS_2026-09-08.md`.
+  - Current SOK warranty-program state belongs in `SOK_RECON_OS_PROJECT.md` and `SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md`; proof-shipment state remains in its applicable SOK/logistics records.
 
 ### 02 — Existing Relationship / Do Not Prospect — 1
 
@@ -162,15 +162,17 @@ Do not make unsupported dealer/channel claims. Verify the correct commercial pat
 
 - **NAZ Solar Electric** — ecommerce conflict in partner qualification. Do not pursue as an Elevation ecommerce-resale supplier under the current model; may remain a project-procurement reference only.
 
-## Current execution priority
+## Supplier-domain routing — not the global priority board
 
-Work the tree in this order unless Casey gives a newer explicit priority:
+Global company priority and cross-project work order are controlled by `CURRENT_WORK_BOARD.md` and newer Casey direction. This file does not independently rank supplier work against customer orders, TikTok, checkout, website, warranty, catalog, or other projects.
 
-1. **Close active qualification/onboarding** — Renogy, VEVOR, Kingboss.
-2. **Review the existing draft queue** — do not create duplicate outreach.
-3. **Handle replies from contacted suppliers** in their existing threads.
-4. **Advance qualified-not-contacted complementary suppliers** only after the higher-value active/draft queue is controlled.
-5. Keep generic battery expansion secondary to SOK unless a defined product, availability, commercial-capacity, referral, Hawaii/Alaska or logistics gap is proven.
+When supplier/commercial work is routed into this domain:
+
+1. Continue the exact active onboarding/relationship task identified by `CURRENT_WORK_BOARD.md`; do not restart qualification.
+2. Review existing drafts before creating new outreach.
+3. Handle material replies in the existing relationship/thread.
+4. Advance qualified-not-contacted complementary suppliers only when higher-priority routed supplier work is controlled or waiting.
+5. Keep generic battery expansion secondary to SOK unless a defined product, availability, commercial-capacity, referral, Hawaii/Alaska, or logistics gap is proven.
 
 ### Solar / inverter / BOS focus
 
@@ -210,9 +212,9 @@ Wholesale approval does **not** automatically mean dropship approval, marketplac
 ## Ownership / handoff
 
 - **Leads Pipeline:** discovery, research, qualification, dedupe, prioritization, commercial angle and manager-review draft preparation.
-- **Email/Freight:** actual external correspondence, supplier replies, follow-up, relationship handling and freight correspondence.
+- **Company Operations / assigned correspondence worker:** actual external correspondence, supplier replies, follow-up, relationship handling and freight correspondence.
 - **Website/Ecommerce:** product/channel activation only after authorization/MAP/channel facts are approved.
-- **GitHub `/operations/`:** active management source of truth.
+- **GitHub `/operations/`:** public-safe management state; `CURRENT_WORK_BOARD.md` owns global work order.
 
 ## Hard dedupe rule
 

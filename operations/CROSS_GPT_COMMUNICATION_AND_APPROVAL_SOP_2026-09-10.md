@@ -1,188 +1,167 @@
-# Elevation UpScales — Cross-GPT Communication, Priority & Approval SOP
+# Elevation UpScales — Cross-GPT Communication & Approval SOP
 
 **Status:** ACTIVE / CONTROLLING EXTENSION  
 **Effective:** 2026-09-10  
+**Reconciled:** 2026-09-10  
 **Owner:** Casey Young  
 **Parent SOP:** `operations/MANAGEMENT_OPERATING_SOP.md`
 
 ## Purpose
 
-Keep Casey / Company Operations and Peter / Ecommerce & Vendor Operations on one operating baseline while allowing Peter's AI team to work independently inside its assigned lane without gaining uncontrolled website-development or repository write authority.
+Keep Company Operations and Peter's Ecommerce & Vendor Operations AI environment on one operating baseline without creating a second priority system or granting uncontrolled website-development authority.
 
-This SOP does not replace the Shared Management Operating SOP. It standardizes the communication bridge between the two AI work environments.
+This SOP controls the communication bridge, execution receipts, synchronization behavior and approval boundaries between the two environments.
+
+It does **not** own the company's global worktree.
+
+Current global priority/state is controlled by:
+
+`operations/CURRENT_WORK_BOARD.md`
 
 ## Shared baseline
 
-Both sides use the same authority order:
+Use this authority order:
 
 1. Casey / Owner's newest explicit direction.
-2. `operations/MANAGEMENT_OPERATING_SOP.md`.
-3. `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`.
-4. Current controlling `/operations/` records for the assigned lane.
-5. Verified live business/platform/vendor state.
-6. Historical handoffs only when needed to resolve an actual gap.
+2. `operations/CURRENT_WORK_BOARD.md` for reconciled global current priority and work-item state.
+3. `operations/MANAGEMENT_OPERATING_SOP.md`.
+4. `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`.
+5. Current controlling `/operations/` project/lane records.
+6. Verified live business/platform/vendor facts.
+7. Historical handoffs only when needed to resolve an actual gap.
 
 Peter's team must not rebuild or fork company policy. Company Operations must not restart work Peter has already verified and returned cleanly.
 
-## Internal confidentiality / IP / terms-of-use control
-
-All Company Materials exchanged between Company Operations, Peter, Peter's AI workers, contractors, managers, or other authorized recipients are subject to `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`.
-
-Company Materials may be used only for authorized Elevation UpScales business purposes. They may not be copied, distributed, republished, commercialized, incorporated into another business system, or reused for another person or organization without prior express written permission from Elevation UpScales, Inc., except where applicable law provides otherwise.
-
-Every newly generated internal ZIP, AI continuity package, worker packet, or cross-GPT file handoff must include at its root:
-
-- `00_READ_FIRST_TERMS_OF_USE.txt` using `operations/ZIP_TERMS_OF_USE_NOTICE_TEMPLATE.txt`;
-- a current copy of `INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`;
-- a README statement that downloading, accessing, opening, extracting, retaining, or using the package after receiving the notice constitutes acknowledgment and acceptance of the package terms to the fullest extent permitted by law.
-
-If the recipient does not accept the terms, the recipient must not download, open, extract, retain, or use the materials and should delete or return them.
-
-No protected credentials, tax documents, customer PII, banking records, private supplier pricing, private freight rates, API keys, authentication artifacts, or other protected records may be placed in a public Git-tracked handoff merely to satisfy this rule.
-
 ## Communication loop
-
-Use this loop for normal cross-GPT coordination:
-
-**OWNER / COMPANY OPERATIONS BASELINE → PETER AI EXECUTION → PETER DELTA / SYNC RECEIPT → COMPANY OPERATIONS RECONCILE → UPDATED BASELINE → PETER CONTINUES**
-
-Peter's AI team should report only what changed from the shared baseline. Company Operations should reconcile only the delta rather than asking Peter to repeat the entire lane.
-
-### Standard Peter sync receipt
-
-Return:
-
-- `BASELINE USED:` controlling file / date / commit when known;
-- `COMPLETED:` what changed;
-- `CURRENT STATE:` READY / IN_PROGRESS / WAITING / BLOCKED / VERIFYING / COMPLETE / HOLD;
-- `EVIDENCE:` source file, platform screen, vendor reply, order ID, or other non-secret reference;
-- `PROPOSED SOP DELTA:` only if Peter's team learned something that should change its working SOP;
-- `BLOCKER:` exact blocker, if any;
-- `NEXT UNBLOCKED ACTION:` next action Peter's team can actually perform;
-- `OWNER GATE:` only when a genuine owner decision or approval is required.
-
-Do not send long historical recaps unless Company Operations specifically requests recovery.
-
-## Peter SOP delta model
-
-Peter's AI team may maintain and improve its own working SOP based on verified execution results, but those edits are **proposed/working deltas**, not authority over company website code or company-wide policy.
-
-When Peter's team changes its own SOP:
-
-1. preserve the shared Management SOP, Internal Worker Confidentiality/IP/File-Use Policy, and this Cross-GPT SOP as the parent baseline;
-2. record only lane-specific additions, clarifications, or lessons learned;
-3. return the changed section or concise delta to Company Operations;
-4. Company Operations reconciles any material company-wide rule into the controlling `/operations/` state when appropriate;
-5. Peter continues from the updated shared baseline rather than creating a competing policy system.
-
-## Website / development / Git approval boundary
-
-Peter and Peter's AI workers are **READ / PROPOSE by default** for the Elevation website-development repository state.
-
-Without an explicit approval issued from Casey's owner-side chat, Peter's AI team must not:
-
-- modify website/runtime source files;
-- modify checkout, auth, payment, shipping, deployment, Worker, Pages, bindings, or production behavior;
-- create or merge website-development branches or pull requests;
-- commit application/runtime changes to `main`;
-- deploy or authorize production releases;
-- treat public Git visibility as development-write authorization.
-
-Peter's team may:
-
-- read public-safe `/operations/` policy and current state;
-- read public website/source information needed to understand its assigned work;
-- prepare proposed changes, annotations, acceptance criteria, product/catalog data, screenshots, or patch instructions;
-- update its own working SOP/project knowledge;
-- return proposed website changes to Company Operations / OS PM / Developer Manager for reconciliation.
-
-### Owner-side development approval gate
-
-Website-editing Git authority exists only when Casey's owner-side chat explicitly states the approved scope.
-
-A valid approval should identify, as applicable:
-
-- exact feature/problem or file scope;
-- whether Peter's team may only prepare a patch or may actually write code;
-- allowed branch/repository path;
-- test/preview requirement;
-- production/deployment authority, if any.
-
-Approval for one scope does not become standing development access.
-
-## Priority synchronization
-
-Peter's worktree must follow the same priority behavior as Company Operations.
-
-### P0 — interrupt only for immediate operating risk
-
-Examples:
-- paid customer order requiring immediate fulfillment action;
-- checkout/payment outage affecting revenue;
-- time-sensitive security/access event;
-- same-day customer/vendor deadline with material consequence.
-
-P0 interrupts the current task only long enough to resolve or isolate the immediate risk.
-
-### P1 — current owner-declared active priority
-
-Current P1 supplier lane:
-
-**VEVOR — direct-site dropship onboarding / account verification / direct supplier feed / first catalog set.**
-
-Keep P1 moving while it has an executable next action.
-
-### P2 — active unblocked revenue / activation work
-
-Use for work that directly advances catalog readiness, supplier activation, fulfillment readiness, sales-channel health, or a live revenue path and is not superseded by P0/P1.
-
-### P3 — routine support / enrichment
-
-Examples include non-urgent cleanup, documentation enrichment, future research, and convenience improvements.
-
-### WAITING / HOLD — move to the end
-
-A task that cannot move because of an external reply, unavailable account access, missing document, future trigger, or other real dependency does **not** occupy the active top of Peter's queue.
 
 Use:
 
-**VERIFY BLOCKER → RECORD TRIGGER → MOVE TO WAITING/HOLD END → CONTINUE NEXT UNBLOCKED PRIORITY**
+**CURRENT COMPANY BASELINE → PETER EXECUTION → PETER DELTA / RESULT → COMPANY OPERATIONS RECONCILE → CURRENT WORK BOARD / LANE RECORD UPDATE → PETER CONTINUES**
 
-Return to a WAITING/HOLD item only when:
+Peter's AI team reports what changed, not the entire lane history.
+
+Peter's normal return format is intentionally short under the current simplified Peter control:
+
+- `DONE:` what was actually completed;
+- `BLOCKED:` only a real blocker, or `NONE`;
+- `NEXT:` next executable action;
+- `NEEDS CASEY:` only when a genuine owner gate exists.
+
+Add evidence or a longer sync receipt only when it materially helps reconciliation, recovery, compliance, or a complex handoff.
+
+## Priority synchronization
+
+Do not maintain a copied static priority board in this SOP.
+
+At the beginning of meaningful work, Peter's environment should consult `CURRENT_WORK_BOARD.md` and identify the highest-priority Peter-owned executable row.
+
+A real paid-customer/order/security/checkout exception may interrupt when immediate operating risk exists. Resolve or isolate that exception, update/return its state, then resume the highest-priority unblocked row.
+
+### WAITING / HOLD behavior
+
+A work item waiting on an external response, unavailable account access, future date, missing document, or other real dependency does not stay at the top of the execution queue.
+
+Use:
+
+**VERIFY BLOCKER → RECORD TRIGGER → WAIT/HOLD → CONTINUE NEXT UNBLOCKED PRIORITY**
+
+Return to the item when:
 
 - the required reply/file/access arrives;
-- a defined date/deadline is reached;
+- its defined date/deadline is reached;
 - a material state change occurs; or
 - Casey / Company Operations explicitly promotes it.
 
-Do not repeatedly re-check or re-email a waiting lane merely because it remains open.
+Do not repeatedly re-check or re-email a legitimately waiting lane merely because it remains open.
 
-## Current synchronized priority board
+A newer priority never silently closes an older unresolved row.
 
-1. **P0 customer/order/security exceptions** — only when a live immediate exception exists.
-2. **P1 VEVOR** — ACTIVE / IN_PROGRESS; verify VEVOR PRO state, tax/account state, direct supplier feed, then 20–40-product direct-site working set.
-3. **P2 other active unblocked commerce/vendor execution** — continue only when it does not displace VEVOR.
-4. **Renogy** — WAITING / APPLICATION UNDER REVIEW; parked until approval/decline/material request.
-5. **Other vendor/logistics lanes in WAITING/HOLD** — end of queue until their trigger occurs.
+## Peter workflow relationship
 
-Within each priority level, choose the highest-value **unblocked** action rather than the oldest open item.
+`PETER_PROJECT_STARTER_V2_2026-09-10.md` now contains Peter's simplified execution control.
 
-## Scheduled Peter-side SOP synchronization task
+That file intentionally removes the earlier heavy Peter-specific management process and recurring SOP-maintenance requirement.
 
-Peter's AI team should create one recurring **flexible evening** task inside Peter's own AI/project environment named:
+Accordingly:
 
-**Peter SOP Sync**
+- **Peter SOP Sync is no longer a required recurring task.**
+- Peter does not need to rewrite his SOP after routine management updates.
+- Current work order belongs in `CURRENT_WORK_BOARD.md`, not in parallel Peter/Cross-GPT boards.
+- Peter should spend routine work time executing, not maintaining management infrastructure.
 
-Task instruction:
+## Peter SOP / working-delta model
 
-> Review the newest owner-approved Company Operations baseline and the current Peter execution deltas. Update Peter's working Ecommerce & Vendor Operations SOP only with verified lane-specific changes. Preserve the Shared Management Operating SOP, Cross-GPT Communication SOP, and Internal Worker Confidentiality/IP/File-Use Policy as parent controls. Move genuinely WAITING/HOLD items to the end of the worktree and continue the highest-priority unblocked action. Ensure every new internal Elevation ZIP or worker handoff embeds the required `00_READ_FIRST_TERMS_OF_USE.txt` notice and current internal policy. Do not modify website/runtime Git or deployment state unless Casey's owner-side chat has explicitly approved that exact development scope. Return a concise sync receipt with COMPLETED / CURRENT STATE / SOP DELTA / BLOCKER / NEXT / OWNER GATE.
+Peter's AI team may still maintain lane-specific working notes when execution genuinely requires them, but those notes are not company-wide authority.
 
-The task is a Peter-side project hygiene/sync task, not authorization for website development, vendor sends, financial commitments, or owner-level actions.
+When a material Peter-lane lesson is discovered:
+
+1. preserve the shared parent SOPs and current work board;
+2. capture only the lane-specific addition/clarification needed;
+3. return the material delta to Company Operations;
+4. Company Operations / OS PM reconciles any company-wide consequence;
+5. Peter continues from the reconciled baseline rather than creating a competing control record.
+
+## Website / development / Git approval boundary
+
+Peter and Peter's AI workers are **READ / PROPOSE by default** for website-development Git.
+
+Without explicit approval issued from Casey's owner-side chat for the exact scope, Peter's AI team must not:
+
+- modify website/runtime source files;
+- modify checkout, auth, payment, shipping, deployment, Workers, Pages, bindings or production behavior;
+- create or merge website-development branches/PRs;
+- commit application/runtime changes to `main`;
+- deploy or authorize production releases;
+- treat repository visibility or technical write capability as authorization.
+
+Peter's team may:
+
+- read public-safe `/operations/` policy/state;
+- read public source needed to understand assigned work;
+- prepare proposed changes, annotations, acceptance criteria, catalog/product data, screenshots or patch instructions;
+- update Peter's internal working project knowledge;
+- return proposals to Company Operations / OS PM / Developer Manager.
+
+### Owner-side development approval gate
+
+A valid owner authorization should identify the approved feature/problem or file scope and, where applicable:
+
+- whether Peter may only propose or actually write;
+- branch/repository boundary;
+- test/preview requirement;
+- production/deployment authority.
+
+Approval for one scope does not become standing website-development authority.
+
+## Platform-access boundary
+
+Connected context is not the same as authenticated action access.
+
+If Peter's worker lacks the tool/account access required for an action:
+
+- preserve the project and work item;
+- return the exact unavailable action;
+- route only that human/UI step;
+- continue other unblocked work.
+
+**A BLOCKED WORKER DOES NOT MEAN A BLOCKED PROJECT.**
+
+Do not request or transmit passwords, MFA codes, tokens, session cookies or other authentication secrets through ordinary handoffs.
+
+## Internal confidentiality / IP / terms-of-use control
+
+All Company Materials exchanged between Company Operations, Peter, Peter's AI workers, contractors, managers or other authorized recipients remain subject to:
+
+`operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`
+
+New internal ZIP, AI continuity, worker or cross-GPT packages must include the required root terms-of-use notice and current internal policy as defined by that controlling record.
+
+No protected credentials, tax documents, customer PII, banking records, private supplier pricing, private freight rates, API keys, authentication artifacts or other protected records may be placed into public Git-tracked handoffs merely for convenience.
 
 ## Protected data
 
-The repository is public. Never place credentials, customer PII, private vendor pricing, signed tax forms, banking records, owner identification, private freight rates, API keys, authentication artifacts, or other protected records into Git or cross-GPT handoffs.
+The repository is public. Never place credentials, customer PII, private vendor pricing, signed tax forms, banking records, private freight rates, API keys, authentication artifacts or other protected records into Git or cross-GPT handoffs.
 
 ## Operating result
 
-**ONE BASELINE → TWO AI WORK ENVIRONMENTS → DELTA-BASED SYNC → PRIORITY BY UNBLOCKED VALUE → HOLD MOVES TO END → COMPANY MATERIALS REMAIN PROTECTED → WEBSITE GIT REMAINS OWNER-GATED**
+**ONE CURRENT WORK BOARD → TWO COORDINATED EXECUTION ENVIRONMENTS → SIMPLE RESULT RETURN → WAITING WORK PRESERVED → AUTHORITY STAYS EXPLICIT → COMPANY MATERIALS REMAIN PROTECTED**

@@ -1,17 +1,20 @@
 # Active Commerce & Supplier Follow-Ups — 2026-09-08
 
 **Owner:** Elevation UpScales Management  
-**Status:** ACTIVE  
-**Source of truth:** GitHub `/operations/`
+**Status:** HISTORICAL / EVIDENCE-ONLY FOR CURRENT GLOBAL STATE  
+**Original status at creation:** ACTIVE  
+**Current global work state:** `CURRENT_WORK_BOARD.md`
 
-This file tracks current action items that must remain visible until closed. It intentionally excludes private identity documents, supplier costs, carrier rates, private partner pricing, customer PII, credentials, and other protected commercial/logistics details.
+> **Supersession note — 2026-09-10:** This dated file is preserved as correspondence/action evidence, WAITING-trigger context, duplicate-send protection, and historical reconstruction. Its embedded statuses, priorities, drafts, and next actions describe the state when they were recorded and may now be stale. **Do not use this file as the current company work board.** Current global priority/state is controlled by `CURRENT_WORK_BOARD.md`; current supplier-domain relationship status is controlled by `SUPPLIER_LEADS_LIVE_MAP.md`; applicable lane/project SOPs control durable rules. Preserve the historical body below rather than rewriting it to imitate later events.
+
+This file originally tracked action items that needed to remain visible until closed. It intentionally excludes private identity documents, supplier costs, carrier rates, private partner pricing, customer PII, credentials, and other protected commercial/logistics details.
 
 ## Owner review override — 2026-09-09
 
 **Status:** OWNER REVIEWED  
 **Priority:** LOW
 
-The following inbox-derived items were reviewed by Casey and are explicitly moved to the low-priority owner-reviewed backlog. They must not interrupt the current active work tree unless a materially new event changes the state:
+The following inbox-derived items were reviewed by Casey and were explicitly moved to the low-priority owner-reviewed backlog at that time. They must not interrupt the current active work tree unless a materially new event changes the state:
 
 - Stripe account-information / verification tasks;
 - TikTok Shop fulfillment-risk and account-verification/appeal items identified in the inbox sweep;
@@ -22,7 +25,7 @@ The following inbox-derived items were reviewed by Casey and are explicitly move
 - Lippert routing-form follow-through;
 - Contractor T-Shirts order Q-001803 design-change follow-through.
 
-Related inbox threads that are already legitimately waiting remain WAITING / HOLD and are not to be chased merely because they are visible in Gmail. This owner-review override supersedes any older priority label in this file for the specific items above unless Casey or current Company Operations direction explicitly promotes one again.
+Related inbox threads that are already legitimately waiting remain WAITING / HOLD and are not to be chased merely because they are visible in Gmail. This historical owner-review override superseded older priority labels for the specific items above at that point in time; later Casey direction and `CURRENT_WORK_BOARD.md` control current priority.
 
 ## 1. Doba order / verification control
 
@@ -334,8 +337,12 @@ Close when:
 - the order is moving or has been properly recovered/refunded;
 - the root cause is captured in the order workflow if a process failure occurred.
 
-## Control rule
+## Historical control rule
+
+At the time this record was active, the governing controls were:
 
 **TRACK UNTIL CLOSED.** New email facts become active management state only after reconciliation into Git. Gmail remains correspondence-only; Git remains the management source of truth.
 
 **NO DOUBLE SEND.** Before any external send, verify the current thread for already-sent correspondence and current unsent drafts. When a response has already been sent, stale drafts for the same response must not be sent. When a valid draft is pending owner review, update or supersede that draft rather than creating a parallel outbound response.
+
+These durable principles remain valid where they do not conflict with newer controlling SOPs. Current task state and priority are now in `CURRENT_WORK_BOARD.md`.
