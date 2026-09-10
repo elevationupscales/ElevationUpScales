@@ -58,6 +58,7 @@ Use one owner for each type of state:
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery/ecommerce/Lower-48/Hawaii/Alaska/paid-order/prepurchase/shipping rules.
 - [`SOK_RECON_OS_PROJECT.md`](./SOK_RECON_OS_PROJECT.md) — dedicated SOK Supplier, Commerce & Warranty Project / SOK RECON OS scope.
 - [`SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md`](./SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md) — current supplier-specific Hawaii warranty negotiation posture and owner gates.
+- [`VEVOR_VENDOR_MASTER_SOP.md`](./VEVOR_VENDOR_MASTER_SOP.md) — controlling VEVOR direct-account vendor, MAP/pricing, Shopify, catalog, fulfillment, and VEVOR-specific change-control lane under Peter / Company Operations.
 - [`WARRANTY_FULFILLMENT_SERVICE_WORKFLOW.md`](./WARRANTY_FULFILLMENT_SERVICE_WORKFLOW.md) — shared company Warranty Fulfillment lifecycle; supplier-specific economics remain in supplier projects.
 - [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — specialized-logistics pricing architecture and protected-rate boundaries.
 - [`SUPPLIER_LOGISTICS_GROWTH.md`](./SUPPLIER_LOGISTICS_GROWTH.md) — supplier/commercial opportunity model.
