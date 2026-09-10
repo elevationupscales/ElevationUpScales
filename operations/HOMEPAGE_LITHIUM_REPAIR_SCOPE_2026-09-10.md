@@ -64,6 +64,20 @@ These role addresses were previously QA-tested through the production email-rout
 
 Do not add additional public addresses unless they are separately verified and routed.
 
+## DEV EXECUTION LOCK
+
+This assignment is the currently authorized bounded Dev lane until it reaches a verified terminal state or Casey explicitly changes it.
+
+Before continuing this assignment or starting any later Dev assignment:
+- re-resolve current `main`;
+- read the newest applicable `/operations/` control delta first;
+- reconcile the active branch against that current control state;
+- do not assume an older branch base or earlier assignment snapshot is still current;
+- if `main` moved and the existing branch is stale or non-mergeable, reconcile/rebuild from current `main` rather than forcing stale work forward;
+- do not reopen closed/superseded PRs simply to preserve old paperwork.
+
+Priority changes elsewhere in Operations do not silently cancel this Dev lane. It remains OPEN until explicitly COMPLETE, HELD, SUPERSEDED, or otherwise terminally reconciled.
+
 ## EFFICIENCY / STOP RULE
 
 First perform a quick exact-SHA recon of current `main` and identify the minimum files causing these faults: copy overload, product-layer/cache fault, logo-as-text fallback, and missing/weak company contact routing.
