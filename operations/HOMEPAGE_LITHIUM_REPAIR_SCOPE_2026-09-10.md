@@ -37,13 +37,40 @@ This pass is limited to the homepage/lithium-store issues identified by the Owne
 - Do not change SOK product identity, authorized-dealer status, product URLs, purchase modes, checkout/payment behavior, PayPal, Pay Later, Shopify ingestion, pricing, MAP, availability, freight rules, Hawaii/Alaska controls, or admin behavior.
 - Do not create a new design layer or workaround stylesheet if the existing conflicting annotation/layer can be safely corrected or removed.
 
+5. Company contact / support professionalism
+- The website must present Elevation UpScales as a company with role-based contact paths, not as a single personal phone contact.
+- Preserve the Owner phone number where currently appropriate, but do not leave it as the only visible support method.
+- Use the verified role addresses below where the corresponding customer intent exists:
+  - Customer support / general help / warranty-help entry point: `support@elevationupscales.com`
+  - Order-status / fulfillment / shipment questions: `orders@elevationupscales.com`
+  - Sales / product purchasing / B2B commercial inquiries: `sales@elevationupscales.com`
+  - Owner / strategic contact only where an owner-level or executive route is actually appropriate: `casey@elevationupscales.com`
+- Do not use `casey@elevationupscales.com` as the default customer-support address.
+- Do not expose internal routing notes, personal mailbox details, forwarding architecture, or private manager contacts.
+- Homepage/footer/support surfaces should make at least the general Support email readily visible alongside the existing phone contact.
+- Add Orders and Sales only where their intent is clear; do not clutter every page with all addresses.
+- Keep current forms/intake routes primary where they are already the intended workflow; role email addresses are supporting contact paths, not replacements for `Start a Project`, checkout, order forms, or other working intake systems.
+- Use ordinary `mailto:` links or the site's existing contact component pattern; do not build a new messaging system.
+- Verify desktop/mobile rendering and that no contact link points to an unverified or placeholder address.
+
+## VERIFIED ROLE EMAIL SOURCE STATE
+
+These role addresses were previously QA-tested through the production email-routing setup and are approved for public website routing where appropriate:
+
+- `support@elevationupscales.com`
+- `orders@elevationupscales.com`
+- `sales@elevationupscales.com`
+- `casey@elevationupscales.com`
+
+Do not add additional public addresses unless they are separately verified and routed.
+
 ## EFFICIENCY / STOP RULE
 
-First perform a quick exact-SHA recon of current `main` and identify the minimum files causing these three faults: copy overload, product-layer/cache fault, and logo-as-text fallback.
+First perform a quick exact-SHA recon of current `main` and identify the minimum files causing these faults: copy overload, product-layer/cache fault, logo-as-text fallback, and missing/weak company contact routing.
 
 If the repair is clearly small and bounded, complete it in one branch/PR with focused QA.
 
-If the repair is likely to require a few hours, broad visual reconstruction, asset pipeline rebuilding, or unrelated refactoring:
+If the repair is likely to require a few hours, broad visual reconstruction, asset pipeline rebuilding, new contact infrastructure, or unrelated refactoring:
 
 **STOP. RETURN HELD / DEFER TO LATER DEV WORK. DO NOT PRESS THE ISSUE DURING ACTIVE DEV PRIORITIES.**
 
@@ -54,6 +81,7 @@ Return only:
 - root cause(s);
 - files changed;
 - confirmation that only the stated scope changed;
+- confirmation of role-email placement and route intent;
 - desktop/mobile verification;
 - before/after screenshot proof if available;
 - QA result;
