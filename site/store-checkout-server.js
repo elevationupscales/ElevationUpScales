@@ -560,8 +560,8 @@ async function createStoreOrder(request, env) {
   if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
   const quote = await quoteStoreItem(raw, env);
   if (!quote.ok) return json(quote, quote.status || 400);
-  if (quote.availability?.paymentEligible === false) return json({error:quote.availability?.mode==="prepurchase"?"Pre-Purchase timing must be confirmed before payment.":quote.availability?.mode==="backorder"?"Backorder replenishment and timing must be confirmed before payment.":"This item is not currently eligible for payment.",reservationRequired:true,reservationUrl:quote.availability?.reservationUrl,quote},409);
-  if (quote.availability?.requiresTimingAcknowledgement && raw?.availabilityTimingAcknowledged !== true) return json({error:"Please acknowledge the estimated fulfillment timing before payment.",timingAcknowledgementRequired:true,quote},409);
+  if (quote.availability?.paymentEligible === false) return json({error:"This item is not currently eligible for direct payment. Use the available purchase-options path to continue.",reservationRequired:true,reservationUrl:quote.availability?.reservationUrl,quote},409);
+  if (quote.availability?.requiresTimingAcknowledgement && raw?.availabilityTimingAcknowledged !== true) return json({error:"Please acknowledge that fulfillment timing is estimated and may change before payment.",timingAcknowledgementRequired:true,quote},409);
   if (quote.hawaii?.customerState === "review_required") return json({error:"Freight Review Required. Elevation will verify the battery and Hawaii freight path and contact you with the next step.",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   if (quote.hawaii?.customerState === "unavailable") return json({error:"Currently Unavailable for Hawaii Shipping",hawaiiFreight:true,requestUrl:quote.hawaii.requestUrl,quote},409);
   if (!paypalConfigured(env)) return json({ error: "PayPal checkout is not configured" }, 503);
