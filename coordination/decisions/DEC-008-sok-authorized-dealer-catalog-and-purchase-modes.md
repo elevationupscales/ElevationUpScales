@@ -179,6 +179,69 @@ They do not bypass:
 
 For Hawaii, quantity `4+` remains **COMMERCIAL QUANTITY - FREIGHT REVIEW REQUIRED** regardless of purchase mode or availability mode.
 
+## Lower-48 warranty handling framework
+
+SOK has confirmed that Elevation may actively support SOK customer warranty cases rather than acting only as a pass-through seller. For Lower-48 operations, warranty support is a post-sale service lane and must not be used to disable otherwise valid checkout, payment, preorder, or backorder flows.
+
+### Customer intake and validation
+
+Elevation should capture, at minimum:
+
+- customer/order identity
+- exact SOK model and SKU
+- serial number when applicable
+- purchase date and sales channel
+- reported issue and relevant photos/video or diagnostic evidence
+- shipping destination
+- whether the issue presents a safety concern
+
+Do not promise a replacement, refund, warranty determination, or supplier reimbursement before the case is validated against the applicable SOK warranty/return basis.
+
+### Standard Lower-48 path
+
+For a normal SOK quality issue on an Elevation-sold unit:
+
+1. Elevation receives and documents the customer case.
+2. Elevation verifies the order, exact SKU, issue evidence, and applicable warranty/return basis.
+3. Elevation routes the claim to SOK when supplier authorization or disposition is required.
+4. SOK may arrange the return label and determine replacement or refund handling under its applicable process.
+5. Elevation records the disposition and keeps the customer informed through completion.
+
+### Elevation-held replacement stock option
+
+SOK Sales Manager Kam has also approved an efficiency path in which Elevation may send a replacement part or battery from Elevation-held warehouse stock and SOK replenishes the replacement into a future Elevation order.
+
+This is an authorized operating option, not a requirement to pre-stock inventory.
+
+Before using this option on a case, Elevation must record:
+
+- case/order reference
+- exact outgoing replacement SKU/model
+- serial number where applicable
+- quantity
+- customer destination
+- supplier authorization/reference when required
+- replenishment owed by SOK
+- later replenishment receipt/reconciliation
+
+Do not create standing warranty inventory, make speculative stock purchases, prepay supplier inventory, or create a recurring purchase commitment solely because this replacement option exists. Those actions remain subject to ordinary commercial authority and economics review.
+
+### Safety and lane isolation
+
+If a warranty case suggests swelling, thermal damage, fire exposure, damaged terminals, leaking, severe impact, or another battery-safety condition, isolate that case for appropriate safety handling and supplier escalation. Do not disable unrelated SOK products or the general customer purchase flow because one warranty case is under review.
+
+**BLOCK THE UNSAFE OR UNVERIFIED LANE — NOT THE ENTIRE PRODUCT OR CUSTOMER FLOW.**
+
+### Hawaii boundary
+
+This Lower-48 framework does **not** establish a standing Hawaii warranty fulfillment program.
+
+Hawaii warranty routing, replacement consolidation, freight reimbursement, dangerous-goods tender, and replenishment mechanics remain a separate controlled lane because SOK does not directly ship ordinary dealer orders to Hawaii under the current operating model. Do not automatically extend Lower-48 replacement procedures to Hawaii.
+
+### Public-safe warranty language
+
+Customer-facing pages may state only verified, supportable warranty information and that Elevation assists customers with warranty cases for SOK products sold by Elevation. Internal replenishment mechanics, supplier credits, dealer costs, warehouse strategy, and future-order reconciliation remain private operations data.
+
 ## Commercial quantities
 
 Keep `Request Commercial Pricing` available even after direct checkout exists. Multi-battery racks, cabinets, recurring supply, mixed pallets, and other commercial configurations should route into controlled quote/review rather than being forced through ordinary checkout.
@@ -213,12 +276,13 @@ Shipping, Hawaii freight, commercial quotes, taxes, and other transaction compon
 6. Add restrained SOK proof placement to the homepage lithium area.
 7. Expand catalog visibility SKU-by-SKU without forcing direct checkout.
 8. Preserve internal/public supplier-data boundaries.
-9. Test Hawaii, Lower-48, catalog-only, purchase-options, direct-checkout, pre-purchase, and backorder combinations.
-10. Stop only at final production promotion or a genuinely new policy decision.
+9. Operate Lower-48 warranty intake using the verified SOK claim and replacement-stock framework above without blocking checkout.
+10. Test Hawaii, Lower-48, catalog-only, purchase-options, direct-checkout, pre-purchase, and backorder combinations.
+11. Stop only at final production promotion or a genuinely new policy decision.
 
 ## Acceptance standard
 
-The integration is successful when Elevation can publicly present a broad, professional SOK catalog while each SKU independently advances from discovery to assisted purchase to direct checkout without duplicate products, dead-end pages, false availability, MAP violations, or weakened Hawaii controls.
+The integration is successful when Elevation can publicly present a broad, professional SOK catalog while each SKU independently advances from discovery to assisted purchase to direct checkout without duplicate products, dead-end pages, false availability, MAP violations, weakened Hawaii controls, or warranty operations unnecessarily blocking valid sales.
 
 **Controlling rule:**
 
