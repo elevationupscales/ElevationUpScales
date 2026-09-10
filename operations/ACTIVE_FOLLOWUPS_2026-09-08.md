@@ -6,6 +6,24 @@
 
 This file tracks current action items that must remain visible until closed. It intentionally excludes private identity documents, supplier costs, carrier rates, private partner pricing, customer PII, credentials, and other protected commercial/logistics details.
 
+## Owner review override — 2026-09-09
+
+**Status:** OWNER REVIEWED  
+**Priority:** LOW
+
+The following inbox-derived items were reviewed by Casey and are explicitly moved to the low-priority owner-reviewed backlog. They must not interrupt the current active work tree unless a materially new event changes the state:
+
+- Stripe account-information / verification tasks;
+- TikTok Shop fulfillment-risk and account-verification/appeal items identified in the inbox sweep;
+- Doba downstream customer / sales-channel cleanup for the already closed/refunded PO-box order;
+- PayPal consultant correspondence;
+- Dometic dealer-application follow-through;
+- Logistics Plus Hawaii warehouse/document-package follow-through;
+- Lippert routing-form follow-through;
+- Contractor T-Shirts order Q-001803 design-change follow-through.
+
+Related inbox threads that are already legitimately waiting remain WAITING / HOLD and are not to be chased merely because they are visible in Gmail. This owner-review override supersedes any older priority label in this file for the specific items above unless Casey or current Company Operations direction explicitly promotes one again.
+
 ## 1. Doba order / verification control
 
 **Status:** ORDER CLOSED / REFUND ISSUED / NO CURRENT VERIFICATION REPLY REQUIRED  
