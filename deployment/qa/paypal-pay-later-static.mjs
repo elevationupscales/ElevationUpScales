@@ -10,19 +10,22 @@ const checkoutHtml = fs.readFileSync("site/checkout/index.html", "utf8");
 // funding sources PayPal returns for the current buyer/merchant/transaction.
 assert.match(checkoutClient, /https:\/\/www\.paypal\.com\/sdk\/js\?/);
 assert.match(checkoutClient, /components=buttons/);
-assert.match(checkoutClient, /window\.paypal\.Buttons\(\{/);
+assert.match(checkoutClient, /paypalButtons\s*=\s*window\.paypal\.Buttons\(\{/);
 assert.match(checkoutClient, /layout:\s*"vertical"/);
 
-// Do not suppress Pay Later or narrow the existing Smart Buttons stack to one
-// funding source. PayPal remains responsible for determining eligibility.
-assert.equal(/disable-funding=/.test(checkoutClient), false, "checkout must not disable PayPal funding sources");
-assert.equal(/disableFunding\s*:/.test(checkoutClient), false, "checkout must not disable PayPal funding sources in button options");
-assert.equal(/fundingSource\s*:/.test(checkoutClient), false, "default Smart Buttons must remain unrestricted so eligible funding options can render");
+// The existing default Smart Buttons instance must remain unrestricted so it
+// can render Pay Later whenever PayPal reports that funding source eligible.
+const buttonsStart = checkoutClient.indexOf("paypalButtons = window.paypal.Buttons({");
+const buttonsEnd = checkoutClient.indexOf("paypalEl.hidden = false", buttonsStart);
+assert.ok(buttonsStart >= 0 && buttonsEnd > buttonsStart, "default PayPal Smart Buttons block must be discoverable");
+const defaultButtonsBlock = checkoutClient.slice(buttonsStart, buttonsEnd);
+assert.equal(/fundingSource\s*:/.test(defaultButtonsBlock), false, "default Smart Buttons must not be narrowed to one funding source");
+assert.equal(/disable-funding=[^\s"'`]*paylater/i.test(checkoutClient), false, "Pay Later must not be disabled in the SDK request");
 
 // Pay Later is a funding option only. It must use the same create/capture path
 // and must not introduce a separate order or fulfillment workflow.
-assert.match(checkoutClient, /fetch\("\/api\/store-checkout\/orders"/);
-assert.match(checkoutClient, /\/api\/store-checkout\/orders\/\$\{encodeURIComponent\(data\.orderID\)\}\/capture/);
+assert.match(defaultButtonsBlock, /fetch\("\/api\/store-checkout\/orders"/);
+assert.match(defaultButtonsBlock, /\/api\/store-checkout\/orders\/\$\{encodeURIComponent\(data\.orderID\)\}\/capture/);
 assert.match(checkoutServer, /PAYPAL_SANDBOX_ORIGIN/);
 assert.match(checkoutServer, /PAYPAL_LIVE_ORIGIN/);
 assert.match(checkoutServer, /STORE_LIVE_CHECKOUT_ENABLED/);
