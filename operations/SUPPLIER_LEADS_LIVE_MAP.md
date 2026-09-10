@@ -1,7 +1,7 @@
 # Elevation UpScales — Supplier / Commercial Leads Live Map
 
 **Status: ACTIVE / CANONICAL SUPPLIER STATE**  
-**Snapshot: 2026-09-09**  
+**Snapshot: 2026-09-10**  
 **Management source: GitHub `/operations/`**
 
 This is the single current public-safe operating map for supplier, vendor, dropship, sourcing, Hawaii/Alaska fulfillment, referral, and specialized-logistics lead work.
@@ -51,10 +51,13 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - Preserve Renogy's verified third-party-marketplace boundary.
 
 - **VEVOR — A / STRATEGIC EXISTING PRODUCT LINE**
-  - State: **COMMERCIAL OPTIONS RECEIVED / CHANNEL BOUNDARY CONFIRMED / VOLUME RESPONSE PENDING**.
-  - Direct-site dropship/bulk options have been received; do not send a second cold introduction.
-  - Use only verified direct-channel permissions; do not extend VEVOR to restricted marketplaces without authorization.
-  - Do not invent purchasing volume.
+  - State: **OWNER APPROVED TO PROCEED / DIRECT-WEBSITE DROPSHIPPING / ONBOARDING IN PROGRESS**.
+  - Operations is authorized to proceed with VEVOR PRO registration, tax-exemption setup, Master Catalog feed reconciliation, and eligible direct-site publication.
+  - Selling price must not be below VEVOR's current selling price.
+  - Approved channel: ElevationUpScales.com / Shopify direct-site sales only.
+  - Amazon, Walmart, eBay, and other third-party marketplaces remain blocked unless VEVOR later provides written authorization.
+  - Every live paid VEVOR order must enter the Elevation Operating System under `SOP-STORE-INT-001` before the integration can be marked CLOSED.
+  - No additional owner gate is required for routine onboarding/catalog execution; escalate only binding terms, unusual financial commitments, or material policy changes.
 
 - **Kingboss — EXISTING CONTACT / LITHIUM SUPPLY + COMPLIANCE**
   - State: **FOLLOW-UP SENT / QUALIFICATION OPEN**.
