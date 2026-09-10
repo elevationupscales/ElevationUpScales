@@ -105,6 +105,28 @@ Exception states remain visible:
 
 The order record displays sales channel, supplier or fulfillment provider, source SKU, Elevation SKU, destination, payment reference, shipping lane, tracking, customer communication state, and one dated next action. Supplier/provider identity and sales channel remain separate.
 
+### Payment path — PayPal Pay Later
+
+Where Elevation uses PayPal Checkout, the payment experience must include **PayPal Pay Later** when PayPal reports the merchant, buyer, market, and transaction eligible.
+
+Pay Later is additive to the normal checkout path. It must not replace ordinary PayPal or other valid payment methods, and Pay Later ineligibility or unavailability must not block checkout.
+
+The Pay Later implementation must:
+
+- use the active PayPal SDK's supported Pay Later button and/or messaging capability rather than a separate financing form;
+- rely on PayPal eligibility checks before displaying an eligible Pay Later funding option;
+- preserve sandbox/live separation and the explicit live-checkout gate;
+- preserve protected product pricing, server-side coupon validation, SOK MAP/purchase-mode/readiness rules, and Hawaii/Alaska routing controls;
+- send a successful Pay Later-funded purchase through the same canonical order, payment, ingestion, and fulfillment flow as another PayPal payment;
+- avoid collecting or storing PayPal consumer-underwriting data in the Elevation Operating System;
+- continue to present another valid payment method when Pay Later is unavailable.
+
+Operations and customer-facing copy must not promise financing approval, specific financing terms, or universal availability. PayPal controls buyer eligibility and the offer it presents.
+
+**Implementation state:** OWNER APPROVED / REQUIRED. If the current checkout does not expose Pay Later under PayPal eligibility, Dev may reopen only for this bounded payment feature. This does not reopen unrelated commerce development.
+
+**Acceptance:** authorized preview verifies Pay Later presentation when PayPal reports eligibility, verifies fallback checkout when it does not, and confirms no protected pricing, geography, purchase-mode, or payment-environment gate is weakened. A genuine eligible transaction may provide live proof; do not fabricate financing eligibility or approval merely to mark the feature complete.
+
 ### Product path
 
 `Supplier or Channel Intake → Preview → Staged Review → Catalog Match → Source/Inventory Check → Channel Authorization → Ready → Publish or Hold`
@@ -213,7 +235,8 @@ The default screen presents a short work queue. Detailed lithium records, compat
 - add explicit next action, due date, customer-update state, and exception reason;
 - support authenticated incremental order ingestion beginning with Doba-managed TikTok/eBay flows;
 - preserve manual entry/CSV fallback and idempotent external order keys;
-- add connectors one at a time only after the manual workflow is complete and testable.
+- add connectors one at a time only after the manual workflow is complete and testable;
+- when PayPal Checkout is used, expose PayPal Pay Later where PayPal reports eligibility while preserving ordinary payment fallback and all protected checkout gates.
 
 Connector order:
 
@@ -224,7 +247,7 @@ Connector order:
 5. Printful and SpreadConnect;
 6. additional providers through the same adapter contract.
 
-**Acceptance:** imported orders do not duplicate existing orders, never change prices or inventory without the authoritative workflow, and always retain their source/channel/provider identities.
+**Acceptance:** imported orders do not duplicate existing orders, never change prices or inventory without the authoritative workflow, always retain their source/channel/provider identities, and PayPal-backed checkout does not omit an eligible Pay Later option or block fallback payment when Pay Later is unavailable.
 
 ### Release 6 — Shipping and logistics simplification
 
@@ -277,6 +300,7 @@ Keep the existing full QA suite and add tests only where they protect the new st
 - customer/Solar/Supplier domain separation;
 - staged product intake disposition and audit history;
 - order ingestion idempotency and source/channel/provider separation;
+- PayPal Pay Later eligibility/rendering and fallback payment behavior where PayPal Checkout is active;
 - lithium/SOK/freight server gates;
 - no private supplier, carrier, customer, or rate-card data in public source;
 - keyboard, focus, mobile overflow, loading, error, and empty states.
@@ -292,6 +316,7 @@ The Command Center is complete when:
 - Leads uses five clear views with separate data domains;
 - product intake reaches a real review disposition;
 - order sources and connectors use idempotent ingestion with manual fallback;
+- PayPal-backed checkout exposes Pay Later when PayPal reports eligibility and preserves a valid fallback payment path when it does not;
 - routine logistics uses structured forms while protected controls remain enforced;
 - retired Marketplace and duplicate workspace layers no longer load in normal operations;
 - current QA passes from a clean GitHub checkout;
