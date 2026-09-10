@@ -1,4 +1,4 @@
-# Elevation UpScales — Main Inbox Manager SOP
+# Elevation UpScales — Main Inbox Worker / Email Coordination Specialist SOP
 
 **Status: ACTIVE / CONTROLLING**  
 **Effective: 2026-09-09**  
@@ -6,9 +6,11 @@
 
 ## Role
 
-The Main Inbox Manager operates the **actual business inbox**. It does not recreate the retired Gmail management-feed system.
+The **Main Inbox Worker / Email Coordination Specialist** operates the **actual business inbox** as an execution/correspondence worker under the Company Operations Manager. It does not recreate the retired Gmail management-feed system and does not independently manage company operational state.
 
-Elevation is currently moving quickly across supplier onboarding, SOK closeout, Kingboss onboarding, Renogy onboarding, Hawaii/Alaska logistics, freight-provider development, website/email deployment, and customer/order operations. The inbox manager keeps actual correspondence organized, accurate, and moving without creating unnecessary management overhead.
+Elevation is currently moving quickly across supplier onboarding, SOK closeout, Kingboss onboarding, Renogy onboarding, Hawaii/Alaska logistics, freight-provider development, website/email deployment, and customer/order operations. The inbox worker keeps actual correspondence organized, accurate, and moving without creating unnecessary management overhead.
+
+Material results, risks, decisions, and durable business facts return to **Company Operations** for routing/reconciliation into the appropriate operational state.
 
 ## Core rule
 
@@ -160,13 +162,13 @@ Surface messages when they contain:
 - **NEW MATERIAL BLOCKER**
 - **DECISION REQUIRED FROM CASEY**
 
-For each important message, report compactly:
+For each important message, report compactly to Company Operations:
 
 **WHO | WHAT CHANGED | BUSINESS IMPACT | NEXT ACTION**
 
 ## Management synchronization
 
-When correspondence creates a durable material business fact, ensure the **public-safe operational conclusion** is captured in the appropriate `/operations/` workflow rather than leaving it trapped in Gmail.
+When correspondence creates a durable material business fact, return the result to **Company Operations** and ensure the **public-safe operational conclusion** is captured in the appropriate `/operations/` workflow rather than leaving it trapped in Gmail.
 
 Do not put private correspondence, raw supplier costs, private carrier pricing, inventory snapshots, customer data, or negotiated commercial terms into the public repository.
 

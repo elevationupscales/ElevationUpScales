@@ -21,6 +21,18 @@ Do not reconstruct current policy from Gmail drafts, Gmail recovery snapshots, p
 
 Email may still be used when the work itself requires reading or sending an actual external business email, but email content does not become active management direction unless the resulting verified fact or owner decision is reconciled into GitHub `/operations/` control.
 
+## Operating Framework
+
+**CASEY → OPERATING SYSTEM PROJECT MANAGER → PROJECT / MANAGER → ROUTED WORKER / SPECIALIST**
+
+- The **Operating System Project Manager** owns reconciled overall project state, cross-project routing, verification, and closure.
+- The **Company Operations Manager** owns company-operational execution and routes company-operational work items to the appropriate workers and specialists.
+- The **Operating System Reconciliation Specialist** supports state reconstruction and reconciliation when directed; it does not replace the Operating System Project Manager or independently own company-operational execution.
+- **Workers and specialists execute routed work items and return state / evidence.** They do not independently own master project state or create competing management sources of truth.
+- `/operations/` is the active policy and public-safe evidence library. Git stores policy / control / evidence; the Operating System Project Manager owns the reconciled overall project state.
+
+State-authority boundaries remain narrow: `SUPPLIER_LEADS_LIVE_MAP.md` is the canonical supplier-domain map; dated follow-up records such as `ACTIVE_FOLLOWUPS_2026-09-08.md` remain correspondence/action evidence useful for WAITING state and duplicate-send protection; Command Center plans control only their specific development scope.
+
 ## Current controlling SOP
 
 - [`MANAGEMENT_OPERATING_SOP.md`](./MANAGEMENT_OPERATING_SOP.md) — shared management execution standard covering source-of-truth order, business priority, manager separation, efficient worktree execution, proportional QA, reuse-first development, public-data protection and common metrics.
@@ -34,7 +46,7 @@ Email may still be used when the work itself requires reading or sending an actu
 - [`VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`](./VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md) — controlling post-approval vendor onboarding standard covering vendor-master data, SKU/model merge packets, channel/MAP rules, supplier-inventory freshness, order/fulfillment workflows, warranty/media/compliance gates, catalog readiness, first-order proof and revalidation.
 - [`COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md`](./COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md) — public-safe deployment contract for adding Supplier / Commercial Leads to the existing Command Center Leads area while preserving the existing customer/Solar leads subsystem and protected-data boundaries.
 - [`COMMAND_CENTER_ECOMMERCE_WORKFLOW_PLAN.md`](./COMMAND_CENTER_ECOMMERCE_WORKFLOW_PLAN.md) — controlling development plan for consolidating the Admin into one six-area ecommerce operating system, redesigning the Leads family, completing intake/order/logistics workflows, and retiring duplicate presentation layers without weakening protected backend controls.
-- [`shopify-manager/SHOPIFY_MANAGER.md`](./shopify-manager/SHOPIFY_MANAGER.md) — dedicated Shopify / Shopify POS / Doba / SOK ecommerce management lane for Peter Torres and the Shopify Manager.
+- [`shopify-manager/SHOPIFY_MANAGER.md`](./shopify-manager/SHOPIFY_MANAGER.md) — dedicated Shopify / Shopify POS / Doba / SOK ecommerce lane for Peter Torres and the Shopify Operations Worker under Company Operations.
 
 ## Public-repository protection
 
