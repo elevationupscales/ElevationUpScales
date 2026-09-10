@@ -2,7 +2,7 @@ import { getPromotionConfig, pricingForProduct } from "./promotion-runtime.js";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const PUBLISH_STATES = new Set(["draft", "published", "paused", "archived", "hold"]);
 const SHIPPING_STATES = new Set(["unverified", "verified", "quote_required", "hold"]);
-const SOURCES = new Set(["doba", "ebay", "tiktok", "fourthwall", "other"]);
+const SOURCES = new Set(["doba", "ebay", "tiktok", "fourthwall", "sok", "kingboss", "printful", "spreadconnect", "self-stock", "other"]);
 const FULFILLMENT = new Set(["tracked", "supplier_managed", "dropship", "pod"]);
 const STORE_SECTIONS = new Set(["rv-outdoor", "lithium-batteries", "apparel", "other"]);
 const JSON_HEADERS = Object.freeze({"Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer"});
@@ -128,8 +128,8 @@ function baseStatus(publishStatus) { return publishStatus === "published" ? "act
 function normalizeSource(value) { const source = clean(value, 30).toLowerCase(); return SOURCES.has(source) ? source : "other"; }
 function baseSupplier(source, value) {
   const supplied = clean(value, 30).toLowerCase();
-  if (["doba","fourthwall","printful","spreadconnect","self-stock","other"].includes(supplied)) return supplied;
-  if (source === "doba" || source === "fourthwall") return source;
+  if (["doba","fourthwall","sok","kingboss","printful","spreadconnect","self-stock","other"].includes(supplied)) return supplied;
+  if (["doba","fourthwall","sok","kingboss","printful","spreadconnect","self-stock"].includes(source)) return source;
   return "other";
 }
 function normalizeRecord(raw = {}, sourceHint = "other") {
@@ -141,9 +141,9 @@ function normalizeRecord(raw = {}, sourceHint = "other") {
   const shippingRaw = clean(raw.shippingStatus, 30).toLowerCase();
   const shippingStatus = SHIPPING_STATES.has(shippingRaw) ? shippingRaw : "unverified";
   const modeRaw = clean(raw.fulfillmentMode, 40).toLowerCase();
-  const fulfillmentMode = FULFILLMENT.has(modeRaw) ? modeRaw : (sourceType === "fourthwall" ? "pod" : sourceType === "doba" ? "dropship" : "supplier_managed");
+  const fulfillmentMode = FULFILLMENT.has(modeRaw) ? modeRaw : (["fourthwall","printful","spreadconnect"].includes(sourceType) ? "pod" : sourceType === "doba" ? "dropship" : "supplier_managed");
   const sectionRaw = clean(raw.storeSection, 50).toLowerCase();
-  const storeSection = STORE_SECTIONS.has(sectionRaw) ? sectionRaw : (sourceType === "fourthwall" ? "apparel" : "rv-outdoor");
+  const storeSection = STORE_SECTIONS.has(sectionRaw) ? sectionRaw : (["fourthwall","printful","spreadconnect"].includes(sourceType) ? "apparel" : sourceType === "sok" ? "lithium-batteries" : "rv-outdoor");
   const images = list(raw.images || raw.additionalImages, 10, 700);
   const primaryImage = clean(raw.primaryImage || raw.image || raw.imageUrl, 700);
   if (primaryImage && !images.includes(primaryImage)) images.unshift(primaryImage);
