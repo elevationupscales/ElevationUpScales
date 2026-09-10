@@ -109,26 +109,41 @@ Close when:
 
 ## 4. Additional Hawaii lithium storage / warehouse option
 
-**Status:** POSITIVE OPERATIONS RESPONSE / OWNER DECISION + DOCUMENT PACKAGE PENDING  
-**Priority:** High
+**Status:** PROVIDER READY TO PRICE / PROOF-STAGE INPUTS + DOCUMENT PACKAGE REQUIRED / NO COMMITMENT  
+**Priority:** High — reactivated by materially new provider response
 
-An additional logistics provider reports that its operations team believes it can generally support Elevation's Hawaii program. Lithium battery storage may require additional warehouse safety measures.
+Logistics Plus Hawaii reports that its operations team believes it can generally support Elevation's Hawaii lithium program, while noting that lithium battery storage may require additional warehouse safety measures. The provider has now followed up specifically asking Elevation to advise on the open operating questions so it can prepare pricing.
 
-The provider asked whether Elevation would consider either a longer-term/minimum commercial commitment if facility investment is required or use of an approved third-party warehouse if the current facility is not suitable. It also requested the SDS and UN38.3 summaries for both starter battery models for operational review.
+The provider asked whether Elevation would consider a longer-term agreement or minimum monthly commitment if facility investment is required, whether an approved third-party Hawaii warehouse would be acceptable if the current facility is unsuitable, and requested the exact-model SDS and UN38.3 summaries for both starter battery models.
 
-This is **not final warehouse acceptance** and no commercial commitment has been authorized.
+Current Elevation operating boundary for the next response:
+- center the immediate qualification on **1 × SOK SK12V100PC** as the proof-stage unit;
+- allow **SK48V100N** to be reviewed in parallel as a secondary/future model without holding the one-unit proof decision;
+- Elevation is open to an approved third-party Hawaii warehouse if that is the cleaner qualified operating solution;
+- Elevation may discuss a longer-term agreement or minimum commitment only after the exact storage requirements, operating scope, facility investment and economics are known;
+- **no standing minimum, long-term commitment or facility investment has been authorized**;
+- exact-model SDS and UN38.3 packages are available for both starter models for operational review.
+
+This remains **operating qualification, not final warehouse acceptance, carrier acceptance, shipment authorization, or a commercial commitment**.
+
+**Correspondence control:** the latest Cara/Logistics Plus message is a material new event and promotes this lane from the prior owner-reviewed low-priority backlog into active qualification. One current reply draft exists but is unsent. Reconcile the provider state and factual quote inputs into Git first, then use the existing Cara thread only; do not create or send a parallel response.
 
 Next action:
-- owner review of the proposed commercial/warehouse paths before any commitment;
-- determine whether to provide the exact-model SDS/UN38.3 review package;
-- obtain written confirmation of the actual receiving/storage scope, site, safety requirements, release process, and commercial structure;
-- keep any private rates, minimums, facility details, and contract terms outside public Git.
+- assemble the exact proof-stage quote inputs for 1 × SK12V100PC, including packed dimensions/weight and the requested receiving/storage/release service scope;
+- provide or attach the exact-model SDS/UN38.3 review material through the existing correspondence path when the response is cleared;
+- ask Logistics Plus to identify the specific lithium-safety measures or facility investment that would be required, if any;
+- obtain the proposed commercial structure and any minimum term, minimum volume, storage commitment or investment recovery requirement before Elevation agrees to anything;
+- confirm whether the current Honolulu facility or an approved third-party facility is the recommended path;
+- confirm receiving, storage, customer will-call/release, fulfillment, local-delivery and Neighbor Island capability and pricing structure;
+- confirm whether a one-unit SK12V100PC proof movement can be received before any long-term commitment;
+- keep private rates, minimums, facility-specific protected details and contract terms outside public Git.
 
 Close when:
 - a specific receiving/storage site is accepted or rejected;
-- lithium handling scope and document requirements are confirmed;
-- any commercial commitment receives owner approval;
-- the option is activated or removed from active qualification.
+- exact lithium handling and safety requirements are confirmed;
+- pricing and service scope are received and evaluated internally;
+- any required commercial commitment is defined and receives owner approval before acceptance;
+- the option is activated for a controlled proof or removed from active qualification.
 
 ## 5. Hawaii freight-route qualification
 
