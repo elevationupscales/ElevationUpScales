@@ -10,10 +10,10 @@ This dated state reconciles current owner direction, live supplier correspondenc
 ## 1. VEVOR — DIRECT-WEBSITE DROPSHIPPING
 
 **State:** IN_PROGRESS  
-**Priority:** P1  
+**Priority:** #1 ACTIVE PETER / ECOMMERCE-VENDOR WORKTREE  
 **Classification:** APPROVED TO PROCEED — DIRECT-WEBSITE DROPSHIPPING
 
-VEVOR is no longer a prospect or qualification lead. Owner approval is granted for routine onboarding/catalog execution without another owner gate.
+VEVOR is no longer a prospect or qualification lead. Owner approval is granted for routine onboarding/catalog execution without another owner gate. Peter and his routed workers should keep VEVOR first among supplier/onboarding work while the lane is unblocked. A real paid-order/customer fulfillment exception may interrupt when immediate customer action is required.
 
 ### Approved operating scope
 - complete VEVOR PRO registration/onboarding;
@@ -37,7 +37,7 @@ Supplier correspondence directs Elevation to:
 4. use the supplier-provided product feed;
 5. keep Elevation's selling price at or above VEVOR's current selling price.
 
-Company Operations has not independently verified the live VEVOR PRO portal state from this chat. Peter's execution environment also reports no direct authenticated VEVOR portal access. Therefore the next human/account action is live portal verification, not requalification or more supplier outreach.
+Company Operations has not independently verified the live VEVOR PRO portal state from this chat. Peter's execution environment previously reported no direct authenticated VEVOR portal access. Therefore the next human/account action is live portal verification, not requalification or more supplier outreach.
 
 ### Product-feed preparation
 Target launch working set: approximately **20–40 products**, focused on products relevant to Elevation's direct-site solar, charging, power conversion, RV/mobile power, backup power, refrigeration, water, heating, off-grid, and outdoor lanes.
@@ -63,7 +63,7 @@ VEVOR remains OPEN until:
 ## 2. RENOGY — DEALER APPLICATION
 
 **State:** WAITING  
-**Priority:** P1  
+**Priority:** PARKED / EXTERNAL REVIEW  
 **Classification:** APPLICATION UNDER RENOGY REVIEW
 
 The Renogy application, required company materials, owner-signed W-9, and requester-specific W-9 follow-through are complete. Current supplier guidance indicates a normal review period of approximately 1–3 business days.
@@ -88,7 +88,9 @@ Renogy remains WAITING until the approval/decline or another material request ar
 
 Current sequence:
 
-**VEVOR → ACTION NOW / account-state verification + direct product-feed preparation**  
+**#1 VEVOR → ACTION NOW / live account-state verification + direct product-feed preparation + catalog activation**  
 **RENOGY → PREPARED / WAIT FOR EXTERNAL APPROVAL**
+
+Routine eBay/account maintenance does not displace VEVOR unless a real customer fulfillment issue needs immediate action.
 
 No new supplier project, duplicate application, repeated supplier outreach, or owner escalation is required for routine execution. Escalate only for binding terms, unusual financial commitments, material channel/policy changes, or another genuine owner-level decision.
