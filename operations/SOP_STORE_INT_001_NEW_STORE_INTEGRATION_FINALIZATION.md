@@ -75,6 +75,25 @@ Verify:
 
 A catalog listing without a functioning payment path does not satisfy this SOP.
 
+### 6A. PAYPAL PAY LATER REQUIREMENT
+Where Elevation uses PayPal Checkout and PayPal reports that the merchant, buyer, market, and transaction are eligible, the customer checkout must expose the appropriate **PayPal Pay Later** option and/or Pay Later messaging supported by the active PayPal SDK integration.
+
+Pay Later is an additional payment choice. It must not replace ordinary PayPal checkout or another valid payment method, and an ineligible or unavailable Pay Later offer must not block an otherwise valid sale.
+
+Implementation and operations must preserve all existing controls, including:
+- sandbox/live separation and explicit live-payment gates;
+- product and purchase-mode eligibility;
+- protected pricing and server-side coupon/discount validation;
+- supported shipping geography and Hawaii/Alaska freight controls;
+- SOK MAP, availability, preorder/backorder, and checkout-readiness rules;
+- ordinary order capture, payment evidence, duplicate protection, and fulfillment routing.
+
+PayPal determines financing availability and buyer eligibility. Elevation must not promise financing approval, specific terms, or availability before PayPal presents them to the customer.
+
+Elevation must not build a parallel consumer-finance or underwriting system or collect financing-underwriting data that belongs to PayPal. The Elevation Operating System retains only the ordinary order/payment references required by the existing payment and fulfillment model.
+
+For verification, confirm in an authorized preview or production environment that Pay Later appears when PayPal reports it eligible and that normal payment choices remain usable when it does not. Do not fabricate eligibility or simulate financing approval solely to claim closure.
+
 ## 7. ORDER INGESTION
 Every paid order must enter the Elevation UpScales Operating System.
 
@@ -149,6 +168,7 @@ Every completed store integration returns one final receipt containing:
 - catalog reconciliation result;
 - checkout result;
 - payment result;
+- PayPal Pay Later eligibility/display result where PayPal Checkout is used;
 - external order reference;
 - Elevation OS order reference;
 - SKU/source verification;
@@ -161,6 +181,7 @@ Every completed store integration returns one final receipt containing:
 A new store integration remains **OPEN** until all of the following are true:
 - customer-facing purchase path works;
 - payment succeeds;
+- where PayPal Checkout is used, eligible Pay Later presentation has been verified without breaking fallback payment choices;
 - external store records the transaction;
 - paid order enters the Elevation Operating System;
 - product/SKU/source mapping is correct;
