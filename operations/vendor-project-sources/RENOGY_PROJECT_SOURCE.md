@@ -8,7 +8,8 @@
 **Human Ecommerce Oversight:** Peter Torres  
 **Tailored Workflow:** `../RENOGY_TAILORED_PROJECT_WORKFLOW_2026-09-10.md`  
 **Master SOP:** `../RENOGY_VENDOR_MASTER_SOP.md`  
-**Current Maturity:** **STAGE 1 — PROVING** for catalog/source integration and first paid order
+**Lower-48 Backorder/Warranty Program:** `../RENOGY_LOWER48_BACKORDER_WARRANTY_PROGRAM_2026-09-10.md`  
+**Current Maturity:** **STAGE 1 — PROVING** for catalog/source integration, exact-SKU availability/warranty mapping and first paid order
 
 ## Purpose
 
@@ -39,13 +40,14 @@ Do not expose EIN, tax-license numbers, dealer pricing, raw inventory, portal cr
 | Dropship | **VERIFIED / SUPPORTED** | Direct-to-customer dropshipping is supported. |
 | Lower-48 shipping | **VERIFIED SUPPLIER GUIDANCE** | Renogy stated free shipping within 48 contiguous states; do not infer Hawaii/Alaska/special freight. |
 | Opening order / MOQ | **VERIFIED — NO MINIMUM OPENING ORDER** | No speculative opening inventory gate. |
-| Product catalog/SKU source | **PARTIAL / SOURCE INTAKE OPEN** | Portal/package and requested structured source data are the current intake lane. |
-| MAP / price-control source | **WAITING / MUST BE VERIFIED PER SKU** | Consolidated post-approval integration request is already sent; use portal/source package first and do not duplicate outreach. |
-| Inventory / availability source | **WAITING / SOURCE INTAKE OPEN** | Do not represent supplier inventory as Elevation On Hand. |
-| Approved media/spec/manuals | **WAITING / SOURCE INTAKE OPEN** | Renogy stated post-approval assets can be provided; use portal/package before asking again. |
-| Fulfillment/tracking instructions | **PARTIAL / DROPSHIP VERIFIED, DETAIL INTAKE OPEN** | Exact operating handoff should be captured before first live order. |
-| Warranty/RMA | **VERIFIED CORE ROUTE** | Warranty claims route through Renogy Warranty Team; covered defects may receive replacement/refund. |
-| Returns | **VERIFIED CORE RULE** | Renogy stated 30-day return policy; supplier label cost may be deducted; alternate return carrier may be arranged. |
+| Product catalog/SKU source | **PARTIAL / SOURCE INTAKE OPEN** | Portal/package and requested structured source data remain the current intake lane. |
+| MAP / price-control source | **PARTIAL / MUST BE VERIFIED PER SKU** | Consolidated post-approval request is already sent; use portal/source package first and do not duplicate outreach. |
+| Inventory / availability source | **PARTIAL / SKU-LEVEL CONTROL DEFINED** | Public Renogy evidence confirms in-stock, preorder, backorder and ordinary unavailable states can coexist. Partner Portal/current supplier source controls actual dealer-order acceptance. |
+| Preorder/backorder | **VERIFIED AS SKU-SPECIFIC, NOT BLANKET** | `backorder_allowed=true` only when the exact SKU is explicitly preorder/backorder supported by current Renogy evidence/order path. Generic zero stock is not enough. |
+| Approved media/spec/manuals | **PARTIAL / SOURCE INTAKE OPEN** | Use Renogy portal/package/current approved sources before requesting duplicate material. |
+| Fulfillment/tracking instructions | **PARTIAL / DROPSHIP VERIFIED, DETAIL INTAKE OPEN** | Exact order/tracking handoff still needs first-order operating proof. |
+| Warranty/RMA | **CORE PROGRAM LOCKED / SKU-SPECIFIC ENRICHMENT OPEN** | Claims route through Renogy Technical Support/Warranty authorization. Exact warranty duration/terms must be mapped to the exact SKU; Elevation supports the claim but does not self-authorize Renogy remedies. |
+| Returns | **VERIFIED CORE RULE / DEALER PROCESS STILL DISTINCT** | Renogy stated a 30-day return baseline; dealer/Elevation customer handling must not simply copy Renogy direct-retail promises where account/product exceptions apply. |
 | Tax/resale treatment | **AVAILABLE / ACCOUNT REVIEW CONTROL** | Reseller certificate may be uploaded through Partner Portal; treatment follows Renogy review/approval. |
 | Commercial/project pricing | **AVAILABLE BY APPROVAL** | May be submitted based on volume/project requirements; not required for ordinary ecommerce. |
 | Account/catalog contacts | **PARTIAL / REQUESTED** | Use Partner Portal/current thread; do not duplicate request if active. |
@@ -54,28 +56,60 @@ Do not expose EIN, tax-license numbers, dealer pricing, raw inventory, portal cr
 ## Existing technical preparation
 
 - Renogy is already a first-class source/supplier/filter in the existing Elevation Admin Catalog model.
-- That catalog-source support is infrastructure only; it does not auto-approve products or fabricate MAP/inventory/media.
+- Renogy Vendor Master SOP v1.2 now contains locked Lower-48 preorder/backorder controls.
+- The Lower-48 specialist program defines normalized availability and warranty fields for exact-SKU mapping.
+- That preparation does **not** auto-approve a product, auto-enable checkout, fabricate MAP/inventory/media, or make every unavailable SKU backorderable.
 - No third-party marketplace permission was added.
+
+## Lower-48 availability / checkout rule
+
+Use the exact current Renogy SKU state:
+
+- `IN_STOCK`
+- `PREORDER_AUTHORIZED`
+- `BACKORDER_AUTHORIZED`
+- `OUT_OF_STOCK_NOT_ORDERABLE`
+- `UNKNOWN_HOLD`
+
+Paid checkout for a delayed Renogy item may remain available only where the exact SKU has verified current preorder/backorder support and the customer presentation accurately reflects the delayed state without an unsupported ETA.
+
+**Generic out-of-stock / zero stock does not create Renogy backorder authority.**
+
+Alaska, Hawaii, territories, international and special dangerous-goods routes remain outside this Lower-48 program until separately qualified.
+
+## Warranty operating rule
+
+Renogy warranty is exact-SKU controlled, not category-wide.
+
+Use the source hierarchy established in `RENOGY_LOWER48_BACKORDER_WARRANTY_PROGRAM_2026-09-10.md` and preserve the current claim flow:
+
+**CUSTOMER CLAIM → ELEVATION CAPTURES ORDER/SKU/SYMPTOM → RENOGY TECHNICAL/WARRANTY CASE → DIAGNOSTICS → RENOGY DETERMINATION → RMA IF REQUIRED → AUTHORIZED REMEDY → CUSTOMER UPDATE → RECEIPT/CLOSE**
+
+Customer-facing warranty promises must not exceed the current warranty applicable to the exact SKU. Elevation may support and document the claim; final authorization/remedy remains with Renogy.
 
 ## Required onboarding/readiness inputs
 
 For each candidate Renogy SKU establish:
 
-**EXACT SKU/MODEL → VERIFIED PRODUCT FACTS → CURRENT MAP/PRICE CONTROL → SELLABILITY SOURCE → APPROVED MEDIA → FULFILLMENT/SHIPPING STATE → DIRECT-SITE CHANNEL → WARRANTY/RETURNS REFERENCE**
+**EXACT SKU/MODEL → VERIFIED PRODUCT FACTS → CURRENT MAP/PRICE CONTROL → CURRENT AVAILABILITY / PREORDER-BACKORDER STATE → APPROVED MEDIA → LOWER-48 FULFILLMENT/SHIPPING STATE → EXACT WARRANTY REFERENCE → DIRECT-SITE CHANNEL → RETURNS/RMA REFERENCE**
 
 Use the Partner Portal and supplier package before requesting duplicate information.
 
+Only the missing fact needed for the affected SKU/action is a gate.
+
 ## Remaining activation work
 
-1. Receive/recover current MAP policy / price-control source.
-2. Receive/recover structured product/SKU source and inventory/availability source.
-3. Receive/recover approved media, specs and manuals.
-4. Lock the dropship ordering/tracking handoff and account/catalog contact route.
-5. Normalize exact launch SKUs into the existing catalog model.
-6. Verify MAP/channel/sellability/media/fulfillment per SKU.
-7. Publish only verified direct-site products.
-8. Complete first real paid order through supplier purchase → tracking → delivery.
-9. Record source-refresh, warranty and returns operation so the lane becomes repeatable.
+1. Receive/recover the current MAP policy / price-control source needed for launch SKUs.
+2. Receive/recover or normalize the structured product/SKU and inventory/availability source.
+3. Map exact Lower-48 SKU availability into the locked Renogy states.
+4. Map exact-SKU warranty terms/source references; do not generalize family-level warranty claims.
+5. Receive/recover approved media, specs and manuals for the launch wave.
+6. Lock the routine dropship ordering/tracking handoff and account/catalog contact route.
+7. Normalize exact launch SKUs into the existing catalog model.
+8. Verify MAP/channel/sellability-or-authorized-backorder/media/fulfillment/warranty per SKU.
+9. Publish only verified direct-site products.
+10. Complete the first real paid order through Renogy purchase → acceptance → tracking → delivery.
+11. Record source-refresh, warranty and returns operation so the lane becomes repeatable.
 
 ## Real gates
 
@@ -84,17 +118,18 @@ Keep:
 - exact SKU identity;
 - current MAP/price-control verification;
 - direct-site channel authorization;
-- supplier sellability/orderability;
+- supplier sellability/orderability or exact-SKU preorder/backorder authorization;
+- exact warranty term/source before publishing a duration or remedy promise;
 - customer payment/order integrity;
 - special Hawaii/Alaska/DG route verification when applicable;
 - binding commercial/financial commitments requiring owner approval.
 
-Do not reopen dealer application, W-9, approval, portal creation or opening-order qualification as routine gates.
+Do not reopen dealer application, W-9, approval, portal creation or opening-order qualification as routine gates. Do not block one verified SKU because another Renogy SKU is unavailable or has unresolved warranty enrichment.
 
 ## Next action
 
-**PORTAL/SOURCE INTAKE → NORMALIZE VERIFIED LAUNCH SKUS → MAP/CHANNEL QA → DIRECT-SITE PUBLISH → FIRST REAL ORDER PROOF**
+**SOURCE/PORTAL INTAKE → BATCH EXACT-SKU AVAILABILITY + WARRANTY MAPPING → MAP/MEDIA/FULFILLMENT QA → DIRECT-SITE PUBLISH → FIRST REAL ORDER PROOF**
 
 ## Close condition for active repeatable vendor onboarding
 
-Renogy reaches repeatable active vendor commerce when the verified source/update path is established, a compliant direct-site catalog is launched, one real paid order completes Renogy purchase through customer delivery, and source refresh / returns / warranty routes are repeatable.
+Renogy reaches repeatable active vendor commerce when the verified source/update path is established, a compliant direct-site catalog is launched with exact-SKU availability/warranty controls, one real paid order completes Renogy purchase through customer delivery, and source refresh / returns / warranty routes are repeatable.
