@@ -4,7 +4,7 @@
 **Effective:** 2026-09-10  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Last reconciled against `main`:** `aa4e101d617c029e4bf9b09401cc0c39cf70cbfb`
+**Last reconciled against `main`:** `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`
 
 ## Purpose
 
@@ -54,7 +54,7 @@ Tonight's focus is intentionally narrowed to move faster:
 
 1. **VEVOR catalog / first-order activation** — continue from the completed PRO/feed/tax-submission state; do not restart onboarding.
 2. **New complementary vendor activation** — work existing vetted draft/qualified lanes before inventing new prospecting; generic battery duplication remains secondary to SOK.
-3. **Homepage/lithium deployment completion** — reconcile PR #94 to current `main`, run focused QA, merge cleanly, then use the exact-SHA preview → production release path and verify production.
+3. **Homepage/lithium deployment completion** — PR #94 is merged into current `main`; finish only the exact-SHA preview → production release path and verify canonical production.
 4. **TikTok and routine eBay work move to tomorrow.** A new real paid-customer, payment, delivery, or marketplace exception may still interrupt.
 5. External WAITING lanes do not block tonight's independent work.
 
@@ -70,7 +70,7 @@ Efficiency rule for this window:
 |---|---|---|---|---|---|---|---|
 | VEVOR direct-site catalog / first-order activation | Peter Torres / Ecommerce & Vendor Operations | IN_PROGRESS | P1-A TONIGHT | **NO GENERAL ONBOARDING GATE** — PRO membership is established, supplier feed is received, and Colorado tax-exempt registration is submitted; final tax review is non-blocking because VEVOR stated tax-exempt purchases may continue during review | Work the curated A-tier set: verify live VEVOR price + MAP + stock, activate eligible direct-site products, and prove the direct order → VEVOR purchase → tracking → customer-completion path | Eligible catalog path verified and first clean live order proves operating flow | `SUPPLIER_LEADS_LIVE_MAP.md`; VEVOR vendor master SOP/project records; verified VEVOR account/feed state |
 | Complementary vendor activation — existing draft/qualified queue | Peter Torres / Vendor Onboarding + Company Operations | READY / EXECUTABLE | P1-B TONIGHT | No blanket manager-review gate after Owner direction to get new vendors moving; each outbound still requires exact route/facts and duplicate-thread check | Advance existing complementary solar / inverter / RV / BOS vendor drafts and qualified-not-contacted leads in order of strategic fit; verify route, send or complete the exact application path, record result, then move to next; do not duplicate suppliers already contacted/waiting | Each worked supplier reaches SENT / APPLICATION SUBMITTED / WAITING / BLOCKED with exact reason and supplier map updated for durable state | `SUPPLIER_LEADS_LIVE_MAP.md`; current supplier correspondence |
-| Homepage lithium hero / approved retail branding repair — PR #94 | Developer lane | IN_PROGRESS | P1 PARALLEL TONIGHT | PR #94 is still open and its branch is behind current `main`; this is a bounded integration/release step, not a reason to stop other work | Reconcile the six-file PR #94 scope onto current `main`, run focused/current QA, merge only the bounded approved presentation changes, then execute exact-SHA preview → production and smoke canonical production | Current-main merge complete; same-SHA preview PASS; production deployment PASS; live production verification recorded | GitHub PR #94; `.github/workflows/worker-release-deploy.yml` |
+| Homepage lithium hero / approved retail branding release | Developer / Release lane | RELEASE READY | P1 PARALLEL TONIGHT | **NO MERGE GATE REMAINS.** PR #94 merged at `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`. No exact-SHA release run has executed yet; live production still shows the prior hero | Dispatch `Worker Exact-SHA Release` for current approved `main` SHA to **preview**; require preview PASS; then dispatch the same SHA to **production** with required confirmation and smoke `elevationupscales.com` | Same-SHA preview PASS; production deployment PASS; canonical live site shows approved homepage/lithium presentation; release receipt recorded | GitHub PR #94; `.github/workflows/worker-release-deploy.yml`; current `main` |
 | Checkout-gate cleanup — authorized preorder/backorder and unnecessary internal gates | Commerce / Developer lane | READY | P2 AFTER RELEASE | No live outage; confirmed logic/state conflict exists | After tonight's bounded release, correct only confirmed gate logic so supported paid-order paths are not blocked by generic zero-stock/HOLD state; preserve real safety/channel/payment controls | Regression proves authorized supported purchase paths remain purchasable while real controls remain intact | `MANAGEMENT_OPERATING_SOP.md`; `SOK_ECOMMERCE_SHIPPING_SOP.md` |
 | Shopify/SOK paid-order Operating System bridge | Commerce / Developer + Company Operations | VERIFYING | P2 | Implementation merged; only live purchase-to-OS proof remains | Prove live purchase → payment → order ingestion → SKU/source/fulfillment verification → production receipt when a real order exists; do not manufacture a management gate around the absence of an order | Full first-order acceptance chain completed | Current merged application state; store-integration control |
 | Master Catalog authenticated Admin preview | Catalog / Developer lane | VERIFYING | P2 | Authenticated acceptance evidence remains; underlying migration foundation is not to be rebuilt | Complete only the remaining authenticated preview/acceptance evidence when routed; do not treat it as a blocker to unrelated vendor/deployment work | Authenticated preview and required acceptance evidence complete | `DAILY_CLOSEOUT_2026-09-09_THROUGH_MIDNIGHT_MDT.md` |
@@ -114,6 +114,7 @@ Efficiency rule for this window:
 - VEVOR generic qualification / PRO-registration gate — COMPLETE; VEVOR is now in catalog/first-order activation. Do not restart onboarding qualification.
 - VEVOR product-feed acquisition gate — COMPLETE; supplier feed received and working derivatives created.
 - VEVOR Colorado tax-exemption submission gate — COMPLETE as a submission task; final review is pending but is not a general commerce blocker under VEVOR's stated pending-review treatment.
+- Homepage/lithium PR #94 merge gate — COMPLETE at `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`; only exact-SHA release/verification remains.
 - Renogy application preparation, owner review, submission, and requested W-9 correction — COMPLETE; current lane is external review.
 - SOK generic supplier prospecting/qualification — COMPLETE; SOK is an active primary authorized supplier.
 - SOK product-image request — COMPLETE as an outreach/request task; downstream media mapping remains active separately.
