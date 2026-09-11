@@ -1,0 +1,80 @@
+# Elevation UpScales — PayPal Cart Integration / First-Sale Revenue Directive
+
+**Owner:** Casey Young  
+**Date:** 2026-09-11  
+**Status:** ACTIVE / BIG IDEA / FIRST-SALE REVENUE PRIORITY  
+**Authority:** Owner direct direction; subordinate to Master S.O.P. V1.0 and current payment/security controls.
+
+## Mission
+
+Make the first direct Elevation website sale as quickly and safely as possible while preserving a working checkout path.
+
+**Revenue rule:** do not hold valid customer purchases merely because the preferred PayPal cart integration is still being improved. Native Shopify checkout may continue accepting supported payment methods while PayPal cart integration is evaluated and implemented in parallel.
+
+The temporary startup-revenue phase remains open until Hybrid Management verifies the first Elevation website order paid through PayPal, unless Casey explicitly supersedes that close condition.
+
+## Verified starting point
+
+- Shopify storefront password protection has been lifted by Owner.
+- Native Shopify storefront is publicly accessible.
+- Live QA reached native Shopify checkout using `VEVOR 50A RV Power Outlet Box — NEMA 14-50R` at `$34.90` without a checkout blocker.
+- The observed native checkout exposed card payment and Shop Pay; PayPal was not observed in that QA path.
+- The separate custom Elevation checkout remains a parallel repair lane where prior QA exposed `Checkout item is unavailable` / cross-origin behavior. That defect must not unnecessarily disable the working native Shopify checkout.
+
+## BIG IDEA — PayPal Cart Integration
+
+Evaluate and implement PayPal's business/developer shopping-cart integration as a direct Elevation commerce option where it improves conversion and preserves correct order capture.
+
+The Owner currently has the PayPal business coding/cart documentation open for implementation review.
+
+### Required architecture outcome
+
+**PUBLIC PRODUCT → CART → VERIFIED PRICE / SELLABILITY / FULFILLMENT → PAYPAL OR WORKING CHECKOUT → ORDER RECORD → PROJECT / FULFILLMENT ROUTING**
+
+### Guardrails
+
+1. Never expose PayPal client secrets, API secrets, tokens, or credentials in Git, browser-visible code, email, or public documentation.
+2. Do not replace or disable a currently working native Shopify checkout until the PayPal cart path passes isolated acceptance.
+3. Do not invent supplier stock, MAP, shipping, tax, or fulfillment facts to make a product purchasable.
+4. Supplier-specific rules remain controlling: SOK backorder support is distinct from Renogy exact-SKU delayed-order rules and VEVOR has no verified blanket preorder authorization.
+5. Payments must create a durable order/fulfillment record before the company treats the purchase as operationally accepted.
+6. Test without placing an unnecessary real order; real payment occurs only through a legitimate customer purchase or explicit owner-authorized test.
+7. Continue selling through any verified working Shopify payment path while PayPal integration is built.
+
+## Fast-money merchandising strategy
+
+Prioritize a small launch set of verified, low-friction products rather than trying to advertise the entire catalog at once.
+
+Initial VEVOR candidate lane should favor products approximately `$30–$100` that have fresh supplier evidence, broad RV/off-grid utility, clear customer intent, and simple fulfillment. Examples already present in Shopify include RV electrical, leveling, charging, solar, water-pump and utility products.
+
+Before promotion, each candidate must pass:
+
+**LIVE SKU → LIVE PRICE/MAP → SUPPLIER SELLABILITY → SHIPPING/FULFILLMENT BASIS → PUBLIC PRODUCT → CART → CHECKOUT**
+
+Products that fail one gate stay out of the launch set without blocking clean products.
+
+## Work sequence
+
+1. Keep native Shopify checkout available.
+2. Run fast-revenue RECON across active Shopify inventory and rank products by purchase friction, price, margin confidence, supplier availability and fulfillment confidence.
+3. Verify the first 5–10 launch SKUs immediately before merchandising.
+4. Evaluate the Owner's PayPal cart/developer implementation path against the current Elevation checkout architecture.
+5. Implement PayPal cart in isolation or as a compatible bridge; do not regress working Shopify checkout.
+6. QA product → cart → payment handoff → durable order capture.
+7. Push free/owned traffic only to products with a proven purchase path.
+8. On first real website order, route fulfillment immediately and record the source, payment method, supplier SKU, fulfillment state and actual exceptions.
+9. The startup-phase PayPal close condition is satisfied only by a verified Elevation website order paid through PayPal.
+
+## Management routing
+
+Primary control: Operating System Project Manager / Company Operations.  
+Technical integration: MASTER DEVELOPER / Commerce lane.  
+Inventory and supplier truth: applicable Vendor Project Manager.  
+Store merchandising: Shopify / Ecommerce execution worker within verified supplier controls.
+
+## Close condition
+
+This BIG IDEA remains ACTIVE until both are true:
+
+1. Elevation has a repeatable direct-site cart/checkout/order-routing path that does not depend on unsafe manual workarounds; and
+2. the first verified Elevation website PayPal order is received and routed into fulfillment, satisfying the current startup-phase close condition.
