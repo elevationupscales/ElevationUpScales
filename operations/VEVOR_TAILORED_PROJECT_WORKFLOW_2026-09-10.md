@@ -6,6 +6,7 @@
 **Project Specialist:** VEVOR Reconciliation & Price-Control Specialist  
 **Human Ecommerce Oversight:** Peter Torres  
 **Status:** ACTIVE  
+**Project Source:** `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`  
 **Controlling SOP:** `VEVOR_VENDOR_MASTER_SOP.md`
 
 ## Project outcome
@@ -60,11 +61,15 @@ The Shopify Operations Worker is the normal bounded execution worker when dedica
 
 ## Tailored operating sequence
 
-### 1 — GIT / PROJECT STATE
+### 1 — GIT / PROJECT SOURCE / WORKTREE PICKUP
 
-Resolve current `main`; read this workflow, `VEVOR_VENDOR_MASTER_SOP.md`, current VEVOR launch receipt, and the VEVOR work-board row.
+Resolve current `main`; read the VEVOR row on `CURRENT_WORK_BOARD.md`, `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`, this workflow, `VEVOR_VENDOR_MASTER_SOP.md`, and the current VEVOR launch receipt.
+
+Identify the last verified VEVOR action and next executable VEVOR action before doing new work.
 
 Do not restart PRO registration, feed intake or the completed 19-product launch.
+
+If a prior worker/chat/branch was interrupted, resume only the unfinished VEVOR action from durable state.
 
 ### 2 — SOURCE / SKU CONTROL
 
@@ -73,6 +78,8 @@ For every candidate or ordered SKU preserve:
 **EXACT VEVOR SKU/MODEL → VEVOR-DIRECT SOURCE → APPROVED PRODUCT FACTS/MEDIA → FEED MAP → LIVE VEVOR SELLING PRICE → LIVE SELLABILITY → NORMAL FULFILLMENT → APPROVED DIRECT-SITE CHANNEL**
 
 Doba-sourced VEVOR stays separate unless a deliberate exact-SKU source merge is independently verified.
+
+Update the VEVOR Project Source when a material onboarding/readiness fact changes.
 
 ### 3 — PRICE RELEASE
 
@@ -132,6 +139,49 @@ A real paid order must enter the Elevation order operating flow before VEVOR int
 
 After public acceptance and clean first-order proof, expand B-tier products using the same SKU/price/sellability controls. Scale from sell-through rather than catalog size alone.
 
+## Worktree continuity + documentation
+
+Material VEVOR state must be recoverable from the Work Board + VEVOR Project Source + this workflow/master SOP.
+
+Document material changes such as:
+
+- source/account status changes;
+- new/changed MAP/channel rules;
+- catalog wave completion;
+- public storefront/checkout acceptance;
+- first-order proof;
+- supplier fulfillment/returns exceptions;
+- a real gate being added, removed, narrowed or reopened.
+
+Do not create management records for every routine Shopify edit.
+
+After COMPLETE / WAITING / VERIFYING / HOLD, automatically select the next safe unresolved VEVOR item. If none exists, return capacity upward rather than taking another project.
+
+## Gate maturity
+
+### Stage 1 — PROVING — CURRENT
+
+Current VEVOR project remains PROVING for public storefront and first real paid direct-VEVOR order.
+
+Keep first-path verification for exact SKU/source, live MAP/VEVOR price, sellability, checkout and supplier fulfillment.
+
+### Stage 2 — CONTROLLED
+
+After public checkout + clean first-order proof:
+
+- do not reapprove the already-completed PRO/feed/onboarding setup;
+- execute routine direct-site catalog/order work using targeted live SKU/price/sellability checks;
+- use exception/change-driven review rather than repeating the launch checklist.
+
+### Stage 3 — MATURE / EXCEPTION-BASED
+
+After repeatable clean orders/source refresh:
+
+- normal already-authorized VEVOR work proceeds by default;
+- manager attention focuses on supplier price changes, stock/source failures, MAP/channel changes, returns/fulfillment exceptions and material economics changes.
+
+If one SKU or one order fails, reopen only that affected control unless evidence proves a broader source/process failure.
+
 ## Waiting behavior
 
 If one VEVOR sub-item waits, continue another safe VEVOR sub-item such as:
@@ -157,6 +207,8 @@ Block only the exact affected SKU/action for:
 - payment/customer obligation;
 - binding supplier-policy exception.
 
+Do not preserve completed PRO registration, feed receipt, A-tier build or ordinary internal manager review as permanent gates.
+
 ## Owner gates
 
 Return to Casey for:
@@ -180,13 +232,14 @@ VEVOR reaches repeatable operating state when:
 
 ## RUN
 
-**VEVOR GIT CHECK → RESUME VEVOR WORKTREE → MANAGER EXECUTES ROUTINE VEVOR WORK OR ROUTES BOUNDED TASK → SPECIALIST VERIFIES SKU/PRICE/SOURCE → RECORD → CONTINUE VEVOR**
+**VEVOR GIT CHECK → READ VEVOR PROJECT SOURCE → PICK UP UNFINISHED VEVOR WORKTREE → MANAGER EXECUTES ROUTINE VEVOR WORK OR ROUTES BOUNDED TASK → SPECIALIST VERIFIES SKU/PRICE/SOURCE → DOCUMENT MATERIAL DELTA → CONTINUE NEXT VEVOR ITEM**
 
 ## Return
 
 **VEVOR COMPLETED:**  
 **VEVOR CURRENT:**  
 **VEVOR WAITING/BLOCKED:**  
+**VEVOR MATURITY / GATE CHANGE:**  
 **VEVOR OWNER GATE:**  
 **VEVOR NEXT:**  
 **ROUTE REQUIRED:**
