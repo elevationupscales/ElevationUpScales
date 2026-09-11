@@ -111,6 +111,29 @@ Control for SOK RECON OS:
 
 Private operating estimates, quotes, rates, contact details, and correspondence remain outside public Git.
 
+## H2O / Pasha additional-model profile extraction — 2026-09-10
+
+Company Operations re-verified the existing SOK source trail before any new supplier outreach.
+
+Current verified state:
+
+- SOK already supplied a manufacturer workbook specifically in response to Elevation's request for packed carton, weight and pallet profiles for the additional SOK models required by the H2O/Pasha pricing lane;
+- therefore this lane is **not waiting on a new SOK reply** and another broad SOK request is not authorized;
+- the workbook remains present as an attachment in the existing SOK correspondence, but the current Gmail connector does not expose that legacy `.xls` attachment as a readable/downloadable attachment;
+- the connected private SOK Google Drive structure and the current SOK catalog sheet were re-checked; the current catalog intentionally leaves the additional-model packaging fields blank, and the exact legacy workbook is not presently preserved in the accessible SOK private Drive folders;
+- exact verified packed profiles remain available for the already-qualified proof models, but they must not be generalized to other SKUs.
+
+**Current blocker:** `TECHNICAL ACCESS / EXISTING SOURCE FILE` — exact additional-model profile data exists in an already-received supplier workbook but is not extractable through the currently connected Gmail/file path.
+
+Control:
+
+- do not guess dimensions/weights from public product pages;
+- do not copy one model's freight profile onto another;
+- do not ask SOK to repeat information while an internal source-recovery path remains available;
+- recover the existing workbook through an authorized attachment/export or human-download path and preserve it in the private SOK evidence structure;
+- after recovery, extract only exact verified model rows and route them to H2O/Pasha under the existing logistics work item;
+- this exact-profile blocker does not stop normal Lower-48 SOK commerce, the SK12V100PC proof lane, warranty planning, or unrelated provider work.
+
 ## SOK planning inputs requested
 
 The sent consolidated request sought the operating inputs needed to size the first Hawaii model, including as applicable:
