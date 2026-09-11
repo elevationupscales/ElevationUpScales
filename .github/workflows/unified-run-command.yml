@@ -1,0 +1,245 @@
+name: RUN — Unified Partner / Manager Worktree
+run-name: RUN ${{ inputs.partner_project }} / ${{ inputs.tasked_role }} — ${{ inputs.work_ref }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      work_ref:
+        description: Partner/manager working branch (branch name only; never main)
+        required: true
+        type: string
+      partner_project:
+        description: Partner, vendor, project, or operating lane
+        required: true
+        type: string
+      tasked_role:
+        description: Manager or worker role responsible for this run
+        required: true
+        type: string
+      task_scope:
+        description: Public-safe one-line scope for this RUN receipt
+        required: true
+        type: string
+      control_file:
+        description: Applicable controlling operations/*.md record
+        required: true
+        default: operations/CURRENT_WORK_BOARD.md
+        type: string
+      run_profile:
+        description: Validation depth for this branch
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - operations
+          - development
+          - release_candidate
+      run_confirmation:
+        description: Owner RUN authorization; must be exact RUN
+        required: true
+        default: RUN
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  statuses: write
+
+concurrency:
+  group: unified-run-${{ inputs.partner_project }}-${{ inputs.tasked_role }}-${{ inputs.work_ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  WORK_REF: ${{ inputs.work_ref }}
+  PARTNER_PROJECT: ${{ inputs.partner_project }}
+  TASKED_ROLE: ${{ inputs.tasked_role }}
+  TASK_SCOPE: ${{ inputs.task_scope }}
+  CONTROL_FILE: ${{ inputs.control_file }}
+  RUN_PROFILE: ${{ inputs.run_profile }}
+  RUN_CONFIRMATION: ${{ inputs.run_confirmation }}
+
+jobs:
+  run:
+    name: Unified RUN gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require current main workflow control
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == "refs/heads/main" ]] || {
+            echo 'Run this workflow from main so the current RUN/SOP control is used.'
+            exit 1
+          }
+
+      - name: Checkout assigned work branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.work_ref }}
+          fetch-depth: 0
+
+      - name: Resolve main, branch state, and control profile
+        id: state
+        env:
+          GH_OUTPUT: ${{ github.output }}
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+
+          MAIN_SHA="$(git rev-parse origin/main)"
+          TARGET_SHA="$(git rev-parse HEAD)"
+
+          if ! git merge-base --is-ancestor origin/main HEAD; then
+            echo "Branch $WORK_REF does not contain current main $MAIN_SHA. Reconcile current main first."
+            exit 1
+          fi
+
+          git diff --name-only origin/main...HEAD > /tmp/unified-run-changed-files.txt
+
+          node - <<'JS'
+          const fs = require('node:fs');
+          const policy = require('./deployment/run/unified-run-policy.cjs');
+          const files = fs.readFileSync('/tmp/unified-run-changed-files.txt', 'utf8').split(/\r?\n/).filter(Boolean);
+          const valid = policy.validateInputs({
+            workRef: process.env.WORK_REF,
+            partnerProject: process.env.PARTNER_PROJECT,
+            taskedRole: process.env.TASKED_ROLE,
+            taskScope: process.env.TASK_SCOPE,
+            controlFile: process.env.CONTROL_FILE,
+            runProfile: process.env.RUN_PROFILE,
+            runConfirmation: process.env.RUN_CONFIRMATION,
+          });
+          const profile = policy.resolveProfile(valid.runProfile, files);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `profile=${profile}\n`);
+          JS
+
+          test -f operations/CURRENT_WORK_BOARD.md
+          test -f operations/OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md
+          test -f "$CONTROL_FILE"
+
+          {
+            echo "main_sha=$MAIN_SHA"
+            echo "target_sha=$TARGET_SHA"
+            echo "changed_count=$(wc -l < /tmp/unified-run-changed-files.txt | tr -d ' ')"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Mark RUN pending
+        uses: actions/github-script@v8
+        env:
+          TARGET_SHA: ${{ steps.state.outputs.target_sha }}
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              ...context.repo,
+              sha: process.env.TARGET_SHA,
+              context: 'elevation/unified-run',
+              state: 'pending',
+              description: `RUN ${process.env.PARTNER_PROJECT} / ${process.env.TASKED_ROLE}`.slice(0, 140),
+              target_url: `${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Diff integrity
+        run: |
+          set -euo pipefail
+          git diff --check origin/main...HEAD
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+
+      - name: Policy regression
+        run: node --test tests/unified-run-policy.test.cjs
+
+      - name: Public-safe secret scan
+        run: npm run qa:secrets
+
+      - name: Install dependencies for development profiles
+        if: steps.state.outputs.profile == 'development' || steps.state.outputs.profile == 'release_candidate'
+        run: npm ci
+
+      - name: Canonical QA for development profile
+        if: steps.state.outputs.profile == 'development'
+        run: npm run qa
+
+      - name: Release-candidate QA
+        if: steps.state.outputs.profile == 'release_candidate'
+        run: |
+          set -euo pipefail
+          node --test tests/worker-release.test.cjs
+          npm run qa
+          test "$(find site -type f | wc -l)" -le 20000
+          test -z "$(find site -type f -size +25M -print -quit)"
+
+      - name: Re-resolve main before receipt
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          NOW_MAIN="$(git rev-parse origin/main)"
+          if [[ "$NOW_MAIN" != "${{ steps.state.outputs.main_sha }}" ]]; then
+            echo "Main changed during RUN. Reconcile the branch and run again before PR/merge."
+            exit 1
+          fi
+          git diff --exit-code
+
+      - name: Build RUN receipt
+        if: always() && steps.state.outcome == 'success'
+        env:
+          RESULT: ${{ job.status }}
+          PROFILE: ${{ steps.state.outputs.profile }}
+          MAIN_SHA: ${{ steps.state.outputs.main_sha }}
+          TARGET_SHA: ${{ steps.state.outputs.target_sha }}
+          CHANGED_COUNT: ${{ steps.state.outputs.changed_count }}
+        run: |
+          {
+            echo "# Elevation Unified RUN Receipt"
+            echo
+            echo "- Result: $RESULT"
+            echo "- Partner / project: $PARTNER_PROJECT"
+            echo "- Tasked role: $TASKED_ROLE"
+            echo "- Scope: $TASK_SCOPE"
+            echo "- Control: $CONTROL_FILE"
+            echo "- Work branch: $WORK_REF"
+            echo "- Branch SHA: $TARGET_SHA"
+            echo "- Current main: $MAIN_SHA"
+            echo "- Profile: $PROFILE"
+            echo "- Changed files: $CHANGED_COUNT"
+            echo
+            echo "## Changed files"
+            if [[ -s /tmp/unified-run-changed-files.txt ]]; then
+              sed 's/^/- `/' /tmp/unified-run-changed-files.txt | sed 's/$/`/'
+            else
+              echo "- none"
+            fi
+            echo
+            echo "## Boundary"
+            echo "This RUN validates the assigned branch under current operations controls. It does not merge, deploy, change supplier authority, or expand the tasked role's authorization."
+          } | tee unified-run-receipt.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload RUN receipt
+        if: always() && steps.state.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unified-run-receipt-${{ steps.state.outputs.target_sha }}
+          path: unified-run-receipt.md
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record RUN result
+        if: always() && steps.state.outcome == 'success'
+        uses: actions/github-script@v8
+        env:
+          RESULT: ${{ job.status }}
+          TARGET_SHA: ${{ steps.state.outputs.target_sha }}
+        with:
+          script: |
+            const success = process.env.RESULT === 'success';
+            await github.rest.repos.createCommitStatus({
+              ...context.repo,
+              sha: process.env.TARGET_SHA,
+              context: 'elevation/unified-run',
+              state: success ? 'success' : 'failure',
+              description: `Unified RUN ${process.env.RESULT}`.slice(0, 140),
+              target_url: `${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
