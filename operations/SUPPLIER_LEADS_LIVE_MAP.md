@@ -28,7 +28,7 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
 
 ## Current lead tree — 59 records
 
-### 01 — Active / Won — 1
+### 01 — Active / Won — 2
 
 - **SOK Energy — PRIMARY / ACTIVE AUTHORIZED SUPPLIER**
   - Anchor battery relationship for ecommerce, dropship, Hawaii/Alaska exact-SKU fulfillment, supplier-referral orders and lithium logistics.
@@ -38,6 +38,16 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - SOK has delivered product-image media in addition to previously supplied logo/manual/specification material; reconcile those assets through the existing SOK catalog/media lane rather than creating a new project.
   - Current SOK warranty-program state belongs in `SOK_RECON_OS_PROJECT.md` and `SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md`; proof-shipment state remains in its applicable SOK/logistics records.
 
+- **Renogy — A+ / ACTIVE APPROVED DEALER PARTNER**
+  - State: **APPROVED / PARTNER PORTAL ACTIVE / DATA & COMMERCE INTEGRATION IN PROGRESS**.
+  - Dealer application, owner-signed documentation and W-9 correction are complete; Renogy has issued the approved Partner Portal account. Do not restart qualification or application work.
+  - Approved lane is Elevation's own website/direct ecommerce. Preserve Renogy's verified prohibition on third-party ecommerce platforms/marketplaces unless Renogy later provides written channel authorization.
+  - Renogy supports direct-to-customer dropshipping and previously stated free shipping within the 48 contiguous U.S. states with no minimum opening order.
+  - Current integration request for MAP policy/source, structured catalog/product data, inventory/availability source, approved media, dropship/tracking instructions, warranty/RMA process and account/integration contacts has been sent. Do not duplicate the request while it is active.
+  - Current controlling lane: `RENOGY_VENDOR_MASTER_SOP.md`.
+  - Direct-site coding/catalog preparation may proceed using verified source facts; block only the exact SKU/channel when MAP, source, sellability, media or fulfillment evidence is unresolved.
+  - SOK remains the primary battery relationship; prioritize Renogy as complementary solar, charging, inverter, monitoring and balance-of-system supply unless a defined battery gap is proven.
+
 ### 02 — Existing Relationship / Do Not Prospect — 1
 
 - **R&R Solar — EXISTING RELATIONSHIP**
@@ -45,13 +55,7 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - Never cold-contact or re-add as a fresh lead.
   - Continue only through the existing relationship/thread.
 
-### 03 — Active Qualification / Onboarding — 3
-
-- **Renogy — A+ / TOP PRIORITY VENDOR**
-  - State: **APPLICATION SUBMITTED / WAITING ON RENOGY**.
-  - Owner-signed application package has already been submitted; do not recreate or resend preparation work.
-  - Direct-channel dealer/dropship opportunity for solar panels, kits, MPPT, DC-DC, inverter/chargers, monitoring, wiring and accessories.
-  - Preserve Renogy's verified third-party-marketplace boundary.
+### 03 — Active Qualification / Onboarding — 2
 
 - **VEVOR — A / STRATEGIC EXISTING PRODUCT LINE**
   - State: **PRO ACTIVE / DIRECT-SITE CATALOG LIVE / FIRST-ORDER PROOF OPEN**.
