@@ -1,0 +1,142 @@
+name: Build VEVOR Worker Assets
+
+on:
+  push:
+    paths:
+      - 'operations/vendor-source/vevor/2026-09-10/.bootstrap'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-vevor-worker-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install workbook reader
+        run: python -m pip install --disable-pip-version-check openpyxl
+
+      - name: Build full lightweight VEVOR feed from supplier source
+        env:
+          VEVOR_SOURCE_URL: https://ads-feed.s3.us-west-2.amazonaws.com/ads/business/533/vevor-533.xlsx
+        run: |
+          python - <<'PY'
+          import csv
+          import os
+          import tempfile
+          import urllib.request
+          from pathlib import Path
+          from openpyxl import load_workbook
+
+          out_dir = Path('operations/vendor-source/vevor/2026-09-10')
+          out_dir.mkdir(parents=True, exist_ok=True)
+          out_csv = out_dir / '06_VEVOR_All_Products_Light.csv'
+          source_url = os.environ['VEVOR_SOURCE_URL']
+
+          wanted = [
+              'SKU',
+              'Product title',
+              'Product link',
+              'Availability',
+              'Inventory quantity',
+              'Product weight(KG)',
+              'Brand',
+              'Product type',
+              'after coupon price',
+              'MAP (Minimum Advertised Price)',
+          ]
+
+          with tempfile.TemporaryDirectory() as tmp:
+              source_file = Path(tmp) / 'vevor-533.xlsx'
+              print(f'Downloading supplier feed: {source_url}')
+              urllib.request.urlretrieve(source_url, source_file)
+              print(f'Downloaded {source_file.stat().st_size:,} bytes')
+
+              wb = load_workbook(source_file, read_only=True, data_only=True)
+              ws = wb.active
+              rows = ws.iter_rows(values_only=True)
+              header = next(rows)
+              header_map = {str(v).strip(): i for i, v in enumerate(header) if v is not None}
+              missing = [name for name in wanted if name not in header_map]
+              if missing:
+                  raise RuntimeError(f'Missing expected VEVOR feed columns: {missing}')
+
+              indices = [header_map[name] for name in wanted]
+              row_count = 0
+              in_stock = 0
+              with out_csv.open('w', newline='', encoding='utf-8-sig') as f:
+                  writer = csv.writer(f)
+                  writer.writerow(wanted)
+                  for row in rows:
+                      values = [row[i] if i < len(row) else None for i in indices]
+                      if not any(v not in (None, '') for v in values):
+                          continue
+                      writer.writerow(['' if v is None else v for v in values])
+                      row_count += 1
+                      if str(values[3]).strip().lower() == 'in stock':
+                          in_stock += 1
+
+              wb.close()
+              print(f'Wrote {row_count:,} product rows; {in_stock:,} marked in stock.')
+          PY
+
+      - name: Build SHA256 manifest and shared worker ZIP
+        run: |
+          set -euo pipefail
+          DIR='operations/vendor-source/vevor/2026-09-10'
+          ZIP="$DIR/ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip"
+          rm -f "$ZIP"
+          {
+            echo 'ELEVATION VEVOR SHARED WORKER SOURCE — SHA256 MANIFEST'
+            echo
+            find "$DIR" -maxdepth 1 -type f \
+              ! -name '.bootstrap' \
+              ! -name '10_MANIFEST_SHA256.txt' \
+              ! -name 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' \
+              -print0 | sort -z | while IFS= read -r -d '' file; do
+                printf '%s  %s\n' "$(sha256sum "$file" | awk '{print $1}')" "$(basename "$file")"
+              done
+          } > "$DIR/10_MANIFEST_SHA256.txt"
+
+          (
+            cd "$DIR"
+            zip -9 -q 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' \
+              00_START_HERE.md \
+              01_VEVOR_PROJECT_MASTER_PROMPT.md \
+              02_VEVOR_CURRENT_PROJECT_STATE.md \
+              03_WORKER_SHARED_SOURCE_README.md \
+              04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx \
+              05_VEVOR_Curated_40.csv \
+              06_VEVOR_All_Products_Light.csv \
+              06_VEVOR_All_Products_Light.REBUILD.md \
+              07_VEVOR_Catalog_SOP_2026-09-10.md \
+              08_Colorado_Wholesale_Sales_Tax_License.RESTRICTED.md \
+              09_SOURCE_MASTER_NOTE.txt \
+              10_MANIFEST_SHA256.txt \
+              11_VEVOR_RUN_RECEIPT_2026-09-10.md \
+              12_PUBLIC_REPO_SECURITY_NOTE.md \
+              VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx
+          )
+
+      - name: Commit generated worker assets
+        run: |
+          set -euo pipefail
+          git config user.name 'Elevation GitHub Automation'
+          git config user.email 'elevationupscales@users.noreply.github.com'
+          git add operations/vendor-source/vevor/2026-09-10/06_VEVOR_All_Products_Light.csv
+          git add operations/vendor-source/vevor/2026-09-10/10_MANIFEST_SHA256.txt
+          git add operations/vendor-source/vevor/2026-09-10/ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip
+          if git diff --cached --quiet; then
+            echo 'No generated changes to commit.'
+            exit 0
+          fi
+          git commit -m 'ops(vevor): generate shared full feed and worker packet'
+          git push origin HEAD:main
