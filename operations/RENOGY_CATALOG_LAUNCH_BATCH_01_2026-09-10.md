@@ -25,6 +25,35 @@ This batch is intentionally small. The goal is not to duplicate Renogy's entire 
 | 5 | P2 12V Pure Sine Wave Inverter family — 1000W/2000W/3000W | High-AOV off-grid/RV power | Current Renogy Hot merchandising and substantial review history; 1000W storefront SKU already partially mapped | exact 2000W/3000W SKU mapping; suffix warranty resolution; MAP; dealer sellability; approved media |
 | 6 | ShadowFlux 120W/200W N-Type Anti-Shading Solar Panel | New-tech featured panel | Current Renogy Best Seller merchandising / strong product differentiation | exact SKU mapping; warranty; MAP; dealer sellability; approved media |
 
+## Shopify staging receipt — 2026-09-11
+
+Owner `RUN` advanced the sales-first worktree from zero Renogy Shopify records to a real staged launch set.
+
+A smart Shopify collection named **Renogy** now exists and automatically includes products where `vendor=Renogy`.
+
+Current staged records:
+
+| Shopify product GID | SKU | Product | State | Staging price source | Remaining activation gates |
+|---|---|---|---|---|---|
+| `gid://shopify/Product/16001198981489` | `RSP100DCT-US` | Renogy 100W N-Type Bifacial Solar Panel | DRAFT | current public Renogy reference `$99.99` at staging time | dealer/MAP recheck; Partner Portal orderability; approved media |
+| `gid://shopify/Product/16001199473009` | `RNG-CTRL-RVR40` | Renogy Rover Li 40A MPPT Solar Charge Controller | DRAFT | current Renogy public promotional reference `$152.44` at staging time | dealer/MAP recheck; current sellability; approved media; price refresh before activation |
+| `gid://shopify/Product/16001199112561` | `RBM500-US` | Renogy 500A Battery Monitor with Shunt | DRAFT | current public Renogy reference `$87.99` at staging time | dealer/MAP recheck; Partner Portal orderability; approved media; exact `-US` warranty bridge before publishing duration |
+| `gid://shopify/Product/16001199276401` | `RNG-INVT-2000-12V-P2-US` | Renogy 2000W 12V Pure Sine Wave Inverter | DRAFT | current public Renogy reference `$285.99` at staging time | dealer/MAP recheck; Partner Portal orderability; approved media |
+| `gid://shopify/Product/16001199735153` | `RBC2125DS-21W-US` | Renogy 50A IP67 DC-DC Battery Charger with MPPT | DRAFT | current public Renogy reference `$299.99` at staging time | exact warranty mapping; dealer/MAP recheck; Partner Portal orderability; approved media |
+
+Staging controls applied:
+
+- all five records are `DRAFT`, not public/active;
+- supplier inventory is not represented as Elevation on-hand inventory;
+- vendor is normalized as `Renogy` so the smart collection remains recoverable;
+- exact SKUs are preserved;
+- listing copy uses bounded verified product facts and preserves unresolved warranty/source holds;
+- transient public promotional prices are tagged for refresh/recheck rather than treated as permanent MAP;
+- no product was activated merely because a draft record exists;
+- no broader storefront design or approved-site-copy change was made.
+
+This completes the first safe **BUILD/STAGE** action for the Tier A sales-first lane. It does not satisfy the per-SKU activation gates.
+
 ## Cross-sell depth candidates
 
 Add after or alongside the six priority lanes where gates clear cleanly:
@@ -119,7 +148,7 @@ For each product:
 - [ ] direct-site channel control confirmed
 - [ ] Lower-48 fulfillment path verified
 - [ ] exact warranty language verified or omitted if still held
-- [ ] listing title/copy/SEO/category complete
+- [x] listing title/copy/SEO/category staging started for first launch wave
 - [ ] cross-sell relationships assigned
 - [ ] Shopify public presentation checked after activation
 
@@ -155,4 +184,6 @@ Use those signals to determine Batch 02 merchandising priorities.
 
 ## Immediate next action
 
-**CLEAR TIER A MAP / SELLABILITY / MEDIA → BUILD/STAGE TIER A LISTINGS → ACTIVATE EACH CLEAN SKU → MAP TIER B EXACT SKUS IN PARALLEL → MEASURE TRAFFIC/SALES → EXPAND**
+**RECHECK TIER A MAP / DEALER SELLABILITY / APPROVED MEDIA → ATTACH VERIFIED MEDIA → FINAL PRICE/AVAILABILITY QA → ACTIVATE EACH CLEAN SKU INDIVIDUALLY → UNIVERSAL-CATALOG PUBLIC QA → FIRST REAL ORDER PROOF**
+
+Do not recreate the five staged Shopify records. Continue from them.
