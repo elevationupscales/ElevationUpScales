@@ -6,6 +6,7 @@
 **Project Specialist:** Renogy Project Specialist — verification / reconciliation / source intelligence  
 **Human Ecommerce Oversight:** Peter Torres  
 **Status:** ACTIVE  
+**Project Source:** `vendor-project-sources/RENOGY_PROJECT_SOURCE.md`  
 **Controlling SOP:** `RENOGY_VENDOR_MASTER_SOP.md`
 
 ## Project outcome
@@ -57,9 +58,11 @@ Catalog, Developer, Fulfillment, Communications or other shared workers enter Re
 
 ## Tailored operating sequence
 
-### 1 — GIT / CURRENT STATE CHECK
+### 1 — GIT / PROJECT SOURCE / WORKTREE PICKUP
 
-Resolve current `main`, read this workflow, `RENOGY_VENDOR_MASTER_SOP.md`, the Renogy row on `CURRENT_WORK_BOARD.md`, and only the current Renogy source/correspondence needed for the action.
+Resolve current `main`; read the Renogy row on `CURRENT_WORK_BOARD.md`, `vendor-project-sources/RENOGY_PROJECT_SOURCE.md`, this workflow, `RENOGY_VENDOR_MASTER_SOP.md`, and only the current Renogy source/correspondence needed for the action.
+
+Identify the last verified Renogy action and next executable Renogy action. If a prior worker/chat/branch was interrupted, resume only the unfinished action rather than rebuilding completed dealer/onboarding work.
 
 ### 2 — PORTAL + SOURCE INTAKE
 
@@ -76,6 +79,8 @@ Recover or receive:
 - account/integration contacts.
 
 Do not ask Renogy to repeat information already present in its portal/package.
+
+Update the Renogy Project Source when a material onboarding/readiness fact changes.
 
 ### 3 — SOURCE NORMALIZATION
 
@@ -147,6 +152,46 @@ After proof:
 - improve system-builder/collection fit;
 - retain only products that fit real Elevation demand and operating economics.
 
+## Worktree continuity + documentation
+
+Material Renogy state must be recoverable from the Work Board + Renogy Project Source + this workflow/master SOP.
+
+Document material changes such as:
+
+- portal/account/source status;
+- MAP/channel changes;
+- product-source/media/inventory source arrival;
+- launch-wave completion;
+- first-order proof;
+- warranty/returns exception;
+- gate or maturity changes.
+
+Do not create management records for routine source inspection that does not change state.
+
+After COMPLETE / WAITING / VERIFYING / HOLD, automatically select the next safe unresolved Renogy item. If none exists, return capacity upward rather than taking another project.
+
+## Gate maturity
+
+### Stage 1 — PROVING — CURRENT
+
+Renogy is approved, but source integration/catalog/first-order proof remains in PROVING.
+
+Keep first-path verification for exact SKU, MAP, source/sellability, approved media, direct-site channel and first supplier order.
+
+### Stage 2 — CONTROLLED
+
+After a verified source/update path, compliant catalog and clean first order:
+
+- do not recreate dealer application/W-9/approval/portal setup;
+- routine Renogy direct-site catalog/order work uses targeted current SKU/MAP/sellability checks;
+- source refresh and exceptions drive additional review.
+
+### Stage 3 — MATURE / EXCEPTION-BASED
+
+After repeatable clean source refresh/orders/returns handling, normal already-authorized Renogy work proceeds by default; management attention focuses on changed MAP/channel/source facts and material fulfillment/warranty exceptions.
+
+If one SKU/source/order fails, reopen only that affected control unless evidence proves a broader Renogy process failure.
+
 ## Waiting behavior
 
 While waiting on Renogy's source package/reply, the project may continue:
@@ -173,6 +218,8 @@ Block only the affected lane for:
 - payment/customer obligation;
 - supplier authorization/compliance issue.
 
+Do not preserve completed dealer application, W-9 correction, supplier approval, portal creation or no-MOQ verification as recurring gates.
+
 ## Owner gates
 
 Return to Casey for:
@@ -197,13 +244,14 @@ Renogy reaches repeatable operating state when:
 
 ## RUN
 
-**RENOGY GIT CHECK → RESUME RENOGY WORKTREE → PROJECT MANAGER EXECUTES ROUTINE SAFE WORK OR ROUTES BOUNDED RENOGY TASK → SPECIALIST VERIFIES → RECORD → CONTINUE RENOGY**
+**RENOGY GIT CHECK → READ RENOGY PROJECT SOURCE → PICK UP UNFINISHED RENOGY WORKTREE → PROJECT MANAGER EXECUTES ROUTINE SAFE WORK OR ROUTES BOUNDED RENOGY TASK → SPECIALIST VERIFIES → DOCUMENT MATERIAL DELTA → CONTINUE NEXT RENOGY ITEM**
 
 ## Return
 
 **RENOGY COMPLETED:**  
 **RENOGY CURRENT:**  
 **RENOGY WAITING/BLOCKED:**  
+**RENOGY MATURITY / GATE CHANGE:**  
 **RENOGY OWNER GATE:**  
 **RENOGY NEXT:**  
 **ROUTE REQUIRED:**
