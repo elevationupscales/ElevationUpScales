@@ -1,6 +1,6 @@
 # Elevation UpScales — Company Operations RUN Delta
 
-**Timestamp:** 2026-09-11 00:10 MDT  
+**Timestamp:** 2026-09-11 00:14 MDT  
 **Owner:** Casey Young  
 **Role:** Company Operations Manager  
 **Mode:** RUN / GIT FIRST / BLOCKED TO BACK / CONTINUE FINISHABLE WORK / DEDUPE BEFORE SEND
@@ -74,11 +74,17 @@ A dealer/ecommerce partnership inquiry has already been sent from Elevation.
 
 ### Solarflexion
 
-Current public evidence still does not establish that ordinary customer account registration equals reseller/dealer authorization.
+Current official Solarflexion source states that it services both **B2C and B2B inquiries** and provides project procurement, stock checks, project quotes, freight shipment support and a direct sales contact route.
 
-**State:** RESEARCH / COMMERCIAL-ACCOUNT ROUTE VERIFY.
+A Gmail dedupe check found no prior direct `@solarflexion.com` correspondence. One bounded commercial/B2B inquiry was therefore sent to `sales@solarflexion.com` asking only for the correct commercial-account path, project/business pricing, reseller terms if offered, job-site/direct shipping, freight, inventory checks, data/media, warranty/RMA and channel rules.
 
-Continue route verification only; do not create a generic customer account and label it a reseller relationship.
+Sent message ID: `1a08f19a1049d012`.
+
+The message explicitly stated that Elevation is **not assuming reseller authorization** and will follow Solarflexion's required account/channel structure.
+
+**State:** CONTACTED / WAITING.
+
+**Deduplication control:** do not send another Solarflexion introduction or account inquiry unless the current message fails/bounces, Solarflexion requests resubmission, or another verified reason exists.
 
 ### Airxcel / Coleman-Mach
 
@@ -123,8 +129,8 @@ Before any new supplier/application send:
 3. BayWa is CONTACTED / WAITING — no resubmission.
 4. Winegard is APPLICATION SUBMITTED / WAITING — no resubmission.
 5. KISAE is CONTACTED / WAITING — no duplicate outreach.
-6. Micro-Air remains an owner-review application gate; prep only until cleared.
-7. Solarflexion remains route-verification work and may continue without external submission.
+6. Solarflexion is CONTACTED / WAITING — no duplicate outreach.
+7. Micro-Air remains an owner-review application gate; prep only until cleared.
 8. Coleman-Mach is the prepared Airxcel brand-specific route and remains at owner-review external-contact gate.
 9. Renogy and other dedicated vendor projects continue under their assigned project managers; Company Operations does not take over their specialist worktrees.
 
