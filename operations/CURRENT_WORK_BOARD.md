@@ -202,3 +202,11 @@ When a material event occurs:
 8. Do not treat a historical issue/PR that says `CONTROLLING`, `P0`, or references an old exact SHA as current authority when its live residuals are already represented by this board and current project sources.
 9. When a project hits a real blocker, preserve the blocker/trigger, move that sub-item to the back of the applicable queue, and continue every finishable in-project worktree before returning to deferred items.
 10. Shared universal-catalog completion is measured by `UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`; do not declare all-vendor live integration complete merely because individual supplier listings exist.
+
+---
+
+# LAST-RESORT / END-OF-WORKBOARD FALLBACK
+
+| Work Item | Owner / Execution Lane | State | Priority | Trigger | Next Action | Close Condition | Source Record |
+|---|---|---|---|---|---|---|---|
+| Elevation-owned in-house checkout / payment-orchestration fallback | MASTER DEVELOPER / Commerce + Operating System | DEFERRED — FALLBACK ONLY | LAST / ONLY AFTER CURRENT PAYPAL + WORKING CHECKOUT PATH IS PROVEN UNSUITABLE | Trigger only if PayPal/current checkout remains materially unreliable after bounded repair, cannot be completed through an acceptable supported path, or requires an added recurring/app/platform cost the Owner rejects. Normal processor/card-network transaction fees are not assumed avoidable and are not by themselves evidence that a safe payment rail can be made free. | Build an Elevation-owned cart/checkout/order-orchestration layer in the existing codebase while preserving any working customer checkout until the replacement passes isolated acceptance. Use approved hosted/tokenized payment processor components/APIs; do not store raw card numbers or CVV. Require payment confirmation → durable order record → SKU/source/fulfillment routing → refund/exception handling → security/PCI review → production QA before cutover. | Elevation-owned commerce path is secure, economically acceptable, customer-viewable/purchasable, repeatable, and proven end-to-end without interrupting sales or depending on an unacceptable paid app/platform layer. | Owner command 2026-09-11; `PAYPAL_CART_INTEGRATION_REVENUE_DIRECTIVE_2026-09-11.md`; universal catalog/checkout acceptance controls |
