@@ -5,60 +5,78 @@
 **Status:** ACTIVE / CONTROLLING SUPPLIER-STATE DELTA  
 **Source of truth:** GitHub `/operations/`
 
-This dated state reconciles current owner direction, live supplier correspondence, and current Company Operations execution. Where it conflicts with older VEVOR or Renogy language in `ACTIVE_FOLLOWUPS_2026-09-08.md`, this file controls until that tracker is refreshed.
+This dated state reconciles current owner direction and Company Operations execution. Where it conflicts with older VEVOR or Renogy language in `ACTIVE_FOLLOWUPS_2026-09-08.md`, this file controls until that tracker is refreshed.
 
 ## 1. VEVOR — DIRECT-WEBSITE DROPSHIPPING
 
-**State:** IN_PROGRESS  
+**State:** ACTIVE / CATALOG A+B ACTIVATION COMPLETE / ENRICHMENT + FULFILLMENT CONTROL ACTIVE  
 **Priority:** #1 ACTIVE PETER / ECOMMERCE-VENDOR WORKTREE  
 **Classification:** APPROVED TO PROCEED — DIRECT-WEBSITE DROPSHIPPING
 
-VEVOR is no longer a prospect or qualification lead. Owner approval is granted for routine onboarding/catalog execution without another owner gate. Peter and his routed workers should keep VEVOR first among supplier/onboarding work while the lane is unblocked. A real paid-order/customer fulfillment exception may interrupt when immediate customer action is required.
+VEVOR is not a prospect or qualification lead. Owner approval remains granted for routine direct-site onboarding, catalog, compliant pricing, merchandising and fulfillment execution without another owner gate. Peter and routed workers continue the VEVOR worktree while individual blocked SKUs are isolated rather than stopping the supplier lane.
 
-### Approved operating scope
-- complete VEVOR PRO registration/onboarding;
-- complete tax-exemption setup through the verified VEVOR account path;
-- reconcile the supplier-provided product feed into the Master Catalog;
-- publish eligible products to ElevationUpScales.com / Shopify direct-site sales only;
-- enforce VEVOR's rule that Elevation's selling price may not be below VEVOR's current selling price;
-- route every live paid order into the Elevation Operating System under `SOP-STORE-INT-001` before this integration may be marked CLOSED.
+### Completed baseline
 
-### Channel control
-Current evidence supports Elevation's independent website/direct channel only. Amazon, Walmart, eBay, and other third-party marketplace listings remain blocked unless VEVOR later provides written authorization for a specific channel.
+- VEVOR PRO registration/onboarding baseline: COMPLETE.
+- Direct supplier product feed: RECEIVED and reconciled.
+- Direct VEVOR and Doba VEVOR source lanes: separated.
+- Curated working set: 40 products.
+- Tier A — Core Launch: 19/19 catalog activation gate CLOSED.
+- Tier B — Strong Expansion: 17/17 catalog activation gate CLOSED after exact SKU, live price/MAP, live selected-SKU sellability, Shopify duplicate, status and publication verification.
+- Legacy direct-source reconciliation: completed for source/SKU/tag identity; individual unavailable legacy records remain isolated in DRAFT/HOLD rather than blocking VEVOR.
 
-### Source-separation control
-Doba-sourced VEVOR products and the direct VEVOR account are separate evidence paths. Existing Doba product activity does not establish direct VEVOR marketplace permission, direct VEVOR SKU mapping, direct VEVOR pricing, or direct VEVOR fulfillment authority.
+### Current VEVOR operating controls
 
-### Current account-state gate
-Supplier correspondence directs Elevation to:
-1. register through VEVOR PRO;
-2. enter company registration details in the account;
-3. submit tax-exemption documentation within the account;
-4. use the supplier-provided product feed;
-5. keep Elevation's selling price at or above VEVOR's current selling price.
+Channel control:
+- approved now: ElevationUpScales.com / Shopify direct-site sales;
+- Amazon, Walmart, eBay, TikTok Shop and other third-party marketplaces remain blocked unless VEVOR later provides written authorization for that channel;
+- Doba permissions do not transfer to direct VEVOR.
 
-Company Operations has not independently verified the live VEVOR PRO portal state from this chat. Peter's execution environment previously reported no direct authenticated VEVOR portal access. Therefore the next human/account action is live portal verification, not requalification or more supplier outreach.
+Pricing control:
 
-### Product-feed preparation
-Target launch working set: approximately **20–40 products**, focused on products relevant to Elevation's direct-site solar, charging, power conversion, RV/mobile power, backup power, refrigeration, water, heating, off-grid, and outdoor lanes.
+**LIVE VEVOR SELLING PRICE CHECK + FEED MAP CHECK → USE THE HIGHER APPLICABLE FLOOR**
 
-Before any direct VEVOR product is published, verify from the direct VEVOR evidence path:
-- exact VEVOR product/SKU identifier;
-- current VEVOR selling price / price-floor input;
-- current availability/source data;
-- specifications and approved media/source record;
-- dropship order path and shipping/service limits;
-- return/customer-service handling where provided;
-- direct-site-only channel eligibility.
+Inventory / sellability control:
+- feed inventory is a snapshot, not a customer promise;
+- identify the exact selected SKU/model;
+- use the selected SKU's actual VEVOR purchase-state block as the live sellability source;
+- a variant-selector `Out of Stock` label does not override an exact selected SKU purchase block that says `In Stock` and exposes normal purchase actions;
+- genuine ambiguity holds only that SKU as MANUAL CONFIRMATION;
+- do not assume a paid VEVOR preorder/backorder path exists.
 
-Do not use a Doba SKU as the canonical direct-VEVOR SKU unless the direct VEVOR feed independently establishes the same exact product mapping.
+Shopify control:
+- Shopify creation/write responses are not final proof of state;
+- after material writes, read the product back and verify exact SKU, price, ACTIVE/DRAFT state and intended publication state;
+- indexing/search lag does not override direct authoritative product reads.
 
-### Close condition
-VEVOR remains OPEN until:
-- account and tax setup are verified complete;
-- the direct supplier feed is reconciled;
-- the first approved catalog set is production-ready/published under direct-site rules;
-- the first live paid VEVOR order is captured by Elevation's operating system and routed through purchase, tracking, and customer completion.
+### Current active work
+
+1. A/B supplier-media and presentation enrichment.
+2. Collection / merchandising consistency verification.
+3. Fulfillment-detail closeout:
+   - blind shipping;
+   - packing-slip treatment;
+   - returns;
+   - customer-support responsibility;
+   - exact tracking handoff.
+4. First live paid VEVOR order proof when a real customer order triggers the lane.
+5. Tier C review only after the active enrichment/fulfillment controls are stable.
+
+### Waiting / nonblocking
+
+Final VEVOR tax-exemption review remains pending. Protected tax documents and account identifiers remain outside public Git. This state does not block otherwise valid catalog, checkout, media or fulfillment-preparation work.
+
+### Wider VEVOR close condition
+
+The VEVOR integration remains ACTIVE until a real paid direct-site order proves:
+
+**CUSTOMER PAID ORDER → ELEVATION SHOPIFY / OPERATING SYSTEM → LIVE SKU/PRICE/STOCK RECHECK → VEVOR PURCHASE → SUPPLIER TRACKING → CUSTOMER TRACKING / FULFILLMENT UPDATE → COMPLETION / ACTUALS**
+
+### Current VEVOR RUN pointer
+
+**A/B MEDIA + PRESENTATION ENRICHMENT → FULFILLMENT DETAIL CLOSEOUT → FIRST LIVE ORDER PROOF WHEN TRIGGERED → C-TIER REVIEW**
+
+Do not restart PRO onboarding, feed intake, A-tier activation or B-tier activation unless a specific changed fact reopens the affected lane.
 
 ## 2. RENOGY — DEALER APPLICATION
 
@@ -71,6 +89,7 @@ The Renogy application, required company materials, owner-signed W-9, and reques
 There is no current internal blocker and no owner blocker. Do not duplicate the application, resend documents, or chase Renogy during the normal review window unless a materially new request arrives.
 
 ### Post-approval activation lane — PREPARED, NOT YET EXECUTED
+
 Upon Renogy approval:
 - capture partner-account access;
 - document dealer pricing/MAP without placing private commercial terms in public Git;
@@ -82,13 +101,14 @@ Upon Renogy approval:
 - validate checkout → Renogy dropship → tracking → Elevation completion workflow.
 
 ### Close condition
+
 Renogy remains WAITING until the approval/decline or another material request arrives. Activation begins only from the resulting verified Renogy terms and account state.
 
 ## 3. OPERATIONS PRIORITY
 
 Current sequence:
 
-**#1 VEVOR → ACTION NOW / live account-state verification + direct product-feed preparation + catalog activation**  
+**#1 VEVOR → ACTION NOW / A+B enrichment + fulfillment-detail control + live-order readiness**  
 **RENOGY → PREPARED / WAIT FOR EXTERNAL APPROVAL**
 
 Routine eBay/account maintenance does not displace VEVOR unless a real customer fulfillment issue needs immediate action.
