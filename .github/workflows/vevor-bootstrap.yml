@@ -1,0 +1,63 @@
+name: Publish VEVOR shared worker source
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/vevor-bootstrap.yml'
+      - '.github/vevor-bootstrap/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vevor-bootstrap-main
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Reconcile latest main
+        shell: bash
+        run: git pull --rebase origin main
+
+      - name: Restore public-safe VEVOR source packet
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/vevor-bootstrap/part-*.b64 > /tmp/vevor-bootstrap.b64
+          base64 --decode /tmp/vevor-bootstrap.b64 > /tmp/vevor-bootstrap.zip
+          unzip -o /tmp/vevor-bootstrap.zip -d .
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install workbook dependency
+        run: python -m pip install --disable-pip-version-check openpyxl
+
+      - name: Build worker assets from VEVOR supplier source
+        run: python .github/scripts/build_vevor_worker_assets.py
+
+      - name: Commit shared VEVOR source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'elevationupscales-automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/scripts/build_vevor_worker_assets.py operations/vendor-source/vevor/2026-09-10
+          if git diff --cached --quiet; then
+            echo 'VEVOR shared worker source already current.'
+            exit 0
+          fi
+          git commit -m 'ops(vevor): publish shared worker source package'
+          git push origin HEAD:main
