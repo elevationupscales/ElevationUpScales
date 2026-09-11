@@ -1,12 +1,14 @@
 # Elevation UpScales — Renogy Vendor Master SOP
 
-**Status: ACTIVE / CONTROLLING RENOGY LANE**  
-**Version: 1.0**  
+**Status: ACTIVE / CONTROLLING RENOGY PROJECT LANE**  
+**Version: 1.1**  
 **Effective: 2026-09-10**  
 **Last reconciled: 2026-09-10**  
 **Owner: Casey Young**  
 **Human Ecommerce Manager: Peter Torres**  
-**Parent:** `MANAGEMENT_OPERATING_SOP.md` and `VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`
+**Project Manager:** Renogy Branch Operations Manager  
+**Scope:** **RENOGY PROJECT ONLY — NOT COMPANY-WIDE**  
+**Parent:** `MANAGEMENT_OPERATING_SOP.md`, `OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md`, and `VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`
 
 ## Purpose
 
@@ -18,18 +20,78 @@ Renogy is already beyond prospecting and application review. The operating objec
 
 This SOP is public-safe. Protected dealer pricing, portal credentials, tax documents, private supplier correspondence, raw inventory counts, payment information and other confidential commercial evidence stay outside the public repository.
 
+**THIS SOP CONTROLS RENOGY WORK. READING IT DOES NOT ASSIGN RENOGY WORK TO OTHER COMPANY MANAGERS OR WORKERS.**
+
 ## 1. Authority and role fit
 
 Use the existing company authority chain:
 
-**CASEY → OPERATING SYSTEM PROJECT MANAGER → COMPANY OPERATIONS → RENOGY LANE / PETER TORRES → ROUTED CATALOG / DEVELOPER / FULFILLMENT WORKERS**
+**CASEY → OPERATING SYSTEM PROJECT MANAGER → COMPANY OPERATIONS → PETER TORRES / ECOMMERCE & VENDOR OPERATIONS → RENOGY BRANCH OPERATIONS MANAGER → ASSIGNED RENOGY WORKERS**
 
 - Casey's newest explicit direction controls.
-- `CURRENT_WORK_BOARD.md` controls global priority and unresolved state.
-- Company Operations owns company-operational execution and routing.
-- Peter Torres remains the Human Ecommerce & Vendor Operations Manager for vendor execution.
+- `CURRENT_WORK_BOARD.md` controls global priority and unresolved state but does not reassign workers across projects.
+- Company Operations owns cross-project company-operational routing.
+- Peter Torres remains the Human Ecommerce & Vendor Operations Manager for vendor execution/oversight.
+- The **Renogy Branch Operations Manager** owns day-to-day coordination of the Renogy project worktree and keeps assigned Renogy workers inside the Renogy lane.
 - This file is the single Renogy-specific master SOP. Do not create parallel Renogy SOPs, manager boards or duplicate qualification projects.
-- Workers execute routed actions and return evidence/state. They do not self-approve policy changes outside their assigned lane.
+- Workers execute routed Renogy actions and return evidence/state. They do not self-approve policy changes outside their assigned lane.
+
+## 1A. Renogy project-lane containment
+
+The Renogy project is a dedicated project lane, not a company-wide task.
+
+The Renogy Branch Operations Manager must:
+
+1. keep Renogy-assigned workers focused on Renogy work;
+2. route each Renogy worker only a bounded Renogy work item;
+3. prevent duplicate Renogy workers from all performing the same task unless deliberate parallel sub-work was explicitly assigned;
+4. use one worker/result as the controlling execution path for each work item whenever possible;
+5. return out-of-scope findings to the Operating System Project Manager / Company Operations Manager as **ROUTE REQUIRED** rather than executing them;
+6. release shared specialists back to their owning lane after the specific Renogy handoff is complete;
+7. mark Renogy work WAITING/HOLD when its real dependency is external rather than filling idle Renogy capacity with unrelated company work.
+
+### Assigned Renogy work includes
+
+- Partner Portal/source intake;
+- Renogy product/SKU normalization;
+- Renogy MAP and price-control verification;
+- Renogy direct-site channel controls;
+- Renogy approved media/spec/manual intake;
+- Renogy fulfillment/order-path definition;
+- Renogy warranty/RMA and returns process;
+- Renogy catalog/staging implementation;
+- Renogy first-order proof and subsequent supplier-specific operating evidence.
+
+### Not Renogy work unless explicitly handed in
+
+- SOK warranty, SOK logistics or SOK product tasks;
+- VEVOR onboarding/catalog/order tasks;
+- Kingboss onboarding;
+- eBay or TikTok general operations;
+- company-wide Shopify administration;
+- unrelated Hawaii logistics/provider work;
+- generic catalog/developer backlog;
+- company-wide management/SOP cleanup;
+- another project's customer/order/fulfillment task.
+
+A shared Catalog/Developer/Fulfillment/Communications worker may enter the Renogy project only through an explicit bounded handoff. The Renogy manager owns the Renogy requirement and acceptance result; the shared worker does not become a permanent Renogy worker and the Renogy manager does not gain control of that worker's unrelated queue.
+
+### RUN interpretation for Renogy
+
+When Casey says **RUN** inside the Renogy project/manager context:
+
+**RUN = CONTINUE THE RENOGY WORKTREE.**
+
+It does not mean:
+
+- run the highest global board item;
+- have every company manager perform the Renogy task;
+- have Renogy workers perform other projects while Renogy waits;
+- convert this SOP into a company-wide assignment.
+
+If Renogy has no executable work, return:
+
+**RENOGY: WAITING / NO EXECUTABLE PROJECT WORK → RETURNED FOR OS/COMPANY OPERATIONS ROUTING**
 
 ## 2. Current verified supplier state
 
@@ -159,7 +221,7 @@ A Renogy SKU may leave draft/staging only when the minimum safe publication set 
 
 **EXACT SKU/MODEL + APPROVED PRODUCT FACTS + CURRENT MAP/PRICE CONTROL + CURRENT SELLABILITY + APPROVED MEDIA + NORMAL FULFILLMENT STATE + APPROVED DIRECT-SITE CHANNEL**
 
-Missing nonessential enrichment blocks only that enrichment, not code work or another fully verified SKU.
+Missing nonessential enrichment blocks only that enrichment, not code work or another fully verified Renogy SKU.
 
 ## 9. Normal order / fulfillment flow
 
@@ -178,7 +240,7 @@ Before supplier placement, verify:
 
 Renogy's stated free dropship shipping applies to the 48 contiguous U.S. states under the verified current dealer information. Treat destinations outside that scope separately until qualified.
 
-Do not manufacture a management gate around the absence of a first order. Keep the first-order proof item open and continue other safe catalog work.
+Do not manufacture a management gate around the absence of a first order. Keep the first-order proof item open and continue other safe **Renogy** catalog work.
 
 ## 10. Warranty and returns
 
@@ -205,15 +267,15 @@ When a verified Renogy fact changes:
 2. preserve protected source evidence outside public Git;
 3. update only the Renogy procedure/workstream that changed;
 4. update the supplier map and current work board when the global state materially changes;
-5. route implementation to the responsible worker;
+5. route implementation to the responsible **Renogy-assigned worker or explicit shared-specialist handoff**;
 6. verify implementation;
-7. continue the next unblocked action.
+7. continue the next unblocked **Renogy** action.
 
 Do not rebuild this SOP for routine file arrivals. Update this master only when a material Renogy operating rule changes.
 
 ## 12. Owner gates
 
-Routine source intake, catalog normalization, direct-site product activation, compliant MAP execution and ordinary Renogy fulfillment are Operations work.
+Routine source intake, catalog normalization, direct-site product activation, compliant MAP execution and ordinary Renogy fulfillment are Operations work inside the Renogy project.
 
 Return to Casey for genuine owner commitments including:
 
@@ -244,7 +306,7 @@ Use public-safe status, rules and source references only.
 
 **APPROVED / ACTIVE DEALER → DATA & COMMERCE INTEGRATION IN PROGRESS**
 
-Current next actions:
+Current Renogy next actions:
 
 1. use Partner Portal access without exposing credentials;
 2. receive/locate MAP, catalog, inventory and approved-media sources;
@@ -252,3 +314,13 @@ Current next actions:
 4. start direct-site Renogy catalog implementation for verified SKUs;
 5. prove the first real paid Renogy order end-to-end;
 6. expand only from verified sell-through and operating evidence.
+
+## 15. Manager return rule
+
+The Renogy Branch Operations Manager returns one concise project state:
+
+**RENOGY COMPLETED:** Renogy work actually finished.  
+**RENOGY WAITING/BLOCKED:** exact Renogy dependency only.  
+**RENOGY NEXT:** next executable Renogy action, or `NONE — RETURN CAPACITY FOR ROUTING`.  
+**OUT-OF-LANE FINDING:** route upward; do not execute.  
+**NEEDS CASEY:** genuine owner decision only.

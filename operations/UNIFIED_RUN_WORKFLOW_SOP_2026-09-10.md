@@ -16,6 +16,8 @@ The goal is:
 
 This workflow reduces duplicate manager-specific Actions and stale branch procedures. It does not create a new management hierarchy, work board, supplier authority or deployment path.
 
+**RUN IS AN EXECUTION/QA MECHANISM, NOT A COMPANY-WIDE TASK BROADCAST.**
+
 ## Authority order
 
 Every Unified RUN uses the existing authority order:
@@ -28,6 +30,24 @@ Every Unified RUN uses the existing authority order:
 6. Current Git/application/platform evidence.
 
 A manager or partner-specific role entered into the Action does **not** expand that role's authority.
+
+## Project-lane containment
+
+The `partner_project`, `tasked_role`, `task_scope`, assigned branch and `control_file` identify the **authorized project boundary** for that run.
+
+Unless Casey or the Operating System Project Manager explicitly routes a task as company-wide:
+
+- a project/vendor SOP applies only to its named project/lane;
+- reading or referencing an SOP does **not** assign its work to every manager or worker;
+- a project manager keeps assigned workers inside that project lane;
+- a worker may execute only the work item routed to that worker/project;
+- shared specialists such as Catalog, Developer, Fulfillment or Communications enter another project only through an explicit routed handoff and return to their owning lane when that handoff is complete;
+- a project manager must not claim a row on `CURRENT_WORK_BOARD.md` that is owned by another project merely because the manager's own lane is waiting;
+- an out-of-lane finding is returned as **NEW FINDING / ROUTE REQUIRED** to the Operating System Project Manager or Company Operations Manager rather than being executed by the discovering project.
+
+For dedicated supplier managers, **continue the next unblocked action means the next unblocked action inside that supplier project**. Cross-project reassignment belongs to the Operating System Project Manager / Company Operations Manager.
+
+A company-wide assignment requires explicit owner/OS-PM scope. The default scope of a named partner/project RUN is **PROJECT-ONLY**.
 
 ## When to use the Unified RUN Action
 
@@ -53,10 +73,10 @@ Do not create a separate partner-specific RUN workflow unless a real technical r
 The Action requires:
 
 - `work_ref` — assigned branch name only; `main` is prohibited;
-- `partner_project` — public-safe partner, vendor, project or lane label;
-- `tasked_role` — public-safe manager/worker role;
-- `task_scope` — one-line public-safe scope for the receipt;
-- `control_file` — applicable `operations/*.md` control record;
+- `partner_project` — public-safe partner, vendor, project or lane label and the default scope boundary for the run;
+- `tasked_role` — public-safe manager/worker role assigned to that project/lane;
+- `task_scope` — one-line public-safe bounded scope for the receipt;
+- `control_file` — applicable `operations/*.md` control record for that project/lane;
 - `run_profile` — `auto`, `operations`, `development`, or `release_candidate`;
 - `run_confirmation` — exact value `RUN`.
 
@@ -71,6 +91,8 @@ The Action itself enforces the current RUN protocol:
 The branch must contain the current `main` before the run may pass. If `main` advanced, reconcile the assigned branch first and rerun.
 
 The workflow must be launched from the workflow definition on `main` so a stale branch cannot provide its own older control logic.
+
+Git validation does not change project ownership. A branch passing Unified RUN does not authorize workers from other projects to work that branch/task.
 
 ## Profiles
 
@@ -124,6 +146,9 @@ The Unified RUN Action may:
 
 It must not:
 
+- broadcast one project task to other managers/workers;
+- reassign a worker from another project;
+- turn a project SOP into a company-wide task;
 - commit to the assigned branch;
 - commit to `main`;
 - merge a PR;
@@ -142,9 +167,11 @@ Production remains controlled by the existing exact-SHA release workflow after m
 
 For any branch-based lane:
 
-**OWNER RUN → RE-RESOLVE MAIN → READ CURRENT WORK BOARD + LANE SOP → RESUME/CREATE ASSIGNED BRANCH → EXECUTE BOUNDED TASK → RUN UNIFIED ACTION → FIX ONLY PROVEN FAILURES → PR/REVIEW IF AUTHORIZED → RECORD RESULT → CONTINUE**
+**OWNER RUN → RESOLVE RECIPIENT PROJECT → RE-RESOLVE MAIN → READ CURRENT WORK BOARD + THAT PROJECT'S LANE SOP → RESUME/CREATE ASSIGNED BRANCH → EXECUTE BOUNDED TASK → RUN UNIFIED ACTION → FIX ONLY PROVEN FAILURES → PR/REVIEW IF AUTHORIZED → RECORD RESULT → CONTINUE INSIDE THE SAME PROJECT**
 
-A waiting supplier response does not block unrelated lanes. Do not repeatedly run a branch merely because its external dependency is still waiting.
+A waiting supplier response does not block other **already assigned work inside that same project**. It also does not authorize that project manager to take work from another project. If the project has no executable work, mark the applicable item WAITING/HOLD and return capacity/routing to the Operating System Project Manager or Company Operations Manager.
+
+Do not repeatedly run a branch merely because its external dependency is still waiting.
 
 ## PASS / FAIL meaning
 
@@ -158,9 +185,11 @@ PASS does **not** mean:
 - the branch is merged;
 - production is deployed;
 - supplier onboarding is complete;
-- a live paid-order proof occurred.
+- a live paid-order proof occurred;
+- the task became company-wide;
+- other managers/workers were reassigned to the project.
 
-Those remain separate factual gates.
+Those remain separate factual/routing gates.
 
 ### FAIL
 
@@ -200,5 +229,7 @@ The commit status context is:
 ## Standing rule
 
 When Casey directs **RUN**, **RUN WORKFLOW**, **CONTINUE WORKFLOW**, or equivalent execution language for a partner/project/manager branch, use this Action for the branch validation/QA stage unless the lane is not Git-based or a more specific already-approved technical gate is required.
+
+Interpret the RUN inside the project/manager context where Casey issued it unless Casey explicitly addresses the Operating System Project Manager / Company Operations Manager for cross-project or company-wide routing.
 
 Do not build duplicate workflows for SOK, Renogy, VEVOR, Kingboss or future partner managers when this shared Action can safely represent the work.
