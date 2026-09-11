@@ -70,7 +70,7 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - Current onboarding still needs the supplier-provided information required to operationalize product identity, U.S. inventory/ship-from points, compliance support, and commercial fulfillment.
   - SOK remains the primary battery relationship; use Kingboss only for defined commercial/product/logistics value.
 
-### 04 — Contacted / Waiting — 31
+### 04 — Contacted / Waiting — 32
 
 These suppliers already have outbound business outreach on record. **Do not send a second cold introduction.** Replies/follow-up stay in the existing correspondence path.
 
@@ -105,6 +105,7 @@ These suppliers already have outbound business outreach on record. **Do not send
 - **SolarStock USA — A** — wholesale module/pallet account inquiry sent 2026-09-10; await wholesale/freight terms.
 - **ECO-WORTHY — A** — B2B solar partnership inquiry sent 2026-09-10; await dealer/wholesale, dropship, channel and fulfillment qualification.
 - **Hughes Autoformers — A** — dealer partnership inquiry sent 2026-09-10 through the verified dealer-program sales route; await dealer onboarding/pricing/channel response.
+- **EcoDirect — A- strategic** — commercial solar/reseller account inquiry sent 2026-09-10 through the verified sales route; await account/pricing/channel/direct-ship qualification.
 
 ### 05 — Acknowledged / Case Open — 1
 
@@ -126,7 +127,7 @@ A current draft already exists for each lead below. **Do not create a duplicate 
   - Attempted public email routes bounced.
   - Do not send again until a newly verified working account/contact path is found.
 
-### 08 — Qualified / Not Yet Contacted — Complementary + Dropship — 7
+### 08 — Qualified / Not Yet Contacted — Complementary + Dropship — 6
 
 These remain legitimate future account targets after the active qualification and draft queues are worked.
 
@@ -135,7 +136,6 @@ These remain legitimate future account targets after the active qualification an
 - **Micro-Air — A-** — EasyStart soft starters, thermostats and RV/marine controls; dealer/distributor path still needs final qualification.
 - **KISAE Technology — A-** — inverters, inverter/chargers and DC-DC charging; explicit dealer inquiry path.
 - **Solarflexion — A- strategic** — Southern California multi-brand solar source; panels, Victron/Xantrex/Samlex/Sol-Ark and BOS.
-- **EcoDirect — A- strategic** — Southern California solar/storage distributor; installer/business/project supply; ecommerce terms need verification.
 - **Airxcel — A** — broad RV component relationship with Colorado presence and national channel; curate by brand/category.
 
 ### 09 — Research / Channel Verify — 8
