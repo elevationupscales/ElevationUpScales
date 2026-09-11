@@ -4,7 +4,7 @@
 **Effective: 2026-09-07**  
 **Management SOP reconciled: 2026-09-10**
 
-This directory is the active repository-based source of truth for current Elevation UpScales ecommerce, supplier-fulfillment, shipping, logistics, management operating rules, and public-safe work state.
+This directory is the active repository-based source of truth for current Elevation UpScales ecommerce, supplier-fulfillment, shipping, logistics, management operating rules, project workflows, vendor onboarding sources, and public-safe work state.
 
 ## Source-of-truth rule
 
@@ -12,7 +12,7 @@ For current operational work:
 
 1. Casey / Owner's newest explicit instruction controls.
 2. `CURRENT_WORK_BOARD.md` controls reconciled global current priority and unresolved work-item state.
-3. The applicable current `/operations/` SOP, project record, or domain record controls lane-specific operating rules and durable facts.
+3. The applicable current `/operations/` SOP, Project Source, project record, tailored workflow, or domain record controls lane-specific operating rules and durable facts.
 4. Current application source under `main` controls actual website/runtime behavior.
 5. **GitHub is the active management/work source.**
 6. Gmail management drafts/feeds/recovery snapshots are not active management control. Ordinary Gmail remains available for actual business correspondence and factual evidence when the work requires it; material current state is reconciled back into Git.
@@ -22,19 +22,23 @@ Do not reconstruct current policy from stale drafts, chat summaries, or historic
 
 ## Operating Framework
 
-**CASEY → OPERATING SYSTEM PROJECT MANAGER → PROJECT / MANAGER → ROUTED WORKER / SPECIALIST**
+**CASEY → OPERATING SYSTEM PROJECT MANAGER / COMPANY OPERATIONS ROUTING → DEDICATED PROJECT OPERATIONS MANAGER → PROJECT SPECIALIST + ASSIGNED WORKERS / BOUNDED SHARED HANDOFFS**
 
 - The **Operating System Project Manager** owns reconciled overall project state, cross-project routing, verification, and closure.
-- The **Company Operations Manager** owns company-operational execution and routes work items to appropriate managers/workers/specialists.
-- The **Operating System Reconciliation / Integrity Specialist** supports state reconstruction, conflict cleanup, worktree continuity, and reconciliation when directed; it does not replace the Project Manager or independently own operational execution.
-- Workers and specialists execute routed work and return state/evidence. They do not independently own master project state or create competing management sources of truth.
-- `/operations/` is the active policy and public-safe evidence/state library; the OS Project Manager maintains the reconciled global state through `CURRENT_WORK_BOARD.md`.
+- The **Company Operations Manager** owns company-operational execution and cross-project routing within its authority.
+- Each dedicated project uses a **Project Operations Manager + Project Specialist** pair with assigned workers and bounded shared handoffs.
+- The **Project Operations Manager** owns the project worktree, routine in-scope execution, project routing, material-state recording and automatic continuation inside that project.
+- The **Project Specialist** owns project-specific verification, reconciliation, research and domain-depth work.
+- The **Operating System Reconciliation / Integrity Specialist** supports global state reconstruction, conflict cleanup, worktree continuity, and reconciliation when directed; it does not replace the Project Manager or independently own operational execution.
+- Workers execute assigned/routed work and return state/evidence. They do not independently own master project state or create competing management sources of truth.
+- `/operations/` is the active policy and public-safe evidence/state library; the OS Project Manager maintains reconciled global state through `CURRENT_WORK_BOARD.md`.
 
 ## State-authority boundaries
 
 Use one owner for each type of state:
 
 - [`CURRENT_WORK_BOARD.md`](./CURRENT_WORK_BOARD.md) — **canonical global current worktree and priority**. Material unresolved work remains visible here until closed or explicitly superseded.
+- Dedicated project **Project Source + master SOP/current state + tailored workflow** — canonical project-specific onboarding facts, operating sequence and worktree recovery path.
 - [`SUPPLIER_LEADS_LIVE_MAP.md`](./SUPPLIER_LEADS_LIVE_MAP.md) — **canonical supplier-domain relationship/status map**. It does not replace the global work board.
 - Dated follow-up records such as `ACTIVE_FOLLOWUPS_2026-09-08.md` — **historical / correspondence-action evidence** used for WAITING triggers, duplicate-send protection, and reconstruction. Older priority labels do not override the work board.
 - Manager/worker control records such as `PETER_PROJECT_STARTER_V2_2026-09-10.md` — lane structure and execution behavior, not a second global priority system.
@@ -44,35 +48,84 @@ Use one owner for each type of state:
 **PRIORITY CHANGE ≠ PROJECT CLOSURE.**  
 **NEW PROJECT ≠ OLD PROJECT DISAPPEARS.**  
 **WAITING ≠ CLOSED.**  
-**HOLD ≠ FORGOTTEN.**
+**HOLD ≠ FORGOTTEN.**  
+**CHAT/WORKER LOSS ≠ WORKTREE LOSS.**
 
 ## Current controlling SOP / control library
 
-- [`CURRENT_WORK_BOARD.md`](./CURRENT_WORK_BOARD.md) — canonical global work board.
+- [`CURRENT_WORK_BOARD.md`](./CURRENT_WORK_BOARD.md) — canonical global work board and dedicated-vendor Project Source index.
 - [`MANAGEMENT_OPERATING_SOP.md`](./MANAGEMENT_OPERATING_SOP.md) — universal management execution standard, commercial strategy, proportional controls, reuse-first development, public-data protection, and common metrics.
+- [`OWNER_PROJECT_WORKFLOW_DIRECTIVE_2026-09-10.md`](./OWNER_PROJECT_WORKFLOW_DIRECTIVE_2026-09-10.md) — owner direction requiring project manager/specialist pairs, tailored workflows, direct manager execution, worktree continuity, material documentation, vendor Project Sources and progressive gate maturity.
+- [`PROJECT_LANE_MANAGER_SPECIALIST_STANDARD_2026-09-10.md`](./PROJECT_LANE_MANAGER_SPECIALIST_STANDARD_2026-09-10.md) — dedicated project structure, manager/specialist/worker responsibilities, tailored-workflow requirements, Project Source requirement and bounded-handoff rules.
+- [`PROJECT_WORKTREE_CONTINUITY_AND_GATE_MATURITY_STANDARD_2026-09-10.md`](./PROJECT_WORKTREE_CONTINUITY_AND_GATE_MATURITY_STANDARD_2026-09-10.md) — worktree pickup/recovery, material documentation, PROVING → CONTROLLED → MATURE progression, permanent hard gates, removable internal gates and narrow regression reopening.
+- [`VENDOR_PROJECT_SOURCE_STANDARD_2026-09-10.md`](./VENDOR_PROJECT_SOURCE_STANDARD_2026-09-10.md) — required onboarding/readiness content and work-board linkage for every dedicated vendor project.
+- [`OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md`](./OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md) — owner RUN execution semantics and project-lane scope resolution.
+- [`UNIFIED_RUN_WORKFLOW_SOP_2026-09-10.md`](./UNIFIED_RUN_WORKFLOW_SOP_2026-09-10.md) — shared branch-validation/QA action for project and manager worktrees; RUN is not a company-wide task broadcast.
 - [`CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md`](./CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md) — Company Operations ↔ Peter execution synchronization and Git/development approval boundaries; global current priority comes from the work board.
 - [`INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`](./INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md) — controlling Company Materials/confidentiality/IP/file-use policy.
 - [`DISASTER_RECOVERY_SOP.md`](./DISASTER_RECOVERY_SOP.md) — recovery-only procedure for worker/session failure, interrupted exact-SHA releases, temporary GitHub loss, checkpoint discipline, and cold recovery evidence.
 - [`MAIN_INBOX_MANAGER_SOP.md`](./MAIN_INBOX_MANAGER_SOP.md) — Main Inbox Worker / Email Coordination Specialist execution standard.
 - [`INBOX_OPERATIONS_ROUTING_SOP.md`](./INBOX_OPERATIONS_ROUTING_SOP.md) — Company Operations decision/routing/escalation logic for material inbox findings.
 - [`SOK_ECOMMERCE_SHIPPING_SOP.md`](./SOK_ECOMMERCE_SHIPPING_SOP.md) — SOK battery/ecommerce/Lower-48/Hawaii/Alaska/paid-order/prepurchase/shipping rules.
-- [`SOK_RECON_OS_PROJECT.md`](./SOK_RECON_OS_PROJECT.md) — dedicated SOK Supplier, Commerce & Warranty Project / SOK RECON OS scope.
+- [`SOK_RECON_OS_PROJECT.md`](./SOK_RECON_OS_PROJECT.md) — dedicated SOK Supplier, Commerce & Warranty Project scope.
 - [`SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md`](./SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md) — current supplier-specific Hawaii warranty negotiation posture and owner gates.
-- [`VEVOR_VENDOR_MASTER_SOP.md`](./VEVOR_VENDOR_MASTER_SOP.md) — controlling VEVOR direct-account vendor, MAP/pricing, Shopify, catalog, fulfillment, and VEVOR-specific change-control lane under Peter / Company Operations.
+- [`VEVOR_VENDOR_MASTER_SOP.md`](./VEVOR_VENDOR_MASTER_SOP.md) — controlling VEVOR direct-account vendor, MAP/pricing, Shopify, catalog, fulfillment, and VEVOR-specific change-control lane.
+- [`RENOGY_VENDOR_MASTER_SOP.md`](./RENOGY_VENDOR_MASTER_SOP.md) — controlling approved Renogy dealer/project lane.
 - [`WARRANTY_FULFILLMENT_SERVICE_WORKFLOW.md`](./WARRANTY_FULFILLMENT_SERVICE_WORKFLOW.md) — shared company Warranty Fulfillment lifecycle; supplier-specific economics remain in supplier projects.
 - [`LOGISTICS_PRICING_MODEL.md`](./LOGISTICS_PRICING_MODEL.md) — specialized-logistics pricing architecture and protected-rate boundaries.
 - [`SUPPLIER_LOGISTICS_GROWTH.md`](./SUPPLIER_LOGISTICS_GROWTH.md) — supplier/commercial opportunity model.
 - [`SUPPLIER_LEADS_LIVE_MAP.md`](./SUPPLIER_LEADS_LIVE_MAP.md) — supplier/commercial relationship and lead state; global priority remains in `CURRENT_WORK_BOARD.md`.
 - [`DROPSHIP_VENDOR_OUTREACH_STANDARD.md`](./DROPSHIP_VENDOR_OUTREACH_STANDARD.md) — dropship first-outreach standard.
 - [`VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`](./VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md) — proportional post-approval vendor onboarding/catalog merge standard.
-- [`COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md`](./COMMAND_CENTER_SUPPLIER_LEADS_DEPLOYMENT.md) — Supplier/Commercial Leads deployment contract for its specific development scope.
-- [`COMMAND_CENTER_ECOMMERCE_WORKFLOW_PLAN.md`](./COMMAND_CENTER_ECOMMERCE_WORKFLOW_PLAN.md) — Admin/ecommerce development plan for its specific scope.
 - [`PETER_PROJECT_STARTER_V2_2026-09-10.md`](./PETER_PROJECT_STARTER_V2_2026-09-10.md) — Peter's simplified Ecommerce & Vendor Operations execution control; work order comes from `CURRENT_WORK_BOARD.md`.
 - [`shopify-manager/SHOPIFY_MANAGER.md`](./shopify-manager/SHOPIFY_MANAGER.md) — Shopify / Shopify POS / Doba / SOK ecommerce worker lane under Company Operations.
 
+## Dedicated vendor Project Sources
+
+Current dedicated vendor Project Sources are linked from `CURRENT_WORK_BOARD.md` and stored under [`vendor-project-sources/`](./vendor-project-sources/):
+
+- [`VEVOR_PROJECT_SOURCE.md`](./vendor-project-sources/VEVOR_PROJECT_SOURCE.md)
+- [`RENOGY_PROJECT_SOURCE.md`](./vendor-project-sources/RENOGY_PROJECT_SOURCE.md)
+- [`SOK_PROJECT_SOURCE.md`](./vendor-project-sources/SOK_PROJECT_SOURCE.md)
+- [`KINGBOSS_PROJECT_SOURCE.md`](./vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md)
+
+Future suppliers do not need a dedicated source file while still only prospects. Once a dedicated vendor project/manager exists, a Project Source becomes mandatory.
+
+## Worktree pickup + documentation rule
+
+At project startup, takeover, RUN, worker recovery or return from WAITING/HOLD:
+
+1. resolve current `main`;
+2. resolve the exact project and owning manager/specialist;
+3. read the global board for routing context;
+4. read that project's Project Source when it is a vendor project;
+5. read that project's master SOP/current state and tailored workflow;
+6. identify unresolved READY / IN_PROGRESS / VERIFYING and triggered WAITING/HOLD items;
+7. identify last verified action + next executable action;
+8. resume from that point instead of recreating setup;
+9. document the material state change back into the owning record;
+10. continue the next safe in-project item automatically;
+11. return routing upward only when no executable in-project work remains.
+
+Document material changes, exceptions and receipts—not every micro-action.
+
+## Gate discipline as projects mature
+
+Dedicated projects should move through:
+
+**PROVING → CONTROLLED → MATURE / EXCEPTION-BASED**
+
+- PROVING: establish source facts and first end-to-end proofs.
+- CONTROLLED: routine already-authorized work proceeds with targeted checks instead of repeated launch approvals.
+- MATURE: normal work proceeds by default; verification is exception/change/threshold driven.
+
+Do not remove genuine customer-money, legal/compliance, supplier/channel, MAP, lithium/DG/freight, binding commercial, irreversible-action or required exact-SHA release gates.
+
+When a mature flow fails, reopen the narrow failed control rather than restarting the entire project unless evidence proves a systemic failure.
+
 ## Public-repository protection
 
-This repository is public. Do not commit confidential supplier/customer information, including dealer/wholesale costs, raw supplier inventory counts, private correspondence, payment credentials/private terms, private carrier quotes, non-public compliance packets, customer PII, or private commercial terms.
+This repository is public. Do not commit confidential supplier/customer information, including dealer/wholesale costs, raw supplier inventory counts, private correspondence, payment credentials/private terms, private carrier quotes, non-public compliance packets, customer PII, private tax identifiers, signatures, or private commercial terms.
 
 The active repository may reference the existence/status of protected evidence without reproducing it.
 
@@ -83,11 +136,14 @@ Before changing SOK, ecommerce, shipping, warranty fulfillment, specialized logi
 1. read this file;
 2. read `CURRENT_WORK_BOARD.md` when current priority, owner, blocker/trigger, or closure state matters;
 3. read `MANAGEMENT_OPERATING_SOP.md` for shared execution/efficiency rules;
-4. read the narrow lane/project SOP required for the assigned work;
-5. inspect current application source when runtime behavior is involved;
-6. preserve protected pricing/MAP, payment, safety, customer, supplier, freight and compliance boundaries;
-7. reconcile new material facts into the owning lane record and update `CURRENT_WORK_BOARD.md` when current work state changes;
-8. reuse existing storage, routes, auth, parsing, receipts, UI shells and permanent deployment workflows before building replacements;
-9. use proportional QA during iteration and the required release QA before preview/merge/production when applicable.
+4. read `OWNER_PROJECT_WORKFLOW_DIRECTIVE_2026-09-10.md`, `PROJECT_LANE_MANAGER_SPECIALIST_STANDARD_2026-09-10.md`, and `PROJECT_WORKTREE_CONTINUITY_AND_GATE_MATURITY_STANDARD_2026-09-10.md` when acting inside a dedicated project;
+5. read `VENDOR_PROJECT_SOURCE_STANDARD_2026-09-10.md` and the linked Project Source when acting inside a dedicated vendor project;
+6. read the narrow lane/project SOP + tailored workflow required for the assigned work;
+7. inspect current application source when runtime behavior is involved;
+8. preserve protected pricing/MAP, payment, safety, customer, supplier, freight and compliance boundaries;
+9. reconcile new material facts into the owning lane record and update `CURRENT_WORK_BOARD.md` when global current work state changes;
+10. reuse existing storage, routes, auth, parsing, receipts, UI shells and permanent deployment workflows before building replacements;
+11. use proportional QA during iteration and the required release QA before preview/merge/production when applicable;
+12. when work is interrupted, recover the unfinished worktree before creating a parallel replacement.
 
 Operational complexity should remain behind the customer experience wherever possible. Build new software only when it materially improves selling, quoting, fulfillment, product discovery, repeat purchasing, or workflow reliability.
