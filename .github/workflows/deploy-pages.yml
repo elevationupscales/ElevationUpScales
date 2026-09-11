@@ -31,10 +31,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       target: ${{ steps.target.outputs.target }}
+      source_sha: ${{ steps.source.outputs.source_sha }}
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.event_name == 'push' && github.sha || 'main' }}
+      - name: Capture exact release source
+        id: source
+        run: |
+          set -euo pipefail
+          echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Resolve deployment target
         id: target
         env:
@@ -81,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ needs.validate.outputs.source_sha }}
       - id: deploy
         uses: cloudflare/wrangler-action@v4
         with:
