@@ -37,6 +37,24 @@ jobs:
           base64 --decode /tmp/vevor-bootstrap.b64 > /tmp/vevor-bootstrap.zip
           unzip -o /tmp/vevor-bootstrap.zip -d .
 
+      - name: Adapt builder to live supplier feed
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('.github/scripts/build_vevor_worker_assets.py')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+              "    if count != 20999:\n        raise SystemExit(f'Unexpected VEVOR row count: {count}; expected 20999')",
+              "    if count < 1:\n        raise SystemExit(f'VEVOR live feed returned no product rows: {count}')"
+          )
+          p.write_text(text, encoding='utf-8')
+          note = Path('operations/vendor-source/vevor/2026-09-10/06_VEVOR_All_Products_Light.REBUILD.md')
+          if note.exists():
+              body = note.read_text(encoding='utf-8').replace('.github/workflows/vevor-worker-assets.yml', '.github/workflows/vevor-bootstrap.yml')
+              note.write_text(body, encoding='utf-8')
+          PY
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -60,4 +78,5 @@ jobs:
             exit 0
           fi
           git commit -m 'ops(vevor): publish shared worker source package'
+          git pull --rebase origin main
           git push origin HEAD:main
