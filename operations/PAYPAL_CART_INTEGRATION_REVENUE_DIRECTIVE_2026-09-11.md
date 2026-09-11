@@ -9,7 +9,7 @@
 
 Make the first direct Elevation website sale as quickly and safely as possible while preserving a working checkout path.
 
-**Revenue rule:** do not hold valid customer purchases merely because the preferred PayPal cart integration is still being improved. Native Shopify checkout may continue accepting supported payment methods while PayPal cart integration is evaluated and implemented in parallel.
+**Revenue rule:** do not hold valid customer purchases merely because the preferred PayPal cart integration is still being improved. Native Shopify checkout may continue accepting supported payment methods while PayPal integration is evaluated and implemented in parallel.
 
 The temporary startup-revenue phase remains open until Hybrid Management verifies the first Elevation website order paid through PayPal, unless Casey explicitly supersedes that close condition.
 
@@ -20,6 +20,31 @@ The temporary startup-revenue phase remains open until Hybrid Management verifie
 - Live QA reached native Shopify checkout using `VEVOR 50A RV Power Outlet Box — NEMA 14-50R` at `$34.90` without a checkout blocker.
 - The observed native checkout exposed card payment and Shop Pay; PayPal was not observed in that QA path.
 - The separate custom Elevation checkout remains a parallel repair lane where prior QA exposed `Checkout item is unavailable` / cross-origin behavior. That defect must not unnecessarily disable the working native Shopify checkout.
+
+## 2026 PayPal path split — controlling implementation direction
+
+Current official platform guidance requires two different PayPal lanes:
+
+### A. Native Shopify checkout — PayPal Wallet
+
+For U.S. Shopify merchants, PayPal Express Checkout is not the current native route. Shopify directs U.S. merchants to **PayPal Wallet through Shopify Payments** when offering PayPal in Shopify checkout.
+
+Therefore:
+
+- do not spend development time trying to force legacy PayPal Express Checkout into the U.S. Shopify checkout;
+- verify whether PayPal Wallet can be enabled in the store's Shopify Payments configuration;
+- only the authorized store owner should make the protected payment-setting change;
+- keep cards/Shop Pay live while PayPal Wallet is evaluated or enabled.
+
+### B. Elevation custom website/cart — PayPal JavaScript SDK v6
+
+For Elevation-owned custom cart/checkout surfaces, current PayPal developer guidance favors **JavaScript SDK v6** for new integrations.
+
+Target pattern:
+
+**CUSTOM CART → SERVER CREATE ORDER → PAYPAL UI / APPROVAL → SERVER CAPTURE → DURABLE ELEVATION ORDER RECORD → FULFILLMENT ROUTING**
+
+The browser must never be trusted to set the final payable amount. The server must re-resolve and validate SKU, quantity, price, shipping, supplier eligibility and any applicable fulfillment restrictions before creating the PayPal order.
 
 ## BIG IDEA — PayPal Cart Integration
 
@@ -40,6 +65,7 @@ The Owner currently has the PayPal business coding/cart documentation open for i
 5. Payments must create a durable order/fulfillment record before the company treats the purchase as operationally accepted.
 6. Test without placing an unnecessary real order; real payment occurs only through a legitimate customer purchase or explicit owner-authorized test.
 7. Continue selling through any verified working Shopify payment path while PayPal integration is built.
+8. Treat Shopify PayPal Wallet enablement and custom PayPal v6 cart development as separate work items sharing one revenue objective; neither should unnecessarily block the other.
 
 ## Fast-money merchandising strategy
 
@@ -58,12 +84,13 @@ Products that fail one gate stay out of the launch set without blocking clean pr
 1. Keep native Shopify checkout available.
 2. Run fast-revenue RECON across active Shopify inventory and rank products by purchase friction, price, margin confidence, supplier availability and fulfillment confidence.
 3. Verify the first 5–10 launch SKUs immediately before merchandising.
-4. Evaluate the Owner's PayPal cart/developer implementation path against the current Elevation checkout architecture.
-5. Implement PayPal cart in isolation or as a compatible bridge; do not regress working Shopify checkout.
-6. QA product → cart → payment handoff → durable order capture.
-7. Push free/owned traffic only to products with a proven purchase path.
-8. On first real website order, route fulfillment immediately and record the source, payment method, supplier SKU, fulfillment state and actual exceptions.
-9. The startup-phase PayPal close condition is satisfied only by a verified Elevation website order paid through PayPal.
+4. In Shopify, verify the current Shopify Payments / PayPal Wallet eligibility and configuration path; do not assume legacy PayPal Express applies in the U.S.
+5. For Elevation custom checkout, compare the current implementation against PayPal JavaScript SDK v6 and server-side Orders create/capture requirements.
+6. Implement PayPal custom cart in isolation or as a compatible bridge; do not regress working Shopify checkout.
+7. QA product → cart → payment handoff → durable order capture.
+8. Push free/owned traffic only to products with a proven purchase path.
+9. On first real website order, route fulfillment immediately and record the source, payment method, supplier SKU, fulfillment state and actual exceptions.
+10. The startup-phase PayPal close condition is satisfied only by a verified Elevation website order paid through PayPal.
 
 ## Management routing
 
