@@ -1,6 +1,6 @@
 # Elevation UpScales — VEVOR Fulfillment Qualification Receipt
 
-**Status:** PARTIALLY VERIFIED / SUPPLIER DETAIL FOLLOW-UP SENT  
+**Status:** SUBSTANTIALLY VERIFIED / FIRST-ORDER PROOF OPEN  
 **Date:** 2026-09-10 MDT  
 **Owner:** Casey Young  
 **Project:** VEVOR Supplier / Catalog / Shopify / Fulfillment  
@@ -8,11 +8,11 @@
 
 ## Purpose
 
-Preserve the public-safe VEVOR order-handling facts needed for the first real direct-site order while keeping unresolved supplier-specific details explicit.
+Preserve the public-safe VEVOR order-handling facts needed for the first real direct-site order while keeping any remaining first-order proof items explicit.
 
 This record does not replace the VEVOR master SOP or supplier correspondence. It records only the operating facts that can safely be used by the VEVOR project.
 
-## Direct supplier facts already verified
+## Direct supplier facts verified
 
 The current VEVOR business-development correspondence confirms:
 
@@ -21,6 +21,10 @@ The current VEVOR business-development correspondence confirms:
 - VEVOR described normal fulfillment from its U.S. warehouse with approximately **3–7 working days** as supplier guidance; this is planning guidance, not a customer delivery guarantee.
 - The approved current sales lane is Elevation's independent website. Amazon, Walmart, eBay and similar third-party marketplaces are not authorized under the current relationship.
 - Elevation's selling price must not be below VEVOR's current selling price; the project also preserves the applicable feed-MAP check.
+- **Customer-package disclosure:** VEVOR product packaging bears the VEVOR logo, but the supplier states that invoices, pricing details and similar price paperwork are not included in the customer package.
+- **Tracking:** carrier/tracking information is available through the Elevation VEVOR PRO account.
+- **Returns / defects:** Elevation should use VEVOR's current return-policy/support process and contact VEVOR support through the supplier website for return, damaged-item and warranty cases.
+- **Customer-support ownership:** the customer should contact Elevation first; Elevation then coordinates the supplier-side issue with VEVOR.
 
 ## Current public-policy baseline
 
@@ -35,25 +39,28 @@ Current VEVOR U.S. public support materials were checked on 2026-09-10 and suppo
 
 These public policies are a supplier-side baseline only. Elevation must not convert them into broader customer promises when the exact order, product, account treatment, shipping exception or supplier authorization has not been verified.
 
-## Still unresolved / do not invent
+## Remaining proof items — do not invent
 
-The following details were not resolved by the existing supplier thread or current public materials:
+The focused supplier reply resolves the prior general blind-shipping, tracking-location and customer-support questions. The remaining items are first-order / case-specific operational proof rather than new onboarding questions:
 
-1. **Blind shipping / packing slips** — whether customer packages include VEVOR pricing, invoices, promotional inserts or other VEVOR-branded paperwork, and whether a blind-shipping option exists.
-2. **Exact tracking handoff** — normal account tracking is verified, but the exact operational timing/format for copying carrier + tracking into Elevation/Shopify must be proven on the first real order.
-3. **RMA / return-label procedure** — exact PRO-account return authorization, label issuance and shipping-cost responsibility need supplier/account confirmation for the operating SOP.
-4. **Customer-support ownership** — whether the end customer should always work through Elevation or may be directed to VEVOR for particular product/support cases remains supplier-specific and unverified.
+1. **Tracking timing/format** — verify on the first real order when the carrier/tracking becomes available in the PRO account and how quickly it can be copied into Shopify/customer communications.
+2. **Return-label / shipping-cost treatment** — exact label issuance and cost responsibility remain case-specific under the supplier return/support process and must be captured from the first applicable RMA/return case rather than promised in advance.
+3. **Packaging expectation** — customer-facing fulfillment should not be represented as fully blind/unbranded because VEVOR has confirmed that the product packaging bears the VEVOR logo.
 
 ## Follow-up state
 
-A focused VEVOR-only follow-up was sent to the supplier on 2026-09-10 requesting confirmation of the four unresolved items above.
+The focused VEVOR-only supplier follow-up has now been answered.
 
-**State: WAITING ON SUPPLIER DETAIL — NOT A GENERAL COMMERCE BLOCKER.**
+**State: SUPPLIER DETAIL RECEIVED / NO FURTHER GENERIC FOLLOW-UP REQUIRED.**
 
-If a real paid VEVOR Direct order arrives before the reply, continue the already-verified order path, recheck exact SKU/sellability/price control, place through the authorized VEVOR account, use the live VEVOR order/tracking record, and avoid promising blind shipping or unverified return handling.
+Do not reopen the same questions. Use the first real order and first applicable exception/return case to capture actual timing, tracking, label and cost behavior.
 
 ## First-order execution control
 
-**CUSTOMER ORDER → VERIFY PAYMENT / EXACT SKU → RECHECK LIVE VEVOR SELLABILITY + PRICE/MAP → PLACE THROUGH VEVOR ACCOUNT → CAPTURE SUPPLIER ACCEPTANCE → CAPTURE CARRIER/TRACKING → UPDATE CUSTOMER/SHOPIFY → DELIVERY → RECORD ACTUALS / EXCEPTIONS**
+**CUSTOMER ORDER → VERIFY PAYMENT / EXACT SKU → RECHECK LIVE VEVOR SELLABILITY + PRICE/MAP → PLACE THROUGH VEVOR PRO ACCOUNT → CAPTURE SUPPLIER ACCEPTANCE → CAPTURE CARRIER/TRACKING FROM PRO ACCOUNT → UPDATE CUSTOMER/SHOPIFY → DELIVERY → RECORD ACTUALS / EXCEPTIONS**
 
-The first clean real order remains the proof event that will turn these planning assumptions into a repeatable operating receipt.
+For support/returns:
+
+**CUSTOMER → ELEVATION → VEVOR SUPPORT / RETURN POLICY PROCESS → RESOLUTION → CUSTOMER CLOSEOUT → RECORD ACTUALS**
+
+The first clean real order remains the proof event that will turn the verified supplier procedure into a repeatable operating receipt.
