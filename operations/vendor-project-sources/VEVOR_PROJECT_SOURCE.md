@@ -8,6 +8,7 @@
 **Human Ecommerce Oversight:** Peter Torres  
 **Tailored Workflow:** `../VEVOR_TAILORED_PROJECT_WORKFLOW_2026-09-10.md`  
 **Master SOP:** `../VEVOR_VENDOR_MASTER_SOP.md`  
+**B-Tier Preparation Receipt:** `../VEVOR_B_TIER_PREPARATION_2026-09-10.md`  
 **Current Maturity:** **STAGE 1 — PROVING** for public storefront + first-order proof
 
 ## Purpose
@@ -36,7 +37,7 @@ Do not expose EIN, tax-license numbers, bank/card data, private address data, cr
 | Supplier relationship | **VERIFIED / ACTIVE DIRECT RELATIONSHIP** | VEVOR PRO/direct supplier lane is beyond prospecting. |
 | PRO/account setup | **VERIFIED / COMPLETE ENOUGH FOR OPERATIONS** | Generic PRO-registration gate is closed; credentials remain protected. |
 | Supplier product feed | **VERIFIED / RECEIVED** | Original/full feed remains source; curated derivatives do not replace it. |
-| Direct vs Doba source identity | **VERIFIED / HARD SEPARATION** | Never treat Doba VEVOR as direct VEVOR without exact-SKU source reconciliation. |
+| Direct vs Doba source identity | **VERIFIED / HARD SEPARATION** | Live Shopify reconciliation on 2026-09-10 found 19 direct VEVOR ACTIVE products and 4 Doba-sourced VEVOR DRAFT products; the source lanes remain separated. Never treat Doba VEVOR as direct VEVOR without exact-SKU source reconciliation. |
 | Sales channel | **VERIFIED — ELEVATION DIRECT WEBSITE** | Direct VEVOR is not authorized for eBay/Amazon/Walmart/TikTok/other marketplaces absent separate written approval. |
 | MAP / price control | **VERIFIED CONTROL EXISTS** | Check feed MAP + current VEVOR public selling price; use higher applicable floor. |
 | Current sellability source | **AVAILABLE / MUST BE RECHECKED** | Feed snapshot is not permanent promise; reverify before publication/material price change/order placement. |
@@ -54,10 +55,12 @@ Do not expose EIN, tax-license numbers, bank/card data, private address data, cr
 
 - A-tier launch is complete.
 - **19 VEVOR Direct products** plus the `VEVOR Direct` collection are ACTIVE/published in Shopify Admin.
+- Live Shopify reconciliation on 2026-09-10 shows **23 total products with vendor VEVOR: 19 direct ACTIVE + 4 Doba-sourced DRAFT**, with source separation intact.
 - Supplier inventory is not represented as Elevation On Hand.
 - Customer prices were set using current verified controls at launch.
 - Current public storefront proof is blocked by the Shopify Online Store password gate, not by VEVOR onboarding.
-- First clean paid direct-VEVOR order has not yet completed end to end.
+- No Shopify order existed in the checked VEVOR launch window at the 2026-09-10 RUN verification, so first-order proof has not started.
+- The **17-SKU B-tier Strong Expansion queue is PREPARED** with zero current Shopify SKU collisions. It is not authorized to publish until the current Stage-1 gate permits expansion and each SKU receives a fresh live price/MAP, sellability, media/source and fulfillment check.
 
 ## Required onboarding/readiness inputs for expansion
 
@@ -76,6 +79,8 @@ Only the missing field needed for that SKU/action is a gate.
 5. Capture supplier acceptance, tracking and customer completion.
 6. Record actual order result and any exception.
 7. Move the repeatable normal-order lane to **CONTROLLED** when proof is clean.
+
+While the storefront password gate remains, continue only safe VEVOR preparation work that does not bypass the gate. The B-tier queue is already prepared; do not recreate it.
 
 ## Real gates
 
