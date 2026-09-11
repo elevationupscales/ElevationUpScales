@@ -44,6 +44,27 @@ No external email send or form submission without Casey authorization unless Cas
 
 For ordinary communications, one Casey approval is enough to execute once, verify, record receipt and update the Worktree.
 
+## Email identity and signature control
+
+All outbound email under this lane must follow `EMAIL_IDENTITY_AND_SIGNATURE_STANDARD_2026-09-11.md`.
+
+Current approved identity model:
+
+- `elevationupscales@gmail.com` = verified technical/system sending mailbox and Google-connected backend identity.
+- `casey@elevationupscales.com` = owner/executive business identity and Casey-specific reply path.
+- `sales@elevationupscales.com` = default team sales/vendor/customer-commerce reply identity.
+- `elevationlithium@gmail.com` = `DISABLED / DO NOT USE`.
+
+Do not claim a domain address was the technical sender unless outbound `Send As` capability for that address is actually verified.
+
+Automated/system-generated external messages represent the **company or role**, not a named person. They use the applicable role signature from the Email Identity & Signature Standard.
+
+**AUTOMATION MAY REPRESENT THE COMPANY; IT MAY NOT SILENTLY PRETEND TO BE CASEY, PETER, OR ANOTHER PERSON.**
+
+A personal signature is allowed only when the named human actually sends/approves the communication as that person or Casey explicitly authorizes the exact message to be sent under that named identity.
+
+Do not include a phone number in automated signatures until the active company phone/contact standard is separately reconciled and verified.
+
 ## Sensitive classification
 
 Gmail Specialists may classify:
