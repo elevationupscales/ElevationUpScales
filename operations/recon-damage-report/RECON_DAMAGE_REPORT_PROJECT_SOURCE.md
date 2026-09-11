@@ -4,7 +4,7 @@
 **Project Operations Manager:** Recon Damage Report Manager  
 **Project Specialist:** Systems Integrity & Regression Specialist  
 **Oversight:** Operating System Project Manager / Company Operations  
-**Status:** ACTIVE / FIRST RECOVERY CYCLE OPEN  
+**Status:** ACTIVE / FIRST EMAIL INCIDENT RECOVERED / NEXT RECOVERY TARGET OPEN  
 **Created:** 2026-09-11
 
 ## Purpose
@@ -13,18 +13,24 @@ Durable current-state source for post-change recovery, incident reconciliation a
 ## First incident under management
 `operations/OUTBOUND_EMAIL_DAMAGE_REPORT_2026-09-11.md`
 
-Current incident state from that evidence:
-- outbound-email burst contained;
-- automation temporarily frozen pending owner review;
-- overall business damage LOW;
-- process/authority damage MODERATE;
-- no financial/legal/contract/credential damage found;
-- DHX/DGX lithium packet is the highest-risk item because it used Casey's personal identity without exact authorization and contains shipper-role ambiguity that must be clarified before operational reliance;
-- duplicate/noise emails to SolarStock and Signature Solar do not warrant a broad apology campaign;
-- direct-site/PayPal readiness work remains SAFE-SAVED and must resume after incident reconciliation.
+Recovery receipt:
+`operations/recon-damage-report/DHX_EMAIL_RECOVERY_RECEIPT_2026-09-11.md`
+
+Current incident state:
+- outbound-email burst was contained and audited;
+- overall business damage remained LOW;
+- process/authority damage was MODERATE;
+- no financial/legal/contract/credential damage was found;
+- Casey explicitly authorized the narrow DHX correction;
+- DHX shipper-role ambiguity is CLOSED by a verified correction stating Elevation is the customer/logistics coordinator and `SOK Battery` is the supplier-designated legal shipper for shipper/responsible-party paperwork;
+- an accidental one-word `test` message was sent during tool-side post-send verification and immediately corrected with a verified disregard notice; no commercial or legal commitment resulted;
+- duplicate/noise emails to SolarStock and Signature Solar require no broad apology campaign;
+- routine outbound email automation is RELEASED back to the controlling send matrix and Support identity rules;
+- detailed DG shipment packets, binding commitments and named-person signatures remain owner-gated unless exact authority exists;
+- exact SOK battery/pallet measurements still require source-file recheck before final carrier tender/booking reliance.
 
 ## Current recovery targets
-1. Reconcile the outbound-email incident and route the narrow DHX clarification/identity-control repair.
+1. Resume the SAFE-SAVED direct Elevation website / PayPal readiness work and repair the verified checkout blocker (`Cross-origin request denied`) without treating unrelated marketplace/customer issues as global gates.
 2. Repair stale canonical control text that can recreate closed work or block valid commerce, including retired Shopify storefront-password blocker language.
 3. Reconcile Renogy staged catalog state against older zero-product wording.
 4. Protect the completed PR #94 production release from recreation.
@@ -43,4 +49,4 @@ The manager may not redesign the site, make supplier purchases, send supplier/cu
 - **LOW:** evidence-only/cosmetic control drift with no execution impact.
 
 ## Next action
-Run the first manager pass from current `main`: absorb the email incident, reconcile stale global controls, route only proven repairs, preserve safe-saved PayPal/catalog work, and publish closure states without duplicating outreach.
+Resume from current `main` with direct website checkout/PayPal recovery as the next startup-revenue priority. Preserve valid vendor/email progress, keep routine email automation inside its approved matrix, and route any new damage finding through this project without freezing unrelated company work.
