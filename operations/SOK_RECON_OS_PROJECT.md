@@ -94,6 +94,23 @@ Determine when local warranty stock, receiving, storage, release, replenishment,
 
 A parallel Logistics Plus follow-up has also been sent for additional detail around investment, long-term-agreement/minimum options, and scalable Hawaii warehouse support while Elevation completes the SOK projections. Keep supplier- and provider-specific private economics isolated.
 
+## Logistics Plus pricing-input development — 2026-09-10
+
+Logistics Plus Hawaii has now returned a concrete request for the remaining planning estimates needed to size warehouse space and prepare pricing. Their request covers initial storage volume, maximum growth storage, inbound/outbound movement, and pallet profile information.
+
+This changes the provider lane from passive waiting to **ACTION REQUIRED / OWNER-REVIEWED OPERATING INPUTS**.
+
+Control for SOK RECON OS:
+
+- do **not** send another SOK supplier question merely to answer this warehouse request;
+- use existing verified SOK pallet/product profiles and conservative Elevation pilot assumptions for the warehouse pricing exercise;
+- clearly classify any volume figures supplied to Logistics Plus as **planning estimates for pricing only**, not purchase commitments, guaranteed throughput, warranty forecasts, or SOK volume commitments;
+- preserve the existing owner gate on any long-term agreement, minimum monthly commitment, warehouse investment, dedicated space, standing inventory, or permanent reserve-stock obligation;
+- when Logistics Plus returns actual pricing, treat that response as a verified Hawaii storage/fulfillment input for the SOK economics model;
+- combine the provider pricing with SOK's separate warranty/support response when it arrives rather than reopening the supplier thread prematurely.
+
+Private operating estimates, quotes, rates, contact details, and correspondence remain outside public Git.
+
 ## SOK planning inputs requested
 
 The sent consolidated request sought the operating inputs needed to size the first Hawaii model, including as applicable:
