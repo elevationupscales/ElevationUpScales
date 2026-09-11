@@ -3,7 +3,7 @@
 **Date:** 2026-09-11  
 **Owner:** Casey Young  
 **Classification:** SYSTEM SENSITIVE / ACCESS-CONTROL INCIDENT  
-**Status:** CONTAINED — IDENTITY RETIRED / IMPACT RECON COMPLETE TO CURRENT EVIDENCE
+**Status:** PARTIALLY CONTAINED — RETIRED IDENTITY BLOCKED / ACTIVE GOOGLE ACCOUNT OWNER VERIFICATION REQUIRED
 
 ## Owner directive
 
@@ -82,6 +82,8 @@ Until Casey authorizes a replacement company identity/access method:
 - no personal or newly created Google identity may be promoted into a company recovery/admin role without owner approval;
 - account login, MFA, recovery phone/email, owner name, billing owner, or legal/contact identity changes are owner-level gates.
 
+A later Peter message proposed an `elevationupscaleslogistics` mailbox/name for VEVOR login migration. That proposal is **NOT AUTHORIZED / NOT VERIFIED ACTIVE** by this incident record and must not be promoted into recovery/admin use without Casey approval.
+
 ## Email-job recovery rule
 
 Any workflow/job previously expected to use this identity must be reassigned rather than recreated blindly.
@@ -92,14 +94,94 @@ Recovery sequence:
 
 Do not send duplicate vendor/customer emails merely because the disabled mailbox cannot be inspected. Reconstruct from surviving company threads, supplier/customer replies, platform records, and existing project Worktrees first.
 
+## ACCESS SWEEP — 2026-09-11
+
+Command scope: retired Google identity + incident phone propagation + Peter operating-access records + accessible company Google surfaces + Git/OS + available commerce integration evidence.
+
+### CLEAN / NO RETIRED-IDENTITY REFERENCE FOUND
+
+- **Connected Google profile:** active profile resolves as Casey Young / `elevationupscales@gmail.com`, not the retired identity.
+- **Google Contacts:** no contact search result for `elevationlithium@gmail.com`.
+- **Google Drive:** no search result for `elevationlithium` or the full retired email.
+- **Google Calendar:** no 2026 event search result for the retired email on the primary calendar.
+- **Project file search:** no indexed Project-file hit for the retired identity.
+- **GitHub legacy references:** no code-search, issue, or PR hit for the retired identity outside the new incident-control record; search-index lag for newly committed controls remains possible.
+- **Surviving Gmail:** no actual to/from traffic with the retired account was found; only messages discussing intended use.
+
+### ACCESS-RECORD FINDINGS
+
+- Peter's prior access request preferred separate/delegated named access rather than shared owner/master credentials.
+- VEVOR login migration was still described as **INCOMPLETE** in the surviving Peter update; the intended next step was a company-controlled address, not reuse of the retired account.
+- No current evidence proves the retired email or incident phone became the primary/recovery value for VEVOR, Shopify, eBay, Doba, SOK, Renogy, or logistics providers.
+
+### UNVERIFIED THIRD-PARTY SETTINGS
+
+The current connected tools do not expose login/recovery/contact settings for:
+
+- VEVOR PRO;
+- eBay Seller Hub;
+- Doba;
+- SOK/vendor portals;
+- Renogy account settings;
+- freight/logistics portals.
+
+The available Shopify connection does not expose staff, owner, login, recovery-email, MFA, or recovery-phone settings. Therefore these account-setting surfaces remain **UNVERIFIED**, not CLEAN.
+
+No available plugin was found for direct eBay/Doba/VEVOR account-setting inspection in this sweep.
+
+### GOOGLE CONTACT DETAIL LIMITATION
+
+Google Contacts search returns Peter's existing iCloud and personal Gmail identities. The connector could not open the returned `otherContacts` record through the detail endpoint, so phone-number detail could not be independently inspected there. This is a **TOOL LIMITATION**, not proof that no phone value exists.
+
+### ACTIVE COMPANY GOOGLE ACCOUNT — OWNER VERIFICATION REQUIRED
+
+A separate Google security alert was found for the active company account `elevationupscales@gmail.com`:
+
+- Google states that the **recovery email was changed**.
+- Alert timestamp: `2026-09-11T01:13:23Z` (September 10, 2026 at 7:13 PM MDT).
+- Current mailbox search found **no later Google security notice showing that recovery-email change was reversed**.
+
+This finding does **not** prove unauthorized access. It does require owner verification because recovery-email changes are an owner-level access-control event.
+
+Required owner-side verification for `elevationupscales@gmail.com`:
+
+1. verify the current recovery email;
+2. verify the current recovery phone and ensure the incident phone is absent;
+3. review recent trusted/sign-in devices and security activity;
+4. verify 2-Step Verification methods;
+5. review third-party Google account access and remove anything not intentionally authorized;
+6. record a receipt after the account is confirmed clean.
+
+No change to the active company's recovery settings was attempted by this sweep because the current correct recovery values cannot be safely inferred.
+
+## Sweep classification by surface
+
+| Surface | Result |
+|---|---|
+| `elevationlithium@gmail.com` | RETIRED / DO NOT USE |
+| Incident phone | RETIRED / DO NOT USE; digits intentionally not in public Git |
+| Surviving Gmail | CLEAN for direct retired-account traffic; one intended-use reference preserved |
+| Google Contacts | CLEAN for retired email search; phone detail partially UNVERIFIED due connector limitation |
+| Google Drive | CLEAN for retired identity search |
+| Google Calendar | CLEAN for retired identity search |
+| Git / OS | INCIDENT CONTROLS PRESENT; no legacy operational reference found in search |
+| Shopify account settings | UNVERIFIED — connector lacks staff/security settings |
+| VEVOR PRO settings | UNVERIFIED — no authenticated account-setting tool |
+| eBay settings | UNVERIFIED — no authenticated account-setting tool |
+| Doba settings | UNVERIFIED — no authenticated account-setting tool |
+| SOK / Renogy / logistics account settings | UNVERIFIED unless individually proven by their owning project |
+| `elevationupscales@gmail.com` recovery controls | ACTION REQUIRED / OWNER VERIFICATION |
+| proposed `elevationupscaleslogistics` identity | NOT AUTHORIZED / NOT VERIFIED ACTIVE |
+
 ## Close condition
 
 Incident containment is complete when:
 
-1. the identity remains blocked from all Elevation use;
+1. the retired identity remains blocked from all Elevation use;
 2. the incident phone number is not used in Elevation access/recovery/contact records;
 3. all discovered third-party references, if any, are replaced through authorized owner/admin paths;
 4. affected workflows have an approved replacement communication/access path;
-5. no worker treats the disabled identity as a valid company account.
+5. no worker treats the disabled identity as a valid company account;
+6. the active `elevationupscales@gmail.com` recovery email/phone/security activity are owner-verified and the result is recorded.
 
-**CONTROL PHRASE:** `ROLE CONTINUES → DAMAGED IDENTITY DOES NOT → NO RECOVERY / NO REUSE / NO PHONE REUSE WITHOUT CASEY.`
+**CONTROL PHRASE:** `ROLE CONTINUES → DAMAGED IDENTITY DOES NOT → NO RECOVERY / NO REUSE / NO PHONE REUSE WITHOUT CASEY → ACTIVE COMPANY GOOGLE RECOVERY CONTROLS REQUIRE OWNER VERIFICATION.`
