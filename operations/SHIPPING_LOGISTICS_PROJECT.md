@@ -2,9 +2,11 @@
 
 **Owner:** Casey Young  
 **Parent Management:** Company Operations Manager  
-**Status:** ACTIVE / PROJECT ESTABLISHED  
+**Status:** ACTIVE / PROJECT ESTABLISHED / V1.0-ALIGNED  
 **Primary Worker State:** STANDBY  
 **Effective:** 2026-09-11
+
+**Controlling authority:** `MASTER_SOP_V1_0.md` + `MASTER_OS_GLOSSARY_V1_0.md`, then this Project's applicable subordinate standards and Worktree. The Project remains the established shared operating home for freight/logistics/storage partners.
 
 ## Project Purpose
 
@@ -44,7 +46,7 @@ Product-vendor commercial management remains in the applicable Vendor Project or
 
 ## Relationship classification
 
-Use `PARTNER_RELATIONSHIP_CLASSIFICATION_STANDARD_2026-09-11.md`.
+Use `PARTNER_RELATIONSHIP_CLASSIFICATION_STANDARD_2026-09-11.md` beneath Master S.O.P. V1.0.
 
 Canonical lifecycle:
 
@@ -73,7 +75,7 @@ Each partner record should identify at minimum:
 
 ## Command behavior
 
-Use `OS_COMMAND_GLOSSARY_AND_SWEEP_STANDARD_2026-09-11.md`.
+Use `MASTER_OS_GLOSSARY_V1_0.md` as controlling terminology and `OS_COMMAND_GLOSSARY_AND_SWEEP_STANDARD_2026-09-11.md` as the detailed subordinate implementation.
 
 Examples:
 
@@ -91,7 +93,7 @@ If a correction cannot be made remotely, place a timestamped RECON NOTE in the a
 
 ## Worker startup
 
-Use `WORKER_STARTUP_REGISTRATION_PROTOCOL_2026-09-11.md`.
+Use `WORKER_STARTUP_REGISTRATION_PROTOCOL_2026-09-11.md` beneath the Master S.O.P./Glossary.
 
 The Shipping & Logistics Partner Worker must orient/register before execution and must not create another Project or management hierarchy.
 
@@ -99,8 +101,10 @@ The Shipping & Logistics Partner Worker must orient/register before execution an
 
 **PROJECT:** ESTABLISHED  
 **WORKER ROLE:** ESTABLISHED  
-**WORKER EXECUTION STATE:** `STANDBY`  
+**WORKER EXECUTION STATE:** `STANDBY` unless an executable Shipping & Logistics Worktree is assigned/verified at RUN  
 **NEXT TRIGGER:** `RUN`, assigned Worktree, or new authorized Company Operations directive.
+
+If unfinished work exists but execution is stopped by an inaccessible dependency, unresolved external result, timeout/crash or exhausted safe retries, preserve it as `OPEN TASK` and set the worker `OPEN TASK / STANDBY` rather than ordinary STANDBY.
 
 ## Scale-up rule
 
