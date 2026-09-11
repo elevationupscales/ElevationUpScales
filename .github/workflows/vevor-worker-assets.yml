@@ -136,32 +136,24 @@ jobs:
           print(f'Wrote {row_count:,} product rows; {in_stock:,} marked in stock; {len(cr)} curated; {len(a_tier)} A-tier.')
           PY
 
-      - name: Build manifest and shared worker ZIP
+      - name: Build manifest
         run: |
           set -euo pipefail
           DIR='operations/vendor-source/vevor/2026-09-10'
-          ZIP="$DIR/ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip"
-          rm -f "$ZIP"
           {
             echo 'ELEVATION VEVOR SHARED WORKER SOURCE — SHA256 MANIFEST'; echo
-            find "$DIR" -maxdepth 1 -type f ! -name '.bootstrap' ! -name '10_MANIFEST_SHA256.txt' ! -name 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' -print0 | sort -z | while IFS= read -r -d '' file; do
+            find "$DIR" -maxdepth 1 -type f ! -name '.bootstrap' ! -name '10_MANIFEST_SHA256.txt' -print0 | sort -z | while IFS= read -r -d '' file; do
               printf '%s  %s\n' "$(sha256sum "$file" | awk '{print $1}')" "$(basename "$file")"
             done
           } > "$DIR/10_MANIFEST_SHA256.txt"
-          (cd "$DIR" && zip -9 -q 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' \
-            00_START_HERE.md 01_VEVOR_PROJECT_MASTER_PROMPT.md 02_VEVOR_CURRENT_PROJECT_STATE.md 03_WORKER_SHARED_SOURCE_README.md \
-            04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx 05_VEVOR_Curated_40_CONTROL.json 05_VEVOR_Curated_40.csv \
-            06_VEVOR_All_Products_Light.csv 06_VEVOR_All_Products_Light.REBUILD.md 07_VEVOR_Catalog_SOP_2026-09-10.md \
-            08_Colorado_Wholesale_Sales_Tax_License.RESTRICTED.md 09_SOURCE_MASTER_NOTE.txt 10_MANIFEST_SHA256.txt 11_VEVOR_RUN_RECEIPT_2026-09-10.md \
-            12_PUBLIC_REPO_SECURITY_NOTE.md 13_VEVOR_PROJECT_SOURCE_CURRENT.md VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx)
 
       - name: Commit generated worker assets
         run: |
           set -euo pipefail
           git config user.name 'Elevation GitHub Automation'
           git config user.email 'elevationupscales@users.noreply.github.com'
-          git add operations/vendor-source/vevor/2026-09-10/{04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx,05_VEVOR_Curated_40.csv,06_VEVOR_All_Products_Light.csv,10_MANIFEST_SHA256.txt,13_VEVOR_PROJECT_SOURCE_CURRENT.md,VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx,ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip}
+          git add operations/vendor-source/vevor/2026-09-10/{04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx,05_VEVOR_Curated_40.csv,06_VEVOR_All_Products_Light.csv,10_MANIFEST_SHA256.txt,13_VEVOR_PROJECT_SOURCE_CURRENT.md,VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx}
           if git diff --cached --quiet; then echo 'No generated changes to commit.'; exit 0; fi
-          git commit -m 'ops(vevor): generate shared full feed and worker packet'
+          git commit -m 'ops(vevor): generate shared full feed and worker assets'
           git pull --rebase origin main
           git push origin HEAD:main
