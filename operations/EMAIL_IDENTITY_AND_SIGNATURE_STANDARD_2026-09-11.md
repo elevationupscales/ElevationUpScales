@@ -9,6 +9,16 @@
 
 Establish one clear company rule for which email identities Elevation uses, how automated/system-generated emails are signed, and when a message may carry a person's name/title.
 
+## Send authority
+
+This file controls **identity, sender presentation, signature and reply path**. It does not independently authorize every outbound message.
+
+Automated external email may execute without separate per-message owner approval only when the message qualifies under `AUTOMATED_EMAIL_EXECUTION_MATRIX_2026-09-11.md` and all required pre-send controls pass.
+
+If the message is outside that matrix, SYSTEM SENSITIVE, BUSINESS SENSITIVE, uncertain, duplicate-risk, or creates a new obligation, follow the owner-gate process in `GMAIL_EMAIL_NETWORK_SOP_V1_0.md`.
+
+This standard applies to email identity/signatures. It does not authorize SMS/text-message automation.
+
 ## Verified current sending reality
 
 Current Gmail send history proves `elevationupscales@gmail.com` is the active technical outbound mailbox.
@@ -169,4 +179,4 @@ An automated or pre-authorized routine message must use a role/team signature un
 
 ## Control phrase
 
-**MAIN GMAIL SENDS → SUPPORT SIGNS → SUPPORT@ IS THE DEFAULT AUTOMATED CONTACT → SALES IS SALES-SPECIFIC → CASEY IS OWNER-SPECIFIC → NEVER REUSE RETIRED IDENTITIES.**
+**MAIN GMAIL SENDS → SUPPORT SIGNS → SUPPORT@ IS THE DEFAULT AUTOMATED CONTACT → AUTOMATION FOLLOWS THE SEND-CLASS MATRIX → SALES IS SALES-SPECIFIC → CASEY IS OWNER-SPECIFIC → NEVER REUSE RETIRED IDENTITIES.**
