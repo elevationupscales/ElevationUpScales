@@ -103,6 +103,28 @@ Do not impose an indefinite Git freeze while Casey is actively directing other c
 
 If a preview for an exact SHA is already actively running or has passed and production must use the same SHA, avoid unrelated commits only for that active preview→production window unless Casey explicitly directs otherwise.
 
+## Unified GitHub RUN action
+
+For branch-based partner, vendor, project-manager, manager or developer work, use the shared:
+
+`RUN — Unified Partner / Manager Worktree`
+
+Workflow:
+
+`.github/workflows/unified-run-command.yml`
+
+Controlling SOP:
+
+`operations/UNIFIED_RUN_WORKFLOW_SOP_2026-09-10.md`
+
+The shared Action standardizes current-main reconciliation, role/scope labeling, applicable `/operations/` control selection, QA depth and a public-safe receipt.
+
+It does **not** grant a manager wider authority, write to the branch, merge a PR, or deploy production.
+
+Use the common Action instead of creating separate SOK, Renogy, VEVOR, Kingboss or manager-specific RUN workflows unless a real technical requirement cannot be represented by the shared control.
+
+Production deployment remains separate and exact-SHA controlled after reviewed merge.
+
 ## Gate discipline
 
 `RUN` does not remove real safety controls. It removes unnecessary workflow hesitation.
