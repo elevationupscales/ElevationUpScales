@@ -3,7 +3,8 @@
 **Date:** 2026-09-11 MDT  
 **Owner:** Casey Young  
 **Prepared for:** Owner / Operating System / Company Operations / Ecommerce & Vendor Operations  
-**Source baseline before this record:** `5dd63782e66a99f1c8879580b0c76ab61afbbff6`  
+**Initial recon baseline:** `5dd63782e66a99f1c8879580b0c76ab61afbbff6`  
+**Post-recon repo baseline reviewed:** `5ebb7c14d9f3764cb2909c6dd70079a50ef12198`  
 **Mode:** GIT FIRST / RECONCILE CURRENT FACTS / BLOCKED TO BACK / CONTINUE FINISHABLE WORK / DEDUPE BEFORE SEND
 
 ## Morning control
@@ -93,7 +94,14 @@ The eBay cancellation request for order `10-15134-90489` remains a real customer
 
 ## Release lane
 
-Homepage / lithium branding release remains open. At the actual release window:
+PR #121 / morning recovery sweep merged after this recon began. Its verified result is:
+
+- canonical QA and credential scan passed;
+- source remains aligned to approved homepage PR #94;
+- live production still remains stale;
+- exact-SHA preview → production dispatch remains the unresolved deployment action.
+
+At the actual release window:
 
 **RESOLVE LATEST REVIEWED MAIN → PREVIEW → PASS → SAME SHA PRODUCTION WITH `DEPLOY` → CANONICAL SMOKE → RECEIPT**
 
