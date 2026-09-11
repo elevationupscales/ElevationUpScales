@@ -1,7 +1,7 @@
 # Elevation UpScales — Unified RUN Workflow SOP
 
 **Status:** ACTIVE / CONTROLLING EXTENSION  
-**Effective:** 2026-09-10  
+**Effective:** 2026-09-10; direct-release continuation updated 2026-09-11  
 **Owner:** Casey Young  
 **Parent:** `operations/OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md`  
 **GitHub Action:** `.github/workflows/unified-run-command.yml`
@@ -12,11 +12,13 @@ Provide one standard GitHub **RUN** action for partner projects, vendor projects
 
 The goal is:
 
-**ONE OWNER RUN SEMANTIC → ONE BRANCH VALIDATION ACTION → ROLE-SCOPED RECEIPT → NORMAL PR/RELEASE FLOW**
+**ONE OWNER RUN SEMANTIC → ONE BRANCH VALIDATION ACTION → ROLE-SCOPED RECEIPT → NORMAL PR/MERGE FLOW → DIRECT RELEASE CONTINUATION WHEN THE OWNER RUN WORKTREE INCLUDES APPROVED RUNTIME REPAIR**
 
-This workflow reduces duplicate manager-specific Actions and stale branch procedures. It does not create a new management hierarchy, work board, supplier authority or deployment path.
+This workflow reduces duplicate manager-specific Actions and stale branch procedures. It does not create a new management hierarchy, work board or supplier authority.
 
 **RUN IS AN EXECUTION/QA MECHANISM, NOT A COMPANY-WIDE TASK BROADCAST.**
+
+The branch-validation Action remains non-deploying by design. Production deployment is a **continuation of the Owner RUN worktree after merge** when the controlling Owner RUN protocol's direct-deployment conditions are satisfied.
 
 ## Authority order
 
@@ -49,6 +51,8 @@ For dedicated supplier managers, **continue the next unblocked action means the 
 
 A company-wide assignment requires explicit owner/OS-PM scope. The default scope of a named partner/project RUN is **PROJECT-ONLY**.
 
+A dedicated supplier/project manager does not gain blanket production-release authority from a successful Unified RUN. Shared-site runtime release is completed by the OS/Company Operations/Developer release lane after the bounded handoff is merged.
+
 ## When to use the Unified RUN Action
 
 Use **RUN — Unified Partner / Manager Worktree** when an Owner-authorized partner/project/manager lane has branch-based work that needs a common execution/QA receipt before normal review or handoff.
@@ -64,7 +68,7 @@ Typical lanes include:
 - Company Operations;
 - Catalog/Commerce development;
 - bounded Developer tasks;
-- release-candidate preparation before the separate production release workflow.
+- release-candidate preparation before merged runtime release.
 
 Do not create a separate partner-specific RUN workflow unless a real technical requirement cannot be represented by this shared control.
 
@@ -129,7 +133,7 @@ For an already authorized branch being prepared for merge/release review.
 
 Includes development QA plus release-policy regression and artifact-size controls.
 
-**Release-candidate does not deploy.**
+**Release-candidate validates the branch; it does not itself deploy.** After authorized merge, the parent Owner RUN protocol determines whether production release is an automatic continuation of the same RUN worktree.
 
 ## What the Action is allowed to do
 
@@ -142,9 +146,9 @@ The Unified RUN Action may:
 - write a commit status on the branch SHA;
 - create a public-safe run summary and downloadable receipt artifact.
 
-## What the Action must never do
+## What the Action must never do by itself
 
-It must not:
+The branch-validation Action must not:
 
 - broadcast one project task to other managers/workers;
 - reassign a worker from another project;
@@ -152,22 +156,27 @@ It must not:
 - commit to the assigned branch;
 - commit to `main`;
 - merge a PR;
-- deploy Cloudflare Pages or Workers;
-- invoke production release automatically;
+- directly deploy Cloudflare Pages or Workers from an unmerged work branch;
 - change supplier/channel authorization;
 - change customer/payment/order state;
 - override MAP, pricing, freight, lithium/DG or compliance controls;
 - treat the role input as standing authority beyond the assigned scope.
 
-Production remains controlled by the existing exact-SHA release workflow after merge:
+This non-deployment boundary applies to the **Unified RUN Action itself**, not to the entire Owner RUN worktree.
 
-**CURRENT REVIEWED MAIN → EXACT-SHA PREVIEW → SAME-SHA PRODUCTION → CANONICAL SMOKE → RECEIPT**
+After an authorized runtime repair is reviewed and merged to current `main`, the OS/Company Operations/Developer release lane follows the parent Owner RUN protocol. When live production is stale or a release-ready repair is open, Owner RUN authorizes the direct production trigger without requiring another owner message.
+
+Preferred continuation:
+
+**MERGED CURRENT MAIN → RE-RESOLVE/VERIFY SHA → FAST-FORWARD `production-deploy` TO CURRENT MAIN → EXISTING DEPLOY WORKFLOW QA + SECRET SCAN + CLOUDFLARE DEPLOY + CANONICAL SMOKE → LIVE RECEIPT**
+
+Never force `production-deploy`, never point it to an unmerged work branch, and never use this continuation for docs-only state changes with no production effect/drift.
 
 ## Manager / partner operating pattern
 
 For any branch-based lane:
 
-**OWNER RUN → RESOLVE RECIPIENT PROJECT → RE-RESOLVE MAIN → READ CURRENT WORK BOARD + THAT PROJECT'S LANE SOP → RESUME/CREATE ASSIGNED BRANCH → EXECUTE BOUNDED TASK → RUN UNIFIED ACTION → FIX ONLY PROVEN FAILURES → PR/REVIEW IF AUTHORIZED → RECORD RESULT → CONTINUE INSIDE THE SAME PROJECT**
+**OWNER RUN → RESOLVE RECIPIENT PROJECT → RE-RESOLVE MAIN → READ CURRENT WORK BOARD + THAT PROJECT'S LANE SOP → RESUME/CREATE ASSIGNED BRANCH → EXECUTE BOUNDED TASK → RUN UNIFIED ACTION → FIX ONLY PROVEN FAILURES → PR/REVIEW IF AUTHORIZED → MERGE/RECONCILE IF AUTHORIZED → IF RUNTIME REPAIR IS RELEASE-READY, ROUTE/CONTINUE THROUGH DIRECT PRODUCTION RELEASE → RECORD RESULT → CONTINUE INSIDE THE SAME PROJECT**
 
 A waiting supplier response does not block other **already assigned work inside that same project**. It also does not authorize that project manager to take work from another project. If the project has no executable work, mark the applicable item WAITING/HOLD and return capacity/routing to the Operating System Project Manager or Company Operations Manager.
 
@@ -179,7 +188,7 @@ Do not repeatedly run a branch merely because its external dependency is still w
 
 PASS means the assigned branch is reconciled to the current main used by the run, required controls exist, applicable QA passed, and a receipt was generated.
 
-PASS does **not** mean:
+PASS does **not** by itself mean:
 
 - the PR is approved;
 - the branch is merged;
@@ -189,7 +198,9 @@ PASS does **not** mean:
 - the task became company-wide;
 - other managers/workers were reassigned to the project.
 
-Those remain separate factual/routing gates.
+Those remain separate factual/routing states.
+
+However, when Casey's active RUN is being executed by the OS/Company Operations/Developer release lane and the branch becomes an approved merged runtime repair, do **not** stop at PASS or merge if production remains stale. Continue through the direct-deployment rule in the parent protocol.
 
 ### FAIL
 
@@ -208,7 +219,7 @@ Do not translate one branch failure into a company-wide stop.
 
 ## Receipt
 
-Every controlled run records:
+Every controlled branch run records:
 
 - result;
 - partner/project;
@@ -220,9 +231,11 @@ Every controlled run records:
 - current main SHA;
 - resolved QA profile;
 - changed-file count/list;
-- explicit non-deployment boundary.
+- explicit statement that the branch Action itself does not deploy.
 
-The commit status context is:
+When the Owner RUN worktree continues into production, the release workflow/live verification must produce the separate production receipt/state evidence.
+
+The branch-validation commit status context is:
 
 `elevation/unified-run`
 
@@ -231,5 +244,7 @@ The commit status context is:
 When Casey directs **RUN**, **RUN WORKFLOW**, **CONTINUE WORKFLOW**, or equivalent execution language for a partner/project/manager branch, use this Action for the branch validation/QA stage unless the lane is not Git-based or a more specific already-approved technical gate is required.
 
 Interpret the RUN inside the project/manager context where Casey issued it unless Casey explicitly addresses the Operating System Project Manager / Company Operations Manager for cross-project or company-wide routing.
+
+For approved website/runtime repairs, **RUN does not stop at branch validation or merge**. Once the repair is merged and the release lane is properly in scope, continue through production deployment and live verification under the parent Owner RUN protocol unless a true hard gate prevents release.
 
 Do not build duplicate workflows for SOK, Renogy, VEVOR, Kingboss or future partner managers when this shared Action can safely represent the work.
