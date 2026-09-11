@@ -54,15 +54,14 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - Preserve Renogy's verified third-party-marketplace boundary.
 
 - **VEVOR — A / STRATEGIC EXISTING PRODUCT LINE**
-  - State: **OWNER APPROVED TO PROCEED / DIRECT-WEBSITE DROPSHIPPING / ONBOARDING IN PROGRESS**.
-  - Operations is authorized to proceed with VEVOR PRO registration, tax-exemption setup, Master Catalog feed reconciliation, and eligible direct-site publication.
-  - VEVOR's latest onboarding instruction is to enter company registration information directly during VEVOR PRO membership registration and submit the tax-exemption certificate through the account workflow.
-  - VEVOR additionally stated that a tax-free-state shipping address is required for its tax-exemption treatment; treat that as supplier onboarding guidance to verify operationally, not as a general tax-law statement.
-  - Selling price must not be below VEVOR's current selling price.
+  - State: **PRO ACTIVE / DIRECT-SITE CATALOG LIVE / FIRST-ORDER PROOF OPEN**.
+  - PRO registration is complete, the supplier feed has been received, and the Colorado tax-exemption submission is pending review without acting as a general commerce blocker under VEVOR's stated pending-review treatment.
+  - The first Shopify launch wave is live: 19 `VEVOR Direct` products plus the `VEVOR Direct` collection are published to the Online Store.
+  - Selling price must not be below VEVOR's current selling price; live supplier sellability, stock, price and applicable MAP/floor must be reverified before supplier purchase/fulfillment.
   - Approved channel: ElevationUpScales.com / Shopify direct-site sales only.
   - Amazon, Walmart, eBay, and other third-party marketplaces remain blocked unless VEVOR later provides written authorization.
   - Every live paid VEVOR order must enter the Elevation Operating System under `SOP-STORE-INT-001` before the integration can be marked CLOSED.
-  - No additional owner gate is required for routine onboarding/catalog execution; escalate only binding terms, unusual financial commitments, or material policy changes.
+  - No additional owner gate is required for routine catalog/order execution; escalate only binding terms, unusual financial commitments, or material policy changes.
 
 - **Kingboss — EXISTING CONTACT / LITHIUM SUPPLY + COMPLIANCE**
   - State: **B2B APPROVED / ONBOARDING WAITING**.
@@ -71,7 +70,7 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - Current onboarding still needs the supplier-provided information required to operationalize product identity, U.S. inventory/ship-from points, compliance support, and commercial fulfillment.
   - SOK remains the primary battery relationship; use Kingboss only for defined commercial/product/logistics value.
 
-### 04 — Contacted / Waiting — 21
+### 04 — Contacted / Waiting — 29
 
 These suppliers already have outbound business outreach on record. **Do not send a second cold introduction.** Replies/follow-up stay in the existing correspondence path.
 
@@ -96,6 +95,14 @@ These suppliers already have outbound business outreach on record. **Do not send
 - **Morningstar Corporation — A** — authorized reseller/professional solar electronics opportunity. Direct onboarding sent 2026-09-08.
 - **Lippert — A** — RV electrical, towing, outdoor living, climate and complementary RV components. Business-account outreach sent 2026-09-08.
 - **Dometic — A** — RV refrigeration, climate, ventilation, sanitation, power and outdoor categories. Dealer/account-routing outreach sent 2026-09-08.
+- **Solar Electric Supply — A+** — completed dealer application packet and Colorado wholesale documentation sent 2026-09-10; await account response.
+- **Sol-Ark — A strategic** — authorized retail/distribution-path inquiry sent 2026-09-10; channel authorization and sourcing path remain to be confirmed.
+- **SunGoldPower — A** — dealer/dropship solar partnership inquiry sent 2026-09-10; await commercial terms/qualification.
+- **Phocos Americas — A-** — authorized reseller/dealer inquiry sent 2026-09-10; await account routing/qualification.
+- **Solaris Technology Industry / Solaris Shop — A-** — commercial/reseller solar account inquiry sent 2026-09-10; await business-account terms.
+- **SolarPanelStore.com / Colorado Solar — A** — Colorado business/reseller account inquiry sent 2026-09-10; await account terms.
+- **SolarStock USA — A** — wholesale module/pallet account inquiry sent 2026-09-10; await wholesale/freight terms.
+- **ECO-WORTHY — A** — B2B solar partnership inquiry sent 2026-09-10; await dealer/wholesale, dropship, channel and fulfillment qualification.
 
 ### 05 — Acknowledged / Case Open — 1
 
@@ -103,20 +110,13 @@ These suppliers already have outbound business outreach on record. **Do not send
   - Dealer inquiry sent; automated case **#00431773** opened.
   - Await human routing. Do not resend while the case is open.
 
-### 06 — Draft Only / Manager Review — 11
+### 06 — Draft Only / Manager Review — 4
 
 A current draft already exists for each lead below. **Do not create a duplicate draft or send without the appropriate owner/manager review.**
 
 - **BigBattery** — battery supplier; SOK-first policy applies. Activate only for a defined product/capacity/logistics gap.
-- **ECO-WORTHY — A** — B2B solar partnership; panels, inverters and systems. Dropship/direct-fulfillment still requires qualification.
 - **VoltGo Power — B+** — battery dealer partnership; secondary to SOK unless differentiated or useful for Hawaii/Alaska.
 - **WattCycle — B+** — wholesale partnership; backup/diversification or logistics/referral role unless a specific SOK gap is proven.
-- **Solar Electric Supply — A+** — completed dealer/application path for wholesale panels, inverters, storage, racking/controllers and systems.
-- **SolarStock USA — A** — wholesale module/pallet account; Southern California sourcing value.
-- **SolarPanelStore.com / Colorado Solar — A** — Colorado solar business/reseller account; panels, controllers, inverters and BOS.
-- **Solaris Technology Industry / Solaris Shop — A-** — Colorado commercial/reseller solar account; ecommerce terms still require qualification.
-- **Phocos Americas — A-** — authorized reseller/dealer opportunity for off-grid inverters/controllers.
-- **SunGoldPower — A** — dealer/dropship solar partnership; panels, hybrid/off-grid inverters and systems; battery line secondary to SOK.
 - **DMX Power / Magnum Energy / Dimensions — A** — high-value inverter/inverter-charger vendor draft; RV/mobile/off-grid power fit.
 
 ### 07 — Routing Failed / Blocked — 1
@@ -138,7 +138,7 @@ These remain legitimate future account targets after the active qualification an
 - **EcoDirect — A- strategic** — Southern California solar/storage distributor; installer/business/project supply; ecommerce terms need verification.
 - **Airxcel — A** — broad RV component relationship with Colorado presence and national channel; curate by brand/category.
 
-### 09 — Research / Channel Verify — 9
+### 09 — Research / Channel Verify — 8
 
 Do not make unsupported dealer/channel claims. Verify the correct commercial path before outreach.
 
@@ -148,7 +148,6 @@ Do not make unsupported dealer/channel claims. Verify the correct commercial pat
 - **WFCO Technologies — A-** — lithium-compatible RV converter/chargers/power centers; determine direct vs distributor path.
 - **MidNite Solar — B+** — professional off-grid solar electronics/BOS; reseller eligibility and account structure need clarification.
 - **Blue Sea Systems — B+** — DC electrical products; likely distributor-led account rather than direct manufacturer account.
-- **Sol-Ark — A strategic** — hybrid inverter manufacturer; verify direct authorized channel vs approved distributor sourcing.
 - **WindyNation — A-** — California solar/inverter retailer program; dropship/direct fulfillment not yet verified.
 - **HQST — A-** — solar panels/controllers/inverters/kits; wholesale inquiry exists; dropship, inventory and channel rules need verification.
 
@@ -176,7 +175,7 @@ When supplier/commercial work is routed into this domain:
 
 ### Solar / inverter / BOS focus
 
-The former “Qualified / Solar + Inverter” queue has been fully advanced into either **Contacted / Waiting** or **Draft Only / Manager Review**. Do not continue using the 2026-09-07 ordering as though those leads were untouched.
+The former “Qualified / Solar + Inverter” queue has been materially advanced into **Contacted / Waiting**, with only the remaining verified draft and qualified lanes left to work. Do not use older dated ordering as though the newly contacted leads were untouched.
 
 ### Hawaii / Alaska supplier opportunity
 
