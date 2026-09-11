@@ -45,12 +45,13 @@ Do not expose EIN, tax-license numbers, bank/card data, private address data, cr
 | Preorder/backorder | **NOT VERIFIED** | Unavailable direct VEVOR SKU pauses individually unless a valid alternate source/order path is verified. |
 | Ship-from / fulfillment | **VERIFIED NORMAL DIRECT ORDER PATH** | VEVOR PRO dropship ordering is placed through the VEVOR website after the customer order; supplier correspondence confirms U.S.-warehouse fulfillment. Exact order still requires live sellability check. |
 | Shipping timing | **PLANNING GUIDANCE ONLY** | Supplier correspondence gave ~3–7 working days for U.S.-warehouse delivery; do not promise as a guarantee without order-specific support. |
-| Tracking / order status | **PUBLIC BASELINE VERIFIED / FIRST ORDER TO PROVE HANDOFF** | VEVOR's current public FAQ uses My Orders / Tracking and posts tracking after shipment. Exact carrier/tracking handoff into Shopify must be proven on the first real order. |
-| Blind shipping / packing slips | **NOT VERIFIED / SUPPLIER FOLLOW-UP OPEN** | Do not promise blind shipping or absence of VEVOR pricing/branding/inserts until supplier confirms. |
+| Tracking / order status | **SUPPLIER VERIFIED / FIRST ORDER TO PROVE TIMING** | VEVOR confirms tracking is available through Elevation's PRO account. Capture actual carrier/tracking timing and Shopify handoff on first real order. |
+| Blind shipping / packing slips | **SUPPLIER VERIFIED — NOT FULLY UNBRANDED** | VEVOR confirms product packaging bears the VEVOR logo. Supplier states invoices/pricing details are not included. Do not market the fulfillment as fully blind/unbranded. |
 | Tax/resale treatment | **SUBMISSION COMPLETE / FINAL REVIEW PENDING** | Colorado tax-exemption submission task is complete; pending optimization is not a general commerce blocker if lawful order economics remain executable. |
 | Payment setup | **AVAILABLE / PROTECTED** | Use current authorized VEVOR account/payment route; never expose payment details here. |
 | Approved media/spec data | **AVAILABLE FOR LAUNCHED SET** | 19 A-tier products have customer-facing source facts/media sufficient for current launch; broader feed expansion remains verified-SKU only. |
-| Warranty/returns/RMA | **PUBLIC BASELINE VERIFIED / PRO ACCOUNT DETAILS PARTIAL** | Current public VEVOR policy states most original-condition items may be returned/exchanged within 30 days and a standard 12-month manufacturer warranty applies on official-site products. Exact PRO-account RMA, label/shipping-cost and customer-support ownership remain supplier-detail items; do not overpromise. |
+| Warranty/returns/RMA | **SUPPLIER ROUTE VERIFIED / CASE ACTUALS OPEN** | VEVOR directs Elevation to its current return policy and supplier support process for returns, damage and warranty issues. Exact label/cost treatment remains case-specific and should be captured on the first applicable case. |
+| Customer-support ownership | **SUPPLIER VERIFIED — ELEVATION FIRST** | Customer contacts Elevation first; Elevation coordinates the supplier-side issue with VEVOR. |
 | Account/catalog contacts | **AVAILABLE THROUGH CURRENT ACCOUNT/CORRESPONDENCE** | Keep private addresses/correspondence outside Git. |
 | Source refresh method | **PARTIAL / ACTIVE SOURCE CHECKS** | Feed + live VEVOR selling-price/sellability verification are controlling; formal automation may mature later. |
 
@@ -62,9 +63,23 @@ Do not expose EIN, tax-license numbers, bank/card data, private address data, cr
 - Supplier inventory is not represented as Elevation On Hand.
 - Customer prices were set using current verified controls at launch.
 - Current public storefront proof is blocked by the Shopify Online Store password gate, not by VEVOR onboarding.
-- No Shopify order existed in the checked VEVOR launch window at the 2026-09-10 RUN verification, so first-order proof has not started.
+- Company Operations attempted the exact password-removal action through an authenticated browser route; Shopify Admin was blocked by a Cloudflare verification challenge before the setting could be reached. No store setting changed. Resume when an owner/admin session can reach the Online Store password setting.
+- The connected Shopify Admin API remains available for supported commerce reads but does not expose the password-protection setting through the currently available action set.
+- A current Shopify order check returned no orders, so no paid-order proof has started.
 - The **17-SKU B-tier Strong Expansion queue is PREPARED** with zero current Shopify SKU collisions. It is not authorized to publish until the current Stage-1 gate permits expansion and each SKU receives a fresh live price/MAP, sellability, media/source and fulfillment check.
-- A focused supplier follow-up covering blind shipping/packing slips, tracking handoff, RMA/return-label procedure and customer-support ownership was sent on 2026-09-10. That response is useful for SOP maturity but is **not a general commerce blocker**.
+- The focused supplier follow-up covering packaging/price paperwork, tracking, returns/RMA and customer-support ownership has been answered. Do not recreate that inquiry.
+
+## Fulfillment operating facts now closed enough for first order
+
+Supplier confirmation establishes:
+
+1. **Packaging:** VEVOR branding remains on product packaging.
+2. **Price paperwork:** supplier states invoices/price details are not included in the customer package.
+3. **Tracking:** use the VEVOR PRO account to retrieve tracking.
+4. **Returns / defects / warranty:** use VEVOR's current return-policy/support process.
+5. **Customer support:** customer contacts Elevation first; Elevation coordinates with VEVOR.
+
+Remaining proof is transactional, not another onboarding questionnaire: actual tracking timing, first-order completion and first applicable return/RMA label/cost behavior.
 
 ## Required onboarding/readiness inputs for expansion
 
@@ -80,11 +95,11 @@ Only the missing field needed for that SKU/action is a gate.
 2. Re-run unauthenticated collection/product/cart/checkout acceptance.
 3. On first real paid VEVOR order, reverify exact SKU, current VEVOR sellability and price/MAP.
 4. Place supplier order through the verified VEVOR account.
-5. Capture supplier acceptance, tracking and customer completion.
+5. Capture supplier acceptance, tracking from the PRO account and customer completion.
 6. Record actual order result and any exception.
 7. Move the repeatable normal-order lane to **CONTROLLED** when proof is clean.
 
-While the storefront password gate remains, continue only safe VEVOR preparation work that does not bypass the gate. The B-tier queue is already prepared; do not recreate it. Supplier-detail waiting does not block the verified normal VEVOR order path.
+While the storefront password gate remains, continue only safe VEVOR preparation work that does not bypass the gate. The B-tier queue is already prepared; do not recreate it. Supplier-detail waiting no longer exists for the focused fulfillment questions.
 
 ## Real gates
 
@@ -102,7 +117,7 @@ Do not use completed PRO onboarding, the existence of internal documentation tas
 
 ## Next action
 
-**PUBLIC STOREFRONT ACCEPTANCE → FIRST REAL VEVOR ORDER PROOF → RECORD ACTUALS → MOVE NORMAL ORDER FLOW TO CONTROLLED**
+**AUTHORIZED SHOPIFY ADMIN ACCESS → REMOVE STOREFRONT PASSWORD → PUBLIC STOREFRONT ACCEPTANCE → FIRST REAL VEVOR ORDER PROOF → RECORD ACTUALS → MOVE NORMAL ORDER FLOW TO CONTROLLED**
 
 ## Close condition for active repeatable vendor onboarding
 
