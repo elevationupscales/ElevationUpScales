@@ -70,7 +70,7 @@ Gmail is the correspondence layer. Sent/draft/reply/bounce facts may be verified
   - Current onboarding still needs the supplier-provided information required to operationalize product identity, U.S. inventory/ship-from points, compliance support, and commercial fulfillment.
   - SOK remains the primary battery relationship; use Kingboss only for defined commercial/product/logistics value.
 
-### 04 — Contacted / Waiting — 29
+### 04 — Contacted / Waiting — 31
 
 These suppliers already have outbound business outreach on record. **Do not send a second cold introduction.** Replies/follow-up stay in the existing correspondence path.
 
@@ -95,6 +95,7 @@ These suppliers already have outbound business outreach on record. **Do not send
 - **Morningstar Corporation — A** — authorized reseller/professional solar electronics opportunity. Direct onboarding sent 2026-09-08.
 - **Lippert — A** — RV electrical, towing, outdoor living, climate and complementary RV components. Business-account outreach sent 2026-09-08.
 - **Dometic — A** — RV refrigeration, climate, ventilation, sanitation, power and outdoor categories. Dealer/account-routing outreach sent 2026-09-08.
+- **DMX Power / Magnum Energy / Dimensions — A** — authorized dealer/ecommerce partnership outreach sent 2026-09-08 to DMX Power; await reply and do not recreate a draft or resend a cold introduction.
 - **Solar Electric Supply — A+** — completed dealer application packet and Colorado wholesale documentation sent 2026-09-10; await account response.
 - **Sol-Ark — A strategic** — authorized retail/distribution-path inquiry sent 2026-09-10; channel authorization and sourcing path remain to be confirmed.
 - **SunGoldPower — A** — dealer/dropship solar partnership inquiry sent 2026-09-10; await commercial terms/qualification.
@@ -103,6 +104,7 @@ These suppliers already have outbound business outreach on record. **Do not send
 - **SolarPanelStore.com / Colorado Solar — A** — Colorado business/reseller account inquiry sent 2026-09-10; await account terms.
 - **SolarStock USA — A** — wholesale module/pallet account inquiry sent 2026-09-10; await wholesale/freight terms.
 - **ECO-WORTHY — A** — B2B solar partnership inquiry sent 2026-09-10; await dealer/wholesale, dropship, channel and fulfillment qualification.
+- **Hughes Autoformers — A** — dealer partnership inquiry sent 2026-09-10 through the verified dealer-program sales route; await dealer onboarding/pricing/channel response.
 
 ### 05 — Acknowledged / Case Open — 1
 
@@ -110,14 +112,13 @@ These suppliers already have outbound business outreach on record. **Do not send
   - Dealer inquiry sent; automated case **#00431773** opened.
   - Await human routing. Do not resend while the case is open.
 
-### 06 — Draft Only / Manager Review — 4
+### 06 — Draft Only / Manager Review — 3
 
 A current draft already exists for each lead below. **Do not create a duplicate draft or send without the appropriate owner/manager review.**
 
 - **BigBattery** — battery supplier; SOK-first policy applies. Activate only for a defined product/capacity/logistics gap.
 - **VoltGo Power — B+** — battery dealer partnership; secondary to SOK unless differentiated or useful for Hawaii/Alaska.
 - **WattCycle — B+** — wholesale partnership; backup/diversification or logistics/referral role unless a specific SOK gap is proven.
-- **DMX Power / Magnum Energy / Dimensions — A** — high-value inverter/inverter-charger vendor draft; RV/mobile/off-grid power fit.
 
 ### 07 — Routing Failed / Blocked — 1
 
@@ -125,12 +126,11 @@ A current draft already exists for each lead below. **Do not create a duplicate 
   - Attempted public email routes bounced.
   - Do not send again until a newly verified working account/contact path is found.
 
-### 08 — Qualified / Not Yet Contacted — Complementary + Dropship — 8
+### 08 — Qualified / Not Yet Contacted — Complementary + Dropship — 7
 
 These remain legitimate future account targets after the active qualification and draft queues are worked.
 
 - **BayWa r.e. Solar Systems — A- strategic** — national solar distributor with California and Honolulu presence; use correct regional account route.
-- **Hughes Autoformers — A** — formal dealer program; RV electrical protection/Power Watchdog/autoformer attach-sale opportunity.
 - **Winegard — A** — authorized reseller/UMAP framework; RV connectivity/mobile technology.
 - **Micro-Air — A-** — EasyStart soft starters, thermostats and RV/marine controls; dealer/distributor path still needs final qualification.
 - **KISAE Technology — A-** — inverters, inverter/chargers and DC-DC charging; explicit dealer inquiry path.
@@ -175,7 +175,7 @@ When supplier/commercial work is routed into this domain:
 
 ### Solar / inverter / BOS focus
 
-The former “Qualified / Solar + Inverter” queue has been materially advanced into **Contacted / Waiting**, with only the remaining verified draft and qualified lanes left to work. Do not use older dated ordering as though the newly contacted leads were untouched.
+The former “Qualified / Solar + Inverter” queue has been materially advanced into **Contacted / Waiting**, with only the remaining verified qualified lanes left to work. Do not use older dated ordering as though contacted leads were untouched.
 
 ### Hawaii / Alaska supplier opportunity
 
@@ -186,7 +186,7 @@ For each relevant supplier, evaluate independently:
 - Hawaii/Alaska demand the supplier currently loses or declines;
 - referral structure;
 - whether Elevation becomes seller/invoice issuer;
-- whether the opportunity is instead standalone specialized logistics;
+- whether the opportunity is instead standalone specialized lithium logistics;
 - whether Southern California inventory/warehouse access improves route economics.
 
 Do not infer dangerous-goods shipment acceptance from dealer approval or ordinary fulfillment capability.
