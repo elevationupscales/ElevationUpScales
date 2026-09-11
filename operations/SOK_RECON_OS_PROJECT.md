@@ -134,6 +134,49 @@ Control:
 - after recovery, extract only exact verified model rows and route them to H2O/Pasha under the existing logistics work item;
 - this exact-profile blocker does not stop normal Lower-48 SOK commerce, the SK12V100PC proof lane, warranty planning, or unrelated provider work.
 
+## Company Operations priority decision — 2026-09-10
+
+SOK Project Operations requested direction among the current proof-shipment, storage, Lower-48/catalog and H2O profile-recovery lanes.
+
+**OPERATIONS RECOMMENDATION:** prioritize **Lower-48 commerce / bounded catalog-media completion as the immediately executable SOK lane**, while keeping the Hawaii proof **owner-ready but unbooked** until the receiving/storage choice is better informed. Continue the legacy-workbook recovery only through available internal/authorized paths; it is now a technical-access hold rather than the main SOK execution lane.
+
+### Why this is the next move
+
+- Lower-48 commerce is already controlled and can produce revenue without waiting on Hawaii provider responses.
+- The H2O additional-SKU profile lane cannot safely advance until the existing supplier workbook is recoverable; guessing is prohibited.
+- Logistics Plus pricing is already pending and may materially affect the best Hawaii receiving/storage structure.
+- The first Hawaii proof remains qualification-oriented. There is no operational reason to create a purchase/booking commitment before the receiving/storage decision inputs return.
+- Waiting on Hawaii inputs must not suppress normal SOK selling, catalog readiness, media use, backorder/preorder handling or customer support.
+
+### What can run in parallel
+
+- continue normal supported Lower-48 SOK commerce;
+- use individually preserved official SOK media/assets where exact product identity is verified;
+- keep the first SK12V100PC proof package, compliance evidence and carrier requirements organized so booking can proceed quickly after the remaining route/receiving decision inputs are available;
+- process the SOK warranty response immediately when received;
+- process Logistics Plus pricing/terms immediately when received;
+- recover the legacy SOK workbook if a supported authorized extraction/download path becomes available, then route exact rows to H2O/Pasha without reopening supplier qualification.
+
+### What remains waiting / held
+
+- SOK warranty operating-input response — WAITING EXTERNAL;
+- Logistics Plus warehouse/fulfillment pricing and terms — WAITING EXTERNAL;
+- H2O additional-SKU pricing — HELD only on exact profile extraction;
+- first material Hawaii booking/release — OWNER GATE / not yet requested;
+- full large-package media ingestion — TOOLING/TRANSFER LIMITATION; use bounded preserved assets rather than block commerce.
+
+### Casey decision now
+
+**NO OWNER DECISION REQUIRED NOW.**
+
+No purchase, shipment booking, warehouse commitment, liability assumption, permanent commercial term or public pricing change is being requested at this stage.
+
+### Exact next executable action for SOK Project Operations
+
+**CONTINUE THE VERIFIED LOWER-48 / CATALOG WORKTREE:** take the next highest-value SOK product/media/catalog item that already has exact identity and approved source evidence, complete its bounded readiness work, and route only the implementation action required. Do not restart qualification and do not wait on Hawaii to continue normal commerce.
+
+When Logistics Plus pricing or SOK warranty inputs arrive, reconcile them immediately and re-rank the Hawaii proof decision. If the legacy workbook becomes extractable first, complete the seven-model profile extraction and hand only verified rows to Company Operations/H2O.
+
 ## SOK planning inputs requested
 
 The sent consolidated request sought the operating inputs needed to size the first Hawaii model, including as applicable:
