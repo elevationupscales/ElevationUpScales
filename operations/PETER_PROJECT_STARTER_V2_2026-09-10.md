@@ -1,118 +1,177 @@
-# Elevation UpScales — Peter Simple Execution Control
+# Elevation UpScales — Peter Minimal Workload Support Control
 
-**Date:** 2026-09-10  
-**Status:** ACTIVE / CONTROLLING PETER WORKFLOW — SIMPLIFIED  
+**Date:** 2026-09-11  
+**Status:** ACTIVE / CONTROLLING PETER WORKFLOW — MINIMAL LOAD  
 **Owner:** Casey Young  
 **Human Manager:** Peter Torres — Ecommerce & Vendor Operations Manager
 
-## Purpose
+## Owner intent
 
-Peter is execution capacity. Peter should spend his time completing ecommerce and vendor work, not maintaining a second management system.
+Peter is valuable human execution capacity, but Elevation should **not consume his time like a full-time operations employee while he is not currently being paid**.
 
-This record **heavily simplifies and replaces the Peter-specific workflow, chat gates, status formats, recurring SOP-maintenance instructions, and priority mechanics previously contained in this file and earlier Peter starter/manager/quick-start packages.**
+The operating goal is now:
 
-Parent company controls remain in force:
+**USE PETER ONLY WHERE HUMAN TIME CREATES CLEAR VALUE → KEEP HIS ACTIVE LOAD SMALL → LET COMPANY OPERATIONS / AI WORKERS DO THE PREP → DO NOT CREATE A BACKLOG FOR HIM TO CATCH UP ON.**
+
+Peter is not expected to clear the company work board, maintain company management systems, or continuously work vendor queues.
+
+Parent controls remain in force:
 
 - Casey's newest explicit owner direction;
-- `operations/CURRENT_WORK_BOARD.md` for the current global work order and unresolved work state;
+- `operations/CURRENT_WORK_BOARD.md` for company-wide state;
 - `operations/MANAGEMENT_OPERATING_SOP.md`;
-- `operations/CROSS_GPT_COMMUNICATION_AND_APPROVAL_SOP_2026-09-10.md`;
-- `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`;
-- the current relevant `/operations/` lane record.
+- current project/vendor source and tailored workflow where applicable;
+- `operations/INTERNAL_WORKER_CONFIDENTIALITY_IP_AND_FILE_USE_POLICY.md`.
 
-## Peter's entire work loop
+## Peter's workload rule
 
-**DO CURRENT TASK → FINISH OR HIT A REAL BLOCKER → REPORT DONE / BLOCKED / NEXT → MOVE ON**
+**ONE SMALL, BOUNDED TASK AT A TIME.**
 
-That is the normal workflow.
+Peter should normally have **zero or one active assignment**.
 
-## Current work order
+Company Operations / the Operating System Project Manager should not route the next Peter task merely because another company task exists. A new Peter assignment should be issued only when:
 
-The canonical current work order is `operations/CURRENT_WORK_BOARD.md`.
+1. the task materially benefits from Peter's human account access, platform interaction, judgment, or relationship context; and
+2. Company Operations / AI workers have already completed the research, reconciliation, file preparation, instructions, and other work that can be done without Peter.
 
-Peter should execute the highest-priority Peter-owned row that has a real next action. Do not maintain a second rolling priority board in this file.
+When Peter finishes the assigned task, his default state is:
 
-As of this reconciliation, the board preserves the current owner direction that **VEVOR is first and the TikTok second appeal / withdrawal-restoration follows next**, while a real paid-customer problem may interrupt when immediate action is required. If Casey or the canonical board later changes that order, the newer direction controls without requiring this Peter control file to be rewritten.
+**CAUGHT UP / NO ACTION REQUIRED**
 
-Within VEVOR, Peter does not need to rebuild strategy. Execute the existing approved direct-site model: verify account state, complete tax-exemption setup when available, capture the supplier feed, reconcile useful products, follow VEVOR's selling-price floor, keep unapproved third-party marketplaces blocked, and establish the normal order/fulfillment path.
+until another genuinely useful bounded assignment is routed to him.
 
-## Remove the extra work
+## Peter does not own the backlog
 
-Peter and Peter's AI project should **NOT** spend routine work time on:
+The canonical work board is for management routing. It is **not Peter's personal to-do list**.
 
-- building or maintaining a separate Peter operating system;
-- rewriting a Peter SOP after every management update;
-- running a recurring Peter SOP Sync task;
-- creating a new manager, project, worker, lane, checklist, or ZIP for every small task;
-- producing long management reports when a short result is enough;
-- re-reading the entire company baseline before every prompt;
-- repeatedly checking WAITING items that have no new trigger;
-- recreating work Company Operations has already completed;
-- asking Casey approval questions when the assigned action is already approved and routine.
+Peter should not independently scan `CURRENT_WORK_BOARD.md` and begin working every Peter-related row.
 
-If a Peter SOP Sync recurring task was created from an earlier instruction, it is **no longer required by this Peter control record**. Peter may stop using it as part of the work process.
+Company Operations decides which single item, if any, is worth Peter's time and sends him a clear bounded assignment.
 
-## Only stop and ask Casey when one of these is true
+Waiting work, research queues, vendor prospecting, catalog reconciliation, SOP updates, project-state maintenance, and general follow-up queues remain with the assigned AI/management/project workers unless Peter is specifically needed for one human step.
 
-1. A new purchase, inventory commitment, unusual fee, financing term, binding contract, or other material financial commitment is required and is not already authorized.
-2. A vendor/platform requires Casey's signature, identity action, banking action, tax certification, or protected information beyond the already-approved document path.
-3. A true account/access blocker requires Casey to authenticate, approve, or change permissions.
-4. The task would change company policy, supplier/channel authorization, or materially expand scope.
-5. Website/runtime code, production deployment, checkout/payment behavior, auth, or another technical production change is required without exact owner-side development approval.
-6. An external communication is outside the sending authority already given for the assigned task.
+## Highest-value uses of Peter
 
-Everything else: use the best current verified information, complete the routine work, and keep moving.
+Prefer Peter for short human-only or human-advantaged actions such as:
 
-## Chat gate simplification
+- authenticated platform/account actions that Company Operations cannot complete through available tools;
+- a clearly prepared vendor portal or account step requiring a human user;
+- checking a live seller/admin screen when API/tool access cannot verify the result;
+- a bounded order/fulfillment exception that benefits from direct account access;
+- relationship-based follow-up when Company Operations has already prepared the facts and Casey has authorized the communication path;
+- a final practical review where Peter's ecommerce/vendor experience adds real value.
 
-Do not use a large gate system for Peter's normal work.
+Do **not** use Peter as the default person for:
 
-- No P0/P1/P2/P3 gate taxonomy in routine chat.
-- No multi-stage approval ceremony for an already-approved task.
-- No question merely to be safe when the answer is already supported by current records.
-- If a noncritical detail is missing, continue everything that can safely be completed.
-- If an external dependency blocks the task, record it once, move the item to WAITING, and start the next assigned item.
-- Do not open parallel side projects while the current task is executable.
+- broad research;
+- repetitive supplier recon;
+- writing SOPs;
+- maintaining Git management records;
+- preparing long reports;
+- rebuilding project context;
+- monitoring waiting vendors;
+- routine AI-manageable catalog normalization;
+- creating ZIPs/handoffs unless Peter himself has files that must be returned;
+- repeatedly checking the same blocked account or vendor state;
+- work that exists only because a management system produced another task.
 
-The global board may use priority labels for management ordering; Peter does not need to reproduce that taxonomy in routine chat.
+## Company Operations / AI responsibility before Peter is assigned
 
-## Reporting format
+Before routing work to Peter, do as much as possible first:
 
-Peter's normal update should be short:
+**RECON → VERIFY → PREPARE → REDUCE TO ONE HUMAN ACTION → ROUTE TO PETER ONLY IF STILL NEEDED.**
 
-**DONE:** what was actually completed.  
-**BLOCKED:** only a real blocker, or `NONE`.  
-**NEXT:** the next executable action.
+A good Peter task should usually arrive with:
 
-Add **NEEDS CASEY:** only when one of the six stop conditions above is actually triggered.
+- one clear objective;
+- the exact account/vendor/order involved;
+- the minimum facts he needs;
+- the exact action requested;
+- the stop condition;
+- no requirement to reconstruct company history.
 
-A routine update should normally fit in **3–6 lines**. Evidence or a file may be attached only when it is actually useful.
+If the assignment cannot be explained simply, it is probably not ready for Peter yet.
 
-## Git rule
+## Current vendor-project interpretation
 
-Shared public-safe management truth remains:
+Peter has oversight experience across ecommerce/vendor operations, but dedicated vendor projects and their AI/project managers own their ongoing worktrees.
 
-`elevationupscales/ElevationUpScales → main → /operations/`
+**VEVOR:** Peter does not need to continuously work the VEVOR project. The VEVOR manager/specialists continue source, catalog, pricing, fulfillment, and project-state work. Peter should be used only for a specific human step that cannot be completed efficiently without him.
 
-Peter should not turn Git access into a work blocker:
+**Renogy / SOK / Kingboss / other vendors:** same rule. Dedicated project workers do the ongoing work. Peter receives only a bounded human-needed task when routed.
 
-- If the repo is visible, read only `CURRENT_WORK_BOARD.md` plus the relevant current control file(s) needed for the task and execute.
-- If the repo is not visible, report **GIT BLOCKED — REPO NOT VISIBLE** once and continue from the newest Peter master package and direct Company Operations instructions.
-- Do not send passwords, MFA codes, tokens, recovery codes, or credentials.
-- Peter's AI team is **READ / PROPOSE** for website-development Git unless Casey explicitly approves the exact write/development scope.
+**eBay / TikTok / Shopify:** use Peter selectively for authenticated account actions, real customer exceptions, or a clearly defined platform task. Do not turn routine account maintenance into an open-ended Peter assignment.
 
-## Handoff / ZIP rule
+## Burnout-prevention operating rules
 
-The newest **Peter Simplified Master** package replaces prior Peter workflow/master/starter/quick-start packages as Peter's execution instructions.
+- No expectation that Peter works every day.
+- No expectation that Peter works through the entire company queue.
+- No requirement to respond immediately to routine internal updates.
+- No recurring SOP-sync task.
+- No routine evening management briefing assignment for Peter.
+- No repeated follow-up on WAITING items unless a real trigger occurs.
+- No parallel Peter assignments unless Casey specifically declares an urgent exception.
+- No "catch-up" burden when Peter has been away from the project.
+- No after-hours expectation created by the management system.
+- A blocked task is returned to Company Operations rather than left hanging over Peter.
 
-The VEVOR Dedicated Project Starter may remain available as a **VEVOR source/reference packet**, but it does not create another manager hierarchy and any workflow instructions inside it are subordinate to this simple control.
+## Scope-expansion rule
 
-Do not return a ZIP for every status update. Use email/chat for normal DONE / BLOCKED / NEXT reporting. Use a ZIP only when actual files must move.
+If a small assignment starts turning into a larger project, Peter should stop expanding it.
 
-Every new internal Elevation ZIP must still include the required terms-of-use notice and current confidentiality/IP/file-use policy. Protected records do not belong in public Git.
+Return:
+
+**DONE:** what was completed.  
+**BLOCKED / SCOPE EXPANDED:** what changed.  
+**NEXT:** what Company Operations should route or prepare.
+
+Company Operations then absorbs, divides, automates, or reroutes the additional work.
+
+Peter should not silently inherit the expanded workload.
+
+## Casey gates
+
+Peter should stop and return the task when Casey must personally:
+
+1. authorize a new purchase, inventory commitment, unusual fee, financing term, or binding commercial commitment;
+2. sign or certify legal/tax/compliance material;
+3. perform owner identity, banking, MFA, recovery, or privileged account action;
+4. approve a material policy/channel/supplier change;
+5. authorize production website/runtime/deployment scope not already approved;
+6. authorize an external communication outside the sending authority already established for the specific assignment.
+
+## Reporting
+
+Peter's normal report should be extremely short:
+
+**DONE:** result.  
+**BLOCKED:** real blocker or `NONE`.  
+**NEXT:** `RETURN TO OPERATIONS` unless one more small step is clearly part of the same assignment.
+
+Use **NEEDS CASEY** only when Casey actually must act.
+
+No management essay is required.
+
+## Git / management systems
+
+Peter is not responsible for keeping management Git current.
+
+Company Operations / OS management owns SOPs, work-board reconciliation, Git records, project handoffs, and cross-project routing.
+
+If Peter needs Git for a task, he should read only the specific current record needed. If Git access is unavailable, that alone does not create a Peter troubleshooting project; report it and let Operations handle access.
+
+Protected data does not belong in public Git.
+
+## Compensation transition
+
+This minimal-load control remains the default while Peter is contributing on an uncompensated / limited-support basis.
+
+If Elevation later establishes a formal compensated workload, Casey may expand Peter's responsibilities, schedule, ownership, and performance expectations through a newer explicit role agreement and SOP update.
+
+Until then, management should optimize for **high-value use of limited human time, not maximum task volume**.
 
 ## Bottom line
 
-Peter's job is not to manage the management system.
+Peter is a **selective human operator**, not the company backlog processor.
 
-**ONE CANONICAL WORK BOARD → ONE TASK → EXECUTE → REPORT RESULT → NEXT TASK.**
+**AI / MANAGEMENT DOES THE BULK WORK → PETER GETS ONE HIGH-VALUE HUMAN TASK → PETER RETURNS THE RESULT → PETER IS CAUGHT UP.**
