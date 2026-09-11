@@ -1,8 +1,9 @@
 # Elevation UpScales — VEVOR Vendor Master SOP
 
 **Status: ACTIVE / CONTROLLING VEVOR LANE**  
-**Version: 1.0**  
+**Version: 1.1**  
 **Effective: 2026-09-10**  
+**Last reconciled: 2026-09-10**  
 **Owner: Casey Young**  
 **Human Ecommerce Manager: Peter Torres**  
 **Parent:** `MANAGEMENT_OPERATING_SOP.md` and `VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`
@@ -234,13 +235,23 @@ Public Git may store policy, state, public-safe SKU identifiers, verification st
 
 Current global work remains governed by `CURRENT_WORK_BOARD.md`.
 
-VEVOR direct-site dropship onboarding is the active Peter / Ecommerce & Vendor Operations lane. The VEVOR project should continue from the existing state rather than restarting onboarding.
+The first direct-site A-tier Shopify activation is complete and is recorded in `VEVOR_SHOPIFY_LAUNCH_RECEIPT_2026-09-10.md`.
 
-Immediate execution sequence:
+Verified launch state:
 
-**A-TIER REVIEW → LIVE PRICE/MAP CHECK → LIVE STOCK CHECK → SHOPIFY BUILD/UPDATE → COLLECTION/CHECKOUT VERIFICATION → ORDER/FULFILLMENT PROOF → B-TIER EXPANSION**
+- 19 / 19 A-tier VEVOR Direct products are ACTIVE and published to Shopify's Online Store publication;
+- the `VEVOR Direct` smart collection is published with 19 products;
+- each product carries an exact VEVOR source SKU, verified customer price, one Shopify-hosted hero image, and public-safe source/MAP/stock verification markers;
+- supplier inventory is not represented as Elevation physical On Hand;
+- Doba-sourced VEVOR records remain separate and unchanged.
 
-Waiting tax-review or secondary fulfillment details do not erase or close otherwise executable catalog work.
+The VEVOR workstream remains open because publication is not fulfillment proof.
+
+Immediate execution sequence is now:
+
+**LIVE STOREFRONT / CHECKOUT VERIFY → FIRST REAL VEVOR DIRECT ORDER → REVERIFY SKU / STOCK / PRICE-MAP → VEVOR PURCHASE → TRACKING → CUSTOMER COMPLETION → ACTUALS → B-TIER EXPANSION**
+
+Waiting tax-review or secondary fulfillment details do not erase or close otherwise executable commerce work. A new verified supplier restriction may block only the affected lane/SKU.
 
 ## 13. Return format
 
