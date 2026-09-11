@@ -16,4 +16,3 @@ Thumbs.db
 
 # Release packages should stay outside source control
 *.zip
-!operations/vendor-source/vevor/2026-09-10/ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip
