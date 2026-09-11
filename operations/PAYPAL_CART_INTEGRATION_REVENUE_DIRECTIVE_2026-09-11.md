@@ -21,6 +21,24 @@ The temporary startup-revenue phase remains open until Hybrid Management verifie
 - The observed native checkout exposed card payment and Shop Pay; PayPal was not observed in that QA path.
 - The separate custom Elevation checkout remains a parallel repair lane where prior QA exposed `Checkout item is unavailable` / cross-origin behavior. That defect must not unnecessarily disable the working native Shopify checkout.
 
+## Owner routing — RECON-led parallel cart initiative
+
+Casey has directed that RECON take point on adding the PayPal shopping-cart capability to the Elevation home site while the rest of company work continues.
+
+This is a **parallel P0 revenue initiative**, not a company-wide stop-work gate.
+
+To remain compliant with the Operating System S.O.P.:
+
+- **RECON owns:** current-state inspection, PayPal documentation/architecture comparison, requirements reconciliation, existing-checkout conflict detection, security/credential checks, acceptance criteria, regression checks, and the final reconciliation/verification packet.
+- **MASTER DEVELOPER / Commerce lane owns:** code changes, branches/PRs, checkout/cart implementation, server-side order-create/capture integration, deployment candidate construction, and technical release execution.
+- **Shopify / Ecommerce execution owns:** native Shopify configuration and merchandising work that does not require custom-site code.
+- **Vendor Project Managers own:** authoritative SKU, price/MAP, availability, shipping, backorder/preorder, warranty and fulfillment facts for their suppliers.
+- **Operating System Project Manager / Company Operations owns:** priority, routing, cross-project coordination, owner gates, and final workboard state.
+
+RECON must not become a competing developer or second project manager. It may drive the initiative, identify the exact technical delta and verify the result, but code execution remains routed through the established technical lane.
+
+**Parallel-work rule:** VEVOR, SOK, Renogy, Kingboss, Shipping & Logistics, vendor onboarding, catalog activation, email operations and other clean worktrees continue while the PayPal cart initiative advances. A blocker inside the cart project blocks only the affected cart sub-item unless the blocker is a real security, payment-integrity, legal or production-safety issue.
+
 ## 2026 PayPal path split — controlling implementation direction
 
 Current official platform guidance requires two different PayPal lanes:
@@ -82,22 +100,24 @@ Products that fail one gate stay out of the launch set without blocking clean pr
 ## Work sequence
 
 1. Keep native Shopify checkout available.
-2. Run fast-revenue RECON across active Shopify inventory and rank products by purchase friction, price, margin confidence, supplier availability and fulfillment confidence.
-3. Verify the first 5–10 launch SKUs immediately before merchandising.
-4. In Shopify, verify the current Shopify Payments / PayPal Wallet eligibility and configuration path; do not assume legacy PayPal Express applies in the U.S.
-5. For Elevation custom checkout, compare the current implementation against PayPal JavaScript SDK v6 and server-side Orders create/capture requirements.
-6. Implement PayPal custom cart in isolation or as a compatible bridge; do not regress working Shopify checkout.
-7. QA product → cart → payment handoff → durable order capture.
-8. Push free/owned traffic only to products with a proven purchase path.
-9. On first real website order, route fulfillment immediately and record the source, payment method, supplier SKU, fulfillment state and actual exceptions.
-10. The startup-phase PayPal close condition is satisfied only by a verified Elevation website order paid through PayPal.
+2. RECON inspects the current Elevation home-site checkout/cart code, current PayPal documentation and existing order-record path; it returns the smallest safe technical delta rather than redesigning commerce.
+3. Run fast-revenue RECON across active Shopify inventory and rank products by purchase friction, price, margin confidence, supplier availability and fulfillment confidence.
+4. Verify the first 5–10 launch SKUs immediately before merchandising.
+5. In Shopify, verify the current Shopify Payments / PayPal Wallet eligibility and configuration path; do not assume legacy PayPal Express applies in the U.S.
+6. For Elevation custom checkout, compare the current implementation against PayPal JavaScript SDK v6 and server-side Orders create/capture requirements.
+7. Route the exact technical implementation to MASTER DEVELOPER / Commerce; build and test in isolation without regressing working Shopify checkout.
+8. RECON validates product → cart → payment handoff → durable order capture, plus security and regression controls, before production acceptance.
+9. Push free/owned traffic only to products with a proven purchase path.
+10. On first real website order, route fulfillment immediately and record the source, payment method, supplier SKU, fulfillment state and actual exceptions.
+11. The startup-phase PayPal close condition is satisfied only by a verified Elevation website order paid through PayPal.
 
 ## Management routing
 
-Primary control: Operating System Project Manager / Company Operations.  
-Technical integration: MASTER DEVELOPER / Commerce lane.  
-Inventory and supplier truth: applicable Vendor Project Manager.  
-Store merchandising: Shopify / Ecommerce execution worker within verified supplier controls.
+Initiative lead / reconciliation: **MASTER RECON / assigned RECON worker**.  
+Primary control: **Operating System Project Manager / Company Operations**.  
+Technical integration: **MASTER DEVELOPER / Commerce lane**.  
+Inventory and supplier truth: **applicable Vendor Project Manager**.  
+Store merchandising: **Shopify / Ecommerce execution worker within verified supplier controls**.
 
 ## Close condition
 
