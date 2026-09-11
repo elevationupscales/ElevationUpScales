@@ -1,16 +1,20 @@
 # Elevation UpScales — Complementary Vendor Application Preparation
 
-**Status:** ACTIVE / MANAGEMENT PREP / NO EXTERNAL SUBMISSION AUTHORIZED  
-**Date:** 2026-09-10 MDT  
+**Status:** ACTIVE / MANAGEMENT EXECUTION + DEDUPE CONTROL  
+**Date:** 2026-09-10 MDT; reconciled 2026-09-11  
 **Owner:** Casey Young  
 **Parent:** `SUPPLIER_LEADS_LIVE_MAP.md`  
 **Execution:** Company Operations / Peter Vendor Operations
 
 ## Control
 
-This file advances qualified complementary supplier lanes without bypassing the external-correspondence and owner-application gates.
+This file advances qualified complementary supplier lanes without bypassing external-correspondence, agreement, factual-attestation or owner gates.
 
-**RESEARCH / PREPARE → OWNER REVIEW WHERE REQUIRED → SUBMIT ONLY AFTER AUTHORIZATION → RECORD RECEIPT → WAIT / CONTINUE NEXT**
+**VERIFY PRIOR OUTBOUND → RESEARCH / PREPARE → SUBMIT ONLY WHEN AUTHORIZED + FACTUALLY SUPPORTED → RECORD RECEIPT → WAIT / CONTINUE NEXT**
+
+Global outbound control: `OWNER_OUTBOUND_DEDUPLICATION_CONTROL_2026-09-11.md`.
+
+Before every email/form/application action, check current Git + Gmail/current thread + any active browser run. **One current attempt only. Resubmit only when a verified reason exists.**
 
 Do not infer business classifications, sign/accept agreements, create binding accounts, or make supplier/channel representations that have not been verified.
 
@@ -20,36 +24,21 @@ Do not infer business classifications, sign/accept agreements, create binding ac
 
 ### Verified current route
 
-BayWa's U.S. solar-distribution webstore has a new-customer registration path. The initial registration asks for:
+BayWa's U.S. solar-distribution webstore has a new-customer registration path whose installer/contractor classification must not be answered by inference. BayWa also provides a public **Connect With Us** account/sales route that permits Elevation to position itself accurately as a commercial distributor/retailer/off-grid power business without claiming an electrical/solar-contractor status.
 
-- first name;
-- last name;
-- email;
-- business phone;
-- job function;
-- company;
-- company website (optional);
-- company address;
-- city;
-- state/province;
-- country;
-- ZIP;
-- required **US-based solar installer or contractor?** yes/no field;
-- required installer-business type classification;
-- required referral-source field;
-- optional product interests;
-- optional brand interests;
-- optional help/request text.
+### Current execution
 
-No business-document upload field or terms-acceptance checkbox was visible on the inspected initial form.
+Elevation used the non-installer **Connect With Us** route and submitted one commercial/reseller account inquiry on 2026-09-11 using the verified company/contact record.
 
-### Gate
+The submitted request covered panels, inverters, storage and BOS, including project pricing and direct/job-site shipping options. No electrical-license claim, paid service, minimum purchase, financing, exclusivity or binding commercial commitment was made.
 
-Elevation must not answer the installer/contractor classification by inference. If management does not affirm that classification, use BayWa's **Connect With Us** account/sales route and position Elevation accurately as a commercial retailer/distributor/off-grid power business rather than making an unsupported installer attestation.
+The browser returned: **“Thanks! We’ve received your submission and will get back to you shortly.”**
 
-**STATE:** QUALIFIED / OWNER FACTUAL-ATTESTATION GATE.
+Public-safe receipt: `BAYWA_RE_OUTBOUND_RECEIPT_2026-09-11.md`.
 
-**NEXT AFTER OWNER REVIEW:** submit the correct BayWa route and preserve the application/contact receipt.
+**STATE:** CONTACTED / WAITING — DO NOT RESUBMIT.
+
+**NEXT:** wait for BayWa reply/account routing. Use the existing submission path only. A new submission requires a verified failure, explicit supplier resubmission request, expiration/closure, or newer Casey direction after current evidence review.
 
 ---
 
@@ -61,11 +50,11 @@ Winegard states that authorization is required to sell Winegard products effecti
 
 ### Gate
 
-This is not a routine cold-email lane. It requires owner review of the current application and agreement before any submission/acceptance.
+This is not a routine cold-email lane. It requires owner review of any current agreement/acknowledgement before acceptance/signature.
 
 **STATE:** QUALIFIED / APPLICATION + AGREEMENT OWNER REVIEW REQUIRED.
 
-**NEXT AFTER OWNER REVIEW:** complete only factually supported fields, accept/sign only if approved, submit, and preserve the receipt/agreement privately where appropriate.
+**NEXT:** dedupe against Git/Gmail/current active form attempt first. Complete only factually supported fields. If acceptance/signature of a binding retailer agreement is required, hold there for owner review rather than inventing or silently accepting terms. Preserve one application attempt/receipt.
 
 ---
 
@@ -85,7 +74,7 @@ Dealer account creation starts the external application workflow and may trigger
 
 **STATE:** QUALIFIED / OWNER REVIEW BEFORE ACCOUNT-APPLICATION START.
 
-**NEXT AFTER OWNER REVIEW:** create the dealer application account using approved company identity/contact data, receive the application email, inspect exact document requirements, then prepare the protected packet without placing protected documents in public Git.
+**NEXT AFTER OWNER REVIEW:** after a fresh dedupe check, create one dealer application account using approved company identity/contact data, receive the application email, inspect exact document requirements, then prepare the protected packet without placing protected documents in public Git.
 
 ---
 
@@ -103,15 +92,19 @@ A dealer/ecommerce partnership inquiry has already been sent by Elevation.
 
 ### Verified current route
 
-Solarflexion's current website exposes normal customer account registration and a general contact path. Public evidence reviewed in this pass does **not** establish that ordinary account registration equals dealer/reseller authorization.
+Solarflexion publicly states that it services **B2C and B2B inquiries** and provides product procurement, system sizing, design, engineering support and broad multi-brand solar supply. Its current Contact page exposes a Sales route plus project quote and stock-check workflows.
+
+Current public evidence still does **not** establish that an ordinary customer login or B2B inquiry creates dealer/reseller authorization. Solarflexion is therefore valid as a project-procurement/commercial sourcing partner without representing it as an authorized Elevation reseller program unless Solarflexion explicitly confirms that relationship.
+
+Its public freight workflow also requires order-specific freight review for panels, batteries, long rails and other heavy/hazardous goods; freight quotes are finalized after order/contact rather than inferred as fixed rates.
 
 ### Gate
 
-Do not represent a generic Solarflexion customer account as a commercial reseller relationship without explicit confirmation.
+Use Solarflexion as **PROJECT PROCUREMENT / B2B SALES ROUTE VERIFIED** unless/until a distinct reseller/dealer authorization is confirmed. Do not label a generic account as a reseller account.
 
-**STATE:** RESEARCH / COMMERCIAL-ACCOUNT ROUTE VERIFY.
+**STATE:** QUALIFIED / PROJECT-PROCUREMENT ROUTE VERIFIED / RESELLER STATUS UNVERIFIED.
 
-**NEXT:** verify whether Solarflexion offers a distinct reseller/dealer/business account or whether the company is intended only as a project-procurement source. Create outreach only after the correct commercial route is verified.
+**NEXT:** when a project/SKU need exists, dedupe first and use the verified Sales / Request Quote / Stock Check route for that bounded procurement need. A generic reseller application is not required unless Solarflexion provides one.
 
 ---
 
@@ -129,17 +122,21 @@ Use the brand-specific dealer/sales-development route. Do not send a generic Air
 
 **STATE:** QUALIFIED / BRAND ROUTE VERIFIED / OWNER-REVIEWED EXTERNAL CONTACT NEXT.
 
-**NEXT:** prepare the Coleman-Mach dealer inquiry/contact-form copy for Casey review; if approved, submit through the official sales-development contact route and preserve the receipt.
+**NEXT:** dedupe Git/Gmail/current active submissions, then prepare/submit only the approved Coleman-Mach dealer inquiry through the official sales-development contact route. Preserve one receipt.
 
 ---
 
 ## Queue result
 
-- BayWa: owner factual-attestation/application gate.
-- Winegard: owner agreement/application gate.
-- Micro-Air: owner account/application gate.
+- BayWa: **CONTACTED / WAITING — form submitted once; no resubmission without verified reason.**
+- Winegard: application/agreement gate; one active application attempt maximum.
+- Micro-Air: owner account/application gate; no account creation before review + dedupe.
 - KISAE: contacted/waiting; no duplicate.
-- Solarflexion: reseller route not yet verified; continue research only.
-- Airxcel/Coleman-Mach: brand-specific dealer route verified; prepare owner-review external contact.
+- Solarflexion: project-procurement/B2B route verified; reseller authorization not verified.
+- Airxcel/Coleman-Mach: brand-specific dealer route verified; owner-reviewed external contact next.
 
-No supplier agreement, external application, binding account creation, inventory commitment, purchase, channel authorization claim, or private document disclosure was made by this preparation pass.
+## Blockage order
+
+Apply `OWNER_BLOCKAGE_DEFER_AND_FINISHABLE_WORKTREE_DIRECTIVE_2026-09-11.md`:
+
+**BLOCKED/WAITING ITEMS GO TO THE BACK OF THEIR QUEUE WITH THEIR TRIGGER PRESERVED. FINISHABLE WORK MOVES FORWARD. NOTHING DISAPPEARS.**
