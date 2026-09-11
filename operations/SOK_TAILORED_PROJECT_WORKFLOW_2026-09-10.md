@@ -6,6 +6,7 @@
 **Project Specialist:** SOK RECON OS — reconciliation / supplier-domain evidence / economics development  
 **Parent Routing:** Operating System Project Manager + Company Operations Manager  
 **Status:** ACTIVE  
+**Project Source:** `vendor-project-sources/SOK_PROJECT_SOURCE.md`  
 **Controlling Project Record:** `SOK_RECON_OS_PROJECT.md`
 
 ## Project outcome
@@ -63,9 +64,11 @@ Catalog, Fulfillment, Logistics, Developer, Communications and Warranty Fulfillm
 
 ## Tailored operating sequence
 
-### 1 — GIT / SOK STATE
+### 1 — GIT / PROJECT SOURCE / SOK WORKTREE PICKUP
 
-Resolve current `main`; read this workflow, `SOK_RECON_OS_PROJECT.md`, the current SOK work-board rows, and only the supplier/logistics evidence needed for the action.
+Resolve current `main`; read the SOK rows on `CURRENT_WORK_BOARD.md`, `vendor-project-sources/SOK_PROJECT_SOURCE.md`, this workflow, `SOK_RECON_OS_PROJECT.md`, and only the supplier/logistics evidence needed for the action.
+
+Identify the last verified SOK action and next executable SOK action. If a prior worker/chat/branch was interrupted, resume only the unfinished action from durable state.
 
 Do not recreate completed supplier requests, onboarding, or prior qualification.
 
@@ -78,6 +81,8 @@ For a customer-sale or catalog action verify:
 Supported preorder/backorder remains a valid SOK commerce mode when supplier terms allow it. Zero current stock is not itself a generic checkout blocker when the authorized preorder/backorder path applies.
 
 Customer acceptance does not mean supplier stock is reserved; reservation follows SOK payment confirmation.
+
+Update the SOK Project Source when a material onboarding/readiness fact changes.
 
 ### 3 — NORMAL ORDER PROOF
 
@@ -156,6 +161,48 @@ Keep permanent commercial economics internal until sufficiently verified and own
 
 Prove the repeatable SOK operating system through real commerce and real authorized warranty cases. Expand reserve/storage commitments only from evidence.
 
+## Worktree continuity + documentation
+
+Material SOK state must be recoverable from the Work Board + SOK Project Source + this workflow/project record.
+
+Document material changes such as:
+
+- supplier terms/MAP/channel/order-mode changes;
+- product/media/compliance source changes;
+- paid-order proof;
+- Hawaii freight/storage provider terms/status;
+- warranty authority/replenishment changes;
+- owner-gated economics/commitment transitions;
+- real gate/maturity changes.
+
+Protected rates, supplier costs, raw inventory, correspondence and compliance packets remain outside public Git.
+
+After COMPLETE / WAITING / VERIFYING / HOLD, automatically select the next safe unresolved SOK item. If none exists, return capacity upward rather than taking another project.
+
+## Gate maturity
+
+SOK maturity is lane-specific.
+
+### Core supplier / Lower-48 commerce — CONTROLLED
+
+The relationship, basic commerce rules, supported preorder/backorder model and supplier identity are already proven enough that generic qualification/onboarding must not recur.
+
+Routine supported commerce uses targeted exact-SKU/MAP/order-mode/destination checks.
+
+### Shopify live-order OS proof — PROVING
+
+The technical bridge is merged; the first clean real purchase-to-OS/supplier/customer chain remains a proof step.
+
+### Hawaii freight / warranty / storage — PROVING
+
+Keep exact DG shipment data, provider acceptance, storage economics, supplier warranty authority and owner-gated commitments verified until the model is repeatable.
+
+### Mature / exception-based target
+
+After repeatable normal orders and proven warranty/logistics operation, routine SOK work proceeds by default; management focuses on changed MAP/source/allocation, carrier/DG exceptions, warranty exceptions and material commercial changes.
+
+If one SKU, route, provider or warranty case fails, reopen only that affected control unless evidence proves a systemic SOK failure.
+
 ## Waiting behavior
 
 While SOK waits externally, continue safe SOK-only work such as:
@@ -181,6 +228,8 @@ Block only the affected action for:
 - unsupported destination/shipping route;
 - customer/payment obligation;
 - material compliance/liability uncertainty.
+
+Do not preserve generic supplier qualification, completed media requests, internal project status, or zero stock by itself as blanket gates where a verified SOK order mode remains available.
 
 ## Owner gates
 
@@ -209,13 +258,14 @@ with Hawaii freight/storage and commercial responsibilities evidence-based rathe
 
 ## RUN
 
-**SOK GIT CHECK → RESUME SOK WORKTREE → PROJECT MANAGER EXECUTES ROUTINE SAFE SOK WORK OR ROUTES BOUNDED TASK → SOK RECON OS VERIFIES/RECONCILES → RECORD → CONTINUE SOK**
+**SOK GIT CHECK → READ SOK PROJECT SOURCE → PICK UP UNFINISHED SOK WORKTREE → PROJECT MANAGER EXECUTES ROUTINE SAFE SOK WORK OR ROUTES BOUNDED TASK → SOK RECON OS VERIFIES/RECONCILES → DOCUMENT MATERIAL DELTA → CONTINUE NEXT SOK ITEM**
 
 ## Return
 
 **SOK COMPLETED:**  
 **SOK CURRENT:**  
 **SOK WAITING/BLOCKED:**  
+**SOK MATURITY / GATE CHANGE:**  
 **SOK OWNER GATE:**  
 **SOK NEXT:**  
 **ROUTE REQUIRED:**
