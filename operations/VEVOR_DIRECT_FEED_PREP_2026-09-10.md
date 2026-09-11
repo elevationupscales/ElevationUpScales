@@ -2,116 +2,97 @@
 
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
-**Status:** ACTIVE / P1 / PREPARATION IN PROGRESS  
+**Status:** CLOSED / FEED PREP + A/B ACTIVATION COMPLETE  
+**Controlling SOP:** `operations/VEVOR_VENDOR_MASTER_SOP.md` v1.1  
 **Parent state:** `operations/VEVOR_RENOGY_ACTIVATION_STATE_2026-09-10.md`
 
 ## Purpose
 
-Prepare the direct-VEVOR dropship catalog lane without requalifying VEVOR, mixing Doba evidence into the direct relationship, or publishing before source truth is verified.
+This file began as the preparation gate for the direct-VEVOR dropship catalog lane. The preparation dependency is now satisfied. It is retained as the public-safe reconciliation receipt for the feed-prep and first two catalog activation tiers.
 
-## Current verified supplier direction
+## Completed supplier/account baseline
 
-VEVOR has provided:
-- VEVOR PRO registration path;
-- a direct product-feed workbook link;
-- a rule that Elevation's selling price may not be below VEVOR's current selling price;
-- U.S.-warehouse dropship fulfillment for the independent-website model;
-- tax-exemption setup through the VEVOR account;
-- current restriction against Amazon, Walmart, eBay, and other major third-party marketplaces unless later authorized in writing.
+- VEVOR PRO registration/onboarding baseline: COMPLETE.
+- Direct VEVOR product feed: RECEIVED and reconciled into the dedicated VEVOR working set.
+- Original supplier master remains preserved as source evidence; working derivatives do not replace it.
+- Direct VEVOR and Doba-sourced VEVOR remain separate sourcing/authorization lanes.
+- Elevation direct-site / Shopify is the approved VEVOR direct-account sales lane unless written supplier authorization expands channel eligibility.
+- Final tax-exemption review remains WAITING / nonblocking. Protected tax/account identifiers and documents stay outside public Git.
 
-## Immediate account-state verification
+## Catalog reconciliation receipt
 
-Peter / authorized human operator should capture the live VEVOR PRO state before catalog activation:
-- registration complete: YES / NO;
-- business profile complete: YES / NO;
-- account/pro level shown;
-- active purchasing discount state;
-- tax-exempt status: APPROVED / PENDING / NOT SUBMITTED / REJECTED;
-- purchasing/order path verified;
-- shipping/service-area limitations shown in account;
-- return/customer-service terms available in account;
-- direct product feed downloaded successfully;
-- date/time of verification;
-- screenshots or exported source evidence retained outside public Git when they contain protected account information.
+Curated launch set: 40 products.
 
-Do not place credentials, tax documents, private discount percentages, account identifiers, or sensitive screenshots in public Git.
+- Tier A — Core Launch: **19/19 catalog activation gate CLOSED**.
+- Tier B — Strong Expansion: **17/17 catalog activation gate CLOSED**.
+- Tier C — Supporting: **4 candidates NOT YET ACTIVATED**; review only after active enrichment/fulfillment controls are stable.
 
-## Direct-feed intake gate
+### Tier B verification completed 2026-09-10
 
-The supplier-provided workbook is the canonical starting source for direct-VEVOR catalog reconciliation. Do not substitute Doba exports or existing Shopify VEVOR-branded products for this feed.
+All 17 B-tier records passed:
 
-When the feed file is available to Company Operations:
-1. preserve the original workbook unchanged as source evidence;
-2. identify columns for VEVOR SKU/product identifier, title, category, selling price, availability/stock, product URL, image/media, specification/source data, shipping information, and any other supplier control fields;
-3. normalize a working copy into the Master Catalog schema;
-4. separate direct VEVOR records from Doba-sourced VEVOR records;
-5. flag missing source data rather than guessing;
-6. apply the VEVOR selling-price floor before any publish-ready status;
-7. retain direct-site-only channel eligibility unless written marketplace permission exists.
+1. exact direct VEVOR SKU/model identity;
+2. live VEVOR public selling-price check;
+3. feed MAP / applicable price-floor comparison;
+4. live selected-SKU purchase-state sellability check;
+5. Shopify duplicate gate before creation;
+6. direct-VEVOR Shopify record creation;
+7. exact Shopify SKU/price readback;
+8. explicit ACTIVE status readback;
+9. intended Shopify publication readback.
 
-## Initial 20–40 product working set
+The pre-create Shopify duplicate gate returned 0/17 direct-SKU duplicates.
 
-Selection should prioritize products that fit Elevation's current direct-site lanes:
-- solar charging and solar accessories;
-- power conversion / electrical support equipment;
-- RV and mobile-power accessories;
-- backup-power support equipment;
-- refrigeration / cooling support;
-- water / pumping / plumbing utility products;
-- heating / climate support where appropriate;
-- off-grid tools and utility equipment;
-- outdoor / property-use products aligned with Elevation's existing catalog.
+A write-state mismatch was caught during verification: the creation response indicated ACTIVE, but authoritative Shopify reads returned DRAFT. The affected B-tier products were explicitly updated to ACTIVE, publication was rerun, and final authoritative reads verified the corrected status and publication state for all 17.
 
-Selection rules:
-- exact direct-VEVOR source mapping required;
-- current VEVOR selling price captured as the floor input;
-- current availability/source state required;
-- adequate supplier media/specification evidence required;
-- shipping/fulfillment path must be supportable;
-- no unsupported certifications or compatibility claims;
-- avoid duplicate clutter where an existing product already serves the same lane unless the VEVOR offer materially improves assortment, price, or fulfillment;
-- keep products in DRAFT / HOLD until all required gates are verified.
+## Live VEVOR sellability interpretation
+
+VEVOR product pages can show an `Out of Stock` label inside a variant/configuration selector while the exact selected SKU's actual purchase block still reports `In Stock` and presents normal purchase actions.
+
+Operational rule:
+
+**EXACT SKU IDENTITY → SELECTED SKU PURCHASE BLOCK → LIVE SELLABILITY DECISION**
+
+Do not hold a SKU solely because selector/link text conflicts with the selected SKU purchase block. If exact SKU or purchase-state evidence is genuinely ambiguous, hold only that SKU as MANUAL CONFIRMATION and continue the rest of the queue.
 
 ## Pricing control
 
-For each candidate:
+For every direct VEVOR SKU:
 
-**ELEVATION SELLING PRICE >= CURRENT VEVOR SELLING PRICE**
+**LIVE VEVOR SELLING PRICE CHECK + FEED MAP CHECK → USE THE HIGHER APPLICABLE FLOOR**
 
-A candidate is HOLD if the current VEVOR selling-price input cannot be verified.
+Feed values remain snapshots. Re-verify price/MAP and live sellability again when a real supplier order is being placed.
 
-Do not use stale Doba retail pricing, previous Shopify pricing, or an older supplier quote as proof of the current direct-VEVOR price floor.
+## Current open work
 
-## Channel control
+### ACTIVE
 
-Allowed now:
-- ElevationUpScales.com / Shopify direct-site sales.
+1. A/B supplier-media and product-presentation enrichment.
+2. Collection / merchandising consistency verification.
+3. Fulfillment-detail closeout:
+   - blind shipping;
+   - packing-slip treatment;
+   - returns;
+   - customer-support responsibility;
+   - exact supplier-tracking → customer-tracking handoff.
+4. First live paid-order proof when triggered by an actual VEVOR customer order.
 
-Blocked unless later authorized in writing by VEVOR:
-- eBay;
-- Amazon;
-- Walmart;
-- other third-party marketplaces.
+### WAITING / NONBLOCKING
 
-Doba channel permissions, if any, do not transfer to the direct VEVOR relationship.
+- final VEVOR tax-exemption review result.
 
-## Order-flow close requirement
+### NOT YET ACTIVE
 
-VEVOR integration cannot be marked CLOSED until a live paid direct-site VEVOR order follows the operating path:
+- Tier C supporting-product activation.
 
-**CUSTOMER PAID ORDER → ELEVATION OPERATING SYSTEM / SOP-STORE-INT-001 → VEVOR PURCHASE → SUPPLIER TRACKING → CUSTOMER TRACKING / FULFILLMENT UPDATE → COMPLETION / RECONCILIATION**
+## Close condition for the wider VEVOR integration
 
-The first live order must preserve exact supplier and SKU mapping and be actionable from the Elevation order record.
+This feed-prep file is CLOSED, but the wider VEVOR integration remains ACTIVE until the first live paid direct-site VEVOR order proves the full operating path:
 
-## Current blocker / dependency
+**CUSTOMER PAID ORDER → ELEVATION SHOPIFY / OPERATING SYSTEM → LIVE SKU/PRICE/STOCK RECHECK → VEVOR PURCHASE → SUPPLIER TRACKING → CUSTOMER TRACKING / FULFILLMENT UPDATE → COMPLETION / ACTUALS**
 
-Company Operations can prepare the schema, selection rules, and reconciliation method now. Final row-level feed reconciliation depends on obtaining the actual direct VEVOR workbook file from the supplier link / VEVOR account path.
+## RUN pointer
 
-Peter's existing assignment already requests live account-state verification and return of the direct feed. Do not send a duplicate assignment merely because this preparation file was created.
+**A/B MEDIA + PRESENTATION ENRICHMENT → FULFILLMENT DETAIL CLOSEOUT → FIRST LIVE ORDER PROOF WHEN TRIGGERED → C-TIER REVIEW**
 
-## Next
-
-1. Receive Peter's live VEVOR PRO account-state receipt and direct feed file.
-2. Reconcile the feed into the Master Catalog working layer.
-3. Produce the first 20–40 candidate set with READY / HOLD reasons.
-4. Keep Renogy parked in WAITING until Renogy sends an approval, decline, or material request.
+Do not restart supplier qualification, feed intake, A-tier activation, or B-tier activation unless a specific verified change reopens an affected SKU or policy lane.
