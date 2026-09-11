@@ -63,3 +63,31 @@ Sensitive flow:
 **PREPARE → RECON → DUPLICATE CHECK → MARK SENSITIVE + REASON → HYBRID MANAGEMENT REVIEW → CASEY REVIEWS FINAL EXACT SEND/SUBMISSION → CASEY AUTHORIZES → EXECUTE ONCE → VERIFY → RECEIPT**
 
 Earlier concept/draft approval does not authorize a materially changed sensitive final version.
+
+## Disabled / retired identity control
+
+When Casey retires, disables, or disqualifies an email/Google identity, that direction is immediate and controlling.
+
+A retired identity must not be:
+
+- recovered or reactivated for Elevation operations;
+- reused as a worker/manager company identity;
+- linked to vendor, ecommerce, logistics, payment, customer, or internal systems;
+- used as a login, recovery email, forwarding target, contact address, or mailbox;
+- treated as current merely because an older email, handoff, project note, contact record, or platform setting still references it.
+
+Any phone number involved in a retired-account incident is also `RETIRED / DO NOT USE` for Elevation login, MFA, recovery, contact, or verification purposes unless Casey explicitly reauthorizes it.
+
+Do not store incident phone digits in public Git. Preserve the minimum control state needed to prevent reuse.
+
+When a retired identity may have supported an active job or workflow:
+
+**SCOUT SURVIVING THREADS/PLATFORM RECORDS → IDENTIFY AFFECTED JOBS → VERIFY WHETHER THE RETIRED IDENTITY ACTUALLY PROPAGATED → REASSIGN TO AN APPROVED IDENTITY/ACCESS PATH → REMOVE/REPLACE RETIRED CONTACT/RECOVERY VALUES WHERE AUTHORIZED → VERIFY → RECEIPT**
+
+Do not create duplicate outbound communication merely because a retired mailbox is unavailable. Reconstruct from surviving company records and counterpart/platform evidence first.
+
+### Current retired identity notice — 2026-09-11
+
+`elevationlithium@gmail.com` is **DISABLED FOR ALL FURTHER ELEVATION USE** by owner direction.
+
+The account and the phone number involved in its lockout/recovery incident must not be reused, recovered, relinked, forwarded to, or treated as valid Elevation access/contact information. See `ELEVATIONLITHIUM_GMAIL_ACCESS_INCIDENT_2026-09-11.md` for the public-safe impact record.
