@@ -12,6 +12,14 @@ Detailed task state remains inside Project Worktrees.
 
 A GOD MODE activation routes established workers into their verified existing Worktrees; it does not create new authority, duplicate Projects, restart completed tasks, or claim an external action succeeded without evidence.
 
+## Active owner operating standard
+
+Until the first verified Elevation website order paid through PayPal, all workers and managers must apply `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md`.
+
+**Customer/order deadlines keep moving but are not global gates. Block only the affected item/lane and keep unrelated executable Worktrees moving.**
+
+When the first website PayPal order is verified, Hybrid Management records the trigger, retires the temporary standard, and reconciles normal order-priority handling under the Master S.O.P.
+
 ## Mandatory fields
 
 | Worker | Parent Project | Reporting Manager | Lane | Status | Current Worktree | Last Timestamp |
