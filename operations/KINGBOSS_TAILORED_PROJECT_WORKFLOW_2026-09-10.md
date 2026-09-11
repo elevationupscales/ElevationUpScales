@@ -6,6 +6,7 @@
 **Project Specialist:** Kingboss Project Specialist — source / compliance / product / commercial verification  
 **Parent Routing:** Ecommerce & Vendor Operations / Company Operations / Operating System Project Manager  
 **Status:** ACTIVE / WAITING ON SUPPLIER ONBOARDING PACKAGE  
+**Project Source:** `vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md`  
 **Current Supplier Source:** `SUPPLIER_LEADS_LIVE_MAP.md`
 
 ## Project outcome
@@ -59,9 +60,11 @@ Catalog, Developer, Fulfillment, Compliance, Logistics or Communications workers
 
 ## Tailored operating sequence
 
-### 1 — GIT / CURRENT KINGBOSS STATE
+### 1 — GIT / PROJECT SOURCE / WORKTREE PICKUP
 
-Resolve current `main`; read this workflow, the Kingboss entry in `SUPPLIER_LEADS_LIVE_MAP.md`, the current work-board routing, and current Kingboss supplier correspondence/source package if available.
+Resolve current `main`; read the Kingboss row on `CURRENT_WORK_BOARD.md`, `vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md`, this workflow, the Kingboss entry in `SUPPLIER_LEADS_LIVE_MAP.md`, and current Kingboss supplier correspondence/source package if available.
+
+Identify the last verified Kingboss action and next executable Kingboss action. If a prior worker/chat/branch was interrupted, resume only the unfinished Kingboss action.
 
 Do not restart B2B qualification.
 
@@ -83,6 +86,8 @@ When information arrives, receive and classify:
 - account/order contacts.
 
 Do not request a second copy of information already supplied.
+
+Update the Kingboss Project Source with the verified result of each material onboarding field.
 
 ### 3 — SOURCE VERIFICATION / GAP MAP
 
@@ -138,6 +143,44 @@ Once a verified sellable SKU is live:
 
 After first-order proof, establish a repeatable source/inventory/price/compliance refresh and expand only from verified demand and supplier performance.
 
+## Worktree continuity + documentation
+
+Material Kingboss state must be recoverable from the Work Board + Kingboss Project Source + this workflow/supplier map.
+
+Document material changes such as:
+
+- onboarding package arrival;
+- portal/account setup;
+- exact catalog/source/ship-from evidence;
+- MAP/channel/order-path verification;
+- compliance/media/warranty source availability;
+- launch/first-order proof;
+- real gate/maturity changes.
+
+Do not create management noise while simply waiting for the same external package.
+
+After COMPLETE / WAITING / VERIFYING / HOLD, automatically select the next safe unresolved Kingboss item. If none exists, return capacity upward rather than taking another project.
+
+## Gate maturity
+
+### Stage 1 — PROVING — CURRENT
+
+Kingboss remains PROVING because the B2B relationship is approved but the operating source package and first sellable product/order path are not yet verified.
+
+### Stage 2 — CONTROLLED
+
+After source package verification, compliant SKU launch and one clean first order:
+
+- do not recreate generic qualification;
+- use the established source/MAP/channel/fulfillment refresh path for routine exact-SKU work;
+- target verification to changed/risky fields.
+
+### Stage 3 — MATURE / EXCEPTION-BASED
+
+After repeatable clean source refresh and fulfillment, normal already-authorized Kingboss work proceeds by default; management focuses on changed source/compliance/channel facts and material order exceptions.
+
+If one SKU/route/order fails, reopen only that affected control unless evidence proves a broader Kingboss source/process failure.
+
 ## Waiting behavior
 
 While the onboarding package is external-waiting, the project may safely continue:
@@ -161,6 +204,8 @@ Block only the affected action for:
 - unverified sellability/order path;
 - payment/customer obligation;
 - material shipping/DG/compliance uncertainty.
+
+Do not preserve generic qualification or internal manager review as recurring gates after the supplier operating path is proven.
 
 ## Owner gates
 
@@ -187,13 +232,14 @@ Kingboss reaches repeatable operating state when:
 
 ## RUN
 
-**KINGBOSS GIT CHECK → RESUME KINGBOSS WORKTREE → PROJECT MANAGER EXECUTES ROUTINE SAFE KINGBOSS WORK OR ROUTES BOUNDED TASK → SPECIALIST VERIFIES SOURCE/COMPLIANCE/PRODUCT FACTS → RECORD → CONTINUE KINGBOSS**
+**KINGBOSS GIT CHECK → READ KINGBOSS PROJECT SOURCE → PICK UP UNFINISHED KINGBOSS WORKTREE → PROJECT MANAGER EXECUTES ROUTINE SAFE KINGBOSS WORK OR ROUTES BOUNDED TASK → SPECIALIST VERIFIES SOURCE/COMPLIANCE/PRODUCT FACTS → DOCUMENT MATERIAL DELTA → CONTINUE NEXT KINGBOSS ITEM**
 
 ## Return
 
 **KINGBOSS COMPLETED:**  
 **KINGBOSS CURRENT:**  
 **KINGBOSS WAITING/BLOCKED:**  
+**KINGBOSS MATURITY / GATE CHANGE:**  
 **KINGBOSS OWNER GATE:**  
 **KINGBOSS NEXT:**  
 **ROUTE REQUIRED:**
