@@ -114,7 +114,7 @@ Efficiency rule for this window:
 
 # CLOSED / PROTECTED FROM RECREATION
 
-- eBay weed-wacker order 10-15134-90489 cancellation/refund — CLOSED per Owner direction after refund action; reopen only if a new customer, marketplace, payment, delivery, or marketplace exception arrives.
+- eBay weed-wacker order 10-15134-90489 cancellation/refund — CLOSED per Owner direction after refund action; reopen only if a new customer, marketplace, payment, or supplier exception arrives.
 - VEVOR generic qualification / PRO-registration gate — COMPLETE; VEVOR is now in catalog/first-order activation. Do not restart onboarding qualification.
 - VEVOR product-feed acquisition gate — COMPLETE; supplier feed received and working derivatives created.
 - VEVOR Colorado tax-exemption submission gate — COMPLETE as a submission task; final review is pending but is not a general commerce blocker under VEVOR's stated pending-review treatment.
