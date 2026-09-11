@@ -360,6 +360,20 @@
 
   function installRetailStoreShell() {
     const path = location.pathname.replace(/\/+$/, "") || "/";
+    const params = new URLSearchParams(location.search);
+    const lithiumProductRoute = path === "/product" && params.get("store") === "lithium";
+    const lithiumBrandRoute =
+      path === "/lithium-batteries" ||
+      path === "/sok-batteries" ||
+      path === "/sok-order.html" ||
+      path.startsWith("/sok/") ||
+      lithiumProductRoute ||
+      (path === "/checkout" && params.get("source") === "lithium");
+    const retailBrandSrc = lithiumBrandRoute
+      ? "/assets/brand/Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT.webp?v=20260910-2"
+      : "/assets/brand/storefront-wordmark.webp";
+    const retailBrandWidth = lithiumBrandRoute ? 1024 : 430;
+    const retailBrandHeight = lithiumBrandRoute ? 341 : 150;
     const retailRoute = path === "/store" || path === "/rv-store" || path === "/lithium-batteries" || path === "/sok-batteries" || path === "/hawaii-lithium-batteries" || path === "/collector" || path === "/checkout" || path === "/product" || path === "/marketplace" || path.startsWith("/sok/");
     if (document.body.classList.contains("retail-home")) return;
     document.body.classList.add("reference-global-shell");
@@ -375,7 +389,7 @@
     const inner = header?.querySelector(".eus-header__inner");
     if (!header || !inner) return;
     inner.innerHTML = `
-      <a class="eus-brand" href="/" aria-label="Elevation UpScales, Inc. home"><img class="reference-header-wordmark" src="/assets/brand/storefront-wordmark.webp" alt="Elevation UpScales, Inc." width="430" height="150"></a>
+      <a class="eus-brand" href="/" aria-label="Elevation UpScales, Inc. home"><img class="reference-header-wordmark" src="${retailBrandSrc}" alt="Elevation UpScales, Inc." width="${retailBrandWidth}" height="${retailBrandHeight}"></a>
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Power <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
