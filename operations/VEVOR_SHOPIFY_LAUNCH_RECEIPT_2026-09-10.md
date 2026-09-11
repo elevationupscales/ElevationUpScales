@@ -70,23 +70,40 @@ The smart collection is driven by the `VEVOR-Direct` tag so direct-account produ
 
 ## Verified Shopify state
 
-At final verification:
+At final catalog verification:
 
 - Online Store publication ID: `gid://shopify/Publication/363213750641`;
 - all 19 tagged VEVOR Direct products reported `publishedOnPublication = true`;
 - all 19 reported `ACTIVE` status;
 - all 19 reported one media item;
 - all 19 reported supplier inventory tracking disabled;
+- all 19 variants reported `availableForSale = true` during the 2026-09-10 RUN storefront check;
 - `VEVOR Direct` collection reported `publishedOnPublication = true` and `productsCount = 19`.
+
+## Customer storefront verification — 2026-09-10 RUN
+
+Customer-side verification identified one exact storefront-level gate after the catalog launch:
+
+- Shopify Admin GraphQL reports Online Store password protection `enabled = true`;
+- unauthenticated requests to the `VEVOR Direct` collection and representative VEVOR product URLs redirect to Shopify's `/password` page and display **Opening soon**;
+- this prevents normal public browsing and checkout even though the VEVOR product records themselves are active, published, and internally sellable;
+- the connected Shopify Admin GraphQL surface exposes the password-protection state for verification but no supported write path was available in the connected toolset to disable it;
+- an authenticated Shopify Admin browser attempt was made under the Owner `RUN` command, but the available browser profile/vault has no Shopify Admin credentials and could not authenticate.
+
+**Exact current blocker:** `SHOPIFY STOREFRONT PASSWORD PROTECTION ENABLED — AUTHENTICATED SHOPIFY ADMIN ACCESS REQUIRED TO DISABLE`.
+
+This is a storefront-access gate, not a product-data failure. Do **not** rebuild, reprice, duplicate, unpublish, or otherwise recreate the 19 VEVOR Direct products to address it.
 
 ## Next
 
-1. Verify the customer storefront / checkout presentation for the live VEVOR Direct wave.
-2. On the first real VEVOR Direct order, reverify the exact SKU, current supplier sellability, price/MAP condition, and VEVOR order path before supplier placement.
-3. Record supplier acceptance, tracking, delivery, exceptions, and actual operating observations.
-4. After the core path is proven, continue B-tier expansion under the VEVOR master SOP.
+1. Using authenticated Shopify owner/admin access, disable the Online Store storefront password / **Opening soon** protection.
+2. Immediately re-run unauthenticated customer acceptance on the `VEVOR Direct` collection, representative product pages, cart and checkout entry.
+3. On the first real VEVOR Direct order, reverify the exact SKU, current supplier sellability, price/MAP condition, and VEVOR order path before supplier placement.
+4. Record supplier acceptance, tracking, delivery, exceptions, and actual operating observations.
+5. After the core path is proven, continue B-tier expansion under the VEVOR master SOP.
 
 ## Closure boundary
 
 **A-TIER SHOPIFY CATALOG LAUNCH: COMPLETE.**  
+**PUBLIC STOREFRONT ACCEPTANCE: BLOCKED ONLY BY SHOPIFY PASSWORD PROTECTION / ADMIN AUTHENTICATION.**  
 **VEVOR FIRST-ORDER OPERATING PROOF: OPEN.**
