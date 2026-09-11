@@ -1,10 +1,11 @@
 # Elevation UpScales — Current Work Board
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-09-10  
+**Effective:** 2026-09-11  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Last source-state reconciliation baseline:** `f605fcbec8db3e65e6fbdcaaa98800547a42b3fa`
+**Last source-state reconciliation baseline:** `f605fcbec8db3e65e6fbdcaaa98800547a42b3fa`  
+**Last control-surface S.O.P. sync:** 2026-09-11 / `MASTER_SOP_V1_0.md` + `MASTER_OS_GLOSSARY_V1_0.md` / pre-sync main `d57d8dd2a83dabd2e487cb65679dced811dd38db`
 
 > The reconciliation baseline records the newest business/project source state reviewed by this board. A later commit that only updates this board or other control documentation does not make the marker stale by itself. Reconcile again when a material project/vendor/customer/release state changes.
 
@@ -22,25 +23,28 @@ and
 
 A priority change does not close a work item. A new project does not erase an older unfinished obligation. WAITING and HOLD items remain visible until their trigger occurs or they are explicitly closed.
 
+This board is a **management routing and current-state control surface**. It does not supersede the controlling Operating System S.O.P. or Master OS Glossary.
+
 ## Authority
 
 Use this order:
 
 1. Casey / Owner's newest explicit direction.
-2. This `CURRENT_WORK_BOARD.md` for reconciled global current priority and work-item state.
-3. The applicable controlling `/operations/` SOP, Project Source, project record or tailored workflow for lane-specific rules.
-4. Current application / Git / platform evidence for actual technical or operational state.
-5. Dated records and historical handoffs as evidence only.
+2. `MASTER_SOP_V1_0.md` and `MASTER_OS_GLOSSARY_V1_0.md` for Operating System authority, terminology, control rules and system behavior.
+3. This `CURRENT_WORK_BOARD.md` for reconciled global current priority, ownership and work-item state.
+4. The applicable controlling Project/Lane S.O.P., Project Source, tailored workflow and Project Worktree for lane-specific rules and execution state.
+5. Current application / Git / platform / correspondence evidence for actual technical or operational state.
+6. Dated records and historical handoffs as evidence only.
 
 `SUPPLIER_LEADS_LIVE_MAP.md` remains the canonical supplier-domain relationship/status map. It does not replace this global work board.
 
 Dated follow-up files such as `ACTIVE_FOLLOWUPS_2026-09-08.md` are correspondence/action evidence and duplicate-send protection records. Their older priority labels do not override this board.
 
-Manager/worker control records define lane authority and execution behavior. Any copied rolling priority text in those records defers to this board and newer Casey direction.
+Manager/worker control records define lane authority and execution behavior. Any copied rolling priority text in those records defers to the controlling Master S.O.P./Glossary, this board for current routing/state, and newer Casey direction.
 
 **THIS BOARD ROUTES WORK; IT DOES NOT ASSIGN EVERY ROW TO EVERY MANAGER.** Dedicated project managers act only on rows assigned to their project/manager or on a bounded handoff explicitly routed into their project. Cross-project reassignment belongs to the Operating System Project Manager / Company Operations Manager.
 
-Owner direct execution semantics for `RUN`, `RUN WORKFLOW`, `CONTINUE WORKFLOW`, and equivalent commands are controlled by `OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md`, `OWNER_BLOCKAGE_DEFER_AND_FINISHABLE_WORKTREE_DIRECTIVE_2026-09-11.md`, and the project continuity controls.
+Owner direct execution semantics for `RUN`, `RUN WORKFLOW`, `CONTINUE WORKFLOW`, and equivalent commands are controlled by the Master S.O.P./Glossary together with applicable current owner-command and project-continuity controls.
 
 ## Operating loop
 
@@ -93,21 +97,15 @@ A chat ending, worker/session failure, manager change, new priority, branch/PR c
 
 At takeover/RUN/resume:
 
-**CURRENT MAIN → PROJECT SOURCE WHEN VENDOR → PROJECT SOP/TAILORED WORKFLOW → LAST VERIFIED ACTION → NEXT EXECUTABLE ACTION → RESUME → DOCUMENT MATERIAL DELTA → CONTINUE SAME PROJECT**
+**CURRENT MAIN → MASTER S.O.P./GLOSSARY → PROJECT SOURCE WHEN VENDOR → PROJECT SOP/TAILORED WORKFLOW → LAST VERIFIED ACTION → NEXT EXECUTABLE ACTION → RESUME → DOCUMENT MATERIAL DELTA → CONTINUE SAME PROJECT**
 
-## Owner-directed execution window — through midnight 2026-09-10 MDT
+## Prior owner-directed execution window — RETIRED AS CONTROLLING PRIORITY
 
-Tonight's focus is intentionally narrowed to move faster:
+The owner-directed window that ran **through midnight 2026-09-10 MDT** is now historical context only and must not control September 11 sequencing.
 
-1. **VEVOR catalog / first-order activation** — A-tier publication is complete, the 17-SKU B-tier expansion queue is already prepared with zero current Shopify SKU collisions, and fulfillment/returns detail follow-up has been sent. The current customer-facing activation gate remains Shopify Online Store password protection requiring authenticated Shopify Admin access. A read-only VEVOR portal inspection reached only the signed-out state; that account-detail evidence gap is parallel/nonblocking and must not recreate feed acquisition or catalog setup.
-2. **New complementary vendor activation** — continue existing vetted lanes. SolarStock USA is now **QUALIFIED / PURCHASE-READY FOR PROJECT-DRIVEN MODULE SUPPLY / QUOTE REQUEST SENT / WAITING**. Do not chase while the current quote/capability request is pending; continue other qualified supplier lanes. Generic battery duplication remains secondary to SOK.
-3. **Renogy sales-first catalog activation** — dealer approval and Partner Portal access are complete. Batches 01–02 are accepted and Batch 03 adds current exact-SKU evidence for larger inverter/REGO/monitoring/panel families. Current business gap is not more generic research: the connected Shopify store had zero Renogy products at sales-first recon. Build the strongest launch products first, clear exact MAP/sellability/media/warranty gates SKU by SKU, stage/publish each clean product, and keep the next product work moving while one SKU waits.
-4. **Universal catalog live integration acceptance** — establish one shared developer completion lane across SOK, VEVOR, Renogy, Kingboss and future active vendors. Verify source identity → normalized catalog → store search/filter → product detail → cart/checkout or correct assisted path → order-source capture → refresh continuity → public discoverability. Preserve approved design/copy.
-5. **Homepage/lithium deployment completion** — PR #94 is merged into current `main`; finish the exact-SHA preview → production release path and verify canonical production.
-6. **TikTok and routine eBay work move to tomorrow.** A new real paid-customer, payment, delivery, or marketplace exception may still interrupt.
-7. External WAITING lanes do not block independently assigned work in their own project lanes.
+Its valid work items remain preserved in the ACTIVE / WAITING / HOLD sections below until individually reconciled, completed, superseded or reprioritized. Legacy labels such as `TONIGHT`, `TOMORROW`, or `AFTER RELEASE` inside preserved rows are evidence of the prior window and are **non-controlling** until the next priority-specific board reconciliation.
 
-Efficiency rule for this window:
+The durable execution rule from that window remains valid where it does not conflict with Master S.O.P. V1.0:
 
 **COMPLETED SETUP IS NOT A GATE. PENDING ENRICHMENT IS NOT A GATE. BLOCK ONLY THE EXACT UNSAFE OR UNVERIFIED LANE.**
 
