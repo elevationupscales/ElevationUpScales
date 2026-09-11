@@ -41,12 +41,12 @@ Do not expose EIN, tax-license numbers, bank/card details, private addresses, si
 | Preorder/backorder | **VERIFIED / AUTHORIZED WHEN SUPPLIER TERMS APPLY** | Customer may pay for supported backorder/preorder; SOK reserve/lock occurs after supplier payment confirmation. Zero stock alone is not a blanket checkout block when this path applies. |
 | Normal fulfillment | **VERIFIED CORE PATH** | Exact SKU/order mode/destination still requires current check. |
 | Lower-48 commerce | **CONTROLLED / ACTIVE** | Ordinary supported commerce should not wait on unrelated Hawaii or warranty development. |
-| Product media/specs | **AVAILABLE / MEDIA RECEIVED** | Map approved assets to exact SKUs; no duplicate media request. |
+| Product media/specs | **AVAILABLE / OFFICIAL PRODUCT-IMAGE SOURCE VERIFIED / LARGE-PACKAGE INTAKE PENDING** | SOK supplied the official product-image source. The large supplier package exceeds the current connected-file transfer limit; preserve the source and map only assets actually recovered to exact SKUs. Do not re-request the package merely because one connector cannot ingest it. |
 | Compliance/SDS/UN38.3 | **AVAILABLE FOR KEY SOK MODELS / SKU-SPECIFIC** | Exact compliance packet remains protected; use correct SKU/revision for carrier/forwarder submission. |
 | Warranty support | **VERIFIED SUPPLIER SUPPORT / SOK RETAINS AUTHORIZATION** | Elevation may take an active warranty role for Elevation customers; permanent Hawaii economics remain under development. |
 | Warranty replacement replenishment | **SUPPORTED IN PRINCIPLE** | Approved warranty-used replacement stock may be replenished into later Elevation orders; consignment is not verified. |
 | Hawaii downstream resale | **VERIFIED IN PRINCIPLE UNDER DEALER RELATIONSHIP** | Subject to applicable pricing/MAP and logistics controls. |
-| Hawaii freight/storage | **PROVING / MULTI-PROVIDER DEVELOPMENT** | Logistics Plus waiting on terms; H2O/Pasha backup pricing needs exact SOK packed profiles; other provider evidence remains separate/protected. |
+| Hawaii freight/storage | **PROVING / MULTI-PROVIDER DEVELOPMENT** | Logistics Plus waiting on terms; H2O/Pasha backup pricing needs exact SOK packed profiles; current extraction blocker is the supplier's legacy workbook format, not missing supplier cooperation. Other provider evidence remains separate/protected. |
 | Tax/resale treatment | **COMPANY DOCUMENTATION AVAILABLE / SUPPLIER-SPECIFIC TREATMENT PROTECTED** | Use current supplier/account evidence; do not infer tax treatment from another vendor. |
 | Returns/RMA | **PARTIAL / WARRANTY-SPECIFIC PROCESS CONTROLS APPLY** | Exact SOK warranty authorization/evidence/disposition rules govern. |
 | First paid order → OS proof | **VERIFYING** | Shopify/SOK paid-order bridge is merged; full live purchase-to-OS proof remains when a real order occurs. |
@@ -58,7 +58,9 @@ Do not expose EIN, tax-license numbers, bank/card details, private addresses, si
 - When SOK replies, classify inputs as **EXACT / ESTIMATE / UNKNOWN**.
 - Combine supplier inputs with verified Hawaii storage/freight economics before forming owner-reviewed permanent commercial terms.
 - Logistics Plus pricing/operating terms are independently waiting after planning inputs were supplied.
-- H2O/Pasha route may proceed using existing verified manufacturer-packed SOK dimensions/weights/configurations; do not estimate missing cargo data.
+- H2O/Pasha confirmed that H2O is the Pasha-facing account/coordination party for this lane. Additional-model pricing requires exact manufacturer-packed dimensions, weights and configurations.
+- SOK already supplied those broader shipment profiles in a legacy spreadsheet. Current connected tooling can locate the source but cannot directly extract that legacy attachment format. Treat only that extraction step as blocked; do not estimate the profiles and do not ask SOK to repeat already-supplied data.
+- The starter Hawaii landed-cost comparison has now been modeled privately from verified supplier and existing freight evidence. Public Git retains only the operational conclusion: the one-unit low-voltage proof is a qualification case rather than a proven scalable-margin lane, consolidation materially improves that lane, and the current high-voltage starter profile shows stronger preliminary freight-carrying economics. Exact costs/rates remain protected and all quoted economics still require current quote validation, excluded-cost reconciliation and first-shipment actuals before scale.
 
 ## Required onboarding/readiness controls
 
@@ -89,12 +91,13 @@ Do not use Hawaii development, an unanswered warranty-program email, internal pr
 
 Parallel SOK work remains:
 
-1. Continue independent verified SOK catalog/media/commerce work.
-2. Use existing verified packed profiles to advance H2O/Pasha pricing where possible.
-3. Process Logistics Plus terms when returned.
+1. Continue independent verified SOK catalog/media/commerce work; use the official media source already supplied and do not duplicate the supplier request.
+2. Recover the exact additional-model shipment profiles from the existing SOK legacy workbook through a supported extraction path, then send only the verified profile data to H2O/Pasha for backup-route pricing.
+3. Process Logistics Plus terms when returned and add protected costs to the private economics model.
 4. Process SOK warranty response when returned; do not resend.
 5. Prove first real Shopify/SOK paid-order → OS ingestion → supplier fulfillment chain when a real order occurs.
-6. Build owner-review Hawaii warranty economics only after verified supplier/provider inputs exist.
+6. Reconcile first Hawaii proof actuals against the protected starter landed-cost model before treating a route as production-proven.
+7. Build owner-review Hawaii warranty economics only after verified supplier/provider inputs exist.
 
 ## Close condition for active repeatable vendor onboarding
 
