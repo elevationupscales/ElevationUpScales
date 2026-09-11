@@ -13,27 +13,52 @@ Establish one clear company rule for which email identities Elevation uses, how 
 
 Current Gmail send history proves `elevationupscales@gmail.com` is the active technical outbound mailbox.
 
-`casey@elevationupscales.com` and `sales@elevationupscales.com` are active company-facing/domain addresses in current correspondence and routing, but this standard does **not** claim either domain address is configured as an outbound Gmail `Send As` identity until that capability is separately verified.
+Current routing evidence also verifies `support@elevationupscales.com` as an established Elevation support-role address. Prior routing QA and inbound messages prove that the support address is active as a company contact/routing identity.
+
+`casey@elevationupscales.com` and `sales@elevationupscales.com` remain valid company-facing domain identities for their assigned roles, but this standard does **not** claim any domain address is configured as a Gmail outbound `Send As` identity unless separately verified.
 
 Therefore:
 
-**TECHNICAL FROM ADDRESS MAY DIFFER FROM THE BUSINESS IDENTITY SHOWN IN THE SIGNATURE / REPLY PATH.**
+**AUTOMATION MAY SEND TECHNICALLY FROM `elevationupscales@gmail.com` WHILE PRESENTING ELEVATION UPSCALES SUPPORT AS THE BUSINESS CONTACT / SIGNATURE IDENTITY.**
 
-Never claim a domain address was the actual sender when the mail platform sent from another address.
+Never falsify the actual From header. The technical sender and the visible support/contact identity may differ.
 
 ## Approved email identities
 
-### 1. `elevationupscales@gmail.com` — SYSTEM / BACKEND MAILBOX
+### 1. `elevationupscales@gmail.com` — TECHNICAL / SYSTEM SENDING MAILBOX
 
 Use for:
 - current authenticated Gmail sending path;
 - Google-connected administrative operations;
-- OS-approved automated/system-generated outbound email when no verified domain `Send As` identity is available;
+- OS-approved automated/system-generated outbound email;
 - central thread continuity and durable correspondence history.
 
-Do not promote this address as the preferred public contact when a domain role address is appropriate.
+This is the technical sender. It is not the preferred public reply/contact identity for automated vendor or website communications.
 
-### 2. `casey@elevationupscales.com` — OWNER / EXECUTIVE IDENTITY
+### 2. `support@elevationupscales.com` — DEFAULT AUTOMATED PUBLIC CONTACT IDENTITY
+
+Use as the default visible support/contact identity for:
+- automated vendor correspondence;
+- vendor onboarding and operational follow-up;
+- ecommerce/catalog support communication;
+- website customer communication;
+- website order/support communication;
+- general automated operational correspondence where a company team identity is appropriate.
+
+Automated messages may technically send from `elevationupscales@gmail.com` while the body/signature identifies `support@elevationupscales.com` as the company contact.
+
+Where the sending platform supports a verified `Reply-To`, use `support@elevationupscales.com` for these automated classes.
+
+### 3. `sales@elevationupscales.com` — SALES-SPECIFIC BUSINESS IDENTITY
+
+Use for:
+- direct sales conversations;
+- sales quotes or sales-specific human correspondence;
+- commercial conversations where Sales is the appropriate functional owner.
+
+It is not the default automated vendor/customer identity unless Casey or the applicable workflow specifically routes that communication through Sales.
+
+### 4. `casey@elevationupscales.com` — OWNER / EXECUTIVE IDENTITY
 
 Use for:
 - Casey-specific executive correspondence;
@@ -42,17 +67,6 @@ Use for:
 - direct replies intended specifically for Casey.
 
 Automated workers must **not** sign Casey's name or title unless the exact communication is explicitly authorized to be sent as Casey / in Casey's voice.
-
-### 3. `sales@elevationupscales.com` — DEFAULT COMPANY SALES / OPERATIONS REPLY IDENTITY
-
-Use as the preferred business-facing reply/contact identity for:
-- vendor outreach and vendor operations;
-- ecommerce/catalog/vendor onboarding communication;
-- general customer sales/support communication;
-- website commerce/order questions;
-- automated operational email where a team reply path is appropriate.
-
-Until outbound `Send As` capability is verified, messages may technically originate from `elevationupscales@gmail.com` while the signature directs replies/contact to `sales@elevationupscales.com`.
 
 ## Retired / disallowed identities
 
@@ -64,26 +78,31 @@ No automated worker may create or adopt a new company email identity, recovery a
 
 ## Automated signature rules
 
-### A. Vendor / ecommerce / operations automation
+### A. Vendor / partner automation
 
-Use:
+Default signature:
 
-Elevation UpScales Operations  
+Elevation UpScales Support  
+Vendor & Partner Support  
 Elevation UpScales, Inc.  
-Vendor & Ecommerce Operations  
-sales@elevationupscales.com  
-elevationupscales.com  
-*Sent through the Elevation Operating System. Replies are reviewed by our team.*
+support@elevationupscales.com  
+elevationupscales.com
 
-### B. Customer / website-commerce automation
+Use for supplier/vendor onboarding, vendor follow-up, catalog/ecommerce coordination, logistics coordination when Support is the company-facing contact, and routine partner correspondence.
 
-Use:
+The message may be technically sent from `elevationupscales@gmail.com`. Do not add Casey's or Peter's personal signature unless the exact message is authorized as that person.
 
-Elevation UpScales Customer Operations  
+### B. Website / customer automation
+
+Default signature:
+
+Elevation UpScales Support  
+Customer & Website Support  
 Elevation UpScales, Inc.  
-sales@elevationupscales.com  
-elevationupscales.com  
-*Sent through the Elevation Operating System. Replies are reviewed by our team.*
+support@elevationupscales.com  
+elevationupscales.com
+
+Use for website inquiries, direct Elevation website orders, order-status communication, general customer support, checkout/support follow-up, and automated website correspondence.
 
 ### C. Internal automated management message
 
@@ -115,10 +134,10 @@ Only when Peter personally authors/approves/sends the communication as himself:
 Peter Torres  
 Ecommerce & Vendor Operations Manager  
 Elevation UpScales, Inc.  
-sales@elevationupscales.com  
+support@elevationupscales.com  
 elevationupscales.com
 
-Automated messages supporting Peter's work use the **Elevation UpScales Operations** role signature instead of impersonating Peter.
+Automated messages supporting Peter's work use the **Elevation UpScales Support** role signature instead of impersonating Peter.
 
 ## Phone-number rule
 
@@ -130,15 +149,19 @@ A retired/incident phone must never appear in a signature, account recovery fiel
 
 Default routing:
 
-- vendor / ecommerce / catalog / general customer commerce → `sales@elevationupscales.com`
+- automated vendor / partner / ecommerce / catalog → `support@elevationupscales.com`
+- automated website / customer / direct website order support → `support@elevationupscales.com`
+- sales-specific human/commercial correspondence → `sales@elevationupscales.com`
 - owner / executive / Casey-specific → `casey@elevationupscales.com`
 - backend Google/system continuity → `elevationupscales@gmail.com`
 
-Where the sending platform supports `Reply-To`, configure the appropriate domain role address once technically verified. Until then, include the correct domain contact visibly in the signature and preserve the actual sender header truthfully.
+Where the sending platform supports a verified `Reply-To`, automated vendor and website/customer mail should use `support@elevationupscales.com`.
+
+Until domain `Send As` is verified, preserve the true technical From address while displaying the approved Support identity/signature in the message body.
 
 ## Anti-impersonation rule
 
-**AUTOMATION MAY REPRESENT THE COMPANY; IT MAY NOT SILENTLY PRETEND TO BE A PERSON.**
+**AUTOMATION MAY REPRESENT ELEVATION UPSCALES SUPPORT; IT MAY NOT SILENTLY PRETEND TO BE A PERSON.**
 
 An automated or pre-authorized routine message must use a role/team signature unless:
 1. the human is actually sending it; or
@@ -146,4 +169,4 @@ An automated or pre-authorized routine message must use a role/team signature un
 
 ## Control phrase
 
-**SYSTEM SENDS AS THE COMPANY → HUMANS SIGN AS THEMSELVES → SALES IS THE DEFAULT TEAM REPLY PATH → CASEY IS OWNER-SPECIFIC → NEVER REUSE RETIRED IDENTITIES.**
+**MAIN GMAIL SENDS → SUPPORT SIGNS → SUPPORT@ IS THE DEFAULT AUTOMATED CONTACT → SALES IS SALES-SPECIFIC → CASEY IS OWNER-SPECIFIC → NEVER REUSE RETIRED IDENTITIES.**
