@@ -25,6 +25,9 @@ VEVOR is not a prospect or qualification lead. Owner approval remains granted fo
 - Tier B — Strong Expansion: **17/17 catalog activation gate CLOSED**.
 - Tier C — Supporting: **4/4 catalog activation gate CLOSED** after exact SKU, live price/MAP, selected-SKU purchase-state, Shopify duplicate, status, collection and publication verification.
 - Curated 40 activation: **40/40 complete**.
+- Tier B media enrichment: **17/17 verified**.
+- Tier C media enrichment: **4/4 exact-SKU VEVOR hero images stored in Shopify and verified by authoritative readback**.
+- Fulfillment-detail closeout: **CLOSED**.
 - Legacy direct-source reconciliation: completed for source/SKU/tag identity; individually unavailable legacy records remain isolated in DRAFT/HOLD rather than blocking VEVOR.
 
 ### Shopify verification / concurrency findings
@@ -37,13 +40,14 @@ During B-tier activation:
 - a later concurrent-workflow regression returned the 17 B-tier records to DRAFT;
 - all 17 were restored to ACTIVE and persistence was verified again;
 - exact SKU, price and both intended publication IDs remained intact;
-- B-tier media enrichment subsequently reached 17/17 through the concurrent media workflow.
+- B-tier media enrichment subsequently reached 17/17.
 
 During C-tier activation:
 - another concurrent worker created the same four verified SKUs first;
-- the later creation-response GIDs were therefore not canonical and resolved to null on authoritative readback;
+- later creation-response GIDs were therefore not canonical and resolved to null on authoritative readback;
 - exact-SKU search identified the existing canonical records instead;
 - those four canonical records were verified ACTIVE with exact price/SKU, both intended publications and membership in the `VEVOR Direct` collection;
+- exact-SKU supplier hero media was then re-hosted in Shopify and verified 4/4;
 - duplicate records were not retained as the controlling records.
 
 **Control:** exact SKU identity + authoritative Shopify readback controls over transient create responses, search indexing or noncanonical GIDs.
@@ -87,15 +91,15 @@ Normal order path:
 
 ### Current active work
 
-1. Complete/verify any remaining C-tier supplier-media enrichment without duplicating concurrent worker writes.
-2. Keep the curated 40 under targeted live price/MAP/sellability maintenance; do not restart wholesale catalog activation.
-3. Execute the first live paid VEVOR order proof when a real customer order triggers the lane.
+1. Keep the curated 40 under targeted live price/MAP/sellability maintenance; do not restart wholesale catalog activation.
+2. Execute the first live paid VEVOR order proof when a real customer order triggers the lane.
+3. Continue presentation/merchandising improvement only where useful and source-safe.
 4. Expand beyond the curated 40 only when a business need or verified merchandising opportunity justifies it; SKU count alone is not a reason to expand.
 
 ### Waiting / nonblocking
 
 - Final VEVOR tax-exemption review result. Protected tax documents and account identifiers remain outside public Git.
-- First live paid-order proof is event-triggered and cannot be closed until an actual VEVOR customer order exists.
+- First live paid-order proof is event-triggered. The 2026-09-11 Shopify trigger check found no paid order requiring VEVOR routing.
 
 ### Wider VEVOR close condition
 
@@ -105,7 +109,7 @@ The VEVOR integration remains ACTIVE until a real paid direct-site order proves:
 
 ### Current VEVOR RUN pointer
 
-**C-TIER MEDIA CHECK → FIRST LIVE ORDER TRIGGER CHECK → ROUTINE PRICE/STOCK/MAP MAINTENANCE → LIVE ORDER PROOF WHEN TRIGGERED**
+**TARGETED PRICE/MAP/STOCK MAINTENANCE → LIVE-ORDER TRIGGER CHECK → LIVE ORDER PROOF WHEN TRIGGERED → EXPAND ONLY ON VERIFIED BUSINESS NEED**
 
 Do not restart PRO onboarding, feed intake or Tier A/B/C activation unless a specific changed fact reopens the affected lane.
 
@@ -139,7 +143,7 @@ Renogy remains WAITING until the approval/decline or another material request ar
 
 Current sequence:
 
-**#1 VEVOR → CURATED 40 ACTIVE / C-MEDIA CHECK + LIVE-ORDER READINESS**  
+**#1 VEVOR → CURATED 40 ACTIVE / LIVE-ORDER READINESS + TARGETED MAINTENANCE**  
 **RENOGY → PREPARED / WAIT FOR EXTERNAL APPROVAL**
 
 Routine eBay/account maintenance does not displace VEVOR unless a real customer fulfillment issue needs immediate action.
