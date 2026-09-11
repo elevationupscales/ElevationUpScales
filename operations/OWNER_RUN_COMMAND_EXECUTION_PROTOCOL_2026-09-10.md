@@ -1,7 +1,7 @@
 # Elevation UpScales — Owner RUN Command Execution Protocol
 
 **Status:** ACTIVE / CONTROLLING EXTENSION  
-**Effective:** 2026-09-10  
+**Effective:** 2026-09-10; direct-deployment rule updated 2026-09-11  
 **Owner:** Casey Young  
 **Parent SOP:** `operations/MANAGEMENT_OPERATING_SOP.md`  
 **Applies To:** Operating System Project Manager, Company Operations, routed managers/workers when acting on an Owner `RUN` command
@@ -43,13 +43,38 @@ Reading a company SOP, vendor SOP, work board row or RUN receipt is **not** itse
 
 When Casey says **RUN**, execute immediately using:
 
-**RESOLVE RECIPIENT PROJECT → GIT FIRST → RESUME THAT PROJECT'S LAST OPEN WORKTREE → COMPLETE AS FAR AS POSSIBLE → RECORD IN GIT → EXECUTE NEW OWNER COMMAND INSIDE THAT SCOPE → COMPLETE AS FAR AS POSSIBLE → RECORD IN GIT → RETURN TO THAT PROJECT'S PRIOR WORKTREE IF STILL OPEN**
+**RESOLVE RECIPIENT PROJECT → GIT FIRST → RESUME THAT PROJECT'S LAST OPEN WORKTREE → COMPLETE AS FAR AS POSSIBLE → RECORD IN GIT → EXECUTE NEW OWNER COMMAND INSIDE THAT SCOPE → COMPLETE AS FAR AS POSSIBLE → RECORD IN GIT → RELEASE APPROVED RUNTIME REPAIRS WHEN THAT RELEASE LANE IS IN SCOPE → VERIFY LIVE → RETURN TO THAT PROJECT'S PRIOR WORKTREE IF STILL OPEN**
 
 For the Operating System Project Manager / Company Operations Manager, the final continuation may move to the next properly owned work item on `CURRENT_WORK_BOARD.md`.
 
 For a dedicated project manager, the final continuation remains inside that project unless a higher manager explicitly reroutes the worker.
 
 Do not stop to ask whether Casey wants the work executed. `RUN` is the authorization to execute the current safe worktree within existing owner/SOP/project boundaries.
+
+## Owner RUN direct-deployment rule
+
+Casey's **RUN** is also the production-deployment authorization **when all of the following are true**:
+
+1. the command is being handled by the Operating System Project Manager, Company Operations Manager, Developer/Release lane, or another lane explicitly routed production-release authority;
+2. the website/runtime repair is already owner-approved or is a bounded repair within an already approved worktree;
+3. the repair has been merged to the reviewed current `main`;
+4. required repository QA/security checks are clean;
+5. production is stale, a release-ready row is open, or live verification proves drift from the approved current source;
+6. no true safety, payment, legal/compliance, supplier/channel, MAP, lithium/DG, credential, or binding-commercial gate requires a separate owner decision.
+
+When those conditions are satisfied, **do not ask Casey for a second `DEPLOY` message**. Complete the worktree through production.
+
+Preferred direct release path when GitHub connector/ref access is available:
+
+**RE-RESOLVE CURRENT MAIN → VERIFY REVIEWED/QA-CLEAN SHA → FAST-FORWARD `production-deploy` TO THAT EXACT MAIN SHA → EXISTING PRODUCTION WORKFLOW RUNS CANONICAL QA + SECRET SCAN + CLOUDFLARE DEPLOY + LIVE SMOKE → VERIFY APPROVED LIVE PRESENTATION/FUNCTION → RECORD RECEIPT**
+
+The `production-deploy` ref must only move by normal fast-forward to the current reviewed `main` SHA. Do not force the ref and do not point it to an unmerged feature branch.
+
+If the direct ref route is unavailable but authenticated Actions dispatch is available, the existing exact-SHA release workflow may be used. `RUN` still supplies the owner authorization; do not manufacture a second owner-confirmation gate solely because the technical dispatch surface asks for release inputs.
+
+A named supplier/project manager does **not** gain blanket production authority from this rule. If that manager's bounded work creates a shared-site runtime repair, the manager records/routs **RELEASE REQUIRED** upward; the OS/Company Operations/Developer release lane completes the production step under the same owner RUN worktree.
+
+Do not deploy for documentation-only or management-state changes that do not affect production runtime and do not correspond to proven production drift.
 
 ## Required sequence
 
@@ -115,14 +140,22 @@ Examples:
 
 - supplier approval → reconcile that supplier state → request required source data → establish/update that vendor master SOP → route that supplier's catalog/code work;
 - customer order → verify payment/order → supplier fulfillment → tracking → customer update → operating receipt;
-- approved code → QA → preview/release path → verification/receipt;
+- approved website/runtime repair → QA → merge/current-main reconciliation → direct production release under this protocol → live verification/receipt;
 - vendor source file → verify → normalize → route that vendor's catalog implementation → record current state.
 
 Do not stop after the first sub-step if the next safe step is clear and available.
 
 Do not use these examples to expand a supplier manager into unrelated supplier/customer/development projects.
 
-### 6. Return to the assigned prior worktree
+### 6. Release approved runtime repairs before declaring the worktree complete
+
+When the assigned scope includes the OS/Company Operations/Developer release lane and a merged approved runtime repair is ahead of production, the RUN worktree is **not complete at merge**.
+
+Perform the direct-deployment rule above, then verify the canonical production domain. A successful Git merge or PR close is not a production receipt.
+
+If release fails, record the exact technical failure and keep the release row OPEN. Fix only the proven failure and retry when safe; do not rewrite already-approved website design/copy merely because production is stale.
+
+### 7. Return to the assigned prior worktree
 
 When the new command is complete, waiting, held, or otherwise controlled:
 
@@ -136,13 +169,15 @@ A new command interrupts the worktree; it does not silently erase it or transfer
 
 Normal Owner-directed work does **not** require freezing Git simply because a release is planned.
 
-Use exact-SHA release discipline only during the actual bounded release sequence that depends on an unchanged SHA:
+For ordinary approved repair catch-up under Owner RUN, use:
 
-**RESOLVE CURRENT MAIN → START PREVIEW FOR THAT SHA → SAME-SHA PRODUCTION → VERIFY → RECORD RECEIPT**
+**RESOLVE CURRENT MAIN → VERIFY REVIEWED/QA-CLEAN SOURCE → DIRECT PRODUCTION TRIGGER (`production-deploy` FAST-FORWARD) → WORKFLOW QA/DEPLOY/SMOKE → LIVE DRIFT CHECK → RECORD RECEIPT**
 
-Do not impose an indefinite Git freeze while Casey is actively directing other company work. If new Owner-directed commits are made before preview starts, the release target simply becomes the newer reviewed current `main` SHA.
+The historical exact-SHA preview → same-SHA production workflow remains available for higher-risk releases, explicit preview requests, or cases where a preview is materially needed before production. It is no longer a mandatory second owner-authorization loop for routine approved repair drift catch-up when Casey has already issued RUN.
 
-If a preview for an exact SHA is already actively running or has passed and production must use the same SHA, avoid unrelated commits only for that active preview→production window unless Casey explicitly directs otherwise.
+Do not impose an indefinite Git freeze while Casey is actively directing other company work. Re-resolve `main` immediately before moving `production-deploy`; the production trigger must point to the current reviewed `main` SHA.
+
+If an explicit preview has already started for an exact SHA and the chosen release path requires that same SHA for production, avoid unrelated commits only for that active preview→production window unless Casey explicitly directs otherwise.
 
 ## Unified GitHub RUN action
 
@@ -160,11 +195,11 @@ Controlling SOP:
 
 The shared Action standardizes current-main reconciliation, role/scope labeling, applicable `/operations/` control selection, QA depth and a public-safe receipt.
 
-It does **not** grant a manager wider authority, broadcast a task to other projects, reassign workers, write to the branch, merge a PR, or deploy production.
+The branch-validation Action itself does **not** grant a manager wider authority, broadcast a task to other projects, reassign workers, write to the branch, merge a PR, or deploy production.
+
+For a website/runtime worktree, however, Owner RUN does **not** end when that branch Action passes. After authorized merge/current-main reconciliation, the OS/Company Operations/Developer release lane must continue through the direct-deployment rule when production drift or a release-ready repair exists.
 
 Use the common Action instead of creating separate SOK, Renogy, VEVOR, Kingboss or manager-specific RUN workflows unless a real technical requirement cannot be represented by the shared control.
-
-Production deployment remains separate and exact-SHA controlled after reviewed merge.
 
 ## Gate discipline
 
@@ -178,7 +213,7 @@ Keep real gates for:
 - MAP/pricing policy;
 - lithium/DG/freight safety;
 - binding commercial commitments requiring Casey;
-- production release checks;
+- production QA/security/live-smoke checks;
 - protected credentials/data.
 
 Do not treat these as general blockers:
@@ -189,7 +224,8 @@ Do not treat these as general blockers:
 - internal report formatting;
 - absence of a first order;
 - historical handoff cleanup;
-- a worker/tool limitation when another route **inside the same assigned project** can safely continue.
+- a worker/tool limitation when another route **inside the same assigned project** can safely continue;
+- a separate `DEPLOY` confirmation after Casey already issued RUN for an approved routine repair and the direct-deployment conditions are satisfied.
 
 **BLOCK THE EXACT UNSAFE OR UNVERIFIED LANE — NOT THE WHOLE PROJECT.**
 
@@ -199,8 +235,9 @@ This principle does not authorize a dedicated project manager to leave the proje
 
 Keep the owner update concise:
 
-**COMPLETED:** actions actually finished.  
+**COMPLETED:** actions actually finished, including production deployment when required by the RUN worktree.  
 **RECORDED:** Git/source-of-truth updates and receipts.  
+**LIVE VERIFIED:** production smoke/drift result when runtime work was released.  
 **WAITING / HELD:** real blockers only.  
 **CONTINUING:** next action inside the assigned project, or `RETURNED FOR ROUTING` when that project has no executable work.  
 **NEEDS CASEY:** only genuine owner decisions.
@@ -208,6 +245,8 @@ Keep the owner update concise:
 ## Standing interpretation
 
 Unless Casey explicitly changes this rule, future messages consisting of **RUN**, **RUN WORKFLOW**, **CONTINUE WORKFLOW**, or equivalent direct execution language should be interpreted under this protocol.
+
+When the active authorized worktree includes an already-approved merged website/runtime repair or proven production drift, **RUN means finish through production deployment and live verification**, not stop at merge or prepare deployment instructions.
 
 The Operating System Project Manager should not self-invent a pause that Casey did not authorize.
 
