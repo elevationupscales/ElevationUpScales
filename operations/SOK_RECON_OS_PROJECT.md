@@ -28,7 +28,7 @@ SOK RECON OS owns detailed reconciliation and program-development state for the 
 - approved media/document intake;
 - supplier-specific warranty requirements;
 - replacement-stock design;
-- Hawaii warranty storage strategy;
+- Hawaii storage strategy;
 - failed-unit handling requirements;
 - replenishment/reimbursement structure;
 - warranty-service economics and proposed compensation structure;
@@ -67,6 +67,8 @@ SOK RECON OS maintains detailed project state, reconciles evidence, develops the
 - Lower-48 warranty execution and Hawaii warranty development are separate lanes.
 - Product-image media has been received and belongs in the existing catalog/media lane.
 - Hawaii downstream resale and proof-shipment work remain controlled by their applicable SOK/logistics records.
+- The consolidated SOK Hawaii warranty operating-input request has been **SENT** in the existing supplier thread.
+- The current external state for that request is **WAITING ON SOK RESPONSE**. Do not recreate the email, create a duplicate draft, or send repeated small clarification loops while the response is pending.
 
 ## Current warranty-development control
 
@@ -76,7 +78,9 @@ The controlling supplier-specific negotiation record is:
 
 Current sequence:
 
-**CAPACITY ESTABLISHED → REQUEST SOK OPERATING INPUTS → HOLD COMMERCIAL MODEL INTERNAL → RECEIVE RESPONSE → MODEL TRUE COST / VALUE → FORM COMMERCIAL COUNTERPROPOSAL**
+**CAPACITY ESTABLISHED → OPERATING INPUT REQUEST SENT → WAIT FOR SOK → EXTRACT EXACT / ESTIMATE / UNKNOWN → COMBINE WITH VERIFIED HAWAII STORAGE / FREIGHT INPUTS → MODEL TRUE COST / VALUE → FORM OWNER-REVIEWED COMMERCIAL STRUCTURE**
+
+The supplier-request step is complete. While waiting, hold permanent commercial economics internal and advance only work that does not require another SOK reply.
 
 Do not commit Elevation to reserve-stock purchases, warehouse minimums/long-term agreements, guaranteed warranty volume/SLA, standing absorption of Hawaii warranty freight, service-fee/retainer terms, exclusivity, or permanent compensation structure without verified inputs and owner approval where applicable.
 
@@ -88,17 +92,30 @@ Use actual protected provider quotes and shipment economics internally. The publ
 
 Determine when local warranty stock, receiving, storage, release, replenishment, and failed-unit control become more economical and customer-friendly than one-off replacement shipments.
 
-## Required SOK planning inputs
+A parallel Logistics Plus follow-up has also been sent for additional detail around investment, long-term-agreement/minimum options, and scalable Hawaii warehouse support while Elevation completes the SOK projections. Keep supplier- and provider-specific private economics isolated.
 
-The current negotiation directive authorizes preparation of a focused request for operating inputs such as:
+## SOK planning inputs requested
+
+The sent consolidated request sought the operating inputs needed to size the first Hawaii model, including as applicable:
 
 - approximate Hawaii warranty/replacement/support volume;
 - models or parts generating the most warranty activity;
 - recommended replacement-stock/reserve approach;
 - expected replenishment timing after local authorized replacement;
-- how supplier freight support or shipping-cost treatment should apply to Hawaii warranty replacements.
+- freight-credit / shipping-cost treatment for Hawaii warranty replacements;
+- failed-unit disposition requirements;
+- evidence and reconciliation records needed for the program.
 
-The outbound request remains subject to the current owner-review gate in the negotiation directive.
+When SOK replies:
+
+1. read the full existing thread;
+2. extract each requested input;
+3. classify each input as **EXACT / ESTIMATE / UNKNOWN**;
+4. combine usable SOK inputs with verified warehouse/freight/storage inputs;
+5. model true incremental and dedicated costs;
+6. identify remaining material unknowns;
+7. return to SOK only if a missing fact materially prevents an executable/economic model;
+8. prepare the owner-review commercial structure.
 
 ## Operating loop
 
