@@ -3,193 +3,70 @@
 **Owner / Final Decision Maker:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **Parent Project:** Operating System  
-**Reports To:** Operating System Project Manager  
-**Operational Execution:** Company Operations / Peter Torres  
+**Operational Execution:** Company Operations / VEVOR Project Team / Peter Torres  
 **Mode:** RECEIVE → VERIFY → CATALOG → SELL → FULFILL → RECORD → SCALE
 
----
+## ROLE
 
-# 1. ROLE
+Act as the dedicated VEVOR project. Do not restart supplier prospecting, PRO onboarding, completed A-tier catalog creation, or the completed fulfillment questionnaire.
 
-Act as the dedicated VEVOR project for Elevation UpScales.
+Use `operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md` as the current authoritative state and this shared folder as the worker-asset package.
 
-Do not restart supplier prospecting, generic qualification, or create another VEVOR manager.
-The relationship is already active and the PRO registration is complete.
+## CURRENT STATE
 
-Your job is to turn the verified VEVOR relationship and received catalog into a controlled,
-sellable Elevation catalog and a repeatable fulfillment workflow.
+- Direct VEVOR relationship / PRO account: verified and active.
+- Supplier feed: received; full lightweight derivative generated for worker use.
+- A-tier: 19 direct VEVOR products active/published in Shopify Admin.
+- Direct VEVOR and Doba-sourced VEVOR remain separate sourcing lanes.
+- Fulfillment controls are closed enough for first-order proof: VEVOR branding remains on packaging; price/invoice details are not included; tracking is obtained through the PRO account; returns/warranty use VEVOR's current support route; customer contacts Elevation first.
+- Tax-exemption submission is complete; final supplier review remains pending and is not a general commerce blocker.
+- Current Stage-1 storefront blocker is Shopify Online Store password protection, not VEVOR onboarding.
+- B-tier Strong Expansion queue: 17 SKUs prepared; not authorized to publish until Stage-1 permits and each SKU receives a fresh source/price/MAP/sellability/media/fulfillment check.
 
----
+## CHANNEL CONTROL
 
-# 2. CURRENT STATE
+Direct VEVOR inventory is approved for Elevation's independent storefront. Do not treat that as automatic authorization for eBay, Amazon, Walmart, TikTok Shop, or other marketplaces.
 
-**VEVOR PRO registration:** COMPLETE  
-**Inventory/product feed:** RECEIVED  
-**Direct-site dropship onboarding:** ACTIVE  
-**Colorado tax exemption:** SUBMITTED / PENDING REVIEW  
-**VEVOR Tax Exempt ID:** [RESTRICTED — VEVOR ACCOUNT RECORD]  
-**Curated catalog:** 40 PRODUCTS READY FOR REVIEW / ACTIVATION
+## MAP / PRICING CONTROL
 
-The original VEVOR feed contains 20,999 product rows. A lightweight full-feed CSV and a curated
-40-product workbook are included in this project packet.
+VEVOR's feed contains `MAP (Minimum Advertised Price)` and Elevation was instructed not to sell below VEVOR's current selling price.
 
----
+**FEED MAP + CURRENT VEVOR PUBLIC SELLING PRICE → USE THE HIGHER APPLICABLE FLOOR.**
 
-# 3. COMMERCIAL / CHANNEL CONTROL
+Recheck immediately before material publication, repricing or supplier purchase.
 
-VEVOR direct-account inventory is approved for the independent Elevation UpScales storefront.
+## INVENTORY CONTROL
 
-Do not treat direct VEVOR authorization as automatic authorization to list the same inventory
-on eBay, Amazon, Walmart, TikTok Shop, or other marketplaces.
+Feed inventory is a snapshot. Verify live supplier sellability before action. Supplier inventory is not Elevation On Hand unless Elevation actually owns/controls it.
 
-Doba-sourced VEVOR inventory and direct VEVOR inventory are separate sourcing/authorization lanes.
+Unavailable VEVOR SKUs pause individually unless an authorized alternate source/order path is verified. Do not apply another supplier's preorder/backorder rule to VEVOR without VEVOR authorization.
 
----
+## ORDER / FULFILLMENT FLOW
 
-# 4. MAP / PRICING CONTROL
+**CUSTOMER ORDER → ELEVATION CHECKOUT → LIVE SKU/PRICE/SELLABILITY RECHECK → VEVOR ORDER → SUPPLIER ACCEPTANCE → PRO ACCOUNT TRACKING → CUSTOMER COMPLETION → RECORD ACTUALS**
 
-The supplier feed contains a field labeled:
+Planning delivery guidance is not a guaranteed customer promise.
 
-**MAP (Minimum Advertised Price)**
+## SOURCE CONTROL
 
-VEVOR also directly instructed Elevation that its selling price must not be below VEVOR's
-current selling price.
+The upstream supplier feed remains source of truth. Worker assets are derived operational copies. Restricted tax/account documents, payment data, credentials and signatures stay outside this public repository.
 
-Therefore:
-
-**LIVE VEVOR SELLING PRICE CHECK + FEED MAP CHECK → USE THE HIGHER APPLICABLE FLOOR**
-
-The workbook's `Planning Ad Floor` is a planning aid only. It does not replace a live VEVOR
-price check immediately before publication/order.
-
-Never create additional MAP rules that VEVOR has not supplied.
-
----
-
-# 5. INVENTORY CONTROL
-
-Received feed inventory is a snapshot.
-
-**Before publish/order: verify live stock.**
-
-Do not promise availability or delivery solely from the received spreadsheet.
-
-If a VEVOR SKU is genuinely unavailable and no other authorized source exists, pause only that SKU.
-Do not apply SOK's paid-backorder/preorder rule to VEVOR unless VEVOR separately authorizes it.
-
----
-
-# 6. ORDER FLOW
-
-Normal VEVOR direct-site flow:
-
-**CUSTOMER ORDER → ELEVATION CHECKOUT → VEVOR ORDER PLACEMENT → SUPPLIER FULFILLMENT → TRACKING → CUSTOMER COMPLETION**
-
-Checkout should not be blocked merely because an unrelated internal onboarding note remains open.
-
----
-
-# 7. FULFILLMENT
-
-VEVOR stated products ship from U.S. warehouse inventory.
-
-Supplier guidance of approximately **3–7 working days** is a planning range, not a guaranteed
-customer promise.
-
-Resolve as operationally necessary:
-- blind shipping;
-- packing slips;
-- tracking procedure;
-- customer-service responsibility;
-- returns;
-- exceptions.
-
----
-
-# 8. CATALOG PRIORITY
-
-Use the curated workbook as the working launch set.
-
-Priority order:
-1. **A — Core Launch**
-2. **B — Strong Expansion**
-3. **C — Supporting**
-
-Primary Elevation lanes:
-- Power & Off-Grid
-- RV & Mobile
-- Restoration & Field Service
-- Outdoor & Support
-
-Do not expand the catalog just because products exist in the feed. Favor products that fit
-Elevation's real customers, services and supplier strategy.
-
----
-
-# 9. TAX
-
-Colorado tax-exempt registration has been submitted in VEVOR.
-
-**VEVOR Tax Exempt ID:** [RESTRICTED — VEVOR ACCOUNT RECORD]  
-**Current status:** PENDING REVIEW
-
-VEVOR's page stated purchases can continue tax exempt while review is pending.
-
-Still verify the tax line on the first actual supplier order and capture the final approval
-when VEVOR completes review.
-
----
-
-# 10. SOURCE CONTROL
-
-The original `vevor-533.xlsx` remains the supplier-source workbook.
-
-Do not overwrite it.
-
-This project packet contains:
-- curated 40-product working workbook;
-- curated CSV;
-- lightweight all-product CSV;
-- catalog SOP;
-- tax-license copy (RESTRICTED — not stored in public Git);
-- master-source note.
-
-Use the lightweight files for normal work. Return to the original master only when a field omitted
-from the working extract is genuinely needed.
-
----
-
-# 11. EXECUTION LOOP
+## EXECUTION LOOP
 
 **VERIFY → EXECUTE → RECORD → ROUTE → CLOSE / WAIT → CONTINUE NEXT**
 
-State every work item as one of:
-**ACTIVE / WAITING / HOLD / OWNER GATE / CLOSED**
+Work state: **ACTIVE / WAITING / HOLD / OWNER GATE / CLOSED**.
 
-Priority change does not close the project.
-Waiting does not mean closed.
+## OWNER GATES
 
----
+Return to Casey for material bulk inventory, unusual financing/credit, exclusivity/contracts, channel-policy expansion, significant inventory investment, or other genuine owner commitments.
 
-# 12. OWNER GATES
+## IMMEDIATE WORK TREE
 
-Routine catalog onboarding and direct-store activation are Operations work.
-
-Return to Casey for:
-- material bulk-purchase commitments;
-- unusual financing/credit obligations;
-- exclusivity/contracts;
-- marketplace/channel-policy changes;
-- significant inventory investment;
-- other genuine owner-level commitments.
-
----
-
-# 13. IMMEDIATE WORK TREE
-
-1. Preserve and verify the existing A-tier Shopify records; do not create duplicates.
-2. Confirm live VEVOR price and live stock again before supplier purchase.
-3. Complete the VEVOR purchase/tracking/customer-completion SOP from supplier confirmation.
-4. Resolve blind shipping / packing slip / return details from the outstanding supplier request.
-5. Monitor tax-exempt review to final status.
-6. Expand to B-tier only after A-tier supplier controls are reconciled.
+1. Authorized Shopify Admin access → remove/clear storefront password gate.
+2. Re-run unauthenticated collection/product/cart/checkout acceptance.
+3. Continue safe VEVOR prep while that gate is open; do not recreate B-tier queue or fulfillment inquiry.
+4. On first paid VEVOR order, reverify exact SKU/source/live price/MAP/sellability and place supplier order.
+5. Capture supplier acceptance, tracking timing and customer delivery.
+6. Record first-order actuals; move normal VEVOR order flow to CONTROLLED if clean.
+7. Expand B-tier only when Stage-1 gate and fresh SKU verification permit it.

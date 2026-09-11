@@ -2,29 +2,29 @@
 
 ## CLOSED
 
-- A-tier live gate: **19/19 checked**.
-- Selected live VEVOR pages showed **In Stock** for all 19 at verification time.
-- Live displayed selling price matched the working feed MAP/planning floor for all 19 at verification time.
-- Shopify reconciliation: **19/19 already existed as ACTIVE `VEVOR-Direct` products** at the verified price.
-- Duplicate product creation was prevented.
-- `VEVOR Direct` smart collection contains the 19 A-tier products and is attached to the Online Store publication.
-- VEVOR-via-Doba records remain a separate supplier lane.
-- Peter received the corrected handoff: do not recreate the products; focus on supplier confirmations.
+- A-tier live verification / launch: **19/19**.
+- Shopify direct catalog: **19 VEVOR Direct products ACTIVE/published**.
+- `VEVOR Direct` collection: active/published in Shopify Admin.
+- Direct VEVOR vs Doba source separation: preserved.
+- Duplicate A-tier product creation: prevented.
+- Focused supplier fulfillment follow-up: **ANSWERED / CLOSED**.
+- B-tier Strong Expansion preparation: **17 SKUs PREPARED**, no Shopify SKU collisions at preparation time.
 
-## EXTERNAL WAIT
+## SUPPLIER FULFILLMENT FACTS
 
-VEVOR Business Development Manager Melinda Jian has already been asked to confirm:
+- VEVOR branding remains on product packaging.
+- Supplier states invoices/pricing details are not included in the customer package.
+- Tracking is retrieved through Elevation's VEVOR PRO account.
+- Returns / defects / warranty use VEVOR's current return-policy/support route; exact label/cost treatment remains case-specific.
+- Customer contacts Elevation first; Elevation coordinates supplier-side support with VEVOR.
 
-- blind shipping / packing-slip and branded-paperwork behavior;
-- tracking location and normal posting timing;
-- return / defect / RMA procedure;
-- customer-support routing.
+## OPEN / ACTIVE PROOF
 
-Final tax-exemption review also remains pending. The account identifier is retained outside public Git.
+- **Shopify public storefront acceptance:** BLOCKED by Online Store password protection. This is not a VEVOR onboarding blocker.
+- **First real paid VEVOR order proof:** OPEN.
+- **Final tax-exemption review:** PENDING / generally non-blocking.
+- **B-tier publication:** HOLD until Stage-1 permits and fresh SKU-level price/MAP/sellability/source/media/fulfillment checks are complete.
 
-## CURRENT POSITION
+## NEXT
 
-**A-TIER VERIFICATION + STOREFRONT ACTIVATION = CLOSED**  
-**SUPPLIER OPERATING-DETAIL CONFIRMATION = IN FLIGHT**
-
-Do not let an external wait stop unrelated valid checkout, catalog-control, or QA work.
+**AUTHORIZED SHOPIFY ADMIN → CLEAR STOREFRONT PASSWORD → UNAUTHENTICATED STOREFRONT/CART/CHECKOUT ACCEPTANCE → FIRST PAID VEVOR ORDER → SUPPLIER ACCEPTANCE/TRACKING/DELIVERY ACTUALS → CONTROLLED NORMAL ORDER FLOW**

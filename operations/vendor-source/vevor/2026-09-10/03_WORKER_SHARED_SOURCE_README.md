@@ -3,32 +3,35 @@
 **Company:** Elevation UpScales, Inc.  
 **Supplier:** VEVOR  
 **Shared location:** `operations/vendor-source/vevor/2026-09-10/`  
-**Purpose:** Common source package for Elevation managers, vendor workers, catalog workers, Shopify workers, and operations.
+**Authoritative current state:** `operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md`
 
 ## READ ORDER
 
-1. `00_START_HERE.md`
-2. `01_VEVOR_PROJECT_MASTER_PROMPT.md`
-3. `02_VEVOR_CURRENT_PROJECT_STATE.md`
-4. `VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx`
-5. `04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx`
-6. `05_VEVOR_Curated_40.csv`
-7. `06_VEVOR_All_Products_Light.csv` — generated in Git from the supplier source feed
-8. `07_VEVOR_Catalog_SOP_2026-09-10.md`
-9. `09_SOURCE_MASTER_NOTE.txt`
+1. `13_VEVOR_PROJECT_SOURCE_CURRENT.md` — generated copy of current company VEVOR source
+2. `00_START_HERE.md`
+3. `01_VEVOR_PROJECT_MASTER_PROMPT.md`
+4. `02_VEVOR_CURRENT_PROJECT_STATE.md`
+5. `VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx`
+6. `04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx`
+7. `05_VEVOR_Curated_40.csv` + `05_VEVOR_Curated_40_CONTROL.json`
+8. `06_VEVOR_All_Products_Light.csv`
+9. `07_VEVOR_Catalog_SOP_2026-09-10.md`
 
 ## CURRENT CONTROL
 
-- VEVOR PRO is active.
-- A-tier live verification is complete for 19/19 products.
-- The 19 A-tier Shopify records already exist and are ACTIVE as `VEVOR-Direct`.
-- The `VEVOR Direct` collection is already published to the Online Store.
-- Do **not** recreate or duplicate those products.
-- VEVOR-via-Doba remains a separate sourcing lane.
-- Remaining A-tier waits are supplier/account confirmations: blind shipping/packing slips, tracking handoff, RMA/returns, customer-support routing, and final tax-exemption review.
+- VEVOR PRO/direct relationship is active.
+- 19 direct VEVOR A-tier Shopify products are active/published.
+- Direct VEVOR and Doba VEVOR remain separate sourcing lanes.
+- Supplier fulfillment questions are answered: VEVOR-branded packaging remains; price/invoice details are not included; tracking comes from the PRO account; returns/warranty use VEVOR's support route; Elevation owns the customer-facing support relationship.
+- Current storefront blocker is Shopify Online Store password protection, not VEVOR onboarding.
+- First paid VEVOR order proof remains open.
+- 17-SKU B-tier queue is prepared and held for Stage-1 authorization + fresh SKU checks.
+- Tax-exemption submission is complete; final review remains pending/non-blocking unless an actual order issue appears.
+
+## BUILD / PORTABILITY
+
+`.github/workflows/vevor-worker-assets.yml` reconstructs the large/light feed, curated CSV, public-safe workbooks, SHA256 manifest and a single public-safe worker ZIP from the official supplier feed + committed catalog control source. This lets any Elevation worker recover the working assets from Git without this chat.
 
 ## PUBLIC-REPOSITORY SECURITY CONTROL
 
-The ElevationUpScales GitHub repository is public. The Colorado wholesale sales-tax license image and tax-account identifier are therefore **not stored in this Git path**. Workers should use the restricted VEVOR/account record when that document is actually required.
-
-Do not add tax-license images, tax-account IDs, passwords, API keys, payment information, or other credentials to this public repository.
+This repository is public. Do not add tax-license images, tax/account IDs, EIN/W-9 signatures, passwords, API keys, payment data, private addresses or private correspondence. Restricted company/account evidence stays outside public Git.

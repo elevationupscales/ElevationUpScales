@@ -1,36 +1,37 @@
 # Elevation UpScales — VEVOR Catalog SOP
 Date: 2026-09-10
 
-## Recon Result
-- Source: `vevor-533.xlsx`
-- Product rows parsed: 20,999
-- In-stock rows in source snapshot: 16,051
-- The source contains an explicit `MAP (Minimum Advertised Price)` field in column AH, populated across the parsed rows.
-- The source workbook does **not** contain an operating SOP.
-- This packet adds the operating controls needed to use the feed inside Elevation's current VEVOR workflow.
+## Source / Recon
+- Supplier source: `vevor-533.xlsx` / official VEVOR feed URL recorded in `09_SOURCE_MASTER_NOTE.txt`.
+- Lightweight full-feed CSV and curated assets are generated for worker use; the supplier source remains controlling.
+- Feed contains an explicit `MAP (Minimum Advertised Price)` field.
+- Feed inventory and price are snapshots, not customer promises.
 
-## Current VEVOR Catalog Controls
-1. VEVOR is an active direct-site dropship supplier onboarding lane.
-2. Direct VEVOR inventory is intended for ElevationUpScales.com unless VEVOR separately authorizes another channel.
-3. Do not advertise below the applicable VEVOR price floor. The feed MAP field is a supplier reference, and VEVOR also instructed Elevation not to sell below VEVOR's current selling price.
-4. The workbook's `Planning Ad Floor` is the higher of the feed MAP and the feed after-coupon reference. It is a planning control, not a substitute for a live VEVOR price check.
-5. Recheck live VEVOR price and live stock before publishing and again when an order is placed.
-6. Feed inventory is not a guarantee to the customer.
-7. Normal order flow: CUSTOMER ORDER → ELEVATION CHECKOUT → VEVOR ORDER → SUPPLIER FULFILLMENT → TRACKING → CUSTOMER COMPLETION.
-8. Do not assume VEVOR supports paid backorders/preorders. If an exact VEVOR SKU is genuinely unavailable and no authorized alternate source exists, pause that SKU until a valid supplier order path is confirmed.
-9. VEVOR's 3–7 working day delivery guidance is a planning range, not a guaranteed customer promise.
-10. Original supplier feed remains the master source. The curated 40 is a working launch set and does not replace the full inventory.
-11. Refresh supplier price/stock data periodically because a stale feed cannot remain the permanent price-floor source.
-12. Resolve blind-shipping, packing-slip, returns and support details as they become operationally necessary, without blocking unrelated safe catalog work.
-13. Current tax status: Colorado tax-exempt registration submitted; VEVOR Tax Exempt ID `[RESTRICTED — VEVOR ACCOUNT RECORD]`; status Pending Review.
+## Current VEVOR Controls
+1. VEVOR is an active direct-site supplier relationship; do not restart prospect/onboarding qualification.
+2. Direct VEVOR is authorized for Elevation's direct website lane. Other marketplaces require separate authorization.
+3. Keep direct VEVOR and Doba-sourced VEVOR records/source identity separate.
+4. Before material publication/repricing/order: verify exact SKU/source, live VEVOR sellability, current VEVOR public selling price, feed MAP and authorized channel.
+5. Use the higher applicable price floor between VEVOR's current selling price and supplier MAP control.
+6. Supplier inventory is not Elevation physical On Hand unless Elevation actually owns/controls it.
+7. Normal order flow: CUSTOMER ORDER → ELEVATION CHECKOUT → LIVE SKU/PRICE/SELLABILITY RECHECK → VEVOR ORDER → SUPPLIER ACCEPTANCE → PRO ACCOUNT TRACKING → CUSTOMER COMPLETION → RECORD ACTUALS.
+8. Do not assume paid preorder/backorder rights for unavailable VEVOR SKUs. Pause only that SKU unless an authorized alternate path exists.
+9. Planning delivery guidance is not a guaranteed customer promise.
+10. Original/full supplier feed remains source of truth; curated working files do not replace it.
+11. Refresh supplier price/stock data periodically; stale feed values cannot become permanent price/inventory truth.
+12. Current tax status: submission complete; final supplier review pending. Restricted tax/account data stays outside public Git.
 
-## Launch Structure
-- 16 Power & Off-Grid products
-- 10 RV & Mobile products
-- 10 Restoration & Field Service products
-- 4 Outdoor & Support products
+## Fulfillment Controls — Supplier Answered
+- **Packaging:** VEVOR branding remains on product packaging. Do not market as fully blind/unbranded shipping.
+- **Price paperwork:** supplier states invoices/pricing details are not included in the customer package.
+- **Tracking:** retrieve through Elevation's VEVOR PRO account; capture actual posting timing on first real order.
+- **Returns / defects / warranty:** use VEVOR's current return-policy/support process; exact return-label/cost behavior is case-specific and should be recorded when it first occurs.
+- **Customer support:** customer contacts Elevation first; Elevation coordinates supplier-side support with VEVOR.
 
-Priority tiers in the curated workbook:
-- **A — Core Launch:** strongest direct fit for current Elevation sales/service lanes.
-- **B — Strong Expansion:** good catalog additions after core launch controls are live.
-- **C — Supporting:** useful secondary/seasonal products.
+## Launch / Expansion Structure
+- A-tier: 19 direct products launched/active in Shopify Admin.
+- B-tier: 17 Strong Expansion SKUs prepared with no Shopify SKU collisions at preparation time; publication remains held until Stage-1 allows expansion and each SKU receives fresh verification.
+- Supporting/C-tier remains secondary.
+
+## Current Stage-1 Gate
+The active public storefront blocker is Shopify Online Store password protection, not VEVOR onboarding. Use authorized Shopify Admin access to clear it, then run unauthenticated collection/product/cart/checkout acceptance before first paid-order proof.

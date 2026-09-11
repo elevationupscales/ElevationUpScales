@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'operations/vendor-source/vevor/2026-09-10/.bootstrap'
+      - 'operations/vendor-source/vevor/2026-09-10/05_VEVOR_Curated_40_CONTROL.json'
+      - 'operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md'
   workflow_dispatch:
 
 permissions:
@@ -24,119 +26,142 @@ jobs:
       - name: Install workbook reader
         run: python -m pip install --disable-pip-version-check openpyxl
 
-      - name: Build full lightweight VEVOR feed from supplier source
+      - name: Build worker catalog assets from VEVOR supplier source
         env:
           VEVOR_SOURCE_URL: https://ads-feed.s3.us-west-2.amazonaws.com/ads/business/533/vevor-533.xlsx
         run: |
           python - <<'PY'
-          import csv
-          import os
-          import tempfile
-          import urllib.request
+          import csv, json, os, tempfile, urllib.request
           from pathlib import Path
-          from openpyxl import load_workbook
+          from openpyxl import Workbook, load_workbook
+          from openpyxl.styles import Font
 
-          out_dir = Path('operations/vendor-source/vevor/2026-09-10')
-          out_dir.mkdir(parents=True, exist_ok=True)
-          out_csv = out_dir / '06_VEVOR_All_Products_Light.csv'
+          d = Path('operations/vendor-source/vevor/2026-09-10')
+          d.mkdir(parents=True, exist_ok=True)
+          control = json.loads((d/'05_VEVOR_Curated_40_CONTROL.json').read_text(encoding='utf-8'))
+          wanted_skus = {x['SKU'] for x in control}
           source_url = os.environ['VEVOR_SOURCE_URL']
+          fields = ['SKU','Product title','Product link','Availability','Inventory quantity','Product weight(KG)','Brand','Product type','after coupon price','MAP (Minimum Advertised Price)']
 
-          wanted = [
-              'SKU',
-              'Product title',
-              'Product link',
-              'Availability',
-              'Inventory quantity',
-              'Product weight(KG)',
-              'Brand',
-              'Product type',
-              'after coupon price',
-              'MAP (Minimum Advertised Price)',
-          ]
+          def num(v):
+              if v in (None, ''): return None
+              try: return float(v)
+              except (TypeError, ValueError): return None
 
+          selected = {}
+          row_count = in_stock = 0
           with tempfile.TemporaryDirectory() as tmp:
-              source_file = Path(tmp) / 'vevor-533.xlsx'
+              src = Path(tmp)/'vevor-533.xlsx'
               print(f'Downloading supplier feed: {source_url}')
-              urllib.request.urlretrieve(source_url, source_file)
-              print(f'Downloaded {source_file.stat().st_size:,} bytes')
-
-              wb = load_workbook(source_file, read_only=True, data_only=True)
+              urllib.request.urlretrieve(source_url, src)
+              print(f'Downloaded {src.stat().st_size:,} bytes')
+              wb = load_workbook(src, read_only=True, data_only=True)
               ws = wb.active
               rows = ws.iter_rows(values_only=True)
               header = next(rows)
-              header_map = {str(v).strip(): i for i, v in enumerate(header) if v is not None}
-              missing = [name for name in wanted if name not in header_map]
-              if missing:
-                  raise RuntimeError(f'Missing expected VEVOR feed columns: {missing}')
-
-              indices = [header_map[name] for name in wanted]
-              row_count = 0
-              in_stock = 0
-              with out_csv.open('w', newline='', encoding='utf-8-sig') as f:
-                  writer = csv.writer(f)
-                  writer.writerow(wanted)
+              hm = {str(v).strip(): i for i,v in enumerate(header) if v is not None}
+              missing = [x for x in fields if x not in hm]
+              if missing: raise RuntimeError(f'Missing VEVOR feed columns: {missing}')
+              idx = [hm[x] for x in fields]
+              with (d/'06_VEVOR_All_Products_Light.csv').open('w', newline='', encoding='utf-8-sig') as f:
+                  w = csv.writer(f); w.writerow(fields)
                   for row in rows:
-                      values = [row[i] if i < len(row) else None for i in indices]
-                      if not any(v not in (None, '') for v in values):
-                          continue
-                      writer.writerow(['' if v is None else v for v in values])
+                      vals = [row[i] if i < len(row) else None for i in idx]
+                      if not any(v not in (None,'') for v in vals): continue
+                      w.writerow(['' if v is None else v for v in vals])
                       row_count += 1
-                      if str(values[3]).strip().lower() == 'in stock':
-                          in_stock += 1
-
+                      if str(vals[3]).strip().lower() == 'in stock': in_stock += 1
+                      sku = str(vals[0]).strip() if vals[0] is not None else ''
+                      if sku in wanted_skus: selected[sku] = dict(zip(fields, vals))
               wb.close()
-              print(f'Wrote {row_count:,} product rows; {in_stock:,} marked in stock.')
+
+          missing_skus = sorted(wanted_skus - set(selected))
+          if missing_skus: raise RuntimeError(f'Curated SKUs missing from current VEVOR feed: {missing_skus}')
+
+          ch = ['Rank','Priority','Lane','SKU','Product Title','Availability','Inventory Qty','Weight kg','After-Coupon Ref','Feed MAP','Planning Ad Floor','Why It Fits Elevation','Suggested Collection','Product Link','VEVOR Product Type','Publish Control']
+          cr = []
+          for x in sorted(control, key=lambda z:int(z['Rank'])):
+              s = selected[x['SKU']]
+              a,m = num(s['after coupon price']), num(s['MAP (Minimum Advertised Price)'])
+              floors = [v for v in (a,m) if v is not None]
+              cr.append([int(x['Rank']),x['Priority'],x['Lane'],x['SKU'],s['Product title'],s['Availability'],s['Inventory quantity'],s['Product weight(KG)'],'' if a is None else a,'' if m is None else m,max(floors) if floors else '',x['Why It Fits Elevation'],x['Suggested Collection'],s['Product link'],s['Product type'],x['Publish Control']])
+
+          with (d/'05_VEVOR_Curated_40.csv').open('w', newline='', encoding='utf-8-sig') as f:
+              w=csv.writer(f); w.writerow(ch); w.writerows(cr)
+
+          book=Workbook(); sh=book.active; sh.title='CURATED 40'; sh.append(ch)
+          for r in cr: sh.append(r)
+          for c in sh[1]: c.font=Font(bold=True)
+          sh.freeze_panes='A2'; sh.auto_filter.ref=sh.dimensions
+          rd=book.create_sheet('README')
+          for r in [['ELEVATION UPSCALES — VEVOR CURATED WORKING SET'],['Purpose','Shared public-safe working catalog reconstructed from supplier feed + committed 40-SKU control source.'],['Control','Verify live VEVOR price, MAP floor, sellability and source before material publication/order action.'],['Security','Tax/account identifiers, credentials and payment details are excluded from public Git.'],['Current state','operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md']]: rd.append(r)
+          rd['A1'].font=Font(bold=True)
+          sc=book.create_sheet('SOURCE CONTROL'); sc.append(['Field','Value'])
+          for r in [['Upstream supplier feed',source_url],['Rows parsed',row_count],['Rows marked in stock',in_stock],['Curated rows',len(cr)],['Control source','05_VEVOR_Curated_40_CONTROL.json']]: sc.append(r)
+          for c in sc[1]: c.font=Font(bold=True)
+          book.save(d/'04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx')
+
+          a_tier=[r for r in cr if str(r[1]).startswith('A')]
+          run=Workbook(); receipt=run.active; receipt.title='RUN RECEIPT'; receipt.append(['Control','State','Note'])
+          for r in [
+              ['A-tier launch','CLOSED',f'{len(a_tier)}/19 curated A-tier products verified/launched in the 2026-09-10 run.'],
+              ['Shopify direct records','CLOSED','19 VEVOR Direct products active/published; direct and Doba source lanes remain separated.'],
+              ['Supplier fulfillment questions','CLOSED','VEVOR answered packaging, price-paperwork, tracking, returns/RMA and customer-support routing.'],
+              ['Storefront public acceptance','BLOCKED','Current blocker is the Shopify Online Store password gate, not VEVOR onboarding.'],
+              ['First paid order proof','OPEN','Capture supplier acceptance, tracking and customer completion on first real order.'],
+              ['B-tier expansion','PREPARED / HOLD','17-SKU Strong Expansion queue prepared; publish only after Stage-1 gate and fresh SKU-level verification.'],
+              ['Tax review','PENDING / NON-BLOCKING','Tax-exemption submission complete; final supplier review pending.']]: receipt.append(r)
+          for c in receipt[1]: c.font=Font(bold=True)
+          receipt.freeze_panes='A2'
+          at=run.create_sheet('A-TIER SOURCE SET'); at.append(ch)
+          for r in a_tier: at.append(r)
+          for c in at[1]: c.font=Font(bold=True)
+          at.freeze_panes='A2'; at.auto_filter.ref=at.dimensions
+          fc=run.create_sheet('FULFILLMENT CONTROLS'); fc.append(['Control','Current verified direction'])
+          for r in [
+              ['Packaging','VEVOR branding remains on product packaging; do not market fulfillment as fully blind/unbranded.'],
+              ['Price paperwork','Supplier states invoices/pricing details are not included in customer package.'],
+              ['Tracking','Retrieve through Elevation VEVOR PRO account; capture actual timing on first real order.'],
+              ['Returns / defects / warranty','Use VEVOR current return-policy/support process; exact label/cost treatment remains case-specific.'],
+              ['Customer support','Customer contacts Elevation first; Elevation coordinates with VEVOR.'],
+              ['Tax','Submission complete; final review pending; restricted account data remains outside public Git.']]: fc.append(r)
+          for c in fc[1]: c.font=Font(bold=True)
+          sl=run.create_sheet('SOURCE LINKS'); sl.append(['Source','Path'])
+          for r in [['Authoritative current VEVOR state','operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md'],['Shared worker source','operations/vendor-source/vevor/2026-09-10/'],['Supplier feed',source_url]]: sl.append(r)
+          for c in sl[1]: c.font=Font(bold=True)
+          run.save(d/'VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx')
+
+          current=Path('operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md')
+          if current.exists(): (d/'13_VEVOR_PROJECT_SOURCE_CURRENT.md').write_text(current.read_text(encoding='utf-8'),encoding='utf-8')
+          print(f'Wrote {row_count:,} product rows; {in_stock:,} marked in stock; {len(cr)} curated; {len(a_tier)} A-tier.')
           PY
 
-      - name: Build SHA256 manifest and shared worker ZIP
+      - name: Build manifest and shared worker ZIP
         run: |
           set -euo pipefail
           DIR='operations/vendor-source/vevor/2026-09-10'
           ZIP="$DIR/ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip"
           rm -f "$ZIP"
           {
-            echo 'ELEVATION VEVOR SHARED WORKER SOURCE — SHA256 MANIFEST'
-            echo
-            find "$DIR" -maxdepth 1 -type f \
-              ! -name '.bootstrap' \
-              ! -name '10_MANIFEST_SHA256.txt' \
-              ! -name 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' \
-              -print0 | sort -z | while IFS= read -r -d '' file; do
-                printf '%s  %s\n' "$(sha256sum "$file" | awk '{print $1}')" "$(basename "$file")"
-              done
+            echo 'ELEVATION VEVOR SHARED WORKER SOURCE — SHA256 MANIFEST'; echo
+            find "$DIR" -maxdepth 1 -type f ! -name '.bootstrap' ! -name '10_MANIFEST_SHA256.txt' ! -name 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' -print0 | sort -z | while IFS= read -r -d '' file; do
+              printf '%s  %s\n' "$(sha256sum "$file" | awk '{print $1}')" "$(basename "$file")"
+            done
           } > "$DIR/10_MANIFEST_SHA256.txt"
-
-          (
-            cd "$DIR"
-            zip -9 -q 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' \
-              00_START_HERE.md \
-              01_VEVOR_PROJECT_MASTER_PROMPT.md \
-              02_VEVOR_CURRENT_PROJECT_STATE.md \
-              03_WORKER_SHARED_SOURCE_README.md \
-              04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx \
-              05_VEVOR_Curated_40.csv \
-              06_VEVOR_All_Products_Light.csv \
-              06_VEVOR_All_Products_Light.REBUILD.md \
-              07_VEVOR_Catalog_SOP_2026-09-10.md \
-              08_Colorado_Wholesale_Sales_Tax_License.RESTRICTED.md \
-              09_SOURCE_MASTER_NOTE.txt \
-              10_MANIFEST_SHA256.txt \
-              11_VEVOR_RUN_RECEIPT_2026-09-10.md \
-              12_PUBLIC_REPO_SECURITY_NOTE.md \
-              VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx
-          )
+          (cd "$DIR" && zip -9 -q 'ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip' \
+            00_START_HERE.md 01_VEVOR_PROJECT_MASTER_PROMPT.md 02_VEVOR_CURRENT_PROJECT_STATE.md 03_WORKER_SHARED_SOURCE_README.md \
+            04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx 05_VEVOR_Curated_40_CONTROL.json 05_VEVOR_Curated_40.csv \
+            06_VEVOR_All_Products_Light.csv 06_VEVOR_All_Products_Light.REBUILD.md 07_VEVOR_Catalog_SOP_2026-09-10.md \
+            08_Colorado_Wholesale_Sales_Tax_License.RESTRICTED.md 09_SOURCE_MASTER_NOTE.txt 10_MANIFEST_SHA256.txt 11_VEVOR_RUN_RECEIPT_2026-09-10.md \
+            12_PUBLIC_REPO_SECURITY_NOTE.md 13_VEVOR_PROJECT_SOURCE_CURRENT.md VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx)
 
       - name: Commit generated worker assets
         run: |
           set -euo pipefail
           git config user.name 'Elevation GitHub Automation'
           git config user.email 'elevationupscales@users.noreply.github.com'
-          git add operations/vendor-source/vevor/2026-09-10/06_VEVOR_All_Products_Light.csv
-          git add operations/vendor-source/vevor/2026-09-10/10_MANIFEST_SHA256.txt
-          git add operations/vendor-source/vevor/2026-09-10/ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip
-          if git diff --cached --quiet; then
-            echo 'No generated changes to commit.'
-            exit 0
-          fi
+          git add operations/vendor-source/vevor/2026-09-10/{04_Elevation_VEVOR_Curated_Catalog_Working_Set_2026-09-10_PUBLIC_SAFE.xlsx,05_VEVOR_Curated_40.csv,06_VEVOR_All_Products_Light.csv,10_MANIFEST_SHA256.txt,13_VEVOR_PROJECT_SOURCE_CURRENT.md,VEVOR_A_TIER_RUN_COMPLETE_2026-09-10_PUBLIC_SAFE.xlsx,ELEVATION_VEVOR_SHARED_WORKER_PACKET_PUBLIC_SAFE_2026-09-10.zip}
+          if git diff --cached --quiet; then echo 'No generated changes to commit.'; exit 0; fi
           git commit -m 'ops(vevor): generate shared full feed and worker packet'
+          git pull --rebase origin main
           git push origin HEAD:main
