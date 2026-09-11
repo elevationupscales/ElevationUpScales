@@ -1,8 +1,8 @@
 # Elevation UpScales — VEVOR Vendor Master SOP
 
 **Status: ACTIVE / CONTROLLING VEVOR LANE**  
-**Version: 1.1**  
-**Effective: 2026-09-10**  
+**Version: 1.2**  
+**Effective: 2026-09-11**  
 **Owner: Casey Young**  
 **Human Ecommerce Manager: Peter Torres**  
 **Parent:** `MANAGEMENT_OPERATING_SOP.md` and `VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`
@@ -28,7 +28,7 @@ Use the existing company authority chain:
 - Company Operations owns company-operational execution and routing.
 - Peter Torres remains the Human Ecommerce & Vendor Operations Manager for VEVOR execution.
 - The existing VEVOR Supplier, Catalog & Commerce Project remains the single VEVOR project. Do not create another top-level VEVOR manager or competing master state.
-- Direct functional managers below are narrow workstream owners. They may maintain VEVOR-specific controls but may not override shared company SOPs or another manager's ownership.
+- Direct functional managers are narrow workstream owners. They may maintain VEVOR-specific controls but may not override shared company SOPs or another manager's ownership.
 - Workers execute routed actions and return evidence/state. They do not self-approve policy changes outside their assigned lane.
 
 ## 2. Direct VEVOR functional managers
@@ -164,7 +164,7 @@ Catalog activation is separate from catalog enrichment. A verified product may b
 For VEVOR direct-account records, preserve public-safe internal identifiers that make the source and control state clear. Recommended controls include:
 - vendor/brand: VEVOR;
 - source tag: `VEVOR-Direct` / `Source-VEVOR-Direct`;
-- tier tag when applicable (`VEVOR-A`, `VEVOR-B`, etc.);
+- tier tag when applicable (`VEVOR-A`, `VEVOR-B`, `VEVOR-C`);
 - `MAP-Controlled` when applicable;
 - current price-verification marker;
 - current stock/sellability-verification marker;
@@ -186,17 +186,33 @@ A write-tool success response is not final proof of Shopify state. After catalog
 
 If the creation response and authoritative read disagree, fix the authoritative state before closing the lane.
 
+### Concurrent-worker reconciliation rule — verified 2026-09-11
+
+When multiple authorized workers touch the same VEVOR SKU:
+1. exact SKU identity controls over create-response IDs;
+2. search/read the current Shopify record before accepting a new GID as canonical;
+3. if a concurrent worker already created the exact SKU, retain one canonical product and do not duplicate the listing;
+4. if status regresses during concurrent work, restore and re-read the authoritative state before closure;
+5. after media writes, re-read the product and verify the stored image/media object rather than relying on a processing placeholder.
+
 ## 8. Normal order / fulfillment flow
 
 Use:
 
-**CUSTOMER ORDER → ELEVATION SHOPIFY CHECKOUT → VEVOR ORDER VALIDATION / PLACEMENT → SUPPLIER FULFILLMENT → TRACKING → CUSTOMER COMPLETION → ACTUALS**
+**CUSTOMER PAID ORDER → ELEVATION SHOPIFY → LIVE SKU/PRICE/STOCK RECHECK → VEVOR PURCHASE → SUPPLIER FULFILLMENT → TRACKING → ELEVATION CUSTOMER UPDATE → COMPLETION / ACTUALS**
 
 An unrelated onboarding note must not automatically block an otherwise verified checkout path.
 
 Before supplier placement, verify the exact SKU, current sellability, valid supplier-order path and current price/MAP condition required for the transaction.
 
-Open operational details such as blind shipping, packing slip treatment, returns, support ownership and exact tracking handoff should be resolved as they become necessary. A missing detail blocks only the lane/action that actually depends on it.
+### Fulfillment-detail control — closed 2026-09-10
+
+- Direct dropship delivery to the customer is supported.
+- Normal product packaging carries VEVOR branding; do not promise blind/unbranded packaging.
+- Parcel packaging does not include customer-visible invoice/price details.
+- Supplier tracking is obtained through the VEVOR PRO account and handed from Elevation to the customer.
+- Elevation remains the first-line customer-facing support contact and coordinates supplier issues with VEVOR.
+- Returns, defects and supplier-side exceptions follow VEVOR's controlled return/support process; customers should not be instructed to ship merchandise back outside that path.
 
 ## 9. VEVOR SOP change control
 
@@ -243,7 +259,7 @@ This repository is public. Never commit:
 
 Public Git may store policy, state, public-safe SKU identifiers, verification status, workflow and evidence pointers.
 
-## 12. Current VEVOR work state — reconciled 2026-09-10
+## 12. Current VEVOR work state — reconciled 2026-09-11
 
 Current global work remains governed by `CURRENT_WORK_BOARD.md`.
 
@@ -252,27 +268,32 @@ Current global work remains governed by `CURRENT_WORK_BOARD.md`.
 - VEVOR PRO registration/onboarding baseline: COMPLETE.
 - Direct supplier feed received and reconciled into the VEVOR working catalog.
 - Tier A — Core Launch: **19/19 activated and closed at the catalog-activation gate**.
-- Legacy direct-source reconciliation: CLOSED for source/SKU/tag conversion; individually unresolved unavailable products remain DRAFT/HOLD rather than blocking the supplier.
-- Tier B — Strong Expansion: **17/17 exact SKU identity, live VEVOR price/MAP floor, live purchase-state sellability, Shopify creation, ACTIVE status and publication verified**.
-- Tier B duplicate gate before creation: 0/17 direct-SKU duplicates in Shopify.
-- A Shopify creation-state mismatch was detected during verification (creation response indicated ACTIVE while authoritative reads returned DRAFT); all 17 affected B-tier products were explicitly corrected to ACTIVE and publication was rerun. Final authoritative read confirmed the intended state.
+- Tier B — Strong Expansion: **17/17 activated and closed at the catalog-activation gate** after exact SKU, live price/MAP, live purchase-state sellability, Shopify duplicate, status and publication verification.
+- Tier C — Supporting: **4/4 activated and closed at the catalog-activation gate** after exact SKU, live price/MAP, live purchase-state sellability, Shopify duplicate, status, collection and publication verification.
+- Curated launch set: **40/40 activated**.
+- Tier B media enrichment: **17/17 verified**.
+- Tier C media enrichment: **4/4 exact-SKU supplier hero images stored in Shopify and verified by authoritative readback**.
+- Fulfillment-detail closeout: **CLOSED**.
+- Legacy direct-source reconciliation: CLOSED for source/SKU/tag conversion; individually unresolved unavailable products remain isolated in DRAFT/HOLD rather than blocking the supplier.
+- Concurrent-worker anomalies were reconciled by exact SKU and authoritative Shopify state rather than transient create responses or indexing.
 
 ### ACTIVE / next executable lanes
 
-1. **A/B catalog media and presentation enrichment** — add/verify approved supplier media, images, collection placement and merchandising quality without changing verified source/MAP controls.
-2. **Fulfillment detail closeout** — resolve blind shipping, packing-slip behavior, returns, customer-support ownership and exact tracking handoff to the level needed for normal order execution.
-3. **First live paid-order proof** — when a VEVOR customer order occurs, route it through Shopify → VEVOR purchase → tracking → customer completion → actuals and retain the receipt.
-4. **Tier C review** — evaluate the 4 supporting candidates only after the active enrichment/fulfillment controls are stable; do not activate them merely to increase SKU count.
+1. **Targeted catalog maintenance** — recheck live VEVOR selling price, feed MAP and selected-SKU sellability when a product is materially edited, repriced, promoted, or ordered.
+2. **Presentation maintenance** — improve approved media/merchandising where useful without reopening verified activation gates.
+3. **First live paid-order proof** — when a real VEVOR customer order occurs, route it through Shopify → live VEVOR recheck → VEVOR purchase → tracking → customer completion → actuals and retain the receipt.
+4. **Expansion beyond curated 40** — only when a verified business need or merchandising opportunity justifies it; SKU count alone is not a reason to expand.
 
 ### WAITING / nonblocking
 
 - Final VEVOR tax-exemption review result. Preserve protected tax/account identifiers outside public Git. This waiting state does not block otherwise valid catalog, media, checkout or fulfillment preparation work.
+- First live paid-order proof remains event-triggered. The 2026-09-11 Shopify trigger check found no paid order requiring VEVOR routing.
 
 ### Current RUN pointer
 
-**A/B MEDIA + PRESENTATION ENRICHMENT → FULFILLMENT DETAIL CLOSEOUT → FIRST LIVE ORDER PROOF WHEN TRIGGERED → C-TIER REVIEW**
+**TARGETED PRICE/MAP/STOCK MAINTENANCE → LIVE-ORDER TRIGGER CHECK → LIVE ORDER PROOF WHEN TRIGGERED → EXPAND ONLY ON VERIFIED BUSINESS NEED**
 
-Do not restart A-tier or B-tier activation unless a specific SKU is reopened by changed live price, MAP, sellability, source identity or publication state.
+Do not restart PRO onboarding, feed intake or Tier A/B/C activation unless a specific changed fact reopens the affected lane.
 
 ## 13. Return format
 
