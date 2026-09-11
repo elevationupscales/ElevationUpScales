@@ -2,7 +2,9 @@
 
 **Owner:** Casey Young  
 **Effective:** 2026-09-11  
-**Status:** ACTIVE / OWNER-DIRECTED MASTER S.O.P. INPUT
+**Status:** ACTIVE / V1.0-ALIGNED SUBORDINATE STANDARD
+
+**Controlling authority:** `MASTER_SOP_V1_0.md` + `MASTER_OS_GLOSSARY_V1_0.md`. This file remains the detailed command/SWEEP implementation standard beneath those controls.
 
 ## Purpose
 
