@@ -3,7 +3,7 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **Parent:** `operations/SUPPLIER_LEADS_LIVE_MAP.md`  
-**Status:** ACTIVE QUALIFICATION / MANAGEMENT REVIEW DRAFT PREPARED  
+**Status:** ACTIVE QUALIFICATION / QUOTE REQUEST SENT / WAITING ON SOLARSTOCK  
 **Public-safe only:** Do not place private quote terms, customer data, payment details, or protected commercial records in this file.
 
 ## Verified supplier response
@@ -37,11 +37,11 @@ Representative current modules selected for management review:
 
 These are quote-comparison candidates only. No purchase, stocking commitment or customer-facing availability has been authorized.
 
-## Management-review draft
+## Quote-request correspondence
 
-A reply draft has been created in the existing SolarStock USA Gmail thread for Casey/management review.
+Owner authorized the prepared reply under the Company Operations RUN workflow and normal external-correspondence control. The reply was sent in the existing SolarStock USA thread; no duplicate introduction was created.
 
-The draft requests:
+The request asks for:
 
 - formal one-pallet pricing and next applicable volume tier for the three representative models;
 - current warehouse and pallet availability;
@@ -54,9 +54,11 @@ The draft requests:
 - residential, limited-access, liftgate and commercial job-site receiving requirements;
 - supplier recommendation if a stronger current SKU fits one of the three intended use classes.
 
-**Email state:** DRAFT / UNSENT / OWNER-MANAGEMENT REVIEW REQUIRED.
+**Email state:** SENT / WAITING ON SOLARSTOCK.
 
-Do not send until Casey approves the exact draft.
+**Gmail receipt:** `1a08ee0a6e3c7ef4`
+
+Do not chase while this request is pending. Resume when SolarStock replies or a real project/order creates a time-sensitive requirement.
 
 ## Operating recommendation
 
@@ -72,7 +74,7 @@ This preserves the company principle:
 
 ## Next
 
-1. Casey/management reviews the prepared SolarStock quote-request draft.
-2. If approved, send it in the existing thread; do not create a new cold-introduction email.
-3. When SolarStock replies, reconcile exact quote/delivery capability privately and update the public-safe supplier status.
+1. WAIT for SolarStock's quote/capability reply; do not duplicate outreach.
+2. When SolarStock replies, reconcile exact quote/delivery capability privately and update the public-safe supplier status.
+3. Compare quoted/current module options against actual project/customer requirements before purchasing.
 4. Do not create a dedicated SolarStock project unless volume/complexity later justifies promotion under the vendor-project standard.
