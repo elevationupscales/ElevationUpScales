@@ -2,71 +2,94 @@
 
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
-**Status:** ACTIVE / P1 / PREPARATION IN PROGRESS  
-**Parent state:** `operations/VEVOR_RENOGY_ACTIVATION_STATE_2026-09-10.md`
+**Status:** SUPPORTING RECEIPT / POST-LAUNCH ACCOUNT-DETAIL RECON  
+**Current state authority:** `operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md`  
+**Parent historical state:** `operations/VEVOR_RENOGY_ACTIVATION_STATE_2026-09-10.md`
 
-## Purpose
+## State reconciliation notice
 
-Prepare the direct-VEVOR dropship catalog lane without requalifying VEVOR, mixing Doba evidence into the direct relationship, or publishing before source truth is verified.
+This file began as a pre-launch feed-preparation checklist. It is **not** the current VEVOR project-state authority.
+
+Current verified project state already establishes:
+
+- the direct VEVOR supplier feed was **RECEIVED**;
+- the direct-vs-Doba source split was reconciled;
+- **19 direct VEVOR products** and the `VEVOR Direct` collection are ACTIVE/published in Shopify Admin;
+- a **17-SKU B-tier expansion queue is PREPARED** with zero current Shopify SKU collisions;
+- VEVOR PRO/direct relationship is active;
+- a focused fulfillment-detail email has already been sent to Melinda and is waiting on reply;
+- the current customer-facing activation gate is the Shopify Online Store password, not feed acquisition or generic VEVOR onboarding.
+
+Therefore:
+
+**DO NOT recreate feed acquisition, the initial 20–40 product selection, PRO registration, A-tier publication, or B-tier preparation from this file.**
+
+Use this document only for the useful account-portal inspection receipt, unresolved account-specific details, future feed-refresh controls, and first-order proof requirements below.
 
 ## Current verified supplier direction
 
-VEVOR has provided:
-- VEVOR PRO registration path;
-- a direct product-feed workbook link;
+VEVOR has provided or confirmed:
+
+- VEVOR PRO membership / direct supplier relationship;
+- a direct product-feed source;
 - a rule that Elevation's selling price may not be below VEVOR's current selling price;
 - U.S.-warehouse dropship fulfillment for the independent-website model;
-- tax-exemption setup through the VEVOR account;
+- tax-exemption setup through the VEVOR account, with final account status still to be confirmed where needed;
 - current restriction against Amazon, Walmart, eBay, and other major third-party marketplaces unless later authorized in writing.
 
-VEVOR has also sent a system confirmation that Elevation UpScales joined the VEVOR Pro Member Program. Treat PRO membership as **VERIFIED BY SUPPLIER EMAIL**. Do not treat that email alone as proof that the business profile, tax-exemption review, account discount state, or all operational settings are complete.
+Treat PRO membership as **VERIFIED BY SUPPLIER EMAIL**. Do not treat that email alone as proof of every account-level setting.
 
 ## Portal inspection receipt — 2026-09-10
 
-Company Operations attempted a **read-only** VEVOR account inspection to capture the account-specific onboarding state without changing settings or placing an order.
+Company Operations attempted a **read-only** VEVOR account inspection to capture account-specific operating details without changing settings or placing an order.
 
 Result:
-- VEVOR account page loaded in signed-out state showing `Hello, Sign in`;
-- no active VEVOR browser session was present in the available company browser profile;
-- no VEVOR credentials were available to the inspection session;
-- inspection stopped without requesting or exposing credentials, codes, or account secrets;
-- no account settings, forms, orders, support contacts, or purchases were changed or submitted.
 
-Therefore the following account-specific fields remain **NOT VERIFIED BY COMPANY OPERATIONS PORTAL INSPECTION**:
+- the VEVOR account page loaded signed out (`Hello, Sign in`);
+- no active VEVOR browser session was available in the inspected company browser profile;
+- no VEVOR credentials were available to that inspection session;
+- inspection stopped without requesting or exposing credentials, codes, or account secrets;
+- no account settings, forms, orders, contacts, or purchases were changed or submitted.
+
+The following account-specific fields were therefore **NOT VERIFIED BY THAT PORTAL INSPECTION**:
+
 - business/company profile completion;
-- tax-exemption certificate status;
-- active PRO purchasing discount state;
-- account-level order / customer ship-to procedure;
-- tracking location and timing;
+- final tax-exemption account status;
+- active PRO purchasing-discount display;
+- account-level customer ship-to / order-entry details;
+- tracking location and posting timing;
 - account-visible returns / RMA / warranty workflow;
 - account-visible shipping or destination restrictions;
-- account-visible inventory / stock synchronization controls;
-- account-specific blind-shipping or packing-slip controls;
-- any account-specific customer-support routing controls.
+- account-visible inventory / stock controls;
+- blind-shipping / packing-slip controls;
+- account-specific customer-support routing.
 
-This is an access-state limitation, not a VEVOR onboarding failure. Do not restart registration or requalify the relationship.
+This is an **access/evidence limitation, not a VEVOR onboarding failure and not a blanket commerce gate**.
 
-## Human / authenticated portal capture required
+## Authenticated portal capture — parallel evidence task
 
-Peter / authorized human operator with legitimate VEVOR account access should capture the following from the live portal and return a concise receipt to the VEVOR project:
+Peter or another authorized human operator with legitimate VEVOR account access may capture a concise protected receipt covering only the fields still useful to repeatable operations:
 
-1. **PRO membership/account level** — confirm active status shown in the account.
-2. **Business profile** — COMPLETE / INCOMPLETE and identify only missing fields; do not copy sensitive account identifiers into public Git.
-3. **Tax exemption** — APPROVED / PENDING / NOT SUBMITTED / REJECTED / UNCLEAR.
-4. **Purchasing discount state** — ACTIVE / NOT SHOWN / OTHER; private discount percentages stay outside public Git.
-5. **Ordering path** — verify whether customer orders are placed by purchasing through the PRO account with the customer as ship-to and whether any special order/reference field is required.
-6. **Tracking** — where carrier/tracking appears and normal posting timing if shown.
-7. **Returns / RMA / warranty** — portal path and role of Elevation vs customer.
-8. **Shipping limitations** — state/destination restrictions, Alaska/Hawaii, PO boxes, oversized/heavy-item limits, residential restrictions, or other special handling shown.
-9. **Inventory / stock** — where current availability is shown and whether the supplier feed or another account source is the controlling availability source.
-10. **Blind shipping / packing slip** — whether neutral or blind fulfillment is available and whether VEVOR invoices, pricing, inserts, or promotional material are included.
-11. **Product feed** — download/capture the current direct VEVOR feed and date/time of retrieval.
+1. PRO membership/account level shown in the account.
+2. Business profile — COMPLETE / INCOMPLETE and only the missing fields.
+3. Tax exemption — APPROVED / PENDING / NOT SUBMITTED / REJECTED / UNCLEAR.
+4. Purchasing-discount state — ACTIVE / NOT SHOWN / OTHER; keep percentages private.
+5. Ordering path — customer ship-to handling and any required PO/reference field.
+6. Tracking — where carrier/tracking appears and normal posting timing if shown.
+7. Returns / RMA / warranty — portal path and Elevation-vs-customer role.
+8. Shipping limitations — destination, PO box, oversized/heavy, residential or SKU-specific restrictions shown.
+9. Inventory / stock — account availability display and its relationship to the supplier feed/live product page.
+10. Blind shipping / packing slip — neutral fulfillment and any VEVOR invoice/pricing/promotional inserts.
+11. Current direct-feed refresh evidence if the portal exposes a newer source than the already-received working feed.
 
-Screenshots or exports containing account-specific or private commercial information must be retained outside public Git.
+Protected screenshots, account identifiers, credentials, private discounts, tax records and other sensitive evidence remain outside public Git.
+
+Do **not** make this portal receipt a prerequisite to keeping the already-launched 19-product A-tier catalog intact. Gate only the exact action that needs an unresolved account fact.
 
 ## Supplier email already open — do not duplicate
 
-A supplier email has already been sent to Melinda requesting confirmation of these four fulfillment controls:
+A supplier email has already been sent to Melinda requesting confirmation of:
+
 - blind shipping / packing slips / VEVOR pricing or promotional inserts;
 - tracking retrieval location and normal posting timing;
 - customer returns, damaged-item, defect and warranty / RMA workflow;
@@ -74,120 +97,105 @@ A supplier email has already been sent to Melinda requesting confirmation of the
 
 Status: **SENT / WAITING FOR VEVOR REPLY**.
 
-Do not send a duplicate email on these four questions while that message is pending.
+Do not send a duplicate email on those four questions while that message is pending.
 
-## Remaining supplier follow-up questions after portal reconciliation
+## Remaining supplier follow-up after portal + current reply reconciliation
 
-After the authenticated portal capture above, send **one consolidated follow-up only for facts that remain unresolved**. The likely unresolved questions are:
+After the authenticated portal receipt and Melinda's existing reply are reconciled, send at most **one consolidated follow-up** and only for facts still unresolved.
 
-1. **Feed update cadence / stock source**  
-   - How often is the supplier-provided workbook/feed refreshed for price and stock?  
-   - Should Elevation use that feed, the live product page, the PRO account, or another source as the final pre-order inventory check?
+Likely candidates:
 
-2. **Dropship order procedure**  
-   - For an Elevation customer order, should Elevation place the order through the PRO account using the customer as the ship-to address?  
-   - Is any PO/reference/order note required to identify the transaction as an Elevation dropship order?
+1. **Feed update cadence / final stock source** — how often the supplier source refreshes and which source is controlling immediately before order placement.
+2. **Dropship order procedure** — customer ship-to use and any PO/reference/order-note requirement.
+3. **Destination / service restrictions** — Alaska, Hawaii, PO boxes, military addresses, oversized/heavy items, residential delivery, or excluded categories.
+4. **Price-floor maintenance** — which VEVOR price controls when website, PRO, coupon/promotional and feed values differ, and whether temporary promotions require immediate repricing.
+5. **Tax-exemption status only if still unclear** after authenticated portal review.
 
-3. **Destination / service restrictions**  
-   - Are there PRO dropship restrictions for Alaska, Hawaii, PO boxes, military addresses, oversized/heavy products, residential delivery, or specific SKU classes?  
-   - Are any categories excluded from direct-to-customer shipping even when they appear available online?
+Do not ask the supplier for information already resolved cleanly by the portal or existing correspondence.
 
-4. **Price-floor maintenance**  
-   - VEVOR has already stated Elevation's selling price may not be below VEVOR's current selling price. Confirm which VEVOR price should be treated as the controlling floor when the website, PRO price, coupon/promotional price, or feed values differ, and whether temporary VEVOR promotions require Elevation to immediately reprice.
+## Direct-feed control — future refresh, not acquisition gate
 
-5. **Tax-exemption status only if portal remains unclear**  
-   - Ask Melinda to confirm whether the submitted tax-exemption documentation is approved/active only if the authenticated portal does not clearly show the result.
+The already-received supplier feed is the canonical starting source for direct-VEVOR catalog reconciliation. Do not substitute Doba exports or Doba-sourced VEVOR records for the direct relationship.
 
-Do not ask the supplier for information that the authenticated portal already resolves cleanly.
+For every future feed refresh:
 
-## Direct-feed intake gate
+1. preserve the supplier source unchanged as evidence;
+2. map exact VEVOR SKU/product identity;
+3. retain direct-vs-Doba separation;
+4. refresh current price/MAP inputs;
+5. refresh sellability/stock evidence;
+6. flag missing source data instead of guessing;
+7. keep direct-site-only eligibility unless written marketplace permission exists;
+8. reconcile changes into the existing catalog rather than recreating the launch set.
 
-The supplier-provided workbook is the canonical starting source for direct-VEVOR catalog reconciliation. Do not substitute Doba exports or existing Shopify VEVOR-branded products for this feed.
+## Catalog state already achieved
 
-When the feed file is available to Company Operations:
-1. preserve the original workbook unchanged as source evidence;
-2. identify columns for VEVOR SKU/product identifier, title, category, selling price, availability/stock, product URL, image/media, specification/source data, shipping information, and any other supplier control fields;
-3. normalize a working copy into the Master Catalog schema;
-4. separate direct VEVOR records from Doba-sourced VEVOR records;
-5. flag missing source data rather than guessing;
-6. apply the VEVOR selling-price floor before any publish-ready status;
-7. retain direct-site-only channel eligibility unless written marketplace permission exists.
+The original 20–40 product working-set task has already advanced beyond preparation:
 
-## Initial 20–40 product working set
+- A-tier launch: **COMPLETE — 19 direct products active/published**;
+- B-tier strong-expansion queue: **COMPLETE AS PREPARATION — 17 SKUs prepared**;
+- broader expansion: verify each SKU at time of publication using current price/MAP, sellability, media/source and fulfillment evidence.
 
-Selection should prioritize products that fit Elevation's current direct-site lanes:
-- solar charging and solar accessories;
-- power conversion / electrical support equipment;
-- RV and mobile-power accessories;
-- backup-power support equipment;
-- refrigeration / cooling support;
-- water / pumping / plumbing utility products;
-- heating / climate support where appropriate;
-- off-grid tools and utility equipment;
-- outdoor / property-use products aligned with Elevation's existing catalog.
-
-Selection rules:
-- exact direct-VEVOR source mapping required;
-- current VEVOR selling price captured as the floor input;
-- current availability/source state required;
-- adequate supplier media/specification evidence required;
-- shipping/fulfillment path must be supportable;
-- no unsupported certifications or compatibility claims;
-- avoid duplicate clutter where an existing product already serves the same lane unless the VEVOR offer materially improves assortment, price, or fulfillment;
-- keep products in DRAFT / HOLD until all required gates are verified.
+Do not recreate the original candidate-selection exercise.
 
 ## Pricing control
 
-For each candidate:
+For each direct VEVOR SKU:
 
-**ELEVATION SELLING PRICE >= CURRENT VEVOR SELLING PRICE**
+**ELEVATION SELLING PRICE >= APPLICABLE CURRENT VEVOR PRICE FLOOR**
 
-A candidate is HOLD if the current VEVOR selling-price input cannot be verified.
-
-Do not use stale Doba retail pricing, previous Shopify pricing, or an older supplier quote as proof of the current direct-VEVOR price floor.
+If the applicable current floor cannot be verified for a new publication/material repricing action, hold that **specific SKU/action**, not the entire VEVOR relationship or already-verified unrelated products.
 
 ## Channel control
 
 Allowed now:
+
 - ElevationUpScales.com / Shopify direct-site sales.
 
-Blocked unless later authorized in writing by VEVOR:
+Blocked unless VEVOR later authorizes in writing:
+
 - eBay;
 - Amazon;
 - Walmart;
-- other third-party marketplaces.
+- TikTok Shop or other third-party marketplaces.
 
-Doba channel permissions, if any, do not transfer to the direct VEVOR relationship.
+Doba permissions do not transfer to direct VEVOR.
 
 ## Order-flow close requirement
 
-VEVOR integration cannot be marked CLOSED until a live paid direct-site VEVOR order follows the operating path:
+VEVOR integration cannot be marked repeatably CONTROLLED until a real paid direct-site VEVOR order proves:
 
-**CUSTOMER PAID ORDER → ELEVATION OPERATING SYSTEM / SOP-STORE-INT-001 → VEVOR PURCHASE → SUPPLIER TRACKING → CUSTOMER TRACKING / FULFILLMENT UPDATE → COMPLETION / RECONCILIATION**
+**CUSTOMER PAID ORDER → EXACT SKU/SOURCE RECHECK → VEVOR PURCHASE → SUPPLIER ACCEPTANCE → TRACKING → CUSTOMER/SHOPIFY UPDATE → DELIVERY → RECONCILIATION**
 
-The first live order must preserve exact supplier and SKU mapping and be actionable from the Elevation order record.
+The first live order must preserve exact supplier/SKU mapping and produce an actionable Elevation order record.
 
 ## Current execution sequence
 
-1. **PRO membership** — VERIFIED BY VEVOR EMAIL.
-2. **Authenticated portal capture** — REQUIRED; current automated read-only inspection could not authenticate.
-3. **Existing fulfillment-question email** — SENT / WAITING; do not duplicate.
-4. **Direct product feed retrieval** — REQUIRED.
-5. **Reconcile 20–40 product working set** — proceed when feed is available.
-6. **One consolidated supplier follow-up** — send only unresolved questions after portal receipt and the existing Melinda reply are reconciled.
-7. **Publish-ready review** — direct-site only, correct current price floor, stock source, shipping support and customer-service workflow verified.
-8. **First live order proof** — required before integration CLOSE.
+1. **Shopify public storefront gate** — disable authorized Online Store password protection and rerun unauthenticated VEVOR Direct collection/product/cart/checkout acceptance.
+2. **Authenticated VEVOR portal receipt** — capture in parallel when authorized access is available; use it to mature account-level SOP details, not to recreate onboarding.
+3. **Existing Melinda fulfillment-detail email** — WAITING; do not duplicate.
+4. **First real paid order** — reverify exact SKU, live VEVOR sellability and price/MAP, place through VEVOR, capture acceptance/tracking/delivery and exceptions.
+5. **B-tier expansion** — publish only after Stage-1 storefront acceptance and fresh per-SKU checks; do not redo queue preparation.
+6. **One consolidated supplier follow-up** — only if material operating facts remain unresolved after portal and current-email reconciliation.
 
 ## Current blocker / dependency
 
-The workflow is not blocked as a whole. The only current missing account evidence is an authenticated portal receipt and the direct VEVOR workbook/feed. Supplier fulfillment questions already have an active email outstanding.
+The VEVOR workflow is **not blocked as a whole**.
 
-Continue feed/catalog preparation where possible. Hold only fields that require authenticated account evidence or supplier clarification.
+Current customer-facing activation gate:
+
+**SHOPIFY ONLINE STORE PASSWORD PROTECTION**
+
+Parallel nonblocking evidence gaps:
+
+- authenticated VEVOR portal account-detail receipt;
+- supplier response on blind shipping/tracking/RMA/support ownership;
+- first-order actuals.
+
+Do not convert those parallel evidence gaps into a feed-acquisition, catalog-rebuild or onboarding gate.
 
 ## Next
 
-1. Authorized human/Peter captures the live VEVOR PRO portal receipt and current direct feed.
-2. Reconcile that receipt against the four questions already sent to Melinda.
-3. Build the final short list of genuinely unresolved questions.
-4. Prepare one consolidated VEVOR follow-up email for owner/management review.
-5. Reconcile the feed into the Master Catalog and produce the first 20–40 candidate set with READY / HOLD reasons.
+**PUBLIC STOREFRONT ACCEPTANCE → FIRST REAL VEVOR ORDER PROOF → RECORD ACTUALS → MOVE NORMAL ORDER FLOW TO CONTROLLED**
+
+In parallel, capture authenticated account details when available and fold only genuinely unresolved facts into one future supplier follow-up.
