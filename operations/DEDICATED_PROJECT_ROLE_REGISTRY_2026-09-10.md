@@ -11,6 +11,12 @@ Record the current manager/specialist pair and tailored workflow for each establ
 
 This registry defines project-role routing only. `CURRENT_WORK_BOARD.md` remains the global unresolved-work state, and each project's master SOP/current state remains the supplier/project rule source.
 
+### Role-label reconciliation rule
+
+For **project role assignment only**, this registry and the newer owner directive `OWNER_PROJECT_WORKFLOW_DIRECTIVE_2026-09-10.md` supersede older manager/worker labels in supplier/project SOPs that predate this architecture. The underlying supplier facts, commercial controls, safety gates and project procedures in those SOPs remain controlling unless separately changed by verified evidence or Casey.
+
+This prevents an older label such as `Project Worker`, `functional manager`, or a generic vendor-manager owner from creating a second project-management chain. It does not delete useful specialist functions; those functions are routed under the project pair below.
+
 ## Current dedicated projects
 
 | Project | Project Operations Manager | Project Specialist | Oversight / Parent Routing | Tailored Workflow | Current Project State |
