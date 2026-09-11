@@ -9,7 +9,8 @@
 **Tailored Workflow:** `../RENOGY_TAILORED_PROJECT_WORKFLOW_2026-09-10.md`  
 **Master SOP:** `../RENOGY_VENDOR_MASTER_SOP.md`  
 **Lower-48 Backorder/Warranty Program:** `../RENOGY_LOWER48_BACKORDER_WARRANTY_PROGRAM_2026-09-10.md`  
-**Current Maturity:** **STAGE 1 — PROVING** for catalog/source integration, exact-SKU availability/warranty mapping and first paid order
+**Accepted mapping evidence:** `../RENOGY_LOWER48_WARRANTY_AVAILABILITY_MAP_BATCH_01_2026-09-10.md`; `../RENOGY_LOWER48_WARRANTY_AVAILABILITY_MAP_BATCH_02_2026-09-10.md`  
+**Current Maturity:** **STAGE 1 — PROVING** for catalog/source integration, continuing exact-SKU availability/warranty mapping and first paid order
 
 ## Purpose
 
@@ -42,11 +43,11 @@ Do not expose EIN, tax-license numbers, dealer pricing, raw inventory, portal cr
 | Opening order / MOQ | **VERIFIED — NO MINIMUM OPENING ORDER** | No speculative opening inventory gate. |
 | Product catalog/SKU source | **PARTIAL / SOURCE INTAKE OPEN** | Portal/package and requested structured source data remain the current intake lane. |
 | MAP / price-control source | **PARTIAL / MUST BE VERIFIED PER SKU** | Consolidated post-approval request is already sent; use portal/source package first and do not duplicate outreach. |
-| Inventory / availability source | **PARTIAL / SKU-LEVEL CONTROL DEFINED** | Public Renogy evidence confirms in-stock, preorder, backorder and ordinary unavailable states can coexist. Partner Portal/current supplier source controls actual dealer-order acceptance. |
-| Preorder/backorder | **VERIFIED AS SKU-SPECIFIC, NOT BLANKET** | `backorder_allowed=true` only when the exact SKU is explicitly preorder/backorder supported by current Renogy evidence/order path. Generic zero stock is not enough. |
+| Inventory / availability source | **PARTIAL / SKU-LEVEL CONTROL DEFINED / BATCHES 01–02 ACCEPTED** | Public Renogy evidence confirms in-stock, preorder, backorder and ordinary unavailable states can coexist. Partner Portal/current supplier source controls actual dealer-order acceptance. |
+| Preorder/backorder | **VERIFIED AS SKU-SPECIFIC, NOT BLANKET** | Exact public paid-backorder examples now include `RSP100DCT-US` and `RBM500-US`. `backorder_allowed=true` only when the exact SKU is explicitly preorder/backorder supported by current Renogy evidence/order path. Generic zero stock is not enough. |
 | Approved media/spec/manuals | **PARTIAL / SOURCE INTAKE OPEN** | Use Renogy portal/package/current approved sources before requesting duplicate material. |
 | Fulfillment/tracking instructions | **PARTIAL / DROPSHIP VERIFIED, DETAIL INTAKE OPEN** | Exact order/tracking handoff still needs first-order operating proof. |
-| Warranty/RMA | **CORE PROGRAM LOCKED / SKU-SPECIFIC ENRICHMENT OPEN** | Claims route through Renogy Technical Support/Warranty authorization. Exact warranty duration/terms must be mapped to the exact SKU; Elevation supports the claim but does not self-authorize Renogy remedies. |
+| Warranty/RMA | **CORE PROGRAM LOCKED / SKU-SPECIFIC MAPPING ACTIVE** | Batches 01–02 contain accepted exact-SKU warranty evidence. Claims route through Renogy Technical Support/Warranty authorization. Exact warranty duration/terms must be mapped to the exact SKU; Elevation supports the claim but does not self-authorize Renogy remedies. |
 | Returns | **VERIFIED CORE RULE / DEALER PROCESS STILL DISTINCT** | Renogy stated a 30-day return baseline; dealer/Elevation customer handling must not simply copy Renogy direct-retail promises where account/product exceptions apply. |
 | Tax/resale treatment | **AVAILABLE / ACCOUNT REVIEW CONTROL** | Reseller certificate may be uploaded through Partner Portal; treatment follows Renogy review/approval. |
 | Commercial/project pricing | **AVAILABLE BY APPROVAL** | May be submitted based on volume/project requirements; not required for ordinary ecommerce. |
@@ -56,9 +57,13 @@ Do not expose EIN, tax-license numbers, dealer pricing, raw inventory, portal cr
 ## Existing technical preparation
 
 - Renogy is already a first-class source/supplier/filter in the existing Elevation Admin Catalog model.
-- Renogy Vendor Master SOP v1.2 now contains locked Lower-48 preorder/backorder controls.
+- Renogy Vendor Master SOP v1.2 contains locked Lower-48 preorder/backorder controls.
 - The Lower-48 specialist program defines normalized availability and warranty fields for exact-SKU mapping.
-- That preparation does **not** auto-approve a product, auto-enable checkout, fabricate MAP/inventory/media, or make every unavailable SKU backorderable.
+- **Batch 01 is ACCEPTED** for its first exact-SKU panel/controller evidence, including exact public backorder support for `RSP100DCT-US` and exact 3-year warranty mapping for the identified Rover Li controller SKUs.
+- **Batch 02 is ACCEPTED** for DC-DC charger, inverter/inverter-charger and monitoring evidence. It adds `RBM500-US` as a second exact public paid-backorder example.
+- Batch 02 also establishes a true narrow warranty-source conflict for `RIV4835CSH1S`: the current product page and current master warranty table disagree. Customer-facing warranty duration for that SKU remains `WARRANTY_CONFLICT_HOLD` until the current authoritative Renogy source is reconciled.
+- Several storefront `-US` variants remain exact-suffix holds where the warranty table uses an unsuffixed SKU. Do not silently collapse identities.
+- Accepted mapping evidence does **not** auto-approve a product, auto-enable checkout, fabricate MAP/inventory/media, or make every unavailable SKU backorderable.
 - No third-party marketplace permission was added.
 
 ## Lower-48 availability / checkout rule
@@ -75,6 +80,8 @@ Paid checkout for a delayed Renogy item may remain available only where the exac
 
 **Generic out-of-stock / zero stock does not create Renogy backorder authority.**
 
+Accepted public examples `RSP100DCT-US` and `RBM500-US` demonstrate that Renogy intentionally uses a paid backordered state on selected exact variants; they do not authorize that state for adjacent SKUs.
+
 Alaska, Hawaii, territories, international and special dangerous-goods routes remain outside this Lower-48 program until separately qualified.
 
 ## Warranty operating rule
@@ -86,6 +93,8 @@ Use the source hierarchy established in `RENOGY_LOWER48_BACKORDER_WARRANTY_PROGR
 **CUSTOMER CLAIM → ELEVATION CAPTURES ORDER/SKU/SYMPTOM → RENOGY TECHNICAL/WARRANTY CASE → DIAGNOSTICS → RENOGY DETERMINATION → RMA IF REQUIRED → AUTHORIZED REMEDY → CUSTOMER UPDATE → RECEIPT/CLOSE**
 
 Customer-facing warranty promises must not exceed the current warranty applicable to the exact SKU. Elevation may support and document the claim; final authorization/remedy remains with Renogy.
+
+A source conflict blocks only the affected warranty statement/SKU action. The `RIV4835CSH1S` warranty conflict does not block unrelated verified Renogy products or continued mapping.
 
 ## Required onboarding/readiness inputs
 
@@ -101,8 +110,8 @@ Only the missing fact needed for the affected SKU/action is a gate.
 
 1. Receive/recover the current MAP policy / price-control source needed for launch SKUs.
 2. Receive/recover or normalize the structured product/SKU and inventory/availability source.
-3. Map exact Lower-48 SKU availability into the locked Renogy states.
-4. Map exact-SKU warranty terms/source references; do not generalize family-level warranty claims.
+3. Continue exact Lower-48 SKU availability mapping beyond accepted Batches 01–02; prioritize larger inverter/charger families, REGO, additional monitoring devices, N-Type panels and BOS/wiring.
+4. Continue exact-SKU warranty mapping; preserve `WARRANTY_CONFLICT_HOLD` and `HOLD_EXACT_SUFFIX` only where the exact source requires them.
 5. Receive/recover approved media, specs and manuals for the launch wave.
 6. Lock the routine dropship ordering/tracking handoff and account/catalog contact route.
 7. Normalize exact launch SKUs into the existing catalog model.
@@ -120,15 +129,18 @@ Keep:
 - direct-site channel authorization;
 - supplier sellability/orderability or exact-SKU preorder/backorder authorization;
 - exact warranty term/source before publishing a duration or remedy promise;
+- narrow source conflicts such as the current `RIV4835CSH1S` warranty conflict;
 - customer payment/order integrity;
 - special Hawaii/Alaska/DG route verification when applicable;
 - binding commercial/financial commitments requiring owner approval.
 
-Do not reopen dealer application, W-9, approval, portal creation or opening-order qualification as routine gates. Do not block one verified SKU because another Renogy SKU is unavailable or has unresolved warranty enrichment.
+Do not reopen dealer application, W-9, approval, portal creation or opening-order qualification as routine gates. Do not block one verified SKU because another Renogy SKU is unavailable, has an exact-suffix hold, or has unresolved warranty enrichment.
 
 ## Next action
 
-**SOURCE/PORTAL INTAKE → BATCH EXACT-SKU AVAILABILITY + WARRANTY MAPPING → MAP/MEDIA/FULFILLMENT QA → DIRECT-SITE PUBLISH → FIRST REAL ORDER PROOF**
+**SOURCE/PORTAL INTAKE → CONTINUE NEXT EXACT-SKU AVAILABILITY + WARRANTY BATCH → MAP/MEDIA/FULFILLMENT QA → DIRECT-SITE PUBLISH → FIRST REAL ORDER PROOF**
+
+Batches 01–02 are complete evidence. Do not recreate them without contradictory current supplier evidence.
 
 ## Close condition for active repeatable vendor onboarding
 
