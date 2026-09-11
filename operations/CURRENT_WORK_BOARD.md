@@ -4,7 +4,7 @@
 **Effective:** 2026-09-10  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Last reconciled against `main`:** `c295810d738b363375705cced19be8a32a2b59e8`
+**Last reconciled against `main`:** `a0bac7a856117abf2414e9918195c215336b77a6`
 
 ## Purpose
 
@@ -56,7 +56,6 @@ Worker failure does not automatically block the project. Preserve the work item 
 |---|---|---|---|---|---|---|---|
 | VEVOR direct-site dropship onboarding | Peter Torres / Ecommerce & Vendor Operations | IN_PROGRESS | P1-A | Human account / portal work remains | Continue existing VEVOR PRO/account/feed/direct-site product activation work | Account/catalog path verified and first live order proves operating flow | `SUPPLIER_LEADS_LIVE_MAP.md`; `PETER_PROJECT_STARTER_V2_2026-09-10.md` |
 | TikTok Shop second appeal / withdrawal-restoration | Peter Torres / Ecommerce & Vendor Operations | READY | P1-B | Begins after current executable VEVOR block unless a live paid-customer problem interrupts | Continue existing second appeal/restoration work; do not restart the case | Verified terminal platform result recorded | `PETER_PROJECT_STARTER_V2_2026-09-10.md` |
-| eBay buyer cancellation request — weed-wacker order | Company Operations / Order & Fulfillment | IN_PROGRESS | P0 | Buyer cancellation request active; marketplace response deadline exists | Resolve existing cancellation/refund request through authorized order lane and preserve truthful customer communication | Marketplace order reaches verified terminal state and customer obligation closes | Verified marketplace cancellation notice 2026-09-10 |
 | eBay shipped folding-bed order | Company Operations / Order & Fulfillment | VERIFYING | P1 customer fulfillment | Supplier shipment exists; marketplace/tracking state still requires verification | Verify marketplace tracking/order propagation and continue delivery monitoring | Delivery/customer obligation verified closed | Current Doba/eBay fulfillment evidence 2026-09-10 |
 | Checkout-gate cleanup — authorized preorder/backorder and unnecessary internal gates | Commerce / Developer lane | READY | P2 HIGH | No live outage; confirmed logic/state conflict exists | Correct authorized preorder/backorder handling so generic zero-stock does not override a supported paid-order path; review HOLD/shipping-quote gates only where they unnecessarily block known customer price and viable fulfillment | Regression proves authorized backorder/preorder stays purchasable while required safety/channel/payment gates remain intact | `MANAGEMENT_OPERATING_SOP.md`; `SOK_ECOMMERCE_SHIPPING_SOP.md` |
 | Shopify/SOK paid-order Operating System bridge | Commerce / Developer + Company Operations | VERIFYING | P2 | Implementation merged; live purchase-to-OS proof remains | Prove live purchase → payment → order ingestion → SKU/source/fulfillment verification → production receipt | Full first-order acceptance chain completed | Current merged application state; store-integration control |
@@ -67,6 +66,7 @@ Worker failure does not automatically block the project. Preserve the work item 
 | eBay / Doba listing profitability and availability cleanup | Peter / Ecommerce & Vendor Operations | READY | P2 | VEVOR and TikTok outrank routine eBay cleanup | Reconcile active eBay listings against current Doba availability/economics; preserve useful sales history; do not blanket-remove channel | Loss-making/unfulfillable listings corrected and useful demand-test listings remain controlled | `EBAY_CHANNEL_RECON_2026-09-09.md`; current owner direction |
 | Homepage lithium hero / approved retail branding repair — PR #94 | Developer lane | IN_PROGRESS | P2 | PR review/QA/release flow remains open | Complete bounded PR flow without changing commerce logic | Approved merge and required release/production verification complete | GitHub PR #94 |
 | Lithium Buyer Network prospecting | Leads / Prospecting lane | IN_PROGRESS | P3 PARALLEL | Must not interfere with customer/order or active supplier activation | Continue Hawaii → Southern California → Colorado prospecting under existing lane | Target batch reaches defined qualification/contact state | `LITHIUM_BUYER_NETWORK_PROSPECTING_2026-09-10.md` |
+| Internal email tracking / `sales@` alias reliability | Operating System / Communications | READY | P3 END-OF-FLOW | `sales@elevationupscales.com` does not reliably route to the regular inbox and can generate delivery-failure notices when used only for internal tracking | At end of the current higher-priority flow, verify the actual mailbox/alias behavior and replace unreliable CC-based tracking with a dependable internal tracking method that does not create false failure notices | Internal tracking remains visible without bounce/failure noise or dependence on a non-delivering alias | Owner direction 2026-09-10 |
 
 ---
 
@@ -95,6 +95,7 @@ Worker failure does not automatically block the project. Preserve the work item 
 
 # CLOSED / PROTECTED FROM RECREATION
 
+- eBay weed-wacker order 10-15134-90489 cancellation/refund — CLOSED per Owner direction after refund action; reopen only if a new customer, marketplace, payment, or supplier exception arrives.
 - Renogy application preparation, owner review, submission, and requested W-9 correction — COMPLETE; current lane is external review.
 - SOK generic supplier prospecting/qualification — COMPLETE; SOK is an active primary authorized supplier.
 - SOK product-image request — COMPLETE as an outreach/request task; downstream media mapping remains active separately.
