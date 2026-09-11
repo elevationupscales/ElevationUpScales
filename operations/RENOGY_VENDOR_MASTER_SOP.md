@@ -1,7 +1,7 @@
 # Elevation UpScales — Renogy Vendor Master SOP
 
 **Status: ACTIVE / CONTROLLING RENOGY PROJECT LANE**  
-**Version: 1.1**  
+**Version: 1.2**  
 **Effective: 2026-09-10**  
 **Last reconciled: 2026-09-10**  
 **Owner: Casey Young**  
@@ -147,10 +147,16 @@ Minimum public-safe/internal fields should include:
 - MAP or applicable advertising-price control;
 - customer selling price;
 - supplier availability state;
+- preorder/backorder state;
+- backorder eligibility source;
+- expected availability/restock date when Renogy provides one;
 - fulfillment method;
 - shipping treatment;
 - approved media reference;
-- warranty/returns reference;
+- exact-SKU warranty term/reference;
+- performance warranty reference where applicable;
+- warranty/RMA source;
+- returns reference;
 - source pointer;
 - last-verified timestamp;
 - approved channel = ElevationUpScales.com / direct website.
@@ -209,17 +215,19 @@ Safe pre-source work includes:
 - direct-site-only channel enforcement;
 - MAP-control field/validation hooks;
 - supplier-vs-On-Hand inventory separation;
+- preorder/backorder state mapping;
+- exact-SKU warranty and RMA field mapping;
 - media-slot mapping;
 - warranty/returns source field;
 - last-verified markers;
 - first-order fulfillment receipt structure;
 - Renogy collection/category structure using existing store/catalog systems.
 
-Do **not** fabricate unverified MAP, dealer cost, stock, SKU specifications, product images, shipping beyond the verified Lower-48 statement, special-route fulfillment or marketplace authorization.
+Do **not** fabricate unverified MAP, dealer cost, stock, preorder/backorder authority, SKU specifications, product images, shipping beyond the verified Lower-48 statement, special-route fulfillment or marketplace authorization.
 
 A Renogy SKU may leave draft/staging only when the minimum safe publication set is verified:
 
-**EXACT SKU/MODEL + APPROVED PRODUCT FACTS + CURRENT MAP/PRICE CONTROL + CURRENT SELLABILITY + APPROVED MEDIA + NORMAL FULFILLMENT STATE + APPROVED DIRECT-SITE CHANNEL**
+**EXACT SKU/MODEL + APPROVED PRODUCT FACTS + CURRENT MAP/PRICE CONTROL + CURRENT SELLABILITY + APPROVED MEDIA + NORMAL FULFILLMENT STATE OR VERIFIED PREORDER/BACKORDER STATE + APPROVED DIRECT-SITE CHANNEL**
 
 Missing nonessential enrichment blocks only that enrichment, not code work or another fully verified Renogy SKU.
 
@@ -232,7 +240,7 @@ Use:
 Before supplier placement, verify:
 
 - exact Renogy SKU/model;
-- current supplier availability;
+- current supplier availability or verified preorder/backorder state;
 - current customer-price/MAP compliance;
 - correct tax treatment at checkout;
 - verified shipping treatment for the destination;
@@ -242,20 +250,91 @@ Renogy's stated free dropship shipping applies to the 48 contiguous U.S. states 
 
 Do not manufacture a management gate around the absence of a first order. Keep the first-order proof item open and continue other safe **Renogy** catalog work.
 
-## 10. Warranty and returns
+## 9A. Preorder / backorder control — LOCKED
 
-Warranty:
+Renogy preorder/backorder is **SKU-specific**, not a blanket permission for all unavailable products.
 
-- route Renogy warranty claims through Renogy's Warranty Team;
-- preserve supplier authorization/diagnostic requirements;
-- do not promise a replacement/refund before Renogy's current warranty process supports it.
+Use the following controlling states for Renogy supplier availability:
 
-Customer returns:
+- **IN_STOCK** — current verified Renogy source supports ordinary purchase/fulfillment.
+- **PREORDER** — the exact SKU is explicitly offered by Renogy for preorder.
+- **BACKORDER** — the exact SKU is explicitly offered/accepted by Renogy for backorder, including a supplier-provided expected availability date when available.
+- **OUT_OF_STOCK_NOT_ORDERABLE** — unavailable and no verified Renogy source supports a paid future order.
+- **UNKNOWN_HOLD** — current sellability/backorder state cannot be verified reliably.
 
-- use Renogy's current 30-day return policy as the supplier reference;
+### Backorder authorization rule
+
+**AN UNAVAILABLE RENOGY SKU IS NOT AUTOMATICALLY BACKORDERABLE.**
+
+Set `backorder_allowed = true` only when the exact SKU is supported by one of these current Renogy sources:
+
+1. Renogy explicitly labels the exact SKU as **Pre-order** or **Back Order**;
+2. the Renogy Partner Portal/order path explicitly accepts the exact unavailable SKU for future fulfillment; or
+3. current written Renogy dealer/account guidance explicitly authorizes backorder/preorder for that exact SKU or defined product set.
+
+A generic out-of-stock state, historic restock pattern, estimated supplier availability, public product existence, or another Renogy SKU's preorder/backorder status is not enough.
+
+### Checkout behavior
+
+- **IN_STOCK:** normal paid checkout may remain enabled when all other controls pass.
+- **PREORDER / BACKORDER:** paid checkout may remain enabled only when the exact SKU has verified Renogy future-order support and the customer presentation clearly communicates the delayed/preorder state without promising an unsupported delivery date.
+- **OUT_OF_STOCK_NOT_ORDERABLE / UNKNOWN_HOLD:** do not accept a paid order for that SKU through the Renogy fulfillment path until the state is resolved.
+
+A later Partner Portal rule may broaden or narrow backorder eligibility. Current Partner Portal/written supplier evidence controls supplier-order execution. Protected dealer evidence stays outside public Git; this SOP records only the public-safe rule.
+
+## 10. Warranty and returns — LOWER 48 PROGRAM CONTROL
+
+Renogy warranty is **exact-SKU driven**. Do not apply one generic Renogy warranty period across the catalog or infer a warranty solely from product category.
+
+The Lower-48 Renogy catalog must maintain, where applicable:
+
+- exact manufacturer SKU/model;
+- applicable written limited-warranty term;
+- prorated/non-prorated treatment where stated;
+- separate performance warranty where applicable;
+- original-purchaser/registration/order-proof requirements where stated;
+- diagnostic/technical-assessment requirements;
+- RMA/return-authorization requirements;
+- warranty exclusions/material limitations needed for correct customer handling;
+- current Renogy warranty source/version;
+- last-verified date.
+
+The current Renogy warranty source contains materially different warranty terms across and within product families. Therefore:
+
+**NO RENOGY SKU MAY RECEIVE A CUSTOMER-FACING WARRANTY TERM FROM CATEGORY ASSUMPTION, MEMORY, OR ANOTHER SKU.**
+
+### Warranty claim operating flow
+
+Use:
+
+**CUSTOMER CLAIM → ELEVATION ORDER / EXACT SKU VERIFY → WARRANTY SOURCE VERIFY → REQUIRED EVIDENCE → RENOGY TECHNICAL ASSESSMENT → RENOGY WARRANTY DETERMINATION → RMA / AUTHORIZATION WHEN REQUIRED → AUTHORIZED REPAIR / REPLACEMENT / REFUND PATH → CUSTOMER UPDATE → RECEIPT / CLOSE**
+
+Operational rules:
+
+- route Renogy warranty claims through Renogy's Warranty Team/current authorized support route;
+- preserve supplier diagnostic, troubleshooting, evidence and authorization requirements;
+- capture the exact SKU and applicable warranty source before representing coverage;
+- do not promise replacement, refund, repair, shipping reimbursement or a specific resolution before Renogy's current process supports it;
+- replacement equipment does not automatically create a new full warranty term unless Renogy's written terms expressly provide one;
+- Elevation customer-facing promises must never exceed current written Renogy warranty terms;
+- preserve all material exclusions and installation/use limitations that affect claim eligibility;
+- use the current controlling Renogy warranty document/source when terms conflict with older pages or prior assumptions.
+
+### Customer returns
+
+- use Renogy's current 30-day return policy as the supplier reference unless a more specific current written product/order rule controls;
 - if Renogy's return label is used, account for the stated label-cost deduction from refund;
 - another carrier may be used when operationally appropriate and supported;
+- do not represent a normal return as a warranty approval or a warranty claim as an automatically approved return;
 - customer-facing promises must not exceed current written supplier terms.
+
+### Warranty catalog build priority
+
+For the Lower-48 catalog, build warranty coverage in exact-SKU batches alongside sellability/availability verification:
+
+**EXACT SKU → CURRENT AVAILABILITY/BACKORDER STATE → CURRENT WARRANTY TERM → PERFORMANCE WARRANTY IF APPLICABLE → RMA/WARRANTY SOURCE → LAST VERIFIED**
+
+An unverified warranty term blocks only the warranty representation/affected SKU publication requirement; it does not authorize guessing and does not block unrelated verified Renogy SKU work.
 
 ## 11. Change control
 
@@ -275,7 +354,7 @@ Do not rebuild this SOP for routine file arrivals. Update this master only when 
 
 ## 12. Owner gates
 
-Routine source intake, catalog normalization, direct-site product activation, compliant MAP execution and ordinary Renogy fulfillment are Operations work inside the Renogy project.
+Routine source intake, catalog normalization, direct-site product activation, compliant MAP execution, verified SKU-specific preorder/backorder execution, ordinary warranty administration, and ordinary Renogy fulfillment are Operations work inside the Renogy project.
 
 Return to Casey for genuine owner commitments including:
 
@@ -283,7 +362,8 @@ Return to Casey for genuine owner commitments including:
 - unusual financing or credit obligations;
 - exclusivity or contracts;
 - material channel expansion;
-- intentional exceptions to established Renogy MAP/channel rules;
+- intentional exceptions to established Renogy MAP/channel/backorder rules;
+- customer compensation or warranty promises beyond current written Renogy support;
 - Hawaii/Alaska or dangerous-goods commitments that create material liability/cost;
 - other material legal/commercial commitments.
 
@@ -304,16 +384,19 @@ Use public-safe status, rules and source references only.
 
 ## 14. Current execution state
 
-**APPROVED / ACTIVE DEALER → DATA & COMMERCE INTEGRATION IN PROGRESS**
+**APPROVED / ACTIVE DEALER → DATA, COMMERCE, BACKORDER & WARRANTY INTEGRATION IN PROGRESS**
 
 Current Renogy next actions:
 
 1. use Partner Portal access without exposing credentials;
 2. receive/locate MAP, catalog, inventory and approved-media sources;
 3. normalize source data into the existing catalog model;
-4. start direct-site Renogy catalog implementation for verified SKUs;
-5. prove the first real paid Renogy order end-to-end;
-6. expand only from verified sell-through and operating evidence.
+4. map Lower-48 exact SKUs to current availability/preorder/backorder state;
+5. map Lower-48 exact SKUs to current written warranty/RMA terms;
+6. start direct-site Renogy catalog implementation for verified SKUs;
+7. prove the first real paid Renogy order end-to-end;
+8. prove the first real Renogy warranty/RMA case when one occurs;
+9. expand only from verified sell-through and operating evidence.
 
 ## 15. Manager return rule
 
