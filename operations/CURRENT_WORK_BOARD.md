@@ -4,7 +4,7 @@
 **Effective:** 2026-09-10  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Last reconciled against `main`:** `481557351d97ecc65829d2e6c8394451012d7e86`
+**Last reconciled against `main`:** `fef9f2164c5cab1af686b45c10d8771010054d26`
 
 ## Purpose
 
@@ -36,6 +36,8 @@ Dated follow-up files such as `ACTIVE_FOLLOWUPS_2026-09-08.md` are correspondenc
 
 Manager/worker control records define lane authority and execution behavior. Any copied rolling priority text in those records defers to this board and newer Casey direction.
 
+Owner direct execution semantics for `RUN`, `RUN WORKFLOW`, `CONTINUE WORKFLOW`, and equivalent commands are controlled by `OWNER_RUN_COMMAND_EXECUTION_PROTOCOL_2026-09-10.md`.
+
 ## Operating loop
 
 Management:
@@ -54,9 +56,10 @@ Tonight's focus is intentionally narrowed to move faster:
 
 1. **VEVOR catalog / first-order activation** — continue from the completed PRO/feed/tax-submission and live 19-product launch state; do not restart onboarding.
 2. **New complementary vendor activation** — continue the existing vetted qualified lanes; newly sent suppliers move to WAITING rather than generating another management loop; generic battery duplication remains secondary to SOK.
-3. **Homepage/lithium deployment completion** — PR #94 is merged into current `main`; finish only the exact-SHA preview → production release path and verify canonical production.
-4. **TikTok and routine eBay work move to tomorrow.** A new real paid-customer, payment, delivery, or marketplace exception may still interrupt.
-5. External WAITING lanes do not block tonight's independent work.
+3. **Renogy approved-dealer integration** — dealer approval is complete; continue source/MAP/media intake, direct-site catalog preparation and safe coding under `RENOGY_VENDOR_MASTER_SOP.md` without restarting application work.
+4. **Homepage/lithium deployment completion** — PR #94 is merged into current `main`; finish the exact-SHA preview → production release path and verify canonical production.
+5. **TikTok and routine eBay work move to tomorrow.** A new real paid-customer, payment, delivery, or marketplace exception may still interrupt.
+6. External WAITING lanes do not block tonight's independent work.
 
 Efficiency rule for this window:
 
@@ -70,7 +73,8 @@ Efficiency rule for this window:
 |---|---|---|---|---|---|---|---|
 | VEVOR direct-site catalog / first-order activation | Peter Torres / Ecommerce & Vendor Operations | IN_PROGRESS — CATALOG LIVE / FIRST-ORDER PROOF OPEN | P1-A TONIGHT | **A-TIER CATALOG GATE COMPLETE** — 19 VEVOR Direct products and the `VEVOR Direct` collection are published to Shopify Online Store; no general onboarding gate remains. First clean live VEVOR Direct order is now the operating-proof trigger. | Verify customer storefront/checkout presentation for the live 19-product wave; on the first real order reverify exact SKU + current supplier sellability + price/MAP, place through VEVOR, capture acceptance/tracking/customer completion, then continue B-tier expansion | Eligible catalog path verified and first clean live order proves operating flow | `VEVOR_VENDOR_MASTER_SOP.md`; `VEVOR_SHOPIFY_LAUNCH_RECEIPT_2026-09-10.md`; `SUPPLIER_LEADS_LIVE_MAP.md` |
 | Complementary vendor activation — existing qualified queue | Peter Torres / Vendor Onboarding + Company Operations | IN_PROGRESS — 10 NEW OUTBOUNDS SENT / REMAINING QUEUE OPEN | P1-B TONIGHT | Ten complementary solar/inverter/RV/BOS suppliers have now been advanced to SENT / WAITING in the current activation sweep. DMX Power / Magnum Energy / Dimensions was separately verified as already sent on 2026-09-08, so it is not a fresh-send target. | Continue with remaining clean qualified routes: BayWa r.e. and Winegard are current form/application routes; Micro-Air/KISAE/Solarflexion/Airxcel remain route-verification/application work. Verify route + dedupe before every send. Do not prioritize generic battery duplication without a defined SOK gap. | Each worked supplier reaches SENT / APPLICATION SUBMITTED / WAITING / BLOCKED with exact reason and supplier map updated for durable state | `SUPPLIER_LEADS_LIVE_MAP.md`; current supplier correspondence |
-| Homepage lithium hero / approved retail branding release | Developer / Release lane | RELEASE READY | P1 PARALLEL TONIGHT | **NO MERGE GATE REMAINS.** PR #94 merged at `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`. No exact-SHA release run has executed yet; live production still shows the prior hero | Dispatch `Worker Exact-SHA Release` for the current approved `main` SHA to **preview**; require preview PASS; then dispatch the same SHA to **production** with required confirmation and smoke `elevationupscales.com` | Same-SHA preview PASS; production deployment PASS; canonical live site shows approved homepage/lithium presentation; release receipt recorded | GitHub PR #94; `.github/workflows/worker-release-deploy.yml`; current `main` |
+| Renogy approved-dealer data / catalog / commerce integration | Peter Torres / Ecommerce & Vendor Operations + Catalog/Developer | IN_PROGRESS — APPROVED / PORTAL ACTIVE / SOURCE INTAKE OPEN | P1-C OWNER DIRECTED | Dealer approval is complete and Partner Portal access exists. Integration request for MAP, catalog/product data, inventory/availability source, approved media, dropship/tracking instructions, warranty/RMA process and account/catalog contacts has been sent. Missing optional enrichment is not a general blocker. | Use existing Partner Portal/source materials first; receive or locate MAP/catalog/media/inventory sources; normalize into the existing catalog model; begin direct-site coding/staging for verified SKUs; publish only exact SKUs with current MAP/source/sellability/media/fulfillment evidence; prove first paid order when it occurs | Renogy direct-site source/update path established, verified catalog launched, first real paid order completes supplier purchase through customer delivery, and refresh/returns routes are repeatable | `RENOGY_VENDOR_MASTER_SOP.md`; `SUPPLIER_LEADS_LIVE_MAP.md`; current Renogy correspondence |
+| Homepage lithium hero / approved retail branding release | Developer / Release lane | RELEASE READY | P1 PARALLEL TONIGHT | **NO MERGE GATE REMAINS.** PR #94 merged at `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`. No exact-SHA release run has executed yet; live production still shows the prior hero. Current main has advanced through owner-directed Operations commits, so the release must resolve and use the then-current reviewed `main` SHA. | Dispatch `Worker Exact-SHA Release` for the current approved `main` SHA to **preview**; require preview PASS; then dispatch the same SHA to **production** with required confirmation and smoke `elevationupscales.com` | Same-SHA preview PASS; production deployment PASS; canonical live site shows approved homepage/lithium presentation; release receipt recorded | GitHub PR #94; `.github/workflows/worker-release-deploy.yml`; current `main` |
 | Checkout-gate cleanup — authorized preorder/backorder and unnecessary internal gates | Commerce / Developer lane | READY | P2 AFTER RELEASE | No live outage; confirmed logic/state conflict exists | After tonight's bounded release, correct only confirmed gate logic so supported paid-order paths are not blocked by generic zero-stock/HOLD state; preserve real safety/channel/payment controls | Regression proves authorized supported purchase paths remain purchasable while real controls remain intact | `MANAGEMENT_OPERATING_SOP.md`; `SOK_ECOMMERCE_SHIPPING_SOP.md` |
 | Shopify/SOK paid-order Operating System bridge | Commerce / Developer + Company Operations | VERIFYING | P2 | Implementation merged; only live purchase-to-OS proof remains | Prove live purchase → payment → order ingestion → SKU/source/fulfillment verification → production receipt when a real order exists; do not manufacture a management gate around the absence of an order | Full first-order acceptance chain completed | Current merged application state; store-integration control |
 | Master Catalog authenticated Admin preview | Catalog / Developer lane | VERIFYING | P2 | Authenticated acceptance evidence remains; underlying migration foundation is not to be rebuilt | Complete only the remaining authenticated preview/acceptance evidence when routed; do not treat it as a blocker to unrelated vendor/deployment work | Authenticated preview and required acceptance evidence complete | `DAILY_CLOSEOUT_2026-09-09_THROUGH_MIDNIGHT_MDT.md` |
@@ -87,7 +91,6 @@ Efficiency rule for this window:
 
 | Work Item | Owner / Execution Lane | State | Priority | Waiting On / Trigger | Action After Trigger | Close Condition | Source Record |
 |---|---|---|---|---|---|---|---|
-| Renogy Partner Program | Peter / Vendor Onboarding | WAITING | Supplier external | Renogy approval, decline, or material information request | Reconcile response immediately and activate only approved lane; do not chase merely because other vendor work is active | Account approved/declined and resulting operating/channel state recorded | `SUPPLIER_LEADS_LIVE_MAP.md` |
 | Kingboss B2B onboarding | Vendor Onboarding | WAITING | Supplier external | Supplier onboarding/package data | Continue exact product/source/compliance/fulfillment onboarding when data arrives; do not restart generic qualification | Defined commercial lane activated or rejected | `SUPPLIER_LEADS_LIVE_MAP.md` |
 | SOK Hawaii warranty operating-input request | SOK RECON OS / Company Operations correspondence | WAITING | P2 | SOK response to the consolidated request already sent in the existing supplier thread | Read the full thread; classify each requested input as EXACT / ESTIMATE / UNKNOWN; combine usable inputs with verified Hawaii warehouse/freight/storage data; model true incremental and dedicated costs; return to SOK only if a missing fact materially blocks the model | Supplier operating inputs sufficiently resolved to support owner-review commercial structure or remaining material unknowns explicitly identified | `SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md`; `SOK_RECON_OS_PROJECT.md` |
 | Logistics Plus Hawaii storage / fulfillment qualification | Company Operations / Logistics + SOK RECON OS | WAITING — PRICING / OPERATING TERMS | P2 STRATEGIC | Conservative planning estimates and verified SOK pallet profiles were sent in the existing Cara thread; no long-term/minimum commitment was made | When pricing returns, extract receiving/DG handling, storage, outbound release/fulfillment, will-call, local delivery, Neighbor Island, minimum/account charges, and current-vs-third-party warehouse differences; use verified numbers in the SOK Hawaii economics model and escalate only genuine commitment gates | Provider returns usable pricing/operating conditions and the option is accepted for proof, rejected, or moved to a defined owner commitment gate | `SOK_RECON_OS_PROJECT.md`; current Logistics Plus correspondence; GitHub issue #67 |
@@ -117,7 +120,8 @@ Efficiency rule for this window:
 - VEVOR Colorado tax-exemption submission gate — COMPLETE as a submission task; final review is pending but is not a general commerce blocker under VEVOR's stated pending-review treatment.
 - VEVOR A-tier Shopify catalog launch — COMPLETE; 19 VEVOR Direct products plus the `VEVOR Direct` collection are ACTIVE/published with source separation, verified customer prices, one hero image per product, and supplier inventory not represented as Elevation On Hand. First-order proof remains active separately.
 - Homepage/lithium PR #94 merge gate — COMPLETE at `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`; only exact-SHA release/verification remains.
-- Renogy application preparation, owner review, submission, and requested W-9 correction — COMPLETE; current lane is external review.
+- Renogy application preparation, owner review, W-9 correction, supplier review and dealer approval — COMPLETE; Renogy is now an ACTIVE approved dealer relationship under `RENOGY_VENDOR_MASTER_SOP.md`. Do not recreate the application/onboarding gate.
+- Renogy integration-source request — COMPLETE as an outbound task; current lane is source intake/catalog implementation and response handling, not duplicate outreach.
 - SOK generic supplier prospecting/qualification — COMPLETE; SOK is an active primary authorized supplier.
 - SOK product-image request — COMPLETE as an outreach/request task; downstream media mapping remains active separately.
 - SOK Hawaii warranty operating-input request drafting/owner-review/send gate — COMPLETE as a send task; live sub-item is WAITING on SOK response.
@@ -138,12 +142,3 @@ When a material event occurs:
 3. Update the lane-specific source only when durable facts or policy changed.
 4. Move WAITING/HOLD items only when their trigger occurs or Casey changes priority.
 5. Move a row to CLOSED only when its closure condition is satisfied or Casey explicitly supersedes it.
-6. Preserve historical dated records; do not rewrite history to imitate current state.
-7. Treat setup/enrichment as non-blocking unless it materially affects safety, legality, payment, fulfillment, supplier authorization, or the specific customer obligation.
-
-**PRIORITY CHANGE ≠ PROJECT CLOSURE.**  
-**NEW PROJECT ≠ OLD PROJECT DISAPPEARS.**  
-**WAITING ≠ CLOSED.**  
-**HOLD ≠ FORGOTTEN.**
-
-**BLOCK THE EXACT UNSAFE / UNVERIFIED LANE — NOT THE ENTIRE WORKFLOW.**
