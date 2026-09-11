@@ -2,7 +2,9 @@
 
 **Owner:** Casey Young  
 **Effective:** 2026-09-11  
-**Status:** ACTIVE / OWNER-DIRECTED MASTER S.O.P. INPUT
+**Status:** ACTIVE / V1.0-ALIGNED SUBORDINATE STANDARD
+
+**Controlling authority:** `MASTER_SOP_V1_0.md` + `MASTER_OS_GLOSSARY_V1_0.md`. This protocol implements the worker startup/registration rules beneath those controls.
 
 ## Purpose
 
@@ -36,7 +38,7 @@ The worker must establish:
 - Handoff and return path;
 - Current assigned task, if any;
 - Startup timestamp;
-- Worker State: `ACTIVE`, `STANDBY`, or `PLACEMENT REQUIRED`.
+- Worker State: `ACTIVE`, `STANDBY`, `OPEN TASK / STANDBY`, or `PLACEMENT REQUIRED`.
 
 ## Worker states
 
@@ -48,6 +50,10 @@ The worker has an authorized executable Worktree and is currently processing it.
 
 The worker has completed startup/registration but has no current executable assignment. It waits for `RUN`, an assigned Worktree, or a new authorized directive.
 
+### OPEN TASK / STANDBY
+
+The worker has unfinished assigned work, but execution is stopped because of a timeout, crash, unresolved external result, exhausted safe retries, inaccessible dependency, or another verified stop condition. The Project Worktree must preserve the unfinished task, last verified state, stop reason, next trigger, and any `UNKNOWN` external result. STANDBY never erases the OPEN TASK.
+
 ### PLACEMENT REQUIRED
 
 The directive cannot be safely fitted into the existing Project/Lane/S.O.P. structure.
@@ -57,6 +63,14 @@ The worker must return:
 **PLACEMENT REQUIRED → DIRECTIVE → EXISTING PROJECTS/LANES CHECKED → CONFLICT/UNKNOWN → RETURN TO PARENT MANAGER**
 
 The worker does not solve placement by creating its own hierarchy.
+
+## Automatic stop-state persistence
+
+For a qualifying timeout, repeated safe-retry failure, crash, catastrophic stop, inaccessible dependency, or unresolved external action/result:
+
+**SAFE-SAVE → RECORD LAST VERIFIED STATE → PRESERVE OPEN TASK → MARK UNKNOWN RESULTS WHERE APPLICABLE → SET WORKER `OPEN TASK / STANDBY` → ROUTE/WAIT FOR TRIGGER**
+
+Do not silently convert unfinished work to ordinary STANDBY.
 
 ## Standard OS Context Header
 
