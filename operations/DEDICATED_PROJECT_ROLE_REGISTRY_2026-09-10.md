@@ -7,9 +7,9 @@
 
 ## Purpose
 
-Record the current manager/specialist pair, Project Source and tailored workflow for each established dedicated supplier project so workers have one clear project lane and do not interpret company SOPs or the global work board as a broadcast assignment list.
+Record the current manager/specialist pair, Project Source and tailored workflow for each established dedicated project so workers have one clear project lane and do not interpret company SOPs or the global work board as a broadcast assignment list.
 
-This registry defines project-role routing only. `CURRENT_WORK_BOARD.md` remains the global unresolved-work state, each vendor Project Source remains the public-safe onboarding/readiness index, and each project's master SOP/current state remains the supplier/project rule source.
+This registry defines project-role routing only. `CURRENT_WORK_BOARD.md` remains the global unresolved-work state, vendor Project Sources remain the public-safe onboarding/readiness indexes for vendor lanes, and each project's Project Source/master SOP/current state remains the project rule source.
 
 ### Role-label reconciliation rule
 
@@ -25,12 +25,13 @@ This prevents an older label such as `Project Worker`, `functional manager`, or 
 | VEVOR | **VEVOR Project Operations Manager** — consolidated existing VEVOR project-management function, not an added competing top-level manager | **VEVOR Reconciliation & Price-Control Specialist** | [`vendor-project-sources/VEVOR_PROJECT_SOURCE.md`](./vendor-project-sources/VEVOR_PROJECT_SOURCE.md) | Peter Torres → Company Operations → OS Project Manager | `VEVOR_TAILORED_PROJECT_WORKFLOW_2026-09-10.md` | DIRECT-SITE CATALOG LIVE / PUBLIC ACCEPTANCE + FIRST-ORDER PROOF OPEN |
 | SOK | **SOK Project Operations Manager** | **SOK RECON OS** — supplier/warranty/logistics/economics reconciliation specialist | [`vendor-project-sources/SOK_PROJECT_SOURCE.md`](./vendor-project-sources/SOK_PROJECT_SOURCE.md) | Company Operations + OS Project Manager | `SOK_TAILORED_PROJECT_WORKFLOW_2026-09-10.md` | ACTIVE PRIMARY AUTHORIZED BATTERY SUPPLIER / COMMERCE + HAWAII WARRANTY-LOGISTICS DEVELOPMENT |
 | Kingboss | **Kingboss Project Operations Manager** | **Kingboss Project Specialist** — source/compliance/product/commercial verification | [`vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md`](./vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md) | Ecommerce & Vendor Operations → Company Operations → OS Project Manager | `KINGBOSS_TAILORED_PROJECT_WORKFLOW_2026-09-10.md` | B2B APPROVED / ONBOARDING PACKAGE-DATA WAITING |
+| Recon Damage Report | **Recon Damage Report Manager** | **Systems Integrity & Regression Specialist** — evidence, regression forensics, stale-control reconciliation and closure verification | [`recon-damage-report/RECON_DAMAGE_REPORT_PROJECT_SOURCE.md`](./recon-damage-report/RECON_DAMAGE_REPORT_PROJECT_SOURCE.md) | Company Operations → OS Project Manager → Casey / Owner | `recon-damage-report/RECON_DAMAGE_REPORT_WORKFLOW_2026-09-11.md` | ACTIVE / INITIAL BASELINE ESTABLISHED / FIRST RECOVERY PASS OPEN |
 
 ## Project Source requirement
 
-Every dedicated vendor project must maintain the linked Project Source required by `VENDOR_PROJECT_SOURCE_STANDARD_2026-09-10.md`.
+Every dedicated vendor project must maintain the linked Project Source required by `VENDOR_PROJECT_SOURCE_STANDARD_2026-09-10.md`. Non-vendor dedicated projects maintain an equivalent project-specific source/current-state file appropriate to their lane.
 
-The Project Source supplies the public-safe onboarding/readiness index needed by the Project Operations Manager and Project Specialist, including reusable Elevation onboarding data, protected-document availability, vendor account/source/MAP/channel/inventory/fulfillment/warranty/compliance readiness, missing inputs, first-order proof and maturity state.
+The Project Source supplies the public-safe/current-state index needed by the Project Operations Manager and Project Specialist. Vendor sources include reusable Elevation onboarding data, protected-document availability, supplier account/source/MAP/channel/inventory/fulfillment/warranty/compliance readiness, missing inputs, first-order proof and maturity state. Non-vendor projects use the same continuity principle for their own evidence/state.
 
 A prospect in `SUPPLIER_LEADS_LIVE_MAP.md` does not require a Project Source until a dedicated project/manager is established.
 
@@ -43,7 +44,7 @@ The manager still owns:
 - the project worktree;
 - routing;
 - current state;
-- Project Source maintenance for material vendor-readiness changes;
+- Project Source maintenance for material readiness/state changes;
 - receipts;
 - next action;
 - close condition.
