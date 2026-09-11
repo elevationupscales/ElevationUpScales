@@ -1,0 +1,16 @@
+MASTER SUPPLIER SOURCE: vevor-533.xlsx
+UPSTREAM: https://ads-feed.s3.us-west-2.amazonaws.com/ads/business/533/vevor-533.xlsx
+
+The supplier workbook remains the VEVOR feed source of truth.
+The Git worker package is a derived operational copy.
+
+Parsed source facts from the 2026-09-10 working snapshot:
+- 20,999 product rows
+- 16,051 rows marked in stock in the feed snapshot
+- MAP field present: column AH, `MAP (Minimum Advertised Price)`
+- Operating SOP present in source workbook: NO
+
+PUBLIC-REPO CONTROL:
+- Colorado tax-license image is restricted and is not stored in public Git.
+- Tax/account identifier is restricted and is not stored in public Git.
+- The large all-product light CSV is generated in GitHub from the upstream supplier workbook.
