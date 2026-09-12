@@ -2,80 +2,41 @@
 
 **Owner:** Casey Young  
 **Date:** 2026-09-12  
-**Status:** CONTROLLING / IMMEDIATE  
-**Applies to:** ElevationUpScales.com checkout, Shopify Store Operations, MPM5, MASTER RECON OS, MASTER DEVELOPER, COM2
+**Status:** **SUPERSEDED / HISTORICAL DRIFT EVIDENCE / DO NOT EXECUTE**  
+**Superseded by:** `OS_RECON_OWNER_PAYMENT_DRIFT_CORRECTION_2026-09-12.md` and the next MPM-recorded replacement payment flow
 
-## OWNER DECISION
+## RECON CORRECTION
 
-Stop combining ElevationUpScales.com checkout with Shopify.
+This file was created from an owner misunderstanding about PayPal inside the current U.S. Shopify payment lane.
 
-### Elevation website lane
+The controlling correction is:
 
-**ElevationUpScales.com uses the Elevation-owned PayPal Checkout tool.**
+- PayPal presented inside the U.S. Shopify checkout is **PayPal Wallet through Shopify Payments**;
+- that Shopify PayPal Wallet path is **not** a direct-PayPal-payout bypass of Shopify Payments;
+- an independent Elevation-owned PayPal Orders v2 checkout outside Shopify is a separate technical architecture and must not be conflated with Shopify PayPal Wallet;
+- MPM is building the replacement flow and owns the next architecture/sequencing decision.
 
-Payment architecture:
+## DEPLOYMENT STOP
 
-**ELEVATION PRODUCT → ELEVATION CHECKOUT → PAYPAL ORDERS V2 → ELEVATION LOCAL ORDER RECORD → PAYPAL CAPTURE / RECONCILIATION → ELEVATION FULFILLMENT ROUTING**
+The prior instruction for MASTER RECON to finish the PayPal-only lane-separation deployment is **RETIRED**.
 
-Controls:
+Do **not** deploy:
 
-- PayPal Orders v2 create/capture remains server-side.
-- PayPal credentials/secrets remain in environment bindings only.
-- Stable `PayPal-Request-Id` is used for idempotent retries.
-- Capture requires matching local Elevation order/state.
-- Amount, currency and PayPal status must reconcile before paid-state transition.
-- PayPal order/capture evidence is retained for reconciliation.
-- Webhooks may be used for recovery only with verified PayPal signatures.
-- QA must not submit a live payment.
+- branch `recon/elevation-paypal-only-separation-20260912`;
+- candidate `84af23ec814baa73718e33ec052044ce4706534d`.
 
-The Elevation website checkout must not route a customer into Shopify for card, Shop Pay, PayPal Wallet, or any other Shopify payment method.
+Preserve that branch/candidate as historical evidence until MPM closes or replaces it. Do not delete it merely to hide the drift.
 
-## Shopify lane
+Current production at the time of correction was:
 
-**Shopify is a separate commerce lane.**
+`dfb0dc2683035dd9e06f667aaabc04fc6eed3a0b`
 
-Shopify products, Shopify Checkout, Shopify Payments, Shopify payout behavior and Shopify-supported payment methods are owned by Shopify Store Operations and remain independent of the Elevation website PayPal checkout.
+This supersession does not authorize a rollback, forward deployment, or production ref movement. Wait for the exact MPM-approved replacement candidate and normal release verification.
 
-Shopify configuration must not be used as a fallback or dependency for the Elevation website checkout.
+## HISTORICAL PURPOSE
 
-## IMMEDIATE WORK STOP / ROUTING
+The original directive attempted to separate an Elevation-owned PayPal checkout from Shopify and instructed RECON to deploy a one-file checkout candidate. That instruction is retained here only as historical context; it has no current execution authority.
 
-Pause all unrelated website payment architecture, catalog expansion, new listings and cross-channel checkout work until the lane-separation repair is deployed and verified.
+## CURRENT CONTROL PHRASE
 
-Do not:
-
-- add another payment fallback to Elevation checkout;
-- route Elevation products to Shopify checkout;
-- restart Shopify configuration as part of the Elevation checkout incident;
-- merge broad `main` state into production;
-- alter the protected homepage top;
-- submit a live payment during QA.
-
-## EXACT REPAIR CANDIDATE
-
-Branch: `recon/elevation-paypal-only-separation-20260912`  
-Base production SHA: `dfb0dc2683035dd9e06f667aaabc04fc6eed3a0b`  
-Candidate SHA: `84af23ec814baa73718e33ec052044ce4706534d`
-
-Candidate delta:
-
-- one commit ahead;
-- zero behind;
-- one file changed: `site/checkout/index.html`;
-- removes Shopify direct-buy/card fallback script loading;
-- removes Shopify card fallback UI from Elevation checkout;
-- preserves Elevation PayPal checkout and core `store-checkout.js` path.
-
-## MASTER RECON OS — FINISH INTERRUPTED DEPLOYMENT
-
-MASTER RECON OS owns completion of the interrupted deployment sequence for this exact candidate.
-
-Required sequence:
-
-**VERIFY EXACT SHA → CONFIRM PAYPAL-ONLY ELEVATION CHECKOUT → CONFIRM NO SHOPIFY CROSS-ROUTE → QA/SMOKE → MOVE SAME SHA TO PRODUCTION → LIVE VERIFY → RECORD RECEIPT → RETURN CONTROL TO MPM5.**
-
-Do not reopen broader development during this deployment.
-
-## CONTROL PHRASE
-
-**ELEVATION = PAYPAL CHECKOUT. SHOPIFY = SHOPIFY LANE. DO NOT COMBINE THEM. RECON FINISHES THE DEPLOYMENT.**
+**DO NOT REPLAY PAYPAL-ONLY DEPLOYMENT → SHOPIFY PAYPAL WALLET IS A SHOPIFY PAYMENTS LANE → MPM DEFINES THE REPLACEMENT FLOW → RECON SYNCS CONTROL.**
