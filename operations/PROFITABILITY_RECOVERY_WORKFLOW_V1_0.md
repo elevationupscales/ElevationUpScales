@@ -3,8 +3,10 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **Effective:** 2026-09-11 MDT  
+**Reconciled:** 2026-09-12 MDT  
 **State:** ACTIVE / P0 PROFITABILITY RECOVERY  
 **Authority:** Casey's newest explicit direction under `MASTER_SOP_V1_0.md`  
+**Paid-Acquisition Override:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`  
 **Purpose:** Maximize realized contribution, stop preventable losses, restore positive operating cash flow, eliminate the cumulative operating deficit, then build a cash reserve.
 
 ## 1. Control
@@ -20,6 +22,18 @@ The company operating sequence becomes:
 **STOP CASH LEAKS → RELEASE CASH → SELL ONLY POSITIVE-CONTRIBUTION OFFERS → FULFILL CLEANLY → RECORD REALIZED PROFIT → REPEAT WINNERS → PAY DOWN THE RED BALANCE → BUILD RESERVE.**
 
 This workflow narrows sequencing toward cash-positive operation; it does not erase valid OPEN / WAITING / HOLD work already preserved by the Master S.O.P. and Workboard.
+
+### Current owner paid-acquisition lock
+
+Until the verified capital-recovery hole is closed **and** Casey explicitly reopens paid acquisition:
+
+- no paid social ads;
+- no boosted posts;
+- no PPC;
+- no sponsored marketplace traffic purchased by Elevation;
+- no paid retargeting or other prepaid media acquisition.
+
+A product becoming profitable or “ad-ready” does not override this company-wide owner rule. Organic/owned/SEO/direct/free marketplace traffic may continue. Performance-based creator/affiliate commissions may continue only where there is no prohibited upfront spend and the resulting order remains positive-contribution.
 
 ## 2. Definition of profit for operations
 
@@ -37,6 +51,8 @@ Taxes collected for taxing authorities are not profit.
 
 Unknown costs must remain `UNKNOWN / VERIFY`; do not turn missing information into an assumed margin.
 
+During the current owner paid-ad lock, ad/promotion cost should normally be zero because prohibited prepaid acquisition is not executed. Performance-based affiliate commission and other permitted variable acquisition costs still belong in contribution math.
+
 ## 3. Definition of "out of the red"
 
 The exact cumulative red balance must come from actual financial records; it must not be guessed from operational receipts.
@@ -51,6 +67,8 @@ For management purposes, recovery proceeds through four gates:
 After Gate 4, move excess operating profit into reserve before broad expansion.
 
 Until an exact financial baseline is connected/reconciled, the red-balance amount remains **UNKNOWN / FINANCIAL BASELINE REQUIRED** rather than an invented number.
+
+Paid acquisition does not automatically reopen at Gate 4; Casey must explicitly reopen it.
 
 ## 4. P0 decision rule
 
@@ -67,7 +85,7 @@ Does this action release held payouts, close fulfillment so funds can settle, co
 If YES, it outranks catalog expansion and low-probability research.
 
 ### C. Produce profitable revenue
-Does this action directly increase the probability of selling an already verified positive-contribution offer through a working checkout path?
+Does this action directly increase the probability of selling an already verified positive-contribution offer through a working checkout path using an allowed traffic method?
 
 If YES, it is P0 revenue execution.
 
@@ -92,14 +110,18 @@ A missing fact holds only that exact SKU.
 ### SELL
 Use when all material facts are verified and expected contribution is positive.
 
+During the owner paid-ad lock, SELL/PROMOTE means organic/owned or another allowed no-prohibited-upfront-spend channel only.
+
 ### VERIFY
-Keep available for reconciliation where safe, but do not spend traffic/advertising effort until the missing material economic fact is resolved.
+Keep available for reconciliation where safe, but do not spend concentrated traffic effort until the missing material economic fact is resolved.
+
+An owning lane may preserve an ACTIVE listing while classifying traffic `HOLD — ECONOMICS UNKNOWN`; ACTIVE storefront state alone does not equal promotion approval.
 
 ### STOP / REBUILD
 Do not accept another order under the current configuration when expected contribution is negative, source fulfillment is unreliable or a material compliance/channel condition fails.
 
 ### SCALE
-Scale only after actual order evidence proves positive realized contribution and clean fulfillment.
+Scale only after actual order evidence proves positive realized contribution and clean fulfillment, and only through acquisition methods allowed by the current owner cash controls.
 
 ## 6. Channel strategy
 
@@ -112,9 +134,9 @@ Prioritize direct-site offers when:
 - expected contribution is positive;
 - supplier payment normally occurs after customer payment or uses another low-working-capital structure.
 
-Current first controlled example remains SOK `SK12V100PC` under the existing P0 clearance.
+Current controlled reference remains SOK `SK12V100PC` under the existing P0 clearance. Current Renogy and VEVOR owning-lane states may also route their exact economics-cleared products to organic/owned traffic.
 
-Use owned/free traffic before paid acquisition.
+**PAID ACQUISITION IS BLOCKED BY OWNER RULE.** Use owned/free traffic only until recovery is complete and Casey explicitly reopens paid acquisition.
 
 **PRODUCT-SPECIFIC CONTENT → EXACT PRODUCT PAGE → BUY NOW / CHECKOUT → PAYMENT → SUPPLIER PO → TRACKING → DELIVERY → REALIZED CONTRIBUTION.**
 
@@ -128,7 +150,7 @@ Existing approved Phase 1 rules remain controlling:
 - 30% pre-fee gross margin hard working minimum;
 - 35%+ preferred;
 - positive expected contribution after all eBay/variable costs required;
-- promoted listings OFF by default;
+- Promoted Listings / paid marketplace acquisition **OFF under the owner capital-recovery rule**;
 - preserve useful sales/watchers/history where a profitable rebuild is plausible;
 - stop new orders on known failed-economics configurations.
 
@@ -142,9 +164,16 @@ Catalog expansion is not success by itself.
 
 Each vendor Project returns only its cleanest sale-ready SKUs to the revenue lane.
 
-### TikTok Shop
+Current reconciled examples:
 
-The second appeal is terminally submitted / waiting. No replay work. TikTok commerce returns to active profitability execution only after an authentic platform trigger restores an executable path.
+- VEVOR: three exact products are promotion-cleared for free/owned traffic; the later shoe-dryer listing is ACTIVE but **HOLD TRAFFIC — ECONOMICS UNKNOWN** until its expected contribution is proven.
+- Renogy: live Shopify state is **2 ACTIVE / 4 DRAFT**; Adventurer 30A is the stronger current organic/owned hero and RBM500 is a thinner free/owned test. Real order fulfillment still requires exact dealer orderability/backorder, cost and shipping recheck.
+
+### TikTok Shop / Affiliate
+
+The seller-verification second appeal is terminally submitted / waiting. No replay work.
+
+TikTok Affiliate Growth is a separate active lane. It may continue performance-based creator work using exact SKU commission economics when there is no prohibited upfront ad spend and expected contribution remains positive. Affiliate Growth and settlement monitoring do not reopen the seller-verification appeal.
 
 ### Hawaii / Alaska / freight lithium
 
@@ -163,7 +192,7 @@ Proof shipments and customer-funded demand may proceed under existing logistics 
 During profitability recovery:
 
 1. **No catalog-for-catalog's-sake spending.**
-2. **No paid advertising by default.** An exact SKU may use paid promotion only after contribution modeling includes the ad cost and management has actual conversion evidence supporting the spend.
+2. **NO PAID ADVERTISING OR PREPAID MEDIA ACQUISITION.** This is an owner hard block until the verified capital-recovery hole is closed and Casey explicitly reopens paid acquisition. Product economics, campaign modeling or one positive order do not override it.
 3. **No new recurring software/app/subscription expense** unless the expense is required for a working revenue/compliance function or has a clear near-term savings/revenue case and passes the applicable owner gate.
 4. **No speculative inventory purchase by default.** Prefer dropship, customer-paid preorder/backorder, supplier-held stock, direct supplier fulfillment or customer-funded freight where authorized.
 5. **No unverified discounts.** Preserve MAP and expected contribution.
@@ -202,6 +231,7 @@ Immediate responsibility:
 - keep P0 direct-site revenue work active;
 - ensure known negative-contribution configurations are stopped in their proper lanes;
 - prevent low-value work from displacing cash recovery/profit execution;
+- enforce the owner no-paid-ads rule across every channel;
 - reconcile exact financial red balance when reliable financial data becomes available.
 
 ### Company Operations
@@ -219,7 +249,7 @@ Owns:
 
 Owns marketplace/channel profitability execution beneath current management direction.
 
-For eBay, execute the already approved contraction/stop-loss sequence rather than growing listing count.
+For eBay, execute the already approved contraction/stop-loss sequence rather than growing listing count. Paid marketplace promotion remains owner-blocked.
 
 ### Vendor Project Managers
 
@@ -231,7 +261,7 @@ A supplier with 100 available products may still have only 2–5 products worth 
 
 ### Marketing / Social
 
-Owned/free traffic comes first.
+Owned/free traffic comes first and is the current allowed acquisition mode.
 
 Content must point to exact verified purchase paths when the post is product-specific.
 
@@ -241,11 +271,13 @@ Measure traffic that can become cash:
 
 Follower count, impressions and catalog views are supporting signals, not recovery success on their own.
 
+Do not create paid boosts/ads/PPC while the owner lock remains active.
+
 ## 10. Daily profitability control loop
 
 At each management RUN during recovery:
 
-**GIT FIRST → CHECK STOP-LOSS ITEMS → CHECK CASH-RELEASE ITEMS → CHECK REAL PAID ORDERS → CHECK NEXT VERIFIED PROFITABLE OFFERS → EXECUTE HIGHEST-VALUE ACTION → RECORD MATERIAL DELTA → CONTINUE.**
+**GIT FIRST → CHECK STOP-LOSS ITEMS → CHECK CASH-RELEASE ITEMS → CHECK REAL PAID ORDERS → CHECK NEXT VERIFIED PROFITABLE OFFERS → EXECUTE HIGHEST-VALUE ALLOWED ACTION → RECORD MATERIAL DELTA → CONTINUE.**
 
 Daily scoreboard should contain only decision-driving fields:
 
@@ -257,7 +289,8 @@ Daily scoreboard should contain only decision-driving fields:
 - realized contribution trailing 7 days;
 - known loss/exception exposure;
 - top 3 executable revenue actions;
-- new recurring/advertising spend approved today;
+- new recurring spend approved today;
+- paid advertising spend: **$0 while owner lock is active**;
 - exact red balance when verified.
 
 Do not create a large dashboard before the underlying numbers are reliable.
@@ -270,19 +303,21 @@ Once per week, Hybrid Management reviews:
 - realized contribution by channel;
 - realized contribution by SKU;
 - refunds/credits/chargebacks;
-- channel/payment/ad fees;
+- channel/payment/affiliate fees;
 - supplier/freight cost leakage;
 - payout holds;
 - inventory cash exposure;
 - fixed/recurring operating expense due in the next 30 days;
 - red-balance movement;
-- top winners to scale;
+- top winners to scale through allowed channels;
 - losers to stop/reprice/resource;
 - blockers that are truly preventing profit.
 
 Decisions are then:
 
 **SCALE / KEEP / REPRICE / RESOURCE / STOP / WAIT.**
+
+Paid-ad execution remains separately owner-blocked regardless of a SCALE classification until Casey reopens it.
 
 ## 12. Recovery stages
 
@@ -302,7 +337,7 @@ Exit when current cash locks/holds are either cleared or isolated as true extern
 
 Drive owned/free traffic to a small number of verified direct-site products and retain only profitable marketplace offers.
 
-Exit when repeatable paid orders produce positive realized contribution with clean fulfillment.
+Exit when repeatable paid customer orders produce positive realized contribution with clean fulfillment. Here “paid orders” means customer-paid orders, not paid advertising.
 
 ### Stage 3 — OPERATING CASH POSITIVE
 
@@ -318,18 +353,18 @@ Do not declare this stage complete from sales volume. Use actual financial recor
 
 ### Stage 5 — RESERVE THEN SCALE
 
-After the red balance reaches zero, accumulate a basic operating reserve before materially increasing paid acquisition, speculative stock or fixed overhead.
+After the red balance reaches zero, accumulate a basic operating reserve before materially increasing speculative stock or fixed overhead.
 
-Scale only the channels/SKUs with proven realized contribution and reliable fulfillment.
+Paid acquisition still requires Casey's explicit reopen after recovery. Scale only the channels/SKUs with proven realized contribution and reliable fulfillment.
 
 ## 13. Current known actions under this workflow
 
 1. Keep the SOK `SK12V100PC` direct-site owned/free-traffic test active; no price cut or paid ad.
-2. Continue the eBay approved stop-loss/contraction work in the dedicated eBay lane; do not chase gross sales or catalog size.
+2. Continue the eBay approved stop-loss/contraction work in the dedicated eBay lane; do not chase gross sales or catalog size; no Promoted Listings while owner lock is active.
 3. Keep Doba cleaning recommendations in VERIFY until authenticated account-level cost/inventory/eligibility return; activate only on contribution pass.
-4. Keep VEVOR first-sale candidates gated by current supplier cost/contribution; do not promote from missing Shopify unit-cost data.
-5. Advance Renogy only SKU-by-SKU through its current activation QA; one held identity/orderability issue must not stop the cleaner SKUs.
-6. Keep TikTok appeal work closed until external trigger.
+4. VEVOR: keep the three economics-cleared first-sale products in free/owned promotion; do not restore the old supplier-email/economics wait. Keep shoe dryer `XXHGJFRSZWXDOY5PFV1` ACTIVE but `HOLD TRAFFIC — ECONOMICS UNKNOWN` until its exact expected contribution clears. A real paid order triggers exact live supplier economics/order-path recheck before purchase.
+5. Renogy: current live Shopify state is 2 ACTIVE / 4 DRAFT. Adventurer 30A remains the stronger organic/owned hero; RBM500 remains a thinner free/owned test. Do not duplicate scheduled Metricool posts. Reverify exact dealer orderability/backorder, protected cost and shipping before supplier fulfillment.
+6. Keep TikTok seller-verification appeal execution closed until external trigger. TikTok Affiliate Growth remains a separate performance-based creator lane subject to exact SKU contribution controls and no prohibited upfront ad spend.
 7. Keep Hawaii freight programs evidence-first and capital-light; do not convert route development into speculative inventory exposure.
 8. Record actual contribution after every real order; estimated profit is not enough to justify scale.
 
@@ -339,6 +374,7 @@ This workflow does not bypass owner gates for:
 
 - material inventory commitments;
 - financing/credit obligations;
+- paid acquisition before the separate owner recovery gate is explicitly reopened;
 - new recurring costs where owner approval is required;
 - material pricing/commercial commitments;
 - sensitive supplier/legal/tax representations;
@@ -357,6 +393,8 @@ The company exits Profitability Recovery only when all are true:
 5. a basic operating reserve is being built or maintained;
 6. future growth work is funded from proven economics rather than uncontrolled cash leakage.
 
+Exiting Profitability Recovery does not silently activate paid ads; paid acquisition still requires Casey's explicit reopen.
+
 ## Control phrase
 
-**DO NOT CHASE GROSS SALES. STOP LOSSES → RELEASE CASH → SELL VERIFIED POSITIVE-CONTRIBUTION OFFERS → FULFILL FAST → RECORD ACTUAL PROFIT → REPAY THE RED → BUILD RESERVE → SCALE ONLY WHAT WORKS.**
+**DO NOT CHASE GROSS SALES. STOP LOSSES → RELEASE CASH → SELL VERIFIED POSITIVE-CONTRIBUTION OFFERS THROUGH ALLOWED ORGANIC/OWNED CHANNELS → FULFILL FAST → RECORD ACTUAL PROFIT → REPAY THE RED → BUILD RESERVE → OWNER DECIDES WHEN PAID ACQUISITION REOPENS.**
