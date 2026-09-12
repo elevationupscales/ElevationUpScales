@@ -15,8 +15,9 @@
     if(/stale|source missing|unknown|hold|review/.test(source))return{code:"hold",label:"Confirm Availability",buy:false};
     if(/unavailable|out of stock|zero stock/.test(mode)||(has&&Number.isFinite(stock)&&stock<=0))return{code:"out",label:"Out of Stock",buy:false};
     if(/prepurchase|preorder|backorder/.test(mode))return{code:"hold",label:p.commerceLabel||"Confirm Availability",buy:eligible&&price>0};
+    if(mode==="check")return{code:"hold",label:"Confirm Availability",buy:false};
     if(!price&&!p.sokProduct)return{code:"hold",label:"Confirm Availability",buy:false};
-    if(/doba/.test(supplier)){if(!has||!Number.isFinite(stock))return{code:"hold",label:"Confirm Availability",buy:false};if(shipping&&shipping!=="verified")return{code:"hold",label:shipping==="quote_required"?"Shipping Quote Required":"Confirm Availability",buy:false};return{code:"buy",label:"Supplier Stock Available",buy:price>0};}
+    if(/doba/.test(supplier)){if(mode!=="available")return{code:"hold",label:"Confirm Availability",buy:false};if(shipping&&shipping!=="verified")return{code:"hold",label:shipping==="quote_required"?"Shipping Quote Required":"Confirm Availability",buy:false};return{code:"buy",label:"Supplier Stock Available",buy:price>0};}
     if(p.sokProduct){if(!eligible)return{code:"hold",label:p.commerceLabel||"See Purchase Options",buy:false};return{code:"buy",label:p.commerceLabel||"Available",buy:price>0};}
     if(shipping==="quote_required")return{code:"hold",label:"Shipping Quote Required",buy:false};
     return{code:"buy",label:"Available",buy:price>0};

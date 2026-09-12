@@ -170,6 +170,8 @@ function catalogRow(row) {
     fourthwallProductId: clean(row.fourthwall_product_id,180), salesChannels: list(safeJson(row.sales_channels_json,[]),12,80), storeSection: clean(row.store_section,50) || "other",
     publishStatus: clean(row.publish_status,30) || (row.status === "active" ? "published" : "draft"), status: clean(row.status,30), reviewState: clean(row.review_state,160),
     internalNotes: clean(row.notes,4000), quantityOnHand: int(row.quantity_on_hand,0), quantityReserved: int(row.quantity_reserved,0), reorderPoint: int(row.reorder_point,0), version: int(row.version,1),
+    dobaSourceStock: row.doba_source_stock === null || row.doba_source_stock === undefined ? null : int(row.doba_source_stock,0),
+    dobaSourceState: clean(row.doba_source_state,80), dobaSourceObservedAt: clean(row.doba_source_observed_at,80),
     createdBy: clean(row.created_by,180), updatedBy: clean(row.catalog_updated_by || row.updated_by,180), createdAt: clean(row.catalog_created_at || row.created_at,80), updatedAt: clean(row.catalog_updated_at || row.updated_at,80)
   };
 }
@@ -330,18 +332,32 @@ export async function handleCatalogPublicApi(request, env, pathname) {
   const requestedSection = clean(url.searchParams.get("section") || "", 50).toLowerCase();
   const allowedSection = STORE_SECTIONS.has(requestedSection) ? requestedSection : "";
   const where = allowedSection ? "WHERE m.publish_status='published' AND m.store_section=?" : "WHERE m.publish_status='published'";
-  const query = `SELECT i.*,m.source_type,m.description,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.images_json,m.ebay_item_id,m.fourthwall_product_id,m.store_section,m.publish_status,m.review_state,m.created_by,m.updated_by AS catalog_updated_by,m.created_at AS catalog_created_at,m.updated_at AS catalog_updated_at FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id ${where} ORDER BY m.updated_at DESC LIMIT 200`;
-  const result = allowedSection ? await db.prepare(query).bind(allowedSection).all() : await db.prepare(query).all();
+  const selectBase = `SELECT i.*,m.source_type,m.description,m.supplier_sku,m.supplier_stock,m.shipping_status,m.shipping_cents,m.primary_image,m.images_json,m.ebay_item_id,m.fourthwall_product_id,m.store_section,m.publish_status,m.review_state,m.created_by,m.updated_by AS catalog_updated_by,m.created_at AS catalog_created_at,m.updated_at AS catalog_updated_at`;
+  const fallbackQuery = `${selectBase} FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id ${where} ORDER BY m.updated_at DESC LIMIT 200`;
+  const sourceAwareQuery = `${selectBase},s.supplier_stock AS doba_source_stock,s.source_state AS doba_source_state,s.last_observed_at AS doba_source_observed_at FROM eus_inventory_items i JOIN eus_catalog_meta m ON m.inventory_item_id=i.id LEFT JOIN eus_doba_source_state s ON lower(s.item_no)=lower(i.supplier_product_id) AND lower(s.supplier_sku)=lower(m.supplier_sku) ${where} ORDER BY m.updated_at DESC LIMIT 200`;
+  let result;
+  try { result = allowedSection ? await db.prepare(sourceAwareQuery).bind(allowedSection).all() : await db.prepare(sourceAwareQuery).all(); }
+  catch (error) {
+    if (!/no such table[^a-z0-9]*eus_doba_source_state/i.test(String(error?.message || error))) throw error;
+    result = allowedSection ? await db.prepare(fallbackQuery).bind(allowedSection).all() : await db.prepare(fallbackQuery).all();
+  }
   const promotionConfig = await getPromotionConfig(env);
   const products = (result.results || []).map(catalogRow).map((p) => {
     const priced = pricingForProduct(p, promotionConfig);
+    const source = clean(p.sourceType,40).toLowerCase();
+    const dobaSourceState = clean(p.dobaSourceState,80).toUpperCase();
+    const dobaSourceCurrent = source === "doba" && dobaSourceState === "CURRENT";
+    const dobaAvailability = source === "doba"
+      ? (!dobaSourceCurrent || p.dobaSourceStock === null ? "check" : (Number(p.dobaSourceStock) > 0 ? "available" : "unavailable"))
+      : "";
+    const availabilityStatus = dobaAvailability || ((p.supplierStock === null || p.supplierStock === undefined || String(p.supplierStock).trim() === "") ? "check" : (Number(p.supplierStock) > 0 ? "available" : "unavailable"));
     return {
       id: p.id, sku: p.sku, title: p.title, description: p.description, category: p.category,
       priceCents: priced.priceCents,
-      availabilityStatus: (p.supplierStock === null || p.supplierStock === undefined || String(p.supplierStock).trim() === "") ? "check" : (Number(p.supplierStock) > 0 ? "available" : "unavailable"),
+      availabilityStatus,
       shippingStatus: p.shippingStatus, shippingCents: p.shippingCents, primaryImage: p.primaryImage, images: p.images,
       storeSection: p.storeSection, publishStatus: p.publishStatus, updatedAt: p.updatedAt,
-      purchaseUrl: (() => { const source=clean(p.sourceType,40).toLowerCase(); const ebay=clean(p.ebayItemId,20); const section=p.storeSection==="lithium-batteries"?"lithium":"rv"; if(source==="doba" && clean(p.publishStatus,30).toLowerCase()==="published" && clean(p.shippingStatus,30).toLowerCase()==="verified" && Number(priced.priceCents)>0) return `/checkout/?source=${section}&id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.title)}`; if(/^\d{12}$/.test(ebay)) return `https://www.ebay.com/itm/${ebay}`; return ""; })(),
+      purchaseUrl: (() => { const source=clean(p.sourceType,40).toLowerCase(); const ebay=clean(p.ebayItemId,20); const section=p.storeSection==="lithium-batteries"?"lithium":"rv"; if(source==="doba" && availabilityStatus==="available" && clean(p.publishStatus,30).toLowerCase()==="published" && clean(p.shippingStatus,30).toLowerCase()==="verified" && Number(priced.priceCents)>0) return `/checkout/?source=${section}&id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.title)}`; if(/^\d{12}$/.test(ebay)) return `https://www.ebay.com/itm/${ebay}`; return ""; })(),
       promotion: {
         active: Boolean(priced?.promotion?.active), eligible: Boolean(priced?.promotion?.eligible), couponEligible: Boolean(priced?.promotion?.couponEligible),
         couponCode: clean(priced?.promotion?.couponCode,40), couponPercent: int(priced?.promotion?.couponPercent,0),
