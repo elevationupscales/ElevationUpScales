@@ -27,6 +27,17 @@ Verified rows:
 
 The fourth row is a second folding-bed order using the same live listing/SKU as `25-15104-41137`. It was not represented as its own current P0 row in `EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md` and must be added to recovery state before the next consequential action.
 
+## Fresh supplier/correspondence recon
+
+A fresh Gmail pass across the exact unresolved order IDs/SKUs found the current eBay sale/late-shipment notices but **no Doba order confirmation or Doba shipment confirmation** for:
+
+- `20-15123-05140` / `D010277TCB2`;
+- `25-15104-41137` / `D0102X33W6W`;
+- `07-15141-13062` / `D0102X33W6W`;
+- `02-15170-43443` / `D01027H21KW`.
+
+This does not authorize inventing a shipment. It reinforces the existing recovery rule that supplier execution must be proven before tracking is added or an uneconomic rescue order is placed.
+
 ## Weed-wacker cancellation verification
 
 Authenticated Seller Hub Cancellations and Order Details both verify the existing weed-wacker recovery lane.
@@ -69,14 +80,21 @@ The existing eBay recovery worktree correctly identified the weed-wacker, flashl
 
 The current worktree's prior `AUTHENTICATED EBAY REQUIRED` blocker is superseded by this verified browser-access state while the Opera Browser Connector remains available.
 
+## Action-surface check
+
+The current Opera Browser Connector can read and navigate authenticated Seller Hub but does not expose a supported click/submit control for eBay's consequential Accept/Decline/refund actions. A fresh plugin-directory check found no eBay seller-operations connector that can safely replace that action surface in this session.
+
+Accordingly, consequential eBay mutations remain an execution-surface gate, not an evidence or decision gate. No unsupported automation or reverse-engineered form submission is authorized.
+
 ## Required next actions
 
 1. eBay Store Operations Worker adopts this delta before resuming P0 recovery.
-2. Add `07-15141-13062` as its own recovery row and reconcile supplier/order evidence before any fulfillment or refund decision.
-3. Preserve `02-15170-43443` as the current organizer economics/source-cost check; do not ship until landed contribution clears.
-4. Reconcile `20-15123-05140`, `25-15104-41137`, and `07-15141-13062` against current supplier state. If no valid shipment/source execution exists, follow the existing customer-recovery/economics controls rather than initiating known uneconomic late fulfillment.
-5. Weed-wacker `10-15134-90489` is now verified unshipped with an active buyer cancellation request and should advance through the existing cancel/refund recovery action using an execution surface that supports the eBay Accept control.
+2. Add `07-15141-13062` as its own recovery row.
+3. `10-15134-90489` is verified unshipped with an active buyer cancellation request and should advance through the existing cancel/refund recovery action using an execution surface that supports the eBay Accept control.
+4. Treat `20-15123-05140`, `25-15104-41137`, and `07-15141-13062` as **UNSHIPPED / NO SUPPLIER CONFIRMATION FOUND** until contrary proof exists. Reconcile exact source once more at execution time; do not create known uneconomic late rescue orders.
+5. Preserve `02-15170-43443` as the current organizer economics/source-cost check; do not ship until landed contribution clears.
 6. Preserve `12-15143-03510` as SHIPPED / TRACKING VERIFIED and monitor delivery only; do not cancel or duplicate tracking.
+7. Once customer recovery actions are executed, continue the authenticated Active Listings metrics/economics audit and eliminate the listings that recreate these failures.
 
 ## Connector stability note
 
