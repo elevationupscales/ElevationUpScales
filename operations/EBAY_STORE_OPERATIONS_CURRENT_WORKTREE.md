@@ -22,13 +22,13 @@ Recover current eBay customer/order issues, then overhaul the live eBay catalog 
 | Priority | Work Item | State | Blocker / Input | Next Action | Close Condition |
 |---|---|---|---|---|---|
 | P0 | Seller Hub live recovery recon | OPEN TASK / AUTHENTICATED EBAY REQUIRED | Need live Seller Hub access; email RECON complete enough to route | Read current awaiting-shipment/cancellation/refund/tracking state and reconcile against email evidence | Every open/recent order has one current verified state |
-| P0 | Weed wacker order `10-15134-90489` | CANCEL REQUESTED / LATE / VERIFY BEFORE ACTION | Must prove unshipped before cancellation | If still unshipped, approve cancellation/refund and apologize in eBay; if shipped, preserve order and update tracking | Buyer request resolved and eBay state verified |
-| P0 | Folding bed order `25-15104-41137` | LATE / VERIFY | No exact shipment evidence in email RECON | Verify Seller Hub + supplier; if no executable fulfillment path, cancel/refund + apologize; if shipped, post tracking + apologize for delay | Order reaches shipped/tracked or canceled/refunded verified state |
-| P0 | VEVOR flashlight order `20-15123-05140` | SHIP-BY SEP 11 / STATUS UNKNOWN | No later shipment evidence in email RECON | Verify Seller Hub/source now; fulfill if executable, otherwise resolve truthfully | Order has verified shipped/tracked or appropriate cancellation/refund state |
+| P0 | Weed wacker order `10-15134-90489` | CANCEL REQUESTED / LATE / BUYER APOLOGY SENT / CANCEL ACTION STILL OPEN | Must prove unshipped before cancellation | Buyer apology sent through the existing eBay member-relay thread on Sep. 11. Next: verify Seller Hub; if still unshipped, approve cancellation/refund; if shipped, preserve order and update tracking | Buyer request resolved and eBay state verified |
+| P0 | Folding bed order `25-15104-41137` | LATE / VERIFY | No exact shipment evidence in email RECON; no buyer-relay thread located in Gmail | Verify Seller Hub + supplier; if no executable fulfillment path, cancel/refund + apologize in Seller Hub; if shipped, post tracking + apologize for delay | Order reaches shipped/tracked or canceled/refunded verified state |
+| P0 | VEVOR flashlight order `20-15123-05140` | SHIP-BY SEP 11 / STATUS UNKNOWN | No later shipment evidence in email RECON; no buyer-relay thread located in Gmail | Verify Seller Hub/source now; fulfill if executable, otherwise resolve truthfully and communicate through Seller Hub | Order has verified shipped/tracked or appropriate cancellation/refund state |
 | P0 | Back-seat organizer `02-15170-43443` | PAID / CURRENT / SHIP-BY SEP 16 | Need profitable source + fulfillment confirmation | Verify source/cost/availability now; place/route fulfillment before deadline | Supplier acceptance/tracking recorded with positive expected contribution |
 | P0 | Doba cot order `12-15143-03510` | SHIPPED / DO NOT CANCEL | Need eBay tracking confirmation | Verify FedEx tracking is posted/visible in eBay; update buyer only if needed | eBay reflects correct shipment/tracking |
-| P0 | Refunded cot order `23-15100-64483` | CLOSED / REFUNDED | None | Do not reopen; optional courtesy only if unresolved buyer thread remains | No unresolved customer action |
-| P1 | Affected-buyer apology sweep | WAITING ON LIVE ORDER RECON | Need exact resolution per order | Send one concise in-platform message to each affected buyer after status is verified | Every materially affected current buyer has one accurate update/apology |
+| P0 | Refunded cot order `23-15100-64483` | CLOSED / REFUNDED | None | Do not reopen; buyer already confirmed refund credit | No unresolved customer action |
+| P1 | Affected-buyer apology sweep | PARTIAL / SELLER HUB REQUIRED | Weed-wacker apology sent; other affected buyers lack usable member-relay threads in current Gmail recon | Send one concise in-platform message to each remaining affected buyer after exact order state is verified | Every materially affected current buyer has one accurate update/apology |
 | P1 | Full active-listing metrics audit | QUEUED | Need Seller Hub active listings + views/watchers/sales | Export/read all active listings and classify with sales/views/watchers/source/economics | Every active listing has one keep/rebuild/end state |
 | P1 | Dead listing cleanup | QUEUED | Metrics audit first | End/drop items with effectively no demand + weak economics/source fit | Dead capital/attention listings removed without destroying valuable history |
 | P1 | Proven listing rebuild/reprice | QUEUED | Need protected cost + current market/source facts | Improve proven listings in place; prioritize cots and other demand-proven categories when profitable | Strong listings meet source, presentation and profit standards |
@@ -85,7 +85,8 @@ Do not migrate listings to direct VEVOR/Renogy/SOK/Kingboss merely because direc
 - eBay has been reported logged into the user's browser.
 - Current available TinyFish automation route could not start because its wallet balance is below zero.
 - No current installed eBay-native seller plugin is available in the plugin registry.
-- Therefore **no Seller Hub cancellation/refund/message/listing change has been claimed executed from this Worktree yet.**
+- One customer communication was still possible through eBay's member-relay email thread and was sent for order `10-15134-90489`.
+- **No Seller Hub cancellation/refund/listing change has been claimed executed from this Worktree yet.**
 
 The worker must adopt the authenticated browser/connector route that is actually available in its execution session and verify live state before any consequential action.
 
