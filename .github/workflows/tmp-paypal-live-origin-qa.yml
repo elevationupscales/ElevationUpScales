@@ -1,0 +1,75 @@
+name: Temporary PayPal live origin QA
+
+on:
+  push:
+    branches:
+      - qa/paypal-live-origin-0911
+
+permissions:
+  contents: read
+
+jobs:
+  live-origin-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read public PayPal checkout configuration safely
+        run: |
+          set -euo pipefail
+          curl -fsS https://elevationupscales.com/api/store-checkout/config -o /tmp/config.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/config.json'))
+          safe={
+            'ok':data.get('ok'),
+            'configured':data.get('configured'),
+            'credentialsConfigured':data.get('credentialsConfigured'),
+            'checkoutEnabled':data.get('checkoutEnabled'),
+            'liveCheckoutApproved':data.get('liveCheckoutApproved'),
+            'environment':data.get('environment'),
+            'hasClientId':bool(data.get('clientId')),
+          }
+          print(json.dumps(safe, sort_keys=True))
+          PY
+      - name: Canonical Elevation quote must pass origin guard
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/canonical.json -w '%{http_code}' \
+            -H 'Origin: https://elevationupscales.com' \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data '{"source":"lithium","id":"sok-sk12v100pc","quantity":1}' \
+            https://elevationupscales.com/api/store-checkout/quote)
+          echo "canonical_status=$code"
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/canonical.json'))
+          safe={k:data.get(k) for k in ('ok','source','id','productName','quantity','unitPriceCents','shippingCents','totalCents','error')}
+          print(json.dumps(safe, sort_keys=True))
+          PY
+          test "$code" = '200'
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/canonical.json'))
+          assert data.get('ok') is True, data
+          assert data.get('id') == 'sok-sk12v100pc', data
+          PY
+      - name: External origin must remain denied
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/evil.json -w '%{http_code}' \
+            -H 'Origin: https://evil.example' \
+            -H 'Content-Type: application/json' \
+            --data '{"source":"lithium","id":"sok-sk12v100pc","quantity":1}' \
+            https://elevationupscales.com/api/store-checkout/quote)
+          echo "external_status=$code"
+          test "$code" = '403'
+          grep -q 'Cross-origin request denied' /tmp/evil.json
+      - name: Missing Origin must remain denied
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/no-origin.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            --data '{"source":"lithium","id":"sok-sk12v100pc","quantity":1}' \
+            https://elevationupscales.com/api/store-checkout/quote)
+          echo "missing_origin_status=$code"
+          test "$code" = '403'
