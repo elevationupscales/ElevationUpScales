@@ -4,218 +4,151 @@
 **Effective:** 2026-09-12  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Last source-state reconciliation baseline:** `5ac33e4e124b7fe8108c7ef3c8a85be27c91442c`  
-**Last control-surface S.O.P. sync:** 2026-09-12 / `MASTER_SOP_V1_0.md` + `MASTER_OS_GLOSSARY_V1_0.md`  
-**Current cross-Project profitability control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
-**Current owner paid-acquisition control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`  
-**Current P0 coding/deployment recovery control:** `MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md` + `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`
+**Current routing control:** `MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md`  
+**Profitability control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
+**Paid-acquisition control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
-> The reconciliation baseline records the newest material business/project source state reviewed by this board. Later commits that only reconcile this board, a worker registry, a Worktree, or an OS RECON receipt do not make the marker stale by themselves.
+## Operating rule
 
-## Purpose
+**ONE CURRENT STATE PER WORK ITEM. ONE EXECUTION OWNER. NO DUPLICATE RECON. NO DUPLICATE DEV ROUTING.**
 
-This file is the single public-safe global work board for unresolved Elevation UpScales operating work.
-
-**ONE CURRENT STATE EXISTS FOR EACH WORK ITEM.**
-
-**NEW WORK NEVER CAUSES EXISTING OPEN WORK TO DISAPPEAR.**
-
-A priority change does not close a work item. WAITING and HOLD items remain visible until their trigger occurs or they are explicitly closed/superseded.
-
-This board routes work. Detailed execution evidence stays in the owning Project Source, Worktree, lane SOP, current platform evidence, and dated receipts.
-
-## Authority
-
-Use this order:
-
-1. Casey / Owner's newest explicit direction.
-2. `MASTER_SOP_V1_0.md` and `MASTER_OS_GLOSSARY_V1_0.md`.
-3. This `CURRENT_WORK_BOARD.md` for reconciled global routing/state.
-4. The applicable Project/Lane SOP, Project Source, tailored workflow and current Worktree.
-5. Current application / Git / platform / correspondence evidence.
-6. Dated records and historical handoffs as evidence only.
-
-`PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md` is an active cross-Project sequencing control under the authority above. It does not create a second Project, manager, Workboard, or accounting system.
-
-`OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md` is an active owner hard control: **no paid social ads, boosts, PPC, sponsored marketplace traffic, paid retargeting or other prepaid media until the verified capital-recovery hole is closed and Casey explicitly reopens paid acquisition.** Product economics readiness does not override this gate. Organic/owned/SEO/direct/free marketplace and positive-contribution performance-based affiliate activity may continue under lane controls.
-
-`MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md` is the active P0 website coding/deployment recovery sequence. Accepted production/recovery baseline is `89912be657d7e92c3582619005c0a110ad843577`. MASTER DEVELOPER returned the Phase B ledger; MASTER RECON independently audited it and recorded PASS; **PM4 acceptance or return is now the next control action.** MASTER DEVELOPER is held at the phase gate and Phase C remains unauthorized until PM4 explicitly accepts Phase B and routes it. Nonessential website feature work is frozen. **No older P2 developer row in this board may independently route MASTER DEVELOPER while the P0 freeze is active.** Exact customer/order emergencies or verified revenue blockers must be routed through PM4 into the coding-stabilization Worktree.
-
-`SUPPLIER_LEADS_LIVE_MAP.md` remains the canonical supplier-domain relationship/status map. It does not replace this board.
-
-### Current owner homepage / commerce boundary
-
-`OWNER_DIRECTIVE_HOMEPAGE_LOCK_2026-09-12.md` now means:
-
-- **store / catalog / product-item / shopability / commerce-navigation work may move only when it does not conflict with the active P0 coding freeze**;
-- the **protected top homepage experience is hard no-touch** unless Casey explicitly authorizes the exact change;
-- the protected top includes direct output and indirect shared-dependency changes that alter its rendered/runtime result;
-- before a commerce change touches a shared API/catalog/backend dependency, verify protected-top output remains unchanged;
-- if protected-top output would change, hold only that exact mutation and continue unrelated commerce work;
-- the earlier interpretation that broad non-hero homepage merchandising was automatically authorized is superseded by this boundary.
-
-`HOMEPAGE_STORE_MERCHANDISING_WORK_ORDER_2026-09-12.md` is preserved as deferred subordinate work. The current developer execution route is `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` under the management repair plan.
-
-## Operating loop
-
-Management:
+Management loop:
 
 **KNOW → RECONCILE → PRIORITIZE → ROUTE → VERIFY → UPDATE → CLOSE**
 
-Execution:
+Execution loop:
 
-**PICK UP LAST VERIFIED WORKTREE → VERIFY → EXECUTE → DOCUMENT MATERIAL DELTA → CLOSE / WAIT / HOLD → CONTINUE NEXT IN-PROJECT ITEM**
+**VERIFY → FIX IF POSSIBLE → COMPLETE IF CLEAN → HOLD ONLY THE BLOCKED ITEM → MOVE ON**
 
-Profitability recovery sequencing:
+Current streamlined routing:
 
-**STOP CASH LEAKS → RELEASE CASH → SELL ONLY POSITIVE-CONTRIBUTION OFFERS → FULFILL CLEANLY → RECORD REALIZED PROFIT → REPEAT WINNERS.**
+**OPERATORS OPERATE → RECON ONLY ON CONFLICT/GATE → DEV ONLY ON PROVEN CODE DEFECT → MPM SEQUENCES → CLOSE WHAT IS DONE.**
 
-Worker failure or one blocked sub-item does not automatically block its Project. Preserve the exact blocker and keep finishable work moving.
+## Hard controls preserved
 
-## Dedicated Vendor Project Source Index
+- Protected top homepage remains **NO TOUCH** unless Casey explicitly authorizes the exact change.
+- No paid ads / boosts / PPC / sponsored marketplace traffic / prepaid retargeting until capital recovery is verified and Casey explicitly reopens paid acquisition.
+- Checkout/payment function repairs remain P0 when a real defect is proven; profitability scoring may not block a functional purchase path.
+- No blind production deploy, wholesale `main` deploy, force update or stale-branch deployment.
+- SOK out-of-stock/unavailable products may use the established pre-purchase/backorder rule where allowed.
+- Hawaii lithium/warranty/logistics controls remain separate and may not be bypassed by generic channel actions.
 
-| Vendor Project | Project Operations Manager | Project Specialist | Project Source | Current High-Level State |
-|---|---|---|---|---|
-| SOK Supplier / Commerce / Hawaii Logistics / Warranty | SOK Project Operations Manager | SOK RECON OS | [SOK Project Source](./vendor-project-sources/SOK_PROJECT_SOURCE.md) | ACTIVE PRIMARY SUPPLIER / Lower-48 CONTROLLED / direct-site P0 traffic active / Hawaii warranty-logistics economics PROVING |
-| VEVOR Supplier / Catalog / Shopify / Fulfillment | VEVOR Project Operations Manager | VEVOR Reconciliation & Price-Control Specialist | [VEVOR Project Source](./vendor-project-sources/VEVOR_PROJECT_SOURCE.md) | ACTIVE / 19 A-tier live / **17 of 17 qualified B-tier ACTIVE** / 10-SKU fresh check COMPLETE / **3 promotion-cleared + 7 stock holds + 1 later ACTIVE economics-hold exception** / first real order open |
-| Renogy Dealer / Catalog / Commerce Integration | Renogy Branch Operations Manager | Renogy Project Specialist | [Renogy Project Source](./vendor-project-sources/RENOGY_PROJECT_SOURCE.md) + `RENOGY_CURRENT_WORKTREE.md` | APPROVED DEALER / portal relationship active / **2 Shopify ACTIVE + 4 DRAFT** / organic hero tests active / exact dealer fulfillment recheck on real order |
-| Kingboss B2B Supplier Onboarding / Catalog / Commerce | Kingboss Project Operations Manager | Kingboss Project Specialist | [Kingboss Project Source](./vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md) | ACTIVE STAGE 1 PROVING / supplier package partially received / Model 133 linkage verified / exact catalog mapping + pricing/MAP/channel/warranty gaps open |
+## DEV disposition
 
-Prospects remain in `SUPPLIER_LEADS_LIVE_MAP.md` until promotion to a dedicated vendor Project is justified.
+**MASTER DEVELOPER: CAUGHT UP / STANDBY / VERIFY-FIX ONLY.**
 
-## Worktree persistence / replay rule
+DEV is no longer a standing destination for every commerce, catalog or operations problem. The owning lane must first exhaust platform/configuration/operator repair.
 
-Unfinished work remains on this board or in its owning Worktree until its close condition is proven or Casey explicitly supersedes it.
+A DEV handoff requires a bounded defect packet with:
 
-At takeover/RUN/resume:
+1. exact URL/path/component;
+2. exact SKU/order when applicable;
+3. reproduction steps;
+4. expected result;
+5. actual result;
+6. customer/revenue impact;
+7. current owning lane;
+8. confirmation that platform/configuration repair was attempted or ruled out.
 
-**CURRENT MAIN → MASTER S.O.P./GLOSSARY → PROJECT SOURCE WHEN VENDOR → CURRENT WORKTREE → LAST VERIFIED ACTION → NEXT EXECUTABLE ACTION → RECORD MATERIAL DELTA → CONTINUE.**
-
-If the owning Worktree is verified `CLOSED`, `EXECUTION CLOSED`, `SUBMITTED / WAITING`, or otherwise terminal, an older board/registry/receipt/chat pointer may not reactivate it.
-
-**TERMINAL CURRENT WORKTREE → DO NOT RE-EXECUTE → CLEAR/ADVANCE STALE POINTER → SELECT NEXT EXECUTABLE WORK OR STANDBY.**
-
-**COM 2 anti-drift:** Company Operations consolidates current owning-lane truth; it does not replace it. A newer Project Source/Current Worktree/verified lane receipt defeats an older COM 2 sweep pointer.
-
-**P0 coding anti-drift:** while `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` is ACTIVE, that Worktree is the only normal execution route for MASTER DEVELOPER. Lower-priority developer rows remain visible as preserved backlog/evidence and cannot independently reactivate feature work.
+MASTER RECON is likewise **triggered**, not continuous: source conflict, release gate, production-lineage ambiguity or management-state drift.
 
 ---
 
-# ACTIVE
+# FOREGROUND P0
 
-| Work Item | Owner / Execution Lane | State | Priority | Exact Blocker / Trigger | Next Action | Close Condition | Source |
-|---|---|---|---|---|---|---|---|
-| Website coding/deployment stabilization — customer trust + production lineage | **PM4 / MPM** state owner; **MASTER DEVELOPER** execution; **MASTER RECON OS** integrity gate; COM 2 commercial continuity | **ACTIVE — P0 TECHNICAL RECOVERY / PHASE B RECON PASS / PM4 DISPOSITION PENDING / FEATURE FREEZE ACTIVE** | **P0 CONTROL-PLANE / CUSTOMER TRUST** | Accepted production/recovery remains `89912be657d7e92c3582619005c0a110ad843577`. `main` remains evidence/work input, not deployment authority. Developer Phase B return is complete and MASTER RECON audit PASS is durably recorded. Phase C remains blocked until PM4 explicitly accepts Phase B and authorizes the next phase. | **PM4 accepts or returns Phase B.** MASTER DEVELOPER remains HOLD AT PHASE GATE. If accepted, PM4 may authorize Phase C; no production movement is authorized by the acceptance alone. No bulk merge, wholesale `main` deploy, blind fast-forward or force update. | Phase B is PM4-accepted, then recovery proceeds through C–F; final freeze release requires no unresolved P0 drift, PM4 recommendation and Casey explicit release. | `MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md`; `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`; `OS_RECON_PRE_PRODUCTION_PHASE_B_AUDIT_2026-09-12.md`; GitHub issue #65; accepted production `89912be...` |
-| Direct-site profitable first sale / Shopify + PayPal | **MPM / Company Operations**; Shopify + vendor Projects + MASTER DEVELOPER only where technical | ACTIVE — NATIVE SHOPIFY CHECKOUT LIVE / CUSTOM PAYPAL LIVE / OWNED-TRAFFIC TESTING ACTIVE / FIRST REAL PAID ORDER OPEN | **P0 PRIMARY PROFIT LANE** | Checkout is not the current blocker. Qualified traffic to economically cleared offers is the bottleneck. Paid acquisition is blocked by owner rule. SOK direct-site testing remains protected; VEVOR/Renogy/Apparel organic tests may proceed only under their exact lane economics. | Preserve both working checkout paths. Route owned/free traffic only to exact verified positive-contribution offers. On a real order, reverify SKU/source/price/sellability, confirm payment + durable order record, route supplier fulfillment and record realized contribution. Any website mutation routes through the P0 coding recovery Worktree while the freeze is active. | Repeatable customer-paid order → source → fulfillment → contribution loop is proven and first real direct-site paid order is routed cleanly. | `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`; `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`; current vendor Worktrees |
-| eBay customer/cash recovery + Phase 1 profitability contraction | **eBay Store Operations Worker / Specialist** under Peter Torres / Company Operations | ACTIVE — AUTHENTICATED SELLER HUB LIVE READS / 4 AWAITING SHIPMENT SNAPSHOT / WEED-WACKER CANCELLATION PROCESSING / MUTATION CLICKS GATED ONLY / PAID ACQUISITION BLOCKED | **P0 PARALLEL** | Authenticated live reads are available when the connector is healthy. Current Awaiting Shipment snapshot remains organizer + spotlight + two separate folding-bed/cot orders. Weed-wacker cancellation is still processing. Consequential Seller Hub mutation clicks may require an action-capable authenticated surface. | Customer obligations first → cash release → action-capable Seller Hub for approved stop-loss/listing mutations → current-cost reverify solar charger → verify gazebo + mattress source → zero-demand purge → verify small profitable core. Never resubmit the weed-wacker cancellation or double-refund. No Promoted Listings while owner ad lock is active. | Customer obligations terminally resolved or cleanly shipped/tracked; held-cash blockers cleared/isolated; failed configurations cannot create repeat losses; active revenue core is exact-source/executable/positive-contribution. | `EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md`; profitability management decision; owner no-paid-ads directive |
-| VEVOR direct-site first profitable order | **VEVOR Project Operations Manager**; Peter oversight; VEVOR Specialist + bounded Shopify workers | ACTIVE — 19 A-TIER LIVE / **17 OF 17 B-TIER ACTIVE** / 10-SKU FRESH CHECK COMPLETE / **3 FREE-OWNED PROMOTION-CLEARED + 7 STOCK HOLDS + 1 ACTIVE ECONOMICS-HOLD EXCEPTION** | P1 PROFITABLE FIRST ORDER | Three exact SKUs are already economics-cleared for free/owned promotion. Supplier economics reply is nonblocking. Later shoe dryer `XXHGJFRSZWXDOY5PFV1` is ACTIVE at $19.90 but is **HOLD TRAFFIC — ECONOMICS UNKNOWN** and is not a fourth released hero. | **Do not rerun the 10-SKU fresh check.** Preserve three released products in free/owned traffic → classify shoe-dryer economics before traffic → real paid order triggers exact live VEVOR sellability/price-MAP/cost/tax/shipping/order-path recheck → fulfill → record actual contribution. | First real VEVOR order completes payment → live recheck → VEVOR purchase → tracking → customer delivery with positive/reconciled contribution and repeatable handling. | `VEVOR_CURRENT_WORKTREE.md`; [VEVOR Project Source](./vendor-project-sources/VEVOR_PROJECT_SOURCE.md); `VEVOR_FIRST_SALE_PROMOTION_RELEASE_2026-09-12.md` |
-| Elevation Apparel cash-light revenue / provider economics | **Apparel Vendor Operations Manager** under Peter Torres; Shopify/Fourthwall execution lanes as applicable | ACTIVE — FOURTHWALL 29 PRODUCTS / NATIVE FULFILLMENT PROVEN / MOUNTAIN PATCH DIRECT OWNED-TRAFFIC TEST / SPREADCONNECT **DISCONNECTED / INSTALL+AUTH GATE** | P1 PARALLEL CASH-LIGHT REVENUE | Fourthwall is a proven no-inventory-prebuy fulfillment lane; payout readiness remains open. Mountain Patch Baseball Cap direct Fourthwall test is active/published. Shopify live-state proved Spreadconnect is not currently installed and has no Spreadconnect fulfillment-service location. Paid ads are blocked company-wide. | Measure Fourthwall direct traffic/order evidence; audit 29 products; normalize/reprice weak hero economics; set payout readiness; install/auth Spreadconnect only through proper Shopify + NA account path when authorized; then compare exact branded blanks/cost/shipping and return 3–5 launch-ready Shopify apparel SKUs with one fulfillment owner each. | 3–5 creator-ready Apparel heroes have verified provider economics, safe purchase/fulfillment path and positive expected contribution; first new Apparel order records realized contribution. | `APPAREL_VENDOR_OPERATIONS_CURRENT_WORKTREE.md`; `FOURTHWALL_STARTUP_CAPITAL_REVENUE_PROGRAM_2026-09-12.md`; `SHOPIFY_SPREADCONNECT_ELEVATION_GEAR_EXECUTION_RETURN_2026-09-12.md` |
-| TikTok Affiliate Growth / profitable creator engine | **TikTok Affiliate Growth Manager** under Peter Torres; Apparel/vendor lanes supply exact economics | ACTIVE — LIVE AFFILIATE ACCESS / PRODUCTS AUTO-ENROLLED IN OPEN COLLABORATION BY DEFAULT / PROFITABILITY GATE ACTIVE / SELLER-VERIFICATION APPEAL SEPARATE AND TERMINAL-WAITING | P1 PARALLEL ACQUISITION | Auto-enrollment creates possible commission exposure even without a deliberate new campaign. `AUTO-ENROLLED` is not `PROFIT-APPROVED`. Mountain Patch Baseball Cap remains a direct Fourthwall `PROMOTE TEST` but is `HOLD RATE / REPRICE OR REROUTE` for TikTok Affiliate under the current screen. No prohibited upfront paid acquisition is allowed. | Audit live Open Collaboration commission settings through owning TikTok Affiliate lane; do not intentionally broaden margin-unknown creator traffic; validate exact fee/provider/shipping/promo/sample/return economics and safe commission ceiling per SKU; Trucker Cap next; tee/Crop Tee/Essential Hoodie remain hold/reprice/reroute. | At least one exact hero SKU supports a safe performance-based creator offer and produces attributable positive realized contribution; creator ladder/performance loop becomes repeatable. | `TIKTOK_AFFILIATE_GROWTH_CURRENT_WORKTREE.md`; `TIKTOK_AFFILIATE_PROFITABILITY_EXECUTION_2026-09-12.md`; `PM4_TIKTOK_AFFILIATE_LIVE_RECON_2026-09-12.md` |
-| Renogy sales-first exact-SKU activation + first-order proof | **Renogy Branch Operations Manager / Renogy Project Specialist** | ACTIVE — APPROVED / **2 ACTIVE + 4 DRAFT** / ORGANIC HERO TESTS ACTIVE / FIRST REAL ORDER OPEN | P1 SKU ACTIVATION / REVENUE | `RNG-CTRL-ADV30-LI-US` is ACTIVE at $82.99 and is the stronger organic/owned hero. `RBM500-US` is ACTIVE at $87.99 as a thinner free/owned test. Four other Renogy products remain DRAFT. Exact dealer orderability/backorder acceptance, protected current cost and shipping remain fulfillment-time checks. | Preserve 2 ACTIVE / 4 DRAFT. Let existing Metricool Adventurer/RBM500 organic posts run; do not duplicate them. On real order, verify exact dealer SKU/orderability/backorder/cost/shipping/contribution before supplier purchase. Continue four DRAFTs independently through exact gates. | Trusted Renogy launch set is live on approved direct channel and first paid order completes supplier purchase through delivery with repeatable refresh/warranty/returns and realized contribution. | `RENOGY_CURRENT_WORKTREE.md`; [Renogy Project Source](./vendor-project-sources/RENOGY_PROJECT_SOURCE.md); current live Shopify evidence |
-| Homepage-connected commerce / protected-top boundary | **PM4 routing only during P0**; MASTER DEVELOPER only through coding-stabilization Worktree | **HOLD — P0 CODING FEATURE FREEZE / BOUNDARY PRESERVED** | P2 DEFERRED | Valid commercial intent remains, but independent feature execution is superseded by the P0 coding/deployment recovery. Protected top remains hard no-touch. | Do not execute as a separate developer Worktree. Preserve the work order as backlog. If an exact current customer/order/revenue blocker is proven, route it through PM4 and classify it under the P0 change-admission rule; otherwise wait for freeze release. | P0 freeze is released by Casey after recovery gates pass, then PM4 may reactivate the exact bounded commerce work. | `OWNER_DIRECTIVE_HOMEPAGE_LOCK_2026-09-12.md`; `HOMEPAGE_STORE_MERCHANDISING_WORK_ORDER_2026-09-12.md`; `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` |
-| Kingboss Stage-1 proving / exact catalog map | **Kingboss Project Operations Manager / Kingboss Project Specialist** | ACTIVE — SUPPLIER INPUTS RECEIVED / EXACT MAPPING + COMMERCIAL GAPS OPEN | P2 PROVING / PARALLEL | Generic qualification is closed. Supplier confirmed 12V wholesale scope, Illinois ship-from, 100-unit mixed-model wholesale MOQ, reserved-stock dropship option, Model 133 linkage and supplied SDS/UN38.3 material. Exact catalog/internal SKU map, protected wholesale price, MAP/channel scope, warranty/RMA and model-specific compliance applicability remain open. | Continue existing image-map/internal-SKU crosswalk and Model 133 compliance reconciliation. Receive/map consolidated supplier product data; then reconcile pricing/MAP/channel/warranty and identify only differentiated positive-contribution launch SKUs. No speculative 100-unit commitment without owner approval. | At least one exact authorized profitable Kingboss product lane completes source/economics/compliance/fulfillment controls and first paid-order proof. | [Kingboss Project Source](./vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md); current Kingboss receipts/correspondence |
-| Universal catalog vendor acceptance | Operating System / Catalog / Developer; vendor managers own source truth | IN_PROGRESS — CROSS-VENDOR ACCEPTANCE OPEN / CODE MUTATIONS ROUTE P0 | P2 PARALLEL | SOK strongest live reference; VEVOR active catalog; **Renogy now has 2 ACTIVE + 4 DRAFT**; Kingboss exact catalog mapping open. Vendor/source acceptance can continue, but website code mutations may not bypass the P0 recovery lane. | Verify each vendor source → normalized catalog → search/filter → exact product route → correct checkout/assisted path → source/order capture → refresh → mobile/desktop/public discoverability. Do not redesign approved storefront. Route any required code change through PM4/P0 recovery while freeze is active. | Representative clean products from every current active vendor pass intended purchase/assisted paths with recoverable source refresh and no shared blocker. | `UNIVERSAL_CATALOG_LIVE_INTEGRATION_PROJECT.md`; `UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`; `RENOGY_CURRENT_WORKTREE.md` |
-| ElevationUpScales.com routing/content integrity residual | **PM4 routing only during P0**; MASTER DEVELOPER only through coding-stabilization Worktree | **HOLD — P0 CODING FEATURE FREEZE / RESIDUAL PRESERVED** | P2 DEFERRED TECHNICAL | The residual findings remain valid evidence, but independent P2 technical execution is superseded by the P0 recovery sequence. | Preserve exact residuals. Do not patch them independently. Any item already classified as REQUIRED RECOVERY in Phase B may execute only after PM4 accepts Phase B and routes the applicable recovery phase. Otherwise keep deferred until freeze release. | Each residual is either admitted and closed through P0 recovery or formally reactivated after freeze release; protected-top output remains unchanged. | `OS_RECON_ELEVATIONUPSCALES_DOTCOM_2026-09-11.md`; issue #65; `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` |
-| Checkout-gate residual — exact Renogy delayed-order test only | Commerce / QA; MASTER DEVELOPER only if a P0 change is routed | VERIFYING — TEST-ONLY / NO INDEPENDENT CODE MUTATION | P2 VERIFICATION | Shared Buy Now source routing and generic Doba availability presentation are production-closed. Remaining test is exact Renogy delayed-order SKU under current active/backorder controls. P0 freeze prohibits unrelated code changes. | Test only a verified exact Renogy delayed-order SKU through product/cart/checkout/production proof without bypassing exact dealer orderability controls. If the test exposes a defect, route the defect to PM4/P0 recovery; do not patch outside the coding-stabilization Worktree. | Exact delayed-order path passes without a vendor-wide bypass, or any defect is durably routed into P0 recovery. | `UNIVERSAL_CHECKOUT_SOURCE_ROUTING_LIVE_RECEIPT_2026-09-11.md`; `DOBA_AVAILABILITY_PRESENTATION_LIVE_RECEIPT_2026-09-11.md`; `RENOGY_CURRENT_WORKTREE.md` |
-| Shopify/SOK paid-order OS bridge | Commerce / Developer + Company Operations | VERIFYING | P2 | Implementation merged; only a real purchase-to-OS proof remains. Any technical mutation discovered by the proof routes through P0 recovery while freeze is active. | On first real order prove payment → durable order → SKU/source/fulfillment routing → production receipt. Do not manufacture an order. | Full real-order acceptance chain completes. | [SOK Project Source](./vendor-project-sources/SOK_PROJECT_SOURCE.md); merged application state |
-| Universal store / normalized retail architecture residual | **PM4 routing only during P0**; MASTER DEVELOPER only through coding-stabilization Worktree | **HOLD — P0 CODING FEATURE FREEZE / ISSUE #65 BACKLOG** | P2 DEFERRED | Issue #65 contains valid residual architecture/QA, but it is not a second priority board and cannot route feature work around the P0 recovery sequence. | Preserve issue evidence; admit only Phase-B-classified REQUIRED RECOVERY work through PM4 after Phase B acceptance. Do not rebuild already-merged implementation or advance deferred architecture independently. | Required recovery items are closed through P0, then any remaining business-valid deferred architecture may be reactivated after freeze release. | GitHub issue #65; `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` |
-| Master Catalog authenticated Admin preview | Catalog / Admin QA | QUEUED — ACCEPTANCE EVIDENCE ONLY / NO DEV ROUTING DURING P0 | P2 QUEUED | Remaining authenticated acceptance evidence only; it is not authorization to consume MASTER DEVELOPER capacity during the freeze. | Complete non-mutating evidence when separately routed to an appropriate QA/admin worker; if a code defect is found, route it into PM4/P0 recovery. | Required authenticated acceptance proof complete or defect durably routed. | GitHub issue #24; current catalog controls |
-| SOK Supplier, Commerce & Warranty Project | **SOK Project Operations Manager / SOK RECON OS** | IN_PROGRESS — LOWER-48 CONTROLLED / DIRECT-SITE P0 SUPPORT / HAWAII WARRANTY-LOGISTICS PROVING | P2 STRATEGIC outside P0 sale actions | SOK Hawaii warranty operating inputs are **RECEIVED** and initial workflow/model recorded. Remaining Hawaii economics depend on provider quotes, excluded-cost reconciliation and first-shipment actuals. H2O/Pasha additional-model workbook exists in prior SOK correspondence but current connector cannot read/download the legacy `.xls`. | Continue verified Lower-48 profitable commerce. Use received warranty inputs without duplicate supplier requests. Recover existing H2O workbook through an authorized path; process Logistics Plus/H2O route economics as evidence arrives. | Repeatable SOK commerce/warranty operation established; Hawaii route economics mature from verified quotes and real proof actuals. | [SOK Project Source](./vendor-project-sources/SOK_PROJECT_SOURCE.md); `SOK_HAWAII_WARRANTY_OPERATING_RECEIPT_2026-09-11.md` |
-| H2O Logistics Hawaii / Pasha backup route | Company Operations / Logistics + SOK Project | IN_PROGRESS — EXISTING SOURCE FILE / TECHNICAL ACCESS BLOCKER | P2 STRATEGIC | Required additional-model workbook already exists in SOK correspondence but legacy `.xls` is not currently accessible through connector. | Recover existing workbook through authorized attachment/export/human-download path; extract only exact model rows; route to H2O/Pasha. Do not estimate or ask SOK to resend already-supplied facts. | Priority SOK profiles priced and route/booking requirements defined. | `SOK_HAWAII_FREIGHT_PRICING_PORTFOLIO_STATE_2026-09-10.md` |
-| Warranty Fulfillment shared service | Operating System / routed warranty execution | IN_PROGRESS | P2 STRATEGIC | Shared workflow exists; proof matures through supplier-specific cases. | Prove lifecycle through actual supplier programs without overriding supplier authority or blocking commerce. | Repeatable workflow proven. | `WARRANTY_FULFILLMENT_SERVICE_WORKFLOW.md` |
-| SOK approved product-media integration | SOK Project / Catalog | IN_PROGRESS — OFFICIAL SOURCE VERIFIED / LARGE-PACKAGE INTAKE PARTIAL | P2 | Official media source already supplied; tooling cannot ingest whole large package in one path. | Recover/map accessible exact-SKU assets and use another supported extraction path for remainder; no duplicate supplier request. | Approved media mapped to exact SKUs. | [SOK Project Source](./vendor-project-sources/SOK_PROJECT_SOURCE.md) |
-| Complementary vendor activation / SolarStock queue | Peter / Vendor Onboarding + Company Operations | IN_PROGRESS — EXISTING OUTREACH WAITING / OTHER CLEAN QUEUE PARALLEL | P3 PARALLEL | Profitability recovery places broad supplier expansion behind executable stop-loss/cash-release/profitable-sales work. SolarStock request is already sent and waiting. | Do not resend/chase SolarStock. Continue only clean, deduped high-value routes when P0/P1 work does not need the capacity. | Existing qualified routes reach durable sent/waiting/approved/rejected states without duplicate outreach. | `SUPPLIER_LEADS_LIVE_MAP.md`; `SOLARSTOCK_USA_QUALIFICATION_DELTA_2026-09-10.md` |
-| Lithium Buyer Network prospecting | Leads / Prospecting | IN_PROGRESS | P3 PARALLEL | Must not displace profitability recovery. | Continue only spare/parallel capacity under existing geography lane. | Target batch reaches defined state. | `LITHIUM_BUYER_NETWORK_PROSPECTING_2026-09-10.md` |
-| Internal `sales@` tracking reliability | Operating System / Communications | READY | P3 END-OF-FLOW | Alias does not reliably route to regular inbox and can create false delivery-failure noise. | Verify alias/mailbox behavior and replace unreliable CC-based tracking when higher-priority work is clear. | Internal tracking reliable without bounce noise. | Owner direction 2026-09-10 |
+| Work Item | Owner | Current State | Next Action | DEV Role | Close Condition |
+|---|---|---|---|---|---|
+| Owner communications / residual Google Voice forwarding | **MPM / Communications Recovery** | **P0 CRITICAL — ACCOUNT RECOVERED / VOICE DELETED / RESIDUAL FORWARDING REMAINS** | Carrier removes conditional + unconditional Voice forwarding; Google clears any stale Voice-side linked/device state; test direct inbound call + SMS. | None unless a separate company-owned web/contact defect is proven. | Direct carrier call PASS + direct SMS PASS + no residual Voice routing + Casey confirms normal business communications. |
+| Shopify purchasability / sales-channel publication | **Shopify Store Operations** | **P0 PARTIAL — 103 ACTIVE / 53 ACTIVE+PUBLISHED / 50 ACTIVE+UNPUBLISHED / 0 ACTIVE unavailable on every channel** | Classify 50 unpublished as **INTENDED PUBLIC / INTENTIONAL HOLD / RETIRE** → publish intended-public only → verify public URL + exact variant/cart + guest checkout/payment UI → return exact before/after counts. | Only after Shopify publication/channel configuration is correct and a reproducible code defect remains. | Intended-public catalog is published and representative exact products complete product → cart → guest checkout → payment UI without sign-in blocker; holds/retirements are documented. |
+| eBay customer/cash recovery + profitability contraction | **eBay Store Operations under Peter / Company Operations** | **P0 PARALLEL — CUSTOMER OBLIGATIONS + CASH RELEASE + LOSS PREVENTION** | Resolve open shipment/cancellation/refund obligations first; clear held-cash blockers; then maintain only exact-source positive-contribution listings. No Promoted Listings while ad lock is active. | None for Seller Hub/platform operations. | Customer obligations resolved; cash blockers isolated/cleared; repeat-loss configurations removed; profitable core is executable. |
+
+---
+
+# PARALLEL REVENUE — DO NOT WAIT FOR DEV
+
+| Lane | Owner | State | Next |
+|---|---|---|---|
+| Direct-site first profitable sale / PayPal + Shopify | MPM / Company Operations + Shopify/vendor lanes | ACTIVE | Preserve custom PayPal and native Shopify checkout. Route owned/free traffic only to exact positive-contribution offers. First real order proves payment → durable order → source → fulfillment → realized contribution. |
+| VEVOR | VEVOR Project Operations Manager / Specialist | ACTIVE — 19 A-tier live / 17 qualified B-tier ACTIVE / 3 promotion-cleared | Do not rerun completed 10-SKU check. Keep released products in free/owned traffic; classify shoe-dryer economics before traffic; real order triggers exact source/cost/MAP/shipping recheck. |
+| Renogy | Renogy Branch Operations Manager / Specialist | ACTIVE — 2 ACTIVE / 4 DRAFT | Preserve 2 ACTIVE / 4 DRAFT. Continue exact-SKU activation; recheck dealer orderability/backorder/cost/shipping on real order. |
+| Apparel / Fourthwall | Apparel Vendor Operations Manager | ACTIVE — Fourthwall 29 products / native fulfillment proven | Audit economics, payout readiness and 3–5 launch-ready heroes. Spreadconnect remains separate install/auth work; do not block proven Fourthwall lane. |
+| TikTok Affiliate Growth | TikTok Affiliate Growth Manager under Peter | ACTIVE — affiliate access live / auto-enrollment not profit approval | Audit commissions and exact SKU economics. No deliberate scaling of margin-unknown products. Paid acquisition lock remains. |
+
+---
+
+# STRATEGIC / SUPPORT WORK — PRESERVED, NOT FOREGROUND
+
+| Work Item | Owner | State / Rule |
+|---|---|---|
+| SOK Supplier / Commerce / Warranty | SOK Project Operations Manager / SOK RECON OS | ACTIVE primary supplier. Lower-48 commerce continues. Hawaii warranty/logistics economics remain proving. No duplicate generic supplier qualification. |
+| Kingboss Stage-1 proving | Kingboss Project Operations Manager / Specialist | ACTIVE. Continue exact catalog/SKU map, protected pricing/MAP/channel/warranty/compliance reconciliation. No speculative 100-unit commitment without owner approval. |
+| Universal catalog vendor acceptance | Catalog + vendor managers | IN PROGRESS. Vendor/source acceptance can continue. Code mutations require a proven defect packet before DEV routing. |
+| Homepage-connected commerce / protected-top boundary | MPM | HOLD / DEFERRED. Protected top remains hard no-touch. No separate DEV worktree. |
+| ElevationUpScales.com residual routing/content items | MPM | PRESERVED / VERIFY-ONLY. Do not create independent developer work; route only a proven current defect. |
+| Universal store / normalized retail architecture residual | MPM | PRESERVED BACKLOG. Issue #65 is evidence/control, not a standing DEV queue. |
+| Exact Renogy delayed-order checkout test | Commerce / QA | TEST-ONLY. If it exposes a defect, return bounded evidence to MPM; do not patch independently. |
+| Shopify/SOK paid-order OS bridge | Company Operations / Commerce | VERIFY ON FIRST REAL ORDER. Do not manufacture an order. |
+| Master Catalog authenticated Admin preview | Catalog / Admin QA | QUEUED acceptance evidence only; no DEV capacity unless defect proven. |
+| H2O Logistics Hawaii / Pasha backup route | Company Operations / Logistics + SOK | IN PROGRESS with existing source file/access blocker. Recover existing workbook; do not ask SOK to resend supplied facts. |
+| Warranty Fulfillment shared service | Operating System / warranty execution | IN PROGRESS through real supplier cases; must not block commerce. |
+| SOK approved product-media integration | SOK Project / Catalog | IN PROGRESS. Use verified official source; continue exact-SKU asset mapping without duplicate supplier request. |
+| Complementary vendor activation / SolarStock queue | Peter / Vendor Onboarding | P3 PARALLEL. Continue only spare capacity; no duplicate outreach. |
+| Lithium Buyer Network prospecting | Leads / Prospecting | P3 PARALLEL; must not displace P0/P1. |
+| Internal `sales@` tracking reliability | Operating System / Communications | P3 END-OF-FLOW. Fix after higher-priority communications and commerce work. |
 
 ---
 
 # WAITING
 
-| Work Item | Owner | State | Trigger | Action After Trigger | Source |
-|---|---|---|---|---|---|
-| SolarStock USA quote / direct-job-site qualification | Company Operations / Vendor Onboarding | WAITING — REQUEST SENT | Supplier response | Reconcile quote, warehouse/pallet availability, lead time, freight/job-site/direct-ship/receiving conditions. No duplicate send/chase. | `SOLARSTOCK_USA_QUALIFICATION_DELTA_2026-09-10.md` |
-| Logistics Plus Hawaii storage / fulfillment qualification | Company Operations / Logistics + SOK | WAITING — DG / OPERATING REVIEW | Provider pricing/operating terms | Reconcile receiving/DG handling, storage, release/fulfillment, will-call/local delivery/Neighbor Island/minimum charges into Hawaii economics. | Current Logistics Plus correspondence; issue #67 |
-| R&R Solar Hawaii proof-support relationship | Logistics / B2B | WAITING | Partner response | Reconcile existing thread response; no duplicate outreach. | Current relationship / follow-up evidence |
-| Refunded folding-bed buyer — bank credit visibility | Company Operations / Order & Fulfillment | WAITING — CUSTOMER EXCEPTION ONLY | Customer/payment-system recheck or new complaint | Respond only if refund remains unresolved/new exception appears. | Verified customer correspondence 2026-09-10 |
-
-Items removed from WAITING because their trigger already occurred: **Kingboss supplier package**, **VEVOR generic fulfillment response**, and **SOK Hawaii warranty operating inputs**. Their remaining work is represented in ACTIVE rows above.
-
----
-
-# HOLD / SCHEDULED / OWNER GATE
-
-| Work Item | Owner | State | Priority | Reopen / Gate | Next | Source |
-|---|---|---|---|---|---|---|
-| Paid advertising / prepaid media acquisition | All commerce / marketing / channel lanes | **HOLD — OWNER CAPITAL-RECOVERY RULE** | COMPANY-WIDE | Verified capital-recovery hole reaches zero **and** Casey explicitly reopens paid acquisition | Continue organic/owned/SEO/direct/free marketplace and positive-contribution performance-based affiliate work only. Do not infer reopen from SKU margin or one profitable order. | `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md` |
-| TikTok Shop second appeal / withdrawal-restoration | Peter Torres / Ecommerce | **SUBMITTED / WAITING ON TIKTOK REVIEW / EXECUTION CLOSED** | MONITOR ONLY | Verified approval/restoration, new evidence request, denial/manual review instruction, or Casey explicit reopen | No rebuild/re-upload/resubmit/re-route while waiting. **TikTok held-funds/settlement monitoring and TikTok Affiliate Growth are separate lanes and do not reopen this appeal.** | `TIKTOK_SELLER_VERIFICATION_REPAIR_CURRENT_WORKTREE.md`; `TIKTOK_SECOND_APPEAL_OWNER_CONFIRMED_SUBMISSION_2026-09-11.md` |
-| SOK Hawaii permanent warranty economics / reserve/service compensation | SOK Project / SOK RECON OS | HOLD — TRUE OWNER GATE / STARTER MODEL EXISTS | P2 | Provider quotes, excluded costs, proof actuals + owner approval for permanent commercial structure | Continue internal evidence model only; do not present preliminary economics as permanent commitment. | `SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md`; warranty operating receipt |
-| SOK compliance reference PR #70 | SOK Documentation | HOLD | P3 | Fresh reconciliation/rebase if still useful | Do not auto-merge stale-lineage draft. | PR #70 |
-| Peter public profile / portrait | Peter / Communications | HOLD | P3 | Lane reactivated | Continue only when publication lane becomes current. | Prior closeout |
-
-Hawaii freight lithium eBay listings are also **protected from generic eBay purge**. Their exact disposition routes through Shipping/Hawaii Lithium verification before modification.
+| Work Item | State | Trigger / Action |
+|---|---|---|
+| SolarStock USA quote / direct-job-site qualification | WAITING — REQUEST SENT | Supplier response → reconcile quote, availability, lead time, freight/direct-ship terms. No duplicate send/chase. |
+| Logistics Plus Hawaii storage / fulfillment qualification | WAITING — DG / OPERATING REVIEW | Provider terms → reconcile handling, storage, release/fulfillment, delivery/minimums. |
+| R&R Solar Hawaii proof-support relationship | WAITING | Partner response → reconcile existing thread. No duplicate outreach. |
+| Refunded folding-bed buyer — bank credit visibility | WAITING — CUSTOMER EXCEPTION ONLY | Recheck only on new complaint or payment-system evidence. |
+| TikTok seller-verification second appeal | SUBMITTED / WAITING / EXECUTION CLOSED | Do not rebuild, re-upload or resubmit unless TikTok returns a new evidence request/decision or Casey reopens. Affiliate Growth is separate. |
 
 ---
 
-# CLOSED / PROTECTED FROM RECREATION
+# OWNER / HARD HOLD
 
-- Protected top homepage experience / approved retail branding release — CLOSED as completed visual experience; production smoke passed. **No-touch includes shared dependencies that would alter protected-top rendered/runtime output.** Do not recreate or mutate absent exact new owner direction or genuine defect.
-- Custom Elevation PayPal checkout origin/quote blocker — CLOSED; live PayPal path accepted. Remaining proof is first real paid order.
-- Shopify storefront password gate — CLOSED by Owner; public native checkout verified.
-- VEVOR generic qualification / PRO registration — COMPLETE.
-- VEVOR product-feed acquisition — COMPLETE.
-- VEVOR Colorado tax-exemption submission — COMPLETE as submission; final review is nonblocking.
-- VEVOR A-tier launch — COMPLETE; 19 direct products established.
-- VEVOR B-tier preparation/publication — COMPLETE for current qualified set; **17/17 VEVOR-B records are ACTIVE**. Do not recreate or bulk-reset.
-- VEVOR generic fulfillment-detail inquiry — COMPLETE / supplier answered: VEVOR-branded packaging, no invoice/price details in package, tracking through PRO account, current returns/support route, Elevation first-line customer support. First-order actuals remain proof work, not another questionnaire.
-- **VEVOR current-window 10-SKU first-sale fresh public sellability/price-MAP check — COMPLETE: 3 orderable / 7 unavailable. Do not rerun until a later refresh trigger exists.**
-- SolarStock bounded request — COMPLETE as send; response is WAITING.
-- Renogy dealer application/W-9/approval/portal setup — COMPLETE; do not restart onboarding.
-- Renogy Lower-48 policy setup and accepted evidence Batches 01–02 — COMPLETE; preserve exact-SKU distinctions and warranty-conflict holds.
-- Historical Renogy `5 DRAFTS / ZERO ACTIVE` and `1 ACTIVE / 5 DRAFTS` snapshots — SUPERSEDED by `RENOGY_CURRENT_WORKTREE.md` and live Shopify **2 ACTIVE / 4 DRAFT** state.
-- SOK generic supplier qualification — COMPLETE; SOK remains primary authorized supplier.
-- SOK official product-image-source request — COMPLETE; source supplied.
-- SOK Hawaii warranty operating-input request + response intake — COMPLETE as correspondence/intake; supplier inputs are recorded in `SOK_HAWAII_WARRANTY_OPERATING_RECEIPT_2026-09-11.md`. Ongoing economics remain ACTIVE/HOLD as represented above.
-- R&R duplicate unsent-response gate — SUPERSEDED; current lane WAITING on partner.
-- Logistics Plus outbound document/pricing-input response tasks — COMPLETE; current lane WAITING on provider terms.
-- Ten complementary vendor introduction/application sends — COMPLETE as outbound tasks; resulting supplier lanes remain in supplier map.
-- DMX Power / Magnum Energy / Dimensions initial outreach — COMPLETE as send; do not recreate drafts.
-- Legacy GitHub control issues #26, #30 and #33–#36 — CLOSED / SUPERSEDED.
-- eBay unknown-device alert — CLOSED after human confirmation.
-- Worker Exact-SHA release workflow implementation — COMPLETE.
-- September 9 supplier-state consolidation / OS role reconciliation — COMPLETE.
-- TikTok second-appeal execution — COMPLETE/SUBMITTED; platform adjudication is an external monitor trigger, not an active execution task.
+| Work Item | State | Reopen Gate |
+|---|---|---|
+| Paid advertising / prepaid media | **HOLD — OWNER CAPITAL-RECOVERY RULE** | Verified capital-recovery hole reaches zero **and** Casey explicitly reopens paid acquisition. |
+| SOK Hawaii permanent warranty economics / reserve/service compensation | HOLD — OWNER GATE | Provider quotes + excluded-cost reconciliation + proof actuals + owner approval. |
+| SOK compliance reference PR #70 | HOLD | Fresh reconciliation/rebase if still useful; do not auto-merge stale lineage. |
+| Peter public profile / portrait | HOLD | Reactivate only when communications/publication lane becomes current. |
 
-Do **not** treat earlier eBay startup text saying authenticated Seller Hub was unavailable as current. Authenticated Seller Hub live reads are the controlling capability when the connector session is healthy; hold only exact unavailable mutation/read surfaces when a connector failure occurs.
+---
+
+# CLOSED / DO NOT RECREATE
+
+- Protected top homepage approved experience — closed/no-touch absent exact owner authorization or genuine defect.
+- Custom Elevation PayPal origin/quote blocker — closed; live custom PayPal path accepted.
+- Shopify storefront password gate — closed.
+- VEVOR PRO registration, feed acquisition, Colorado tax-exemption submission, A-tier launch and current qualified B-tier publication — completed; do not restart.
+- VEVOR generic fulfillment inquiry and current-window 10-SKU fresh check — completed; do not rerun without refresh trigger.
+- Renogy dealer onboarding/W-9/portal setup — completed; do not restart.
+- SOK generic supplier qualification, official image-source request and Hawaii warranty-input request/intake — completed; do not duplicate.
+- SolarStock bounded outbound request — completed as send; now waiting.
+- R&R duplicate response gate, Logistics Plus outbound request, ten complementary vendor introductions, DMX/Magnum/Dimensions initial outreach — completed as send; preserve current waiting/prospect states.
+- TikTok second-appeal execution — completed/submitted; adjudication is monitoring only.
+- Legacy GitHub control issues #26, #30 and #33–#36 — closed/superseded.
+- eBay unknown-device alert — closed after human confirmation.
 
 ## Update discipline
 
-When a material event occurs:
+1. Update the owning row/state; do not create a second global truth record.
+2. New factual evidence corrects stale facts but does not silently override management authority.
+3. A terminal current Worktree defeats stale active pointers.
+4. Company Operations consumes owning-lane truth; it does not repeat completed current-window checks.
+5. Block only the exact blocked item; unrelated executable work continues.
+6. An ACTIVE Shopify product is not automatically publicly purchasable; publication/channel state must be verified.
+7. An auto-enrolled affiliate product is not automatically profit-approved.
+8. A DEV request without a bounded reproducible defect packet is rejected back to the owning operator lane.
+9. MASTER RECON is called only for conflict/gate/integrity work, not as a duplicate executor.
+10. MPM closes or downgrades stale recovery rows as evidence matures instead of keeping every historical P0 active forever.
 
-1. Verify against the applicable current source.
-2. Update this row instead of creating a second global status record.
-3. Update a dedicated vendor Project Source or Current Worktree when durable vendor readiness facts change.
-4. Move WAITING/HOLD only when its trigger occurs or Casey changes priority.
-5. Close only when closure condition is proven or Casey supersedes it.
-6. After transition, continue the next executable unresolved action inside the owning Project when authorized.
-7. Historical `P0`, `CONTROLLING`, old SHA, old Workboard, old Registry, receipt, cached chat text, or older COM 2 sweep pointer does not override newer current state.
-8. Preserve exact blockers and continue unrelated executable work.
-9. Universal catalog completion is measured by its acceptance baseline, not listing count alone.
-10. A verified terminal Worktree defeats stale active pointers.
-11. Profitability recovery does not erase WAITING/HOLD work; it sequences executable capacity toward stop-loss, cash release, positive-contribution sales and clean fulfillment.
-12. TikTok seller-verification terminal state is independent from Affiliate Growth and held-funds/settlement monitoring; neither may silently reactivate the appeal.
-13. COM 2 must consume newer owning-lane truth and consolidate it; it may not send a Project/channel backward to repeat already-completed current-window work.
-14. TikTok `AUTO-ENROLLED` does not mean profit-approved; safe commission economics control deliberate creator scaling.
-15. Commerce work may continue while the protected top homepage remains unchanged, but website mutations must also satisfy the active P0 coding recovery gate while the feature freeze is active.
-16. **Paid acquisition remains HOLD company-wide until the verified capital-recovery hole is closed and Casey explicitly reopens it. No lower-level economics record may silently reopen this owner gate.**
-17. An ACTIVE storefront listing is not automatically a PROMOTE candidate; exact promotion/economics classification controls traffic assignment.
-18. **CONTROL-PLANE INTEGRITY:** Work Board, Worker Registry, owning CURRENT_WORKTREE, active management/incident record and accepted production pointer must agree on the active recovery phase and execution owner. If they disagree, classify `CONTROL-PLANE DRIFT`, stop only the conflicting routing, SYNC objective state, and do not give the affected worker another conflicting `RUN` until the pointer set is reconciled.
-19. **NEW FACT ≠ NEW AUTHORITY:** newer factual evidence corrects stale facts; it does not let a lower-level worker, receipt, specialist or platform record silently supersede management priority, Project ownership or protected owner gates.
+## Last-resort fallback
 
----
-
-# LAST-RESORT / END-OF-WORKBOARD FALLBACK
-
-| Work Item | Owner | State | Trigger | Next | Close Condition |
-|---|---|---|---|---|---|
-| Elevation-owned in-house checkout / payment-orchestration fallback | MASTER DEVELOPER / Commerce + Operating System | DEFERRED — FALLBACK ONLY | Only if current PayPal/working checkout becomes materially unreliable, unsupported, or requires an owner-rejected recurring platform/app cost | Preserve working checkout while building any replacement. Use approved hosted/tokenized processor components; never store raw card/CVV; require payment confirmation → durable order → source/fulfillment → refund/exception/security/PCI QA before cutover. | Replacement is secure, economically acceptable and proven end-to-end without interrupting sales. |
+Elevation-owned in-house checkout/payment orchestration remains **DEFERRED / FALLBACK ONLY**. It activates only if current PayPal/Shopify purchase paths become materially unreliable, unsupported or economically unacceptable. Any replacement must preserve sales continuity, use hosted/tokenized payment components, never store raw card/CVV, and prove payment confirmation → durable order → source/fulfillment → refund/exception/security acceptance before cutover.
