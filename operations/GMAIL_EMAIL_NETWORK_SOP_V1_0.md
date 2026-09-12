@@ -6,9 +6,48 @@
 
 ## Role
 
-The Gmail Email Network is a complementary communication Project/lane supporting authorized Leads, Prospector, Gmail Specialists and related communication workers.
+The Gmail Email Network is a complementary external-communications, correspondence-evidence and source-file-retrieval Project/lane supporting authorized Leads, Prospector, Gmail Specialists and related communication workers.
 
 It does not replace the affected Vendor, Logistics, Sales, Customer, Warranty or other Project.
+
+## Management communication retirement
+
+By owner direction, Gmail is **RETIRED AS AN INTERNAL MANAGER-COMMUNICATION / MANAGEMENT-CONTROL SURFACE**.
+
+Do not use Gmail drafts, internal manager emails, historical “management feeds,” emailed handoffs or emailed priority lists as the controlling place to assign work, change priority, operate a Worktree, direct managers, or establish current company management truth.
+
+Current management control belongs in:
+
+**MASTER S.O.P. / MASTER OS GLOSSARY → CURRENT WORK BOARD → PROJECT/LANE S.O.P. → PROJECT SOURCE / CURRENT_WORKTREE → VERIFIED EXECUTION RECEIPTS**
+
+Historical Gmail management messages may still be read as **factual evidence** when specifically needed, but they are non-controlling and must be reconciled against current Git/Project state before use.
+
+**GMAIL MAY CARRY FACTS; GIT/WORKTREES CARRY MANAGEMENT TRUTH.**
+
+## Gmail file and source-evidence use remains authorized
+
+Retiring Gmail for manager communication does **not** retire Gmail as a source-of-origin, file-recovery or evidence system.
+
+Authorized uses include:
+
+- locating and retrieving vendor attachments;
+- recovering supplier catalogs, workbooks, price sheets, product files and approved media packages;
+- recovering SDS/MSDS, UN38.3, warranty, returns, shipping, freight and compliance documents;
+- retrieving customer/order evidence and platform correspondence;
+- retrieving applications, forms, quotes, invoices and other authorized business documents;
+- reading factual external correspondence needed to reconcile a Project;
+- identifying exact Gmail message/thread/attachment IDs so a source can be recovered again later;
+- using Gmail attachments as the original source when Gmail is the authoritative system in which the counterpart delivered the file.
+
+A chat-upload expiration does not invalidate an original file that is still retrievable from Gmail or another authorized system of origin.
+
+When a materially important file is recovered from Gmail:
+
+**RETRIEVE ORIGINAL → VERIFY MESSAGE/SENDER/DATE/FILENAME/VERSION → ROUTE TO OWNING PROJECT → PRESERVE DURABLE REFERENCE/COPY IN THE APPROPRIATE PRIVATE OR PUBLIC-SAFE SYSTEM → RECORD SOURCE IDENTITY → CONTINUE WORK**
+
+Sensitive/private files must not be copied into public Git merely for convenience. Preserve only public-safe metadata/facts in Git and retain protected originals in an authorized private system of record.
+
+All workers must also follow `FILE_AVAILABILITY_INCIDENT_STANDARD_V1_0.md` when a required file becomes unavailable.
 
 ## Incoming classification
 
@@ -22,9 +61,9 @@ Material change to vendor/partner status, order, quote, approval, shipping condi
 
 Flow:
 
-**EMAIL RECEIVED → THREAD RECON → CLASSIFY → RECORD SOURCE/TIMESTAMP → MANAGEMENT COMMUNICATION LANE → HYBRID MANAGEMENT ROUTES → PROJECT RECEIVES → PROJECT INCORPORATES → CLOSED**
+**EMAIL RECEIVED → THREAD RECON → CLASSIFY → RECORD SOURCE/TIMESTAMP → ROUTE MATERIAL DELTA TO THE OWNING PROJECT / COMPANY OPERATIONS → PROJECT INCORPORATES INTO GIT/WORKTREE → CLOSED**
 
-Gmail identifies/verifies the update but does not become the Project Manager.
+Gmail identifies/verifies the update but does not become the Project Manager and does not maintain a parallel email-based management feed.
 
 ## Email Commerce Update fields
 
@@ -46,7 +85,7 @@ The controlling routine send classes and protected exceptions are defined in:
 
 `AUTOMATED_EMAIL_EXECUTION_MATRIX_2026-09-11.md`
 
-Owner-authorized routine classes may execute without separate per-message approval only when every matrix pre-send control passes. After execution, verify the send, record the receipt in the applicable Worktree when material, and route any OS state change through the Email Commerce Update bridge.
+Owner-authorized routine classes may execute without separate per-message approval only when every matrix pre-send control passes. After execution, verify the send, record the receipt in the applicable Worktree when material, and route any OS state change into the owning Project/Git control surface.
 
 If classification, recipient, facts, prior-send state, authority, or outcome is uncertain, do not auto-send. Preserve the item OPEN and route for review while unrelated clean work continues.
 
@@ -54,7 +93,7 @@ For ordinary communications outside a pre-authorized send class, one Casey appro
 
 ## Automated email continuity rule
 
-Routine automated email is intended to keep authorized Projects moving; it must not become another management gate.
+Routine automated email is intended to keep authorized Projects moving; it must not become another management gate or a substitute management network.
 
 Pre-authorized automation may:
 - acknowledge receipt;
@@ -63,7 +102,7 @@ Pre-authorized automation may:
 - follow up on an already-submitted application/packet/quote request;
 - provide verified routine Elevation website inquiry/order/support status;
 - perform explicitly authorized/queued outreach using an already-authorized lane/template after dedupe;
-- send internal routing/handoff/receipt messages.
+- transmit an externally required file/attachment when the owning Project authorizes the factual transmission.
 
 Pre-authorized automation may **not** create new legal, financial, commercial, security, pricing, inventory, refund, liability, identity, access, or other protected obligations. The full boundary is controlled by `AUTOMATED_EMAIL_EXECUTION_MATRIX_2026-09-11.md`.
 
@@ -75,7 +114,7 @@ All outbound email under this lane must follow `EMAIL_IDENTITY_AND_SIGNATURE_STA
 
 Current approved identity model:
 
-- `elevationupscales@gmail.com` = verified technical/system sending mailbox and Google-connected backend identity.
+- `elevationupscales@gmail.com` = verified technical/system sending mailbox, Google-connected backend identity, external correspondence archive and source-file retrieval mailbox.
 - `support@elevationupscales.com` = default automated public contact / reply identity for vendor, partner, ecommerce, catalog, website and customer-support automation.
 - `sales@elevationupscales.com` = sales-specific business identity when the communication belongs to Sales.
 - `casey@elevationupscales.com` = owner/executive business identity and Casey-specific reply path.
