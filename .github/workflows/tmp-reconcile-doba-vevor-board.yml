@@ -1,0 +1,30 @@
+name: Temporary Doba VEVOR board reconciliation
+
+on:
+  push:
+    branches:
+      - ops/doba-live-closeout-vevor-gate-0911
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ops/doba-live-closeout-vevor-gate-0911
+      - name: Reconcile current operations state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/tmp_reconcile_doba_vevor_board.py
+          rm .github/scripts/tmp_reconcile_doba_vevor_board.py
+          rm .github/workflows/tmp-reconcile-doba-vevor-board.yml
+          git diff --check
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add operations/CURRENT_WORK_BOARD.md operations/VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md .github/scripts/tmp_reconcile_doba_vevor_board.py .github/workflows/tmp-reconcile-doba-vevor-board.yml
+          git commit -m "Ops: close Doba gate and preserve VEVOR profit gate"
+          git push origin HEAD:ops/doba-live-closeout-vevor-gate-0911
