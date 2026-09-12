@@ -4,7 +4,7 @@
 **Effective:** 2026-09-11  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Last source-state reconciliation baseline:** `0ef359d224a79ce5214e58d9798a717497e4c3dd`
+**Last source-state reconciliation baseline:** `2695ab6c440bf0f2734ba70106e8e7a9ff2d4ad9`
 **Last control-surface S.O.P. sync:** 2026-09-11 / `MASTER_SOP_V1_0.md` + `MASTER_OS_GLOSSARY_V1_0.md` / pre-sync main `d57d8dd2a83dabd2e487cb65679dced811dd38db`
 
 > The reconciliation baseline records the newest business/project source state reviewed by this board. A later commit that only updates this board or other control documentation does not make the marker stale by itself. Reconcile again when a material project/vendor/customer/release state changes.
@@ -99,6 +99,8 @@ At takeover/RUN/resume:
 
 **CURRENT MAIN → MASTER S.O.P./GLOSSARY → PROJECT SOURCE WHEN VENDOR → PROJECT SOP/TAILORED WORKFLOW → LAST VERIFIED ACTION → NEXT EXECUTABLE ACTION → RESUME → DOCUMENT MATERIAL DELTA → CONTINUE SAME PROJECT**
 
+Terminal replay protection is mandatory: if the owning current Worktree is verified `CLOSED`, `EXECUTION CLOSED`, `SUBMITTED / WAITING`, or otherwise terminal for execution, an older board/registry/receipt/chat pointer may not reactivate it. Clear or advance the stale pointer, select the next executable work item, or STANDBY unless Casey or another higher-authority valid record explicitly reopens the lane.
+
 ## Prior owner-directed execution window — RETIRED AS CONTROLLING PRIORITY
 
 The owner-directed window that ran **through midnight 2026-09-10 MDT** is now historical context only and must not control September 11 sequencing.
@@ -151,7 +153,7 @@ The durable execution rule from that window remains valid where it does not conf
 
 | Work Item | Owner | State | Priority | Gate / Trigger | Next | Close Condition | Source Record |
 |---|---|---|---|---|---|---|---|
-| TikTok Shop second appeal / withdrawal-restoration | Peter Torres / Ecommerce & Vendor Operations | HOLD — LOWER-PRIORITY PARALLEL | STARTUP REVENUE PHASE | Current owner standard places marketplace/customer issues below direct Elevation website revenue unless a material safety/security/legal/financial/account-suspension exception appears | Continue in parallel capacity without displacing P0 direct-site revenue work; do not restart it. | Verified terminal platform result recorded | `PETER_PROJECT_STARTER_V2_2026-09-10.md`; `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md` |
+| TikTok Shop second appeal / withdrawal-restoration | Peter Torres / Ecommerce & Vendor Operations | SUBMITTED / WAITING ON TIKTOK REVIEW / EXECUTION CLOSED | MONITOR ONLY | Owner-confirmed second appeal submission is complete. Reopen only on verified TikTok approval/restoration, additional-evidence request, denial, manual-review instruction, or explicit Casey reopen. | **No execution while waiting. Do not rebuild, re-upload, resubmit, or re-route the appeal.** Monitor for an authentic platform result; when one arrives, reconcile the new result before changing state. | Execution close is satisfied by owner-confirmed submission; final platform adjudication is a separate external trigger | `TIKTOK_SELLER_VERIFICATION_REPAIR_CURRENT_WORKTREE.md`; `TIKTOK_SECOND_APPEAL_OWNER_CONFIRMED_SUBMISSION_2026-09-11.md`; `PM3_POST_TIKTOK_WORKFLOW_UPDATE_AND_SYSTEM_SWEEP_2026-09-11.md` |
 | eBay shipped folding-bed order monitoring | Company Operations / Order & Fulfillment | HOLD — LOWER-PRIORITY PARALLEL | STARTUP REVENUE PHASE / exception interrupt | Marketplace/customer work is below direct-site revenue unless a material exception appears | Verify marketplace tracking/order propagation and delivery state in parallel; escalate only material new exception. | Delivery/customer obligation verified closed | Current Doba/eBay fulfillment evidence; `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md` |
 | eBay / Doba listing profitability and availability cleanup | Peter / Ecommerce & Vendor Operations | HOLD — LOWER-PRIORITY PARALLEL | STARTUP REVENUE PHASE | Current owner standard prioritizes first direct Elevation website revenue | Reconcile active eBay listings against Doba availability/economics in parallel; preserve useful sales history; do not blanket-remove channel. | Loss-making/unfulfillable listings corrected and useful demand-test listings remain controlled | `EBAY_CHANNEL_RECON_2026-09-09.md`; `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md` |
 | SOK Hawaii permanent warranty economics / reserve-stock / service compensation | SOK Project Operations Manager / SOK RECON OS | HOLD — TRUE OWNER GATE / STARTER MODEL EXISTS | P2 | A protected starter landed-cost model now exists, but permanent warranty reserve/service economics still require current supplier volume/support inputs, Logistics Plus/H2O validated quotes, excluded-cost reconciliation and first Hawaii proof actuals. Material commitments remain owner-gated. | Continue internal evidence model only. Add verified provider/supplier inputs and first-proof actuals as they arrive; do not present preliminary economics as permanent pricing/commitment. | Commercial proposal is evidence-based, reconciled to actual shipment/provider costs, and owner-approved before commitment | [SOK Project Source](./vendor-project-sources/SOK_PROJECT_SOURCE.md); `SOK_HAWAII_WARRANTY_NEGOTIATION_DIRECTIVE_2026-09-10.md` |
@@ -207,6 +209,7 @@ When a material event occurs:
 8. Do not treat a historical issue/PR that says `CONTROLLING`, `P0`, or references an old exact SHA as current authority when its live residuals are already represented by this board and current project sources.
 9. When a project hits a real blocker, preserve the blocker/trigger, move that sub-item to the back of the applicable queue, and continue every finishable in-project worktree before returning to deferred items.
 10. Shared universal-catalog completion is measured by `UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`; do not declare all-vendor live integration complete merely because individual supplier listings exist.
+11. A verified terminal current Worktree defeats stale active pointers. Do not re-execute completed/submitted external actions from an older board row, Registry assignment, dated receipt or cached chat context; reconcile the pointer first, then continue the next executable work or STANDBY.
 
 ---
 
