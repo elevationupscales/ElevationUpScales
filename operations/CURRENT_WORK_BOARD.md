@@ -35,6 +35,8 @@ Current commerce sequencing:
 - No paid ads / boosts / PPC / sponsored marketplace traffic / prepaid retargeting until capital recovery is verified and Casey explicitly reopens paid acquisition.
 - **No new-channel expansion campaign is foreground work while `MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md` is active.** Meta, Google & YouTube, Amazon, Walmart and other not-yet-installed channels remain backlog/evidence only.
 - Checkout/payment function repairs remain P0 when a real defect is proven; profitability scoring may not block a functional purchase path.
+- Shopify Payments account/setup work is Shopify Store Operations + owner/platform configuration first; incomplete setup is not a DEV wake-up condition by itself.
+- Preserve the accepted custom Elevation PayPal path while Shopify Payments setup remains incomplete.
 - No blind production deploy, wholesale `main` deploy, force update or stale-branch deployment.
 - SOK out-of-stock/unavailable products may use the established pre-purchase/backorder rule where allowed.
 - Hawaii lithium/warranty/logistics controls remain separate and may not be bypassed by generic channel actions.
@@ -65,7 +67,7 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 | Work Item | Owner | Current State | Next Action | DEV Role | Close Condition |
 |---|---|---|---|---|---|
 | Owner communications / residual Google Voice forwarding | **MPM / Communications Recovery** | **P0 CRITICAL — ACCOUNT RECOVERED / VOICE DELETED / RESIDUAL FORWARDING REMAINS** | Carrier removes conditional + unconditional Voice forwarding; Google clears any stale Voice-side linked/device state; test direct inbound call + SMS. | None unless a separate company-owned web/contact defect is proven. | Direct carrier call PASS + direct SMS PASS + no residual Voice routing + Casey confirms normal business communications. |
-| Shopify purchasability / sales-channel publication | **Shopify Store Operations** | **P0 PARTIAL — 103 ACTIVE / 53 ACTIVE+PUBLISHED / 50 ACTIVE+UNPUBLISHED / 0 ACTIVE unavailable on every channel** | Classify 50 unpublished as **INTENDED PUBLIC / INTENTIONAL HOLD / RETIRE** → publish intended-public only → verify public URL + exact variant/cart + guest checkout/payment UI → return exact before/after counts. | Only after Shopify publication/channel configuration is correct and a reproducible code defect remains. | Intended-public catalog is published and representative exact products complete product → cart → guest checkout → payment UI without sign-in blocker; holds/retirements are documented. |
+| Shopify purchasability / sales-channel publication + payment readiness | **Shopify Store Operations** | **P0 ACTIVE — 103 ACTIVE / 53 ACTIVE+PUBLISHED / 50 ACTIVE+UNPUBLISHED / SHOPIFY PAYMENTS `Complete setup`** | Classify 50 unpublished as **INTENDED PUBLIC / INTENTIONAL HOLD / RETIRE** → publish intended-public only → complete Shopify Payments owner/platform setup → verify exact public URL + variant/cart + guest checkout/payment UI → preserve PayPal → return exact before/after counts and payment-readiness result. | Only after Shopify publication/account configuration is correct and a reproducible code defect remains. | Intended-public catalog is published; Shopify Payments setup is complete/reverified; representative exact products complete product → cart → guest checkout → payment UI without sign-in blocker; PayPal remains healthy; holds/retirements documented. |
 | eBay customer/cash recovery + profitability contraction | **eBay Store Operations under Peter / Company Operations** | **P0 PARALLEL — CUSTOMER OBLIGATIONS + CASH RELEASE + LOSS PREVENTION** | Resolve open shipment/cancellation/refund obligations first; clear held-cash blockers; then maintain only exact-source positive-contribution listings. No Promoted Listings while ad lock is active. | None for Seller Hub/platform operations. | Customer obligations resolved; cash blockers isolated/cleared; repeat-loss configurations removed; profitable core is executable. |
 
 ---
@@ -74,7 +76,7 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 
 | Lane | Owner | State | Next |
 |---|---|---|---|
-| Direct-site first profitable sale / PayPal + Shopify | MPM / Company Operations + Shopify/vendor lanes | ACTIVE | Preserve custom PayPal and native Shopify checkout. Tune current publication, product truth, shipping/payment configuration and current offers before adding channels. First real order proves payment → durable order → source → fulfillment → realized contribution. |
+| Direct-site first profitable sale / PayPal + Shopify | MPM / Company Operations + Shopify/vendor lanes | ACTIVE / PLATFORM READINESS OPEN | Preserve custom PayPal. Complete Shopify publication + Shopify Payments setup/configuration, verify purchase paths, tune product truth/shipping/current offers, then prove first real order → durable order → source → fulfillment → realized contribution. |
 | Shopify-installed surfaces — Shop / Microsoft Copilot / Agentic | Shopify Store Operations | TUNING / EXISTING SURFACES ONLY | Audit existing product exposure, eligibility, price, availability, shipping and purchase path. Correct zero-product or over-broad states. Do not expand catalog simply to raise channel count. |
 | VEVOR | VEVOR Project Operations Manager / Specialist | ACTIVE — 19 A-tier live / 17 qualified B-tier ACTIVE / 3 promotion-cleared | Do not rerun completed 10-SKU check. Keep released products in free/owned traffic; classify shoe-dryer economics before traffic; real order triggers exact source/cost/MAP/shipping recheck. |
 | Renogy | Renogy Branch Operations Manager / Specialist | ACTIVE — 2 ACTIVE / 4 DRAFT | Preserve 2 ACTIVE / 4 DRAFT. Continue exact-SKU activation; recheck dealer orderability/backorder/cost/shipping on real order. |
@@ -153,11 +155,12 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 4. Company Operations consumes owning-lane truth; it does not repeat completed current-window checks.
 5. Block only the exact blocked item; unrelated executable work continues.
 6. An ACTIVE Shopify product is not automatically publicly purchasable; publication/channel state must be verified.
-7. An auto-enrolled affiliate product is not automatically profit-approved.
-8. A DEV request without a bounded reproducible defect packet is rejected back to the owning operator lane.
-9. MASTER RECON is called only for conflict/gate/integrity work, not as a duplicate executor.
-10. MPM closes or downgrades stale recovery rows as evidence matures instead of keeping every historical P0 active forever.
-11. **Do not create new-channel work while the existing-shops tuning hold is active.**
+7. Shopify checkout UI visibility does not prove Shopify Payments production readiness while the account still shows `Complete setup`.
+8. An auto-enrolled affiliate product is not automatically profit-approved.
+9. A DEV request without a bounded reproducible defect packet is rejected back to the owning operator lane.
+10. MASTER RECON is called only for conflict/gate/integrity work, not as a duplicate executor.
+11. MPM closes or downgrades stale recovery rows as evidence matures instead of keeping every historical P0 active forever.
+12. **Do not create new-channel work while the existing-shops tuning hold is active.**
 
 ## Last-resort fallback
 
