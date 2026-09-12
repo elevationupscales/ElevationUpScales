@@ -72,6 +72,22 @@ For a qualifying timeout, repeated safe-retry failure, crash, catastrophic stop,
 
 Do not silently convert unfinished work to ordinary STANDBY.
 
+## File Availability Incident rule
+
+All workers must also follow `FILE_AVAILABILITY_INCIDENT_STANDARD_V1_0.md`.
+
+If a required source file is missing, expired, detached, inaccessible, unreadable, corrupted or its controlling version cannot be proven, the worker must not continue from memory or assumption.
+
+Required worker behavior:
+
+**IDENTIFY EXACT SOURCE → PRESERVE AFFECTED TASK → RECORD `FILE SOURCE DEGRADED / UNAVAILABLE / VERSION UNCERTAIN` → NOTIFY REPORTING MANAGER → ROUTE TO MASTER RECON / COMPANY OPERATIONS FOR RECOVERY → CONTINUE UNRELATED SAFE WORK**
+
+The worker may perform a lightweight recovery check in already-authorized Project/Git/connector sources, but may not endlessly retry or quietly replace the missing source with an unrelated file.
+
+Casey is asked to re-upload or re-supply a file only after authorized Project/Git/connector/Library/source-of-origin recovery has failed, or when the source exists only in an owner-controlled location.
+
+A worker startup or `RUN` that discovers an unavailable required file must treat the condition as an operating incident and report it through the normal management path. “File expired” is not an acceptable terminal state by itself.
+
 ## Standard OS Context Header
 
 Every new worker prompt must begin with a compact header using canonical OS terms:
