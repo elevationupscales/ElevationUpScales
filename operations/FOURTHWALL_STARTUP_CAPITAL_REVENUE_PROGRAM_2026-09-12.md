@@ -5,6 +5,7 @@
 **Owner:** Casey Young  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
 **Provider:** Fourthwall  
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`  
 **Operating objective:** Turn Fourthwall from a legacy merch storefront into a repeatable profitable revenue lane that does not require Elevation to buy inventory before the customer pays.
 
 ## Owner direction
@@ -132,7 +133,7 @@ Use this hierarchy:
 
 ### Promotion gate
 
-Do not spend paid-ad money or creator incentives on a Fourthwall product unless it passes all applicable gates:
+Do not spend concentrated promotion capacity or creator incentives on a Fourthwall product unless it passes all applicable gates:
 
 - provider-backed on-demand fulfillment is active;
 - public/in-stock state is verified;
@@ -142,7 +143,9 @@ Do not spend paid-ad money or creator incentives on a Fourthwall product unless 
 - any promo code leaves a positive contribution after discount and payment processing;
 - no negative-balance or owner-card subsidy is required for the sale.
 
-Owner-approved exceptions may be used for deliberate acquisition/sample campaigns, but must be labeled as marketing spend rather than profit.
+Performance-based creator/affiliate commission may be considered only when the exact order remains positive-contribution and no prohibited upfront paid acquisition is created. Samples, giveaways, retainers or other cash acquisition expenses remain separately owner-gated.
+
+**Paid ads, boosts, PPC, sponsored marketplace traffic, paid retargeting and other prepaid media are blocked regardless of product economics until the verified capital-recovery hole is closed and Casey explicitly reopens paid acquisition.**
 
 ## Revenue architecture
 
@@ -159,13 +162,13 @@ All other products remain catalog depth until they earn traffic through demand o
 
 ### Phase B — Organic distribution first
 
-Use zero/low-cash channels before paid acquisition:
+Use no-upfront-spend channels while the owner paid-ad lock is active:
 
 - ElevationUpScales.com apparel discovery → exact Fourthwall product → Fourthwall native checkout;
 - Fourthwall native storefront;
 - connected Instagram & Facebook Shop;
 - organic Facebook/Instagram/TikTok/YouTube content;
-- creator showcase/affiliate use only where contribution remains positive;
+- creator showcase/affiliate use only where contribution remains positive and no prohibited upfront acquisition spend is created;
 - TikTok Shop Fourthwall integration remains connected but execution must respect the separate TikTok seller-account terminal/waiting state.
 
 ### Phase C — Payout readiness
@@ -188,19 +191,19 @@ Until that is proven:
 
 1. Activate Fourthwall payouts.
 2. Audit all 29 products into `PROMOTE / REPRICE / HOLD / RETIRE` using live Fourthwall displayed economics.
-3. Normalize the Emblem Tee, one hoodie and Women's Crop Tee to the profitability gate before promotion.
+3. Normalize the Emblem Tee, one hoodie and Women's Crop Tee to the profitability gate before concentrated promotion.
 4. Keep the Mountain Patch Cap as the current low-price hero candidate unless final realized economics disprove it.
 5. Verify Instagram/Facebook Shop product sync and catalog health.
 6. Leave TikTok Shop connected but do not reopen the seller-verification appeal from Fourthwall sync messaging.
 7. Route the hero set through ElevationUpScales.com using exact Fourthwall URLs/native checkout.
-8. Launch organic content around the small hero set; measure product-level clicks, Fourthwall orders and realized profit.
-9. Scale only products that produce repeatable positive realized contribution.
+8. Continue organic/owned content around the small hero set; measure product-level clicks, Fourthwall orders and realized profit.
+9. Scale only products that produce repeatable positive realized contribution, using acquisition methods allowed by the current owner cash controls.
 
 ## Cash discipline
 
 Fourthwall may charge the saved payment method when promos, giveaways or intentionally underpriced products create a negative balance. Therefore:
 
-**NO UNBOUNDED DISCOUNTS → NO LOSS-LEADER GIVEAWAYS WITHOUT OWNER APPROVAL → NO PAID ADS UNTIL ORGANIC PRODUCT ECONOMICS ARE PROVEN.**
+**NO UNBOUNDED DISCOUNTS → NO LOSS-LEADER GIVEAWAYS WITHOUT OWNER APPROVAL → NO OWNER-CARD WORKING-CAPITAL SUBSIDY → NO PAID ADS UNTIL CAPITAL RECOVERY IS COMPLETE AND CASEY EXPLICITLY REOPENS THEM.**
 
 ## Success condition
 
@@ -211,9 +214,10 @@ Fourthwall is considered recovered when:
 - ElevationUpScales.com routes apparel safely to Fourthwall native checkout;
 - connected social-commerce channels point to the same exact products;
 - at least three new real customer orders complete without owner inventory cash;
-- realized contribution remains positive and is recorded per order;
-- only then is paid acquisition considered.
+- realized contribution remains positive and is recorded per order.
+
+Reaching this success condition does not silently reopen paid acquisition. Casey must explicitly reopen paid ads after company capital recovery.
 
 ## Control phrase
 
-**NO INVENTORY CASH FIRST → SELL THE PRODUCT → FOURTHWALL PRODUCES/FULFILLS → REALIZE PROFIT → REINVEST → SCALE ONLY WINNERS.**
+**NO INVENTORY CASH FIRST → ORGANIC / OWNED SALES → FOURTHWALL PRODUCES/FULFILLS → REALIZE PROFIT → REINVEST → CLOSE THE HOLE → OWNER DECIDES WHEN PAID ADS RETURN.**
