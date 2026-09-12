@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-12  
 **Owner:** Casey Young  
-**Status:** ACTIVE / P0 MANAGEMENT-CONTROLLED TECHNICAL RECOVERY  
+**Status:** ACTIVE / P0 MANAGEMENT-CONTROLLED TECHNICAL RECOVERY / PHASE B IN EXECUTION  
 **State Owner:** Operating System Project Manager / PM4 / MPM  
 **Execution Owner:** MASTER DEVELOPER  
 **Integrity Oversight:** MASTER RECON OS  
@@ -137,9 +137,9 @@ Phase A may be reopened only by a verified live regression.
 
 ### Phase B — production ↔ `main` delta ledger
 
-**State: NEXT / P0**
+**State: IN EXECUTION / P0 / MASTER DEVELOPER ACTIVE / LEDGER RETURN PENDING**
 
-MASTER DEVELOPER produces a file-level ledger for every production-affecting divergence and classifies each item:
+MASTER DEVELOPER is actively producing a file-level ledger for every production-affecting divergence and classifies each item:
 
 1. **OPERATIONS ONLY** — documentation/state; no customer runtime effect;
 2. **REQUIRED RECOVERY** — necessary for trust, checkout, source-of-truth, protected-top or deployment safety;
@@ -158,9 +158,11 @@ Priority order for the ledger:
 
 No file crosses into production because it is newer. It crosses only after classification + QA + acceptance.
 
+**Phase B return gate:** MASTER DEVELOPER returns a durable ledger/artifact with the accepted baseline, comparison target, classified production-affecting files, unresolved UNKNOWN items and recommended REQUIRED RECOVERY order. MASTER RECON audits the return before PM4 accepts Phase B or opens Phase C execution.
+
 ### Phase C — one authoritative public commerce contract
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Repair toward one authoritative customer-public eligibility contract.
 
@@ -183,7 +185,7 @@ Browser filtering remains defense in depth, not the primary source-of-truth cont
 
 ### Phase D — route, detail and checkout reconciliation
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Verify and deliberately map:
 
@@ -206,7 +208,7 @@ Rules:
 
 ### Phase E — customer-copy and protected-homepage firewall
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Port/reconcile only the reviewed protections needed to ensure:
 
@@ -217,7 +219,7 @@ Port/reconcile only the reviewed protections needed to ensure:
 
 ### Phase F — release-system repair
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 MASTER DEVELOPER must make the deployment path deterministic and branch-aware.
 
@@ -300,6 +302,18 @@ MASTER RECON returns:
 - whether management pointers match verified truth;
 - PASS / HOLD / ROUTE REQUIRED.
 
+### Control-plane integrity test
+
+Before MASTER DEVELOPER receives a new `RUN` at a recovery phase boundary, and before PM4 accepts a phase transition, verify the following surfaces agree on the active phase, execution owner and accepted production SHA:
+
+1. `CURRENT_WORK_BOARD.md`;
+2. `MASTER_WORKER_REGISTRY_V1_0.md`;
+3. `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`;
+4. GitHub Issue #65;
+5. `production-deploy` / accepted production pointer.
+
+If one surface says `P2` while the recovery chain says `P0`, one says `NEXT` while execution is active, or one carries an obsolete production SHA, classify **CONTROL-PLANE DRIFT**. Stop only the conflicting routing, SYNC the objective state, preserve unrelated work, and do not route the affected worker from the stale pointer.
+
 ## 8. Feature-freeze release gates
 
 The feature freeze stays active until all are true:
@@ -318,9 +332,9 @@ The feature freeze stays active until all are true:
 
 ## 9. Immediate management work order
 
-**PM4:** adopt this plan as the P0 recovery sequence and prevent lower-priority feature routing into MASTER DEVELOPER.  
-**MASTER DEVELOPER:** begin Phase B production-vs-`main` delta ledger from accepted production `89912be...`; then execute the next highest-risk REQUIRED RECOVERY item.  
-**MASTER RECON:** verify current heads, accepted deployment receipt, worktree/issue/management alignment, and flag any stale pointer still naming `780247...` as the current recovery target.  
+**PM4:** keep this plan as the P0 recovery sequence, suppress lower-priority feature routing into MASTER DEVELOPER, and do not authorize Phase C until Phase B is audited/accepted.  
+**MASTER DEVELOPER:** continue Phase B production-vs-`main` delta ledger from accepted production `89912be...`; return the durable classified ledger and stop at the phase gate.  
+**MASTER RECON:** verify current heads, accepted deployment receipt, Work Board/Registry/Worktree/Issue alignment, and audit the returned Phase B ledger without recreating it.  
 **COM 2:** continue customer/order/cash/profitable-sales work; route only exact revenue-critical technical blockers; do not create new website feature requests during the freeze.  
 **Vendor/Channel Managers:** continue source/economics/fulfillment work without independent website mutations.  
 
