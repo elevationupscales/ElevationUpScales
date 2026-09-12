@@ -3,7 +3,7 @@
 **Date:** 2026-09-12  
 **Owner:** Casey Young  
 **Lane:** MASTER DEVELOPER / Website Routing & Commerce Integrity  
-**Status:** PARTIAL COMPLETE / PRODUCTION DEPLOYMENT NOT CLAIMED
+**Status:** SOURCE RESIDUALS COMPLETE / SHARED-SHELL HOLD / PRODUCTION DEPLOYMENT NOT CLAIMED
 
 ## Scope
 
@@ -53,6 +53,23 @@ The current store uses the normalized commerce catalog/API path and resilience l
 
 Do **not** recreate a dead `local-products.js` file merely to eliminate a historical 404.
 
+### 4. Hawaii pre-payment freight gate source verification — PASS
+
+The current commerce source already prevents unsafe Hawaii lithium payment:
+
+- `quoteStoreItem()` identifies actual lithium shipping to `HI` and resolves the exact Hawaii customer/route state.
+- `createStoreOrder()` rejects `review_required` with `409 Freight Review Required` before PayPal order creation.
+- `createStoreOrder()` rejects `unavailable` with `409 Currently Unavailable for Hawaii Shipping` before PayPal order creation.
+- Hawaii payment is allowed only when `customerState === "shipping_available"`.
+- `customerState === "shipping_available"` requires the lithium shipping record to be `INTERNAL REQUIREMENTS SATISFIED` and at least one destination route to be `APPROVED`.
+- destination `APPROVED` state passes through `routeApprovalBlockers()` before it can be written.
+- the active HI shipping rule is consolidated freight to Honolulu pickup, `pickupOnly=true`, with preferred consolidation of 3 compatible batteries.
+- final-mile/address delivery is a separate quote-required rule and is not silently bundled into the standardized Honolulu-pickup price.
+
+Disposition: **SOURCE-LEVEL PASS / NO GENERIC CHECKOUT MUTATION REQUIRED.**
+
+This verification did not change SOK product listings, pricing, source records or active SOK operating work.
+
 ## Protected dependency hold
 
 The current shared `site/site-shell.js` still contains Marketplace references in global Company navigation/footer and the support-dialog `Report an Issue` label.
@@ -62,8 +79,6 @@ The current shared `site/site-shell.js` still contains Marketplace references in
 This hold does not block unrelated commerce work.
 
 ## Deployment state
-
-`main` source has advanced through `4216c60860ee8d179f1445eedf7c86de1a0ad495`.
 
 The repository deployment workflow does **not** automatically deploy from `main`. `deploy-pages.yml` deploys on manual workflow dispatch or push to the dedicated `production-deploy` branch, with production authorization and canonical QA gates.
 
@@ -78,9 +93,10 @@ Do not equate Git commit with production release.
 ## Remaining exact Dev residuals
 
 1. Preview/prove any shared-shell Marketplace cleanup against the protected-top homepage boundary before mutation/release.
-2. Verify the Hawaii pre-payment freight gate without changing SOK listings or active SOK vendor work; if a required change would alter protected SOK behavior, route that exact delta to the owning SOK lane/Casey.
-3. Run canonical preview/live smoke through the controlled deployment path when authorized.
-4. Continue only the smallest remaining Issue #65 / catalog acceptance residuals; do not rebuild already-merged architecture.
+2. Run canonical preview/live smoke through the controlled deployment path when authorized.
+3. Continue only the smallest remaining Issue #65 / catalog acceptance residuals; do not rebuild already-merged architecture.
+4. Exact Renogy delayed-order checkout proof remains product-triggered: test only when the owning Renogy lane provides an activation-ready delayed-order SKU.
+5. Shopify/SOK paid-order OS bridge remains real-order-triggered; do not manufacture an order.
 
 ## Guardrails verified
 
@@ -88,8 +104,9 @@ Do not equate Git commit with production release.
 - **Protected top homepage files/output: NO INTENTIONAL MUTATION**
 - No retired Marketplace backend recreated.
 - No dead local catalog asset recreated.
+- Hawaii pre-payment gate source behavior remains fail-closed for unapproved freight.
 - No production deployment claimed without evidence.
 
 ## Control state
 
-**ROUTING SOURCE FIXED → STALE HELP COPY FIXED → LEGACY 404 CLASSIFIED → SHARED-SHELL DELTA HELD AT PROTECTED DEPENDENCY → DEPLOYMENT REMAINS SEPARATELY GATED.**
+**ROUTING SOURCE FIXED → STALE HELP COPY FIXED → LEGACY 404 CLASSIFIED → HAWAII PRE-PAYMENT GATE SOURCE PASS → SHARED-SHELL DELTA HELD AT PROTECTED DEPENDENCY → DEPLOYMENT REMAINS SEPARATELY GATED.**
