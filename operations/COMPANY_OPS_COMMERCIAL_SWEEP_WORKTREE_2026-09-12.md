@@ -7,7 +7,8 @@
 **Execution Owner:** Company Operations Manager / COM 2  
 **Parent Controls:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md`, `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`, `CURRENT_WORK_BOARD.md`, current vendor Project Sources/Worktrees  
 **Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`  
-**Last COM 2 reconciliation source:** current main after `OS_RECON_RUN_ORGANIC_TRAFFIC_AND_RENOGY_COLLECTION_SYNC_2026-09-12.md` and current lane worktrees
+**P0 Coding/Deployment Control:** `MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md` + `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`  
+**Last COM 2 reconciliation source:** current main after OS RECON control-plane drift repair and current lane worktrees
 
 ## COM 2 anti-drift boundary
 
@@ -17,7 +18,7 @@ Controlling sequence:
 
 **CURRENT MAIN → CURRENT WORK BOARD → OWNING PROJECT SOURCE / CURRENT WORKTREE → LAST VERIFIED LANE ACTION → COM 2 CONSOLIDATES / ROUTES ONLY.**
 
-When a newer owning-lane state exists, **the newer owning-lane state wins**. COM 2 updates this consolidation instead of sending the lane backward.
+When a newer owning-lane state exists, **the newer owning-lane state wins on objective lane facts**. COM 2 updates this consolidation instead of sending the lane backward. Newer factual state does not create new management authority.
 
 COM 2 must not:
 
@@ -30,7 +31,8 @@ COM 2 must not:
 - create a second apparel/provider source of truth;
 - alter the protected SOK lane under this sweep;
 - alter the protected top homepage experience without Casey's exact approval;
-- authorize paid advertising while the owner capital-recovery rule is active.
+- authorize paid advertising while the owner capital-recovery rule is active;
+- create a parallel developer Worktree or directly route nonessential website feature/commerce code around PM4 and the active P0 coding-stabilization recovery.
 
 ## Commercial objective
 
@@ -55,7 +57,7 @@ COM 2 may route organic/owned/SEO/direct/free-marketplace traffic and performanc
 COM 2 action:
 
 - no sweep-driven repricing, rebuild, contraction or deactivation;
-- accept/rout real SOK orders through the existing approved workflow;
+- accept/route real SOK orders through the existing approved workflow;
 - preserve current owned/free traffic and Project controls;
 - return only material order/source exceptions to PM4/SOK Project.
 
@@ -199,23 +201,27 @@ For every cleared hero:
 
 **SESSION → PRODUCT → CART → CHECKOUT → PAYMENT → OWNING FULFILLMENT LANE → TRACKING/DELIVERY → REALIZED CONTRIBUTION.**
 
-### Developer boundary
+### Developer boundary — P0 coding freeze controls
 
-Developer work is limited to verified revenue blockers or approved commerce work in:
+COM 2 does **not** directly assign website coding while the P0 coding/deployment stabilization freeze is active.
 
-**DISCOVERY → CONVERSION → PAYMENT → FULFILLMENT → MEASUREMENT.**
+COM 2 may identify only an **exact verified customer/order/revenue technical blocker** and return it to PM4 with evidence. PM4 classifies it under `MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md` and, if admitted, routes it into `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` for MASTER DEVELOPER.
 
-Store/catalog/product/shopability/navigation work may move, but the protected top homepage output remains hard no-touch.
+Current route:
 
-Required dependency check:
+**COM 2 IDENTIFIES EXACT BLOCKER → PM4 CLASSIFIES / PRIORITIZES → CODING-STABILIZATION WORKTREE ADMITS OR HOLDS → MASTER DEVELOPER EXECUTES ONLY THE AUTHORIZED RECOVERY ITEM.**
 
-**COMMERCE CHANGE → CHECK PROTECTED TOP DEPENDENCY → VERIFY TOP OUTPUT UNCHANGED → EXECUTE.**
+During the freeze:
 
-If protected-top output would change:
+- **CUSTOMER / ORDER EMERGENCY** → route immediately through PM4/P0 recovery;
+- **VERIFIED REVENUE BLOCKER** → PM4 decides admission/order in P0 recovery;
+- **FEATURE / COSMETIC / MERCHANDISING / NICE-TO-HAVE CODE** → HOLD;
+- **PROTECTED TOP CHANGE** → HOLD + exact owner gate;
+- **UNCLEAR** → HOLD only that mutation; continue non-code commercial operations.
 
-**HOLD ONLY THAT MUTATION → ROUTE EXACT DELTA TO CASEY → CONTINUE UNRELATED COMMERCE WORK.**
+Store/catalog/product/shopability/navigation facts, source work, merchandising decisions and traffic work may continue in their owning non-code lanes. A required website mutation does not move merely because the business work is approved; it must enter the P0 technical recovery route first.
 
-No redesign, cosmetic experimentation, protected-top copy/image/CTA/product-binding change, broad refactor or new admin system is implied by this Worktree.
+The protected top homepage output remains hard no-touch. No redesign, cosmetic experimentation, protected-top copy/image/CTA/product-binding change, broad refactor or new admin system is implied by this Worktree.
 
 ## Current Company Operations execution order
 
@@ -227,7 +233,7 @@ No redesign, cosmetic experimentation, protected-top copy/image/CTA/product-bind
 6. **Kingboss:** continue exact differentiated cash-light launch proving only.
 7. **Doba:** exact gap-fill opportunities only.
 8. **Shopify/Marketing:** send free/owned traffic to each exact `PROMOTE` candidate as soon as its owning lane clears it; do not wait for every vendor.
-9. **Developer:** act only on a verified commerce/revenue blocker and preserve the protected homepage top.
+9. **Developer routing:** COM 2 identifies only an exact verified technical revenue/customer blocker → PM4 classifies → P0 coding-stabilization Worktree controls execution. COM 2 does not create or reactivate a parallel developer Worktree.
 10. **Paid ads:** remain BLOCKED company-wide until capital recovery is complete and Casey explicitly reopens them.
 
 ## Required return schema for any proposed hero
@@ -274,7 +280,7 @@ PM4 retains sequencing and final hero-set authority.
 
 ## Daily COM 2 loop
 
-**GIT FIRST → CURRENT WORK BOARD → CURRENT OWNING WORKTREES → CHECK REAL ORDERS → CHECK CASH RELEASE → CONSUME NEW LANE RETURNS → CLEAR ONLY CROSS-LANE ECONOMIC/LOGISTICS BLOCKERS → ROUTE CLEAN PROMOTE CANDIDATES → RECORD REALIZED CONTRIBUTION → ESCALATE PM DECISION ONLY WHERE REQUIRED → CONTINUE.**
+**GIT FIRST → CURRENT WORK BOARD → CURRENT OWNING WORKTREES → CHECK REAL ORDERS → CHECK CASH RELEASE → CONSUME NEW LANE RETURNS → CLEAR ONLY CROSS-LANE ECONOMIC/LOGISTICS BLOCKERS → ROUTE CLEAN PROMOTE CANDIDATES → RETURN EXACT TECHNICAL BLOCKERS TO PM4 → RECORD REALIZED CONTRIBUTION → ESCALATE PM DECISION ONLY WHERE REQUIRED → CONTINUE.**
 
 Before routing any task, ask:
 
@@ -282,10 +288,11 @@ Before routing any task, ask:
 2. Is there a newer Project Source/Current Worktree/receipt than this snapshot?
 3. Is COM 2 the action owner or only the consolidator?
 4. Is the blocker exact enough to route without recreating finished work?
+5. Does the task require website code? If yes, has PM4 admitted it into the active P0 coding-stabilization Worktree?
 
-If newer owning-lane state exists:
+If newer owning-lane factual state exists:
 
-**ADOPT NEWER STATE → UPDATE CONSOLIDATION → DO NOT RE-EXECUTE.**
+**ADOPT NEWER FACT → UPDATE CONSOLIDATION → DO NOT RE-EXECUTE → DO NOT INFER NEW AUTHORITY.**
 
 ## Phase 1 close condition
 
@@ -297,7 +304,8 @@ Phase 1 closes when:
 - Shopify/Spreadconnect has verified provider economics or an exact install/auth hold;
 - PM4 can rank the company-wide hero set without inventing economics;
 - clean `PROMOTE` products receive bounded owned/affiliate traffic without waiting for slower lanes;
-- no COM 2 stale pointer asks a lane to repeat a completed current-window action.
+- no COM 2 stale pointer asks a lane to repeat a completed current-window action;
+- no COM 2 route bypasses the active P0 coding-stabilization control for website mutations.
 
 ## First commercial proof milestone
 
@@ -307,4 +315,4 @@ Repeat until ordinary commerce activity can be funded from operating cash rather
 
 ## Control phrase
 
-**OWNING LANE PROVES → COM 2 CONSOLIDATES → PM4 PRIORITIZES → SPECIALIST EXECUTES → COM 2 VERIFIES → RESULT RECORDED → NO PAID ADS UNTIL OWNER REOPENS AFTER RECOVERY.**
+**OWNING LANE PROVES FACTS → COM 2 CONSOLIDATES → PM4 PRIORITIZES → APPROPRIATE OWNING WORKER EXECUTES → COM 2 VERIFIES → RESULT RECORDED → WEBSITE CODE ROUTES THROUGH P0 RECOVERY → NO PAID ADS UNTIL OWNER REOPENS AFTER RECOVERY.**
