@@ -1,154 +1,116 @@
-# ELEVATION UPSCALES — HOMEPAGE STORE MERCHANDISING WORK ORDER
+# ELEVATION UPSCALES — HOMEPAGE COMMERCE WORK ORDER
 
 **Date:** 2026-09-12 MDT  
 **Owner:** Casey Young  
-**State:** ACTIVE / BOUNDED DEVELOPER ROUTE  
-**Parent:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md` + `COMPANY_OPS_COMMERCIAL_SWEEP_WORKTREE_2026-09-12.md`  
-**Execution Lane:** MASTER DEVELOPER  
-**Management:** PM4 / Company Operations  
+**State:** SYNC CORRECTED / COMMERCE FUNCTIONALITY ONLY / PROTECTED TOP EXCLUDED  
+**Parent:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md` + `COMPANY_OPS_COMMERCIAL_SWEEP_WORKTREE_2026-09-12.md` + `OWNER_DIRECTIVE_HOMEPAGE_LOCK_2026-09-12.md`  
+**Execution Lane:** MASTER DEVELOPER when technical work is required  
+**Management:** PM4 / Company Operations
 
-## Owner boundary — hard lock
+## Correction
 
-The homepage hero is **NO TOUCH, PERIOD**.
+The earlier interpretation of this work order as broad permission to change homepage store merchandising is superseded by Casey's newer explicit clarification and the Master SOP authority hierarchy.
 
-This work order does **not** authorize any change to:
+The authorized scope is **commerce functionality**. The carefully built top homepage experience is not part of this work order.
 
-- homepage hero layout;
-- homepage hero images;
-- homepage hero text/copy;
-- homepage hero buttons/CTA text or destination;
-- homepage hero SOK products;
-- hero scripts/slides;
-- homepage typography, colors, spacing, or visual design;
-- existing printed/customer-facing copy anywhere on the homepage.
+## Authorized commerce work
 
-Do not edit `site/index.html` or `site/home-commerce.js` for this work order. Treat current live hero/runtime output as frozen.
+Developer and commerce workers may perform bounded work on:
 
-## Authorized surface
+- catalog/product/item records;
+- store/category/collection pages;
+- commerce navigation and browse paths;
+- exact product/store links and routes;
+- shopability, Buy Now and checkout routing;
+- source, availability and fulfillment bindings;
+- store search/filter behavior;
+- approved commerce APIs and integrations;
+- backend/catalog logic needed for store operation when protected top output is unchanged.
 
-Homepage **store merchandising outside the hero** is authorized using the existing `Shop the Store` product-card system only.
+Use existing Project/vendor source authority for product economics and promotion classification.
 
-Current architecture already supports this safely:
+## Protected top homepage — excluded from this work order
 
-`homepage existing store section → home-commerce.js → GET /api/store/featured → existing cards`
+No direct or indirect change is authorized to the protected top homepage experience, including:
 
-The current endpoint returns the first six eligible catalog records after catalog ordering. Because the public catalog is ordered by recent catalog update time, homepage merchandising can drift toward recently edited products rather than commercially cleared products.
+- layout/structure;
+- images/backgrounds;
+- copy/headlines/printed wording;
+- CTAs, CTA destinations or CTA behavior;
+- typography/colors/spacing/styles;
+- animations/slides/rotation/timing;
+- product bindings, product ordering or selection;
+- data bindings and top links;
+- responsive visibility/placement;
+- runtime behavior;
+- shared API/data changes that alter what the protected top renders.
 
-This work order exists to correct **selection**, not presentation.
+## `/api/store/featured` correction
 
-## Technical scope
+The previous work order identified `/api/store/featured` as a preferred target. That is **not blanket authorization to change that endpoint**.
 
-Preferred implementation target:
+Before modifying `/api/store/featured`, `site/_worker.js`, catalog ordering, a shared data source or any related dependency:
 
-- `site/_worker.js`
-- specifically the `/api/store/featured` selection logic only.
+1. identify every current consumer of the proposed change;
+2. determine whether the protected top homepage consumes it directly or indirectly;
+3. verify the proposed change leaves the protected top rendered/runtime output unchanged;
+4. if protected top output would change, HOLD the exact mutation and route it to Casey for explicit approval;
+5. continue unrelated commerce work through product/store/collection/channel surfaces.
 
-Avoid changes to HTML/CSS/homepage scripts unless a proven technical necessity is escalated first.
+A technically backend-only change is still a protected-top mutation if its effect changes the protected top.
 
-## Merchandising control
+## Product promotion gate
 
-The homepage store rail must not automatically treat "recently updated" as "best product to promote."
+Before concentrated traffic, a candidate still requires its owning lane to resolve material commercial facts:
 
-Use an explicit, deterministic featured-product control compatible with current commercial-sweep ownership.
+**EXACT SOURCE/SKU → CURRENT ORDERABILITY → PRICE/MAP → SOURCE COST → SHIPPING/FREIGHT → PAYMENT/CHANNEL COST → POSITIVE EXPECTED CONTRIBUTION → CONTROLLED WORKING-CAPITAL EXPOSURE → RELIABLE FULFILLMENT → WORKING PURCHASE PATH.**
 
-Recommended bounded pattern:
+Use `PROMOTE / VERIFY / REPRICE / HOLD / RETIRE` as appropriate.
 
-1. preserve the existing API response shape (`{ lithium: [...], rv: [...] }`);
-2. preserve existing card count limit and UI rendering;
-3. make product selection deterministic from an explicit approved featured list / priority control rather than catalog update time;
-4. never infer promotion approval from product title, vendor name, catalog recency, or gross selling price alone;
-5. if an approved featured candidate is no longer safely public/orderable, omit only that product and continue with the next approved clean candidate;
-6. do not introduce a new customer-facing label, badge, banner, copy block, design component, or hero element.
+Do not infer `PROMOTE` from catalog presence, product title, supplier name, update recency or gross selling price.
 
-A small public-safe config/allowlist is acceptable if it contains only non-confidential product identifiers/order and no protected supplier economics.
+## Approved revenue surfaces without touching protected top
 
-## Company Operations product gate
+Revenue acceleration can continue through:
 
-A non-SOK product may enter the homepage featured list only after its owning lane returns `PROMOTE` under the commercial sweep with material facts resolved:
-
-- exact source/SKU;
-- current availability/orderability;
-- current customer price/MAP;
-- current source cost kept in protected source when confidential;
-- shipping/freight treatment;
-- applicable payment/channel costs;
-- positive expected contribution;
-- low/controlled working-capital requirement;
-- reliable fulfillment path;
-- exact working checkout/product path.
-
-`VERIFY`, `REPRICE`, `HOLD`, `RETIRE`, unknown current cost, unresolved shipping, or unresolved fulfillment = **not eligible for concentrated homepage placement**.
+- product pages;
+- Shopify store and collections;
+- Universal Catalog/store routes;
+- Elevation Gear/Apparel surfaces;
+- Fourthwall native store/product checkout;
+- vendor/category pages;
+- TikTok/creator/social deep links;
+- direct/email links;
+- store navigation/search/browse improvements;
+- checkout/payment/fulfillment fixes;
+- other approved commerce channels.
 
 ## SOK carve-out
 
 SOK remains protected under `OWNER_DIRECTIVE_SOK_PROTECTION_2026-09-12.md`.
 
-Current SOK homepage presentation and SOK hero are not to be changed by this work order.
-
-Existing SOK featured/store products may remain if already safely public under the SOK Project. Do not use this task to reprice, deactivate, rebuild, or contract SOK.
-
-## Current live `/api/store/featured` snapshot reviewed during RUN
-
-### Lithium rail
-
-- `sok-sk12v100pc` — KEEP / protected existing SOK lane.
-- `sok-sk48v100n` — KEEP / protected existing SOK lane.
-- `cat-01e78438-5fb8-4e0d-aaab-ffbe86f5cf77` — VERIFY / do not newly prioritize until Doba/current economics pass.
-- `cat-ba15b95a-ab9c-49ba-be75-fc1b325f451e` — VERIFY / do not newly prioritize until Doba/current economics pass.
-- `cat-5104ec49-cf2f-4d6c-beb4-52a0b6f0186c` — VERIFY / do not newly prioritize until Doba/current economics pass.
-- `cat-336cf814-be3f-49fd-b574-0d0a39ac7312` — VERIFY / do not newly prioritize until Doba/current economics pass.
-
-### RV / Outdoor rail
-
-Current live cards include:
-
-- `EUS-CAT-B9BEAF9D` — rechargeable spotlight;
-- `EUS-CAT-3533989E` — 8L tankless water heater;
-- `EUS-CAT-BBFED4E7` — walk-in greenhouse;
-- `EUS-CAT-0E4EE8F0` — 12V electric scissor jack / impact wrench;
-- `EUS-CAT-AAF23901` — 12V water diaphragm pump;
-- `EUS-CAT-E0829C05` — 5.3-gallon metal fuel can.
-
-These are **VERIFY pending current protected source cost / stock / shipping / fee / contribution return** from the owning VEVOR/Doba lane. Catalog presence alone is not homepage PROMOTE approval.
-
-Do not delete them from the catalog. Homepage prominence and catalog availability are separate decisions.
-
-## First approved replacement pool
-
-Company Operations will feed product IDs into the explicit featured control as vendor/apparel lanes return `PROMOTE`.
-
-Priority return order:
-
-1. VEVOR — first 1–5 current positive-contribution, low-cash candidates;
-2. Renogy — `RBM500-US`, then `RSP100DCT-US` independently when activated and cleared;
-3. Doba — gap-fill only on current account-level economics pass;
-4. Kingboss — only after differentiated SKU/commercial/compliance/fulfillment gates pass.
-
-Apparel remains in its existing appropriate store/collection surfaces unless the current homepage store section is explicitly expanded by a newer owner instruction. This work order does not add a new homepage apparel section.
+Do not use this work order to reprice, rebuild, deactivate, contract or restart protected SOK listings/current Project work.
 
 ## Acceptance tests
 
-Developer return must prove:
+Any technical work under this order must prove:
 
-1. homepage hero DOM/source/runtime behavior unchanged from task baseline;
-2. no homepage customer-facing copy changed;
-3. no CSS/design files changed;
-4. `/api/store/featured` keeps the same response contract;
-5. featured selection is deterministic and management-controlled rather than recency-controlled;
-6. unsafe/missing approved item fails closed without breaking the homepage store section;
-7. product detail and Buy Now routes still resolve correctly;
-8. mobile/desktop existing card layout remains unchanged;
-9. canonical QA passes;
-10. isolated preview confirms hero byte/visual behavior unchanged and only intended store-card population changes.
+1. protected top homepage rendered/runtime behavior unchanged;
+2. protected top copy/images/CTA/layout/product selection unchanged;
+3. no indirect shared-data/API effect changes protected top output;
+4. the exact intended commerce path is improved or repaired;
+5. source/product identity remains correct;
+6. checkout/Buy Now routing remains correct;
+7. mobile/desktop commerce behavior passes for the exact changed surface;
+8. canonical QA passes;
+9. isolated preview is used for code changes before production under normal deployment control.
 
-## Deployment gate
+## Deployment rule
 
-Normal coding workflow applies:
+**CURRENT MAIN → FOCUSED CHANGE → QA → ISOLATED PREVIEW → VERIFY PROTECTED TOP UNCHANGED → NORMAL RELEASE GATE → PRODUCTION → LIVE SMOKE.**
 
-**CURRENT MAIN → FOCUSED BRANCH → QA → ISOLATED PREVIEW → VERIFY HERO UNCHANGED + STORE SELECTION ONLY → PM/OWNER RELEASE GATE AS REQUIRED → PRODUCTION → LIVE SMOKE.**
-
-Do not deploy a homepage change that alters the hero, design, or printed copy under this authorization.
+If protected top changes at all, do not release under this work order.
 
 ## Control phrase
 
-**HERO NO TOUCH → DESIGN NO TOUCH → COPY NO TOUCH → EXISTING STORE CARDS ONLY → PROMOTE-CLEARED PRODUCTS CONTROL THE RAIL → CATALOG RECENCY DOES NOT.**
+**COMMERCE FUNCTIONALITY CAN MOVE → PROTECTED TOP IS OUT OF SCOPE → CHECK SHARED DEPENDENCIES → SELL THROUGH STORE / PRODUCT / COLLECTION / CREATOR PATHS → OWNER APPROVAL REQUIRED FOR ANY TOP-HOMEPAGE DELTA.**
