@@ -1,12 +1,12 @@
 # Elevation UpScales — Shopify Store Operations Current Worktree
 
-**Status:** ACTIVE WORKTREE / PRIMARY WORKER NOT YET STARTED  
+**Status:** ACTIVE WORKTREE / PRIMARY WORKER ACTIVE  
 **Date:** 2026-09-11  
 **Owner:** Casey Young  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
 **Reporting Manager:** Peter Torres — Ecommerce & Vendor Operations Manager  
 **Primary Worker:** Shopify Store Operations Worker  
-**Worker State Until Startup:** OPEN TASK / STANDBY  
+**Worker State:** ACTIVE  
 **Lane SOP:** `SHOPIFY_STORE_OPERATIONS_SOP_V1_0.md`  
 **Worker Prompt:** `SHOPIFY_STORE_OPERATIONS_WORKER_PROMPT_V1_0.md`
 
@@ -102,6 +102,22 @@ Interpretation:
 
 Do not treat this tiny sample as a durable conversion rate.
 
+## Latest startup execution receipt — 2026-09-11 19:30 MDT
+
+- `GIT FIRST` completed against current `main`; latest observed pre-worker startup commit was `8000892ba4fd0f08f92bcad10519d52448e34f21`.
+- Master SOP, Glossary, Current Work Board, Shopify lane SOP, Shopify Current Worktree, Worker Registry and Direct-Site Profitability Gate were read from current `main`.
+- VEVOR Project Source was read before consuming VEVOR product state. The older VEVOR source still contains stale storefront-password language; the newer higher-authority Current Work Board / Shopify Worktree records the password gate as closed, so no rollback was performed.
+- Live connected Shopify store identity verified through Shopify Admin tooling.
+- Live VEVOR `status:active AND price:<=100` catalog query returned the current low-friction candidate pool, including the ten preliminary shortlist SKUs. No product status or price write was made.
+- Recent Shopify order check returned **0 orders**. No paid-order routing event exists yet.
+- Shopify analytics recheck for the current 7-day window returned **8 sessions / 1 cart addition / 1 checkout reached / 0 completed checkout**, consistent with the existing tiny-sample baseline.
+- VEVOR profitability classification is **still vendor-input controlled**. No `PROMOTE` result was found in current Git; Shopify will not guess protected supplier cost or promote economics-unknown products.
+- Live Renogy check confirmed exactly **five DRAFT products / zero activation action taken**. All five currently have no featured media in Shopify. `RSP100DCT-US` and `RBM500-US` remain advanced activation-QA candidates; the other three exact holds remain contained.
+- Registry startup state was changed from `OPEN TASK / STANDBY` to `ACTIVE` in commit `77725244806c2c273e3d2f7010af3a3183bbd540`.
+- Active-worker boundary remains respected: VEVOR and Renogy managers/specialists remain ACTIVE for protected vendor facts. Shopify will consume their verified outputs rather than duplicate those tasks.
+
+**Current next executable Shopify action:** preserve working buy paths and monitor orders while waiting for the VEVOR `PROMOTE/HOLD` handoff; consume the first clean vendor result immediately. In parallel, continue non-destructive Renogy draft QA only from verified vendor outputs and do not activate a draft until exact media/current price/current sellability clears.
+
 ## Routing rules
 
 ### Route to Vendor Project Manager
@@ -144,16 +160,16 @@ Do not treat this tiny sample as a durable conversion rate.
 
 When the new worker chat starts:
 
-- [ ] GIT FIRST
-- [ ] Read Master SOP + Glossary
-- [ ] Read Current Work Board
-- [ ] Read Shopify Store Operations SOP
-- [ ] Read this Current Worktree
-- [ ] Read Master Worker Registry
-- [ ] Verify live Shopify Admin/store state
-- [ ] Verify no competing worker owns the selected first task
-- [ ] Self-register / update Registry to ACTIVE
-- [ ] Start P0 from last verified state
+- [x] GIT FIRST
+- [x] Read Master SOP + Glossary
+- [x] Read Current Work Board
+- [x] Read Shopify Store Operations SOP
+- [x] Read this Current Worktree
+- [x] Read Master Worker Registry
+- [x] Verify live Shopify Admin/store state
+- [x] Verify no competing worker owns the selected first task
+- [x] Self-register / update Registry to ACTIVE
+- [x] Start P0 from last verified state
 
 ## Control phrase
 
