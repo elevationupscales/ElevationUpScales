@@ -1,0 +1,53 @@
+name: Temporary homepage release closeout
+
+on:
+  push:
+    branches:
+      - ops/homepage-lithium-release-closeout-0911
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ops/homepage-lithium-release-closeout-0911
+      - name: Close proven homepage release row
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          board=Path('operations/CURRENT_WORK_BOARD.md')
+          text=board.read_text()
+          lines=text.splitlines()
+          out=[]
+          removed=0
+          for line in lines:
+              if line.startswith('| Homepage lithium hero / approved retail branding release |'):
+                  removed += 1
+                  continue
+              out.append(line)
+          if removed != 1:
+              raise SystemExit(f'Expected one homepage release row, found {removed}')
+          text='\n'.join(out)+'\n'
+          marker='# CLOSED / PROTECTED FROM RECREATION'
+          note='- Homepage lithium hero / approved retail branding release — CLOSED. PR #94 merged at `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`; production run #39 deployed descendant `3aed2c99ef751882c298362b4c2596bf38a2117f`; canonical smoke passed; live homepage now shows the approved `AUTHORIZED SOK ENERGY DEALER` / `Lithium Power` / `for RV, Solar & Backup` flagship presentation. Do not recreate or redeploy this release unless a new visual/code defect is identified.'
+          if marker not in text:
+              raise SystemExit('Closed marker missing')
+          if note not in text:
+              text=text.replace(marker,marker+'\n\n'+note,1)
+          board.write_text(text)
+
+          Path('operations/HOMEPAGE_LITHIUM_RELEASE_CLOSEOUT_2026-09-11.md').write_text('''# Elevation UpScales — Homepage Lithium Release Closeout\n\n**Date:** 2026-09-11 MDT\n**Owner:** Casey Young\n**State:** CLOSED / PRODUCTION VERIFIED\n\n## Release lineage\n\n- Approved bounded homepage/lithium presentation PR: #94.\n- PR #94 merge commit: `3ee835f0d31e7f69922972358e68b1e22cdf1fdf`.\n- Production PayPal-repair release source: `3aed2c99ef751882c298362b4c2596bf38a2117f`.\n- Git ancestry confirms the production source is a descendant of PR #94.\n- Production workflow run `34660573945` / run #39 completed Cloudflare deployment, deployment smoke, canonical-domain smoke, and receipt successfully.\n\n## Canonical live verification\n\nThe live homepage now presents the approved flagship hierarchy:\n\n- `AUTHORIZED SOK ENERGY DEALER`\n- `Lithium Power`\n- `for RV, Solar & Backup`\n- supporting copy focused on SOK lithium batteries and power systems for RV, solar, backup and off-grid use.\n\nThe dedicated freight/logistics section remains on the page separately, consistent with the approved PR #94 scope.\n\n## Close decision\n\nThe prior work-board state `RELEASE READY` is stale. The approved presentation is already in production and canonical smoke passed. No additional exact-SHA deployment is required for this work item.\n\nReopen only for a newly verified visual/code defect or a new owner-authorized presentation change.\n''')
+          PY
+          rm .github/workflows/tmp-homepage-release-closeout.yml
+          git diff --check
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add operations/CURRENT_WORK_BOARD.md operations/HOMEPAGE_LITHIUM_RELEASE_CLOSEOUT_2026-09-11.md .github/workflows/tmp-homepage-release-closeout.yml
+          git commit -m 'Ops: close verified homepage lithium release'
+          git push origin HEAD:ops/homepage-lithium-release-closeout-0911
