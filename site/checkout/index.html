@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/store-checkout.css?v=4.5.3">
   <script defer src="/site-shell.js?v=5.2.0"></script>
   <script defer src="/store-checkout.js?v=4.6.1"></script>
+  <script defer src="/store-direct-buy-payment-hotfix.js?v=20260912-1"></script>
   <script defer src="/store-checkout-email-workflow.js?v=1.0.0"></script>
   <script defer src="/store-variant-image-enhancer.js?v=3.11.43"></script>
 <link rel="stylesheet" href="/labor-day-promo.css?v=4.4.2">
@@ -140,6 +141,15 @@
         <section id="checkout-availability-panel" class="eus-checkout-hawaii" hidden><p class="eus-checkout-step">PRODUCT AVAILABILITY</p><h3 id="checkout-availability-label">Availability</h3><p id="checkout-availability-timing"></p><p>Item may not be immediately available. Estimated fulfillment timing may change. Elevation will provide status updates and normal cancellation/refund terms remain applicable to the transaction.</p><label id="checkout-availability-ack-row" hidden><input id="checkout-availability-ack" type="checkbox"> I understand the fulfillment timing is an estimate and may change.</label><a id="checkout-availability-reserve" class="eus-checkout-hawaii-cta" href="/sok-order.html">Start Reservation / Order Review</a></section>
 
         <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>
+
+        <section id="checkout-shopify-direct" class="eus-checkout-hawaii" aria-label="Card and Shop Pay checkout" hidden>
+          <p class="eus-checkout-step">MORE WAYS TO PAY</p>
+          <h3>Pay by Card or Shop Pay</h3>
+          <p>Continue in Shopify's secure checkout for card payment or Shop Pay. Your exact SOK item and quantity will carry over.</p>
+          <a id="checkout-shopify-direct-link" class="eus-checkout-hawaii-cta" href="#">PAY BY CARD / SHOP PAY</a>
+          <p>Visa · Mastercard · American Express · Shop Pay</p>
+        </section>
+
         <div id="checkout-paypal" class="eus-checkout-paypal" hidden></div>
 
         <section id="checkout-success" class="eus-checkout-success" hidden>
