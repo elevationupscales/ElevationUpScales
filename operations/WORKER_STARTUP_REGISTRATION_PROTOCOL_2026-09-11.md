@@ -22,7 +22,25 @@ A worker created inside an existing Project must not invent a new Project, manag
 
 When a new worker first starts work:
 
-**RECEIVE DIRECTIVE → IDENTIFY PROJECT → IDENTIFY REPORTING MANAGER → READ MASTER S.O.P. / MASTER OS GLOSSARY → READ PROJECT/LANE S.O.P. → READ PROJECT WORKBOARD + CURRENT WORKTREE → INSPECT ACTIVE WORKERS → DEFINE ROLE FROM DIRECTIVE → REGISTER SELF → VERIFY ASSIGNED WORK → EXECUTE OR STANDBY**
+**RECEIVE DIRECTIVE → IDENTIFY PROJECT → IDENTIFY REPORTING MANAGER → READ MASTER S.O.P. / MASTER OS GLOSSARY → READ PROJECT/LANE S.O.P. → READ PROJECT WORKBOARD + CURRENT_WORKTREE → INSPECT ACTIVE WORKERS → DEFINE ROLE FROM DIRECTIVE → REGISTER SELF → VERIFY ASSIGNED WORK → EXECUTE OR STANDBY**
+
+## Streamline Mode inheritance
+
+When Casey or management activates `STREAMLINE` / `STREAMLINE MODE`, workers do not create a second workflow system.
+
+They inherit:
+
+- `STREAMLINE_MODE_MASTER_WORKFLOW_2026-09-11.md` for the short execution loop;
+- `MANAGEMENT_COMMUNICATION_AND_FILE_RECOVERY_WORKFLOW_2026-09-11.md` for management-channel and source-recovery behavior;
+- `REVENUE_ENGINE_COORDINATION_WORKFLOW_2026-09-11.md` when the worker touches commerce/revenue;
+- `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` when a direct-site product/order/promotion decision depends on economics;
+- the worker's existing Project Source / Lane S.O.P. / CURRENT_WORKTREE for lane-specific authority.
+
+Streamline Mode means:
+
+**USE EXISTING STRUCTURE → HOLD ONLY THE BLOCKED ITEM → REMOVE AVOIDABLE FRICTION → KEEP AUTHORIZED WORK MOVING.**
+
+It does not enlarge worker authority or erase protected gates.
 
 ## Required startup registration
 
@@ -52,7 +70,7 @@ The worker has completed startup/registration but has no current executable assi
 
 ### OPEN TASK / STANDBY
 
-The worker has unfinished assigned work, but execution is stopped because of a timeout, crash, unresolved external result, exhausted safe retries, inaccessible dependency, or another verified stop condition. The Project Worktree must preserve the unfinished task, last verified state, stop reason, next trigger, and any `UNKNOWN` external result. STANDBY never erases the OPEN TASK.
+The worker has unfinished assigned work, but execution is stopped because of a timeout, crash, unresolved external result, exhausted safe retries, inaccessible dependency, missing required source file, or another verified stop condition. The Project Worktree must preserve the unfinished task, last verified state, stop reason, next trigger, and any `UNKNOWN` external result. STANDBY never erases the OPEN TASK.
 
 ### PLACEMENT REQUIRED
 
@@ -64,29 +82,38 @@ The worker must return:
 
 The worker does not solve placement by creating its own hierarchy.
 
+## File availability incident rule
+
+A missing, expired, inaccessible, corrupt or wrong-version source file is an Operating System incident, not a reason to guess or silently substitute another source.
+
+Worker flow:
+
+**DETECT FILE/SOURCE PROBLEM → RECORD EXACT FILE/SOURCE + TASK IMPACT → REPORT TO MANAGER → ROUTE RECOVERY TO PROJECT RECON / MASTER RECON / COMPANY OPERATIONS AS APPROPRIATE → PRESERVE AFFECTED TASK OPEN → CONTINUE UNRELATED CLEAN WORK → RESUME AFTER VERIFIED RECOVERY**
+
+Use:
+
+- `FILE_AVAILABILITY_INCIDENT_STANDARD_2026-09-11.md`
+- `MANAGEMENT_COMMUNICATION_AND_FILE_RECOVERY_WORKFLOW_2026-09-11.md`
+
+The worker must not ask Casey to re-upload a file before authorized existing recovery paths have been checked when the Operating System can perform that recovery itself.
+
+## Management communication rule
+
+Current internal manager instructions, priorities, handoffs and operating state are controlled through Git / Master Workboard / Master Management Coordination / Project Worktrees.
+
+Gmail is not the current management-command source of truth.
+
+The active company Gmail may still be used for external correspondence and for recovering original supplier/customer/logistics attachments and factual evidence under `GMAIL_EMAIL_NETWORK_SOP_V1_0.md`.
+
 ## Automatic stop-state persistence
 
-For a qualifying timeout, repeated safe-retry failure, crash, catastrophic stop, inaccessible dependency, or unresolved external action/result:
+For a qualifying timeout, repeated safe-retry failure, crash, catastrophic stop, inaccessible dependency, source-file incident that blocks the exact task, or unresolved external action/result:
 
-**SAFE-SAVE → RECORD LAST VERIFIED STATE → PRESERVE OPEN TASK → MARK UNKNOWN RESULTS WHERE APPLICABLE → SET WORKER `OPEN TASK / STANDBY` → ROUTE/WAIT FOR TRIGGER**
+**SAFE-SAVE → RECORD LAST VERIFIED STATE → PRESERVE OPEN TASK → MARK UNKNOWN RESULTS WHERE APPLICABLE → SET WORKER `OPEN TASK / STANDBY` WHEN NO OTHER ASSIGNED WORK IS EXECUTABLE → ROUTE/WAIT FOR TRIGGER**
+
+If other assigned work is still executable, hold only the blocked item and continue rather than putting the entire worker/project on standby.
 
 Do not silently convert unfinished work to ordinary STANDBY.
-
-## File Availability Incident rule
-
-All workers must also follow `FILE_AVAILABILITY_INCIDENT_STANDARD_V1_0.md`.
-
-If a required source file is missing, expired, detached, inaccessible, unreadable, corrupted or its controlling version cannot be proven, the worker must not continue from memory or assumption.
-
-Required worker behavior:
-
-**IDENTIFY EXACT SOURCE → PRESERVE AFFECTED TASK → RECORD `FILE SOURCE DEGRADED / UNAVAILABLE / VERSION UNCERTAIN` → NOTIFY REPORTING MANAGER → ROUTE TO MASTER RECON / COMPANY OPERATIONS FOR RECOVERY → CONTINUE UNRELATED SAFE WORK**
-
-The worker may perform a lightweight recovery check in already-authorized Project/Git/connector sources, but may not endlessly retry or quietly replace the missing source with an unrelated file.
-
-Casey is asked to re-upload or re-supply a file only after authorized Project/Git/connector/Library/source-of-origin recovery has failed, or when the source exists only in an owner-controlled location.
-
-A worker startup or `RUN` that discovers an unavailable required file must treat the condition as an operating incident and report it through the normal management path. “File expired” is not an acceptable terminal state by itself.
 
 ## Standard OS Context Header
 
@@ -116,4 +143,4 @@ Every major term/lane should preserve:
 
 ## Startup control phrase
 
-**FIT INTO THE EXISTING OS BEFORE CREATING NEW STRUCTURE.**
+**FIT INTO THE EXISTING OS BEFORE CREATING NEW STRUCTURE → HOLD ONLY THE BLOCKED ITEM → KEEP AUTHORIZED WORK MOVING.**
