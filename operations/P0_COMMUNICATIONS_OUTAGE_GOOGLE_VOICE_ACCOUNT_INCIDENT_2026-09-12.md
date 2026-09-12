@@ -2,7 +2,10 @@
 
 **Date:** 2026-09-12  
 **Owner:** Casey Young  
+**Parent Project:** Operating System / Company Operations  
 **State Owner:** MPM 5 / Operating System Project Manager  
+**Execution Lane:** Company Operations + Owner / carrier-account-holder actions  
+**Peter Torres Role:** EVIDENCE RETURN ONLY / NO MUTATION AUTHORITY IN INCIDENT LANE  
 **Severity:** **P0 / CRITICAL**  
 **Status:** **ACTIVE — ACCOUNT RECOVERED / GOOGLE VOICE DELETED / RESIDUAL FORWARDING REMAINS**
 
@@ -16,6 +19,31 @@ Current owner truth as of 2026-09-12:
 - the Google Voice number/service was deleted;
 - call-forwarding behavior remains in effect and is still causing business disruption;
 - the incident is therefore no longer primarily an account-recovery problem; it is now a residual call-routing/forwarding recovery problem.
+
+## Scope
+
+### IN SCOPE
+
+- restore Casey's carrier-native inbound calls and SMS;
+- identify and remove residual conditional/unconditional forwarding associated with the deleted Google Voice setup;
+- verify no port-out, SIM/eSIM swap, line suspension, or unintended routing state exists;
+- request T-Mobile/carrier reprovisioning where needed;
+- report residual Google Voice linked-number/device-routing state through the available private Google Voice feedback/support path;
+- reconcile Peter's exact change log as evidence;
+- test and document direct carrier call + SMS recovery;
+- close the incident only after owner verification.
+
+### OUT OF SCOPE / FROZEN
+
+- recreating Google Voice;
+- claiming or reverifying another Voice number;
+- changing Google recovery email/phone methods again;
+- changing SIM/eSIM or porting/transferring the carrier number unless the carrier identifies a specific required recovery step;
+- experimenting with verification codes;
+- unrelated website, Shopify, eBay, vendor, freight, apparel, marketing, or catalog changes;
+- stopping unrelated company work solely because this P0 exists.
+
+**Containment rule:** stop only communications-routing mutations that can worsen the incident. Preserve unrelated work and continue normal authorized lanes.
 
 ## Verified / reconciled evidence
 
@@ -40,6 +68,23 @@ Current owner truth as of 2026-09-12:
 - additional verification-code experiments.
 
 No worker may make another Voice/account mutation in this lane unless MPM explicitly releases a bounded recovery action.
+
+## Workflow / Worktree
+
+**GIT FIRST → PRESERVE CURRENT PHONE STATE → CARRIER FORWARDING RESET → DIRECT CALL TEST → DIRECT SMS TEST → GOOGLE RESIDUAL-STATE REPORT → VERIFY NO ROUTING REMAINS → OWNER CONFIRMS BUSINESS COMMUNICATIONS RESTORED → CLOSE / RELEASE FREEZE.**
+
+### Current live worktree
+
+| Step | Owner | State | Next action / close condition |
+|---|---|---|---|
+| Account recovery | Casey / Google account | **COMPLETE** | Preserve recovered account; no additional recovery-method changes. |
+| Google Voice service deletion | Casey / Google Voice | **COMPLETE** | Do not recreate Voice during incident. |
+| Peter change-log return | Peter Torres | **OPEN / EVIDENCE ONLY** | Return exact account/Voice/linked-number/forwarding/verification actions and approximate timestamps. No settings changes. |
+| T-Mobile/carrier forwarding reset | Casey + Company Operations | **P0 ACTIVE / OWNER-ACCOUNT ACTION REQUIRED** | Contact T-Mobile, request full conditional + unconditional forwarding audit/reset, verify no port/SIM/line issue, reprovision voice/SMS if needed. |
+| Direct carrier inbound call | Casey | **OPEN VERIFICATION** | PASS only when a caller reaches the native carrier line normally. |
+| Direct carrier SMS | Casey | **OPEN VERIFICATION** | PASS only when a standard carrier SMS reaches the phone normally. |
+| Google residual Voice-state report | Company Operations / Owner | **OPEN / SECONDARY TO CARRIER RESET** | Submit private feedback/support request asking Google to remove any stale linked-number/device-routing state. Do not post the phone number publicly. |
+| Incident closure | MPM 5 | **BLOCKED ON VERIFICATION** | Close only after direct call + SMS pass and owner confirms normal business communications. |
 
 ## Recovery sequence
 
@@ -81,5 +126,14 @@ Incident remains open until:
 ## Support-contact execution note
 
 An attempt was made to launch a private authenticated Google support/feedback browser flow through the available automation surface, but the connected browser-automation wallet was out of funds, so no Google submission was made. This does not change the carrier-first recovery priority.
+
+## Cross-Project routing
+
+- **MPM 5:** owns priority, incident state and closure.
+- **Company Operations:** coordinates carrier/support evidence and communications continuity.
+- **Peter Torres:** evidence return only; no Voice/account/carrier mutation authority until released.
+- **MASTER DEVELOPER:** no role unless a separate verified website/phone-link code defect is discovered and routed through the website P0 lane.
+- **Shopify/eBay/vendor/apparel/logistics workers:** continue current authorized Worktrees. This incident does not independently pause them.
+- **Paid acquisition:** remains separately blocked by the existing owner no-paid-ads directive.
 
 **Until verification passes: P0 / CRITICAL.**
