@@ -9,6 +9,8 @@
 
 Too many release gates are slowing the website repair. For the current Elevation cart / secure-checkout repair, use a direct production path.
 
+**Newest owner payment-method direction (2026-09-12): Elevation does not want Shop Pay offered. Preserve PayPal and standard card payment where available, but remove Shop Pay from the customer checkout experience and from Elevation checkout copy. This newest direction supersedes the earlier requirement to preserve Card / Shop Pay together.**
+
 ## RELEASE PATH
 
 **DEV CODE → SMOKE TEST → PRODUCTION → LIVE SMOKE → CLOSE / FIX FORWARD IF NEEDED**
@@ -20,7 +22,9 @@ No separate MASTER RECON acceptance gate, no COM2 pre-production approval gate, 
 The direct path still must preserve these controls because they protect active customer payment capability:
 
 - preserve the currently working PayPal path;
-- preserve the currently working Card / Shop Pay production hotfix;
+- preserve standard credit/debit card payment where available;
+- do not offer or promote Shop Pay;
+- do not remove standard card acceptance merely to remove Shop Pay unless no clean separation is available;
 - do not touch the protected homepage top;
 - do not expose secrets, raw card data or CVV;
 - do not submit a real payment as part of QA;
@@ -30,9 +34,9 @@ The direct path still must preserve these controls because they protect active c
 
 ## CURRENT PRODUCTION TRUTH
 
-The live `production-deploy` branch is currently at `4da62160a5d9250a1d977a42052644798fac0b40`, which added Card / Shop Pay alongside PayPal.
+The live `production-deploy` branch is currently at `4da62160a5d9250a1d977a42052644798fac0b40`, which added Card / Shop Pay alongside PayPal as a P0 fallback. That behavior is now partially superseded by owner direction: PayPal and standard card may remain, but Shop Pay is not approved as a customer payment option.
 
-The current cart/checkout repair implementation has not yet landed as a newer code commit. Therefore the next production deployment must contain the actual repair code and must preserve the `4da62160` payment hotfix behavior.
+The current cart/checkout repair implementation has not yet landed as a newer code commit. Therefore the next production deployment must contain the actual repair code, preserve the working PayPal path, preserve standard card where cleanly separable, and remove Shop Pay exposure.
 
 ## EXECUTION BRANCH
 
@@ -48,7 +52,9 @@ for the bounded repair unless MASTER DEVELOPER has already created a newer exact
 - richer checkout item review and exact product-detail return path;
 - canonical server-side product / price / shipping validation;
 - hardened PayPal capture / local-order reconciliation / retry behavior;
-- retain PayPal + Card / Shop Pay;
+- retain PayPal;
+- retain standard card payment where available;
+- remove Shop Pay from customer-facing checkout and checkout copy;
 - mobile + desktop smoke.
 
 ## HOLD
