@@ -1,0 +1,45 @@
+name: Temporary PayPal checkout origin repair
+
+on:
+  push:
+    branches:
+      - work/paypal-checkout-origin-repair-0911
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, 'Fix checkout trusted origin validation') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/paypal-checkout-origin-repair-0911
+          fetch-depth: 0
+      - name: Apply bounded origin repair
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('site/_worker.js')
+          text = path.read_text()
+          old = 'function sameOriginPost(request){if(request.method!=="POST")return true;const origin=clean(request.headers.get("Origin"),500);if(!origin)return false;try{return origin===new URL(request.url).origin;}catch(_){return false;}}'
+          new = 'const TRUSTED_CHECKOUT_ORIGINS=new Set(["https://elevationupscales.com"]);\nfunction sameOriginPost(request){if(request.method!=="POST")return true;const origin=clean(request.headers.get("Origin"),500);if(!origin)return false;try{const parsedOrigin=new URL(origin).origin;return parsedOrigin===new URL(request.url).origin||TRUSTED_CHECKOUT_ORIGINS.has(parsedOrigin);}catch(_){return false;}}'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one checkout-origin guard, found {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+      - name: Verify bounded diff
+        run: |
+          git diff --check
+          git diff -- site/_worker.js
+      - name: Remove temporary patch workflow
+        run: rm .github/workflows/tmp-paypal-origin-repair.yml
+      - name: Commit repair
+        run: |
+          git config user.name "elevationupscales"
+          git config user.email "caseymyoung@gmail.com"
+          git add site/_worker.js .github/workflows/tmp-paypal-origin-repair.yml
+          git commit -m "Fix checkout trusted origin validation"
+          git push origin HEAD:work/paypal-checkout-origin-repair-0911
