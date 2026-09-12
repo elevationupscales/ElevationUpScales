@@ -73,3 +73,20 @@ jobs:
             https://elevationupscales.com/api/store-checkout/quote)
           echo "missing_origin_status=$code"
           test "$code" = '403'
+      - name: Headless browser must render live PayPal checkout
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+            --virtual-time-budget=20000 \
+            --dump-dom 'https://elevationupscales.com/checkout/?source=lithium&id=sok-sk12v100pc&name=SOK%20SK12V100PC' \
+            > /tmp/checkout-dom.html
+          grep -q 'SOK SK12V100PC 12.8V 100Ah 1280Wh LiFePO4 Battery' /tmp/checkout-dom.html
+          grep -q 'Secure PayPal checkout ready.' /tmp/checkout-dom.html
+          if grep -Eiq 'paypal\.com|paypal-button|zoid' /tmp/checkout-dom.html; then
+            echo 'paypal_render_evidence=present'
+          else
+            echo 'PayPal checkout status is ready but no rendered PayPal frame/button evidence was found in the dumped DOM.' >&2
+            exit 1
+          fi
