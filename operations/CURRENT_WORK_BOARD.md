@@ -204,3 +204,17 @@ When a material event occurs:
 8. Do not treat a historical issue/PR that says `CONTROLLING`, `P0`, or references an old exact SHA as current authority when its live residuals are already represented by this board and current project sources.
 9. When a project hits a real blocker, preserve the blocker/trigger, move that sub-item to the back of the applicable queue, and continue every finishable in-project worktree before returning to deferred items.
 10. Shared universal-catalog completion is measured by `UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`; do not declare all-vendor live integration complete merely because individual supplier listings exist.
+
+---
+
+## OWNER FALLBACK — IN-HOUSE CHECKOUT / PAYMENT ORCHESTRATION
+
+If the PayPal / Shopify-hosted payment path remains blocked, unreliable, or requires an avoidable recurring platform cost that the Owner does not accept after bounded verification, route the commerce lane to **ELEVATION IN-HOUSE CART / ORDER ORCHESTRATION** instead of allowing the third-party integration to become a standing sales gate.
+
+**In-house means Elevation owns:** cart state, checkout routing, server-side price and sellability validation, order state, receipts, gateway abstraction, fulfillment handoff, recovery records, and provider switching.
+
+**In-house does not mean:** bypassing a lawful payment processor, card-network requirements, PCI/security obligations, fraud controls, taxes, supplier MAP/channel rules, or other binding payment/compliance controls. Actual movement of customer funds must still use an approved payment processor/gateway.
+
+**Fallback trigger:** bounded PayPal/Shopify verification demonstrates persistent technical failure, unacceptable reliability, or Owner-rejected platform cost. Ordinary transaction-processing fees alone do not silently change vendor pricing rules or authorize unsafe payment handling.
+
+**Fallback execution rule:** preserve any working Shopify/native checkout while the Elevation-owned cart/order layer is built; migrate product flows only after isolated payment, order-capture, receipt, fulfillment-routing, refund/error, and security acceptance passes.
