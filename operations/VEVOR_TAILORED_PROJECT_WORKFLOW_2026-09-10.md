@@ -5,43 +5,52 @@
 **Project Operations Manager:** VEVOR Project Operations Manager — existing VEVOR project management function, not an added competing top-level manager  
 **Project Specialist:** VEVOR Reconciliation & Price-Control Specialist  
 **Human Ecommerce Oversight:** Peter Torres  
-**Status:** ACTIVE — STAGE 1 PROVING  
-**Last reconciled:** 2026-09-10  
+**Status:** ACTIVE — STAGE 1 PROVING / PUBLIC CHECKOUT VERIFIED / FIRST PROFITABLE ORDER OPEN  
+**Last reconciled:** 2026-09-11  
 **Project Source:** `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`  
 **Controlling SOP:** `VEVOR_VENDOR_MASTER_SOP.md`  
-**B-Tier Receipt:** `VEVOR_B_TIER_PREPARATION_2026-09-10.md`  
-**Fulfillment Receipt:** `VEVOR_FULFILLMENT_QUALIFICATION_2026-09-10.md`
+**B-Tier Preparation Receipt:** `VEVOR_B_TIER_PREPARATION_2026-09-10.md`  
+**B-Tier Live Qualification Receipt:** `VEVOR_B_TIER_LIVE_QUALIFICATION_2026-09-10.md`  
+**Fulfillment Receipt:** `VEVOR_FULFILLMENT_QUALIFICATION_2026-09-10.md`  
+**Profitability Control:** `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md`  
+**First-Sale Shortlist:** `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md`
 
 ## Project outcome
 
-Operate VEVOR as a controlled direct-site supplier lane that turns verified VEVOR source data into customer-ready Shopify products, proves real supplier fulfillment, and scales only from live sell-through while preserving source separation and current VEVOR pricing/channel rules.
+Operate VEVOR as a controlled direct-site supplier lane that turns verified VEVOR source data into customer-ready Shopify products, proves profitable real supplier fulfillment, and scales from live sell-through while preserving source separation, current VEVOR pricing/channel rules and Elevation cash protection.
+
+Current operating objective:
+
+**VERIFY SOURCE → VERIFY LIVE SELLABILITY → CONTROL MAP / PRICE → VERIFY ORDER CONTRIBUTION → PROMOTE → SELL → FULFILL → RECORD ACTUALS → SCALE WINNERS**
 
 ## Verified current state
 
-- VEVOR PRO/direct relationship is active.
-- Supplier feed has been received.
+- VEVOR PRO/direct relationship is active and generic onboarding is complete enough for operations.
+- Supplier feed has been received; the original/full supplier feed remains the source and curated derivatives do not replace it.
 - Direct VEVOR and Doba-sourced VEVOR are separate source lanes.
 - Direct VEVOR is authorized for ElevationUpScales.com / Shopify direct-site sales; third-party marketplaces remain blocked absent separate written authorization.
-- The supplier rule requires Elevation's selling price not be below VEVOR's current selling price; the feed also contains a MAP field.
-- Planning floor is only a screening aid. Live price and current sellability must be reverified before supplier purchase.
-- No verified paid direct-VEVOR preorder/backorder path exists; genuinely unavailable SKUs pause individually.
-- First A-tier launch is complete: 19 VEVOR Direct products and the `VEVOR Direct` collection are ACTIVE/published in Shopify Admin.
-- Live source reconciliation shows 19 direct VEVOR ACTIVE products and 4 Doba-sourced VEVOR DRAFT products with source separation intact.
-- A 17-SKU B-tier Strong Expansion queue is prepared with zero current Shopify SKU collisions. Preparation is complete; publication is not yet authorized.
-- VEVOR public order-status/tracking baseline is verified through My Orders / Tracking after shipment.
-- Current public VEVOR returns/warranty baseline is qualified: most original-condition items may be returned/exchanged within 30 days and the standard official-site manufacturer warranty is 12 months. Exact PRO-account RMA, return-label/shipping-cost handling and support ownership remain supplier-detail items.
-- A focused supplier follow-up covering blind shipping/packing slips, tracking handoff, RMA/return-label procedure and customer-support ownership has been sent. Waiting on that answer does not block the verified normal-order path.
-- Current customer-facing proof remains incomplete because Shopify Online Store password protection is enabled.
-- No real paid VEVOR Direct Shopify order existed in the most recent launch-window check, so first-order proof has not started.
+- The supplier rule requires Elevation's selling price not be below VEVOR's current selling price; the feed also contains a MAP field. Use the higher applicable live-price/MAP floor.
+- Supplier inventory is not represented as Elevation physical On Hand.
+- No verified blanket paid direct-VEVOR preorder/backorder path exists; genuinely unavailable SKUs pause individually.
+- A-tier launch is complete: 19 VEVOR Direct products and the `VEVOR Direct` collection are established in Shopify.
+- B-tier live qualification is complete: all 17 exact B-tier SKUs were checked against current public VEVOR source pages; exact SKU identity, public price/feed-MAP alignment at the qualification check, source-backed media, Shopify records and Shopify-hosted hero media were verified.
+- Current live Shopify reconciliation on 2026-09-11 found **17 / 17 `VEVOR-B` products ACTIVE and 0 `VEVOR-B` products DRAFT**. Preserve this live state unless Casey or a newer controlling VEVOR rule explicitly changes it. Do not recreate or bulk-roll back the qualified B-tier set.
+- The earlier shared-worker DRAFT/ACTIVE write conflict is historical evidence and remains a concurrency-control lesson. It is not a current instruction to start another status tug-of-war.
+- Shopify storefront password protection is **CLOSED** by owner action. Public native Shopify checkout has been verified on a VEVOR product. Do not recreate the password-removal task.
+- VEVOR fulfillment questions are closed enough for first-order operation: product packaging remains VEVOR branded; supplier states invoice/pricing paperwork is not included; tracking is available through the PRO account; customers contact Elevation first; Elevation coordinates supplier-side return/warranty/support through VEVOR's current process.
+- Generic supplier fulfillment follow-up is answered/closed. Do not resend it.
+- Current Shopify order sweep on 2026-09-11 returned **0 orders**, so first-real-order proof remains open.
+- Current first-sale execution is governed by `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md`: a product is not a promotion target until current economics support positive expected order contribution.
+- `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md` is the current bounded promotion-candidate queue. It does not authorize discounts, paid ads, inventory buys or promotion before the profit gate passes.
 
 ## Current worktree
 
-**LAST VERIFIED:** A-tier launch complete; live direct-vs-Doba reconciliation clean; B-tier 17-SKU queue prepared; fulfillment/returns qualification recorded; supplier-detail follow-up sent.  
-**CURRENT EXACT GATE:** Shopify Online Store password protection requires authenticated Shopify owner/admin action before public storefront/cart/checkout acceptance can be proven.  
-**DO NOT REBUILD:** PRO registration, supplier-feed intake, 19-product A-tier launch, VEVOR Direct collection, B-tier queue preparation, direct-vs-Doba reconciliation, or fulfillment qualification receipt.  
-**NEXT EXECUTABLE AFTER GATE:** unauthenticated `VEVOR Direct` collection → product → cart → checkout acceptance.  
-**FIRST REAL ORDER TRIGGER:** reverify exact SKU + live sellability + live VEVOR selling price/feed MAP → place supplier order → capture acceptance/tracking/customer completion → record actuals.  
-**EXPANSION CONTROL:** B-tier may remain staged/prepared while Stage 1 is open; publish only after the current publication gate permits expansion and each SKU receives fresh exact-SKU source, MAP/live-price, sellability, media and fulfillment checks.
+**LAST VERIFIED:** public Shopify checkout is open; A-tier is established; B-tier 17/17 is live-qualified, ACTIVE and media-complete; fulfillment baseline is answered; zero current Shopify orders.  
+**CURRENT ACTIVE TASK:** convert the preliminary VEVOR first-sale shortlist into `PROMOTE`, `HOLD — ECONOMICS UNKNOWN`, or `HOLD — NEGATIVE CONTRIBUTION` using fresh exact-SKU source/sellability/price-MAP checks plus protected current order economics.  
+**CURRENT EXTERNAL TRIGGER:** first real paid VEVOR order.  
+**DO NOT REBUILD:** PRO registration, supplier-feed intake, A-tier launch, VEVOR Direct collection, B-tier queue preparation, B-tier live qualification, B-tier product/media creation, direct-vs-Doba source separation, storefront-password removal, or generic fulfillment inquiry.  
+**NEXT EXECUTABLE:** fresh-check highest-value shortlist SKUs; calculate expected order contribution using protected economics outside public Git; route clean `PROMOTE` items into free/owned traffic and existing Shopify merchandising.  
+**FIRST REAL ORDER TRIGGER:** reverify exact SKU + live sellability + current VEVOR selling price/feed MAP + supplier-order path → place supplier order → capture supplier acceptance/tracking/customer completion → record actual contribution and exceptions.
 
 ## Unified project team
 
@@ -50,13 +59,14 @@ Operate VEVOR as a controlled direct-site supplier lane that turns verified VEVO
 The VEVOR Project Operations Manager owns the VEVOR worktree and may directly perform routine in-scope execution, including:
 
 - feed/source organization;
-- live supplier price/sellability checks;
-- routine Shopify product/collection work when the required facts are already verified and the manager has authorized access/capability;
+- live supplier public-price/sellability checks;
+- routine Shopify product/collection work when required facts are verified and access/capability is authorized;
 - routine VEVOR account/source verification;
 - project receipts/current-state updates;
-- first-order coordination and follow-through.
+- first-order coordination and follow-through;
+- routing protected cost/economics checks without placing those protected values in public Git.
 
-The manager must not self-waive VEVOR MAP/price controls or expand channels.
+The manager must not self-waive VEVOR MAP/price controls, expand channels, invent blanket backorder authority, or normalize a loss-making promotion.
 
 ### Project Specialist
 
@@ -69,27 +79,25 @@ The VEVOR Reconciliation & Price-Control Specialist owns:
 - sellability/source verification;
 - policy/change-control research;
 - identification of product/order exceptions;
-- execution-ready findings returned to the Project Operations Manager.
+- public-safe `PROMOTE` / HOLD disposition after protected economics are evaluated by the authorized lane.
 
-Existing VEVOR MAP/pricing and SOP/change-control functions are specialist/control functions inside this one project; they do not create additional competing project managers.
+Existing VEVOR MAP/pricing and SOP/change-control functions remain specialist/control functions inside this one project; they do not create additional competing project managers.
 
 ### Assigned/shared workers
 
-The Shopify Operations Worker is the normal bounded execution worker when dedicated storefront work is needed. Catalog, Developer, Fulfillment, Research or Communications may enter only through a bounded VEVOR handoff and return afterward.
+The Shopify Store Operations Worker / Shopify Operations Worker is the bounded execution layer when dedicated storefront work is needed. Catalog, Developer, Fulfillment, Research, Marketing or Communications may enter only through a bounded VEVOR handoff and return afterward.
 
-The Shopify Operations Worker may execute already-approved VEVOR product, price, collection, source-control and publication changes, but may not invent supplier policy, expand channels or bypass the storefront-owner authentication gate.
+Shared workers must not override VEVOR source/MAP/channel/profitability controls. When another worker is changing the same Shopify records, use the concurrency rule: verify current state, preserve valid records, avoid write races, and reconcile once against current authority.
 
 ## Tailored operating sequence
 
 ### 1 — GIT / PROJECT SOURCE / WORKTREE PICKUP
 
-Resolve current `main`; read the VEVOR row on `CURRENT_WORK_BOARD.md`, `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`, this workflow, `VEVOR_VENDOR_MASTER_SOP.md`, and the current VEVOR launch/preparation/fulfillment receipts.
+Resolve current `main`; read `MASTER_SOP_V1_0.md`, `MASTER_OS_GLOSSARY_V1_0.md`, the VEVOR row on `CURRENT_WORK_BOARD.md`, `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`, this workflow, `VEVOR_VENDOR_MASTER_SOP.md`, the latest VEVOR receipts, and the current profitability/first-sale controls.
 
 Identify the last verified VEVOR action and next executable VEVOR action before doing new work.
 
-Do not restart PRO registration, feed intake, the completed 19-product launch, B-tier preparation, or already-qualified fulfillment research.
-
-If a prior worker/chat/branch was interrupted, resume only the unfinished VEVOR action from durable state.
+Do not restart completed onboarding, catalog, media, password or fulfillment-research work.
 
 ### 2 — SOURCE / SKU CONTROL
 
@@ -99,20 +107,22 @@ For every candidate or ordered SKU preserve:
 
 Doba-sourced VEVOR stays separate unless a deliberate exact-SKU source merge is independently verified.
 
-Update the VEVOR Project Source when a material onboarding/readiness fact changes.
+Update the Project Source when a material readiness fact changes.
 
-### 3 — PRICE RELEASE
+### 3 — PRICE / MAP RELEASE
 
-Before first publication and before a material price change:
+Before first publication, material price change, active promotion and supplier-order placement when required:
 
 1. verify exact SKU;
 2. read the applicable feed MAP;
 3. check VEVOR's current public selling price;
 4. use the higher applicable advertised-price floor;
-5. set Elevation's customer price using protected economics outside public Git;
-6. verify the live Shopify price after change.
+5. use protected internal economics outside public Git to determine an acceptable Elevation customer price;
+6. verify the Shopify variant price after any authorized change.
 
 If price evidence is missing, hold only that SKU/price action.
+
+Never use discounts, compare-at pricing, automatic promotions, bundles or gifts to bypass VEVOR MAP.
 
 ### 4 — SELLABILITY / STOCK CHECK
 
@@ -125,113 +135,158 @@ Use customer-safe states:
 - UNAVAILABLE;
 - DISCONTINUED / RETIRED.
 
-Before supplier purchase, reverify current sellability. Do not invent preorder/backorder authorization.
+Before active promotion and before supplier purchase, reverify current sellability. Do not invent preorder/backorder authorization.
 
-### 5 — CURATED CATALOG
+### 5 — PROFITABILITY GATE / FIRST-SALE SHORTLIST
 
-Use launch priority:
+The current startup objective is the first **profitable** Elevation direct-site order.
 
-**A CORE LAUNCH → B STRONG EXPANSION → C SUPPORTING**
+For every promotion candidate apply:
+
+**CUSTOMER PRODUCT REVENUE + CUSTOMER-PAID SHIPPING, IF ANY − SUPPLIER PRODUCT COST − SUPPLIER SHIPPING/FREIGHT − PAYMENT/PLATFORM FEES − ELEVATION-FUNDED DISCOUNTS/CREDITS − OTHER KNOWN VARIABLE ORDER COSTS = EXPECTED ORDER CONTRIBUTION**
+
+Protected supplier costs, margins and private commercial terms stay outside public Git.
+
+Disposition each candidate as:
+
+- `PROMOTE` — expected order contribution > 0 and all source/fulfillment/checkout controls are clean;
+- `HOLD — ECONOMICS UNKNOWN` — a material current cost is not known;
+- `HOLD — NEGATIVE CONTRIBUTION` — expected contribution is $0 or below;
+- `OWNER REVIEW — STRATEGIC EXCEPTION` — deliberate loss leader/subsidy or other strategic exception.
+
+Use the current first-sale shortlist as the initial bounded queue. Re-rank by purchase friction + expected dollar contribution + contribution rate + brand fit + fulfillment reliability + support/return risk.
+
+### 6 — CATALOG / SHOPIFY CONTROL
+
+Use launch sequence:
+
+**A — CORE LAUNCH → B — STRONG EXPANSION → C — SUPPORTING**
 
 A-tier is complete.
 
-B-tier preparation is complete for the current 17-SKU queue. Do not recreate that queue. Keep it staged until the public storefront Stage-1 gate permits expansion, then run fresh per-SKU checks before publication.
+B-tier qualification and build are complete for 17 exact SKUs. Current live Shopify state is 17/17 `VEVOR-B` ACTIVE with media; preserve it. Publication itself is no longer the immediate gate because the storefront password gate is closed and public checkout is verified.
 
-Favor products aligned to off-grid, RV/mobile, restoration/field-service and outdoor/support demand.
+Existing active products are not automatically promotion-approved. Active promotion still requires fresh source/sellability/price-MAP and positive-contribution checks.
 
-### 6 — SHOPIFY BUILD / PUBLIC ACCEPTANCE
+Do not rebuild products or duplicate collections. Preserve direct-source tags/identity and keep legacy Doba/Stock-Hold records separate.
 
-Project Operations Manager may directly complete routine Shopify execution if authorized and capable; otherwise use the Shopify Operations Worker.
+### 7 — PUBLIC ACCEPTANCE
 
-For each direct VEVOR record preserve source identity, exact SKU, price-control state, sellability marker and collection/lane.
+The prior immediate acceptance sequence is complete:
 
-Current immediate acceptance sequence:
+**STOREFRONT PASSWORD CLOSED → PUBLIC STOREFRONT ACCESS VERIFIED → VEVOR PRODUCT → NATIVE SHOPIFY CART/CHECKOUT VERIFIED**
 
-**AUTHENTICATED OWNER/ADMIN REMOVES STOREFRONT PASSWORD → PUBLIC STOREFRONT ACCESS → VEVOR DIRECT COLLECTION → PRODUCT PAGE → CART → CHECKOUT**
+Do not recreate password-removal or generic checkout proof unless a new defect appears.
 
-The 19 direct products and VEVOR Direct collection already exist and are published in Shopify Admin. If Shopify storefront password protection remains enabled, remove only that exact gate using authenticated Shopify owner/admin access, then rerun unauthenticated acceptance. Do not rebuild products or create duplicate collections.
+If a new product/path is materially different, test only that affected path.
 
-### 7 — FIRST REAL ORDER PROOF
+### 8 — PROMOTION HANDOFF
+
+After a candidate earns `PROMOTE`:
+
+1. verify the current Shopify buy path remains valid;
+2. preserve MAP/customer-price controls;
+3. route the bounded product target to Shopify Store Operations / authorized Marketing lane;
+4. prefer free/owned traffic during startup unless paid acquisition is separately approved and included in economics;
+5. do not invent a discount simply to create the first sale;
+6. preserve the first-order fulfillment handoff.
+
+### 9 — FIRST REAL ORDER PROOF
 
 Use:
 
-**CUSTOMER ORDER → SHOPIFY CHECKOUT → EXACT SKU REVERIFY → LIVE STOCK/SELLABILITY → LIVE PRICE/MAP CHECK → VEVOR PURCHASE → SUPPLIER ACCEPTANCE → TRACKING → CUSTOMER COMPLETION → ACTUALS / RECEIPT**
+**CUSTOMER ORDER → SHOPIFY/PAYPAL PAYMENT CONFIRMATION → EXACT SKU REVERIFY → LIVE SELLABILITY → LIVE PRICE/MAP → SUPPLIER ORDER PATH → VEVOR PURCHASE → SUPPLIER ACCEPTANCE → PRO TRACKING → CUSTOMER COMPLETION → ACTUAL ORDER ECONOMICS / RECEIPT**
 
-The supplier's normal direct-order path is verified as PRO-account ordering through VEVOR's website with U.S.-warehouse fulfillment. Tracking/order status is publicly supported through VEVOR's account flow after shipment.
+Verified fulfillment baseline:
 
-Do not promise blind shipping, packing-slip treatment, exact return-label costs or support ownership until supplier detail is confirmed.
+- normal direct dropship path uses the VEVOR PRO account after the customer order;
+- U.S.-warehouse fulfillment is the normal direct lane;
+- approximately 3–7 working days is planning guidance, not a customer guarantee;
+- tracking is obtained through the PRO account;
+- VEVOR branding remains on product packaging;
+- supplier states invoice/pricing paperwork is not included;
+- customer contacts Elevation first and Elevation coordinates supplier-side support/returns/warranty.
 
-A real paid order must enter the Elevation order operating flow before VEVOR integration is considered proven.
+A real paid order must complete the Elevation operating flow before the VEVOR order lane moves to CONTROLLED.
 
-### 8 — B-TIER EXPANSION
+### 10 — RETURNS / WARRANTY ACTUALS
 
-The current 17-SKU B-tier queue is already prepared and collision-free.
+Use current VEVOR policy/support process subject to exact order/product applicability.
 
-After the Stage-1 publication gate permits expansion, process each SKU through the same exact source/price/sellability/media/fulfillment controls. First-order proof remains the maturity trigger for moving the normal VEVOR order lane to CONTROLLED.
+On the first applicable case capture actual label/cost, shipping treatment, refund/replacement timing and supplier disposition. Do not promise free return shipping, automatic approval or exact resolution timing without order-specific support.
 
-Scale from sell-through rather than catalog size alone.
+## Concurrency control
+
+When multiple workers touch the same VEVOR Shopify records:
+
+1. resolve current Git and current Shopify state first;
+2. preserve valid records/SKUs/prices/media;
+3. do not delete/recreate records merely to regain control;
+4. do not enter repeated status-write races;
+5. record the conflicting worktree and defer only the conflicting write when another active worker controls it;
+6. reconcile once after the conflicting worker stops or authority changes;
+7. current live state after the Stage-1 password gate closed is preserved unless a newer authorized decision requires a change.
 
 ## Worktree continuity + documentation
 
-Material VEVOR state must be recoverable from the Work Board + VEVOR Project Source + this workflow/master SOP.
+Material VEVOR state must be recoverable from the Work Board + Project Source + this workflow + Master SOP.
 
 Document material changes such as:
 
 - source/account status changes;
-- new/changed MAP/channel rules;
-- catalog wave completion;
+- MAP/channel rules;
+- catalog wave qualification/build completion;
 - public storefront/checkout acceptance;
-- first-order proof;
+- profit-gate dispositions when they materially affect promotion routing;
+- first-order proof and actual economics state without exposing protected amounts;
 - supplier fulfillment/returns exceptions;
-- a real gate being added, removed, narrowed or reopened.
+- a real gate added, removed, narrowed or reopened.
 
 Do not create management records for every routine Shopify edit.
 
-After COMPLETE / WAITING / VERIFYING / HOLD, automatically select the next safe unresolved VEVOR item. If none exists, return capacity upward rather than taking another project.
+After COMPLETE / WAITING / VERIFYING / HOLD, automatically select the next safe unresolved VEVOR item. If none exists, return capacity upward rather than taking another project without routing.
 
 ## Gate maturity
 
 ### Stage 1 — PROVING — CURRENT
 
-Current VEVOR project remains PROVING for public storefront and first real paid direct-VEVOR order.
+Public Shopify access/checkout is proven, but first profitable real VEVOR order remains open.
 
-Current exact customer-facing gate: Shopify Online Store password protection.
-
-Keep first-path verification for exact SKU/source, live MAP/VEVOR price, sellability, checkout and supplier fulfillment.
-
-Supplier-detail waiting for blind shipping/packing slips, exact RMA mechanics and support ownership is an SOP-maturity item, not a blanket checkout blocker.
+Keep exact SKU/source, live price/MAP, sellability, positive contribution and supplier-order verification for promoted/order-bound products.
 
 ### Stage 2 — CONTROLLED
 
-After public checkout + clean first-order proof:
+After a clean profitable first-order proof:
 
-- do not reapprove the already-completed PRO/feed/onboarding setup;
-- execute routine direct-site catalog/order work using targeted live SKU/price/sellability checks;
-- use exception/change-driven review rather than repeating the launch checklist.
+- do not reapprove completed PRO/feed/catalog setup;
+- execute routine direct-site catalog/order work using targeted live SKU/price/sellability/economics checks;
+- use exception/change-driven review rather than repeating launch checklists;
+- record actual fulfillment and support exceptions.
 
 ### Stage 3 — MATURE / EXCEPTION-BASED
 
-After repeatable clean orders/source refresh:
+After repeatable clean profitable orders/source refresh:
 
 - normal already-authorized VEVOR work proceeds by default;
 - manager attention focuses on supplier price changes, stock/source failures, MAP/channel changes, returns/fulfillment exceptions and material economics changes.
 
-If one SKU or one order fails, reopen only that affected control unless evidence proves a broader source/process failure.
+If one SKU/order fails, reopen only that affected control unless evidence proves a broader source/process failure.
 
 ## Waiting behavior
 
 If one VEVOR sub-item waits, continue another safe VEVOR sub-item such as:
 
 - source cleanup;
-- product/media normalization;
+- price/sellability refresh for a different shortlist SKU;
+- protected economics review for another candidate;
+- product/media normalization where not already complete;
 - direct-vs-Doba reconciliation when new SKUs appear;
-- order-receipt preparation;
-- B-tier per-SKU verification after the publication gate permits it;
-- processing supplier fulfillment-detail replies when received.
+- first-order receipt preparation;
+- supplier/account evidence processing if new information arrives.
 
-Do not recreate already-complete B-tier preparation or fulfillment qualification.
+Do not recreate completed B-tier preparation/live qualification, password work or generic fulfillment inquiry.
 
-Do not leave the VEVOR project to take unrelated company work.
+Do not leave the VEVOR project to take unrelated company work without routing.
 
 ## Real gates
 
@@ -242,41 +297,43 @@ Block only the exact affected SKU/action for:
 - unavailable/unverified supplier order path;
 - unverified sellability;
 - unauthorized marketplace/channel;
+- unknown material economics when the action is active promotion;
+- non-positive expected contribution when the action is active promotion;
 - payment/customer obligation;
-- binding supplier-policy exception;
-- public storefront password protection when public checkout acceptance is the action being tested.
+- binding supplier-policy exception.
 
-Do not preserve completed PRO registration, feed receipt, A-tier build, B-tier preparation, fulfillment research or ordinary internal manager review as permanent gates.
+The closed storefront-password gate is not a current blocker.
 
 ## Owner gates
 
 Return to Casey for:
 
-- authenticated Shopify owner/admin action that cannot be performed through available authorized tooling, including clearing the current storefront password gate;
 - material bulk/inventory commitment;
 - unusual financing/credit;
 - exclusivity/contracts;
 - material marketplace/channel expansion;
 - intentional exception to supplier price/channel rules;
+- strategic loss-leader or below-zero-contribution promotion;
 - significant inventory investment;
 - other binding legal/commercial commitments.
 
 ## Close / proof condition
 
-VEVOR reaches repeatable operating state when:
+VEVOR reaches repeatable CONTROLLED operating state when:
 
-1. public storefront/cart/checkout acceptance passes;
-2. one real VEVOR Direct order completes supplier purchase through customer completion;
-3. exact SKU/source/price/sellability controls are repeatable;
-4. expansion can proceed without recreating onboarding.
+1. public storefront/cart/checkout remains functional;
+2. one real VEVOR Direct order completes payment through supplier purchase to customer completion;
+3. the order demonstrates an executable profitable path or any variance is corrected before repeat;
+4. exact SKU/source/price/sellability controls are repeatable;
+5. expansion proceeds without recreating onboarding.
 
 ## RUN
 
-**VEVOR GIT CHECK → READ VEVOR PROJECT SOURCE + CURRENT RECEIPTS → PICK UP UNFINISHED VEVOR WORKTREE → MANAGER EXECUTES ROUTINE VEVOR WORK OR ROUTES BOUNDED TASK → SPECIALIST VERIFIES SKU/PRICE/SOURCE → DOCUMENT MATERIAL DELTA → CONTINUE NEXT VEVOR ITEM**
+**VEVOR GIT CHECK → READ PROJECT SOURCE + CURRENT RECEIPTS + PROFITABILITY CONTROL → VERIFY LIVE SHOPIFY/ORDER STATE → PICK UP UNFINISHED VEVOR WORKTREE → SPECIALIST VERIFIES SKU/PRICE/SOURCE/SELLABILITY → AUTHORIZED LANE VERIFIES PROTECTED ECONOMICS → DISPOSITION PROMOTE/HOLD → ROUTE CLEAN PROMOTION → DOCUMENT MATERIAL DELTA → CONTINUE NEXT VEVOR ITEM**
 
 Current RUN pickup:
 
-**CHECK STOREFRONT PASSWORD → IF ENABLED, REPORT AUTHENTICATED OWNER/ADMIN GATE → CONTINUE ONLY SAFE NON-DUPLICATIVE VEVOR PREP → WHEN CLEARED, RUN PUBLIC COLLECTION/PRODUCT/CART/CHECKOUT ACCEPTANCE → WAIT FOR FIRST REAL ORDER TRIGGER**
+**ZERO ORDER CONFIRMED → PRESERVE 17/17 LIVE-QUALIFIED ACTIVE B-TIER → DO NOT RECREATE CLOSED PASSWORD/FULFILLMENT TASKS → FRESH-CHECK FIRST-SALE SHORTLIST → APPLY POSITIVE-CONTRIBUTION GATE → ROUTE TOP CLEAN PROMOTE ITEMS → WAIT FOR FIRST REAL ORDER WHILE CONTINUING OTHER SAFE VEVOR WORK**
 
 ## Return
 
