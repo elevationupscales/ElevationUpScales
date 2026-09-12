@@ -1,9 +1,20 @@
 # Elevation UpScales — eBay Direct-Source Channel Authorization RECON
 
 **Owner:** Casey Young  
+**Authority:** **OWNER / PRESIDENT DIRECTIVE — NOT A LOWER-MANAGER OR WORKER POLICY CHANGE**  
 **Date:** 2026-09-11 MDT  
 **Lane:** eBay Store Operations / Ecommerce & Vendor Operations  
-**State:** ACTIVE SOURCE-CONTROL RECEIPT / OWNER CLARIFICATION APPLIED
+**State:** ACTIVE SOURCE-CONTROL RECEIPT / OWNER DIRECTIVE APPLIED
+
+## Authority and provenance
+
+This sourcing rule was changed directly by **Casey Young, Owner / President of Elevation UpScales, Inc.**
+
+It is **not** a policy created by the eBay worker, Ecommerce Manager, Company Operations Manager, OS RECON, Project Manager, or any lower management role.
+
+Lower managers and workers are responsible only for implementing this owner-level direction accurately. They may not reinterpret it into a stricter rule that forces removal of otherwise valid Doba-backed listings.
+
+If older management language conflicts with this directive, this owner decision controls unless Casey later supersedes it.
 
 ## Purpose
 
@@ -16,7 +27,7 @@ These are separate source paths.
 
 A listing must not be removed solely because Elevation lacks direct eBay authorization from the manufacturer when the exact product is legitimately offered through Doba for eBay and the Doba product-level MAP/channel/availability/fulfillment controls pass.
 
-## Owner clarification — controlling eBay source rule
+## Owner directive — controlling eBay source rule
 
 For an exact SKU sourced through Doba:
 
