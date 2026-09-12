@@ -6,7 +6,7 @@
 **Reports To:** Operating System Project Manager / PM4  
 **Execution Owner:** Company Operations Manager / COM 2  
 **Parent Controls:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md`, `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`, `CURRENT_WORK_BOARD.md`, current vendor Project Sources/Worktrees  
-**OS RECON baseline:** `main@110a7549832e1d6f7b1764d29339eacec72aba22`
+**OS RECON baseline:** `main@c2aee08412834ba4203a915eaa40d91616f2c80b`
 
 ## OS RECON correction — COM 2 drift boundary
 
@@ -26,7 +26,7 @@ COM 2 must not:
 - duplicate eBay customer/order actions already controlled by the eBay specialist;
 - create a second apparel/provider source of truth;
 - use the commercial sweep to alter the protected SOK lane;
-- use homepage revenue work to alter the locked hero/design/printed-copy surfaces.
+- use commerce work to alter the protected top homepage experience without Casey's exact approval.
 
 When COM 2 encounters a newer owning-lane state, **the newer lane state wins** and COM 2 updates its consolidation view instead of sending the worker backward.
 
@@ -45,7 +45,7 @@ This is not a new Project, manager, catalog or source-of-truth system. Vendor ma
 5. No speculative inventory commitment or new recurring software spend merely to increase catalog breadth.
 6. One blocked SKU does not block another clean SKU or vendor.
 7. Realized contribution is final scale truth.
-8. **Homepage hero, design system and printed/copy wording remain no-touch.** Bounded existing non-hero store merchandising is separately authorized under `HOMEPAGE_STORE_MERCHANDISING_WORK_ORDER_2026-09-12.md`.
+8. **Store/catalog/product/shopability/commerce-navigation work may move, but the protected top homepage experience is hard no-touch.** Any shared API/catalog/backend change that would alter protected-top rendered/runtime output is also a protected-top change and must be held for Casey.
 
 ## Commercial objective
 
@@ -209,15 +209,18 @@ Do not restart broad speculative Doba catalog work.
 Current owning-lane facts:
 
 - Fourthwall is a proven made-to-order/no-inventory-prebuy fulfillment path;
-- Mountain Patch Baseball Cap is the first `PROMOTE TEST` candidate through Fourthwall native checkout;
+- Mountain Patch Baseball Cap is the first direct-store `PROMOTE TEST` candidate through Fourthwall native checkout;
 - a Facebook owned-traffic post for that exact product has already been scheduled by PM4;
+- the direct-store test remains valid;
+- **the same cap is currently `HOLD RATE / REPRICE OR REROUTE` for TikTok Affiliate** because direct Fourthwall profit does not prove safe TikTok affiliate contribution;
 - Signature Collection Emblem Tee has proven fulfillment but current economics do not safely support broad TikTok affiliate commission at the current cost structure;
 - Women's Crop Tee and Essential Hoodie remain reprice/reroute candidates before concentrated promotion;
 - payout readiness remains open.
 
 COM 2 control:
 
-- do not schedule a duplicate Mountain Patch traffic test;
+- do not schedule a duplicate Mountain Patch direct-store traffic test;
+- do not interpret a direct Fourthwall `PROMOTE TEST` as TikTok Affiliate approval;
 - do not move Fourthwall products into custom PayPal fulfillment until automatic Fourthwall order creation is actually proven;
 - consume the 29-product audit/provider-economics return from Apparel Vendor Operations;
 - use realized order profit as final truth.
@@ -283,53 +286,58 @@ COM 2 must not:
 
 ## TikTok Affiliate Growth — organic acquisition lane
 
-**State:** Affiliate Growth is ACTIVE and separate from the terminal seller-verification appeal. A dedicated profitability gate now controls commissions/samples.
+**State:** Affiliate Growth is ACTIVE and separate from the terminal seller-verification appeal. Authenticated Seller Center Affiliate access is live. TikTok currently reports eligible Shop products are auto-added to Open Collaboration by default, creating a margin-exposure risk even when Elevation has not deliberately launched a SKU campaign.
 
 No seller-verification replay.
 
 Current control:
 
-- do not broaden affiliate rates merely because a product is eligible;
-- exact all-in SKU contribution and safe commission ceiling are required first;
-- Mountain Patch Baseball Cap economics are first priority;
-- Mountain Patch Trucker Cap economics second;
+- `AUTO-ENROLLED` does **not** mean `PROFIT-APPROVED`;
+- audit current live Open Collaboration commission settings through the owning TikTok Affiliate lane when the exact settings surface is available;
+- do not intentionally broaden creator traffic to margin-unknown products;
+- exact all-in SKU contribution and safe commission ceiling are required before deliberately increasing rates/traffic;
+- Mountain Patch Baseball Cap remains `PROMOTE TEST` for direct Fourthwall owned traffic but `HOLD RATE / REPRICE OR REROUTE` for TikTok Affiliate;
+- Mountain Patch Trucker Cap economics remain next comparison priority;
 - Signature Tee, Women's Crop Tee and Essential Hoodie remain `OFF / HOLD` from concentrated affiliate promotion until rerouted/repriced;
 - historical 20% commission is a performance-tier reference, not a blanket default;
-- live Seller Center remains final fee/configuration check before consequential setting changes.
+- live Seller Center remains final fee/configuration check before consequential setting changes;
+- paid/flat-fee creator deals remain HOLD until organic affiliate profitability is proven.
 
 Execution target:
 
 - maintain warm creator pipeline;
-- use only product feeds with safe SKU-specific commission ceilings;
+- use only product feeds with safe SKU-specific commission ceilings for deliberate scaling;
 - prioritize accepted/showcased/sampled/posted/converting creators;
 - prepare Apparel/Lifestyle and Camping/Outdoor separation for authentic platform restriction lift;
 - track `creator → showcase → content → clicks → order → commission → realized contribution`.
 
-## Developer — bounded revenue-blocker / homepage-merchandising lane
+## Developer — commerce/revenue-blocker lane under protected-top boundary
 
-Developer action is authorized when a technical issue materially blocks:
+Normal commerce work is authorized for:
 
-- exact hero product discovery/route;
-- checkout/source routing;
-- order-source capture;
-- approved vendor/catalog integration;
-- fulfillment handoff;
-- delayed-order/freight safety gate;
-- decision-driving product analytics.
+- catalog/product/item records;
+- collections/store/category/product navigation;
+- exact product routes and links;
+- Buy Now / checkout / payment routing;
+- shopability and purchase-path repairs;
+- availability/source/fulfillment bindings;
+- store search/filter/browse behavior;
+- approved commerce APIs/integrations;
+- Shopify, Fourthwall and other approved store surfaces.
 
-The owner has also authorized the separate bounded work order:
+Protected top homepage experience remains no-touch, including direct changes and indirect shared-dependency changes that alter its rendered/runtime output.
 
-`HOMEPAGE_STORE_MERCHANDISING_WORK_ORDER_2026-09-12.md`
+Required check:
 
-Under that work order:
+**COMMERCE CHANGE → CHECK PROTECTED TOP DEPENDENCY → VERIFY TOP OUTPUT UNCHANGED → EXECUTE.**
 
-- homepage hero = NO TOUCH;
-- homepage design/printed-copy = NO TOUCH;
-- existing non-hero `Shop the Store` cards may receive deterministic management-controlled product selection;
-- preferred implementation is the existing `/api/store/featured` selection logic;
-- a product must reach `PROMOTE` before receiving new concentrated non-SOK homepage placement.
+If protected-top output would change:
 
-No redesign, broad refactor or new admin system merely because the commercial sweep exists.
+**HOLD ONLY THAT MUTATION → ROUTE EXACT DELTA TO CASEY → CONTINUE UNRELATED COMMERCE WORK.**
+
+Do not treat the earlier broad non-hero homepage merchandising interpretation as blanket authorization. Read `OWNER_DIRECTIVE_HOMEPAGE_LOCK_2026-09-12.md` and the current synced homepage work order.
+
+No redesign, cosmetic experimentation, protected-top copy/image/CTA/product-binding change, broad refactor or new admin system is implied by the commercial sweep.
 
 # Dynamic hero core
 
@@ -346,12 +354,12 @@ Products outside the hero core may remain safely available/searchable under thei
 1. **Real orders / cash release first** — no sweep work may delay current customer obligations or releaseable cash.
 2. **Renogy** — clear `RBM500-US`; clear `RSP100DCT-US` independently.
 3. **VEVOR** — wait/process exact PRO economics for the already-defined three orderable SKUs; **do not rerun current-window fresh check**.
-4. **Apparel** — continue Fourthwall audit/real traffic proof; Spreadconnect remains install/auth gated before exact Shopify-native economics.
-5. **TikTok Affiliate** — preserve creator pipeline but activate rates/samples only after SKU-specific safe ceiling clears.
+4. **Apparel** — continue Fourthwall audit/real direct traffic proof; Spreadconnect remains install/auth gated before exact Shopify-native economics.
+5. **TikTok Affiliate** — audit auto-enrolled Open Collaboration exposure; preserve creator pipeline; do not deliberately broaden rates/traffic until SKU-specific safe ceiling clears.
 6. **Kingboss** — exact differentiated cash-light launch candidates.
 7. **Doba** — exact gap-fill candidates only.
 8. **Shopify/Marketing** — direct owned traffic to each product as soon as that exact candidate reaches PROMOTE; do not wait for every lane to finish.
-9. **Developer** — execute only confirmed revenue blockers plus the explicit bounded homepage non-hero merchandising work order.
+9. **Developer** — execute approved commerce work while checking every shared dependency against the protected top-homepage hard lock.
 
 # Company-wide sweep output to PM4
 
@@ -421,4 +429,4 @@ Repeat until ordinary commerce activity can be funded from operating cash rather
 
 ## Control phrase
 
-**COM 2 CONSOLIDATES CURRENT TRUTH → IT DOES NOT CREATE COMPETING TRUTH → PROTECT SOK → NEVER REPLAY TERMINAL WORK → ROUTE ONLY THE MISSING FACT → SEND TRAFFIC TO CLEAN OFFERS → REALIZED PROFIT DECIDES SCALE.**
+**COM 2 CONSOLIDATES CURRENT TRUTH → IT DOES NOT CREATE COMPETING TRUTH → PROTECT SOK → NEVER REPLAY TERMINAL WORK → ROUTE ONLY THE MISSING FACT → PROTECTED TOP HOMEPAGE NO TOUCH → AUTO-ENROLLED DOES NOT MEAN PROFIT-APPROVED → REALIZED PROFIT DECIDES SCALE.**
