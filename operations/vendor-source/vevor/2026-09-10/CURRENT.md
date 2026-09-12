@@ -4,22 +4,20 @@ Current Elevation worker source package:
 
 `operations/vendor-source/vevor/2026-09-10/`
 
+Controlling current-state source:
+
+`operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md`
+
 Start with:
 
 `operations/vendor-source/vevor/2026-09-10/03_WORKER_SHARED_SOURCE_README.md`
 
-Controlling current-state source:
-
-`operations/vendor-source/vevor/2026-09-10/13_VEVOR_PROJECT_SOURCE_CURRENT.md`
-
 Latest execution receipt:
 
-`operations/vendor-source/vevor/2026-09-10/14_VEVOR_RUN_RECEIPT_2026-09-11.md`
+`operations/vendor-source/vevor/2026-09-10/15_VEVOR_RUN_RECEIPT_2026-09-12.md`
 
-Current position: **A-tier verification, Shopify records, VEVOR Direct collection, and supplier fulfillment-detail reconciliation are closed enough for first order. The active Stage-1 blocker is the Shopify Online Store password gate: authenticated admin automation is stopped by Shopify/Cloudflare human verification, and the public VEVOR collection still redirects to `/password`. No real Shopify order is available yet for first-order proof. Tax-exemption final review remains pending.**
+Current position: **STAGE 1 — PROVING / PUBLIC CHECKOUT VERIFIED / FIRST PROFITABLE ORDER OPEN. A-tier remains active and the 17-SKU B-tier set is live-qualified/active. The first-sale queue is narrowed to 3 currently orderable exact SKUs. Supplier fulfillment-detail reconciliation is closed enough for first order. The current narrow execution gate is authenticated VEVOR PRO economics verification for the three orderable SKUs; unknown protected values remain VERIFY. Current Opera VEVOR session is signed out and metered browser automation is unfunded. These are access/tooling blockers only and do not roll back Shopify customer checkout or the qualified catalog. No real Shopify order is available yet for first-order proof.**
 
-Next action: **authorized Shopify admin completes human verification and removes the storefront password → rerun public collection/product/cart/checkout acceptance → execute the first real paid VEVOR order when received.**
+Next action: **restore authenticated VEVOR PRO access → verify quantity-one executable member/net cost and shipping treatment for the three orderable SKUs → contribution screen → keep working Shopify paths active → first real paid VEVOR order → supplier fulfillment proof.**
 
-B-tier: **prepared; do not recreate or publish until the current Stage-1 gate permits expansion and each SKU receives fresh live price/MAP, sellability, media/source and fulfillment checks.**
-
-Security: this repository is public. Restricted tax-license/account material is intentionally kept outside Git.
+Security: this repository is public. Restricted tax-license/account/payment/credential and protected economics material stays outside Git.
