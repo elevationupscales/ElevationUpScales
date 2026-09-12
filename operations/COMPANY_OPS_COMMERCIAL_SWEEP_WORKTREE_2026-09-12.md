@@ -6,7 +6,8 @@
 **Reports To:** Operating System Project Manager / PM4  
 **Execution Owner:** Company Operations Manager / COM 2  
 **Parent Controls:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md`, `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`, `CURRENT_WORK_BOARD.md`, current vendor Project Sources/Worktrees  
-**Last COM 2 reconciliation source:** `main@b945a9cffad8233340b2a93cec6af0683e5d533f`
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`  
+**Last COM 2 reconciliation source:** current main after `OS_RECON_RUN_ORGANIC_TRAFFIC_AND_RENOGY_COLLECTION_SYNC_2026-09-12.md` and current lane worktrees
 
 ## COM 2 anti-drift boundary
 
@@ -28,7 +29,8 @@ COM 2 must not:
 - duplicate eBay customer/order actions;
 - create a second apparel/provider source of truth;
 - alter the protected SOK lane under this sweep;
-- alter the protected top homepage experience without Casey's exact approval.
+- alter the protected top homepage experience without Casey's exact approval;
+- authorize paid advertising while the owner capital-recovery rule is active.
 
 ## Commercial objective
 
@@ -37,6 +39,12 @@ COM 2 must not:
 The current company constraint is not product access. It is concentrating qualified traffic on economically cleared offers with clean fulfillment and low working-capital exposure.
 
 Unknown material facts remain `UNKNOWN / VERIFY`; they are never converted into assumed economics.
+
+## Current owner advertising control
+
+**NO PAID ADS UNTIL THE VERIFIED CAPITAL-RECOVERY HOLE IS CLOSED AND CASEY EXPLICITLY REOPENS PAID ACQUISITION.**
+
+COM 2 may route organic/owned/SEO/direct/free-marketplace traffic and performance-based affiliate activity where exact order contribution stays positive and no prohibited upfront media spend is created. Product economics readiness does not reopen the paid-ad gate.
 
 ## Current owning-lane consolidation
 
@@ -51,13 +59,13 @@ COM 2 action:
 - preserve current owned/free traffic and Project controls;
 - return only material order/source exceptions to PM4/SOK Project.
 
-### VEVOR — three candidates released to free/owned traffic
+### VEVOR — three promotion-cleared products + one economics-hold exception
 
-**Owning-lane advance adopted from current main:** `VEVOR_FIRST_SALE_PROMOTION_RELEASE_2026-09-12.md`.
+**Owning-lane source:** `VEVOR_CURRENT_WORKTREE.md` and `VEVOR_FIRST_SALE_PROMOTION_RELEASE_2026-09-12.md`.
 
 The prior COM 2 pointer that treated the three viable VEVOR candidates as waiting on protected economics is **SUPERSEDED**.
 
-Current released set:
+Current promotion-cleared set:
 
 | Exact SKU | Shopify customer price | Current state |
 |---|---:|---|
@@ -65,11 +73,20 @@ Current released set:
 | `AXLSTCQJDSYKAZ99C001V0` | $54.90 | **PROMOTE — FREE/OWNED TRAFFIC ONLY** |
 | `D25FT14IN20AHOGLOV1` | $66.90 | **PROMOTE — FREE/OWNED TRAFFIC ONLY** |
 
+Later active listing exception:
+
+| Exact SKU | Shopify customer price | Current state |
+|---|---:|---|
+| `XXHGJFRSZWXDOY5PFV1` — Portable Shoe Dryer | $19.90 | **ACTIVE / HOLD TRAFFIC — ECONOMICS UNKNOWN** |
+
+The shoe dryer is MAP/public-price clean from the recorded source snapshot but has not yet proven the full protected positive-contribution screen required for concentrated traffic. It is **not** a fourth released hero.
+
 Controls:
 
 - do not rerun the completed 10-SKU public fresh check in this source window;
 - seven unavailable shortlist SKUs remain sellability holds at the back of the refresh queue;
 - do not wait on the supplier economics reply; later correspondence is reconciliation input only;
+- do not promote the shoe dryer until expected contribution is verified;
 - no paid acquisition, speculative inventory, marketplace expansion or margin-erasing discounting;
 - on a real order, reverify exact SKU, live VEVOR sellability, price/MAP, supplier cost/tax/shipping and executable order path before purchase;
 - record actual realized contribution after fulfillment.
@@ -78,20 +95,33 @@ Current COM 2 route:
 
 **THREE RELEASED VEVOR SKUS → EXISTING FREE/OWNED TRAFFIC SURFACES → FIRST REAL ORDER → LIVE ORDER-TIME RECHECK → FULFILLMENT → ACTUAL CONTRIBUTION.**
 
-### Renogy — incremental name-brand activation
+### Renogy — two active direct-site products + four drafts
 
-**State:** five Shopify drafts preserved / zero accidental active / activation QA continues.
+**Current controlling pickup:** `RENOGY_CURRENT_WORKTREE.md` plus live Shopify state.
 
-First candidates remain:
+Current Shopify truth is **2 ACTIVE / 4 DRAFT**, not the historical five-draft/zero-active or one-active/five-draft snapshots.
 
-1. `RBM500-US` — 500A Battery Monitor with Shunt.
-2. `RSP100DCT-US` — 100W N-Type Bifacial Solar Panel.
+ACTIVE:
 
-Owning-lane next action remains:
+1. `RNG-CTRL-ADV30-LI-US` — Adventurer Li 30A PWM — $82.99 — **STRONG ORGANIC / OWNED HERO**.
+2. `RBM500-US` — 500A Battery Monitor with Shunt — $87.99 — **POSITIVE BUT THINNER / FREE-OWNED TEST**.
 
-**AUTHENTICATED PORTAL CHECK FOR THREE EXACT HOLDS → FINAL QA TWO CLEANER DRAFTS → ATTACH EXACT APPROVED MEDIA → REFRESH PRICE/AVAILABILITY → ACTIVATE EACH CLEAN SKU → UNIVERSAL-CATALOG QA → FIRST REAL ORDER PROOF.**
+DRAFT:
 
-COM 2 does not restart dealer onboarding, recreate the five drafts or block one clean SKU on another SKU's hold.
+- `RSP100DCT-US`;
+- `RBC2125DS-21W-US`;
+- `RNG-INVT-2000-12V-P2-US`;
+- `RNG-CTRL-RVR40`.
+
+Metricool already owns pending organic Facebook posts for Adventurer 30A and RBM500. Do not create duplicate traffic actions because another scheduler appears empty or quota-gated.
+
+Controls:
+
+- preserve the two ACTIVE and four DRAFT records; no recreation or stale-state deactivation;
+- exact dealer orderability/backorder acceptance, protected current cost, shipping treatment and contribution remain order-time fulfillment checks;
+- do not represent Shopify inventory zero as supplier on-hand or supplier unavailability;
+- resolve the four DRAFTs SKU-by-SKU without blocking clean products;
+- no paid ads.
 
 ### Apparel / Fourthwall — cash-light direct proof
 
@@ -106,11 +136,12 @@ Current COM 2 controls:
 - Signature Collection Emblem Tee is fulfillment-proven but requires better economics for broad affiliate promotion;
 - Women's Crop Tee and Essential Hoodie remain reprice/reroute candidates;
 - payout readiness remains open until owning-lane proof says otherwise;
-- do not route Fourthwall products through custom Elevation PayPal unless automatic Fourthwall order creation is proven.
+- do not route Fourthwall products through custom Elevation PayPal unless automatic Fourthwall order creation is proven;
+- no paid ads while the owner capital-recovery rule is active.
 
 ### Shopify + Spreadconnect apparel
 
-**State:** Shopify active/public; Spreadconnect remains **DISCONNECTED** unless a newer owning-lane return proves otherwise.
+**State:** Shopify active/public; Spreadconnect is **DISCONNECTED / INSTALL + AUTH GATE** unless a newer owning-lane return proves otherwise.
 
 Gate:
 
@@ -128,7 +159,8 @@ Controls:
 - owning TikTok Affiliate lane audits Open Collaboration exposure;
 - no intentional broadening of creator rates/traffic without SKU-specific safe contribution ceiling;
 - historical 20% commission is a reference, not a blanket default;
-- paid/flat-fee creator acquisition remains HOLD until organic affiliate profitability is proven;
+- performance-based affiliate commissions may continue where positive contribution remains and no prohibited upfront acquisition spend is created;
+- paid/flat-fee creator acquisition remains blocked by owner cash controls;
 - seller-verification appeal remains terminal/waiting and is not replayed.
 
 ### eBay — dedicated customer/cash recovery
@@ -140,7 +172,8 @@ COM 2 must not:
 - resubmit an in-process cancellation;
 - issue duplicate refunds;
 - infer one transaction's fulfillment from another;
-- execute listing/customer mutations outside the dedicated eBay lane.
+- execute listing/customer mutations outside the dedicated eBay lane;
+- authorize Promoted Listings or any other paid marketplace acquisition while the owner no-paid-ads rule is active.
 
 ### Kingboss — differentiated proving
 
@@ -159,6 +192,8 @@ A candidate must have exact SKU, current cost/stock, destination/shipping eligib
 ### Shopify / direct-site conversion
 
 Working checkout is preserved. Checkout rebuild is not P0 while current purchase paths remain healthy.
+
+Current connected analytics have shown Facebook attribution registering and the funnel reaching cart/checkout without a completed Shopify order yet. The active bottleneck remains qualified traffic/conversion rather than checkout availability.
 
 For every cleared hero:
 
@@ -185,14 +220,15 @@ No redesign, cosmetic experimentation, protected-top copy/image/CTA/product-bind
 ## Current Company Operations execution order
 
 1. **Real orders / cash release first.** Never delay a customer obligation or releasable cash for sweep work.
-2. **VEVOR released three:** route existing free/owned traffic now; monitor first real order; order-time live recheck is mandatory.
-3. **Renogy:** allow the two clean candidates to advance independently while three exact holds are resolved by the owning lane.
+2. **VEVOR released three:** preserve existing free/owned traffic; monitor first real order; order-time live recheck is mandatory. Shoe dryer remains hold-traffic pending economics.
+3. **Renogy:** preserve 2 ACTIVE / 4 DRAFT; let existing Metricool organic tests run; real order triggers exact dealer recheck; continue draft QA independently.
 4. **Apparel:** consume Fourthwall 29-product audit and real direct-traffic/order evidence; preserve native fulfillment; Spreadconnect stays install/auth gated.
-5. **TikTok Affiliate:** audit auto-enrolled commission exposure and preserve creator pipeline; no deliberate rate/traffic expansion without safe SKU economics.
+5. **TikTok Affiliate:** audit auto-enrolled commission exposure and preserve creator pipeline; no deliberate rate/traffic expansion without safe SKU economics; no upfront paid acquisition.
 6. **Kingboss:** continue exact differentiated cash-light launch proving only.
 7. **Doba:** exact gap-fill opportunities only.
 8. **Shopify/Marketing:** send free/owned traffic to each exact `PROMOTE` candidate as soon as its owning lane clears it; do not wait for every vendor.
 9. **Developer:** act only on a verified commerce/revenue blocker and preserve the protected homepage top.
+10. **Paid ads:** remain BLOCKED company-wide until capital recovery is complete and Casey explicitly reopens them.
 
 ## Required return schema for any proposed hero
 
@@ -271,4 +307,4 @@ Repeat until ordinary commerce activity can be funded from operating cash rather
 
 ## Control phrase
 
-**OWNING LANE PROVES → COM 2 CONSOLIDATES → PM4 PRIORITIZES → SPECIALIST EXECUTES → COM 2 VERIFIES → RESULT RECORDED.**
+**OWNING LANE PROVES → COM 2 CONSOLIDATES → PM4 PRIORITIZES → SPECIALIST EXECUTES → COM 2 VERIFIES → RESULT RECORDED → NO PAID ADS UNTIL OWNER REOPENS AFTER RECOVERY.**
