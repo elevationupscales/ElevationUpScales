@@ -14,10 +14,13 @@ This is a customer-contact and owner-availability outage. It outranks non-custom
 
 ## Verified evidence
 
-- Google sent a security alert confirming the recovery email for `elevationupscales@gmail.com` was changed on 2026-09-11.
+- Google sent a security alert for a new Windows sign-in to `elevationupscales@gmail.com` on 2026-09-10 UTC.
+- Google then sent a security alert confirming the recovery email for `elevationupscales@gmail.com` was changed on 2026-09-11 UTC.
 - By 2026-09-12, `elevationlithium@gmail.com` could successfully send a recovery test to the primary Elevation Gmail and Peter.
 - The email-side recovery does **not** prove the phone/Voice path is healthy.
 - Google Voice linked-number/call-forwarding settings can prevent Google Voice calls from ringing a linked phone, but those settings do not normally disable direct carrier SMS/calls to the carrier number itself.
+
+The Windows sign-in and recovery-email change must each be reconciled as authorized or unauthorized. If either was not Casey-authorized, account security recovery is part of this P0 incident.
 
 ## Immediate control
 
@@ -65,11 +68,12 @@ After the carrier path works:
 
 ### Layer 3 — Google Account Security
 
-1. Review the 2026-09-11 recovery-email-change security event.
-2. Determine who initiated the recovery-email change and whether it was authorized.
-3. Review recent account security activity and sign-in methods.
-4. Remove/reverse only unrecognized or unintended account changes.
-5. Do not rotate or remove recovery methods blindly while phone recovery is underway.
+1. Review the new-Windows-sign-in security event.
+2. Review the recovery-email-change security event.
+3. Determine who initiated each event and whether Casey authorized it.
+4. Review recent account security activity and sign-in methods.
+5. If an event is unrecognized, secure the account through Google's security flow and remove only unrecognized or unintended access/recovery methods.
+6. Do not rotate or remove recovery methods blindly while phone recovery is underway.
 
 ## Peter required return
 
@@ -77,7 +81,7 @@ Peter must return an exact change log before touching this lane again:
 
 - Google account used;
 - Google Voice number involved;
-- carrier number linked / claimed / reverifed;
+- carrier number linked / claimed / reverified;
 - exact Voice settings changed;
 - exact recovery email / phone changes;
 - verification codes requested and which destination received them;
