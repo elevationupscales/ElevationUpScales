@@ -83,16 +83,28 @@ Current tuning focus:
 
 ### 4. TikTok Shop / TikTok Affiliate
 
-**State:** EXISTING CHANNEL / RESTRICTION + PROFITABILITY TUNING
+**State:** ACTIVE UNDER RESTRICTION / APPEAL TERMINAL-FAILED / TUNE CURRENT SHOP ONLY
+
+Newest owning-lane return: `TIKTOK_EXISTING_SHOP_TUNING_RETURN_2026-09-12.md`.
+
+Current verified routing facts:
+
+- the seller-verification/high-risk-shop appeal is **FAILED / CANNOT APPEAL AGAIN**;
+- do not rebuild, resubmit or recreate the appeal from stale `SUBMITTED / WAITING` instructions;
+- TikTok still allows limited operations and is performing/expected to perform automatic re-evaluation under the platform restriction;
+- current dashboard shows probation/order/listing limits, held funds and one out-of-stock product requiring correction;
+- shop operations are otherwise currently caught up on shipments/returns/recent violation/support queues per the latest owning-lane return;
+- exact live GMV, held-funds amount and dashboard limits remain in the owning TikTok return and should be refreshed there rather than copied forward indefinitely.
 
 Current tuning focus:
 
-- do not replay the submitted seller-verification appeal unless a real external trigger arrives;
-- audit auto-enrolled affiliate commission exposure;
-- keep only exact products that are TikTok-eligible and contribution-safe;
-- work warm creators and existing relationships before broad cold expansion;
-- no paid boosts, retainers, prepaid creator spend or unbounded samples;
-- normalize product/creator state instead of expanding channel scope.
+- identify and correct the exact out-of-stock product;
+- preserve operational cleanliness under restriction;
+- track held funds separately from available cash;
+- audit current active products against exact source/inventory/economics rather than expanding catalog count;
+- audit affiliate/open-collaboration commission exposure against safe SKU ceilings;
+- no automatic high commission, free/refundable samples, paid boosts, retainers, prepaid creator spend or other platform-suggested spend without existing company/owner authority;
+- wait for automatic re-evaluation or a genuinely new authentic TikTok remedy; do not replay the failed appeal.
 
 ### 5. Fourthwall / Elevation Apparel
 
@@ -133,7 +145,7 @@ A shop is not considered tuned because products are merely ACTIVE or listings ex
 
 - **Shopify Store Operations:** existing Shopify public catalog, intentional staging holds, existing-channel eligibility/publication, public URL, variant buyability, Shopify-native/account configuration and Shopify Payments operating verification.
 - **eBay Store Operations:** eBay customer obligations, listing state, marketplace economics, seller-health operating actions.
-- **TikTok Shop / Affiliate:** TikTok account/channel eligibility, creator/commission exposure, current catalog and account restrictions.
+- **TikTok Shop / Affiliate:** TikTok restriction compliance, current-account/catalog eligibility, OOS correction, held-cash tracking, creator/commission exposure and clean operation under automatic re-evaluation; failed appeal is terminal unless TikTok supplies a new remedy.
 - **Apparel Vendor Operations:** Fourthwall/POD economics, product classification, provider routing and apparel profitability.
 - **Vendor Projects:** exact source, authorization, SKU identity, MAP/floor, stock/orderability, warranty and fulfillment truth.
 - **Company Operations:** cross-shop conflicts, customer-remedy exceptions, payout/cash escalation and consolidation.
@@ -146,7 +158,7 @@ A shop is not considered tuned because products are merely ACTIVE or listings ex
 1. Communications outage remains P0 until owner call/SMS is restored.
 2. Shopify existing-public-catalog/payment-readiness tuning: keep VEVOR staging hidden, complete/reverify Shopify Payments, preserve PayPal, verify representative purchase paths.
 3. eBay customer/cash/listing tuning.
-4. TikTok current-account/catalog/affiliate tuning.
+4. TikTok tune-under-restriction: fix OOS, control commission/samples, track held cash, preserve clean operation, no appeal replay.
 5. Fourthwall/Apparel catalog/economics tuning.
 6. Existing Shopify-installed discovery surfaces audit/tuning.
 7. Consolidate results, remove duplicate/stale work, and verify clean operating baselines.
@@ -154,4 +166,4 @@ A shop is not considered tuned because products are merely ACTIVE or listings ex
 
 ## Control phrase
 
-**TUNE BEFORE EXPANDING → KEEP STAGING HOLDS CONTROLLED → TUNE CURRENT PUBLIC CATALOGS → COMPLETE PAYMENT READINESS → PROVE CURRENT PURCHASE PATHS → PROVE CURRENT FULFILLMENT → PROVE CURRENT PROFIT → THEN ADD REACH.**
+**TUNE BEFORE EXPANDING → KEEP STAGING HOLDS CONTROLLED → TUNE CURRENT PUBLIC CATALOGS → COMPLETE PAYMENT READINESS → KEEP RESTRICTED SHOPS CLEAN → PROVE CURRENT PURCHASE PATHS → PROVE CURRENT FULFILLMENT → PROVE CURRENT PROFIT → THEN ADD REACH.**
