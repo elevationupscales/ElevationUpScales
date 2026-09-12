@@ -4,100 +4,82 @@
 **Owner:** Casey Young  
 **State Owner:** MPM 5 / Operating System Project Manager  
 **Severity:** **P0 / CRITICAL**  
-**Status:** **ACTIVE — CHANGE FREEZE / RECOVERY REQUIRED**
+**Status:** **ACTIVE — ACCOUNT RECOVERED / GOOGLE VOICE DELETED / RESIDUAL FORWARDING REMAINS**
 
 ## Incident
 
-Casey reports that the Peter-managed Google Voice / backup-email incident has escalated: Casey's actual phone is no longer reliably receiving inbound calls or text messages.
+Casey reports that the Peter-managed Google Voice / backup-email incident escalated into a business communications outage affecting inbound calls/texts to Casey's actual phone.
 
-This is a customer-contact and owner-availability outage. It outranks non-customer-critical account setup work until the carrier phone path is restored.
+Current owner truth as of 2026-09-12:
 
-## Verified evidence
+- the Google account has been recovered/fixed;
+- the Google Voice number/service was deleted;
+- call-forwarding behavior remains in effect and is still causing business disruption;
+- the incident is therefore no longer primarily an account-recovery problem; it is now a residual call-routing/forwarding recovery problem.
 
-- Google sent a security alert for a new Windows sign-in to `elevationupscales@gmail.com` on 2026-09-10 UTC.
+## Verified / reconciled evidence
+
+- Google previously sent a security alert for a new Windows sign-in to `elevationupscales@gmail.com` on 2026-09-10 UTC.
 - Google then sent a security alert confirming the recovery email for `elevationupscales@gmail.com` was changed on 2026-09-11 UTC.
-- By 2026-09-12, `elevationlithium@gmail.com` could successfully send a recovery test to the primary Elevation Gmail and Peter.
-- The email-side recovery does **not** prove the phone/Voice path is healthy.
-- Google Voice linked-number/call-forwarding settings can prevent Google Voice calls from ringing a linked phone, but those settings do not normally disable direct carrier SMS/calls to the carrier number itself.
-
-The Windows sign-in and recovery-email change must each be reconciled as authorized or unauthorized. If either was not Casey-authorized, account security recovery is part of this P0 incident.
+- Casey has since confirmed the Google account itself is fixed.
+- Casey has confirmed Google Voice was deleted.
+- Google Voice documentation states that when a mobile line was configured to send unanswered/busy/unreachable calls to Google Voice using carrier conditional call forwarding, that forwarding must be disabled through the mobile carrier after stopping Voice.
+- Therefore, residual forwarding after Voice deletion must be treated first as likely carrier-side conditional/unconditional call forwarding, while also asking Google to clear any stale linked-number/device-routing state still attached to the deleted Voice service.
 
 ## Immediate control
 
 **FREEZE all Peter / worker changes involving:**
 
-- Google Voice linked numbers;
-- number claim / reverify actions;
+- Google Voice number recreation;
+- linked-number claims / reverification;
 - Google Voice call forwarding;
 - Google Voice device-number changes;
 - Google-account recovery email / phone changes;
 - carrier-number porting or transfer attempts;
 - SIM/eSIM changes;
-- conditional/unconditional call-forwarding changes;
 - additional verification-code experiments.
 
-No worker may make another change in this lane until Casey's direct carrier phone service is verified stable or MPM explicitly releases a bounded recovery action.
+No worker may make another Voice/account mutation in this lane unless MPM explicitly releases a bounded recovery action.
 
-## Recovery split
+## Recovery sequence
 
-### Layer 1 — Carrier line / device — FIRST
+### P0-A — Carrier forwarding reset — FIRST
 
-Verify Casey's carrier-native line independently of Google Voice:
+Contact the mobile carrier and request a complete forwarding audit/reset for Casey's carrier line:
 
-1. SIM/eSIM line active on device.
-2. Direct inbound carrier call rings the device.
-3. Direct carrier SMS reaches the device.
-4. Carrier confirms no port-out / number transfer / SIM swap / line suspension.
-5. Carrier confirms SMS provisioning and call routing are active.
-6. Carrier confirms no unintended unconditional forwarding.
+1. Confirm no port-out / SIM swap / line suspension.
+2. Remove all Google Voice destination forwarding.
+3. Disable conditional forwarding for unanswered, busy, and unreachable calls.
+4. Disable any unconditional call forwarding.
+5. Reprovision inbound calling and SMS if needed.
+6. Confirm the carrier line is not routing to any deleted Google Voice number or voicemail destination.
+7. Test direct inbound carrier call and direct SMS.
 
-**Do not delete the eSIM, port the number, or replace the SIM until the carrier has checked the line state.**
+Do **not** delete the eSIM, replace the SIM, or port the number unless the carrier identifies a specific need.
 
-If direct carrier calls/SMS fail, the incident remains carrier/device P0 even if Google Voice also has bad settings.
+### P0-B — Google Voice residual-state report
 
-### Layer 2 — Google Voice
+Because the prior account was consumer/free Google Voice, normal paid 24/7 Voice support is not available. Submit a private Google Voice feedback/support report if the product surface permits it. Request:
 
-After the carrier path works:
+- removal of any remaining linked-number association;
+- clearing of stale forwarding/device-routing state;
+- confirmation that the deleted Voice service has no active routing relationship with Casey's carrier line;
+- confirmation that no Google Voice configuration can continue intercepting, redirecting, or forwarding calls involving the carrier line.
 
-1. Identify exact Google account owning the Voice number.
-2. Verify the intended carrier number under Devices and numbers / Linked numbers.
-3. Verify the intended device and linked number are enabled under Incoming calls / Call forwarding.
-4. Check Google Voice Do Not Disturb and custom forwarding rules.
-5. Reverify an inactive linked number only when the intended carrier number is confirmed and Casey controls the verification code.
-6. Preserve direct carrier service while restoring Google Voice forwarding.
+Do not post Casey's phone number publicly in the Google Voice Help Community.
 
-### Layer 3 — Google Account Security
+### P0-C — Verification
 
-1. Review the new-Windows-sign-in security event.
-2. Review the recovery-email-change security event.
-3. Determine who initiated each event and whether Casey authorized it.
-4. Review recent account security activity and sign-in methods.
-5. If an event is unrecognized, secure the account through Google's security flow and remove only unrecognized or unintended access/recovery methods.
-6. Do not rotate or remove recovery methods blindly while phone recovery is underway.
-
-## Peter required return
-
-Peter must return an exact change log before touching this lane again:
-
-- Google account used;
-- Google Voice number involved;
-- carrier number linked / claimed / reverified;
-- exact Voice settings changed;
-- exact recovery email / phone changes;
-- verification codes requested and which destination received them;
-- any call-forwarding or device-number changes;
-- timestamps as closely as available;
-- whether any number port / transfer / claim flow was started.
-
-## Close condition
-
-Incident may not close until all are true:
+Incident remains open until:
 
 - direct carrier inbound call PASS;
 - direct carrier SMS PASS;
-- Google Voice inbound routing PASS where intended;
-- Google account security change reconciled;
-- no unauthorized linked number, forwarding rule, recovery method, or transfer remains;
-- owner confirms normal calls/texts are arriving again.
+- carrier confirms forwarding reset;
+- no residual Voice routing is observed;
+- owner confirms normal business calls/texts are arriving again.
 
-**Until then: P0 / CRITICAL.**
+## Support-contact execution note
+
+An attempt was made to launch a private authenticated Google support/feedback browser flow through the available automation surface, but the connected browser-automation wallet was out of funds, so no Google submission was made. This does not change the carrier-first recovery priority.
+
+**Until verification passes: P0 / CRITICAL.**
