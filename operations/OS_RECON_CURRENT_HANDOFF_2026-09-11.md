@@ -4,7 +4,8 @@
 **Date:** 2026-09-11  
 **Owner:** Casey Young  
 **Role:** OS RECON  
-**Reconciled main at checkpoint start:** `fea9a046d1b69745fcfc05295b060c24648b4f97`
+**Reconciled main at checkpoint start:** `fea9a046d1b69745fcfc05295b060c24648b4f97`  
+**Latest parallel delta reconciled:** `8ccd73913d557bbbdfe30c7dd00c7b70394f268a`
 
 ## Role boundary
 
@@ -63,6 +64,7 @@ These are preserved as exact gates, not global blockers:
 - **Renogy:** five existing Shopify DRAFT records are live-verified. Preserve them. Exact per-SKU identity / dealer orderability / current price-MAP / media activation holds remain SKU-specific. Do not recreate the five drafts.
 - **SOK:** ordinary Lower-48 commerce remains distinct from Hawaii freight / warranty / DG economics. Hawaii-specific evidence must not block a valid Lower-48 order path.
 - **Kingboss:** dedicated project exists; continue from current verified source state and do not fabricate catalog readiness where exact supplier source evidence is missing.
+- **eBay direct-source permissions:** current eBay operations sent written channel-permission clarification requests to SOK and Kingboss. Both are `WAITING — NONBLOCKING`; do not migrate eBay listings to direct SOK or Kingboss sourcing until written authorization is received. VEVOR Direct remains prohibited for eBay under current supplier restrictions, and Renogy Direct remains prohibited for third-party marketplace sales under current dealer terms. These waits do not stop direct-site revenue, customer recovery, payout/order protection or other authorized supplier work.
 
 ## Recovery / damage-recon relationship
 
@@ -83,13 +85,14 @@ At every OS RECON `RUN`:
 
 ## Immediate next OS RECON worktree
 
-1. Reconcile `CURRENT_WORK_BOARD.md` against newest post-`fea9a046...` commits before changing any priority text.
+1. Reconcile `CURRENT_WORK_BOARD.md` against newest post-`8ccd7391...` commits before changing any priority text.
 2. Audit for stale references that can re-open closed work, especially:
    - obsolete Shopify-password gating;
    - obsolete Renogy zero-product / recreate-product language;
    - obsolete homepage release-ready wording;
    - obsolete universal checkout `source=universal` assumptions;
-   - regenerated blocked archive artifacts or duplicated temporary workflows.
+   - regenerated blocked archive artifacts or duplicated temporary workflows;
+   - eBay direct-source language that treats SOK or Kingboss permission as granted before a written supplier reply.
 3. Verify that new parallel channel/store/vendor commits do not overwrite current checkout/payment protections.
 4. Route any proven runtime defect to MASTER DEVELOPER / owning store lane; keep OS RECON focused on evidence, reconciliation and closure verification.
 
