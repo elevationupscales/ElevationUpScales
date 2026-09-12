@@ -1,176 +1,164 @@
 # Elevation UpScales — eBay Store Operations Current Worktree
 
-**Status:** ACTIVE WORKTREE / RECOVERY + SOURCE ECONOMICS RECON ADVANCED / AUTHENTICATED SELLER HUB STILL REQUIRED  
+**Status:** ACTIVE WORKTREE / P0 PARALLEL CUSTOMER + CASH RECOVERY / PROFITABILITY CONTRACTION APPROVED  
 **Date:** 2026-09-11  
 **Owner:** Casey Young  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
 **Reporting Manager:** Peter Torres — Ecommerce & Vendor Operations Manager  
-**Primary Worker:** eBay Store Operations Worker  
-**Worker State:** OPEN TASK / STANDBY — P0 consequential actions require authenticated Seller Hub evidence  
+**Primary Worker:** eBay Store Operations Worker / Specialist  
+**Worker State:** ACTIVE — authenticated Seller Hub read/recon is verified; consequential Seller Hub mutations require an action-capable authenticated surface  
 **Lane SOP:** `EBAY_STORE_OPERATIONS_SOP_V1_0.md`  
 **Worker Prompt:** `EBAY_STORE_OPERATIONS_WORKER_PROMPT_V1_0.md`  
 **Recovery RECON:** `EBAY_RECOVERY_RECON_2026-09-11.md`  
-**Source Economics RECON:** `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md`
+**Source Economics RECON:** `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md`  
+**Authenticated PM4 Delta:** `PM4_EBAY_AUTHENTICATED_RECOVERY_DELTA_2026-09-11.md`  
+**PM4 Specialist Handoffs:** `PM4_TO_EBAY_SPECIALIST_HANDOFF_2026-09-11.md`; `EBAY_PM4_TO_STORE_SPECIALIST_HANDOFF_2026-09-11.md`  
+**Profitability Decision:** `PM4_EBAY_PROFITABILITY_STREAMLINE_MANAGEMENT_DECISION_2026-09-11.md`  
+**Company Profitability Control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`
+
+## Reconciliation note
+
+This Current Worktree supersedes the earlier startup state that said authenticated Seller Hub was unavailable. PM4 subsequently verified authenticated Seller Hub through the Opera Browser Connector and handed active execution back to the dedicated eBay specialist.
+
+The available Opera connection supports authenticated reading/navigation and verified Seller Hub evidence. It did not expose a supported click/submit control for consequential cancellation/refund/listing mutations during PM4's run. Therefore:
+
+**AUTHENTICATED EVIDENCE IS AVAILABLE → DECISIONS MAY ADVANCE → ONLY THE UNSUPPORTED MUTATION IS GATED.**
+
+Do not turn that bounded execution-surface gate back into a blanket eBay authentication blocker.
 
 ## Objective
 
-Recover current eBay customer/order issues, then overhaul the live eBay catalog into a repeatable profitable sales channel.
+Recover current customer obligations and held cash first, stop new loss-making orders, contract the store to a small verified profitable core, preserve useful demand history, and scale only after actual positive contribution and clean fulfillment.
 
-**RECOVER CUSTOMERS → PROTECT SELLER ACCOUNT → AUDIT LISTINGS → VERIFY SOURCE/PERMISSION → VERIFY PROFIT → IMPROVE OR END → SELL → FULFILL → RECORD ACTUALS.**
+**CUSTOMER FIRST → CASH RELEASE → STOP NEW LOSSES → VERIFY SOURCE + ECONOMICS → KEEP ONLY EXECUTABLE POSITIVE-CONTRIBUTION LISTINGS → RECORD ACTUALS → SCALE WINNERS.**
 
-## Priority queue
+## Current authenticated account state
 
-| Priority | Work Item | State | Blocker / Input | Next Action | Close Condition |
-|---|---|---|---|---|---|
-| P0 | Seller Hub live recovery recon | OPEN TASK / AUTHENTICATED EBAY REQUIRED | Backup web/browser route reached eBay Seller Hub URL but redirected to eBay sign-in; it did not inherit the user's authenticated browser session. Owner directed not to use TinyFish for this run. | Resume from an authenticated eBay Seller Hub / approved browser session. Read current awaiting-shipment/cancellation/refund/tracking state and reconcile against email evidence before any consequential action. | Every open/recent order has one current verified state |
-| P0 | Weed wacker order `10-15134-90489` | CANCEL REQUESTED / LATE / BUYER APOLOGY SENT / ECONOMIC FAIL CONFIRMED / CANCEL ACTION STILL OPEN | Must prove unshipped before cancellation. Sep. 11 eBay late-shipment reminder still says buyer is waiting and offers Add Tracking. Doba source candidate `D0102X316EA` is $62.59 against a $49.98 eBay sale, a negative pre-fee spread. | Verify Seller Hub; if still unshipped, approve cancellation/refund; if shipped, preserve order and update tracking. Do not send a duplicate apology and do not place an uneconomic rescue supplier order. | Buyer request resolved and eBay state verified |
-| P0 | Folding bed order `25-15104-41137` | LATE / NO SUPPLIER CONFIRMATION FOUND / ECONOMIC FAIL CONFIRMED / VERIFY | eBay sale was $50.66, sold Sep. 6, ship-by Sep. 10. Current Gmail recon found no Doba confirmation/shipment record. Doba SKU `D0102X33W6W` is $62.59 dropship / $45.80 pickup-with-label, leaving negative to ~9.6% pre-fee margin at the sale price. | Verify Seller Hub + supplier. If still unshipped and no already-paid supplier shipment exists, cancel/refund + apologize instead of initiating an uneconomic late fulfillment; if shipped, post tracking + apologize for delay. | Order reaches shipped/tracked or canceled/refunded verified state |
-| P0 | VEVOR flashlight order `20-15123-05140` | LATE / NO SUPPLIER CONFIRMATION FOUND / MAP + ECONOMIC FAIL / STATUS UNKNOWN | eBay sale was $34.98, ship-by Sep. 11. Doba `D010277TCB2` shows MAP $35.90, $41.65 dropship and $33.53 pickup-with-label. Sale was below MAP; both source paths fail the operating margin screen. | Verify Seller Hub/source. If a valid authorized source has already shipped, post tracking; if unfulfilled/non-executable, cancel/refund + buyer update. Then correct/end the listing economics before another sale. | Order resolved and listing no longer creates the same MAP/economics failure |
-| P0 | Back-seat organizer `02-15170-43443` | PAID / CURRENT / EXACT SOURCE FOUND / COST LOGIN-GATED / SHIP-BY SEP 16 | eBay sale was $24.33. Exact Doba public source `D01027H21KW` / AL AUTO is currently in stock, U.S. ship-from, estimated 2-business-day processing, but exact account price is authentication-gated. Sep. 7 exports and historical Doba mail contain no usable cost row. | Obtain exact Doba account cost. Fulfill only if landed source cost and variable fees support positive contribution; 30% screen requires landed source cost ≤ **$17.03**, 35% preferred ≤ **$15.81**. Control live listing if economics fail. | Supplier acceptance/tracking recorded with positive expected contribution and live listing disposition controlled |
-| P0 | Doba cot order `12-15143-03510` | SHIPPED / DO NOT CANCEL / THIN ECONOMICS CONFIRMED | Doba shipment email confirms order `26091017391956` shipped. eBay sale $55.66 vs final Doba shipped total $44.46 = ~20.1% pre-fee margin, below operating screen. eBay tracking display remains unverified. | Verify FedEx tracking is posted/visible in eBay; update buyer only if needed. Reprice/rebuild the listing before scaling further sales at this cost structure. | eBay reflects correct shipment/tracking and listing economics are controlled |
-| P0 | Refunded cot order `23-15100-64483` | CLOSED / REFUNDED | eBay refund email plus buyer confirmation support closure. | Do not reopen; buyer already confirmed refund credit. | No unresolved customer action |
-| P1 | Affected-buyer apology sweep | PARTIAL / SELLER HUB REQUIRED | Weed-wacker apology sent; targeted Gmail searches found no usable member-relay buyer thread for `laidaleffall12` or `zuc-9588`; routine eBay notification mail is not a buyer-message channel. | Send one concise in-platform message to each remaining affected buyer after exact order state is verified. | Every materially affected current buyer has one accurate update/apology |
-| P1 | Full active-listing metrics audit | PARTIAL PUBLIC + ECONOMICS RECON / SELLER HUB REQUIRED | Public eBay indexing and historical email now provide a strong audit seed, but public search is not authoritative for complete active inventory, private views/watchers or current Seller Hub state. | Use `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md` as the source/economics decision seed, then read the complete Seller Hub active list and finalize every listing with views/watchers/sales/source/contribution. | Every active listing has one keep/rebuild/end state |
-| P1 | Dead listing cleanup | QUEUED | Seller Hub metrics audit first. | End/drop items with effectively no demand + weak economics/source fit; do not destroy valuable history blindly. | Dead capital/attention listings removed without destroying valuable history |
-| P1 | Proven listing rebuild/reprice | IN PROGRESS / ECONOMICS CANDIDATES CLASSIFIED | Economics receipt now identifies multiple proven-demand but underpriced listings including cot, boot dryer and lawn sweeper. | Once Seller Hub metrics are available, preserve useful history and reprice/rebuild only where a verified authorized source can produce positive contribution. | Strong listings meet source, presentation and profit standards |
-| P1 | Doba/source-by-product reconciliation | IN PROGRESS / ECONOMICS RECEIPT ACTIVE | Exact source/economics now reconciled for multiple products; organizer and camping fan still have price/SKU authentication gaps. Direct vendor marketplace authorization still controls source switching. | Continue exact source mapping; keep Doba only where it is the best authorized/profitable/reliable source. Use `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md` as the current decision receipt. | Every retained listing has a verified current source and channel permission |
-| P1 | eBay profit loop | IN PROGRESS / ACTUALS RECOVERED FOR MULTIPLE SKUS | Historical actuals now prove negative/thin contribution on weed wacker, cot, flashlight, boot dryer, lawn sweeper, battery and RV guard source/price combinations. | Use actual landed cost + eBay fees to set corrected pricing or cut/rebuild listings; record actual contribution on every new order. | eBay produces repeatable positive contribution, not just gross sales |
+PM4's authenticated Seller Hub recon established the following current management evidence:
 
-## Current demand evidence
+- Total sales: **$485.29** in the then-current 31-day view.
+- Net sales: **$386.53** before supplier/product cost.
+- eBay selling costs: approximately **$66.39 / 14% of gross sales**.
+- Impressions: **104,797**.
+- Listing views: **900**.
+- CTR: **0.8%**.
+- Sales conversion: **1.6%**.
+- Seller level: **Above Standard**.
+- Next evaluation shown: **2026-09-20**.
+- Transaction defects: **2 of 7**.
+- Tracking uploaded on time/validated: **7 of 7**.
+- Cases closed without seller resolution: **0 of 7**.
+- Payments showed **8 held rows**, previously reconciled at **$242.79** total.
 
-Recent sale history captured from eBay email shows:
+These figures are a dated operational snapshot, not permanent metrics. Refresh Seller Hub before using them for a new consequential decision.
 
-- repeated Portable Heavy Duty Folding Bed / camping cot purchases;
-- VEVOR boot/shoe dryer purchases;
-- VEVOR rechargeable flashlight purchase;
-- back-seat organizer purchase;
-- VEVOR lawn sweeper purchase;
-- weed-wacker purchase followed by cancellation/fulfillment failure;
-- historical 12V 100Ah lithium battery purchases including failed Hawaii parcel routing.
+## P0 customer / cash recovery queue
 
-Use demand evidence to prioritize investigation, not to bypass channel/source/profit controls.
+| Order | Current verified state | Economic / source state | Next action |
+|---|---|---|---|
+| `10-15134-90489` — weed wacker | **CANCELLATION PROCESSING / TERMINAL REFUND VERIFICATION OPEN** | Known Doba source candidate exceeds the $49.98 sale before fees. No rescue order. | Recheck terminal canceled/refunded state through authenticated Seller Hub. If a supported action remains required, use an action-capable authenticated eBay surface. Then end/drop the failed listing configuration. |
+| `25-15104-41137` — folding bed | **AWAITING SHIPMENT / OVERDUE / NO TRACKING VISIBLE IN AUTHENTICATED RECON** | Known source economics fail the operating screen; no Doba order/shipment confirmation found in the fresh correspondence pass. | Reverify exact source once at execution time. If no valid already-executed shipment exists, follow customer-recovery controls rather than placing an uneconomic late rescue order. |
+| `07-15141-13062` — folding bed | **AWAITING SHIPMENT / OVERDUE / NO TRACKING VISIBLE IN AUTHENTICATED RECON** | Same listing/SKU family as the other folding-bed order; no Doba order/shipment confirmation found. | Maintain this as its own transaction row. Reverify exact source; resolve customer obligation without inventing tracking or creating known negative economics. |
+| `20-15123-05140` — VEVOR spotlight/flashlight | **AWAITING SHIPMENT / NO TRACKING VISIBLE IN AUTHENTICATED RECON** | Historical sale/source economics fail; preserved MAP evidence was also unfavorable. No Doba order/shipment confirmation found. | Resolve customer obligation first. If no valid shipment/source execution exists, follow cancellation/refund/customer-update controls through an action-capable surface, then end/hold the failed listing configuration. |
+| `02-15170-43443` — back-seat organizer | **PAID / CURRENT / SHIP-BY SEP 16 / ADD TRACKING AVAILABLE** | Exact Doba source is known; current authenticated account cost remained unresolved in PM4. 30% source-cost ceiling at the sale is **$17.03**; 35% preferred **$15.81**. | Obtain exact current Doba landed/account cost. Fulfill only if expected contribution is positive and source execution is clean; otherwise protect the customer and control the listing. |
+| `12-15143-03510` — cot | **SHIPPED / TRACKING VERIFIED / DELIVERY MONITOR ONLY** | Shipped economics were thin (~20.1% pre-fee from recovered actuals), below the Phase 1 screen. | Do not cancel or duplicate tracking. Monitor delivery/payout only and rebuild/reprice before further sales at the same economics. |
+| `23-15100-64483` — refunded cot | **CLOSED / REFUNDED** | Customer refund evidence supports closure. | Do not reopen absent a genuine new customer/payment exception. |
 
-## Economics control snapshot
+No tracking, shipment, cancellation, refund, listing mutation, or supplier purchase may be invented from absence of evidence.
 
-The durable economics decisions are maintained in `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md`.
+## Phase 1 profitability controls — approved
 
-Current high-value conclusions:
+PM4 accepted the profitability streamline and returned execution to this specialist lane.
 
-- **Weed wacker:** $49.98 sale vs $62.59 source candidate → negative before fees → `END / DROP` unless a better authorized source is proven.
-- **Flashlight:** $34.98 sale below $35.90 MAP; $41.65 dropship / $33.53 pickup → MAP + economics failure → rebuild/reprice/end after recovery.
-- **Cot:** repeated demand, but actual shipped order was $55.66 sale vs $44.46 landed (~20.1% pre-fee); another late sale at $50.66 cannot economically support the known source → preserve history but reprice/rebuild.
-- **Organizer:** exact Doba source found/in stock; exact cost remains login-gated. Current $24.33 sale requires landed cost ≤ $17.03 for the 30% screen.
-- **Boot dryer:** sales/watchers exist, but a known $10.89 sale cost $14.00 shipped. Later ~$17.89 pricing still misses the 30% screen at that historical cost.
-- **Lawn sweeper:** $69.99 sale vs $63.36 final Doba shipped total (~9.5% pre-fee); later ~$73.50–$75.50 pricing still misses the screen.
-- **Kingboss 12V 100Ah Doba SKU `D01027HH7BV`:** $169 historical sale vs $159.50 source (~5.6% pre-fee), and Doba parcel source excludes AK/HI. Hawaii sale was canceled. Ordinary listing flow must not create another unsupported Hawaii parcel order.
-- **VEVOR RV screen-door guard:** $37.66 listing vs $41.65 dropship / $32.37 pickup → negative to ~14% pre-fee; current issue is price economics, not availability.
-- **Camping fan `168647434992`:** active at $46.85; source-family inventory exists but exact Doba item/cost is not yet proven. 30% source-cost ceiling is $32.80.
+1. Use **approximately 12 active revenue listings as a Phase 1 maximum, not a quota**. Fewer is acceptable.
+2. **30% pre-fee gross margin is the hard working minimum**; **35%+ preferred**.
+3. Final keep/list/scale authorization also requires **positive expected contribution after eBay fees, supplier shipping/freight, promoted-listing fees, discounts/credits and other variable order costs**.
+4. Promoted listings are **OFF BY DEFAULT**. An exact listing may be promoted only when the modeled ad rate is included and contribution remains positive.
+5. Preserve useful sales/watchers/history where a profitable rebuild is plausible; do not keep a failed configuration merely to preserve listing count.
+6. Customer obligations outrank catalog cleanup.
+7. Do not cancel a verified shipped/tracked order and do not duplicate tracking.
 
-## Public listing recon — provisional only
+## Approved stop-new-loss controls
 
-Public eBay search/index evidence currently surfaces the following Elevation seller listings/candidates. This is a **seed list**, not the full catalog and not a substitute for authenticated Seller Hub metrics:
+After checking the exact open-order dependency:
 
-| Product / Listing Signal | Public / Historical Evidence | Provisional Audit Priority |
-|---|---|---|
-| Universal Tactical Vehicle Back Seat Organizer with Detachable Molle Pouches | Elevation listing indexed at $24.33; fresh Sep. 11 sale | **P0 source-cost check** — exact Doba source found but cost is login-gated |
-| VEVOR Fast-Drying Electric Boot & Shoe Dryer | Indexed around $17.89 with watchers; repeat sales | **P1 preserve-history / reprice candidate** — known historical economics fail screen |
-| VEVOR 21-Inch Lawn Sweeper | Sale at $69.99; later listing $73.50; public index around $75.50 | **P1 preserve-history / major reprice-source audit** |
-| Camping Fan with Lantern 10000mAh Rechargeable Battery Powered Portable Tripod | Listing `168647434992` at $46.85 | **P1 exact-SKU/source-cost audit** |
-| 12V 100Ah LiFePO4 / Kingboss battery family | Real sales and multiple historical listings; exact SKU `D01027HH7BV` source excludes HI | **HIGH-RISK routing + economics audit** |
-| Adjustable RV Screen Door Guard / Protector | Listing `168633285491` at $37.66; exact Doba source `D01027RQMT2` | **P1 reprice/rebuild candidate** |
+- weed wacker listing `168634712408` → quantity zero/preserve until cancellation is terminal, then end/drop current configuration;
+- folding bed/cot listing `168634722813` → quantity zero while customer obligations are resolved, then rebuild source/price before new sales;
+- VEVOR spotlight listing `168631043193` → quantity zero / no new order under failed economics;
+- back-seat organizer listing `168634275726` → remain quantity zero until exact landed cost and contribution pass.
 
-Public indexing also surfaced additional Elevation listings with inconsistent crawl ages. Do not treat it as the complete current active set until Seller Hub is available.
+The nine exact-screened Phase 1 candidates recorded in `EBAY_PHASE1_COST_SCREEN_BATCH_2026-09-11.md` are approved for their recorded `END / REBUILD` or `END / HOLD` dispositions after checking immediate open-order dependencies.
 
-## Listing classification standard
+Three high-signal candidates remain `HOLD / VERIFY` until exact source/economics clear:
 
-- `KEEP + REPRICE`
-- `KEEP + REBUILD IN PLACE`
-- `END + REBUILD`
-- `END / DROP`
+- RV Mattress — item `168633077471`;
+- Patio Gazebo 10x20 — item `168633889386`;
+- VEVOR 50W Solar Charger + MPPT — item `168634158033`.
 
-Metrics required where available:
+## Doba and direct-vendor source control
 
-**views → watchers → sales → conversion → returns/cancellations → source → availability → margin → contribution → fulfillment reliability.**
+Current Owner/PM4 rule:
 
-## Profit screen
+**Doba-backed marketplace sourcing does not require separate direct-manufacturer eBay authorization solely because of the underlying brand.**
 
-Working target from prior Ecommerce Manager recommendation:
+A Doba-backed eBay offer still requires:
 
-- ~30% pre-fee gross margin = minimum working screen;
-- 35%+ preferred.
+**EXACT SKU → EBAY ALLOWED → MAP/PRICE COMPLIANT → INVENTORY → DESTINATION → LANDED COST → POSITIVE CONTRIBUTION → FULFILLMENT RELIABILITY.**
 
-Then require positive expected contribution after eBay fees, supplier shipping/freight, promoted-listing fees, discounts and other variable order costs.
+Doba is not blanket inventory authority and is not automatically the best source. Keep it where it wins the verified economic/reliability comparison.
 
-## Source control
+Direct-manufacturer sourcing is a separate path. Do not silently switch a listing from Doba to direct VEVOR, Renogy, SOK, Kingboss, or another manufacturer without the applicable direct marketplace/channel authority and exact source controls.
 
-Doba is superseded as blanket eBay inventory authority.
+## Hawaii / freight lithium protection
 
-Current rule:
+The four Hawaii freight lithium listings identified by the eBay profitability recon are **excluded from generic parcel-listing purge or modification solely under this contraction work**.
 
-**DEMAND → EBAY CHANNEL AUTHORIZATION → BEST VERIFIED SOURCE → FULL ECONOMICS → RELIABLE FULFILLMENT → LIST/KEEP.**
+Route their disposition through Hawaii Lithium / Shipping & Logistics for exact verification of source, inventory, DG/compliance package, freight route/batch economics, customer-facing configuration, live authorization and expected contribution.
 
-Doba remains valid when it wins that comparison.
+Do not treat those listings as ordinary Doba parcel products.
 
-Do not migrate listings to direct VEVOR/Renogy/SOK/Kingboss merely because direct relationships exist. Marketplace permission is vendor-specific and must be verified.
+## Current execution sequence
 
-## Browser/access state
+**GIT FIRST → CUSTOMER ORDERS FIRST → CASH RELEASE → APPLY APPROVED STOP-LOSS CONTROLS → EXECUTE APPROVED FAILED-CANDIDATE DISPOSITIONS → VERIFY 3 REMAINING HIGH-SIGNAL CANDIDATES → PURGE TRUE ZERO-DEMAND/NO-ADVANTAGE LISTINGS → VERIFY ACTIVE CORE COUNT → RECORD NEW BASELINE.**
 
-- eBay has been reported logged into the user's normal browser, but that authentication has not been inherited by the available backup web/browser route in this worker session.
-- Owner directed this worker not to use TinyFish for this run.
-- Backup web/browser access to `https://www.ebay.com/sh/ord` reaches eBay but redirects to the sign-in page, so it is not an authenticated Seller Hub execution path.
-- Public eBay/Doba web indexing can be used only for non-destructive provisional discovery/availability observations. It cannot prove current Seller Hub order state, complete listing inventory, seller analytics, private watchers, or authenticated Doba account price.
-- No current installed eBay-native seller or Doba-native operations plugin was found in the plugin registry.
-- One customer communication was possible through eBay's member-relay email thread and was sent for order `10-15134-90489` before this worker startup.
-- **No Seller Hub cancellation/refund/listing change has been claimed executed from this Worktree.**
+Where an eBay mutation cannot be executed through the currently available authenticated connector:
 
-The worker must adopt an authenticated browser/connector route that is actually available in its execution session and verify live state before any consequential action.
+- preserve the exact action, order/listing ID, current evidence and required outcome;
+- mark only that mutation `OPEN TASK / ACTION SURFACE REQUIRED`;
+- continue every non-destructive authenticated/source/economics action that remains executable;
+- do not route PM4 back into duplicate operational execution.
 
-## Startup execution receipt — 2026-09-11 MDT
+## Historical evidence preserved
 
-- GIT FIRST completed. Startup initially resolved `main` at `55c4aa50cfdab0ffa8c30c7213f4b1df2610057f`; before the startup write, `main` was refreshed and had advanced to `d024a56a63637016b9ca9709957759655653fb9b` from a VEVOR workflow sync.
-- Read controlling Master S.O.P., Master OS Glossary, Current Work Board, eBay Recovery RECON, eBay Store Operations SOP, eBay Current Worktree, eBay Parallel Revenue Recovery Directive and Master Worker Registry.
-- Registry showed no competing active eBay Store Operations Worker; the assigned worker row remained `OPEN TASK / STANDBY` pending startup/authentication.
-- Owner directed use of the backup browser route instead of TinyFish.
-- Backup browser/web route was tested read-only against Seller Hub and redirected to eBay sign-in; no authenticated Seller Hub session was obtained.
-- Fresh Gmail recovery recon confirmed: weed-wacker cancellation request still requires resolution and Sep. 11 late-shipment reminder exists; folding-bed order still has Sep. 11 late-shipment reminders; Doba cot order `12-15143-03510` is supplier-confirmed shipped; cot order `23-15100-64483` is refunded/closed; back-seat organizer sale is current; flashlight has no later exact-order email evidence beyond the original sale.
-- No cancellation, refund, tracking edit, listing edit, or duplicate buyer apology was executed without authenticated Seller Hub evidence.
+Earlier startup/public-recon statements that said Seller Hub authentication was unavailable are **historical only** and are superseded by PM4's authenticated Seller Hub receipts and active specialist handoff.
 
-## RUN execution receipt — recovery/public recon
+Use these records for chronology/evidence rather than replaying old blockers:
 
-- GIT FIRST rerun against moving `main`; intervening non-eBay commits did not supersede the lane.
-- Checked current eBay/Doba/member-relay mail; no newer eBay order-state email superseded the recorded recovery states.
-- Exact-order recon completed for `25-15104-41137`, `20-15123-05140` and `02-15170-43443`.
-- Current evidence contains no Doba order/shipment confirmation for those three orders; this strengthens the fulfillment-risk classification but is not treated as platform proof of non-shipment.
-- Targeted member-relay searches for folding-bed buyer `laidaleffall12` and flashlight buyer `zuc-9588` found only ordinary eBay notification mail, not a usable buyer-message relay thread.
-- `12-15143-03510` remains protected as SHIPPED / DO NOT CANCEL; `23-15100-64483` remains CLOSED / REFUNDED.
-- Public eBay indexing was used for a non-destructive provisional catalog seed.
-- No consequential eBay action was repeated or guessed while Seller Hub authentication remains unavailable.
+- `EBAY_RECOVERY_RECON_2026-09-11.md`
+- `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md`
+- `PM4_EBAY_AUTHENTICATED_RECOVERY_DELTA_2026-09-11.md`
+- `EBAY_PROFITABILITY_RECOVERY_RECON_2026-09-11.md`
+- `EBAY_PHASE1_CORE_SELECTION_EXECUTION_2026-09-11.md`
+- `EBAY_PHASE1_LIVE_CANDIDATE_SKU_SNAPSHOT_2026-09-11.md`
+- `EBAY_PHASE1_COST_SCREEN_BATCH_2026-09-11.md`
+- `EBAY_CASH_RELEASE_BOARD_2026-09-11.md`
+- `EBAY_CONTRACTION_BATCH_01_2026-09-11.md`
+- `EBAY_STORE_CONTRACTION_AND_DIRECT_SOURCE_REBUILD_2026-09-11.md`
+- `PM4_TO_EBAY_SPECIALIST_HANDOFF_2026-09-11.md`
+- `EBAY_PM4_TO_STORE_SPECIALIST_HANDOFF_2026-09-11.md`
+- `PM4_EBAY_PROFITABILITY_STREAMLINE_MANAGEMENT_DECISION_2026-09-11.md`
 
-## RUN execution receipt — source economics expansion
+## Close / maturity condition
 
-- Created `EBAY_SOURCE_ECONOMICS_RECON_2026-09-11.md` at commit `7609861333061118dfd6a7b49d5cbbdd42193d49` and expanded it at commit `8d588d9f63f658d56d82ffb28e23d1c085745e92`.
-- Recovered Sep. 7 Doba inventory/export facts plus historical actual order totals from company Gmail.
-- Proved negative/thin pre-fee economics on the weed wacker, flashlight, cot, boot dryer, lawn sweeper, Kingboss 100Ah battery source, and RV screen-door guard at their known listing/sale prices.
-- Exact organizer source `D01027H21KW` is current/in stock, but current Doba account price is not exposed publicly and was not present in the Sep. 7 exports or historical order mail. No guessed cost was used.
-- Exact historical Kingboss battery SKU `D01027HH7BV` was tied to eBay order `08-15101-45641`; source export excludes AK/HI, and the Honolulu order was canceled/refunded. Battery destination controls are therefore part of the listing correction, not merely a pricing issue.
-- Camping fan `168647434992` remains cost/SKU unresolved despite public in-stock source-family evidence; no source substitution was assumed.
-- Next consequential execution remains Seller Hub authentication. In parallel, exact Doba account cost for the organizer is the highest-value source-side unresolved input because its Sep. 16 ship-by deadline has not yet passed.
+Phase 1 eBay recovery is complete when:
 
-## Startup checklist
-
-- [x] GIT FIRST
-- [x] Read Master SOP / Glossary / Current Work Board
-- [x] Read `EBAY_RECOVERY_RECON_2026-09-11.md`
-- [x] Read eBay Store Operations SOP
-- [x] Read this Worktree
-- [x] Read Worker Registry
-- [x] Establish source/economics decision receipt
-- [ ] Verify authenticated eBay Seller Hub — backup browser reached sign-in only
-- [x] Verify no competing eBay worker owns recovery task
-- [ ] Self-register ACTIVE — correctly withheld because authenticated Seller Hub startup gate is not satisfied
-- [ ] Execute P0 recovery queue — live consequential actions gated by Seller Hub authentication; non-destructive order/source/economics recon advanced
-- [x] Record recovery/economics receipts before catalog overhaul
+- every current customer obligation is terminally resolved or cleanly shipped/tracked;
+- held-cash blockers are cleared or isolated as true external waits;
+- known failed-economics configurations cannot create another order;
+- active revenue listings are contracted to a small exact-source, executable, positive-contribution core;
+- actual contribution is recorded on new orders;
+- profitable listings fulfill cleanly enough to scale from evidence rather than gross sales.
 
 ## Control phrase
 
-**RECOVER CUSTOMERS → SELL WHAT PEOPLE WANT → SOURCE IT RIGHT → PRICE FOR PROFIT → FULFILL ON TIME → CUT WHAT DOESN'T WORK.**
+**CUSTOMER FIRST → CASH RELEASE → STOP NEW LOSSES → KEEP ONLY EXECUTABLE POSITIVE-CONTRIBUTION LISTINGS → PRESERVE USEFUL DEMAND HISTORY → SCALE AFTER ACTUAL PROFIT.**
