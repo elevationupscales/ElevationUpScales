@@ -4,7 +4,7 @@
 **Owner:** Casey Young  
 **Lane:** eBay Store Operations  
 **Reporting Manager:** Peter Torres — Ecommerce & Vendor Operations Manager  
-**State:** ACTIVE / MANAGEMENT APPROVAL RECEIVED / BROWSER MUTATIONS GATED ONLY
+**State:** ACTIVE / MANAGEMENT APPROVAL RECEIVED / AUTHENTICATED READS LIVE / MUTATION CLICKS GATED ONLY
 
 ## Management approval adopted
 
@@ -24,30 +24,65 @@ The Sep. 12 `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md` was checke
 
 ## Current execution-surface state
 
-Opera Browser Connector had previously provided authenticated Seller Hub read/navigation access, but during this RUN the connection returned `Browser not connected` when reopening Seller Hub.
+Opera Browser Connector initially returned `Browser not connected` during this RUN, then reconnected on the allowed retry. Authenticated Seller Hub read/navigation access is again working.
 
-Per the reconciled Worktree, this is a bounded execution-surface gate only:
+The available connector still does not expose a supported generic click/edit/submit action for the consequential listing and cancellation mutations. Therefore the remaining gate is narrow:
 
-**AUTHENTICATED EVIDENCE REMAINS DURABLE → DECISIONS CONTINUE → ONLY SELLER HUB MUTATIONS / NEW LIVE READS ARE GATED UNTIL OPERA RECONNECTS.**
+**AUTHENTICATED LIVE EVIDENCE IS AVAILABLE → DECISIONS CONTINUE → ONLY UNSUPPORTED SELLER HUB MUTATION CLICKS ARE GATED.**
 
 No TinyFish use is authorized for this eBay lane.
 
-## Customer-order delta
+## Live customer-order recheck
 
-Fresh Gmail/eBay correspondence after Sep. 11 produced no new terminal cancellation/refund/shipment receipt for:
+Authenticated Seller Hub was re-read after Opera reconnected.
 
-- weed wacker `10-15134-90489`;
-- folding bed `25-15104-41137`;
-- folding bed `07-15141-13062`;
-- spotlight `20-15123-05140`;
-- organizer `02-15170-43443`.
+### Weed wacker `10-15134-90489`
 
-Therefore the last authenticated Seller Hub truth remains controlling until Opera reconnects:
+Live order detail still states:
 
-- weed wacker cancellation accepted / processing — do not resubmit or refund twice;
-- four awaiting-shipment obligations remain the current recovery set;
-- shipped cot `12-15143-03510` remains protected / do not cancel / do not duplicate tracking;
-- last authenticated held-funds snapshot remains 8 rows / $242.79 until a new Seller Hub payment read proves otherwise.
+- **Cancellation requested**;
+- **Cancellation is in progress.**;
+- **The cancellation is processing.**;
+- **Add tracking** is present rather than a shipped/tracking record.
+
+**Control:** do not resubmit cancellation and do not issue a duplicate refund. Wait for terminal canceled/refunded settlement, then end/drop the failed listing configuration.
+
+### Folding bed `25-15104-41137`
+
+Live order detail verifies:
+
+- **Buyer paid**;
+- **Shipping overdue — Ship by Sep 10**;
+- **Add tracking** present;
+- no tracking record surfaced in the authenticated recheck.
+
+Current source/economics evidence still does not support a new uneconomic rescue order.
+
+### Folding bed `07-15141-13062`
+
+Live order detail independently verifies:
+
+- **Buyer paid**;
+- **Shipping overdue — Ship by Sep 10**;
+- **Add tracking** present;
+- no tracking record surfaced in the authenticated recheck.
+
+Treat this as its own transaction; do not infer fulfillment from the separate cot that already shipped.
+
+### Aggregate Awaiting Shipment queue
+
+Authenticated Orders continues to show **Awaiting shipment (4)** consisting of:
+
+- organizer `02-15170-43443` — ship by Sep. 16;
+- spotlight `20-15123-05140` — ship by Sep. 11;
+- cot `07-15141-13062` — overdue / ship by Sep. 10;
+- cot `25-15104-41137` — overdue / ship by Sep. 10.
+
+Fresh Gmail/eBay correspondence produced no newer supplier shipment or terminal eBay outcome that supersedes these live states.
+
+Shipped cot `12-15143-03510` remains protected: do not cancel and do not duplicate tracking.
+
+The last authenticated Payments snapshot remains **8 held rows / $242.79** until a new Payments read proves a change.
 
 ## Remaining high-signal candidate screen
 
@@ -97,7 +132,7 @@ Historical pre-fee screen at $41.12 landed vs $59 current listing = approximatel
 
 ## Approved listing mutations still open
 
-The following approved changes remain `OPEN TASK / ACTION SURFACE REQUIRED` until an authenticated action-capable Seller Hub surface is available:
+The following approved changes remain `OPEN TASK / ACTION SURFACE REQUIRED` because the connector can read/navigate but cannot press the consequential Seller Hub mutation controls:
 
 1. weed wacker item `168634712408` → temporary quantity 0 now; end/drop only after cancellation becomes terminal;
 2. folding-bed/cot item `168634722813` → temporary quantity 0 / preserve history while customer obligations resolve;
@@ -106,11 +141,11 @@ The following approved changes remain `OPEN TASK / ACTION SURFACE REQUIRED` unti
 5. execute the nine PM4-approved failed-candidate END/REBUILD or END/HOLD dispositions after immediate live open-order dependency check;
 6. re-read Payments after customer/order actions and record the actual held-funds change.
 
-Do not interpret this action-surface gate as permission to stop source/economics work or to send duplicate cancellations/refunds.
+Do not interpret this mutation-surface gate as permission to stop source/economics work or to send duplicate cancellations/refunds.
 
 ## Next RUN sequence
 
-**RECONNECT OPERA → VERIFY AUTHENTICATED SELLER HUB → CUSTOMER ORDERS FIRST → CASH RELEASE → APPLY QTY-0 STOP-LOSS CONTROLS → EXECUTE NINE APPROVED DISPOSITIONS → CURRENT-COST REVERIFY SOLAR CHARGER → VERIFY GAZEBO + MATTRESS SOURCE → ZERO-DEMAND PURGE → VERIFY ACTIVE CORE COUNT → RECORD NEW BASELINE.**
+**CUSTOMER ORDER MUTATIONS THROUGH ACTION-CAPABLE SELLER HUB → CASH RELEASE → APPLY QTY-0 STOP-LOSS CONTROLS → EXECUTE NINE APPROVED DISPOSITIONS → CURRENT-COST REVERIFY SOLAR CHARGER → VERIFY GAZEBO + MATTRESS SOURCE → ZERO-DEMAND PURGE → VERIFY ACTIVE CORE COUNT → RECORD NEW BASELINE.**
 
 ## Control phrase
 
