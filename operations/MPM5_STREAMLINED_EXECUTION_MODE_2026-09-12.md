@@ -29,12 +29,14 @@ Owner: MPM / communications recovery.
 Target: carrier forwarding reset + Google Voice stale-state cleanup + direct inbound call/SMS proof.  
 DEV: **not involved** unless a company-owned web/contact implementation defect is separately proven.
 
-### P0-B — Shopify purchasability / sales-channel publication
+### P0-B — Shopify existing-shop purchasability / payment readiness
 
 Owner: Shopify Store Operations.  
-Current verified live state: **103 ACTIVE / 53 ACTIVE+PUBLISHED / 50 ACTIVE+UNPUBLISHED / 0 ACTIVE unavailable on every channel**.  
-Required action: classify the 50 unpublished items as **INTENDED PUBLIC / INTENTIONAL HOLD / RETIRE**, publish only intended-public products, then verify exact public URL + variant/cart + guest checkout/payment UI.  
-DEV receives only defects that remain after Shopify publication/channel configuration is correct.
+Current verified live state: **103 ACTIVE / 53 Online Store public / 50 VEVOR staging intentional hold / 0 ACTIVE unavailable on every channel**.  
+Newest owning-lane return proves the entire 50-product hidden cohort is tagged `VEVOR-Profit-50-2026-09-12` and is **INTENTIONAL HOLD / DO NOT BULK PUBLISH**, not a general publication outage.  
+Latest verified Shopify Payments onboarding state remains **`Complete setup`**; a newer connector read lacked Shopify Payments read permission, so no newer payment state is inferred.  
+Required action: keep the 50 VEVOR staging records hidden → tune/verify the 53 public Online Store products and existing installed surfaces → complete/reverify Shopify Payments through the legitimate owner/platform flow → preserve custom PayPal → verify representative public URL + exact variant/cart + guest checkout/payment UI.  
+DEV receives only defects that remain after Shopify platform/configuration work is correct and a bounded reproducible residual code defect is proven.
 
 ### P0-C — eBay customer/cash recovery
 
