@@ -37,6 +37,7 @@ Current commerce sequencing:
 - Checkout/payment function repairs remain P0 when a real defect is proven; profitability scoring may not block a functional purchase path.
 - Shopify Payments account/setup work is Shopify Store Operations + owner/platform configuration first; incomplete setup is not a DEV wake-up condition by itself.
 - Preserve the accepted custom Elevation PayPal path while Shopify Payments setup remains incomplete.
+- TikTok failed appeal is terminal under the current platform state; do not replay/resubmit it unless TikTok provides a genuinely new remedy or Casey explicitly reopens a new platform-supported path.
 - No blind production deploy, wholesale `main` deploy, force update or stale-branch deployment.
 - SOK out-of-stock/unavailable products may use the established pre-purchase/backorder rule where allowed.
 - Hawaii lithium/warranty/logistics controls remain separate and may not be bypassed by generic channel actions.
@@ -81,7 +82,7 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 | VEVOR | VEVOR Project Operations Manager / Specialist | ACTIVE — 19 A-tier live / 17 qualified B-tier ACTIVE / 3 promotion-cleared / 50-SKU Shopify staging cohort held | Do not rerun completed 10-SKU check. Keep 50-product staging cohort hidden unless exact VEVOR controls authorize release. Keep released products in free/owned traffic; classify shoe-dryer economics before traffic; real order triggers exact source/cost/MAP/shipping recheck. |
 | Renogy | Renogy Branch Operations Manager / Specialist | ACTIVE — 2 ACTIVE / 4 DRAFT | Preserve 2 ACTIVE / 4 DRAFT. Continue exact-SKU activation; recheck dealer orderability/backorder/cost/shipping on real order. |
 | Apparel / Fourthwall | Apparel Vendor Operations Manager | ACTIVE — Fourthwall 29 products / native fulfillment proven | Tune the existing 29-product catalog: economics, stale promos, payout readiness, hero classification and weak-margin products. Do not mass-migrate or add a new storefront. |
-| TikTok Shop / Affiliate Growth | TikTok execution + TikTok Affiliate Growth Manager under Peter | ACTIVE EXISTING CHANNEL / RESTRICTION + PROFITABILITY TUNING | Do not replay seller appeal. Audit auto-enrolled commission exposure, exact SKU eligibility/economics, warm creator state and current catalog. No deliberate scaling of margin-unknown products and no new channel expansion. |
+| TikTok Shop / Affiliate Growth | TikTok execution + TikTok Affiliate Growth Manager under Peter | **ACTIVE UNDER RESTRICTION / APPEAL TERMINAL-FAILED / TUNE CURRENT SHOP ONLY** | Use `TIKTOK_EXISTING_SHOP_TUNING_RETURN_2026-09-12.md`; do not replay appeal; identify/fix one OOS product; preserve clean fulfillment/returns/support state; track held funds separately; audit commission/sample exposure and exact SKU economics; wait for automatic re-evaluation or a genuinely new platform remedy. No catalog expansion or paid spend. |
 
 ---
 
@@ -116,7 +117,6 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 | Logistics Plus Hawaii storage / fulfillment qualification | WAITING — DG / OPERATING REVIEW | Provider terms → reconcile handling, storage, release/fulfillment, delivery/minimums. |
 | R&R Solar Hawaii proof-support relationship | WAITING | Partner response → reconcile existing thread. No duplicate outreach. |
 | Refunded folding-bed buyer — bank credit visibility | WAITING — CUSTOMER EXCEPTION ONLY | Recheck only on new complaint or payment-system evidence. |
-| TikTok seller-verification second appeal | SUBMITTED / WAITING / EXECUTION CLOSED | Do not rebuild, re-upload or resubmit unless TikTok returns a new evidence request/decision or Casey reopens. Affiliate Growth is separate. |
 
 ---
 
@@ -138,13 +138,13 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 - Custom Elevation PayPal origin/quote blocker — closed; live custom PayPal path accepted.
 - Shopify storefront password gate — closed.
 - Shopify 50-product hidden cohort generic-publication blocker — closed as **VEVOR intentional staging hold / do not bulk publish**.
+- TikTok seller-verification/high-risk-shop appeal — **FAILED / CANNOT APPEAL AGAIN**; do not recreate or resubmit from stale `SUBMITTED / WAITING` pointers. Operate cleanly under restriction and use only automatic re-evaluation or a genuinely new authentic TikTok remedy.
 - VEVOR PRO registration, feed acquisition, Colorado tax-exemption submission, A-tier launch and current qualified B-tier publication — completed; do not restart.
 - VEVOR generic fulfillment inquiry and current-window 10-SKU fresh check — completed; do not rerun without refresh trigger.
 - Renogy dealer onboarding/W-9/portal setup — completed; do not restart.
 - SOK generic supplier qualification, official image-source request and Hawaii warranty-input request/intake — completed; do not duplicate.
 - SolarStock bounded outbound request — completed as send; now waiting.
 - R&R duplicate response gate, Logistics Plus outbound request, ten complementary vendor introductions, DMX/Magnum/Dimensions initial outreach — completed as send; preserve current waiting/prospect states.
-- TikTok second-appeal execution — completed/submitted; adjudication is monitoring only.
 - Legacy GitHub control issues #26, #30 and #33–#36 — closed/superseded.
 - eBay unknown-device alert — closed after human confirmation.
 
@@ -157,11 +157,12 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 5. Block only the exact blocked item; unrelated executable work continues.
 6. An ACTIVE Shopify product is not automatically publicly purchasable; publication/channel state must be verified against intended staging/release controls.
 7. Shopify checkout UI visibility does not prove Shopify Payments production readiness while the latest verified account state remains `Complete setup`.
-8. An auto-enrolled affiliate product is not automatically profit-approved.
-9. A DEV request without a bounded reproducible defect packet is rejected back to the owning operator lane.
-10. MASTER RECON is called only for conflict/gate/integrity work, not as a duplicate executor.
-11. MPM closes or downgrades stale recovery rows as evidence matures instead of keeping every historical P0 active forever.
-12. **Do not create new-channel work while the existing-shops tuning hold is active.**
+8. A TikTok appeal marked failed/cannot appeal again defeats older submitted/waiting pointers; do not replay it.
+9. An auto-enrolled affiliate product is not automatically profit-approved.
+10. A DEV request without a bounded reproducible defect packet is rejected back to the owning operator lane.
+11. MASTER RECON is called only for conflict/gate/integrity work, not as a duplicate executor.
+12. MPM closes or downgrades stale recovery rows as evidence matures instead of keeping every historical P0 active forever.
+13. **Do not create new-channel work while the existing-shops tuning hold is active.**
 
 ## Last-resort fallback
 
