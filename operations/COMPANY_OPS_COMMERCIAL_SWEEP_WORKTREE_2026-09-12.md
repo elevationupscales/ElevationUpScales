@@ -2,10 +2,33 @@
 
 **Date:** 2026-09-12 MDT  
 **Owner:** Casey Young  
-**State:** ACTIVE / PHASE 1 COMPANY-WIDE SWEEP  
+**State:** ACTIVE / PHASE 1 COMPANY-WIDE SWEEP / RECONCILED TO CURRENT LANE TRUTH  
 **Reports To:** Operating System Project Manager / PM4  
-**Execution Owner:** Company Operations Manager  
-**Parent Controls:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md`, `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`, current vendor Project Sources/Worktrees
+**Execution Owner:** Company Operations Manager / COM 2  
+**Parent Controls:** `COMMERCIAL_REVENUE_ACCELERATION_DIRECTIVE_2026-09-12.md`, `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`, `CURRENT_WORK_BOARD.md`, current vendor Project Sources/Worktrees  
+**OS RECON baseline:** `main@110a7549832e1d6f7b1764d29339eacec72aba22`
+
+## OS RECON correction — COM 2 drift boundary
+
+COM 2 is a **consolidation, routing and exception-clearing lane**. It is not a competing source of truth for vendor Projects, channel workers, specialist Worktrees or PM4.
+
+During the Sep. 12 commercial sweep, specialist lanes advanced faster than this worktree snapshot. That created stale-pointer risk. The controlling rule is now explicit:
+
+**CURRENT MAIN → CURRENT WORK BOARD → OWNING PROJECT SOURCE / CURRENT WORKTREE → LAST VERIFIED LANE ACTION → COM 2 CONSOLIDATES / ROUTES ONLY.**
+
+COM 2 must not:
+
+- rerun a completed current-window vendor fresh check;
+- recreate closed onboarding, fulfillment, catalog or verification work;
+- overwrite a specialist lane's newer `PROMOTE / HOLD / WAIT / TERMINAL` state with an older sweep instruction;
+- treat a broad sweep target as authorization to make platform/customer/vendor mutations owned by another lane;
+- reactivate the TikTok seller-verification appeal from Affiliate Growth, settlement monitoring or cash-recovery work;
+- duplicate eBay customer/order actions already controlled by the eBay specialist;
+- create a second apparel/provider source of truth;
+- use the commercial sweep to alter the protected SOK lane;
+- use homepage revenue work to alter the locked hero/design/printed-copy surfaces.
+
+When COM 2 encounters a newer owning-lane state, **the newer lane state wins** and COM 2 updates its consolidation view instead of sending the worker backward.
 
 ## Purpose
 
@@ -22,12 +45,15 @@ This is not a new Project, manager, catalog or source-of-truth system. Vendor ma
 5. No speculative inventory commitment or new recurring software spend merely to increase catalog breadth.
 6. One blocked SKU does not block another clean SKU or vendor.
 7. Realized contribution is final scale truth.
+8. **Homepage hero, design system and printed/copy wording remain no-touch.** Bounded existing non-hero store merchandising is separately authorized under `HOMEPAGE_STORE_MERCHANDISING_WORK_ORDER_2026-09-12.md`.
 
 ## Commercial objective
 
-**AUDIT EVERYTHING → IDENTIFY BEST MONEY-MAKERS → CONCENTRATE TRAFFIC → TAKE PAYMENT → FULFILL CLEANLY → RECORD REALIZED CONTRIBUTION → SCALE WINNERS.**
+**AUDIT CURRENT TRUTH → IDENTIFY BEST MONEY-MAKERS → CONCENTRATE TRAFFIC → TAKE PAYMENT → FULFILL CLEANLY → RECORD REALIZED CONTRIBUTION → SCALE WINNERS.**
 
 The company does not currently have a product-access problem. The operating problem is concentration of qualified traffic onto economically cleared offers with clean fulfillment and low working-capital exposure.
+
+`AUDIT` does not mean repeat work that the owning lane has already completed for the current source window. COM 2 consumes verified lane returns and only requests the still-missing material facts.
 
 ## Required return schema — every promoted candidate
 
@@ -77,7 +103,7 @@ For PM4 comparison after material economics are known:
 
 The score is a ranking tool, not a substitute for exact contribution economics.
 
-# Phase 1 lane sweep
+# Phase 1 lane sweep — reconciled current state
 
 ## SOK — protected reference revenue lane
 
@@ -95,14 +121,14 @@ SOK is a working supplier/trust reference, not a target for cross-vendor rebuild
 
 ## Renogy — incremental name-brand activation lane
 
-**State:** 5 Shopify drafts / no accidental activation / exact-SKU activation QA active
+**State:** 5 Shopify drafts preserved / no accidental activation / exact-SKU activation QA active
 
 Current first candidates:
 
 1. `RBM500-US` — 500A Battery Monitor with Shunt
 2. `RSP100DCT-US` — 100W N-Type Bifacial Solar Panel
 
-Required return:
+Required remaining return:
 
 - dealer-authoritative orderability/backorder state;
 - exact applicable checkout/payment fee treatment;
@@ -110,30 +136,38 @@ Required return:
 - exact/current approved media binding;
 - PROMOTE or exact HOLD for each candidate independently.
 
+COM 2 does not restart dealer onboarding or the five-draft foundation.
+
 Goal:
 
 **CLEAR 1–2 CLEAN RENOGY SKUS → ACTIVATE INDIVIDUALLY → OWNED TRAFFIC → FIRST REAL POSITIVE-CONTRIBUTION ORDER.**
 
-## VEVOR — live breadth / hero selection lane
+## VEVOR — current three-SKU economics gate
 
-**State:** materially populated ACTIVE Shopify catalog; broad catalog is not the current task.
+**State:** 19 A-tier live / 17 of 17 qualified B-tier ACTIVE / public checkout verified / current-window 10-SKU fresh check COMPLETE.
 
-Required return:
+Current owning-lane return:
 
-- 2–5 lowest-cash/highest-demand candidate SKUs;
-- current source cost;
-- current stock/orderability;
-- shipping treatment;
-- applicable channel/payment cost;
-- expected contribution;
-- supplier-purchase cash exposure;
-- PROMOTE or exact HOLD.
+- **3 / 10 exact shortlist SKUs are currently orderable**;
+- **7 / 10 are currently out of stock** and remain at the back of the source-refresh queue;
+- the current three-SKU economics queue is:
+  - `XXKLJT124INCLJF0QV0` — Camper Levelers;
+  - `AXLSTCQJDSYKAZ99C001V0` — A-Frame Trailer Jack;
+  - `D25FT14IN20AHOGLOV1` — 25-ft Electric Drain Auger;
+- all three remain `HOLD — ECONOMICS UNKNOWN` pending exact current PRO net unit price + normal continental-U.S. dropship shipping treatment;
+- a focused supplier request for those exact economics has already been sent.
 
-Candidate categories may include power/off-grid, RV, camping/outdoor and practical problem-solving products, but exact economics control ranking.
+COM 2 control:
+
+- **do not rerun the completed 10-SKU public fresh check during this source window**;
+- do not request another generic VEVOR qualification/fulfillment pass;
+- do not rebuild A-tier/B-tier publication;
+- consume the three-SKU protected-economics return when it arrives;
+- route only a clean `PROMOTE` result into concentrated traffic.
 
 Goal:
 
-**VERIFY ONE CLEAN HERO FIRST → PROMOTE → FIRST PROFITABLE VEVOR ORDER → EXPAND ONLY FROM PROOF.**
+**3 VIABLE SKUS → EXACT PRO ECONOMICS → PROMOTE/HOLD → ONE CLEAN HERO → FIRST PROFITABLE VEVOR ORDER.**
 
 ## Kingboss — differentiated proving lane
 
@@ -168,53 +202,47 @@ Required return:
 
 Do not restart broad speculative Doba catalog work.
 
-## Fourthwall — zero-inventory apparel/capsule lane
+## Fourthwall — cash-light apparel / proven native fulfillment lane
 
-**State:** 29 products / native fulfillment proven / payout setup remains an operational prerequisite / historical profit too thin to scale indiscriminately.
+**State:** 29 products / native fulfillment proven / payout setup remains open / Mountain Patch Baseball Cap has already entered the first bounded owned-traffic test.
 
-Required sweep:
+Current owning-lane facts:
 
-- all 29 products classified `PROMOTE / REPRICE / HOLD / RETIRE`;
-- exact displayed product profit and retail price;
-- identify 3–4 hero products;
-- preserve native Fourthwall checkout/fulfillment unless order-creation automation is separately proven;
-- verify payout readiness;
+- Fourthwall is a proven made-to-order/no-inventory-prebuy fulfillment path;
+- Mountain Patch Baseball Cap is the first `PROMOTE TEST` candidate through Fourthwall native checkout;
+- a Facebook owned-traffic post for that exact product has already been scheduled by PM4;
+- Signature Collection Emblem Tee has proven fulfillment but current economics do not safely support broad TikTok affiliate commission at the current cost structure;
+- Women's Crop Tee and Essential Hoodie remain reprice/reroute candidates before concentrated promotion;
+- payout readiness remains open.
+
+COM 2 control:
+
+- do not schedule a duplicate Mountain Patch traffic test;
+- do not move Fourthwall products into custom PayPal fulfillment until automatic Fourthwall order creation is actually proven;
+- consume the 29-product audit/provider-economics return from Apparel Vendor Operations;
 - use realized order profit as final truth.
-
-Current known candidate logic:
-
-- Mountain Patch Baseball Cap — entry hero candidate;
-- Signature Collection Emblem Tee — proven fulfillment candidate, normalize thin variants;
-- Women's Crop Tee — reprice before concentrated promotion;
-- Elevation Essential Hoodie — reprice before concentrated promotion.
 
 Goal:
 
-**NO INVENTORY CASH → CUSTOMER ORDER → FOURTHWALL FULFILLS → POSITIVE REALIZED PROFIT.**
+**NO INVENTORY CASH → NATIVE FOURTHWALL ORDER → FOURTHWALL FULFILLS → POSITIVE REALIZED PROFIT.**
 
 ## Shopify + Spreadconnect apparel — owned brand lane
 
-**State:** Shopify is active/public but not yet operating as a focused apparel storefront; Spreadconnect is the preferred Shopify-native POD candidate subject to exact account/SKU/economics verification.
+**State:** Shopify active/public; **Spreadconnect is currently DISCONNECTED from Shopify.** Live Shopify inspection found no installed Spreadconnect app and no Spreadconnect fulfillment-service location.
 
-Required return:
+Current gate:
 
-- verify connected North America fulfillment account/service;
-- current exact branded blank availability;
-- compare exact candidate economics vs Fourthwall;
-- create a 6–10 SKU proposed `Elevation Gear` core;
-- assign exactly one fulfillment owner per SKU;
-- return first 3–5 launch-ready products with contribution and fulfillment proof.
+**SPREADCONNECT INSTALL/AUTH LINK → VERIFY NORTH AMERICA ACCOUNT + FULFILLMENT SERVICE → EXACT SKU/COST/SHIPPING → COMPARE WITH FOURTHWALL → 3–5 LAUNCH-READY HEROES.**
 
-Preferred assortment coverage:
+Current comparison core is already established as a bounded 6–10 SKU Elevation Gear matrix. Public/consumer catalog price is not accepted as supplier business cost.
 
-- evergreen Elevation basics;
-- one strong headwear item;
-- one women's hero;
-- one premium recognizable branded blank;
-- one work/performance product;
-- optional accessory/premium item only on contribution pass.
+COM 2 control:
 
-No hundreds-of-SKU POD dump.
+- do not describe Spreadconnect as connected;
+- do not request product publication before install/auth + exact account economics;
+- do not create duplicate apparel SKUs merely to satisfy the sweep;
+- one fulfillment owner per SKU;
+- Shopify owns brand/checkout/customer relationship for Shopify-native apparel; Fourthwall remains native fulfillment owner for its existing Fourthwall products unless deliberately rerouted after economics proof.
 
 ## Shopify storefront — conversion surface
 
@@ -232,6 +260,8 @@ Company Operations / Shopify execution:
 
 ## eBay — dedicated recovery lane
 
+**State:** authenticated Seller Hub live reads recovered after retry; four Awaiting Shipment rows remain; weed-wacker cancellation is still processing; consequential mutation clicks remain the narrow tooling gate.
+
 No takeover.
 
 Company Operations monitors:
@@ -244,9 +274,28 @@ Company Operations monitors:
 
 The eBay Store Operations Specialist remains the consequential platform-mutation owner.
 
+COM 2 must not:
+
+- resubmit the weed-wacker cancellation;
+- issue a duplicate refund;
+- infer fulfillment of one folding-bed/cot transaction from another;
+- execute the approved listing contractions outside the dedicated action-capable eBay lane.
+
 ## TikTok Affiliate Growth — organic acquisition lane
 
+**State:** Affiliate Growth is ACTIVE and separate from the terminal seller-verification appeal. A dedicated profitability gate now controls commissions/samples.
+
 No seller-verification replay.
+
+Current control:
+
+- do not broaden affiliate rates merely because a product is eligible;
+- exact all-in SKU contribution and safe commission ceiling are required first;
+- Mountain Patch Baseball Cap economics are first priority;
+- Mountain Patch Trucker Cap economics second;
+- Signature Tee, Women's Crop Tee and Essential Hoodie remain `OFF / HOLD` from concentrated affiliate promotion until rerouted/repriced;
+- historical 20% commission is a performance-tier reference, not a blanket default;
+- live Seller Center remains final fee/configuration check before consequential setting changes.
 
 Execution target:
 
@@ -256,9 +305,9 @@ Execution target:
 - prepare Apparel/Lifestyle and Camping/Outdoor separation for authentic platform restriction lift;
 - track `creator → showcase → content → clicks → order → commission → realized contribution`.
 
-## Developer — revenue-blocker-only lane
+## Developer — bounded revenue-blocker / homepage-merchandising lane
 
-Developer action is authorized only when a technical issue materially blocks:
+Developer action is authorized when a technical issue materially blocks:
 
 - exact hero product discovery/route;
 - checkout/source routing;
@@ -267,6 +316,18 @@ Developer action is authorized only when a technical issue materially blocks:
 - fulfillment handoff;
 - delayed-order/freight safety gate;
 - decision-driving product analytics.
+
+The owner has also authorized the separate bounded work order:
+
+`HOMEPAGE_STORE_MERCHANDISING_WORK_ORDER_2026-09-12.md`
+
+Under that work order:
+
+- homepage hero = NO TOUCH;
+- homepage design/printed-copy = NO TOUCH;
+- existing non-hero `Shop the Store` cards may receive deterministic management-controlled product selection;
+- preferred implementation is the existing `/api/store/featured` selection logic;
+- a product must reach `PROMOTE` before receiving new concentrated non-SOK homepage placement.
 
 No redesign, broad refactor or new admin system merely because the commercial sweep exists.
 
@@ -280,20 +341,21 @@ A clean high-performing product may displace a weaker category representative. P
 
 Products outside the hero core may remain safely available/searchable under their current source controls.
 
-# Parallel execution order
+# Parallel execution order — current
 
 1. **Real orders / cash release first** — no sweep work may delay current customer obligations or releaseable cash.
 2. **Renogy** — clear `RBM500-US`; clear `RSP100DCT-US` independently.
-3. **VEVOR** — return first 1–5 protected-economics candidates; no new breadth work.
-4. **Apparel** — Fourthwall 29-product audit + Shopify/Spreadconnect 6–10 SKU comparison.
-5. **Kingboss** — exact differentiated cash-light launch candidates.
-6. **Doba** — exact gap-fill candidates only.
-7. **Shopify/Marketing** — direct owned traffic to each product as soon as that exact candidate reaches PROMOTE; do not wait for every lane to finish.
-8. **Developer** — fix only confirmed revenue blockers surfaced by the above lanes.
+3. **VEVOR** — wait/process exact PRO economics for the already-defined three orderable SKUs; **do not rerun current-window fresh check**.
+4. **Apparel** — continue Fourthwall audit/real traffic proof; Spreadconnect remains install/auth gated before exact Shopify-native economics.
+5. **TikTok Affiliate** — preserve creator pipeline but activate rates/samples only after SKU-specific safe ceiling clears.
+6. **Kingboss** — exact differentiated cash-light launch candidates.
+7. **Doba** — exact gap-fill candidates only.
+8. **Shopify/Marketing** — direct owned traffic to each product as soon as that exact candidate reaches PROMOTE; do not wait for every lane to finish.
+9. **Developer** — execute only confirmed revenue blockers plus the explicit bounded homepage non-hero merchandising work order.
 
 # Company-wide sweep output to PM4
 
-Company Operations consolidates lane returns into one PM review packet with:
+Company Operations consolidates **current owning-lane returns** into one PM review packet with:
 
 1. Executive revenue summary.
 2. Master commercial SKU matrix.
@@ -306,11 +368,26 @@ Company Operations consolidates lane returns into one PM review packet with:
 9. Owned/affiliate traffic assignments.
 10. Expected vs realized contribution scoreboard.
 
+COM 2 may summarize/classify the returns, but it may not replace their Project Source/Current Worktree with a second detailed truth record.
+
 No protected vendor cost/MAP/private commercial terms are to be written into public-safe Git when supplier confidentiality applies. Public-safe Git records may use state/classification while protected economics remain in their authorized source surface.
 
 # Daily Company Operations loop
 
-**GIT FIRST → CHECK REAL ORDERS → CHECK CASH RELEASE → CHECK SWEEP RETURNS → CLEAR EXACT ECONOMIC/LOGISTICS BLOCKERS → ROUTE CLEAN PROMOTE CANDIDATES → RECORD REALIZED CONTRIBUTION → ESCALATE PM DECISION ONLY WHERE REQUIRED → CONTINUE.**
+**GIT FIRST → CURRENT WORK BOARD → CURRENT OWNING WORKTREES → CHECK REAL ORDERS → CHECK CASH RELEASE → CONSUME NEW LANE RETURNS → CLEAR ONLY CROSS-LANE ECONOMIC/LOGISTICS BLOCKERS → ROUTE CLEAN PROMOTE CANDIDATES → RECORD REALIZED CONTRIBUTION → ESCALATE PM DECISION ONLY WHERE REQUIRED → CONTINUE.**
+
+### Replay guard
+
+Before assigning a lane task, COM 2 asks:
+
+1. Did the owning Project/worker already complete this exact current-window step?
+2. Is there a newer source, receipt or Current Worktree than this COM 2 snapshot?
+3. Is the action owned by COM 2, or is COM 2 only supposed to monitor/consolidate it?
+4. Is the blocker exact enough to route without recreating finished work?
+
+If the answer shows a newer completed/terminal lane state:
+
+**ADOPT NEWER STATE → UPDATE CONSOLIDATION → DO NOT RE-EXECUTE.**
 
 Decision-driving fields:
 
@@ -331,9 +408,10 @@ Phase 1 sweep is complete when:
 - every active commercial lane has returned its current candidate/classification state;
 - material hero candidates have exact source/payment/fulfillment/economic facts or an exact HOLD;
 - Fourthwall 29-product audit is returned;
-- Shopify/Spreadconnect apparel core is returned;
+- Shopify/Spreadconnect apparel core has either exact verified provider economics or an exact install/auth/economics HOLD;
 - PM4 can rank a company-wide hero set without inventing missing economics;
-- clean products already reaching PROMOTE have begun receiving owned/affiliate traffic without waiting for slower lanes.
+- clean products already reaching PROMOTE have begun receiving owned/affiliate traffic without waiting for slower lanes;
+- COM 2 has no stale pointer that asks an owning lane to repeat a completed current-window action.
 
 # First commercial proof milestone
 
@@ -343,4 +421,4 @@ Repeat until ordinary commerce activity can be funded from operating cash rather
 
 ## Control phrase
 
-**PROTECT SOK → SWEEP THE COMPANY → RETURN EXACT ECONOMICS → RANK THE BEST OFFERS → SEND TRAFFIC → TAKE PAYMENT → FULFILL CLEANLY → MEASURE REAL PROFIT → SCALE WHAT PAYS.**
+**COM 2 CONSOLIDATES CURRENT TRUTH → IT DOES NOT CREATE COMPETING TRUTH → PROTECT SOK → NEVER REPLAY TERMINAL WORK → ROUTE ONLY THE MISSING FACT → SEND TRAFFIC TO CLEAN OFFERS → REALIZED PROFIT DECIDES SCALE.**
