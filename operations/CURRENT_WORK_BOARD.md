@@ -5,6 +5,7 @@
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
 **Current routing control:** `MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md`  
+**Current commerce tuning control:** `MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md`  
 **Profitability control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
 **Paid-acquisition control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
@@ -24,10 +25,15 @@ Current streamlined routing:
 
 **OPERATORS OPERATE → RECON ONLY ON CONFLICT/GATE → DEV ONLY ON PROVEN CODE DEFECT → MPM SEQUENCES → CLOSE WHAT IS DONE.**
 
+Current commerce sequencing:
+
+**TUNE BEFORE EXPANDING → FIX CURRENT STORES → CLEAN CURRENT CATALOGS → PROVE CURRENT PURCHASE PATHS → PROVE CURRENT FULFILLMENT → PROVE CURRENT PROFIT → THEN ADD REACH.**
+
 ## Hard controls preserved
 
 - Protected top homepage remains **NO TOUCH** unless Casey explicitly authorizes the exact change.
 - No paid ads / boosts / PPC / sponsored marketplace traffic / prepaid retargeting until capital recovery is verified and Casey explicitly reopens paid acquisition.
+- **No new-channel expansion campaign is foreground work while `MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md` is active.** Meta, Google & YouTube, Amazon, Walmart and other not-yet-installed channels remain backlog/evidence only.
 - Checkout/payment function repairs remain P0 when a real defect is proven; profitability scoring may not block a functional purchase path.
 - No blind production deploy, wholesale `main` deploy, force update or stale-branch deployment.
 - SOK out-of-stock/unavailable products may use the established pre-purchase/backorder rule where allowed.
@@ -64,15 +70,16 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 
 ---
 
-# PARALLEL REVENUE — DO NOT WAIT FOR DEV
+# EXISTING SHOP TUNING / PARALLEL REVENUE — DO NOT WAIT FOR DEV
 
 | Lane | Owner | State | Next |
 |---|---|---|---|
-| Direct-site first profitable sale / PayPal + Shopify | MPM / Company Operations + Shopify/vendor lanes | ACTIVE | Preserve custom PayPal and native Shopify checkout. Route owned/free traffic only to exact positive-contribution offers. First real order proves payment → durable order → source → fulfillment → realized contribution. |
+| Direct-site first profitable sale / PayPal + Shopify | MPM / Company Operations + Shopify/vendor lanes | ACTIVE | Preserve custom PayPal and native Shopify checkout. Tune current publication, product truth, shipping/payment configuration and current offers before adding channels. First real order proves payment → durable order → source → fulfillment → realized contribution. |
+| Shopify-installed surfaces — Shop / Microsoft Copilot / Agentic | Shopify Store Operations | TUNING / EXISTING SURFACES ONLY | Audit existing product exposure, eligibility, price, availability, shipping and purchase path. Correct zero-product or over-broad states. Do not expand catalog simply to raise channel count. |
 | VEVOR | VEVOR Project Operations Manager / Specialist | ACTIVE — 19 A-tier live / 17 qualified B-tier ACTIVE / 3 promotion-cleared | Do not rerun completed 10-SKU check. Keep released products in free/owned traffic; classify shoe-dryer economics before traffic; real order triggers exact source/cost/MAP/shipping recheck. |
 | Renogy | Renogy Branch Operations Manager / Specialist | ACTIVE — 2 ACTIVE / 4 DRAFT | Preserve 2 ACTIVE / 4 DRAFT. Continue exact-SKU activation; recheck dealer orderability/backorder/cost/shipping on real order. |
-| Apparel / Fourthwall | Apparel Vendor Operations Manager | ACTIVE — Fourthwall 29 products / native fulfillment proven | Audit economics, payout readiness and 3–5 launch-ready heroes. Spreadconnect remains separate install/auth work; do not block proven Fourthwall lane. |
-| TikTok Affiliate Growth | TikTok Affiliate Growth Manager under Peter | ACTIVE — affiliate access live / auto-enrollment not profit approval | Audit commissions and exact SKU economics. No deliberate scaling of margin-unknown products. Paid acquisition lock remains. |
+| Apparel / Fourthwall | Apparel Vendor Operations Manager | ACTIVE — Fourthwall 29 products / native fulfillment proven | Tune the existing 29-product catalog: economics, stale promos, payout readiness, hero classification and weak-margin products. Do not mass-migrate or add a new storefront. |
+| TikTok Shop / Affiliate Growth | TikTok execution + TikTok Affiliate Growth Manager under Peter | ACTIVE EXISTING CHANNEL / RESTRICTION + PROFITABILITY TUNING | Do not replay seller appeal. Audit auto-enrolled commission exposure, exact SKU eligibility/economics, warm creator state and current catalog. No deliberate scaling of margin-unknown products and no new channel expansion. |
 
 ---
 
@@ -80,6 +87,7 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 
 | Work Item | Owner | State / Rule |
 |---|---|---|
+| New-channel expansion — Meta / Google & YouTube / Amazon / Walmart / additional marketplaces | MPM / Ecommerce | **HOLD — EXISTING-SHOPS TUNING FIRST.** Research may remain as backlog/evidence, but no installation/configuration campaign begins until current stores reach a clean operating baseline and MPM/Owner reopens expansion. |
 | SOK Supplier / Commerce / Warranty | SOK Project Operations Manager / SOK RECON OS | ACTIVE primary supplier. Lower-48 commerce continues. Hawaii warranty/logistics economics remain proving. No duplicate generic supplier qualification. |
 | Kingboss Stage-1 proving | Kingboss Project Operations Manager / Specialist | ACTIVE. Continue exact catalog/SKU map, protected pricing/MAP/channel/warranty/compliance reconciliation. No speculative 100-unit commitment without owner approval. |
 | Universal catalog vendor acceptance | Catalog + vendor managers | IN PROGRESS. Vendor/source acceptance can continue. Code mutations require a proven defect packet before DEV routing. |
@@ -114,6 +122,7 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 
 | Work Item | State | Reopen Gate |
 |---|---|---|
+| New-channel expansion | **HOLD — TUNE CURRENT SHOPS FIRST** | Existing current shops reach clean product/publication/purchase/fulfillment/profitability baselines and MPM/Casey explicitly reopens expansion. |
 | Paid advertising / prepaid media | **HOLD — OWNER CAPITAL-RECOVERY RULE** | Verified capital-recovery hole reaches zero **and** Casey explicitly reopens paid acquisition. |
 | SOK Hawaii permanent warranty economics / reserve/service compensation | HOLD — OWNER GATE | Provider quotes + excluded-cost reconciliation + proof actuals + owner approval. |
 | SOK compliance reference PR #70 | HOLD | Fresh reconciliation/rebase if still useful; do not auto-merge stale lineage. |
@@ -148,6 +157,7 @@ MASTER RECON is likewise **triggered**, not continuous: source conflict, release
 8. A DEV request without a bounded reproducible defect packet is rejected back to the owning operator lane.
 9. MASTER RECON is called only for conflict/gate/integrity work, not as a duplicate executor.
 10. MPM closes or downgrades stale recovery rows as evidence matures instead of keeping every historical P0 active forever.
+11. **Do not create new-channel work while the existing-shops tuning hold is active.**
 
 ## Last-resort fallback
 
