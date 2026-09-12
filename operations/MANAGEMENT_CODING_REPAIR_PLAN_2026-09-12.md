@@ -2,351 +2,137 @@
 
 **Date:** 2026-09-12  
 **Owner:** Casey Young  
-**Status:** ACTIVE / P0 MANAGEMENT-CONTROLLED TECHNICAL RECOVERY / PHASE B RECON PASS / PM4 DISPOSITION PENDING  
-**State Owner:** Operating System Project Manager / PM4 / MPM  
-**Execution Owner:** MASTER DEVELOPER  
-**Integrity Oversight:** MASTER RECON OS  
-**Commercial Continuity:** Company Operations Manager / COM 2  
-**Incident:** GitHub Issue #65  
+**Status:** SUPERSEDED AS ACTIVE ROUTING / PRESERVED AS HISTORICAL RECOVERY EVIDENCE  
+**Current State Owner:** Operating System Project Manager / MPM5  
+**Current Routing Control:** `MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md`  
+**Current Global Work State:** `CURRENT_WORK_BOARD.md`  
+**Current Coding Worktree:** `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`  
+**Incident:** GitHub Issue #65 — open control/evidence record, not a standing DEV queue
 
-## 1. Management objective
+## 0. CURRENT CONTROL — DO NOT REPLAY THE OLD PHASE GATE
 
-Repair the website coding/deployment system without another broad rebuild.
+This file originally controlled the P0 coding/deployment recovery sequence. That recovery history remains valid evidence, but its former standing routing is no longer current.
 
-The management goal is:
+Casey subsequently directed management to streamline execution after MASTER DEVELOPER caught up. The current control is:
 
-**PROTECT CUSTOMERS → HOLD NONESSENTIAL CODE → STABILIZE VERIFIED PRODUCTION → RECONCILE SOURCE → RESTORE ONE PUBLIC PRODUCT TRUTH → PROVE CHECKOUT/ROUTING → HARDEN RELEASE CONTROLS → CONVERGE DELIBERATELY → RELEASE FEATURE FREEZE.**
+**OPERATORS OPERATE → RECON ONLY ON CONFLICT/GATE → DEV ONLY ON PROVEN CODE DEFECT → MPM SEQUENCES → CLOSE WHAT IS DONE.**
 
-This plan does not authorize a redesign, wholesale `main` deployment, speculative catalog expansion, protected homepage-top changes, or broad feature work.
+Current worker disposition:
 
-## 2. Accepted recovery baseline
+- **MASTER DEVELOPER:** CAUGHT UP / STANDBY / VERIFY-FIX ONLY.
+- **MASTER RECON OS:** TRIGGERED INTEGRITY GATE ONLY.
+- **Shopify Store Operations:** owns publication/purchasability/configuration work first.
+- **eBay Store Operations:** owns Seller Hub/customer/cash recovery work first.
+- **Vendor / Apparel / TikTok lanes:** own their platform/source/configuration work first.
+- **MPM5:** sequences, accepts bounded technical defect packets, and prevents duplicate routing.
 
-The accepted recovery/production baseline is:
+The former instruction **“PM4 ACCEPT OR RETURN PHASE B → THEN AUTHORIZE PHASE C” is historical and must not be replayed as current routing.**
 
-**`89912be657d7e92c3582619005c0a110ad843577`**
+## 1. CURRENT VERIFIED LINEAGE
 
-Production proof:
+At this RECON sync:
 
-- GitHub Actions deployment run `34709944113` / run #49;
-- canonical production QA: PASS;
-- secret / oversized-artifact gate: PASS;
-- Cloudflare deployment: PASS;
-- deployed-application smoke: PASS;
-- canonical-domain smoke: PASS;
-- deployment receipt: PASS;
-- independent live verification confirmed the legacy generic catalog APIs fail closed, the dedicated SOK catalog remains live, SOK detail links use trusted `/sok/...` routes, and the SOK SK12V100PC checkout remains purchase-ready at the intended $319 customer price without submitting payment.
+- `main`: `d22f84f50b9cb528acfea0fba58817e28cafffd3`
+- `production-deploy`: `4da62160a5d9250a1d977a42052644798fac0b40`
+- `recovery/coding-stabilization-20260912`: `4da62160a5d9250a1d977a42052644798fac0b40`
+- deployment workflow run for `4da62160...`: GitHub Actions run `34717381144` / run #50 — **SUCCESS**
 
-`main` and the production recovery lineage remain intentionally divergent. The accepted production SHA does **not** make the rest of `main` safe to deploy.
+The prior accepted production/recovery SHA `89912be657d7e92c3582619005c0a110ad843577` remains a valid historical Phase A / Phase B audit baseline. It is **not the current production/recovery branch head**.
 
-Hard control:
+`main` and production remain intentionally divergent. Therefore the core deployment control remains:
 
-**NO BULK MERGE → NO WHOLESALE MAIN DEPLOY → NO BLIND FAST-FORWARD → NO FORCE UPDATE.**
+**NO BLIND PRODUCTION DEPLOY → NO WHOLESALE `main` DEPLOY → NO FORCE UPDATE → NO STALE-BRANCH RELEASE.**
 
-## 3. Management roles
+## 2. CURRENT REACTIVATION GATE
 
-### PM4 / MPM — recovery manager
+MASTER DEVELOPER does not receive standing work from this historical plan.
 
-PM4 owns:
+A technical task may wake DEV only when the owning lane returns a bounded defect packet containing:
 
-- recovery priority and sequencing;
-- the definition of P0 vs deferred feature work;
-- cross-lane routing;
-- acceptance gates;
-- escalation to Casey only when owner authority is required;
-- final recommendation to release the feature freeze.
+1. exact URL/path/component;
+2. exact SKU/order when applicable;
+3. reproduction steps;
+4. expected result;
+5. actual result;
+6. customer/revenue impact;
+7. owning lane;
+8. confirmation that platform/configuration/operator repair was exhausted or ruled out.
 
-PM4 does not independently rewrite production code.
+MPM must accept that packet before DEV is reactivated.
 
-### MASTER DEVELOPER — technical execution owner
+## 3. CURRENT OPERATING BOUNDARIES
 
-MASTER DEVELOPER owns:
+The following controls remain active:
 
-- recovery branch implementation;
-- production-vs-`main` technical delta ledger;
-- one-root-cause-at-a-time repairs;
-- tests, QA, preview/deployment controls and production receipts;
-- exact runtime/source changes needed to satisfy this plan.
+- protected top homepage remains hard no-touch absent exact owner authorization or a genuine defect;
+- no paid acquisition until the capital-recovery gate is satisfied and Casey explicitly reopens it;
+- SOK/Hawaii controls remain separate and may not be bypassed by generic channel actions;
+- checkout/payment repairs remain P0 when a real defect is proven;
+- working purchase paths are protected from unrelated refactors;
+- production mutation must remain deliberate and traceable;
+- issue #65 remains an open technical control/evidence record, not an automatic DEV wake-up signal.
 
-During P0, MASTER DEVELOPER works from the accepted recovery lineage. `main` is evidence/input until each production-affecting delta is classified.
+Current foreground commerce routing is defined by:
 
-### MASTER RECON OS — integrity gate
+- `MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md`
+- `MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md`
+- `CURRENT_WORK_BOARD.md`
+- `MASTER_WORKER_REGISTRY_V1_0.md`
+- the owning platform/vendor Worktree.
 
-MASTER RECON owns:
+## 4. HISTORICAL RECOVERY RECORD — PRESERVE, DO NOT AUTO-EXECUTE
 
-- verifying current branch/SHA lineage before each material recovery step;
-- detecting stale pointers, replay, duplicated fixes and conflicting control state;
-- checking that management files reflect actual deployed/source truth;
-- independently verifying closure criteria;
-- refusing to certify convergence while unresolved P0 drift remains.
+The following remain authoritative evidence for what was previously discovered, contained, classified and audited:
 
-MASTER RECON does not become a second developer.
+- `OWNER_DIRECTIVE_CODING_STABILIZATION_2026-09-12.md`
+- `OWNER_DIRECTIVE_PUBLIC_COPY_FIREWALL_2026-09-12.md`
+- `OWNER_DIRECTIVE_COMMERCIAL_RETAIL_STORE_STANDARD_2026-09-12.md`
+- `COMMERCIAL_RETAIL_STORE_FINE_TUNE_WORKFLOW_2026-09-12.md`
+- `MASTER_DEVELOPER_PHASE_B_PRODUCTION_MAIN_DELTA_LEDGER_2026-09-12.md`
+- `OS_RECON_PRE_PRODUCTION_PHASE_B_AUDIT_2026-09-12.md`
+- `OS_RECON_PHASE_B_CONTROL_PLANE_SYNC_2026-09-12.md`
+- GitHub Issue #65 historical comments and receipts.
 
-### Company Operations Manager / COM 2 — commercial continuity
+Historical Phase B result remains:
 
-COM 2 continues customer, order, cash-release and profitable-sales operations.
+**MASTER DEVELOPER RETURNED → MASTER RECON PASS.**
 
-During the coding freeze COM 2 may:
+That result is evidence, not a standing instruction to reopen Phase C/D/E/F/G as a sequential DEV backlog.
 
-- identify an exact customer/revenue technical blocker;
-- route that blocker to PM4 / MASTER DEVELOPER;
-- preserve working checkout/order paths;
-- continue non-code vendor/channel work under existing lane rules.
+## 5. CURRENT CONTROL-PLANE INTEGRITY TEST
 
-COM 2 must not:
-
-- request redesign/cosmetic work;
-- restart broad website merchandising or feature expansion;
-- create a second developer worktree;
-- treat an older commercial wish-list as authority over the P0 recovery plan;
-- ask a vendor/channel lane to alter protected homepage-top output;
-- bypass the recovery branch because a change appears small.
-
-### Vendor / channel managers
-
-Vendor and channel managers remain source owners for product, price, availability, fulfillment, warranty, MAP/channel and platform facts.
-
-They return exact source facts to management. They do not independently patch the website during P0 unless MASTER DEVELOPER owns the technical change and routes it through recovery controls.
-
-### Casey / Owner
-
-Casey retains authority for:
-
-- protected homepage-top changes;
-- material scope changes;
-- exceptions to the freeze;
-- final feature-freeze release.
-
-## 4. Repair phases
-
-### Phase A — containment and recovery baseline
-
-**State: COMPLETE / VERIFIED**
-
-Completed:
-
-- customer-trust containment deployed;
-- unsafe legacy generic public catalog endpoints fail closed;
-- trusted SOK catalog remains available;
-- stale SOK detail-loop routing repaired;
-- customer-safe availability copy deployed;
-- SOK direct checkout verified healthy;
-- regression guards added for the containment class;
-- accepted production SHA pinned at `89912be...`.
-
-Phase A may be reopened only by a verified live regression.
-
-### Phase B — production ↔ `main` delta ledger
-
-**State: DEV RETURNED / MASTER RECON PASS / PM4 ACCEPTANCE OR RETURN PENDING**
-
-MASTER DEVELOPER returned the durable file-level ledger:
-
-`MASTER_DEVELOPER_PHASE_B_PRODUCTION_MAIN_DELTA_LEDGER_2026-09-12.md`
-
-The return classifies production-affecting divergence as:
-
-1. **OPERATIONS ONLY** — documentation/state; no customer runtime effect;
-2. **REQUIRED RECOVERY** — necessary for trust, checkout, source-of-truth, protected-top or deployment safety;
-3. **BUSINESS-VALID / DEFERRED** — legitimate but frozen feature/vendor work;
-4. **REJECT / RETIRE** — stale, duplicate, superseded or unsafe implementation.
-
-MASTER RECON independently audited the Developer ledger and recorded:
-
-**PASS — PHASE B ACCEPTABLE FOR PM4**
-
-Durable audit:
-
-`OS_RECON_PRE_PRODUCTION_PHASE_B_AUDIT_2026-09-12.md` @ `d9f15b23373e883287318ed75ef07ebe3c4996c3`
-
-Verified Phase B controls:
-
-- accepted production / recovery remains `89912be657d7e92c3582619005c0a110ad843577`;
-- no unauthorized production mutation occurred;
-- no omitted production-affecting file was identified at the audited inventory level;
-- the classification and REQUIRED RECOVERY sequence are acceptable for PM4 review;
-- no unresolved UNKNOWN production-affecting file was identified at the file-inventory level;
-- post-target `main` advance was control-plane/S.O.P./Phase-B-return state and did not require the technical inventory to reopen.
-
-**Phase B management gate:** PM4 must now explicitly accept or return Phase B. RECON PASS alone does not authorize Phase C.
-
-### Phase C — one authoritative public commerce contract
-
-**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
-
-Repair toward one authoritative customer-public eligibility contract.
-
-A product may reach public discovery/purchase only when the contract can determine:
-
-- exact identity / SKU / vendor ownership;
-- customer-safe title and description;
-- approved media provenance;
-- publish state;
-- customer price or explicit purchase-options state;
-- availability/orderability state;
-- checkout eligibility;
-- fulfillment owner/path;
-- destination/shipping restrictions;
-- exact trusted detail route.
-
-Unsafe/unknown trust-critical records fail closed before the public response whenever technically possible.
-
-Browser filtering remains defense in depth, not the primary source-of-truth control.
-
-### Phase D — route, detail and checkout reconciliation
-
-**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
-
-Verify and deliberately map:
-
-- `/store`;
-- supplier storefronts;
-- trusted product detail routes;
-- legacy product URLs;
-- direct checkout URLs;
-- PayPal/custom checkout paths;
-- intentional Shopify purchase paths;
-- order-persistence hooks;
-- source-specific purchase-options/backorder routes.
-
-Rules:
-
-- no customer route may expose a record that the public contract rejects;
-- no legacy detail route may bypass the public contract;
-- a working checkout is protected from unrelated refactors;
-- no payment is submitted during smoke testing.
-
-### Phase E — customer-copy and protected-homepage firewall
-
-**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
-
-Port/reconcile only the reviewed protections needed to ensure:
-
-- internal AI/OS/developer/operations language does not leak into customer copy;
-- public trust controls operate silently rather than describing quarantines/internal processes to customers;
-- protected homepage top copy, CTA, imagery, product bindings, layout and runtime output cannot be silently overwritten by shared commerce JavaScript or backend ordering changes;
-- owner homepage lock remains the authority.
-
-### Phase F — release-system repair
-
-**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
-
-MASTER DEVELOPER must make the deployment path deterministic and branch-aware.
-
-Required controls:
-
-- exact source SHA captured before QA;
-- recovery candidate can be previewed/tested without implicitly switching to unrelated `main`;
-- production mutation occurs only from an explicitly accepted candidate;
-- QA failure blocks deployment;
-- critical customer JS/CSS changes require an asset/cache version change where applicable;
-- deployed-app smoke runs;
-- canonical-domain smoke runs;
-- deployment receipt records source SHA and result;
-- rollback target is known before production mutation.
-
-### Phase G — controlled convergence
-
-**State: HOLD UNTIL B–F PASS**
-
-After recovery gates pass:
-
-1. choose the surviving canonical development lineage;
-2. deliberately port/merge accepted recovery truth;
-3. retire obsolete duplicate route/catalog/deployment assumptions;
-4. confirm the selected development lineage can reproduce the accepted production state;
-5. update Work Board, Registry and incident state;
-6. MASTER RECON performs final drift sweep;
-7. PM4 returns a freeze-release recommendation to Casey;
-8. Casey explicitly releases or modifies the feature freeze.
-
-## 5. P0 execution order
-
-Until management changes this plan, the order is:
-
-**1. CUSTOMER TRUST / OUTAGE / PAYMENT FAILURE**  
-**2. CHECKOUT + ORDER RECORD INTEGRITY**  
-**3. PUBLIC PRODUCT SOURCE-OF-TRUTH**  
-**4. ROUTE/DETAIL/LEGACY BYPASS CONTROL**  
-**5. PROTECTED HOMEPAGE / PUBLIC COPY**  
-**6. DEPLOYMENT / PREVIEW / CACHE / RECEIPT CONTROL**  
-**7. MAIN CONVERGENCE**  
-**8. DEFERRED FEATURES**
-
-A lower item may proceed in parallel only when it cannot interfere with a higher item.
-
-## 6. Change admission rule during freeze
-
-Every proposed website change is classified before coding:
-
-- **P0 REPAIR** → execute through recovery controls;
-- **CUSTOMER/ORDER EMERGENCY** → execute through recovery controls immediately;
-- **REVENUE BLOCKER** → PM4 verifies it is truly blocking an existing approved sale/order path, then routes through recovery;
-- **FEATURE / COSMETIC / NICE-TO-HAVE** → HOLD;
-- **PROTECTED TOP CHANGE** → HOLD and route exact delta to Casey;
-- **UNCLEAR** → HOLD only that change; continue other repair work.
-
-## 7. Required management reporting
-
-MASTER DEVELOPER returns after each material repair:
-
-- source branch/SHA;
-- exact root cause;
-- exact files changed;
-- QA/tests run;
-- deployment state;
-- canonical/live verification;
-- unresolved risk;
-- next root cause.
-
-COM 2 reports only:
-
-- customer/order impact;
-- revenue/cash impact;
-- exact technical blocker needing routing.
-
-MASTER RECON returns:
-
-- lineage state;
-- drift/replay/conflict findings;
-- whether management pointers match verified truth;
-- PASS / HOLD / ROUTE REQUIRED.
-
-### Control-plane integrity test
-
-Before MASTER DEVELOPER receives a new `RUN` at a recovery phase boundary, and before PM4 accepts a phase transition, verify the following surfaces agree on the active phase, execution owner and accepted production SHA:
+On any future RECON trigger, verify these surfaces against actual Git/platform truth:
 
 1. `CURRENT_WORK_BOARD.md`;
 2. `MASTER_WORKER_REGISTRY_V1_0.md`;
 3. `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`;
 4. GitHub Issue #65;
-5. `production-deploy` / accepted production pointer.
+5. `production-deploy` and recovery branch heads;
+6. the newest MPM/owner routing directive.
 
-If one surface says `P2` while the recovery chain says `P0`, one says `NEXT` while execution is active, or one carries an obsolete production SHA, classify **CONTROL-PLANE DRIFT**. Stop only the conflicting routing, SYNC the objective state, preserve unrelated work, and do not route the affected worker from the stale pointer.
+If a historical file advertises an obsolete production SHA, active phase, or standing worker queue that conflicts with newer controlling state, classify **CONTROL-PLANE DRIFT**, stop only the conflicting routing, sync the objective state, and preserve unrelated work.
 
-## 8. Feature-freeze release gates
+## 6. CURRENT MANAGEMENT ORDER
 
-The feature freeze stays active until all are true:
+The present work order is not the old Phase B → Phase C sequence.
 
-1. accepted production SHA is traceable and reproducible;
-2. production-vs-`main` delta ledger is complete for production-affecting files;
-3. one public eligibility/source contract owns customer product truth;
-4. unsafe legacy API/detail bypasses are retired or mapped;
-5. checkout/payment/order persistence paths pass regression checks;
-6. public copy firewall and protected-top guards pass;
-7. branch-aware preview/deployment path is proven;
-8. canonical production smoke + receipt are routine and exact-SHA tied;
-9. MASTER RECON reports no unresolved P0 drift;
-10. PM4 recommends release;
-11. Casey explicitly releases the freeze.
+Current foreground priorities are:
 
-## 9. Immediate management work order
+1. owner communications recovery;
+2. Shopify publication/purchasability tuning;
+3. eBay customer/cash recovery and profitable contraction;
+4. current-store/vendor/apparel/TikTok tuning under their owning lanes;
+5. DEV only on an MPM-accepted bounded code defect;
+6. RECON only on conflict, release gate, production-lineage ambiguity, or management-state drift.
 
-**PM4:** review the Phase B Developer ledger together with the MASTER RECON PASS and explicitly **ACCEPT or RETURN PHASE B**. If accepted, authorize Phase C as the next bounded recovery phase. Do not authorize production movement by this disposition alone.  
-**MASTER DEVELOPER:** **HOLD AT PHASE GATE / DEV RETURNED**. Do not begin Phase C until PM4 explicitly accepts Phase B and routes execution.  
-**MASTER RECON:** Phase B audit is COMPLETE / PASS; hold for PM4 disposition and resume only for a returned repair, verified new drift, or the next authorized RECON gate.  
-**COM 2:** continue customer/order/cash/profitable-sales work; route only exact revenue-critical technical blockers; do not create new website feature requests during the freeze.  
-**Vendor/Channel Managers:** continue source/economics/fulfillment work without independent website mutations.  
+## 7. HISTORICAL OBJECTIVE PRESERVED
+
+The recovery objective that produced this control remains valid as an engineering principle:
+
+**PROTECT CUSTOMERS → PRESERVE WORKING CHECKOUT → MAINTAIN ONE TRUSTED PRODUCT TRUTH → KEEP PUBLIC COPY CUSTOMER-SAFE → PROTECT THE OWNER-LOCKED HOMEPAGE → DEPLOY DELIBERATELY → RECORD EXACT LINEAGE.**
+
+It no longer creates a standing phase queue by itself.
 
 ## Control phrase
 
-**MANAGEMENT PRIORITIZES → MASTER DEVELOPER REPAIRS → MASTER RECON VERIFIES → COM 2 PRESERVES COMMERCE → PM4 ACCEPTS → CASEY RELEASES THE FREEZE.**
+**CURRENT ROUTING BEATS HISTORICAL PHASE TEXT → OPERATORS OPERATE → RECON VERIFIES ONLY WHEN TRIGGERED → DEV FIXES ONLY PROVEN CODE DEFECTS → MPM SEQUENCES → CASEY RETAINS OWNER GATES.**
