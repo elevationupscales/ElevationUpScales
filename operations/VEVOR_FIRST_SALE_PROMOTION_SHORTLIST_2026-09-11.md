@@ -49,6 +49,20 @@ Those tags are evidence of the previous verification pass, not a substitute for 
 
 Shopify `totalInventory=0` is not treated as proof that VEVOR is out of stock because supplier inventory is intentionally not represented as Elevation physical On Hand.
 
+## Protected Shopify cost-field check — 2026-09-11
+
+A live Shopify Admin GraphQL check was run against all 10 exact shortlist SKUs using the protected `InventoryItem.unitCost` field. All 10 returned `unitCost = null`.
+
+This is not evidence that supplier cost is zero. It means Shopify does not currently contain the protected supplier unit cost needed to clear contribution for these candidates.
+
+Therefore:
+
+- Shopify price, active status, media and product identity remain useful launch evidence;
+- Shopify alone cannot clear the profitability gate for any of the 10 shortlist SKUs;
+- no shortlist SKU is authorized for promotion from this check alone;
+- the next valid trigger is a protected current supplier-cost / landed-order-cost source, followed by the existing full contribution calculation;
+- public Git must record only the resulting `PROMOTE / HOLD` state, not protected supplier costs.
+
 ## Merchandising ranking rule
 
 The preliminary order above favors low purchase friction and strong brand fit. **It must be re-ranked after protected current supplier costs and order economics are known.**
