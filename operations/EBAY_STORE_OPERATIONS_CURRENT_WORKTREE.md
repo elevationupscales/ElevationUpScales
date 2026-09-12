@@ -1,7 +1,7 @@
 # Elevation UpScales — eBay Store Operations Current Worktree
 
 **Status:** ACTIVE WORKTREE / P0 PARALLEL CUSTOMER + CASH RECOVERY / PROFITABILITY CONTRACTION APPROVED  
-**Date:** 2026-09-11  
+**Date:** 2026-09-12  
 **Owner:** Casey Young  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
 **Reporting Manager:** Peter Torres — Ecommerce & Vendor Operations Manager  
@@ -14,7 +14,8 @@
 **Authenticated PM4 Delta:** `PM4_EBAY_AUTHENTICATED_RECOVERY_DELTA_2026-09-11.md`  
 **PM4 Specialist Handoffs:** `PM4_TO_EBAY_SPECIALIST_HANDOFF_2026-09-11.md`; `EBAY_PM4_TO_STORE_SPECIALIST_HANDOFF_2026-09-11.md`  
 **Profitability Decision:** `PM4_EBAY_PROFITABILITY_STREAMLINE_MANAGEMENT_DECISION_2026-09-11.md`  
-**Company Profitability Control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`
+**Company Profitability Control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
 ## Reconciliation note
 
@@ -72,8 +73,8 @@ PM4 accepted the profitability streamline and returned execution to this special
 
 1. Use **approximately 12 active revenue listings as a Phase 1 maximum, not a quota**. Fewer is acceptable.
 2. **30% pre-fee gross margin is the hard working minimum**; **35%+ preferred**.
-3. Final keep/list/scale authorization also requires **positive expected contribution after eBay fees, supplier shipping/freight, promoted-listing fees, discounts/credits and other variable order costs**.
-4. Promoted listings are **OFF BY DEFAULT**. An exact listing may be promoted only when the modeled ad rate is included and contribution remains positive.
+3. Final keep/list/scale authorization also requires **positive expected contribution after eBay fees, supplier shipping/freight, discounts/credits and other variable order costs**.
+4. **Promoted Listings and all paid marketplace acquisition are OFF under `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`.** No modeled ad-rate result authorizes spend. Paid acquisition stays blocked until the verified capital-recovery hole is closed and Casey explicitly reopens it.
 5. Preserve useful sales/watchers/history where a profitable rebuild is plausible; do not keep a failed configuration merely to preserve listing count.
 6. Customer obligations outrank catalog cleanup.
 7. Do not cancel a verified shipped/tracked order and do not duplicate tracking.
@@ -161,4 +162,4 @@ Phase 1 eBay recovery is complete when:
 
 ## Control phrase
 
-**CUSTOMER FIRST → CASH RELEASE → STOP NEW LOSSES → KEEP ONLY EXECUTABLE POSITIVE-CONTRIBUTION LISTINGS → PRESERVE USEFUL DEMAND HISTORY → SCALE AFTER ACTUAL PROFIT.**
+**CUSTOMER FIRST → CASH RELEASE → STOP NEW LOSSES → KEEP ONLY EXECUTABLE POSITIVE-CONTRIBUTION LISTINGS → NO PAID ACQUISITION UNTIL OWNER REOPENS → PRESERVE USEFUL DEMAND HISTORY → SCALE AFTER ACTUAL PROFIT.**
