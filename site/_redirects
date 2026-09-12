@@ -32,16 +32,16 @@
 /kingboss-batteries/ /kingboss-batteries 308
 /kingboss-batteries.html /kingboss-batteries 301
 
-# Marketplace retirement: route shoppers to active commerce surfaces.
+# Marketplace retirement: route shoppers to active commerce surfaces. Retired issue URLs route to the active help/contact surface.
 /marketplace /store 301
 /marketplace/ /store 301
 /marketplace.html /store 301
 /make-a-listing /store 301
 /make-a-listing/ /store 301
 /make-a-listing.html /store 301
-/report-an-issue /store 301
-/report-an-issue/ /store 301
-/report-an-issue.html /store 301
+/report-an-issue /other-ways-we-can-help 301
+/report-an-issue/ /other-ways-we-can-help 301
+/report-an-issue.html /other-ways-we-can-help 301
 # Preserve the retired RV seller intake contract; /rv-store then canonically consolidates into the universal RV department.
 /list-an-rv /rv-store 301
 /list-an-rv/ /rv-store 301
