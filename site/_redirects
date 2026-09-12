@@ -89,8 +89,10 @@
 /other-ways-we-can-help/ /other-ways-we-can-help 301
 /work-with-us/ /work-with-us 301
 /solar-project/ /solar-project 301
-/product.html /product 301
-/product/ /product 308
+# P0 customer-trust containment: legacy product-detail records fail closed to the curated store until provenance repair is complete.
+/product /store 302
+/product.html /store 302
+/product/ /store 302
 /home-project /start-a-project?type=home&source=legacy-route 302
 /home-project/ /start-a-project?type=home&source=legacy-route 302
 /home-project.html /start-a-project?type=home&source=legacy-route 302
