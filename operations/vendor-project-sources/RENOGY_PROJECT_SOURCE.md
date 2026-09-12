@@ -12,8 +12,11 @@
 **Accepted mapping evidence:** `../RENOGY_LOWER48_WARRANTY_AVAILABILITY_MAP_BATCH_01_2026-09-10.md`; `../RENOGY_LOWER48_WARRANTY_AVAILABILITY_MAP_BATCH_02_2026-09-10.md`  
 **Sales-First Scope:** `../RENOGY_SALES_FIRST_CATALOG_SCOPE_2026-09-10.md`  
 **Current Launch Batch:** `../RENOGY_CATALOG_LAUNCH_BATCH_01_2026-09-10.md`  
+**Supplier Source / Alias Recon:** `../RENOGY_SUPPLIER_SOURCE_INTAKE_AND_SKU_ALIAS_RECON_2026-09-11.md`  
+**Shopify Live Draft Verification:** `../RENOGY_SHOPIFY_DRAFT_LIVE_VERIFICATION_2026-09-11.md`  
+**Lower-48 Catalog / Hazmat Recon:** `../RENOGY_LOWER48_CATALOG_HAZMAT_SHOPIFY_RECON_2026-09-11.md`  
 **Universal Catalog Acceptance:** `../UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`  
-**Current Maturity:** **STAGE 1 — PROVING** for sales-led catalog integration, continuing exact-SKU mapping and first paid order
+**Current Maturity:** **STAGE 1 — PROVING** for sales-led catalog integration, exact-SKU activation and first paid order
 
 ## Purpose
 
@@ -38,24 +41,24 @@ Do not expose EIN, tax-license numbers, dealer pricing, raw inventory, portal cr
 | Onboarding field | Current state | Control / note |
 |---|---|---|
 | Supplier relationship | **VERIFIED / APPROVED DEALER PARTNER** | Application, owner review, W-9 correction, supplier review and approval are complete. |
-| Partner Portal | **VERIFIED / ACTIVE** | Renogy created Partner Portal access for `casey@elevationupscales.com`; credentials stay protected. |
+| Partner Portal | **VERIFIED / ACTIVE / AUTHENTICATED SESSION AVAILABLE** | Renogy Partner Portal access exists for the company account. Credentials stay protected. Current authenticated browser access is available for read-only SKU/orderability verification; do not expose credentials or account-private data. |
 | Dealer pricing | **AVAILABLE / PROTECTED** | Supplied through Partner Portal; never expose dealer cost publicly. |
 | Sales channel | **VERIFIED — ELEVATION DIRECT WEBSITE** | Renogy stated third-party ecommerce/marketplaces are not permitted under current dealer terms. |
 | Dropship | **VERIFIED / SUPPORTED** | Direct-to-customer dropshipping is supported. |
 | Lower-48 shipping | **VERIFIED SUPPLIER GUIDANCE** | Renogy stated free shipping within 48 contiguous states; do not infer Hawaii/Alaska/special freight. |
 | Opening order / MOQ | **VERIFIED — NO MINIMUM OPENING ORDER** | No speculative opening inventory gate. |
-| Product catalog/SKU source | **PARTIAL / SOURCE INTAKE OPEN** | Portal/package and requested structured source data remain the current intake lane. |
-| MAP / price-control source | **PARTIAL / MUST BE VERIFIED PER SKU** | Consolidated post-approval request is already sent; use portal/source package first and do not duplicate outreach. |
-| Inventory / availability source | **PARTIAL / SKU-LEVEL CONTROL DEFINED / BATCHES 01–02 ACCEPTED** | Public Renogy evidence confirms in-stock, preorder, backorder and ordinary unavailable states can coexist. Partner Portal/current supplier source controls actual dealer-order acceptance. |
-| Preorder/backorder | **VERIFIED AS SKU-SPECIFIC, NOT BLANKET** | Exact public paid-backorder examples now include `RSP100DCT-US` and `RBM500-US`. `backorder_allowed=true` only when the exact SKU is explicitly preorder/backorder supported by current Renogy evidence/order path. Generic zero stock is not enough. |
-| Approved media/spec/manuals | **PARTIAL / SOURCE INTAKE OPEN** | Use Renogy portal/package/current approved sources before requesting duplicate material. |
-| Fulfillment/tracking instructions | **PARTIAL / DROPSHIP VERIFIED, DETAIL INTAKE OPEN** | Exact order/tracking handoff still needs first-order operating proof. |
+| Product catalog/SKU source | **VERIFIED CURRENT SUPPLIER WORKBOOK RECEIVED / PUBLIC PROSPECT UNIVERSE ALSO RECONCILED** | Renogy supplied a current product/item workbook with item number, description, public price-reference fields and UPC where available. Public Lower-48 recon also established a 188-product prospect universe for later expansion. Neither source is blanket publication authority. |
+| MAP / price-control source | **PROTECTED / MUST BE VERIFIED PER SKU BEFORE ACTIVATION** | Renogy supplied current public-price-reference guidance; protected dealer/MAP controls remain private and controlling where applicable. Public retail reference does not replace protected MAP verification. |
+| Inventory / availability source | **VERIFIED SOURCE PATH / EXACT SKU CHECK REQUIRED** | Partner Portal is the current dealer inventory/orderability source; exact quantity may also be confirmed with Renogy. Shopify zero on-hand inventory is not supplier inventory and is not backorder authorization. |
+| Preorder/backorder | **VERIFIED AS SKU-SPECIFIC, NOT BLANKET** | Exact public paid-backorder examples include `RSP100DCT-US` and `RBM500-US`. `backorder_allowed=true` only when the exact SKU is explicitly preorder/backorder supported by current Renogy evidence/order path. Generic zero stock is not enough. |
+| Approved media/spec/manuals | **VERIFIED APPROVED SOURCE RECEIVED / PER-SKU ATTACHMENT OPEN** | Renogy supplied the main Marketing Toolkit plus current product/spec source guidance. Product-by-product media selection and exact identity attachment remain activation tasks. |
+| Fulfillment/tracking instructions | **CORE DROPSHIP FLOW VERIFIED / FIRST-ORDER PROOF OPEN** | Customer order → exact SKU/price/sellability verification → Renogy order → customer recipient data → Renogy shipment → tracking through primary account/Partner Portal → Elevation customer update. Ordinary lead-time guidance is planning guidance, not a guarantee. |
 | Warranty/RMA | **CORE PROGRAM LOCKED / SKU-SPECIFIC MAPPING ACTIVE** | Batches 01–02 contain accepted exact-SKU warranty evidence. Claims route through Renogy Technical Support/Warranty authorization. Exact warranty duration/terms must be mapped to the exact SKU; Elevation supports the claim but does not self-authorize Renogy remedies. |
 | Returns | **VERIFIED CORE RULE / DEALER PROCESS STILL DISTINCT** | Renogy stated a 30-day return baseline; dealer/Elevation customer handling must not simply copy Renogy direct-retail promises where account/product exceptions apply. |
 | Tax/resale treatment | **AVAILABLE / ACCOUNT REVIEW CONTROL** | Reseller certificate may be uploaded through Partner Portal; treatment follows Renogy review/approval. |
 | Commercial/project pricing | **AVAILABLE BY APPROVAL** | May be submitted based on volume/project requirements; not required for ordinary ecommerce. |
-| Account/catalog contacts | **PARTIAL / REQUESTED** | Use Partner Portal/current thread; do not duplicate request if active. |
-| Live Elevation Shopify Renogy catalog | **ZERO PRODUCTS AT SALES-FIRST RECON** | Connected Elevation Shopify search returned no Renogy products, accepted Renogy SKUs or Renogy collection. This is the current sales activation gap. |
+| Account/catalog contacts | **VERIFIED — SALES SUPPORT PRIMARY** | Use the current Sales Support / Partner Portal route. Do not duplicate already-answered source requests. |
+| Live Elevation Shopify Renogy catalog | **FIVE PRODUCTS STAGED AS DRAFT / ZERO ACTIVE** | Live Shopify verification found exactly five Renogy DRAFT products and zero accidental activations. Preserve these records; do not recreate them. |
 | First-order proof | **NOT YET COMPLETE** | Required for Stage 2 repeatable active vendor commerce. |
 
 ## Existing technical preparation
@@ -67,24 +70,32 @@ Do not expose EIN, tax-license numbers, dealer pricing, raw inventory, portal cr
 - **Batch 02 is ACCEPTED** for DC-DC charger, inverter/inverter-charger and monitoring evidence. It adds `RBM500-US` as a second exact public paid-backorder example.
 - Batch 02 establishes a true narrow warranty-source conflict for `RIV4835CSH1S`: the current product page and current master warranty table disagree. Customer-facing warranty duration for that SKU remains `WARRANTY_CONFLICT_HOLD` until the authoritative current Renogy source is reconciled.
 - Several storefront `-US` variants remain exact-suffix holds where the warranty table uses an unsuffixed SKU. Do not silently collapse identities.
+- Renogy Sales Support supplied a current item workbook, Marketing Toolkit and operating answers for availability, dropship, tracking, warranty/returns and support routing.
+- Public Lower-48 recon established a **188-product prospect universe** and a lithium/hazmat intake schema. This is expansion evidence, not blanket sellability/MAP approval.
+- Five Shopify Renogy records already exist as DRAFT and are live-verified as contained. Do not recreate them.
+- Current staged-wave supplier-item reconciliation:
+  - `RSP100DCT-US` → `RSP100DCT-G1-US` — unique public-alias to supplier-item mapping; activation QA may continue.
+  - `RBM500-US` → `RBM500-G3-US` — unique public-alias to supplier-item mapping; activation QA may continue with bounded warranty language.
+  - `RBC2125DS-21W-US` → `RBC2125DS-21W-G3-US` — identity mapping established; hold only current dealer orderability/delayed-order authority.
+  - `RNG-INVT-2000-12V-P2-US` — supplier workbook contains multiple generation-coded candidates; hold only exact current generation/order-source identity.
+  - `RNG-CTRL-RVR40` — current supplier workbook exposes a Bluetooth generation-coded Rover 40A item rather than a clean match to the staged non-Bluetooth identity; hold only exact current variant identity.
 - Accepted mapping evidence does **not** auto-approve a product, auto-enable checkout, fabricate MAP/inventory/media, or make every unavailable SKU backorderable.
 - No third-party marketplace permission was added.
 
 ## Sales-first launch direction
 
-The project is no longer allowed to stop at research/mapping while no Renogy products are live.
+The project is no longer allowed to stop at research/mapping while no Renogy products are active.
 
 Current launch priorities are defined in `RENOGY_SALES_FIRST_CATALOG_SCOPE_2026-09-10.md` and `RENOGY_CATALOG_LAUNCH_BATCH_01_2026-09-10.md`.
 
 Initial merchandising focus:
 
 1. `RSP100DCT-US` — 100W N-Type bifacial panel;
-2. `RNG-CTRL-RVR40` — Rover Li 40A MPPT controller;
-3. `RBM500-US` — 500A battery monitor;
-4. current 30A/50A DC-DC charger with MPPT family;
-5. P2 12V pure-sine inverter family;
-6. ShadowFlux N-Type anti-shading panel family;
-7. supporting monitoring/BOS products after the feature products.
+2. `RBM500-US` — 500A battery monitor;
+3. `RBC2125DS-21W-US` — 50A IP67 DC-DC charger with MPPT once current orderability is verified;
+4. current Rover 40A controller variant after exact current identity is resolved;
+5. current P2 2000W inverter generation after exact supplier order-source identity is resolved;
+6. ShadowFlux / N-Type panels and supporting monitoring/BOS for later waves.
 
 Renogy batteries remain secondary to SOK unless a defined product/capacity/commercial/logistics gap exists.
 
@@ -134,30 +145,36 @@ A missing MAP/media/portal/warranty fact for one SKU does not put the Renogy pro
 
 Continue:
 
-- next prioritized exact-SKU mapping;
+- exact-SKU public-alias → supplier-item mapping;
 - launch candidate research;
 - customer-ready listing drafting using verified facts;
 - category/tag/SEO staging;
 - compatibility/comparison structure;
 - cross-sell/system mapping;
-- approved-media classification;
+- approved-media classification and product-by-product attachment;
 - clearly non-public Shopify draft preparation where safe;
 - universal-catalog field mapping and integration QA;
 - public-search/discoverability preparation without unauthorized design/copy changes;
-- another SKU whose publication set can be cleared independently.
+- another SKU whose publication set can be cleared independently;
+- lithium transport-document reconciliation in parallel without blocking clean non-lithium Lower-48 products.
 
 ## Remaining activation work
 
-1. Clear current MAP/customer price, dealer sellability and approved-media gates for Tier A launch candidates.
-2. Build/stage Tier A customer-ready listings while those exact activation facts are verified.
-3. Continue Tier B exact-SKU mapping: current DC-DC MPPT family, larger P2 inverters, ShadowFlux/N-Type panels and supporting monitoring/BOS.
-4. Normalize clean launch SKUs into the universal catalog.
-5. Activate each product individually when its minimum safe publication set clears; do not wait for the whole Renogy catalog.
-6. Verify universal store search/filter/product/cart/checkout behavior under `UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`.
-7. Verify intended public Renogy catalog/product discoverability as live routes become available.
-8. Complete the first real paid order through Renogy purchase → acceptance → tracking → delivery.
-9. Use product views, cart/checkout activity, sales, contribution and support friction to prioritize later catalog waves.
-10. Record source-refresh, warranty and returns operation so the lane becomes repeatable.
+1. Preserve the five existing Shopify DRAFT records; do not recreate them.
+2. Advance `RSP100DCT-US` and `RBM500-US` through final exact-media / current-price / current-sellability activation QA independently.
+3. Use the authenticated Partner Portal read-only path to resolve:
+   - `RBC2125DS-21W-US` current dealer orderability / delayed-order authority;
+   - `RNG-INVT-2000-12V-P2-US` exact current generation/order-source identity;
+   - `RNG-CTRL-RVR40` exact current variant identity.
+4. Attach exact approved Renogy media to each clean staged listing.
+5. Recheck current customer-facing price/MAP control and exact availability immediately before activation.
+6. Activate each clean product individually; do not wait for all five or the whole Renogy catalog.
+7. Continue Tier B exact-SKU mapping from the 188-product prospect universe: current DC-DC/MPPT family, larger P2 inverters, ShadowFlux/N-Type panels and supporting monitoring/BOS.
+8. Normalize clean launch SKUs into the universal catalog and verify search/filter/product/cart/checkout behavior under `UNIVERSAL_CATALOG_VENDOR_INTEGRATION_ACCEPTANCE_BASELINE_2026-09-10.md`.
+9. Verify intended public Renogy catalog/product discoverability as live routes become available.
+10. Complete the first real paid order through Renogy purchase → acceptance → tracking → delivery.
+11. Use product views, cart/checkout activity, sales, contribution and support friction to prioritize later catalog waves.
+12. Record source-refresh, warranty and returns operation so the lane becomes repeatable.
 
 ## Real gates
 
@@ -184,9 +201,9 @@ Use the existing Elevation universal-catalog/store presentation. Product listing
 
 ## Next action
 
-**CLEAR TIER A ACTIVATION FACTS → BUILD/STAGE CUSTOMER-READY TIER A LISTINGS → ACTIVATE EACH CLEAN SKU → CONTINUE TIER B RECON IN PARALLEL → UNIVERSAL-CATALOG QA → FIRST REAL ORDER PROOF → EXPAND FROM SALES DATA**
+**AUTHENTICATED PORTAL CHECK FOR THREE EXACT HOLDS → FINAL QA TWO CLEANER DRAFTS → ATTACH EXACT APPROVED MEDIA → REFRESH PRICE/AVAILABILITY → ACTIVATE EACH CLEAN SKU → UNIVERSAL-CATALOG QA → FIRST REAL ORDER PROOF → EXPAND FROM SALES DATA**
 
-Batches 01–02 are complete evidence. Do not recreate them without contradictory current supplier evidence.
+Batches 01–02 are complete evidence. The supplier workbook/toolkit, alias recon and live Shopify draft verification are newer accepted state. Do not recreate completed source intake or five staged Shopify records without contradictory current supplier evidence.
 
 ## Close condition for active repeatable vendor onboarding
 
