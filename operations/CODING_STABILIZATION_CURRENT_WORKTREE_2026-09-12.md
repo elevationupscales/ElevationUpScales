@@ -1,26 +1,45 @@
 # ELEVATION UPSCALES — CODING STABILIZATION CURRENT WORKTREE
 
 **Date:** 2026-09-12
-**State:** ACTIVE / P0 TECHNICAL RECOVERY
+**State:** ACTIVE / P0 TECHNICAL RECOVERY / MANAGEMENT PLAN INSTALLED
 **Reports To:** PM4 / MPM
 **Execution Owner:** MASTER DEVELOPER
 **Integrity Oversight:** MASTER RECON OS
+**Commercial Continuity:** Company Operations Manager / COM 2
 **Controlling Owner Directive:** `OWNER_DIRECTIVE_CODING_STABILIZATION_2026-09-12.md`
 **Companion Trust Control:** `OWNER_DIRECTIVE_PUBLIC_COPY_FIREWALL_2026-09-12.md`
+**Management Repair Plan:** `MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md`
 
-## Verified start state
+## Accepted production / recovery baseline
 
-- Production deployment branch: `production-deploy`.
-- Emergency customer-trust hotfix line exists independently from current `main`.
-- `main` and `production-deploy` are diverged from merge base `c4126b819d2ddcd9b61ade955528b74cec24a161`.
-- Latest verified comparison during this RUN: `main` has **120 unique commits** beyond the production branch lineage while `production-deploy` has **4 unique commits** not present on `main`.
-- `production-deploy` head: `780247289c304a5f7150cc5addc5e53c7003055f`.
-- Canonical `https://elevationupscales.com/store` currently renders the same old storefront copy present in `production-deploy` at `780247...`, including the same internal-language defects. This is strong current evidence that `780247...` is the active recovery lineage; deployment receipt/run evidence is still required before calling it the final accepted baseline.
-- Therefore **NO BULK MERGE / NO BLIND FAST-FORWARD / NO FORCE UPDATE** is allowed.
+**ACCEPTED SHA:** `89912be657d7e92c3582619005c0a110ad843577`
 
-## Current incident
+Verified production proof:
 
-GitHub issue `#65` — **P0: Customer trust incident — quarantine legacy catalog presentation** — remains OPEN until live acceptance criteria pass.
+- GitHub Actions run `34709944113` / run #49: SUCCESS;
+- canonical production QA: PASS;
+- secret / oversized-artifact gate: PASS;
+- Cloudflare deployment: PASS;
+- deployed-application smoke: PASS;
+- canonical-domain smoke: PASS;
+- deployment receipt: PASS;
+- independent live verification confirmed legacy generic catalog APIs fail closed, dedicated SOK catalog remains live, SOK Details use trusted `/sok/...` routes, customer-safe availability copy is live, and SOK SK12V100PC checkout remains purchase-ready at $319 without submitting payment.
+
+The earlier `780247...` recovery pointer is historical evidence only and must not be treated as the current accepted baseline.
+
+## Lineage condition
+
+`main` and the production recovery lineage remain diverged.
+
+Therefore:
+
+**NO BULK MERGE / NO WHOLESALE MAIN DEPLOY / NO BLIND FAST-FORWARD / NO FORCE UPDATE.**
+
+`main` is an evidence/input pool until each production-affecting delta is classified and deliberately admitted through the recovery plan.
+
+## Incident
+
+GitHub issue `#65` — **P0: Website coding/deployment stabilization — customer trust + production lineage** — remains OPEN.
 
 Known failure classes:
 
@@ -28,130 +47,202 @@ Known failure classes:
 2. unrelated retailer/marketplace image provenance;
 3. raw/incomplete customer copy;
 4. inconsistent truth across catalog/API/browser paths;
-5. product-detail path capable of bypassing catalog curation;
+5. product-detail paths capable of bypassing catalog curation;
 6. stale browser asset cache after emergency JS changes;
-7. operations/public-copy contamination discovered during incident review;
-8. commerce JavaScript rewriting owner-protected homepage copy/CTA at runtime.
+7. operations/public-copy contamination;
+8. commerce JavaScript rewriting owner-protected homepage output;
+9. development and deployment lineages diverging without a controlled convergence step;
+10. preview/deployment assumptions capable of testing the wrong source branch.
 
-## Phase 0 — containment
+## Phase A — containment and verified baseline
 
-**State: IN PROGRESS**
+**State: COMPLETE / VERIFIED**
 
-Completed/started:
+Completed:
 
-- trust-risk customer discovery filter added to store renderer;
-- trust-risk homepage featured-card filter added;
-- legacy `/product` detail route temporarily fails closed to `/store`;
-- emergency production deployment completed for first containment set;
-- store script cache version bumped on `production-deploy` to force new trust renderer;
-- follow-up controlled deploy triggered;
-- public-copy owner firewall established;
-- on `main`, `home-commerce.js` no longer rewrites the protected homepage hero lead or primary CTA;
-- on `main`, Store customer copy was rewritten from internal implementation language to normal retail language;
-- on `main`, Store renderer still keeps trust filtering but no longer tells customers about hidden/quarantined/trust-review records.
+- customer-trust discovery filter deployed;
+- blocked-media defense remains in customer renderers;
+- three legacy generic public catalog endpoints fail closed at the route boundary;
+- dedicated SOK catalog remains available;
+- stale SOK Details loop repaired to trusted `/sok/...` product routes;
+- SOK purchase paths preserve exact API-provided CTA/purchase routing;
+- customer availability wording cleaned;
+- store renderer cache version bumped so returning customers receive the repaired code;
+- SOK direct checkout live-verified healthy;
+- P0 containment regression tests wired into canonical `npm test`;
+- stale legacy regression wording corrected;
+- accepted production SHA pinned at `89912be...`.
 
-Do not close Phase 0 merely because `main` is cleaner. The recovery changes must be classified and deliberately ported to the recovery lineage, then previewed/deployed/verified.
+Do not replay Phase A unless current live evidence shows a regression.
 
-## Phase 1 — establish recovery baseline
+## Phase B — production ↔ `main` delta ledger
 
-Current evidence supports `production-deploy` head `780247289c304a5f7150cc5addc5e53c7003055f` as the working recovery anchor because canonical `/store` matches that branch's storefront source.
+**State: NEXT / P0**
 
-Next:
+MASTER DEVELOPER must build a production-affecting file ledger from accepted production `89912be...` against current `main`.
 
-1. obtain/confirm the successful deployment run or equivalent deployment receipt for `780247...`;
-2. pin the verified production SHA as accepted recovery baseline;
-3. create/use a dedicated recovery branch from that exact SHA;
-4. do not move production for ordinary feature work;
-5. inventory public customer surfaces from the recovery baseline:
-   - `/`
-   - `/store`
-   - `/product` / legacy product URLs
-   - `/checkout`
-   - SOK storefront
-   - Kingboss storefront
-   - public catalog APIs
-   - featured-product API
-   - Shopify direct purchase links where intentionally external;
-6. identify which surface owns product truth and which are legacy/duplicate consumers.
+Every divergence is classified:
 
-## Phase 2 — reconcile `main` safely
+- **OPERATIONS ONLY** — docs/receipts/worktrees; no customer runtime effect;
+- **REQUIRED RECOVERY** — trust, checkout, product truth, protected-top, deployment or regression safety;
+- **BUSINESS-VALID / DEFERRED** — legitimate future feature/vendor work held by the freeze;
+- **REJECT / RETIRE** — stale, duplicate, superseded or unsafe implementation.
 
-Classify the divergent `main` work into four buckets:
+Priority order:
 
-- **OPERATIONS ONLY** — docs/receipts/worktrees; no production code effect;
-- **REQUIRED RECOVERY** — trust, checkout, catalog truth, deployment, tests;
-- **BUSINESS-VALID BUT DEFERRED** — legitimate future feature/vendor work held by stabilization freeze;
-- **REJECT / RETIRE** — stale, duplicate, superseded or trust-risk code.
+1. Cloudflare/worker/routes/deployment workflow;
+2. public catalog/API/product-detail code;
+3. checkout/payment/order-persistence code;
+4. homepage/shared customer runtime;
+5. Store/catalog renderers and asset versions;
+6. admin/internal runtime;
+7. operations-only changes.
 
-Port only REQUIRED RECOVERY changes onto the recovery branch after inspection.
+No commit is admitted because it is newer.
 
-No commit count or recency makes a change deployable by itself.
+## Phase C — one authoritative public commerce contract
 
-## Phase 3 — server-side retail contract
+**State: OPEN / P0**
 
-Build one customer-public eligibility gate shared by public product feeds and page consumers.
+Build/reconcile one public eligibility contract that can determine:
 
-Minimum public eligibility:
-
-- verified product identity;
-- approved title/description presentation;
+- verified product identity / exact SKU;
+- vendor/supplier ownership;
+- customer-safe title/description;
 - approved media provenance;
-- positive/current sell price or explicit purchase-options state;
-- explicit publish state;
-- known supplier/vendor ownership;
-- orderability/availability state;
+- publish state;
+- current customer price or explicit purchase-options state;
+- availability/orderability;
 - checkout eligibility;
-- fulfillment route.
+- fulfillment owner/path;
+- destination/shipping limitations;
+- trusted detail route.
 
-Unsafe/unknown records must fail closed before public API response whenever possible.
+Trust-critical unknowns fail closed before public response whenever technically appropriate.
 
-Client-side filtering remains secondary defense only.
+Client-side filtering remains defense in depth only.
 
-## Phase 4 — regression guard
+## Phase D — route / detail / checkout reconciliation
 
-**State: PARTIAL / ACTIVE**
+**State: OPEN / P0**
 
-Now present on `main`:
+Verify and deliberately map:
 
-- `tests/public-copy-firewall.test.mjs` — blocks high-signal internal OS/developer terms from customer-facing HTML/public renderers;
-- `tests/homepage-protected-top.test.mjs` — asserts protected hero copy/CTA stay authored in `index.html` and are not rewritten by `home-commerce.js`;
-- both tests are wired into normal `npm test`.
+- `/store`;
+- supplier storefronts;
+- trusted product detail routes;
+- legacy product URLs;
+- direct checkout URLs;
+- custom PayPal checkout paths;
+- intentional Shopify purchase paths;
+- order-persistence hooks;
+- purchase-options/backorder routes.
 
-Still required before stabilization closes:
+No customer route may bypass the public eligibility contract.
 
-- blocked third-party retailer media domains;
-- empty/garbage/raw-feed titles on public cards;
-- unpublished/hold products leaking as Buy Now;
-- public API rows bypassing retail eligibility;
-- stale `/product` links exposing unsafe rows;
-- broken checkout routes;
-- supplier attribution mismatch;
-- JS/CSS asset version not changing when critical customer-facing code changes;
-- canonical production smoke tied to exact deployed SHA.
+Working checkout is protected from unrelated refactors. Smoke tests do not submit payment.
 
-## Phase 5 — controlled convergence
+## Phase E — customer copy / protected homepage firewall
 
-Only after recovery passes:
+**State: OPEN / P0**
 
-1. choose the surviving canonical development branch/lineage;
-2. merge/rebase reconciled recovery truth deliberately;
-3. archive/retire obsolete deployment assumptions;
-4. verify canonical production SHA is traceable to approved source;
-5. update Work Board / Registry with the accepted baseline;
-6. request Casey release the feature freeze.
+Reconcile only reviewed protections required to ensure:
+
+- internal AI/OS/dev/operations language does not leak publicly;
+- customer trust controls operate silently;
+- protected homepage top copy, CTA, imagery, product bindings, layout and runtime output cannot be rewritten indirectly by commerce/shared code;
+- Casey's newest homepage lock remains controlling authority.
+
+## Phase F — release-system repair
+
+**State: OPEN / P0**
+
+Required release controls:
+
+- exact source SHA captured before QA;
+- recovery candidate preview/test does not implicitly substitute unrelated `main`;
+- production mutates only from explicit accepted candidate;
+- QA failure blocks deployment;
+- customer-critical JS/CSS cache/version changes are enforced where applicable;
+- deployed-app smoke runs;
+- canonical-domain smoke runs;
+- receipt records source SHA and result;
+- rollback target is known before production mutation.
+
+## Phase G — controlled convergence
+
+**State: HOLD UNTIL B–F PASS**
+
+After recovery gates pass:
+
+1. choose surviving canonical development lineage;
+2. deliberately port/merge accepted recovery truth;
+3. retire obsolete duplicate route/catalog/deployment assumptions;
+4. prove chosen development lineage reproduces accepted production state;
+5. update Current Work Board / Worker Registry / issue state;
+6. MASTER RECON performs final drift sweep;
+7. PM4 returns freeze-release recommendation;
+8. Casey explicitly releases or modifies the freeze.
+
+## Management boundary
+
+### PM4 / MPM
+
+Owns recovery sequence, priority, acceptance gates and freeze-release recommendation.
+
+### MASTER DEVELOPER
+
+Owns technical implementation on the recovery lineage, one root cause at a time.
+
+### MASTER RECON OS
+
+Owns lineage/drift/replay verification and management-state integrity. It does not become a second developer.
+
+### COM 2
+
+Continues customer/order/cash/profitable-sales work and routes exact revenue-critical technical blockers only. It does not create redesign/cosmetic/feature work during the freeze and does not create a parallel developer worktree.
+
+### Vendor / channel managers
+
+Continue exact product/economics/fulfillment/source work without independent website mutations during P0.
+
+## Change admission rule
+
+Every website change is classified before coding:
+
+- **P0 REPAIR** → recovery lane;
+- **CUSTOMER / ORDER EMERGENCY** → recovery lane immediately;
+- **VERIFIED REVENUE BLOCKER** → PM4 routes through recovery;
+- **FEATURE / COSMETIC / NICE-TO-HAVE** → HOLD;
+- **PROTECTED TOP CHANGE** → HOLD + route exact delta to Casey;
+- **UNCLEAR** → HOLD only that change; continue other repairs.
 
 ## RUN loop
 
-**GIT FIRST → VERIFY PRODUCTION SHA → VERIFY ISSUE #65 → LIVE CUSTOMER SURFACE → FIX ONE ROOT CAUSE → QA → CONTROLLED DEPLOY → LIVE VERIFY → RECORD → NEXT ROOT CAUSE.**
-
-Do not substitute planning for executable repairs. Do not allow one blocked repair to stop unrelated P0 stabilization work.
+**GIT FIRST → VERIFY ACCEPTED PRODUCTION SHA → VERIFY ISSUE #65 / MANAGEMENT PLAN → PICK HIGHEST-RISK OPEN ROOT CAUSE → FIX ON RECOVERY LINEAGE → QA → CONTROLLED DEPLOY IF REQUIRED → CANONICAL VERIFY → RECORD → NEXT ROOT CAUSE.**
 
 ## Current next action
 
-1. Confirm deployment receipt/run evidence for `780247...` and pin the recovery baseline.
-2. Create/use the recovery branch from that baseline.
-3. Build the production-vs-`main` delta ledger, prioritizing customer-visible runtime files over operations-only commits.
-4. Port only REQUIRED RECOVERY changes: public-copy firewall, protected-top runtime fix, trust/API fixes and associated tests.
-5. Preview and smoke canonical customer paths before any production mutation.
+1. MASTER DEVELOPER: produce Phase B production-vs-`main` delta ledger from accepted production `89912be...`.
+2. MASTER RECON: verify all management/current-worktree pointers have advanced from historical `780247...` to accepted `89912be...` where they claim current production truth.
+3. PM4: suppress nonessential website feature routing into MASTER DEVELOPER while the freeze is active.
+4. COM 2: preserve active commerce/order/cash work; return only exact technical revenue blockers.
+5. After ledger, execute the highest-risk **REQUIRED RECOVERY** item and continue the RUN loop.
 
-**STATUS:** ACTIVE / P0 / FEATURE FREEZE IN FORCE / NO WHOLESALE MAIN DEPLOY.
+## Feature-freeze release gates
+
+Freeze remains active until:
+
+1. accepted production SHA is traceable/reproducible;
+2. production-vs-`main` production-affecting delta ledger is complete;
+3. one public product/source eligibility contract controls customer truth;
+4. unsafe legacy bypasses are retired/mapped;
+5. checkout/payment/order persistence paths pass regression checks;
+6. public copy + protected-top guards pass;
+7. branch-aware preview/deployment path is proven;
+8. canonical smoke + exact-SHA receipt are routine;
+9. MASTER RECON reports no unresolved P0 drift;
+10. PM4 recommends release;
+11. Casey explicitly releases the freeze.
+
+**STATUS:** ACTIVE / P0 / FEATURE FREEZE IN FORCE / ACCEPTED PRODUCTION `89912be...` / PHASE B NEXT.
