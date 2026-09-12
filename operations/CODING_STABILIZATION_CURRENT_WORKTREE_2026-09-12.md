@@ -6,13 +6,16 @@
 **Execution Owner:** MASTER DEVELOPER
 **Integrity Oversight:** MASTER RECON OS
 **Controlling Owner Directive:** `OWNER_DIRECTIVE_CODING_STABILIZATION_2026-09-12.md`
+**Companion Trust Control:** `OWNER_DIRECTIVE_PUBLIC_COPY_FIREWALL_2026-09-12.md`
 
 ## Verified start state
 
 - Production deployment branch: `production-deploy`.
 - Emergency customer-trust hotfix line exists independently from current `main`.
-- Current branch comparison at stabilization start: `main` and `production-deploy` are diverged from merge base `c4126b819d2ddcd9b61ade955528b74cec24a161`.
-- More than 100 `main` commits exist beyond the common base; production contains emergency hotfix commits that are not on `main`.
+- `main` and `production-deploy` are diverged from merge base `c4126b819d2ddcd9b61ade955528b74cec24a161`.
+- Latest verified comparison during this RUN: `main` has **120 unique commits** beyond the production branch lineage while `production-deploy` has **4 unique commits** not present on `main`.
+- `production-deploy` head: `780247289c304a5f7150cc5addc5e53c7003055f`.
+- Canonical `https://elevationupscales.com/store` currently renders the same old storefront copy present in `production-deploy` at `780247...`, including the same internal-language defects. This is strong current evidence that `780247...` is the active recovery lineage; deployment receipt/run evidence is still required before calling it the final accepted baseline.
 - Therefore **NO BULK MERGE / NO BLIND FAST-FORWARD / NO FORCE UPDATE** is allowed.
 
 ## Current incident
@@ -27,7 +30,8 @@ Known failure classes:
 4. inconsistent truth across catalog/API/browser paths;
 5. product-detail path capable of bypassing catalog curation;
 6. stale browser asset cache after emergency JS changes;
-7. operations/public-copy contamination discovered during incident review.
+7. operations/public-copy contamination discovered during incident review;
+8. commerce JavaScript rewriting owner-protected homepage copy/CTA at runtime.
 
 ## Phase 0 — containment
 
@@ -40,18 +44,25 @@ Completed/started:
 - legacy `/product` detail route temporarily fails closed to `/store`;
 - emergency production deployment completed for first containment set;
 - store script cache version bumped on `production-deploy` to force new trust renderer;
-- follow-up controlled deploy triggered.
+- follow-up controlled deploy triggered;
+- public-copy owner firewall established;
+- on `main`, `home-commerce.js` no longer rewrites the protected homepage hero lead or primary CTA;
+- on `main`, Store customer copy was rewritten from internal implementation language to normal retail language;
+- on `main`, Store renderer still keeps trust filtering but no longer tells customers about hidden/quarantined/trust-review records.
 
-Do not close Phase 0 until the cache-bust deployment succeeds and live canonical `/store` no longer exposes blocked retailer-image records.
+Do not close Phase 0 merely because `main` is cleaner. The recovery changes must be classified and deliberately ported to the recovery lineage, then previewed/deployed/verified.
 
 ## Phase 1 — establish recovery baseline
 
-After Phase 0 passes:
+Current evidence supports `production-deploy` head `780247289c304a5f7150cc5addc5e53c7003055f` as the working recovery anchor because canonical `/store` matches that branch's storefront source.
 
-1. pin the successful `production-deploy` SHA as the accepted recovery baseline;
-2. create/use a dedicated recovery branch from that exact SHA;
-3. do not move production for ordinary feature work;
-4. inventory public customer surfaces from the recovery baseline:
+Next:
+
+1. obtain/confirm the successful deployment run or equivalent deployment receipt for `780247...`;
+2. pin the verified production SHA as accepted recovery baseline;
+3. create/use a dedicated recovery branch from that exact SHA;
+4. do not move production for ordinary feature work;
+5. inventory public customer surfaces from the recovery baseline:
    - `/`
    - `/store`
    - `/product` / legacy product URLs
@@ -61,7 +72,7 @@ After Phase 0 passes:
    - public catalog APIs
    - featured-product API
    - Shopify direct purchase links where intentionally external;
-5. identify which surface owns product truth and which are legacy/duplicate consumers.
+6. identify which surface owns product truth and which are legacy/duplicate consumers.
 
 ## Phase 2 — reconcile `main` safely
 
@@ -98,17 +109,25 @@ Client-side filtering remains secondary defense only.
 
 ## Phase 4 — regression guard
 
-Add tests that fail production candidates for:
+**State: PARTIAL / ACTIVE**
+
+Now present on `main`:
+
+- `tests/public-copy-firewall.test.mjs` — blocks high-signal internal OS/developer terms from customer-facing HTML/public renderers;
+- `tests/homepage-protected-top.test.mjs` — asserts protected hero copy/CTA stay authored in `index.html` and are not rewritten by `home-commerce.js`;
+- both tests are wired into normal `npm test`.
+
+Still required before stabilization closes:
 
 - blocked third-party retailer media domains;
 - empty/garbage/raw-feed titles on public cards;
 - unpublished/hold products leaking as Buy Now;
 - public API rows bypassing retail eligibility;
-- stale `/product` links exposing quarantined rows;
+- stale `/product` links exposing unsafe rows;
 - broken checkout routes;
 - supplier attribution mismatch;
 - JS/CSS asset version not changing when critical customer-facing code changes;
-- protected homepage top output changing outside owner authorization.
+- canonical production smoke tied to exact deployed SHA.
 
 ## Phase 5 — controlled convergence
 
@@ -129,9 +148,10 @@ Do not substitute planning for executable repairs. Do not allow one blocked repa
 
 ## Current next action
 
-1. Wait only for the already-running cache-bust deployment result.
-2. Live-verify `/store` against the specific blocked image hosts and raw-feed leakage.
-3. If containment passes, pin that production SHA and create recovery branch.
-4. Begin code-path inventory and classify divergent production-affecting `main` files.
+1. Confirm deployment receipt/run evidence for `780247...` and pin the recovery baseline.
+2. Create/use the recovery branch from that baseline.
+3. Build the production-vs-`main` delta ledger, prioritizing customer-visible runtime files over operations-only commits.
+4. Port only REQUIRED RECOVERY changes: public-copy firewall, protected-top runtime fix, trust/API fixes and associated tests.
+5. Preview and smoke canonical customer paths before any production mutation.
 
-**STATUS:** ACTIVE / P0 / FEATURE FREEZE IN FORCE.
+**STATUS:** ACTIVE / P0 / FEATURE FREEZE IN FORCE / NO WHOLESALE MAIN DEPLOY.
