@@ -14,11 +14,11 @@ A GOD MODE activation routes established workers into their verified existing Wo
 
 ## Active owner operating standard
 
-Until the first verified Elevation website order paid through PayPal, all workers and managers must apply `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md`.
+Until the first verified Elevation website order paid through PayPal, all workers and managers must apply `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md` together with newer owner overrides.
 
-**Direct Elevation website revenue/readiness and vendor activation lead startup priority. Non-Elevation-website marketplace/customer issues such as eBay/TikTok remain lower-priority parallel work unless a real safety, security, legal, fraud, chargeback, account-suspension or comparable financial-risk exception exists. Block only the affected item/lane and keep unrelated executable Worktrees moving.**
+**Direct Elevation website revenue/readiness and vendor activation remain P0. `EBAY_PARALLEL_REVENUE_RECOVERY_DIRECTIVE_2026-09-11.md` now explicitly elevates eBay customer recovery + profitable marketplace overhaul to P0 PARALLEL. Other non-Elevation-website marketplace/customer issues such as routine TikTok work remain lower-priority parallel work unless a real safety, security, legal, fraud, chargeback, account-suspension or comparable financial-risk exception exists. Block only the affected item/lane and keep unrelated executable Worktrees moving.**
 
-When the first website PayPal order is verified, Hybrid Management records the trigger, retires the temporary standard, and reconciles normal order-priority handling under the Master S.O.P.
+When the first website PayPal order is verified, Hybrid Management records the trigger, retires the temporary startup standard and reconciles normal order-priority handling under the Master S.O.P.; the eBay profitability lane remains active unless separately superseded.
 
 ## Mandatory fields
 
@@ -29,8 +29,9 @@ When the first website PayPal order is verified, Hybrid Management records the t
 | Company Operations Manager | Company Operations | MPM | Operations | ACTIVE | Company Operations execution / vendor oversight / logistics / continuous communication routing | 2026-09-11 |
 | MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | STANDBY | Email catch-up Packets 01–03 complete through current 7-day operating window; continuous lightweight email RECON active under Gmail lane; wait for conflict/backlog/drift or assigned full RECON | 2026-09-11 |
 | MASTER DEVELOPER / Deployment Developer | Operating System / Technical Lane | MPM / authorized management | Development / Deployment | OPEN TASK / STANDBY | Authorized exact-current-main release path + technical catalog/checkout residuals; execute only through verified technical release lane | 2026-09-11 |
-| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE | VEVOR priority oversight + active approved-vendor commerce work; retired Google identity excluded | 2026-09-11 |
+| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE | Shopify + eBay revenue oversight + VEVOR priority oversight + active approved-vendor commerce work; retired Google identity excluded | 2026-09-11 |
 | Shopify Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres — Ecommerce & Vendor Operations Manager | Shopify Store Operations / Direct Commerce | ACTIVE | `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` — startup adopted; live Shopify verified; first profitable direct-site order + VEVOR profit-qualified merchandising + Renogy controlled activation + universal-catalog Shopify acceptance | 2026-09-11 19:30 MDT |
+| eBay Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres — Ecommerce & Vendor Operations Manager | eBay Store Operations / Marketplace Revenue | OPEN TASK / STANDBY | `EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md` — Seller Hub customer recovery first; late/cancel-requested order cleanup; affected-buyer apologies; listing views/watchers/sales + source/profit overhaul | 2026-09-11 |
 | SOK Project Operations Manager | SOK Supplier / Commerce / Hawaii Logistics / Warranty | Company Operations / MPM | Vendor Operations | ACTIVE | Lower-48 controlled commerce + Hawaii/warranty/logistics proving; reconcile new Kam operating-input reply | 2026-09-11 |
 | SOK RECON OS | SOK Supplier / Commerce / Hawaii Logistics / Warranty | SOK Project Operations Manager | Project RECON / Evidence | ACTIVE | SOK source/media/Hawaii economics + classify new supplier operating inputs EXACT / ESTIMATE / UNKNOWN | 2026-09-11 |
 | VEVOR Project Operations Manager | VEVOR Supplier / Catalog / Shopify / Fulfillment | Company Operations / MPM | Vendor Operations | ACTIVE | Public storefront/first-order activation + catalog continuation; duplicate B-tier/fulfillment email work suppressed | 2026-09-11 |
