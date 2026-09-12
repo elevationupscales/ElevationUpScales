@@ -36,6 +36,13 @@ test("customer-facing product renderers retain blocked-media defense in depth", 
   }
 });
 
+test("trusted SOK cards use dedicated detail and purchase routes", () => {
+  assert.match(storeJs, /providedDetail\.startsWith\("\/sok\/"\)/);
+  assert.match(storeJs, /p\.sokProduct&&purchase\?purchase/);
+  assert.match(storeJs, /Availability is confirmed as part of your order\./);
+  assert.doesNotMatch(storeJs, /Supplier availability is validated before fulfillment\./);
+});
+
 test("store containment script is cache-busted", () => {
-  assert.match(storeHtml, /universal-store\.js\?v=1\.0\.1-p0/);
+  assert.match(storeHtml, /universal-store\.js\?v=1\.0\.2-p0/);
 });
