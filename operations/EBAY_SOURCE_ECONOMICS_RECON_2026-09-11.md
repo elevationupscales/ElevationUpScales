@@ -20,7 +20,7 @@ Working screen from the eBay Store Operations SOP:
 
 This receipt uses:
 
-- current eBay sale/order emails;
+- current eBay sale/order/listing emails;
 - Doba order/shipment emails;
 - Casey's Sep. 6 `Inventory DOBA` source exports dated Sep. 7;
 - current public Doba product/index evidence where useful for availability only.
@@ -141,7 +141,7 @@ This SKU is tied to the eBay folding-bed listing through prior eBay/Doba records
 - Prepaid-label support shown on category index
 - Exact current price/inventory count require authenticated Doba access
 
-The Sep. 7 inventory exports available in the current company mailbox did not expose a usable row for this exact item, so no source-cost claim is made.
+The Sep. 7 inventory exports available in the current company mailbox do not contain this exact item, and targeted historical Doba email search also found no prior order for this SKU. No source-cost claim is made.
 
 **Economic gate at current eBay sale price:**
 
@@ -154,9 +154,10 @@ The Sep. 7 inventory exports available in the current company mailbox did not ex
 
 ---
 
-## P1 demand item — VEVOR boot / shoe dryer
+## P1 demand / active-listing economics
 
-**eBay listing:** `168633017846`  
+### 5. VEVOR boot / shoe dryer — listing `168633017846`
+
 **Historical eBay sales found:** at least two sales at **$10.89** each.  
 **Doba evidence:**
 
@@ -174,6 +175,98 @@ Using the known $14.00 shipped fulfillment as the conservative historical cost:
 
 ---
 
+### 6. VEVOR 21-inch lawn sweeper — listing `168637439895`
+
+**Demand evidence:** eBay order `18-15061-83906` sold Aug. 24 for **$69.99**.  
+**Historical listing evidence:** later listing notification showed **$73.50**. Public indexing later surfaced approximately **$75.50**.  
+**Doba order:** `26082517591415`  
+**Doba confirmation:** **$61.52**  
+**Final Doba shipped total:** **$63.36**
+
+**Economics:**
+
+- At actual $69.99 sale: **$6.63** pre-fee spread / **~9.5% pre-fee margin**.
+- At $73.50: **~13.8% pre-fee margin** against the historical $63.36 shipped cost.
+- At $75.50: **~16.1% pre-fee margin** against the historical $63.36 shipped cost.
+- $63.36 landed cost requires a sale price of **~$90.51** for 30% pre-fee margin and **~$97.48** for 35%, before eBay fees.
+
+**Provisional classification:** demand is proven, so preserve sales history if useful, but `KEEP + REPRICE` only if the market can support materially higher pricing or a better authorized source is found. Otherwise `END + REBUILD` / `END-DROP` based on live views/watchers and source alternatives. Do not scale at the historical $69.99–$75.50 band with this fulfillment cost.
+
+---
+
+### 7. 12V 100Ah Kingboss / Doba lithium battery — exact historical SKU `D01027HH7BV`
+
+**Historical eBay order:** `08-15101-45641`  
+**eBay sale:** **$169.00**  
+**Destination:** Honolulu, Hawaii 96826  
+**Exact Doba SKU:** `D01027HH7BV` — 12V 100Ah LiFePO4, 1280Wh, Kingboss  
+**Sep. 7 Doba export:**
+
+- Dropshipping price: **$159.50**
+- Inventory: **200**
+- Shipping: FedEx
+- Ship-to: **United States excluding AK, HI**
+- Estimated shipping cost shown in export: **$26.32**
+- Pickup price with prepaid shipping label: **$159.50**
+- Processing: **2 business days**
+- Packaged size/weight: **13 x 9 x 7 in / 23 lb**
+
+The Hawaii sale was canceled/refunded because the standard supplier shipping path could not fulfill Hawaii. The order was not a successful Doba shipment.
+
+**Economics / routing:**
+
+- At the $169 sale against the $159.50 source price, the pre-fee spread was only **$9.50 / ~5.6%** before eBay fees.
+- A related 12V 100Ah listing notification from Aug. 29 showed item `168647672158` at **$181.56`; even at that price, $159.50 cost is only about **12.1% pre-fee margin**.
+- $159.50 landed cost requires approximately **$227.86** selling price for 30% pre-fee margin and **$245.38** for 35%.
+- The Doba source explicitly excludes Hawaii, so normal eBay shipping settings must not allow this source to create another standard-parcel Hawaii obligation.
+
+**Provisional classification:** `END + REBUILD / KEEP + REPRICE` only after exact listing-to-SKU mapping, lower-48 shipping exclusion controls, and profitable source economics are proven. Any Hawaii battery offer belongs to the controlled lithium freight program, not the ordinary parcel listing flow.
+
+---
+
+### 8. VEVOR RV screen-door protector — listing `168633285491`
+
+**eBay listing price:** **$37.66**  
+**Exact Doba source:** `D01027RQMT2` — VEVOR RV Screen Door Protector, adjustable 22–31.5 in  
+**Sep. 7 Doba export:**
+
+- MSRP: **$39.49**
+- MAP: **$35.90**
+- Dropshipping price: **$41.65**
+- Inventory: **1,985**
+- Pickup price with prepaid shipping label: **$32.37**
+- Ship-to: **United States excluding AK, HI**
+- Prohibited marketplace field: **Amazon; Temu; Walmart** — eBay is not named
+- Processing: **3 business days**
+
+Current public Doba indexing still shows the item in stock with prepaid-label support and 3-business-day processing.
+
+**Economics:**
+
+- Dropship path at $37.66 is **negative before eBay fees**: $37.66 - $41.65 = **-$3.99**.
+- Pickup/prepaid-label path leaves **$5.29 / ~14.0% pre-fee margin**.
+- $32.37 landed cost requires approximately **$46.24** sale price for 30% pre-fee margin and **$49.80** for 35%.
+- The current problem is price/source economics, not availability.
+
+**Provisional classification:** `KEEP + REPRICE / END + REBUILD` depending live Seller Hub traffic/watchers. Do not keep selling at $37.66 with this source cost.
+
+---
+
+### 9. Camping fan with lantern — listing `168647434992`
+
+**eBay listing price:** **$46.85**  
+**Public title:** Camping Fan with Lantern 10000mAh Rechargeable Battery Powered Portable Tripod.  
+**Public Doba source-family evidence:** exact-title-family camping fan records are currently in stock; the closest exact-title version with timer/speed/brightness settings shows **2 business days** and prepaid-label support. Multiple near-identical Doba variants also exist, so the exact Doba item number/source cost is **not yet proven**.
+
+**Economic gate at current eBay price:**
+
+- Maximum landed source cost for 30% pre-fee margin: **$32.80**
+- Maximum landed source cost for 35% preferred: **$30.45**
+
+**Provisional classification:** `HOLD / VERIFY EXACT SKU + COST`. Do not source-switch or assume the public Doba variant is product-identical merely because the titles are similar. If exact landed cost is above the gate, reprice/rebuild or end based on Seller Hub demand.
+
+---
+
 ## Current listing disposition map
 
 | Product | Demand Signal | Current Source/Economics Result | Provisional Disposition |
@@ -183,6 +276,10 @@ Using the known $14.00 shipped fulfillment as the conservative historical cost:
 | Folding bed / cot | Repeated sales | Demand strong but recent source economics only ~9.6–20.1% pre-fee or negative depending path | Preserve history; `KEEP + REPRICE` if viable, else `END + REBUILD` |
 | Back-seat organizer | Fresh sale; listing appears live | Exact source found/in stock, but price remains authenticated-only | `HOLD / VERIFY COST`; act before Sep. 16 |
 | VEVOR boot dryer | Repeat sales + watchers | Historical $10.89 sale lost money; current ~$17.89 remains below 30% screen at $14 historical shipped cost | Preserve history; `KEEP + REPRICE / REBUILD IN PLACE` if source supports |
+| VEVOR lawn sweeper | Proven sale | ~$63.36 actual shipped cost vs $69.99 sale; later pricing still under screen | Preserve history; `KEEP + REPRICE` if market/source allows, else rebuild/end |
+| Kingboss 12V 100Ah battery `D01027HH7BV` | Real sale, canceled due Hawaii route | ~$159.50 source vs $169 sale; source excludes HI; only ~5.6% pre-fee | Correct destination controls + major reprice/source rebuild before ordinary eBay sale |
+| VEVOR RV screen-door guard | Active/public listing | $41.65 dropship exceeds $37.66 listing; pickup path ~14% pre-fee | `KEEP + REPRICE / END + REBUILD` after live traffic check |
+| Camping fan `168647434992` | Active/public listing | Source family found/in stock but exact SKU + cost unresolved | `HOLD / VERIFY EXACT SKU + COST` |
 
 ## Seller Hub action queue once authenticated
 
@@ -191,16 +288,18 @@ Using the known $14.00 shipped fulfillment as the conservative historical cost:
 3. Flashlight `20-15123-05140` — prove current state; if unshipped/no supplier order, cancel/refund + buyer update; then correct/end listing economics and MAP conflict.
 4. Shipped cot `12-15143-03510` — verify FedEx tracking is visible; **do not cancel**.
 5. Organizer `02-15170-43443` — verify order state and exact source cost before supplier purchase; control live listing if economics fail.
-6. Active catalog — use Seller Hub views/watchers/sales to finalize the provisional dispositions above and sweep remaining listings record-by-record.
+6. Battery listings — verify which are still active, map each listing to its exact SKU, remove ordinary Hawaii eligibility where source/parcel route excludes Hawaii, then reprice/end based on full contribution and current lithium shipping policy.
+7. Lawn sweeper / RV guard / boot dryer / camping fan — use views/watchers/sales to finalize `KEEP + REPRICE`, `KEEP + REBUILD`, `END + REBUILD`, or `END / DROP` from the source/economics evidence above.
+8. Remaining active catalog — sweep record-by-record with exact source and economics before any bulk cleanup.
 
 ## Control conclusion
 
-The primary failure pattern is now evidenced:
+The primary failure pattern is now evidenced across multiple categories:
 
 **LOW EBAY PRICE + UNVERIFIED SOURCE COST + LATE FULFILLMENT CHECK = CUSTOMER DAMAGE + NEGATIVE/THIN CONTRIBUTION.**
 
 The corrected operating loop remains:
 
-**SALE / LISTING → EXACT SKU → AUTHORIZED SOURCE → LIVE COST + AVAILABILITY → PROFIT GATE → SUPPLIER ACCEPTANCE → TRACKING → ACTUAL CONTRIBUTION → SCALE / REPRICE / CUT.**
+**SALE / LISTING → EXACT SKU → AUTHORIZED SOURCE → LIVE COST + AVAILABILITY → PROFIT GATE → DESTINATION/SHIPPING FIT → SUPPLIER ACCEPTANCE → TRACKING → ACTUAL CONTRIBUTION → SCALE / REPRICE / CUT.**
 
 No Seller Hub cancellation, refund, tracking edit, message, price change or listing end action is claimed by this receipt. Those remain gated on authenticated Seller Hub evidence.
