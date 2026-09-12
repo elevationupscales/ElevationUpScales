@@ -16,7 +16,7 @@ A GOD MODE activation routes established workers into their verified existing Wo
 
 Until the first verified Elevation website order paid through PayPal, all workers and managers must apply `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md` together with newer owner overrides.
 
-**Direct Elevation website revenue/readiness and vendor activation remain P0. `EBAY_PARALLEL_REVENUE_RECOVERY_DIRECTIVE_2026-09-11.md` now explicitly elevates eBay customer recovery + profitable marketplace overhaul to P0 PARALLEL. Other non-Elevation-website marketplace/customer issues such as routine TikTok work remain lower-priority parallel work unless a real safety, security, legal, fraud, chargeback, account-suspension or comparable financial-risk exception exists. TikTok Seller verification repair under `TIKTOK_SELLER_VERIFICATION_REPAIR_CURRENT_WORKTREE.md` is currently such a P0 account-compliance exception. Block only the affected item/lane and keep unrelated executable Worktrees moving.**
+**Direct Elevation website revenue/readiness and vendor activation remain P0. `EBAY_PARALLEL_REVENUE_RECOVERY_DIRECTIVE_2026-09-11.md` explicitly elevates eBay customer recovery + profitable marketplace overhaul to P0 PARALLEL. Other non-Elevation-website marketplace/customer issues such as routine TikTok work remain lower-priority parallel work unless a real safety, security, legal, fraud, chargeback, account-suspension or comparable financial-risk exception exists. The temporary TikTok Seller verification repair exception is CLOSED as an execution lane: the second appeal is SUBMITTED / WAITING ON TIKTOK REVIEW. TikTok is monitoring-only until an authentic external result or Casey explicitly reopens it. Block only the affected item/lane and keep unrelated executable Worktrees moving.**
 
 When the first website PayPal order is verified, Hybrid Management records the trigger, retires the temporary startup standard and reconciles normal order-priority handling under the Master S.O.P.; the eBay profitability lane remains active unless separately superseded.
 
@@ -24,12 +24,12 @@ When the first website PayPal order is verified, Hybrid Management records the t
 
 | Worker | Parent Project | Reporting Manager | Lane | Status | Current Worktree | Last Timestamp |
 |---|---|---|---|---|---|---|
-| MPM / Operating System Project Manager (PM3) | Operating System | Casey | Master Management | ACTIVE | Normal V1.0 master coordination / direct-site revenue + vendor-project routing / Workboard business-state reconciliation | 2026-09-11 |
+| MPM / Operating System Project Manager (PM3) | Operating System | Casey | Master Management | ACTIVE | Normal V1.0 master coordination / direct-site revenue + eBay P0 parallel recovery + vendor-project routing / Workboard business-state reconciliation; TikTok monitoring-only until external trigger | 2026-09-11 |
 | Company Project Manager | Company Project Management | MPM | Project Coordination | ACTIVE | Cross-Project continuity / placement / handoffs | 2026-09-11 |
-| Company Operations Manager | Company Operations | MPM | Operations | ACTIVE | **P0 TikTok Seller verification repair** via `TIKTOK_SELLER_VERIFICATION_REPAIR_CURRENT_WORKTREE.md` + normal Company Operations execution/vendor/logistics oversight; hold only TikTok's blocked field and keep unrelated Operations lanes moving | 2026-09-11 |
-| MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | ACTIVE | TikTok Seller verification evidence map / source-version integrity / duplicate-wrong-slot detection / pre-submit RECON QA; return STANDBY after repair submission receipt or exact unresolved gate is routed | 2026-09-11 |
+| Company Operations Manager | Company Operations | MPM | Operations | ACTIVE | Normal Company Operations execution / eBay P0 parallel recovery / vendor-logistics oversight; TikTok second appeal monitoring-only with no active repair execution | 2026-09-11 |
+| MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | STANDBY | On-demand OS integrity / source-version alignment / duplicate and terminal-worktree replay prevention; TikTok repair execution closed unless a verified external trigger reopens it | 2026-09-11 |
 | MASTER DEVELOPER / Deployment Developer | Operating System / Technical Lane | MPM / authorized management | Development / Deployment | OPEN TASK / STANDBY | Authorized exact-current-main release path + technical catalog/checkout residuals; execute only through verified technical release lane | 2026-09-11 |
-| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE | Shopify + eBay revenue oversight + VEVOR priority oversight + active approved-vendor commerce work + TikTok ecommerce oversight beneath Company Operations repair manager; retired Google identity excluded | 2026-09-11 |
+| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE | Shopify + eBay revenue oversight + VEVOR priority oversight + active approved-vendor commerce work; TikTok monitoring-only until verified external result | 2026-09-11 |
 | Shopify Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres — Ecommerce & Vendor Operations Manager | Shopify Store Operations / Direct Commerce | ACTIVE | `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` — startup adopted; live Shopify verified; first profitable direct-site order + VEVOR profit-qualified merchandising + Renogy controlled activation + universal-catalog Shopify acceptance | 2026-09-11 19:30 MDT |
 | eBay Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres — Ecommerce & Vendor Operations Manager | eBay Store Operations / Marketplace Revenue | OPEN TASK / STANDBY | `EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md` — Seller Hub customer recovery first; late/cancel-requested order cleanup; affected-buyer apologies; listing views/watchers/sales + source/profit overhaul | 2026-09-11 |
 | SOK Project Operations Manager | SOK Supplier / Commerce / Hawaii Logistics / Warranty | Company Operations / MPM | Vendor Operations | ACTIVE | Lower-48 controlled commerce + Hawaii/warranty/logistics proving; reconcile new Kam operating-input reply | 2026-09-11 |
@@ -49,6 +49,16 @@ When the first website PayPal order is verified, Hybrid Management records the t
 - `OPEN TASK / STANDBY`
 - `PLACEMENT REQUIRED`
 - `CLOSED / RETIRED`
+
+## Terminal Worktree replay guard
+
+Before an ACTIVE task is resumed or selected by `RUN`, the worker/manager must resolve the candidate task against current `main` and its owning current Worktree.
+
+If the owning current Worktree is verified `CLOSED`, `EXECUTION CLOSED`, `SUBMITTED / WAITING`, or otherwise terminal for execution, the older task pointer is stale unless a higher-authority record explicitly reopens it.
+
+**TERMINAL CURRENT WORKTREE → DO NOT RE-EXECUTE → CLEAR/ADVANCE STALE POINTER → SELECT NEXT EXECUTABLE WORK OR STANDBY.**
+
+A dated receipt, old Workboard row, older Registry assignment, cached chat context, or prior P0 label may not reactivate a terminal Worktree by itself. External-action lanes must never be resent/re-submitted merely because stale control text is encountered.
 
 ## GOD MODE activation rule
 
