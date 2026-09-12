@@ -42,8 +42,8 @@
 
     if (panel.hidden === shouldShow) panel.hidden = !shouldShow;
     if (shouldShow) {
-      if (trustStrong) trustStrong.textContent = "PayPal • Card • Shop Pay";
-      if (trustSpan) trustSpan.textContent = "Secure payment options";
+      if (trustStrong) trustStrong.textContent = "PayPal";
+      if (trustSpan) trustSpan.textContent = "Primary secure payment";
     }
   };
 
