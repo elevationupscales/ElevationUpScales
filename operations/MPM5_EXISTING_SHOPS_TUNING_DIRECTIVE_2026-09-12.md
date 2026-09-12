@@ -21,35 +21,48 @@ Those channels remain valid future opportunities. They are not current execution
 
 ### 1. Elevation direct website / Shopify Online Store
 
-**State:** ACTIVE / PRIMARY DIRECT STORE
+**State:** ACTIVE / PRIMARY DIRECT STORE / PAYMENT ONBOARDING OPEN
+
+Newest Shopify owning-lane return establishes:
+
+- 103 ACTIVE products;
+- 53 ACTIVE + Online Store published;
+- 50 ACTIVE + Online Store unpublished;
+- 0 ACTIVE unavailable on every channel;
+- the complete 50-product unpublished cohort is VEVOR staging tagged `VEVOR-Profit-50-2026-09-12`;
+- all 50 are **INTENTIONAL HOLD / DO NOT BULK PUBLISH**;
+- the 50-product cohort is not a general publication failure;
+- latest verified Shopify Payments onboarding state remains **`Complete setup`** until an authorized current read or owner completion proves otherwise.
 
 Current tuning focus:
 
-- classify the 50 ACTIVE + unpublished products;
-- publish only `INTENDED PUBLIC` products;
-- verify exact public URL + exact variant buyability;
-- preserve native Shopify checkout and the direct Elevation PayPal path;
+- keep the 50 VEVOR staging products hidden unless the owning VEVOR lane authorizes exact SKU release;
+- tune the 53 current public Online Store products;
+- verify exact public URL + exact variant buyability on representative public products;
+- complete/reverify Shopify Payments through the legitimate owner/platform setup flow;
+- preserve the direct Elevation PayPal path while Shopify Payments setup remains incomplete;
 - verify shipping/payment/customer-facing policy behavior;
 - remove stale/duplicate/incorrect catalog states;
-- route only proven code defects to MASTER DEVELOPER.
-
-Current verified live count at the latest management check:
-
-- 103 ACTIVE products;
-- 53 ACTIVE + published;
-- 50 ACTIVE + unpublished;
-- 0 ACTIVE unavailable on every channel.
+- route only proven residual code defects to MASTER DEVELOPER through MPM5.
 
 ### 2. Shopify-installed discovery/sales surfaces
 
 Includes currently installed Shopify surfaces such as Shop, Microsoft Copilot and Agentic storefront exposure.
 
+Current verified surface state includes:
+
+- Online Store: 53 ACTIVE products;
+- Shop: 0 ACTIVE products — existing-surface configuration/eligibility hold;
+- Point of Sale: 0 ACTIVE products — not a current ecommerce priority;
+- Microsoft Copilot: 103 ACTIVE products — existing surface to preserve/tune, not a reason to expand channels.
+
 Current tuning focus:
 
 - verify existing product publication and eligibility state;
-- reconcile incorrect zero-product or over-broad product exposure;
+- reconcile incorrect zero-product or over-broad product exposure only where the surface is intended to operate;
 - verify product identity, price, availability, shipping and purchase path;
 - do not broaden the catalog merely to raise channel counts;
+- do not bulk-publish the 50 VEVOR staging cohort;
 - keep one product truth and one fulfillment owner per order.
 
 These are tuning tasks only. Do not turn them into a new expansion program.
@@ -112,13 +125,13 @@ Research may be preserved as backlog/evidence. No installation/configuration cam
 
 Each existing shop must be reduced to the same operating questions:
 
-**PRODUCT TRUTH → PUBLICATION/ELIGIBILITY → PRICE/MAP → INVENTORY/ORDERABILITY → SHIPPING → CHECKOUT/PAYMENT → FULFILLMENT OWNER → RETURNS/WARRANTY → CUSTOMER COMMUNICATION → EXPECTED CONTRIBUTION → REALIZED CONTRIBUTION.**
+**PRODUCT TRUTH → INTENDED PUBLICATION/ELIGIBILITY → PRICE/MAP → INVENTORY/ORDERABILITY → SHIPPING → CHECKOUT/PAYMENT → FULFILLMENT OWNER → RETURNS/WARRANTY → CUSTOMER COMMUNICATION → EXPECTED CONTRIBUTION → REALIZED CONTRIBUTION.**
 
 A shop is not considered tuned because products are merely ACTIVE or listings exist.
 
 ## Lane ownership
 
-- **Shopify Store Operations:** Shopify product publication, channel publication, public URL, variant buyability, Shopify-native configuration.
+- **Shopify Store Operations:** existing Shopify public catalog, intentional staging holds, existing-channel eligibility/publication, public URL, variant buyability, Shopify-native/account configuration and Shopify Payments operating verification.
 - **eBay Store Operations:** eBay customer obligations, listing state, marketplace economics, seller-health operating actions.
 - **TikTok Shop / Affiliate:** TikTok account/channel eligibility, creator/commission exposure, current catalog and account restrictions.
 - **Apparel Vendor Operations:** Fourthwall/POD economics, product classification, provider routing and apparel profitability.
@@ -131,14 +144,14 @@ A shop is not considered tuned because products are merely ACTIVE or listings ex
 ## Current management order
 
 1. Communications outage remains P0 until owner call/SMS is restored.
-2. Shopify publication/purchasability tuning.
+2. Shopify existing-public-catalog/payment-readiness tuning: keep VEVOR staging hidden, complete/reverify Shopify Payments, preserve PayPal, verify representative purchase paths.
 3. eBay customer/cash/listing tuning.
 4. TikTok current-account/catalog/affiliate tuning.
 5. Fourthwall/Apparel catalog/economics tuning.
-6. Existing Shopify-installed discovery surfaces audit.
+6. Existing Shopify-installed discovery surfaces audit/tuning.
 7. Consolidate results, remove duplicate/stale work, and verify clean operating baselines.
 8. Only then reconsider new-channel expansion.
 
 ## Control phrase
 
-**TUNE BEFORE EXPANDING → FIX CURRENT STORES → CLEAN CURRENT CATALOGS → PROVE CURRENT PURCHASE PATHS → PROVE CURRENT FULFILLMENT → PROVE CURRENT PROFIT → THEN ADD REACH.**
+**TUNE BEFORE EXPANDING → KEEP STAGING HOLDS CONTROLLED → TUNE CURRENT PUBLIC CATALOGS → COMPLETE PAYMENT READINESS → PROVE CURRENT PURCHASE PATHS → PROVE CURRENT FULFILLMENT → PROVE CURRENT PROFIT → THEN ADD REACH.**
