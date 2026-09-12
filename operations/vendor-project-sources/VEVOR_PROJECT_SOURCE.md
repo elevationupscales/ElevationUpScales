@@ -14,8 +14,9 @@
 **Profitability Control:** `../DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md`  
 **First-Sale Shortlist:** `../VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md`  
 **First-Sale Fresh Check:** `../VEVOR_FIRST_SALE_FRESH_CHECK_2026-09-12.md`  
+**Owner Economics Override:** `../OWNER_DIRECTIVE_VEVOR_ECONOMICS_NONBLOCKING_2026-09-12.md`  
 **Last reconciled:** 2026-09-12  
-**Current Maturity:** **STAGE 1 — PROVING / PUBLIC CHECKOUT VERIFIED / FIRST PROFITABLE ORDER OPEN**
+**Current Maturity:** **STAGE 1 — PROVING / PUBLIC CHECKOUT VERIFIED / FIRST PROFITABLE ORDER OPEN / ECONOMICS REPLY NONBLOCKING**
 
 ## Purpose
 
@@ -76,7 +77,7 @@ Do not expose EIN, tax-license numbers, bank/card data, private address data, cr
 - The first-sale shortlist was fresh-checked on **2026-09-12**: **3 / 10 exact SKUs are currently publicly orderable and 7 / 10 are currently out of stock**.
 - The three currently orderable first-sale candidates are `XXKLJT124INCLJF0QV0`, `AXLSTCQJDSYKAZ99C001V0`, and `D25FT14IN20AHOGLOV1`. At the fresh check, each public VEVOR selling price matched the feed MAP reference and each page showed a valid Buy Now / Add to Cart path.
 - The seven unavailable shortlist SKUs are exact-SKU sellability holds and return to the back of the source-refresh queue. Do not spend protected-economics or promotion capacity on them until a later fresh check shows a valid order path.
-- Current first-sale work is now an **exact PRO economics check for the three orderable SKUs**, not another generic shortlist/source pass.
+- **Owner direction 2026-09-12 makes the supplier economics reply nonblocking.** Current first-sale work is live authenticated VEVOR PRO/account economics verification for the three orderable SKUs; the existing supplier reply remains informational/reconciliation input rather than a WAIT state.
 
 ## Concurrency control
 
@@ -90,7 +91,7 @@ When multiple workers touch the same VEVOR Shopify records:
 6. after the other worker stops, reconcile once against Casey's newest direction and current VEVOR controls;
 7. technical ability to activate/deactivate a product does not itself create VEVOR policy authority.
 
-The earlier B-tier status race is closed as the controlling current-state question: current live state is active, the password/public-checkout gate is closed, and the next gate is per-SKU promotion economics and freshness.
+The earlier B-tier status race is closed as the controlling current-state question: current live state is active, the password/public-checkout gate is closed, and the next execution step is self-verifying executable economics for viable SKUs without waiting on supplier correspondence.
 
 ## Fulfillment operating facts closed enough for first order
 
@@ -110,53 +111,57 @@ For every direct VEVOR SKU establish:
 
 **EXACT SKU/MODEL → DIRECT VEVOR SOURCE → APPROVED FACTS/MEDIA → FEED MAP → LIVE VEVOR SELLING PRICE → LIVE SELLABILITY → NORMAL FULFILLMENT → AUTHORIZED DIRECT-SITE CHANNEL**
 
-For active promotion also establish:
+For deliberate scaling/paid acquisition also establish:
 
 **CURRENT SUPPLIER COST + SUPPLIER SHIPPING/FREIGHT + APPLICABLE PAYMENT/PLATFORM FEES + OTHER KNOWN VARIABLE ORDER COSTS → EXPECTED ORDER CONTRIBUTION > $0**
 
+For the current three-SKU first-sale proof, owner direction permits the lane to continue without waiting on supplier correspondence. Use live authenticated PRO/cart/checkout evidence to self-verify executable cost/shipping whenever available; unknown values remain `VERIFY`, never invented.
+
 Protected cost/margin values remain outside public Git.
 
-Only the missing field needed for that SKU/action is a gate.
+Only the missing field needed for that exact action is a gate.
 
 ## Current first-sale execution control
 
-`DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` controls promotion economics.
+`DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` remains the economics framework, read together with `OWNER_DIRECTIVE_VEVOR_ECONOMICS_NONBLOCKING_2026-09-12.md`.
 
 Use public-safe dispositions:
 
+- `ACTIVE — ORDER-FIRST / LIVE PRO ECONOMICS VERIFY`
 - `PROMOTE`
-- `HOLD — ECONOMICS UNKNOWN`
 - `HOLD — NEGATIVE CONTRIBUTION`
+- `HOLD — SELLABILITY / SOURCE FAILURE`
 - `OWNER REVIEW — STRATEGIC EXCEPTION`
 
 `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md` is now narrowed by `VEVOR_FIRST_SALE_FRESH_CHECK_2026-09-12.md`.
 
 Current bounded queue:
 
-- **3 orderable candidates — `HOLD — ECONOMICS UNKNOWN` pending exact current PRO net unit price and normal supplier shipping treatment.**
+- **3 orderable candidates — `ACTIVE — ORDER-FIRST / LIVE PRO ECONOMICS VERIFY`; do not wait on supplier reply.**
 - **7 unavailable candidates — exact-SKU sellability hold; no active promotion/economics work until a later source refresh.**
 
-Supplier correspondence establishes a PRO discount framework, but that framework does not prove exact SKU-specific net checkout cost. A focused supplier request for the three orderable SKUs has been sent in the existing supplier thread. Waiting on that exact answer does not reopen onboarding or block other VEVOR work.
+Supplier correspondence establishes a PRO discount framework, but that framework does not prove exact SKU-specific net checkout cost. A focused supplier request for the three orderable SKUs has already been sent. That reply is now **INFORMATIONAL / RECONCILIATION INPUT — NOT A WAIT STATE**.
 
-Before promoting a candidate:
+Current execution path:
 
-**EXACT SKU → LIVE SELLABILITY → CURRENT VEVOR PRICE / MAP → PROTECTED CURRENT COSTS → POSITIVE EXPECTED CONTRIBUTION → WORKING SHOPIFY BUY PATH → PROMOTE**
+**EXACT SKU → LIVE SELLABILITY → CURRENT VEVOR PRICE / MAP → AUTHENTICATED LIVE PRO COST + SHIPPING CHECK → CONTRIBUTION SCREEN → WORKING SHOPIFY BUY PATH → BOUNDED FREE/OWNED TRAFFIC / ORDER-FIRST PROOF**
 
-Prefer free/owned traffic during startup unless paid acquisition is separately approved and included in economics.
+Do not use paid acquisition until economics support it and acquisition spend is separately approved.
 
 ## Remaining activation proof
 
 1. Keep the current active qualified catalog intact; do not recreate or bulk-reset it.
 2. **Fresh public sellability / price-MAP check for the 10-item first-sale shortlist is COMPLETE for the current source window. Do not rerun it unless a later refresh trigger exists.**
-3. Obtain/reconcile exact protected current PRO unit cost and normal supplier shipping treatment for the **3 currently orderable candidates only**.
-4. Calculate expected order contribution using protected values outside public Git and return `PROMOTE` or exact HOLD state for each of those three.
-5. Route the first clean `PROMOTE` items into existing Shopify merchandising and free/owned traffic.
+3. For the **3 currently orderable candidates only**, use the authenticated VEVOR PRO/account/cart/checkout path to self-verify current executable unit cost and normal supplier shipping treatment; do not wait on the supplier reply.
+4. Calculate expected order contribution when current protected values are available; preserve unknowns as `VERIFY`, not assumed numbers.
+5. Route viable orderable products through bounded free/owned traffic and existing working Shopify paths under the owner nonblocking rule; paid acquisition remains economics-gated.
 6. Recheck the seven unavailable SKUs only on a later source-refresh cycle; they do not block the three viable candidates.
-7. On first real paid VEVOR order, reverify exact SKU, current sellability, current price/MAP and valid supplier order path.
-8. Place supplier order through the verified VEVOR account.
+7. On first real paid VEVOR order, reverify exact SKU, current sellability, current price/MAP, live PRO cost/shipping and valid supplier order path before supplier purchase.
+8. Place supplier order through the verified VEVOR account when the live order path remains executable.
 9. Capture supplier acceptance, tracking from PRO account and customer completion.
 10. Record actual order economics state and any exception without exposing protected amounts.
-11. Move the repeatable normal-order lane to **CONTROLLED** when proof is clean.
+11. Reconcile any later supplier economics reply against the live account evidence; do not send the lane backward.
+12. Move the repeatable normal-order lane to **CONTROLLED** when proof is clean.
 
 ## Real gates
 
@@ -166,16 +171,17 @@ Keep:
 - current VEVOR MAP/live-price floor;
 - authorized channel;
 - live supplier sellability/orderability;
-- positive expected contribution before active promotion;
+- live executable supplier-order path before supplier purchase;
 - customer payment/order integrity;
 - any genuine tax/legal restriction;
-- owner approval for material inventory/financing/contracts/channel expansion/strategic loss-leading.
+- owner approval for material inventory/financing/contracts/channel expansion/strategic loss-leading;
+- verified economics before paid acquisition or deliberate scale.
 
-Do not use completed PRO onboarding, feed acquisition, catalog build, password removal, generic fulfillment research, optional enrichment or unrelated project status as a checkout/promotion blocker.
+Do not use completed PRO onboarding, feed acquisition, catalog build, password removal, generic fulfillment research, optional enrichment, unanswered supplier correspondence or unrelated project status as a checkout/execution blocker.
 
 ## Next action
 
-**EXACT PRO ECONOMICS FOR 3 CURRENTLY ORDERABLE SKUS → CALCULATE PROTECTED ORDER CONTRIBUTION → DISPOSITION PROMOTE/HOLD → ROUTE CLEAN PROMOTE ITEMS TO FREE/OWNED TRAFFIC → FIRST REAL VEVOR ORDER → REVERIFY → FULFILL → RECORD ACTUALS → MOVE NORMAL ORDER FLOW TO CONTROLLED**
+**LIVE VEVOR PRO ECONOMICS SELF-CHECK FOR 3 ORDERABLE SKUS → CONTRIBUTION SCREEN / VERIFY → KEEP WORKING SHOPIFY PATHS ACTIVE → BOUNDED FREE/OWNED TRAFFIC → FIRST REAL VEVOR ORDER → REVERIFY LIVE COST/SHIPPING + ORDER PATH → FULFILL → RECORD ACTUALS → RECONCILE LATER SUPPLIER REPLY IF/WHEN RECEIVED → MOVE NORMAL ORDER FLOW TO CONTROLLED**
 
 ## Close condition for active repeatable vendor onboarding
 
