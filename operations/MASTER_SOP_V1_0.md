@@ -4,7 +4,8 @@
 **Company:** Elevation UpScales, Inc.  
 **Version:** 1.0  
 **Effective:** 2026-09-11  
-**Status:** CONTROLLING MASTER S.O.P. BASELINE
+**Status:** CONTROLLING MASTER S.O.P. BASELINE / AMENDED 2026-09-12  
+**Amendment:** Authority propagation, factual-truth vs management-authority separation, control-plane integrity and incident/freeze routing
 
 ## 1. Purpose
 
@@ -38,6 +39,51 @@ Lower-level records are corrected through `SYNC` / RECON when they conflict with
 
 A new Owner direction may immediately change priority or Scope. It does **not** silently rewrite the MASTER S.O.P. The affected worker must safe-save current work, preserve unfinished work as OPEN, timestamp the state, apply the new Scope/priority, and continue under the existing S.O.P. unless Casey explicitly changes policy.
 
+### 2A. Authority propagation / factual-truth separation
+
+The OS distinguishes **objective factual truth** from **management authority**.
+
+A newer verified factual record may defeat an older factual record. It does not, by freshness alone, grant the recorder authority to reprioritize work, change Project ownership, bypass a manager, override an owner gate, create a new management layer or reopen terminal work.
+
+**NEW FACT ≠ NEW AUTHORITY.**
+
+Required propagation pattern:
+
+**VERIFIED FACT → OWNING PROJECT/LANE INCORPORATES → MANAGEMENT RECONCILES IMPACT → MANAGEMENT PRIORITIZES/ROUTES → AUTHORIZED WORKER EXECUTES → RESULT VERIFIED → CONTROL SURFACES UPDATED.**
+
+Rules:
+
+1. Workers and Specialists report verified facts upward/into the owning lane; they do not convert those facts into self-granted cross-Project priority.
+2. Project Managers must consume newer verified facts that materially change their Project state; management authority is not permission to preserve known-stale facts.
+3. Hybrid Management owns cross-Project priority/routing and must reconcile the Master Workboard when verified lower-level facts change management state.
+4. A receipt, platform record, email, Worktree or worker prompt can correct facts within its proven scope; it cannot silently supersede a higher authority layer.
+5. A valid owner/management incident, stabilization, freeze or emergency control may temporarily subordinate lower-priority Workboard/Project work without deleting it. Deferred work stays visible and cannot independently reactivate until the controlling gate releases it.
+6. `ACTIVE`, newer timestamp, newer commit or broader tool access does not imply higher authority.
+7. A terminal current Worktree (`CLOSED`, `EXECUTION CLOSED`, `SUBMITTED / WAITING`, or another verified terminal state) defeats stale lower-level active pointers. Stale records are advanced/synchronized; terminal work is not replayed.
+
+### 2B. Control-plane integrity rule
+
+Management/control surfaces that jointly route the same active recovery or critical work must agree on the material execution state.
+
+For a critical recovery this normally includes, where applicable:
+
+- Master Workboard;
+- Worker Registry;
+- owning `CURRENT_WORKTREE`;
+- active management/incident record;
+- technical issue/incident record;
+- accepted production/release pointer.
+
+If they disagree on active phase, execution owner, terminal/open state or accepted production/release authority, classify:
+
+**CONTROL-PLANE DRIFT**
+
+Response:
+
+**STOP ONLY THE CONFLICTING ROUTING → VERIFY OBJECTIVE STATE → SYNC THE POINTER SET → PRESERVE UNRELATED WORK → CONTINUE.**
+
+Do not freeze the entire company because one control surface drifted. Do not issue another conflicting `RUN` to the affected worker until the routing conflict is reconciled.
+
 ## 3. Management structure
 
 ### Owner — Casey
@@ -64,6 +110,8 @@ MPM, Company Project Manager and Company Operations Manager form the primary Hyb
 
 They share one **Master Management Coordination Worktree Log** for cross-Project state, routed OPEN TASKS, gates, handoffs, RECON/DEV routing, owner decisions and meaningful Git/SHA receipts.
 
+Hybrid Management must reconcile meaningful newer owning-lane facts into the management control plane. It may not keep routing from a known-stale Board merely because that Board is a higher authority surface.
+
 ## 4. Projects, Scope, Workflow and Worktree
 
 **Project first, worker second.**
@@ -77,6 +125,8 @@ The Master Workboard is high-level. It tracks Projects, material workstreams and
 Detailed task state belongs in the Project Worktree.
 
 **ONE TASK = ONE PRIMARY ACTIVE WORKER.** Other contributors may assist, but one worker owns active execution unless management explicitly reassigns it.
+
+When a Project Worktree has newer verified objective state than a stale management pointer, the factual delta must be propagated upward; the Project Worktree does not thereby become the cross-Project priority authority.
 
 ## 5. Daily operating model
 
@@ -94,6 +144,8 @@ For Hybrid Managers, Project Managers, MASTER RECON OS, MASTER DEVELOPER and Git
 
 This is not a full RECON every time. If Git conflicts with the worker's current state, trigger the appropriate `SYNC` / RECON before continuing.
 
+If the conflict changes who should execute, which phase is active, whether work is terminal or which release/production state is authoritative, treat it as control-plane drift and reconcile before issuing conflicting execution.
+
 ## 7. Worker startup and registration
 
 Default rule:
@@ -102,7 +154,7 @@ Default rule:
 
 Mandatory startup:
 
-**RECEIVE DIRECTIVE → IDENTIFY PROJECT → IDENTIFY REPORTING MANAGER → READ MASTER S.O.P. + MASTER OS GLOSSARY → READ PROJECT/LANE S.O.P. → READ PROJECT WORKBOARD + CURRENT_WORKTREE → INSPECT ACTIVE WORKERS → DEFINE ROLE FROM DIRECTIVE → SELF-REGISTER → VERIFY ASSIGNED WORK → EXECUTE OR STANDBY**
+**RECEIVE DIRECTIVE → IDENTIFY PROJECT → IDENTIFY REPORTING MANAGER → READ MASTER S.O.P. + MASTER OS GLOSSARY → READ MASTER WORKBOARD / ACTIVE MANAGEMENT CONTROL → READ PROJECT/LANE S.O.P. → READ PROJECT WORKBOARD + CURRENT_WORKTREE → INSPECT ACTIVE WORKERS → DEFINE ROLE FROM DIRECTIVE → SELF-REGISTER → VERIFY ASSIGNED WORK → EXECUTE OR STANDBY**
 
 Every worker registers:
 - Worker name/function
@@ -141,6 +193,8 @@ Canonical worker states:
 - `CLOSED / RETIRED`
 
 Detailed tasks remain in Project Worktrees.
+
+The Registry is an index/control pointer, not a grant of authority and not a substitute for the owning Worktree or management priority state. A stale Registry row must be synchronized rather than used to replay completed/superseded work.
 
 When a qualifying failure/timeout/crash/unknown-result stop occurs, the Registry automatically changes the worker to `OPEN TASK / STANDBY` while the Project Worktree preserves the unfinished task.
 
@@ -208,9 +262,11 @@ Core relationship:
 
 For Git-aware roles:
 
-**GIT FIRST → identify Project/Lane → locate last verified Worktree → verify current state → execute next safe action → record material delta → continue until completion/gate/wait/no executable work → update state → STANDBY when appropriate**
+**GIT FIRST → identify Project/Lane → locate last verified Worktree → verify current management/incident gate → verify current state → execute next safe authorized action → record material delta → continue until completion/gate/wait/no executable work → update state → STANDBY when appropriate**
 
 `RUN` never increases authority by itself.
+
+A stale lower-level `RUN` pointer cannot bypass a newer verified owner/management freeze, terminal Worktree or incident recovery sequence.
 
 ## 13. STREAMLINE
 
@@ -266,6 +322,8 @@ It may direct assigned/standby RECON workers within authorized routing.
 
 It corrects objective state when safe and authorized. When it cannot correct directly, it leaves a timestamped RECON NOTE and routes the correction.
 
+MASTER RECON may synchronize objective state and repair stale pointers, but it does not create new business priority merely because its evidence is newer. When a factual correction materially changes management routing, RECON records the verified delta and routes/updates the management control surface within established authority.
+
 ### Assigned Project RECON Worker
 
 Bound to its named Project/Scope. It protects that Project and does not take over other Projects. Out-of-Project findings become `ROUTE REQUIRED`.
@@ -285,6 +343,8 @@ Routing:
 - Project-wide → Project Workflow/CURRENT_WORKTREE;
 - cross-Project/system → Master Management Coordination / Master Workboard path.
 
+For control-plane drift, the RECON NOTE/receipt must also identify the conflicting pointers and the current verified phase/owner/release authority so management can remove the contradiction without replaying work.
+
 ## 18. Git authority
 
 ### Workers
@@ -299,8 +359,12 @@ Owns Master Git management truth: Master Workboard, management indexes, priority
 ### MASTER RECON OS
 Verifies/reconciles against management truth and writes RECON findings, notes, evidence and integrity records. It does not casually rewrite Hybrid Management's management-control layer.
 
+When specifically authorized to perform an OS reconciliation/sweep, MASTER RECON may correct demonstrably stale objective control pointers required to restore consistency, but it may not invent new priority or policy. Material management decisions still route to Hybrid Management/Owner.
+
 ### MASTER DEVELOPER / Deployment Developer
 Owns technical Git areas required for website/source code, build/config, technical repairs, deployment workflows, technical receipts and release state. DEV routes business/management-state deltas to Hybrid Management rather than rewriting management truth.
+
+An accepted production/release pointer is a technical authority for deployment lineage only; it does not become cross-Project management priority. Conversely, a newer `main` commit is not deployment authority merely because it is newer.
 
 Control distinction:
 
@@ -333,6 +397,8 @@ Vendor Projects should not be duplicated merely because another specialist/worke
 Shared capacity is shared **within its lane**. Cross-Project shared operational capacity should generally be routed through Company Operations rather than allowing workers to roam between Projects.
 
 A Specialist is a domain expert/advisory/execution role—not a Project Manager by default. A Specialist cannot independently reprioritize a Project, own the entire Project Worktree or supersede the responsible manager merely because it has subject-matter knowledge or broad data/email access.
+
+Freshness of data, broad tool access or possession of a newer receipt does not elevate a Specialist into management authority.
 
 ## 22. Gmail Email Network
 
@@ -421,7 +487,11 @@ When a manager receives `UPDATE S.O.P.`:
 
 **GIT FIRST → SAFE-SAVE CURRENT WORK → IDENTIFY S.O.P. SCOPE → READ MASTER S.O.P. + MASTER WORKBOARD → READ CURRENT LANE/PROJECT S.O.P. → RECONCILE, DON'T REINVENT → UPDATE ONLY AUTHORIZED S.O.P. → VERIFY NO CONFLICT WITH MASTER RULES → RECORD VERSION/SHA → UPDATE AFFECTED WORKTREE/INDEX → RESUME PRIOR WORK**
 
-A subordinate S.O.P. conflict is corrected to the MASTER S.O.P. If the MASTER S.O.P. itself needs policy change, propose/escalate rather than silently overriding it.
+A subordinate S.O.P. conflict is corrected to the MASTER S.O.P. If the MASTER S.O.P. itself needs policy change, owner/authorized management approval is required rather than silently overriding it.
+
+A MASTER S.O.P. amendment is incomplete until affected controlling surfaces are checked for propagation. At minimum, inspect the Master Workboard, Worker Registry, applicable Project/Lane S.O.P.s, active `CURRENT_WORKTREE`s and startup prompts that could route contradictory work.
+
+**POLICY CHANGE → MASTER S.O.P. AMENDMENT → GLOSSARY IF TERMINOLOGY CHANGED → CONTROL-SURFACE PROPAGATION → RECON VERIFY → RESUME.**
 
 ## 27. V1.0 preservation rule
 
@@ -435,6 +505,8 @@ Future changes must preserve version history and identify whether they are:
 - MASTER S.O.P. amendment;
 - structural change requiring owner approval.
 
+This 2026-09-12 authority-propagation/control-plane-integrity change is a **MASTER S.O.P. amendment**, not a replacement of V1.0.
+
 ## 28. Control statement
 
-**PRESERVE STATE → KEEP PROJECTS MOVING → ROUTE ONE OWNER PER TASK → VERIFY BEFORE CLAIM → MAKE UNFINISHED WORK VISIBLE → RECONCILE DRIFT → PROTECT OWNER GATES → DO NOT RECREATE WORK THAT ALREADY EXISTS.**
+**PRESERVE STATE → KEEP PROJECTS MOVING → ROUTE ONE OWNER PER TASK → VERIFY BEFORE CLAIM → NEW FACT DOES NOT CREATE NEW AUTHORITY → PROPAGATE MATERIAL TRUTH THROUGH MANAGEMENT → MAKE UNFINISHED WORK VISIBLE → RECONCILE CONTROL-PLANE DRIFT → PROTECT OWNER GATES → DO NOT RECREATE WORK THAT ALREADY EXISTS.**
