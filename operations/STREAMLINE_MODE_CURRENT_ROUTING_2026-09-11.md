@@ -19,8 +19,8 @@ This is a short routing overlay. It does not replace the Master Workboard, Proje
 
 ### Do not wait on
 
-- unrelated eBay recovery;
-- TikTok verification repair;
+- eBay Seller Hub authentication blocker;
+- TikTok review result;
 - one blocked Renogy SKU;
 - Kingboss full-catalog completion;
 - Hawaii freight work;
@@ -32,33 +32,22 @@ First verified **profitable** Elevation direct-site order completed through fulf
 
 ---
 
-## P0 ACCOUNT-COMPLIANCE EXCEPTION — TikTok Seller Verification Repair
+## MONITORING — TikTok Seller Verification
 
-**Primary Manager:** Company Operations Manager  
-**RECON Support:** MASTER RECON OS / assigned RECON  
-**Ecommerce Oversight:** Peter Torres  
+**State:** SECOND APPEAL SUBMITTED / WAITING ON TIKTOK REVIEW  
+**Closeout:** `TIKTOK_SECOND_APPEAL_SUBMISSION_CLOSEOUT_2026-09-11.md`  
 **Worktree:** `TIKTOK_SELLER_VERIFICATION_REPAIR_CURRENT_WORKTREE.md`
 
-### Current verified issue
+The temporary account-compliance exception is closed. TikTok is no longer an active P0 execution lane while the platform reviews the second appeal.
 
-- authenticated TikTok Seller Hub is open in Casey's local browser;
-- owner observed two IRS EIN uploads in the review where the document mapping is wrong/duplicated;
-- owner recorded the representative verification video but it was not uploaded correctly into the required Seller Center video field;
-- RECON recovered the correct Colorado wholesale sales-tax license and the prior TikTok upload map from the authorized private Gmail evidence archive;
-- no Seller Center edit or resubmission is claimed until the exact live review fields/attempt state are verified.
+Reopen only for:
 
-### Execute
+- approval/restoration;
+- additional-evidence request;
+- second-appeal denial;
+- TikTok Support instruction to enter manual review.
 
-**OPEN EXACT REVIEW → VERIFY CORRECTION/APPEAL + ATTEMPT COUNT + DEADLINE → MAP EVERY CURRENT FIELD → REPLACE DUPLICATE/MISPLACED EIN WITH THE CORRECT FIELD-SPECIFIC EVIDENCE → USE WHOLESALE LICENSE IN BUSINESS-LICENSE SLOT WHEN REQUESTED → VERIFY/UPLOAD REPRESENTATIVE VIDEO INTO VIDEO FIELD → PRE-SUBMIT RECON → SUBMIT ONCE → CAPTURE RECEIPT → MONITOR REVIEW.**
-
-### Controls
-
-- raw ID/tax/license/video files remain private;
-- Gmail may recover original evidence but is not the management-control surface;
-- do not falsely claim warehouse ownership;
-- do not use available paperwork merely to fill an unrelated slot;
-- one blocked verification field does not stop Shopify/eBay/vendor/logistics execution;
-- materially new legal/business representations remain owner-gated.
+Do not let waiting on TikTok block Shopify, eBay, vendor, logistics or catalog work.
 
 ---
 
@@ -69,26 +58,30 @@ First verified **profitable** Elevation direct-site order completed through fulf
 
 ### Execute now
 
-- maintain recovery queue;
-- source/economics recon;
+- protect every open/recent paid-order obligation;
+- release/verify tracking and payout holds where evidence supports it;
+- complete source/economics recon;
 - identify loss-making listings;
-- prepare Seller Hub disposition decisions;
 - preserve proven demand/sales history;
-- verify Doba/source-by-product economics.
+- contract the active catalog toward a manageable profitable core;
+- retire Doba as the default blanket eBay merchandising source while preserving valid current-order fulfillment where appropriate.
 
 ### Authenticated Seller Hub trigger
 
 When authenticated Seller Hub access is available:
 
-**OPEN ORDER TRUTH → SHIP / CANCEL / REFUND / APOLOGIZE → ACTIVE LISTING VIEWS/WATCHERS/SALES → KEEP/REPRICE/REBUILD/END → VERIFY**
+**OPEN ORDER TRUTH → SHIP / CANCEL / REFUND / APOLOGIZE → VERIFY TRACKING/HOLDS → ACTIVE LISTING VIEWS/WATCHERS/SALES → KEEP/REPRICE/REBUILD/END → VERIFY CORE COUNT**
 
-### Current economics controls
+### Current controls
 
 - weed wacker known source economics fail;
 - flashlight known MAP/economics fail;
-- cot demand proven but current historical economics thin/failing target;
-- organizer exact Doba source found but exact account cost still required;
-- other active listings require source-by-product decision.
+- cot demand is proven but historical economics are thin/failing target;
+- organizer exact Doba source exists but exact protected account cost remains required;
+- Doba is not the default future catalog source;
+- direct VEVOR/SOK/Kingboss sourcing requires explicit eBay marketplace authorization;
+- direct Renogy sourcing is not authorized for eBay under current dealer terms;
+- temporary Phase-1 target is approximately 12 active revenue listings maximum, not a quota.
 
 Do not place uneconomic rescue supplier orders to conceal late-order mistakes.
 
@@ -104,6 +97,8 @@ Do not place uneconomic rescue supplier orders to conceal late-order mistakes.
 **SHORTLIST SKU → LIVE SELLABILITY → CURRENT VEVOR PRICE/MAP → PROTECTED COST → SHIPPING/FEES → CONTRIBUTION → PROMOTE/HOLD → SHOPIFY CONSUMES RESULT**
 
 17/17 B-tier publication/media work is already complete. Do not rebuild it.
+
+Current hold is protected supplier-cost/contribution truth for the existing first-sale shortlist, not catalog construction.
 
 Return only material `PROMOTE / HOLD` decisions and exceptions.
 
@@ -175,18 +170,11 @@ If attachment/source access fails, use File Availability Incident workflow.
 
 ## MASTER RECON OS
 
-**State:** ACTIVE / BOUNDED TIKTOK VERIFICATION REPAIR SUPPORT
+**State:** STANDBY / ON-DEMAND INTEGRITY + SOURCE RECOVERY
 
-Current assignment:
+TikTok pre-submit QA assignment is closed by owner-confirmed second-appeal submission.
 
-- verify TikTok evidence-source/version integrity;
-- preserve the exact recovered license/EIN/registration/ID evidence map privately;
-- detect duplicate/misplaced evidence;
-- compare live Seller Center fields against current TikTok requirements;
-- perform pre-submit QA;
-- return to STANDBY after the repair is submitted/receipted or an exact unresolved gate is routed.
-
-Also activate on demand for:
+Activate on demand for:
 
 - conflicting versions;
 - stale management/project state;
@@ -201,15 +189,15 @@ Do not use MASTER RECON for ordinary clean execution.
 
 ## Company Operations
 
-Owns cross-lane operational support and is the primary manager for the current TikTok verification repair:
+Owns cross-lane operational support:
 
-- live TikTok Seller Center evidence-field audit and repair;
-- factual verification resubmission + receipt after RECON PASS;
 - live customer/order recovery;
 - fulfillment/source exceptions;
+- eBay payout/tracking/customer exception routing;
 - file/source recovery coordination when an operational deadline exists;
 - shipping/logistics support;
 - platform-access exception routing;
+- TikTok review monitoring only until a material result arrives;
 - making sure blocked items do not freeze unrelated work.
 
 ---
@@ -230,4 +218,4 @@ Every lane uses:
 
 ## Current company control phrase
 
-**MAKE PROFITABLE SALES → FIX CUSTOMER OBLIGATIONS → PROTECT CASH → REPAIR ACCOUNT COMPLIANCE WITH EXACT EVIDENCE → RECOVER SOURCE TRUTH → KEEP CLEAN WORK MOVING.**
+**MAKE PROFITABLE SALES → FIX CUSTOMER OBLIGATIONS → PROTECT CASH → RECOVER SOURCE TRUTH → KEEP CLEAN WORK MOVING.**
