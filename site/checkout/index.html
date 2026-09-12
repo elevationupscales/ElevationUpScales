@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/store-checkout.css?v=4.5.3">
   <script defer src="/site-shell.js?v=5.2.0"></script>
   <script defer src="/store-checkout.js?v=4.6.1"></script>
-  <script defer src="/store-direct-buy-payment-hotfix.js?v=20260912-1"></script>
+  <script defer src="/store-direct-buy-payment-hotfix.js?v=20260912-2"></script>
   <script defer src="/store-checkout-email-workflow.js?v=1.0.0"></script>
   <script defer src="/store-variant-image-enhancer.js?v=3.11.43"></script>
 <link rel="stylesheet" href="/labor-day-promo.css?v=4.4.2">
@@ -38,7 +38,7 @@
       </div>
       <div class="eus-checkout-trust" aria-label="Checkout security">
         <strong>PayPal</strong>
-        <span>Secure payment</span>
+        <span>Primary secure payment</span>
       </div>
     </div>
 
@@ -142,15 +142,15 @@
 
         <div id="checkout-status" class="eus-checkout-status" role="status">Loading checkout…</div>
 
-        <section id="checkout-shopify-direct" class="eus-checkout-hawaii" aria-label="Card and Shop Pay checkout" hidden>
-          <p class="eus-checkout-step">MORE WAYS TO PAY</p>
-          <h3>Pay by Card or Shop Pay</h3>
-          <p>Continue in Shopify's secure checkout for card payment or Shop Pay. Your exact SOK item and quantity will carry over.</p>
-          <a id="checkout-shopify-direct-link" class="eus-checkout-hawaii-cta" href="#">PAY BY CARD / SHOP PAY</a>
-          <p>Visa · Mastercard · American Express · Shop Pay</p>
-        </section>
-
         <div id="checkout-paypal" class="eus-checkout-paypal" hidden></div>
+
+        <section id="checkout-shopify-direct" class="eus-checkout-hawaii" aria-label="Standard card checkout" hidden>
+          <p class="eus-checkout-step">ALTERNATIVE PAYMENT</p>
+          <h3>Pay by Card</h3>
+          <p>Prefer a credit or debit card? Continue to Shopify's secure card checkout. Your exact SOK item and quantity will carry over.</p>
+          <a id="checkout-shopify-direct-link" class="eus-checkout-hawaii-cta" href="#">PAY BY CARD</a>
+          <p>Visa · Mastercard · American Express · Discover</p>
+        </section>
 
         <section id="checkout-success" class="eus-checkout-success" hidden>
           <h2>Payment complete</h2>
