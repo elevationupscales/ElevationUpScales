@@ -36,6 +36,23 @@
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money = (cents) => new Intl.NumberFormat("en-US", { style:"currency", currency:"USD" }).format((Number(cents)||0)/100);
   const track = (type,value,details={}) => window.EUSIntent?.track?.(type,value,{source:"homepage-commerce",...details});
+  const TRUSTED_MEDIA_HOSTS = ["elevationupscales.com","cdn.shopify.com","image.doba.com","img.vevorstatic.com","image.vevor.com","vevor.com","renogy.com","sokbattery.com","fourthwall.com","fwcdn.pl"];
+  const BLOCKED_MEDIA_HOSTS = ["walmartimages.com","walmart.com","lowes.com","alicdn.com","alibaba.com","utedusjer.no"];
+  const hostMatches = (host,suffix) => host === suffix || host.endsWith(`.${suffix}`);
+  function trustedMedia(raw) {
+    const value = String(raw || "").trim();
+    if (!value) return false;
+    if (value.startsWith("/")) return true;
+    try {
+      const url = new URL(value, location.origin), host = url.hostname.toLowerCase();
+      if (BLOCKED_MEDIA_HOSTS.some((suffix) => hostMatches(host,suffix))) return false;
+      if (host === location.hostname.toLowerCase()) return true;
+      return TRUSTED_MEDIA_HOSTS.some((suffix) => hostMatches(host,suffix));
+    } catch (_) { return false; }
+  }
+  function trustedFeatured(item) {
+    return Boolean(item && item.id && item.title && Number(item.priceCents) > 0 && trustedMedia(item.image));
+  }
 
   function installLogisticsStyles() {
     if (document.querySelector('link[href*="home-logistics-capability.css"]')) return;
@@ -74,8 +91,9 @@
 
   function render(host, rows) {
     if (!host) return;
-    if (!Array.isArray(rows) || !rows.length) { host.innerHTML = '<p class="home-commerce-empty">Current products are temporarily unavailable. Shop the universal store for current availability.</p>'; return; }
-    host.innerHTML = rows.slice(0,6).map(card).join("");
+    const trusted = Array.isArray(rows) ? rows.filter(trustedFeatured) : [];
+    if (!trusted.length) { host.innerHTML = '<p class="home-commerce-empty">Current products are temporarily unavailable. Shop the universal store for current verified availability.</p>'; return; }
+    host.innerHTML = trusted.slice(0,6).map(card).join("");
   }
 
   root.addEventListener("click", (event) => {
