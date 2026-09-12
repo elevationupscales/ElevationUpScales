@@ -36,7 +36,7 @@ jobs:
           changed="$(git diff --name-only "$current_main"...HEAD)"
           printf '%s\n' "$changed"
           test -n "$changed"
-          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/trust-repair-runtime\.js|site/script\.js|site/labor-day-promo\.js|site/checkout/index\.html|site/sok-batteries\.js|\.github/workflows/trust-surface-gate\.yml)$' || true)"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev '^(site/trust-repair-runtime\.js|site/script\.js|site/labor-day-promo\.js|site/checkout/index\.html|site/sok-batteries\.html|site/sok-batteries\.js|\.github/workflows/trust-surface-gate\.yml)$' || true)"
           if [ -n "$unexpected" ]; then
             echo "Unexpected trust-repair scope:" >&2
             printf '%s\n' "$unexpected" >&2
@@ -68,6 +68,8 @@ jobs:
           ! grep -qi 'Labor Day coupon' site/checkout/index.html
           grep -q 'Promotion code' site/checkout/index.html
           grep -q 'OFF-GRID POWER • SUPPLY • LOGISTICS' site/checkout/index.html
+          grep -q 'OFF-GRID POWER • SUPPLY • LOGISTICS' site/sok-batteries.html
+          ! grep -q 'Elevate the Experience' site/sok-batteries.html
           grep -q 'Show all published products' site/trust-repair-runtime.js
           grep -q 'shown >= 18' site/trust-repair-runtime.js
           grep -q 'trust-repair-runtime.js' site/script.js
@@ -109,6 +111,8 @@ jobs:
           grep -q 'confirmed Honolulu terminal / pickup location' /tmp/checkout.html
           ! grep -qi 'Labor Day coupon' /tmp/checkout.html
           ! grep -qi 'our Honolulu warehouse / pickup location' /tmp/checkout.html
+          grep -q 'OFF-GRID POWER • SUPPLY • LOGISTICS' /tmp/sok.html
+          ! grep -q 'Elevate the Experience' /tmp/sok.html
           grep -q 'Show all published products' /tmp/trust.js
           grep -q 'sk48v100n/home-crop.webp' /tmp/trust.js
           test -s /tmp/sk48.webp
@@ -122,5 +126,5 @@ jobs:
           echo "Main parent: $CURRENT_MAIN" >> "$GITHUB_STEP_SUMMARY"
           echo "Candidate: $CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Preview: $BASE" >> "$GITHUB_STEP_SUMMARY"
-          echo 'Trust repairs: Honolulu wording, SK48 product identity, retail branding guard, lithium curation, promotion cleanup.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Trust repairs: Honolulu wording, SK48 product identity, source-level SOK branding, retail branding guard, lithium curation, promotion cleanup.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Production promotion: NOT PERFORMED BY THIS WORKFLOW' >> "$GITHUB_STEP_SUMMARY"
