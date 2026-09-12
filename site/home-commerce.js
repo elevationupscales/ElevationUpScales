@@ -1,18 +1,7 @@
 (() => {
   "use strict";
 
-  const MISSION = "Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping. We aim to make dependable power products easier to buy and move, including streamlined fulfillment to Hawaii, Alaska, and select international markets where supplier, carrier, and compliance requirements support it.";
-
-  function installRelease66Home() {
-    const lead = document.querySelector(".reference-storefront-hero__lead");
-    if (lead) lead.textContent = MISSION;
-
-    const primary = document.querySelector(".reference-storefront-hero__primary");
-    if (primary) {
-      primary.href = "/store";
-      primary.innerHTML = "Shop Power &amp; Energy <span aria-hidden=\"true\">→</span>";
-    }
-
+  function installCommerceNavigation() {
     const shopMenu = [...document.querySelectorAll(".reference-nav-menu")].find((menu) => menu.querySelector("summary")?.textContent.trim().startsWith("Shop"));
     const dropdown = shopMenu?.querySelector(".eus-dropdown");
     if (dropdown) dropdown.innerHTML = `
@@ -27,7 +16,7 @@
     document.querySelectorAll('a[href="/rv-store"]').forEach((link) => { link.href = "/store?department=rv-outdoor"; });
   }
 
-  installRelease66Home();
+  installCommerceNavigation();
 
   const root = document.querySelector("[data-home-commerce]");
   if (!root) return;
