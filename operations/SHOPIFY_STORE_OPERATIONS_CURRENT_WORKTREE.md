@@ -1,26 +1,32 @@
 # Elevation UpScales — Shopify Store Operations Current Worktree
 
 > **CURRENT RECON OVERRIDE — 2026-09-12**  
-> **Status:** ACTIVE / P0 PUBLICATION + SHOPIFY PAYMENTS CONFIGURATION / OPERATOR-OWNED  
+> **Status:** ACTIVE / P0 SHOPIFY PAYMENTS CONFIGURATION + EXISTING PUBLIC-CATALOG TUNING / OPERATOR-OWNED  
 > **Current routing:** `CURRENT_WORK_BOARD.md` + `MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md` + `MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md`
 >
-> Fresh Company Operations live verification after the older state below established:
+> Newest owning-lane return: `SHOPIFY_EXISTING_SHOP_TUNING_RETURN_2026-09-12.md`.
 >
-> - Shopify still has **103 ACTIVE / 53 ACTIVE+PUBLISHED / 50 ACTIVE+UNPUBLISHED**;
-> - the 50 unpublished records still require `INTENDED PUBLIC / INTENTIONAL HOLD / RETIRE` classification before publication changes;
-> - **Shopify Payments currently shows `Complete setup`** and must not be treated as fully production-ready until setup is completed and reverified;
+> Current verified Shopify truth:
+>
+> - Shopify has **103 ACTIVE / 53 ACTIVE+ONLINE-STORE-PUBLISHED / 50 ACTIVE+ONLINE-STORE-UNPUBLISHED**;
+> - the complete 50-product unpublished cohort is VEVOR staging tagged `VEVOR-Profit-50-2026-09-12`;
+> - all 50 are classified **INTENTIONAL HOLD / VEVOR STAGING COHORT — DO NOT BULK PUBLISH**;
+> - the 50-product group is **not** a general Shopify publication outage and does not require a bulk classification/publication campaign;
+> - current public Online Store catalog = **53 products: 42 VEVOR / 2 Renogy / 9 SOK**;
+> - Shop currently has 0 ACTIVE products and remains an **existing-surface configuration/eligibility hold**, not a new-channel expansion trigger;
+> - Microsoft Copilot remains an already-installed surface with 103 ACTIVE product exposure; preserve/tune, do not convert this into channel expansion;
+> - **Shopify Payments latest verified onboarding state remains `Complete setup`**; the newer Shopify connector read could not re-read Payments because payment-read permissions were unavailable, so no newer payment state is inferred;
 > - native checkout UI may render card / Shop Pay controls, but payment readiness is not proven by UI visibility alone;
 > - the accepted custom Elevation PayPal path remains protected while Shopify Payments setup is incomplete;
 > - first real Shopify paid order remains open;
-> - **do not classify qualified traffic as the sole current blocker** while publication and Shopify Payments setup remain incomplete;
-> - Shopify Payments/account setup and publication are **Shopify Store Operations / owner-platform configuration work**, not a MASTER DEVELOPER task;
+> - Shopify Payments/account setup is **Shopify Store Operations + Casey/Shopify platform configuration work**, not a MASTER DEVELOPER task;
 > - MASTER DEVELOPER remains **CAUGHT UP / STANDBY / VERIFY-FIX ONLY** and wakes only on an MPM5-accepted bounded reproducible code defect after platform/configuration repair is exhausted or ruled out;
 > - paid acquisition remains blocked; existing-shop tuning remains controlling.
 >
 > **Current Shopify execution order:**  
-> `CLASSIFY 50 UNPUBLISHED → PUBLISH INTENDED-PUBLIC ONLY → COMPLETE SHOPIFY PAYMENTS OWNER/PLATFORM SETUP → REVERIFY PUBLIC URL + EXACT VARIANT + CART + GUEST CHECKOUT + PAYMENT UI → PRESERVE PAYPAL → FIRST REAL ORDER → FULFILLMENT → ACTUAL CONTRIBUTION.`
+> `KEEP 50 VEVOR STAGING PRODUCTS HIDDEN → TUNE THE 53 PUBLIC PRODUCTS + EXISTING SURFACES → COMPLETE/VERIFY SHOPIFY PAYMENTS OWNER-PLATFORM SETUP → VERIFY REPRESENTATIVE PUBLIC PRODUCT + VARIANT + CART + GUEST CHECKOUT + PAYMENT UI → PRESERVE PAYPAL → FIRST REAL ORDER → FULFILLMENT → ACTUAL CONTRIBUTION.`
 >
-> The older detailed content below remains useful vendor/catalog history, but any statement that checkout is fully production-ready, traffic is the only blocker, or the historical PM4/P0 phase queue is active is superseded by this override and newer MPM5 controls.
+> Older detailed content below remains useful vendor/catalog history, but any statement that the 50 hidden VEVOR records are an unclassified publication outage, checkout UI proves Shopify Payments production readiness, traffic is the sole blocker, or the historical PM4/P0 phase queue is active is superseded by this override and newer MPM5 controls.
 
 **Status:** ACTIVE / CURRENT STATE RECONCILED / FIRST PROFITABLE DIRECT-SITE ORDER OPEN  
 **Date:** 2026-09-12  
@@ -45,17 +51,18 @@ Current commercial target:
 
 ## Current verified control state
 
-The current override at the top of this file controls where it differs from the older snapshot below.
+The current override at the top of this file controls where it differs from older snapshots below.
 
 - Shopify storefront is public.
-- Native Shopify cart/checkout UI is reachable, but Shopify Payments production readiness remains **INCOMPLETE / `Complete setup`** until owner/platform setup is completed and reverified.
+- 53 ACTIVE products are public on Online Store; the 50 hidden VEVOR records are intentional staging holds, not a publication outage.
+- Native Shopify cart/checkout UI is reachable, but Shopify Payments production readiness remains **INCOMPLETE / latest verified `Complete setup`** until owner/platform setup is completed and reverified.
 - Custom Elevation/PayPal checkout remains an accepted working purchase path.
 - No synthetic paid order should be manufactured.
 - First real direct-site paid order remains open.
-- Publication and Shopify Payments configuration are current P0 operating gaps; qualified traffic must not be treated as the sole blocker.
+- Current P0 Shopify gap is payment onboarding/readiness plus representative existing-public-catalog purchase verification; qualified traffic must not be treated as the sole blocker while payment setup remains incomplete.
 - `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` remains mandatory for traffic assignment.
 - Paid acquisition is **HOLD company-wide** until the verified capital-recovery hole is closed and Casey explicitly reopens paid acquisition.
-- Website development is trigger-only under MPM5 streamlined routing. Shopify operations continues; a required website-code mutation routes to MPM5 only after a bounded reproducible code defect remains after platform/configuration work.
+- Website development is trigger-only under MPM5 streamlined routing. Shopify operations continues; a website-code mutation routes to MPM5 only after a bounded reproducible residual code defect remains after platform/configuration work.
 
 ## Current vendor truth consumed by Shopify
 
@@ -79,12 +86,13 @@ Current controlling pickup: `VEVOR_CURRENT_WORKTREE.md`.
   - `AXLSTCQJDSYKAZ99C001V0` — A-Frame Trailer Jack — $54.90;
   - `D25FT14IN20AHOGLOV1` — 25-ft Electric Drain Auger — $66.90;
 - `XXHGJFRSZWXDOY5PFV1` — Portable Shoe Dryer — ACTIVE at $19.90 but **HOLD TRAFFIC — ECONOMICS UNKNOWN**;
+- the separate 50-product VEVOR staging cohort remains hidden and **DO NOT BULK PUBLISH**;
 - supplier economics email reply is not a WAIT state;
 - do not rerun the completed 10-SKU current-window check without a material refresh trigger.
 
 Shopify action:
 
-**PRESERVE THREE RELEASED PRODUCTS → SUPPORT EXISTING FREE/OWNED TRAFFIC → DO NOT PROMOTE SHOE DRYER UNTIL ECONOMICS CLEAR → FIRST REAL ORDER TRIGGERS LIVE VEVOR ORDER-TIME RECHECK.**
+**KEEP STAGING COHORT HIDDEN → PRESERVE RELEASED PUBLIC PRODUCTS → SUPPORT EXISTING FREE/OWNED TRAFFIC → DO NOT PROMOTE SHOE DRYER UNTIL ECONOMICS CLEAR → FIRST REAL ORDER TRIGGERS LIVE VEVOR ORDER-TIME RECHECK.**
 
 ### Renogy
 
@@ -122,13 +130,14 @@ Controls:
 
 | Priority | Work Item | State | Primary Owner | Next Action | Close Condition |
 |---|---|---|---|---|---|
-| P0 | Shopify publication classification | ACTIVE / 50 UNPUBLISHED | Shopify Store Operations | Classify `INTENDED PUBLIC / INTENTIONAL HOLD / RETIRE`; publish intended-public only | Intended-public set is published; holds/retirements documented |
-| P0 | Shopify Payments setup | **ACTIVE / `Complete setup`** | Shopify Store Operations + Casey for owner identity/banking/compliance inputs | Complete Shopify Payments platform setup without placing sensitive data in Git; reverify payment readiness | Shopify Payments setup complete and representative guest checkout/payment verification passes |
-| P0 | First profitable Elevation direct-site order | ACTIVE | Shopify Store Operations + Vendor/Marketing/Operations handoffs | Preserve PayPal; finish publication/payment readiness; consume current `PROMOTE` candidates; detect first real order; route fulfillment; record actual contribution | Real direct-site paid order completes through correct vendor fulfillment with positive/reconciled actual contribution or owner-approved strategic exception |
+| P0 | VEVOR hidden staging cohort | **RESOLVED CLASSIFICATION / INTENTIONAL HOLD** | Shopify + VEVOR Project | Keep 50 staging-tagged products hidden; no bulk publish; release only through owning VEVOR controls | No staging product is bulk-published outside exact VEVOR authorization |
+| P0 | Shopify Payments setup | **ACTIVE / latest verified `Complete setup`** | Shopify Store Operations + Casey for owner identity/banking/compliance inputs | Complete Shopify Payments platform setup through legitimate account flow; reverify payment readiness | Shopify Payments setup complete and representative guest checkout/payment verification passes |
+| P0 | Existing public catalog purchase verification | ACTIVE / 53 PUBLIC PRODUCTS | Shopify Store Operations | Tune representative public products, Shop existing-surface eligibility and checkout/payment behavior; preserve PayPal | Representative public products pass exact URL → variant → cart → guest checkout → payment UI with current payment state understood |
+| P0 | First profitable Elevation direct-site order | ACTIVE | Shopify Store Operations + Vendor/Marketing/Operations handoffs | Preserve PayPal; finish payment readiness; use only current traffic-cleared public products; detect first real order; route fulfillment; record actual contribution | Real direct-site paid order completes through correct vendor fulfillment with positive/reconciled actual contribution or owner-approved strategic exception |
 | P0 | Preserve native Shopify + Elevation/PayPal buy paths | PAYPAL WORKING / SHOPIFY PAYMENTS SETUP INCOMPLETE | Shopify Store Operations; MPM5 only for residual code defects | Do not rebuild working PayPal; complete Shopify account/config first; then bounded representative QA | No material platform/configuration or code defect blocks valid purchase |
 | P1 | VEVOR first profitable order | ACTIVE / THREE RELEASED | VEVOR Project owns source/economics; Shopify consumes | Preserve three released heroes in allowed traffic; do not replay completed fresh-check; hold shoe dryer traffic; first order triggers exact live VEVOR recheck | First VEVOR paid order fulfills cleanly and records actual contribution |
 | P1 | Renogy exact-SKU revenue proof | ACTIVE / 2 ACTIVE + 4 DRAFT | Renogy Project owns dealer facts; Shopify consumes | Preserve current 2/4 state; existing organic tests run; first order triggers exact dealer recheck; continue four drafts independently | First Renogy paid order fulfills cleanly and launch set remains source-safe |
-| P1 | Qualified traffic handoff | ACTIVE / NOT SOLE BLOCKER | Shopify → Marketing/Social | Use exact promotion-ready products only; organic/owned/performance traffic only; do not use traffic to mask publication/payment gaps | Measurable attributable product/cart/checkout/order evidence accumulates after readiness gates are clean |
+| P1 | Qualified traffic handoff | ACTIVE / NOT SOLE BLOCKER | Shopify → Marketing/Social | Use exact promotion-ready public products only; organic/owned/performance traffic only; do not use traffic to mask payment-readiness gaps | Measurable attributable product/cart/checkout/order evidence accumulates after payment readiness is clean |
 | P1 | Store conversion analytics loop | ACTIVE | Shopify Store Operations | Measure sessions → product → cart → checkout → order → actual contribution; record sample size | Conversion/profit evidence influences hero ranking without overreading tiny samples |
 | P1 | Paid Shopify order routing | EVENT-DRIVEN | Shopify → Vendor/Shipping fulfillment owner | On real order verify payment/source/SKU; route exact vendor fulfillment; trigger required supplier recheck; record receipt | Order reaches responsible fulfillment lane with clean payment/source state |
 | P1 | Universal Catalog Shopify-side acceptance | ACTIVE / NON-CODE FACT WORK CONTINUES | Shopify + Vendor managers | Verify source-backed product/collection/filter/order-source behavior; any residual code defect becomes an MPM5 trigger packet | Representative current vendor products pass intended purchase/assisted path without bypassing controls |
@@ -136,7 +145,7 @@ Controls:
 
 ## Store / traffic control
 
-No product is traffic-cleared merely because it is ACTIVE.
+No product is traffic-cleared merely because it is ACTIVE or public.
 
 Use:
 
@@ -161,7 +170,7 @@ For a verified Shopify technical defect:
 
 Classification:
 
-- platform/account/publication/payment configuration → Shopify Store Operations / Casey as required;
+- platform/account/payment/channel configuration → Shopify Store Operations / Casey as required;
 - customer/order emergency with proven code defect → MPM5 immediately;
 - verified residual revenue-blocking code defect → MPM5 decides admission;
 - feature/cosmetic/nice-to-have → HOLD;
@@ -178,7 +187,7 @@ Do not carry an old session count forward as live truth. When conversion measure
 
 Current operating interpretation:
 
-**PUBLICATION GAP + SHOPIFY PAYMENTS SETUP GAP + SMALL TRAFFIC SAMPLE → FIX PLATFORM READINESS → USE ECONOMICALLY CLEARED OFFERS → MEASURE → DO NOT REBUILD CODE WITHOUT A VERIFIED RESIDUAL DEFECT.**
+**50 HIDDEN VEVOR = INTENTIONAL STAGING HOLD → TUNE 53 PUBLIC PRODUCTS + EXISTING SURFACES → SHOPIFY PAYMENTS SETUP STILL OPEN → SMALL TRAFFIC SAMPLE → USE ECONOMICALLY CLEARED OFFERS → MEASURE → DO NOT REBUILD CODE WITHOUT A VERIFIED RESIDUAL DEFECT.**
 
 ## Routing rules
 
@@ -206,22 +215,23 @@ Route loss-leader/negative-contribution strategy, material pricing exception, ba
 
 The following are historical/superseded and may not route current work:
 
+- `50 ACTIVE + unpublished = broken publication queue requiring classification/bulk publication` — superseded; all 50 are VEVOR staging **INTENTIONAL HOLD / DO NOT BULK PUBLISH**;
 - `VEVOR vendor input required / no PROMOTE result` — superseded by three released VEVOR products;
 - `Renogy five DRAFT / zero active` — superseded by **2 ACTIVE / 4 DRAFT**;
 - direct Shopify → MASTER DEVELOPER routing — superseded by MPM5 trigger-only routing;
-- `traffic is the only current blocker` — superseded by current publication + Shopify Payments setup evidence;
+- `traffic is the only current blocker` — superseded by current Shopify Payments setup evidence;
 - `native checkout UI visible = Shopify Payments production-ready` — false until setup completes and is reverified;
 - old exact analytics counts — historical measurement only unless freshly re-read;
 - an older Worktree/receipt may not undo a newer owning Vendor Worktree or canonical Work Board state.
 
 ## Historical startup execution receipt — 2026-09-11
 
-The prior Sept. 11 receipt remains historical evidence of the state at that time: Shopify was public, checkout paths were proven under the evidence then available, VEVOR promotion economics had not yet returned, and Renogy then showed five drafts. Those facts **must not be replayed as current routing state** after the Sept. 12 vendor/management reconciliation and newer Shopify Payments evidence.
+The prior Sept. 11 receipt remains historical evidence of the state at that time. Those facts **must not be replayed as current routing state** after the Sept. 12 owning-lane return and newer Shopify Payments evidence.
 
 ## Worker RUN
 
-**GIT FIRST → CURRENT WORK BOARD → THIS CURRENT WORKTREE → CURRENT OWNING VENDOR WORKTREE FOR ACTIVE SKU → LIVE SHOPIFY STATE AS NEEDED → CHECK REAL ORDERS → CLASSIFY/PUBLISH → COMPLETE PAYMENT CONFIGURATION → VERIFY PURCHASE PATH → EXECUTE NEXT AUTHORIZED SHOPIFY OPERATION → ROUTE ONLY RESIDUAL CODE DEFECTS TO MPM5 → RECORD MATERIAL DELTA → CONTINUE.**
+**GIT FIRST → CURRENT WORK BOARD → THIS CURRENT WORKTREE → `SHOPIFY_EXISTING_SHOP_TUNING_RETURN_2026-09-12.md` → CURRENT OWNING VENDOR WORKTREE FOR ACTIVE SKU → LIVE SHOPIFY STATE AS NEEDED → CHECK REAL ORDERS → KEEP STAGING COHORT HIDDEN → TUNE PUBLIC/EXISTING SURFACES → COMPLETE/VERIFY PAYMENT CONFIGURATION → VERIFY PURCHASE PATH → EXECUTE NEXT AUTHORIZED SHOPIFY OPERATION → ROUTE ONLY RESIDUAL CODE DEFECTS TO MPM5 → RECORD MATERIAL DELTA → CONTINUE.**
 
 ## Control phrase
 
-**PUBLISH CORRECTLY → COMPLETE SHOPIFY PAYMENTS → PRESERVE PAYPAL → VERIFY PURCHASE PATH → CURRENT VENDOR TRUTH → PROFIT CHECK → REAL ORDER → CORRECT FULFILLMENT → ACTUAL CONTRIBUTION; DEV ONLY ON PROVEN RESIDUAL CODE DEFECT.**
+**50 HIDDEN VEVOR = INTENTIONAL HOLD → TUNE THE 53 PUBLIC PRODUCTS → COMPLETE/VERIFY SHOPIFY PAYMENTS → PRESERVE PAYPAL → VERIFY PURCHASE PATH → CURRENT VENDOR TRUTH → PROFIT CHECK → REAL ORDER → CORRECT FULFILLMENT → ACTUAL CONTRIBUTION; DEV ONLY ON PROVEN RESIDUAL CODE DEFECT.**
