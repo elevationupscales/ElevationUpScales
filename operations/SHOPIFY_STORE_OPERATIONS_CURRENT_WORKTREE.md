@@ -1,176 +1,197 @@
 # Elevation UpScales — Shopify Store Operations Current Worktree
 
-**Status:** ACTIVE WORKTREE / PRIMARY WORKER ACTIVE  
-**Date:** 2026-09-11  
+**Status:** ACTIVE / CURRENT STATE RECONCILED / FIRST PROFITABLE DIRECT-SITE ORDER OPEN  
+**Date:** 2026-09-12  
 **Owner:** Casey Young  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
 **Reporting Manager:** Peter Torres — Ecommerce & Vendor Operations Manager  
 **Primary Worker:** Shopify Store Operations Worker  
 **Worker State:** ACTIVE  
 **Lane SOP:** `SHOPIFY_STORE_OPERATIONS_SOP_V1_0.md`  
-**Worker Prompt:** `SHOPIFY_STORE_OPERATIONS_WORKER_PROMPT_V1_0.md`
+**Worker Prompt:** `SHOPIFY_STORE_OPERATIONS_WORKER_PROMPT_V1_0.md`  
+**P0 Coding/Deployment Control:** `MANAGEMENT_CODING_REPAIR_PLAN_2026-09-12.md` + `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`  
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
 ## Current objective
 
-Build repeatable profitable direct-site commerce through the existing Shopify store without duplicating vendor management or development work.
+Build repeatable profitable direct-site commerce through the existing Shopify store without duplicating vendor management, marketing or development work.
 
-Current startup close target:
+Current commercial target:
 
-**FIRST PROFITABLE ELEVATION DIRECT-SITE ORDER → CORRECT FULFILLMENT → ACTUAL PROFITABILITY RECEIPT → REPEATABLE PROFITABLE SALES FLOW**
+**FIRST PROFITABLE ELEVATION DIRECT-SITE ORDER → CORRECT FULFILLMENT → ACTUAL CONTRIBUTION RECEIPT → REPEATABLE PROFITABLE SALES FLOW**
 
-## Current verified baseline
+## Current verified control state
 
-- Shopify password protection is lifted.
-- Native Shopify storefront is public.
-- Native Shopify cart/checkout has been proven through payment-entry on a representative VEVOR product.
-- Current management state reports custom Elevation PayPal checkout live acceptance after the trusted-origin repair.
-- PR #133 / merge `97bd22023b0ae02ec5dbc11d6b5cb45ce6f6a7da` routes Universal Store direct `Buy Now` actions into the supported checkout source lanes: SOK/lithium products → `source=lithium`; RV/other currently supported direct items → `source=rv`. Do not restore the unsupported `source=universal` checkout route.
+- Shopify storefront is public.
+- Native Shopify cart/checkout is working from the latest verified acceptance state.
+- Custom Elevation/PayPal checkout remains an accepted working purchase path.
 - No synthetic paid order should be manufactured.
-- Current direct-site traffic is extremely low; recent Shopify analytics showed 8 sessions in the 7-day window at the measurement point, 1 cart addition, 1 checkout reached and 0 completed checkout.
-- Current referral traffic was direct/unknown; no measurable social-referral traffic was present at the measurement point.
-- `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` is controlling for active product promotion.
+- First real direct-site paid order remains open.
+- Checkout availability is not the primary current blocker; qualified traffic/conversion to economically cleared offers remains the operating bottleneck from the latest connected evidence.
+- `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` remains mandatory for traffic assignment.
+- Paid acquisition is **HOLD company-wide** until the verified capital-recovery hole is closed and Casey explicitly reopens paid acquisition.
+- Website code is under the active P0 coding/deployment stabilization freeze. Shopify operations may continue; required website-code mutations route to PM4 and the coding-stabilization Worktree rather than directly to MASTER DEVELOPER.
+
+## Current vendor truth consumed by Shopify
+
+### SOK
+
+- protected reference direct-site battery lane;
+- existing SOK Project/workflow remains controlling;
+- no sweep-driven rebuild/reprice/deactivation;
+- Shopify consumes current SOK source truth rather than recreating it.
+
+### VEVOR
+
+Current controlling pickup: `VEVOR_CURRENT_WORKTREE.md`.
+
+- 19 A-tier products live;
+- 17/17 qualified B-tier records ACTIVE/media-complete;
+- current 10-SKU first-sale fresh-check is COMPLETE;
+- seven shortlist SKUs remain sellability/stock holds;
+- **three exact SKUs are already `PROMOTE — FREE/OWNED TRAFFIC ONLY`:**
+  - `XXKLJT124INCLJF0QV0` — Camper Levelers — $39.90;
+  - `AXLSTCQJDSYKAZ99C001V0` — A-Frame Trailer Jack — $54.90;
+  - `D25FT14IN20AHOGLOV1` — 25-ft Electric Drain Auger — $66.90;
+- `XXHGJFRSZWXDOY5PFV1` — Portable Shoe Dryer — ACTIVE at $19.90 but **HOLD TRAFFIC — ECONOMICS UNKNOWN**;
+- supplier economics email reply is not a WAIT state;
+- do not rerun the completed 10-SKU current-window check without a material refresh trigger.
+
+Shopify action:
+
+**PRESERVE THREE RELEASED PRODUCTS → SUPPORT EXISTING FREE/OWNED TRAFFIC → DO NOT PROMOTE SHOE DRYER UNTIL ECONOMICS CLEAR → FIRST REAL ORDER TRIGGERS LIVE VEVOR ORDER-TIME RECHECK.**
+
+### Renogy
+
+Current controlling pickup: `RENOGY_CURRENT_WORKTREE.md` plus live Shopify evidence.
+
+Current state is **2 ACTIVE / 4 DRAFT**.
+
+ACTIVE:
+
+1. `RNG-CTRL-ADV30-LI-US` — Adventurer Li 30A PWM — $82.99 — strong organic/owned hero.
+2. `RBM500-US` — 500A Battery Monitor with Shunt — $87.99 — thinner free/owned test.
+
+DRAFT:
+
+- `RSP100DCT-US` — $99.99;
+- `RBC2125DS-21W-US` — $299.99;
+- `RNG-INVT-2000-12V-P2-US` — $285.99;
+- `RNG-CTRL-RVR40` — $152.44.
+
+Controls:
+
+- historical `5 DRAFT / 0 ACTIVE` and `1 ACTIVE / 5 DRAFT` states are superseded;
+- do not recreate/deactivate active products because of stale receipts or older Project Source text;
+- existing Metricool Adventurer/RBM500 organic posts own the current tests; do not duplicate them;
+- first real Renogy order triggers exact dealer SKU/orderability/backorder/cost/shipping/contribution recheck before supplier purchase;
+- resolve four DRAFT products independently.
+
+### Kingboss
+
+- approved Stage-1 proving lane;
+- exact catalog/SKU mapping, protected pricing/MAP/channel, warranty/RMA and model-specific compliance remain owning-lane controls;
+- do not create speculative broad Shopify catalog or a 100-unit commitment from this Worktree.
 
 ## Work queue
 
-| Priority | Work Item | State | Primary Owner | Blocker / Input | Next Action | Close Condition |
-|---|---|---|---|---|---|---|
-| P0 | First profitable Elevation direct-site order | ACTIVE | Shopify Store Operations Worker + Vendor/Marketing/Operations handoffs | Needs profit-qualified products + qualified traffic + real customer event | Keep working buy paths stable; consume `PROMOTE` candidates; route free/owned traffic; detect first real order; route fulfillment; record actual contribution | Real direct-site paid order completes through correct vendor fulfillment with positive actual contribution or a documented owner-approved strategic exception |
-| P0 | VEVOR first-sale profitability qualification | ACTIVE / VENDOR INPUT REQUIRED | VEVOR Manager + Price-Control Specialist; Shopify worker consumes result | Protected current supplier cost, live sellability/MAP and variable order costs | Use `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md`; return `PROMOTE / HOLD — ECONOMICS UNKNOWN / HOLD — NEGATIVE CONTRIBUTION`; Shopify worker merchandises only `PROMOTE` items | First 3–5 profitable VEVOR candidates are confirmed and routed to direct-site merchandising/traffic |
-| P0 | Preserve native Shopify + Elevation/PayPal buy paths | ACTIVE / MONITOR | Shopify worker for store operations; MASTER DEVELOPER for code defects | Only a verified live defect | Run bounded representative product/cart/checkout checks when needed; do not rewrite working checkout | No material store/cart/checkout defect blocks valid purchase |
-| P1 | Renogy five-draft activation | ACTIVE / CONTROLLED | Shopify worker + Renogy Manager/Specialist | Three exact SKU/orderability holds; exact media/current price/current sellability before activation | Preserve five DRAFT records; advance `RSP100DCT-US` and `RBM500-US`; consume portal/vendor results for other three; activate clean SKUs individually | Clean Renogy launch products are ACTIVE and pass universal store QA without ambiguous SKU publication |
-| P1 | Universal Catalog Shopify-side acceptance | ACTIVE | Shopify worker + Universal Catalog/Developer + Vendor managers | Vendor-by-vendor verified source facts | Normalize verified vendor outputs into product/collection/filter/order-source flow; preserve source identity; run representative QA | SOK/VEVOR/Renogy/Kingboss participate in intended Shopify/store path as each vendor becomes activation-ready |
-| P1 | Qualified traffic handoff | ACTIVE / TRAFFIC BOTTLENECK | Shopify worker → Marketing/Social lane | Need profit-qualified product targets | Return 3–5 promotion-ready products with exact product identity, verified price, core value proposition and working buy path; Marketing executes traffic | Measurable qualified referral sessions/cart/checkout activity begins and is attributable enough to learn from |
-| P1 | Store conversion analytics loop | ACTIVE | Shopify worker | Real traffic/order sample | Track sessions → cart → checkout → order → order value → actual contribution → referrer/product; do not overinterpret tiny samples | Repeatable conversion and profitability reporting influences merchandising priority |
-| P1 | Paid Shopify order routing | EVENT-DRIVEN | Shopify worker → Vendor/Shipping fulfillment owner | Trigger = real paid direct-site order | Verify payment/order/source; route fulfillment; protect PII; trigger vendor recheck; record receipt | Order reaches responsible fulfillment lane with clean source/payment state |
-| P2 | Product/collection cleanup and enrichment | QUEUED / NON-BLOCKING | Shopify worker | P0/P1 work takes precedence | Improve only source-backed tags/media/organization/data that materially helps discoverability or conversion | No meaningful catalog hygiene issue impairs selling or routing |
+| Priority | Work Item | State | Primary Owner | Next Action | Close Condition |
+|---|---|---|---|---|---|
+| P0 | First profitable Elevation direct-site order | ACTIVE | Shopify Store Operations + Vendor/Marketing/Operations handoffs | Preserve working purchase paths; consume current `PROMOTE` candidates; support allowed free/owned traffic; detect first real order; route fulfillment; record actual contribution | Real direct-site paid order completes through correct vendor fulfillment with positive/reconciled actual contribution or owner-approved strategic exception |
+| P0 | Preserve native Shopify + Elevation/PayPal buy paths | ACTIVE / MONITOR | Shopify Store Operations; PM4/P0 coding recovery only for code defects | Run bounded representative QA only when needed; do not rebuild working checkout; route verified code defects to PM4 | No material store/cart/checkout defect blocks valid purchase |
+| P1 | VEVOR first profitable order | ACTIVE / THREE RELEASED | VEVOR Project owns source/economics; Shopify consumes | Preserve three released heroes in allowed traffic; do not replay completed fresh-check; hold shoe dryer traffic; first order triggers exact live VEVOR recheck | First VEVOR paid order fulfills cleanly and records actual contribution |
+| P1 | Renogy exact-SKU revenue proof | ACTIVE / 2 ACTIVE + 4 DRAFT | Renogy Project owns dealer facts; Shopify consumes | Preserve current 2/4 state; existing organic tests run; first order triggers exact dealer recheck; continue four drafts independently | First Renogy paid order fulfills cleanly and launch set remains source-safe |
+| P1 | Qualified traffic handoff | ACTIVE / TRAFFIC BOTTLENECK | Shopify → Marketing/Social | Return exact promotion-ready products with current URL/price/value proposition; organic/owned/performance traffic only under current owner controls | Measurable attributable product/cart/checkout/order evidence accumulates |
+| P1 | Store conversion analytics loop | ACTIVE | Shopify Store Operations | Measure sessions → product → cart → checkout → order → actual contribution; record sample size | Conversion/profit evidence influences hero ranking without overreading tiny samples |
+| P1 | Paid Shopify order routing | EVENT-DRIVEN | Shopify → Vendor/Shipping fulfillment owner | On real order verify payment/source/SKU; route exact vendor fulfillment; trigger required supplier recheck; record receipt | Order reaches responsible fulfillment lane with clean payment/source state |
+| P1 | Universal Catalog Shopify-side acceptance | ACTIVE / NON-CODE FACT WORK CONTINUES | Shopify + Vendor managers | Verify source-backed product/collection/filter/order-source behavior; any required code mutation becomes a PM4/P0 coding-recovery input | Representative current vendor products pass intended purchase/assisted path without bypassing P0 code controls |
+| P2 | Product/collection cleanup and enrichment | QUEUED / NON-BLOCKING | Shopify Store Operations | Improve only source-backed Shopify data that materially helps selling and does not require frozen website code | No meaningful catalog hygiene issue impairs selling/routing |
 
-## Renogy protected draft state
+## Store / traffic control
 
-Do not recreate these records.
+No product is traffic-cleared merely because it is ACTIVE.
 
-| Staged SKU | State | Shopify action |
-|---|---|---|
-| `RSP100DCT-US` | ADVANCED / ACTIVATION QA | Preserve DRAFT until exact final media/price/sellability QA clears; may then activate individually |
-| `RBM500-US` | ADVANCED / ACTIVATION QA | Preserve DRAFT until exact final media/price/sellability QA clears; warranty language may remain bounded |
-| `RBC2125DS-21W-US` | HOLD | Hold only current dealer orderability/delayed-order authority |
-| `RNG-INVT-2000-12V-P2-US` | HOLD | Hold exact current supplier generation/order-source identity |
-| `RNG-CTRL-RVR40` | HOLD | Hold exact current variant identity |
+Use:
 
-## VEVOR first-sale lane
+**EXACT SKU → AUTHORIZED SOURCE → CURRENT SELLABILITY / AUTHORIZED DELAYED-ORDER PATH → CURRENT PRICE/MAP → LANDED VARIABLE COST → EXPECTED CONTRIBUTION → WORKING CHECKOUT → FULFILLMENT RELIABILITY → PROMOTE.**
 
-The current preliminary shortlist is in:
+Traffic states remain:
 
-`VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md`
+- `PROMOTE — FREE/OWNED TRAFFIC ONLY` while owner paid-ad lock is active;
+- `HOLD — ECONOMICS UNKNOWN`;
+- `HOLD — NEGATIVE CONTRIBUTION`;
+- `OWNER REVIEW — STRATEGIC EXCEPTION`.
 
-Do not promote based on price alone.
+Shopify `unitCost:null` or blank unit cost is a **data-quality gap, not zero cost**.
 
-Required sequence:
+## Website-code boundary during P0 stabilization
 
-**LIVE SELLABILITY → CURRENT MAP/PRICE FLOOR → CURRENT SUPPLIER COST → SHIPPING/VARIABLE COST → PAYMENT/PLATFORM FEES → POSITIVE CONTRIBUTION → PROMOTE**
+Shopify Store Operations does not route code directly to MASTER DEVELOPER while the P0 coding freeze is active.
 
-Shopify worker must not write protected raw supplier cost to public Git.
+For a verified Shopify technical defect:
 
-## Universal Catalog control
+**SHOPIFY LIVE EVIDENCE → EXACT CUSTOMER/ORDER/REVENUE IMPACT → PM4 → P0 CHANGE-ADMISSION CLASSIFICATION → `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` → MASTER DEVELOPER IF ADMITTED.**
 
-Shopify-side flow:
+Classification:
 
-**VENDOR PROJECT SOURCE → VERIFIED/NORMALIZED PRODUCT → SHOPIFY PRODUCT → COLLECTION/FILTER/TAGS → PRODUCT PAGE → CART/CHECKOUT OR APPROVED ASSISTED PATH → ORDER SOURCE → FULFILLMENT ROUTE**
+- customer/order emergency → PM4/P0 immediately;
+- verified revenue blocker → PM4 decides recovery admission/order;
+- feature/cosmetic/nice-to-have → HOLD;
+- protected-top change → HOLD + exact Casey approval;
+- unclear → hold only that mutation and continue non-code Shopify work.
 
-Current vendor high-level state:
+No parallel developer Worktree may be created from this lane.
 
-- **SOK:** strongest/reference direct-site battery lane; exact source rules remain SOK-controlled.
-- **VEVOR:** large live catalog / checkout proven / first profitable direct order still open.
-- **Renogy:** five DRAFT Shopify products / source package received / individual activation QA.
-- **Kingboss:** approved relationship / supplier/compliance reconciliation active / Shopify catalog wave not yet activation-ready.
+## Current analytics interpretation
 
-## Store analytics baseline
+Historical and recent analytics receipts show a very small traffic sample with cart/checkout reach but no completed Shopify order at the latest verified checkpoint.
 
-At the latest measurement point:
+Do not carry an old session count forward as live truth. When conversion measurement is needed, use a fresh Shopify analytics read and record the time window.
 
-- 7-day sessions: 8
-- current-day sessions: 7
-- sessions with cart additions: 1
-- sessions reaching checkout: 1
-- completed checkout: 0
-- device mix: 8 desktop sessions in the measured 7-day data
-- referral source: 7 direct / 1 unknown
-- measurable social-referral sessions: 0
+Current operating interpretation remains:
 
-Interpretation:
-
-**WORKING PURCHASE PATH EXISTS → TRAFFIC SAMPLE IS TOO SMALL → PROFIT QUALIFICATION FIRST → THEN DRIVE QUALIFIED TRAFFIC.**
-
-Do not treat this tiny sample as a durable conversion rate.
-
-## Latest startup execution receipt — 2026-09-11 19:30 MDT
-
-- `GIT FIRST` completed against current `main`; latest observed pre-worker startup commit was `8000892ba4fd0f08f92bcad10519d52448e34f21`.
-- Master SOP, Glossary, Current Work Board, Shopify lane SOP, Shopify Current Worktree, Worker Registry and Direct-Site Profitability Gate were read from current `main`.
-- VEVOR Project Source was read before consuming VEVOR product state. The older VEVOR source still contains stale storefront-password language; the newer higher-authority Current Work Board / Shopify Worktree records the password gate as closed, so no rollback was performed.
-- Live connected Shopify store identity verified through Shopify Admin tooling.
-- Live VEVOR `status:active AND price:<=100` catalog query returned the current low-friction candidate pool, including the ten preliminary shortlist SKUs. No product status or price write was made.
-- Recent Shopify order check returned **0 orders**. No paid-order routing event exists yet.
-- Shopify analytics recheck for the current 7-day window returned **8 sessions / 1 cart addition / 1 checkout reached / 0 completed checkout**, consistent with the existing tiny-sample baseline.
-- VEVOR profitability classification is **still vendor-input controlled**. No `PROMOTE` result was found in current Git; Shopify will not guess protected supplier cost or promote economics-unknown products.
-- Live Renogy check confirmed exactly **five DRAFT products / zero activation action taken**. All five currently have no featured media in Shopify. `RSP100DCT-US` and `RBM500-US` remain advanced activation-QA candidates; the other three exact holds remain contained.
-- Registry startup state was changed from `OPEN TASK / STANDBY` to `ACTIVE` in commit `77725244806c2c273e3d2f7010af3a3183bbd540`.
-- Active-worker boundary remains respected: VEVOR and Renogy managers/specialists remain ACTIVE for protected vendor facts. Shopify will consume their verified outputs rather than duplicate those tasks.
-
-**Current next executable Shopify action:** preserve working buy paths and monitor orders while waiting for the VEVOR `PROMOTE/HOLD` handoff; consume the first clean vendor result immediately. In parallel, continue non-destructive Renogy draft QA only from verified vendor outputs and do not activate a draft until exact media/current price/current sellability clears.
+**WORKING PURCHASE PATH EXISTS → QUALIFIED TRAFFIC SAMPLE IS SMALL → USE ECONOMICALLY CLEARED OFFERS → MEASURE → DO NOT REBUILD CHECKOUT WITHOUT A VERIFIED DEFECT.**
 
 ## Routing rules
 
-### Route to Vendor Project Manager
+### Vendor Project Manager
 
-- cost / MAP / price floor;
-- availability/orderability;
-- exact SKU identity;
-- supplier media/source rights;
-- backorder/preorder rules;
-- warranty/returns/fulfillment facts.
+Route supplier cost, MAP/floor, availability/orderability, exact SKU identity, source media, backorder/preorder, warranty/returns and fulfillment facts to the owning Vendor Project.
 
-### Route to MASTER DEVELOPER
+### PM4 / P0 coding recovery
 
-- live code/theme defect;
-- custom checkout backend/frontend defect;
-- PayPal/custom payment code;
-- API/backend/deployment issue.
+Route verified code/theme/custom-checkout/API/backend/deployment defects with exact customer/order/revenue impact to PM4. During the active freeze, PM4 controls admission into the coding-stabilization Worktree; Shopify does not directly assign MASTER DEVELOPER.
 
-### Route to Company Operations
+### Company Operations
 
-- refunds/credits/material order remedy;
-- fulfillment exception spanning projects;
-- account/platform exception;
-- cross-worker conflict.
+Route refunds/credits/material order remedy, fulfillment exceptions spanning Projects, account/platform exceptions and cross-worker operating conflict.
 
-### Route to Marketing/Social
+### Marketing / Social
 
-- profit-qualified product promotion;
-- organic/free traffic execution;
-- social content/campaign work.
+Route only exact profit-qualified products for organic/free/permitted performance traffic. Paid acquisition remains blocked by owner rule.
 
-### Route to Casey
+### Casey
 
-- loss-leader/negative-contribution strategy;
-- material pricing exception;
-- bank/payment/payout identity change;
-- binding financial/legal commitment.
+Route loss-leader/negative-contribution strategy, material pricing exception, bank/payment/payout identity changes, binding financial/legal commitments and protected-top exceptions.
 
-## Worker startup checklist
+## Replay guards
 
-When the new worker chat starts:
+The following are historical/superseded and may not route current work:
 
-- [x] GIT FIRST
-- [x] Read Master SOP + Glossary
-- [x] Read Current Work Board
-- [x] Read Shopify Store Operations SOP
-- [x] Read this Current Worktree
-- [x] Read Master Worker Registry
-- [x] Verify live Shopify Admin/store state
-- [x] Verify no competing worker owns the selected first task
-- [x] Self-register / update Registry to ACTIVE
-- [x] Start P0 from last verified state
+- `VEVOR vendor input required / no PROMOTE result` — superseded by three released VEVOR products;
+- `Renogy five DRAFT / zero active` — superseded by **2 ACTIVE / 4 DRAFT**;
+- direct Shopify → MASTER DEVELOPER routing during P0 freeze — superseded by PM4/P0 coding recovery;
+- old exact analytics counts — historical measurement only unless freshly re-read;
+- an older Worktree/receipt may not undo a newer owning Vendor Worktree or canonical Work Board state.
+
+## Historical startup execution receipt — 2026-09-11
+
+The prior Sept. 11 receipt remains historical evidence of the state at that time: Shopify was public, checkout paths were proven, VEVOR promotion economics had not yet returned, and Renogy then showed five drafts. Those facts **must not be replayed as current routing state** after the Sept. 12 vendor/management reconciliation.
+
+## Worker RUN
+
+**GIT FIRST → CURRENT WORK BOARD → THIS CURRENT WORKTREE → CURRENT OWNING VENDOR WORKTREE FOR ACTIVE SKU → LIVE SHOPIFY STATE AS NEEDED → CHECK REAL ORDERS → EXECUTE NEXT AUTHORIZED SHOPIFY OPERATION → ROUTE CODE DEFECTS TO PM4/P0 → RECORD MATERIAL DELTA → CONTINUE.**
 
 ## Control phrase
 
-**PROFIT-QUALIFIED PRODUCT → SHOPIFY BUY PATH → QUALIFIED TRAFFIC → SALE → CORRECT FULFILLMENT → ACTUAL PROFIT → SCALE.**
+**CURRENT VENDOR TRUTH → PROFIT CHECK → SHOPIFY EXECUTION → ALLOWED TRAFFIC → REAL ORDER → CORRECT FULFILLMENT → ACTUAL CONTRIBUTION; WEBSITE CODE ROUTES THROUGH PM4/P0 RECOVERY.**
