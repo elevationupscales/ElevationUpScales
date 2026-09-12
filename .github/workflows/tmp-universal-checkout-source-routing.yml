@@ -1,0 +1,53 @@
+name: Temporary universal checkout source routing repair
+
+on:
+  push:
+    branches:
+      - work/universal-checkout-source-routing-0911
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/universal-checkout-source-routing-0911
+      - name: Repair universal checkout source routing and add regression
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          runtime = Path('site/universal-store.js')
+          text = runtime.read_text()
+          old = '''  function action(p,s){const id=text(p.id||""),sku=text(p.sku||p.supplierSku||""),title=text(p.title||p.name||"Product"),detail=`/product?id=${encodeURIComponent(id||sku)}&store=universal`;if(s.buy)return{href:`/checkout/?source=universal&id=${encodeURIComponent(id||sku)}&name=${encodeURIComponent(title)}`,label:/prepurchase|preorder|backorder/i.test(String(p.availabilityMode||""))?"Purchase Options":"Buy Now",detail};if(p.sokProduct)return{href:`/sok-order.html?sku=${encodeURIComponent(sku)}&intent=purchase_options`,label:"See Purchase Options",detail};return{href:detail,label:s.code==="out"?"View Product":"Confirm Availability",detail};}'''
+          new = '''  function action(p,s){const id=text(p.id||""),sku=text(p.sku||p.supplierSku||""),title=text(p.title||p.name||"Product"),detail=`/product?id=${encodeURIComponent(id||sku)}&store=universal`,section=text(p.storeSection||p.store_section).toLowerCase(),checkoutSource=p.sokProduct||section==="lithium-batteries"?"lithium":"rv";if(s.buy)return{href:`/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id||sku)}&name=${encodeURIComponent(title)}`,label:/prepurchase|preorder|backorder/i.test(String(p.availabilityMode||""))?"Purchase Options":"Buy Now",detail};if(p.sokProduct)return{href:`/sok-order.html?sku=${encodeURIComponent(sku)}&intent=purchase_options`,label:"See Purchase Options",detail};return{href:detail,label:s.code==="out"?"View Product":"Confirm Availability",detail};}'''
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected one universal action function, found {text.count(old)}')
+          runtime.write_text(text.replace(old,new,1))
+
+          tests = Path('tests/universal-store.test.cjs')
+          t = tests.read_text()
+          block = r'''
+
+test('universal store routes direct checkout into supported checkout source lanes', () => {
+  const runtime = read('site/universal-store.js');
+  assert.doesNotMatch(runtime, /\/checkout\/\?source=universal/);
+  assert.match(runtime, /checkoutSource=p\.sokProduct\|\|section==="lithium-batteries"\?"lithium":"rv"/);
+  assert.match(runtime, /\/checkout\/\?source=\$\{checkoutSource\}/);
+});
+'''
+          if "universal store routes direct checkout into supported checkout source lanes" not in t:
+              tests.write_text(t.rstrip()+block)
+          PY
+          rm .github/workflows/tmp-universal-checkout-source-routing.yml
+          git diff --check
+          npm test
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add site/universal-store.js tests/universal-store.test.cjs .github/workflows/tmp-universal-checkout-source-routing.yml
+          git commit -m 'Fix universal store checkout source routing'
+          git push origin HEAD:work/universal-checkout-source-routing-0911
