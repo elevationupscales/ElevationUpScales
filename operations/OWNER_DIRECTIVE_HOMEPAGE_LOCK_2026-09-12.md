@@ -1,82 +1,95 @@
-# ELEVATION UPSCALES — OWNER DIRECTIVE: HOMEPAGE STORE WORK / HERO LOCK
+# ELEVATION UPSCALES — OWNER DIRECTIVE: HOMEPAGE COMMERCE BOUNDARY / TOP EXPERIENCE HARD LOCK
 
 **Owner:** Casey Young  
 **Effective:** 2026-09-12  
-**State:** ACTIVE / HOMEPAGE STORE WORK AUTHORIZED / HERO + DESIGN + PRINT-COPY LOCKED  
-**Applies To:** PM4, Company Operations, MASTER DEVELOPER, Shopify Store Operations, Marketing/Social, Catalog/Commerce workers, vendor Projects, and Commercial Revenue Acceleration work
+**State:** ACTIVE / COMMERCE EDITS AUTHORIZED / PROTECTED TOP HOMEPAGE NO TOUCH  
+**Applies To:** PM4, Company Operations, MASTER RECON, MASTER DEVELOPER, Shopify Store Operations, Marketing/Social, Catalog/Commerce workers, vendor Projects, and Commercial Revenue Acceleration work
 
 ## Owner decision
 
-The prior full homepage freeze is narrowed.
+Casey's newest explicit direction controls under `MASTER_SOP_V1_0.md`.
 
-**Homepage store merchandising work is authorized.**
+**Store, catalog, product/item, shopability and commerce-navigation work may be edited.**
 
-**The homepage hero is locked and must not be changed, period.**
+**The protected top homepage experience that was carefully built over multiple days is a hard no-touch surface unless Casey later explicitly authorizes the exact change.**
 
-The existing homepage design and existing printed/copy wording also remain locked unless Casey gives a newer explicit instruction.
+Revenue acceleration, hero-product ranking, vendor activation or merchandising work does not by itself authorize a change to that protected top experience.
 
-## Authorized homepage work
+## Authorized commerce scope
 
-Workers may use existing homepage store/product merchandising areas outside the hero to support approved revenue acceleration.
+Workers may improve commerce functionality, including:
 
-Within the existing approved homepage structure, workers may:
+- catalog and product/item records;
+- collections and store pages;
+- store/category/product browsing and navigation;
+- exact product routes and links;
+- Buy Now / checkout / payment routing;
+- product shopability and purchase-path repairs;
+- availability, supplier/source and fulfillment bindings;
+- store search/filter/browse behavior;
+- commerce APIs and integrations;
+- Shopify, Fourthwall and other approved store surfaces;
+- catalog/data work used by commerce surfaces, provided the protected top homepage output remains unchanged.
 
-- surface approved store products in existing non-hero merchandising modules;
-- populate, rotate, or reorder products within existing non-hero store/product slots where the existing component already supports it;
-- bind or correct exact product/store routes used by existing non-hero merchandising components;
-- update product-source/data bindings needed to show the correct approved SKU in an existing non-hero store module;
-- repair broken non-hero store links, source routing, availability state, or checkout routing;
-- route qualified traffic from existing non-hero store sections to approved products, collections, or store pages;
-- perform bounded technical work required for existing non-hero store merchandising modules to function correctly.
+Catalog availability and product promotion remain separate decisions. A product may remain safely available without receiving concentrated traffic.
 
-## Hard lock — homepage hero
+## Protected top homepage experience — HARD LOCK
 
-Do not change the homepage hero under this directive.
+Do not change the existing top homepage experience unless Casey gives a new explicit instruction authorizing the exact change.
 
-This includes no changes to:
+Protected scope includes, directly or indirectly:
 
-- hero layout;
-- hero imagery;
-- hero background;
-- hero headline or text;
-- hero buttons or CTAs;
-- hero links;
-- hero products;
-- hero animations;
-- hero styling;
-- hero data bindings;
-- hero ordering or rotation;
-- hero visibility or placement.
+- top/hero layout and structure;
+- imagery, backgrounds and visual composition;
+- headlines, body copy, labels and other printed wording;
+- CTA/button text, destinations and behavior;
+- typography, colors, spacing and styling;
+- animation, slide, rotation and timing behavior;
+- top/hero product bindings, ordering or selection;
+- top/hero links and data bindings;
+- visibility, placement and responsive behavior;
+- runtime behavior of the protected top section;
+- any shared data, API, catalog-ordering or backend change that would alter what the protected top renders.
 
-**HOMEPAGE HERO = NO-TOUCH SURFACE UNTIL CASEY EXPLICITLY UNLOCKS IT.**
+Technical implementation location does not determine authority. A change in a shared API or backend is still a protected-top change when it changes the protected top's rendered/runtime output.
 
-## Still locked — design and printed/copy content
+## Shared-dependency rule
 
-Do not, under this authorization:
+Before any commerce change that touches a dependency shared with the protected top:
 
-- redesign the homepage;
-- change overall homepage layout or section architecture;
-- change typography, spacing system, styling system, colors, visual language, navigation presentation, or component design;
-- rewrite or replace homepage headlines, body copy, slogans, labels, printed wording, or general marketing copy;
-- create new homepage sections merely because the commercial sweep exists;
-- make cosmetic changes outside bounded non-hero store merchandising work.
+**COMMERCE CHANGE → CHECK PROTECTED TOP DEPENDENCY → VERIFY TOP OUTPUT REMAINS UNCHANGED → EXECUTE COMMERCE CHANGE.**
 
-## Other commerce surfaces remain active
+If the proposed change would alter the protected top output:
 
-Revenue acceleration continues through:
+**HOLD ONLY THAT CHANGE → ROUTE EXACT DELTA TO CASEY → WAIT FOR EXPLICIT APPROVAL.**
 
-- exact product pages;
-- Shopify collections/store surfaces;
-- Universal Catalog/store routes;
-- Elevation Gear/apparel surfaces;
-- Fourthwall native product/store routes;
-- vendor/category pages;
-- social/creator deep links;
-- email/direct links;
-- checkout/payment/fulfillment fixes;
-- admin/operations tooling;
-- approved non-hero homepage store merchandising areas.
+The rest of the commerce work continues.
+
+## Homepage-connected commerce
+
+Commerce functionality connected to the homepage may be repaired or improved only when the protected top experience remains unchanged.
+
+This permits underlying store/catalog/shopability/navigation work, but it does not grant blanket authority to rotate, replace, reorder or feature products inside the protected top section.
+
+If a homepage store module is clearly outside the protected top and can be changed without changing the protected top directly or through shared dependencies, normal commerce controls apply. When that boundary is uncertain, fail closed on the exact homepage mutation and continue through product, collection, store, creator/social and other approved commerce surfaces.
+
+## SOK carve-out
+
+`OWNER_DIRECTIVE_SOK_PROTECTION_2026-09-12.md` remains controlling for SOK.
+
+The current commercial sweep must not use this homepage-commerce authority to reprice, deactivate, rebuild, contract or restart protected SOK listings/work.
+
+## No implied redesign authority
+
+This directive does not authorize:
+
+- homepage redesign;
+- cosmetic experimentation on the protected top;
+- rewriting the protected top copy;
+- changing protected top imagery;
+- changing protected top CTAs or product selection;
+- using a revenue plan as an implied permission to modify the protected top.
 
 ## Control phrase
 
-**HOMEPAGE HERO NO-TOUCH → HOMEPAGE STORE WORK OUTSIDE HERO AUTHORIZED → NO DESIGN CHANGES → NO PRINT/COPY CHANGES → REVENUE SWEEP CONTINUES.**
+**STORE / CATALOG / SHOPABILITY / NAVIGATION CAN MOVE → PROTECTED TOP HOMEPAGE DOES NOT → CHECK SHARED DEPENDENCIES → IF TOP OUTPUT CHANGES, HOLD FOR CASEY → KEEP SELLING THROUGH APPROVED COMMERCE SURFACES.**
