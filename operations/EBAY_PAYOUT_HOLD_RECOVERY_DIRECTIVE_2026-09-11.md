@@ -5,7 +5,8 @@
 **Priority:** P0 FINANCIAL RECOVERY EXCEPTION  
 **Primary Execution:** eBay Store Operations Worker  
 **Oversight:** Peter Torres / Company Operations / MPM  
-**State:** ACTIVE / LIVE SELLER HUB ROW-LEVEL RECON REQUIRED
+**State:** ACTIVE / LIVE SELLER HUB ROW-LEVEL RECON REQUIRED  
+**Cash Release Board:** `EBAY_CASH_RELEASE_BOARD_2026-09-11.md`
 
 ## Owner-reported live state
 
@@ -43,20 +44,30 @@ For transaction holds, tracking/delivery confirmation is a primary release signa
 
 ## Candidate eight-order set — RECON SEED ONLY
 
-The count of eight owner-reported held transactions closely matches one pre-restoration undelivered sale plus seven post-restoration sales currently present in eBay email evidence. This is a **candidate map**, not authoritative until the Payments → On hold rows are read live.
+The count of eight owner-reported held transactions closely matches one pre-restoration refunded sale plus seven post-restoration sales currently present in eBay email evidence. This remains a **candidate map**, not authoritative until the Payments → On hold rows are read live.
 
-Candidate order IDs:
+Candidate order IDs and verified evidence state:
 
-1. `23-15100-64483` — folding bed — later refunded/closed; verify whether any residual hold row remains.
-2. `25-15104-41137` — folding bed — late / no supplier confirmation found.
-3. `10-15134-90489` — weed wacker — late / cancellation requested / economic failure.
-4. `07-15141-13062` — folding bed — Sep. 10 ship-by; exact current fulfillment state requires Seller Hub reconciliation.
-5. `20-15123-05140` — VEVOR flashlight — late / source economics + MAP failure / status unknown.
-6. `12-15143-03510` — folding bed — supplier-confirmed shipped / eBay tracking visibility must be verified.
-7. `03-15160-05408` — folding bed — Sep. 14 ship-by; exact current supplier/shipping state must be verified.
-8. `02-15170-43443` — back-seat organizer — current paid order / ship-by Sep. 16 / exact source cost unresolved.
+1. `23-15100-64483` — folding bed — **REFUNDED / CLOSED**; buyer previously confirmed credit. If present in On hold, treat as residual settlement only and do not refund again.
+2. `25-15104-41137` — folding bed — **LATE / BUYER WAITING / NO SUPPLIER CONFIRMATION FOUND**. Sep. 11 eBay reminder says shipping was due Sep. 10 and offers Add Tracking.
+3. `10-15134-90489` — weed wacker — **LATE / BUYER CANCELLATION REQUEST OPEN / ECONOMIC FAILURE**. Response deadline Sep. 13. Buyer apology already sent. No supplier shipment evidence found.
+4. `07-15141-13062` — folding bed — **LATE / BUYER WAITING / NO SUPPLIER CONFIRMATION FOUND**. Sep. 11 eBay reminder says shipping was due Sep. 10 and offers Add Tracking. This order was missing from the earlier P0 worktree and is now explicitly added.
+5. `20-15123-05140` — VEVOR flashlight — **SHIP-BY SEP. 11 / NO LATER SUPPLIER OR SHIPMENT EVIDENCE FOUND / SOURCE ECONOMICS + MAP FAILURE**.
+6. `12-15143-03510` — folding bed — **SUPPLIER-CONFIRMED SHIPPED / DO NOT CANCEL**. Doba order `26091017391956`; FedEx tracking `876997666368`; eBay tracking visibility remains the execution check.
+7. `03-15160-05408` — folding bed — **CANCELED / REFUNDED CONFIRMED BY EBAY** on Sep. 10, Cancel ID `5453036060`. Do not refund again; if present in On hold, reconcile only the residual settlement row.
+8. `02-15170-43443` — back-seat organizer — **CURRENT / SHIP-BY SEP. 16**. Exact Doba source `D01027H21KW` is found/in stock; authenticated source price remains unresolved.
 
 Do not assume this candidate set equals the eight live hold rows until Seller Hub confirms each row.
+
+### Current post-restoration live-sale reconciliation
+
+Excluding the already canceled/refunded `03-15160-05408`, the six still-live post-restoration sales above total **$266.27 gross**. The owner-reported held balance is **$242.79**, a difference of **$23.48**. This is consistent with the held figure representing net transaction proceeds after selling costs/adjustments, but this is an operational inference rather than row-level Seller Hub proof.
+
+### Current dispute/case evidence
+
+Targeted current-mail reconciliation found **no new active item-not-received case, return request, payment dispute, or new account restriction notice after seller privileges were restored**. The only matching refund-request evidence after restoration belongs to an already refunded/closed order.
+
+Therefore the current evidence continues to support fulfillment/delivery transaction holds as the primary problem. Seller Hub remains authoritative if any of the eight live rows shows a dispute/case or account-level hold reason.
 
 ## Recovery workflow
 
@@ -97,21 +108,22 @@ Use one state:
 
 ### Step 4 — Cash-release board
 
-Maintain one short table:
+Maintain the active table in:
 
-| Order | Held Amount | Root Cause | Fix Executed | Delivery/Refund State | Expected Release | Actual Release |
-|---|---:|---|---|---|---|---|
+`operations/EBAY_CASH_RELEASE_BOARD_2026-09-11.md`
 
 Close each line only when the hold is `Released` or the transaction is fully refunded/settled with no remaining company obligation.
 
 ## Priority order
 
-1. Any dispute/case with a response deadline.
-2. Any shipped/delivered order missing tracking in eBay.
-3. Late unfulfilled/cancellation-requested orders.
-4. Current orders still inside ship window.
-5. Hold rows already delivered and merely waiting release.
-6. Listing overhaul only after current held-order obligations are stabilized.
+1. **`12-15143-03510`** — supplier-confirmed shipped; add/verify FedEx tracking because delivery confirmation is the cleanest immediate cash-release signal.
+2. **`10-15134-90489`** — resolve the buyer cancellation request before Sep. 13 after proving shipped vs unshipped.
+3. **`25-15104-41137`** — late; tracking if shipped, otherwise cancel/refund + apology if unshipped/non-executable.
+4. **`07-15141-13062`** — late; same truth-first resolution.
+5. **`20-15123-05140`** — due Sep. 11; resolve immediately, without an uneconomic late rescue order.
+6. **`02-15170-43443`** — still inside handling window; prove Doba source cost and fulfill cleanly before Sep. 16 or resolve the exception before it becomes late.
+7. **`03-15160-05408` and `23-15100-64483`** — settlement verification only; no duplicate refund.
+8. Listing overhaul only after current held-order obligations are stabilized.
 
 ## Commercial control
 
