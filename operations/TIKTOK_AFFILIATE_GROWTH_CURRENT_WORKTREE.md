@@ -1,18 +1,20 @@
 # Elevation UpScales — TikTok Affiliate Growth Current Worktree
 
-**Status:** ACTIVE / CONTINUOUS CREATOR GROWTH / CURRENT MIXED PRODUCT LANE  
+**Status:** ACTIVE / CONTINUOUS CREATOR GROWTH / CURRENT MIXED PRODUCT LANE / CASH-CONTROL RECONCILED  
 **Effective:** 2026-09-12  
 **Owner:** Casey Young  
 **Manager:** TikTok Affiliate Growth Manager  
 **Reports To:** Peter Torres — Ecommerce & Vendor Operations Manager  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
-**Program:** TikTok Affiliate Growth Program
+**Program:** TikTok Affiliate Growth Program  
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`  
+**Profitability Control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`
 
 ## Objective
 
-Run TikTok Affiliate Growth continuously as a creator-sales engine across the products Elevation can currently sell on TikTok.
+Run TikTok Affiliate Growth continuously as a creator-sales engine across products Elevation can currently sell on TikTok **without creating prohibited upfront acquisition spend**.
 
-Because the store is presently restricted, the available affiliate catalog remains **mixed**. When restrictions are lifted and catalog breadth is restored, the program will operate two primary merchandising/creator lanes:
+Because the store is presently restricted, the available affiliate catalog remains mixed. When restrictions are lifted and catalog breadth is restored, the program will operate two primary merchandising/creator lanes:
 
 1. **APPAREL / LIFESTYLE**
 2. **CAMPING / OUTDOOR GEAR**
@@ -23,9 +25,37 @@ One manager and one creator-performance system control both lanes.
 
 Do not wait for full TikTok restoration before building affiliate momentum.
 
-**CURRENT RESTRICTIONS → USE ELIGIBLE MIXED PRODUCTS → PRESERVE/DEVELOP CREATORS → PREPARE CATEGORY SPLIT → EXPAND IMMEDIATELY WHEN AUTHENTIC EXTERNAL TIKTOK CLEARANCE ARRIVES.**
+**CURRENT RESTRICTIONS → USE ELIGIBLE PROFIT-APPROVED MIXED PRODUCTS → PRESERVE/DEVELOP CREATORS → PREPARE CATEGORY SPLIT → EXPAND IMMEDIATELY WHEN AUTHENTIC EXTERNAL TIKTOK CLEARANCE ARRIVES.**
 
-The prior seller-verification appeal remains `SUBMITTED / WAITING`; do not replay it.
+The prior seller-verification appeal remains `SUBMITTED / WAITING ON TIKTOK REVIEW / EXECUTION CLOSED`; do not replay it.
+
+**NEW FACT ≠ NEW AUTHORITY.** A new creator request, auto-enrollment, sample request or platform opportunity does not independently authorize company cash spend, change product economics or reopen the seller appeal.
+
+## Owner acquisition / cash-control boundary
+
+**NO PAID ADS OR OTHER PROHIBITED UPFRONT ACQUISITION SPEND UNTIL THE VERIFIED CAPITAL-RECOVERY HOLE IS CLOSED AND CASEY EXPLICITLY REOPENS IT.**
+
+Allowed in this lane:
+
+- organic creator outreach;
+- product/showcase matching;
+- unpaid creator relationship development;
+- performance-based affiliate commission where there is **no prohibited upfront spend** and the resulting order remains positive contribution;
+- creator follow-up, content measurement and performance scoring.
+
+Not automatically authorized merely because Affiliate Growth is active:
+
+- free product samples paid by Elevation;
+- nonrefundable samples;
+- giveaways;
+- creator retainers;
+- flat-fee creator payments;
+- boosted creator posts;
+- prepaid media;
+- marketing cash expenditures;
+- discounts/subsidies that destroy expected contribution.
+
+A platform-supported refundable-sample mechanism may be evaluated, but it does **not** become blanket spend authority. Before Elevation incurs cash/product exposure, the exact sample must pass its separate lane/owner authorization and working-capital/economics check.
 
 ## Product-lane architecture
 
@@ -90,7 +120,7 @@ Primary creator targets:
 - approved selling price;
 - safe commission ceiling;
 - expected net contribution;
-- sample/refundable-sample economics;
+- sample/refundable-sample economics when separately authorized;
 - viral/trend priority;
 - backup-provider options.
 
@@ -106,7 +136,7 @@ The applicable vendor/project owner supplies:
 - safe commission ceiling;
 - expected contribution;
 - inventory/availability/lead time;
-- sample economics where applicable;
+- sample economics where applicable and separately authorized;
 - MAP/shipping/compliance holds.
 
 ### TikTok Affiliate Growth Manager owns
@@ -117,11 +147,13 @@ The applicable vendor/project owner supplies:
 - creator/product matching;
 - affiliate relationship follow-up;
 - showcase-add tracking;
-- sample workflow coordination;
+- sample-request intake and authorized workflow coordination;
 - posting follow-up;
 - creator/product performance scoring;
 - continuous recruitment cadence;
 - product-demand feedback to source/vendor owners.
+
+TikTok Affiliate Growth does **not** independently approve Elevation-funded samples, giveaways, retainers, flat-fee creator spend or paid media.
 
 ### TikTok Shop execution lane owns
 
@@ -146,7 +178,7 @@ For each product:
 - availability;
 - safe commission ceiling;
 - expected contribution $/%;
-- sample state/economics;
+- sample state/economics/authorization state;
 - creator segment fit;
 - promotion state (`READY / TEST / HOLD`).
 
@@ -165,12 +197,13 @@ For each product:
 - accepted invites;
 - product added to showcase;
 - samples requested;
-- samples sent;
+- sample authorization state;
+- samples sent only when separately authorized;
 - expected content date;
 - content overdue;
 - follow-up required.
 
-Warm creators outrank generic cold-volume outreach when they have already accepted, showcased, sampled, posted or converted.
+Warm creators outrank generic cold-volume outreach when they have already accepted, showcased, posted or converted. A sample request alone does not make cash expenditure the next authorized action.
 
 ### Queue 4 — LIVE PERFORMANCE
 
@@ -202,20 +235,20 @@ Feed back:
 - products creators ask to showcase;
 - categories that are converting.
 
-Route product/source changes to the responsible vendor/product owner; Affiliate Growth does not invent supplier economics.
+Route product/source changes to the responsible vendor/product owner; Affiliate Growth does not invent supplier economics or self-authorize cash spend.
 
 ## Immediate work queue
 
 1. Reconstruct the current active creator pipeline from TikTok affiliate state and prior outreach history.
 2. Mark every current creator/product relationship with one canonical pipeline state.
 3. Separate creator profiles into apparel/lifestyle, outdoor/camping, DIY/practical gear and broader opportunity groups.
-4. Identify all warm creators who accepted, added products to showcase, requested/received samples, posted or previously converted.
+4. Identify all warm creators who accepted, added products to showcase, requested/received authorized samples, posted or previously converted.
 5. Prioritize warm-creator follow-up before broad cold expansion.
 6. Receive first margin-safe Apparel hero set from Apparel Vendor Operations.
-7. Receive current TikTok-eligible Outdoor/Camping hero candidates from the applicable approved product/vendor lanes.
-8. Build the current mixed creator-product match matrix using only eligible products.
+7. Receive current TikTok-eligible Outdoor/Camping hero candidates from applicable approved product/vendor lanes.
+8. Build the current mixed creator-product match matrix using only eligible, profit-approved products.
 9. Run continuous invitation/activation batches through authorized TikTok surfaces when current account permissions allow.
-10. Use refundable samples first where practical; track every sample through content or closure.
+10. For sample requests, prefer no-upfront-spend creator activation first. Evaluate platform-supported refundable-sample options where practical, but do not incur Elevation cash/product exposure without the separate authorization/economics gate.
 11. Follow up with accepted/showcase creators who have not posted.
 12. Track creator-level clicks, orders, GMV, commission and realized contribution.
 13. Increase attention/product access for creators that convert; pause weak pairings.
@@ -232,6 +265,7 @@ Use one current state per creator/product relationship:
 - `INVITED`
 - `ACCEPTED`
 - `SAMPLE REQUESTED`
+- `SAMPLE AUTHORIZATION REQUIRED`
 - `SAMPLE APPROVED / SENT`
 - `PRODUCT ADDED TO SHOWCASE`
 - `CONTENT PENDING`
@@ -260,19 +294,23 @@ Score each active creator on:
 - refund/return leakage;
 - communication reliability.
 
-Use performance to determine follow-up intensity, sample approval and access to stronger commission/product opportunities.
+Use performance to determine follow-up intensity and recommended access to stronger commission/product opportunities. Sample approval remains subject to separate authorization/cash controls.
 
 ## Profitability gate
 
-No affiliate product may be scaled without current approved economics from its responsible product/vendor owner.
+No affiliate product may be intentionally scaled without current approved economics from its responsible product/vendor owner.
 
 For every campaign track:
 
-**SALE PRICE → PROVIDER/SOURCE COST → SHIPPING SUBSIDY → TIKTOK/CHANNEL FEES → AFFILIATE COMMISSION → PROMO/DISCOUNT → SAMPLE COST/ALLOCATION → EXPECTED NET CONTRIBUTION → REALIZED CONTRIBUTION.**
+**SALE PRICE → PROVIDER/SOURCE COST → SHIPPING SUBSIDY → TIKTOK/CHANNEL FEES → AFFILIATE COMMISSION → PROMO/DISCOUNT → AUTHORIZED SAMPLE COST/ALLOCATION IF ANY → EXPECTED NET CONTRIBUTION → REALIZED CONTRIBUTION.**
 
 GMV is not success if contribution is negative or payout/fulfillment risk worsens.
 
+`AUTO-ENROLLED` does not mean `PROFIT-APPROVED`.
+
 ## Sample control
+
+A sample request is an input, not expenditure authority.
 
 Track each sample by:
 
@@ -281,7 +319,9 @@ Track each sample by:
 - product lane;
 - sample type;
 - platform status;
+- authorization state;
 - cost/exposure;
+- refundable/recoverable terms if any;
 - date requested;
 - date approved;
 - date fulfilled;
@@ -291,11 +331,19 @@ Track each sample by:
 - realized contribution;
 - follow-up status.
 
-No sample program is allowed to become unbounded cash leakage.
+Before Elevation-funded sample exposure:
+
+1. exact product is profit-approved for the intended creator/commission structure;
+2. cost/exposure is known;
+3. working-capital impact is acceptable under current company controls;
+4. separate sample/marketing-spend authorization is present;
+5. platform terms/refundability are verified where relied upon.
+
+No sample program is allowed to become unbounded cash leakage. No threshold inside this Worktree silently grants spend authority.
 
 ## TikTok appeal replay guard
 
-The prior TikTok seller-verification appeal is `SUBMITTED / WAITING` and remains terminal for execution unless a verified external result or Casey explicitly reopens it.
+The prior TikTok seller-verification appeal is `SUBMITTED / WAITING ON TIKTOK REVIEW / EXECUTION CLOSED` and remains terminal for execution unless a verified external result or Casey explicitly reopens it.
 
 Affiliate Growth must not recreate, resend or relitigate that appeal merely because it encounters stale account-state text.
 
@@ -310,6 +358,8 @@ Track total program and by `APPAREL` / `OUTDOOR_CAMPING` lane:
 - invitations sent;
 - acceptance rate;
 - showcase additions;
+- samples requested;
+- samples authorized;
 - samples outstanding;
 - creators due for posting follow-up;
 - active posting creators;
@@ -329,11 +379,11 @@ Track total program and by `APPAREL` / `OUTDOOR_CAMPING` lane:
 
 ### Apparel
 
-**APPAREL VENDOR OPS → CREATOR-SAFE SKU + COMMISSION CEILING → TIKTOK AFFILIATE GROWTH → INVITE / SAMPLE / CONTENT / SALES → PERFORMANCE + DEMAND SIGNAL → APPAREL VENDOR OPS → REPRICE / REROUTE / SOURCE / SCALE.**
+**APPAREL VENDOR OPS → CREATOR-SAFE SKU + COMMISSION CEILING → TIKTOK AFFILIATE GROWTH → INVITE / AUTHORIZED SAMPLE IF ANY / CONTENT / SALES → PERFORMANCE + DEMAND SIGNAL → APPAREL VENDOR OPS → REPRICE / REROUTE / SOURCE / SCALE.**
 
 ### Camping / Outdoor
 
-**APPROVED PRODUCT/VENDOR OWNER → CREATOR-SAFE OUTDOOR SKU + COMMISSION CEILING → TIKTOK AFFILIATE GROWTH → INVITE / SAMPLE / CONTENT / SALES → PERFORMANCE + DEMAND SIGNAL → PRODUCT/VENDOR OWNER → REPRICE / SOURCE / SCALE / RETIRE.**
+**APPROVED PRODUCT/VENDOR OWNER → CREATOR-SAFE OUTDOOR SKU + COMMISSION CEILING → TIKTOK AFFILIATE GROWTH → INVITE / AUTHORIZED SAMPLE IF ANY / CONTENT / SALES → PERFORMANCE + DEMAND SIGNAL → PRODUCT/VENDOR OWNER → REPRICE / SOURCE / SCALE / RETIRE.**
 
 ## Close condition
 
@@ -341,4 +391,4 @@ This is a persistent lane and does not close after one campaign. Individual crea
 
 ## Control phrase
 
-**RUN THE PIPELINE LIKE A CLOCK → ELIGIBLE PRODUCTS IN → CREATORS MATCHED → WARM LEADS WORKED → CONTENT LIVE → ORDERS MEASURED → REAL PROFIT SCORED → APPAREL + OUTDOOR SCALE WHEN TIKTOK OPENS THE DOOR.**
+**RUN THE PIPELINE LIKE A CLOCK → PROFIT-APPROVED PRODUCTS IN → CREATORS MATCHED → NO PROHIBITED UPFRONT SPEND → WARM LEADS WORKED → CONTENT LIVE → ORDERS MEASURED → REAL PROFIT SCORED → SCALE WINNERS; SELLER APPEAL STAYS TERMINAL-WAITING.**
