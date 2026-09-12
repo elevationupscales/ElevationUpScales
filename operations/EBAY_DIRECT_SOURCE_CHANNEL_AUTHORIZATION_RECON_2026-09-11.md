@@ -3,43 +3,72 @@
 **Owner:** Casey Young  
 **Date:** 2026-09-11 MDT  
 **Lane:** eBay Store Operations / Ecommerce & Vendor Operations  
-**State:** ACTIVE SOURCE-CONTROL RECEIPT
+**State:** ACTIVE SOURCE-CONTROL RECEIPT / OWNER CLARIFICATION APPLIED
 
 ## Purpose
 
-Prevent the eBay contraction/rebuild from replacing Doba one-for-one with a direct supplier that has not authorized Elevation to sell that supplier's products on eBay.
+Prevent the eBay contraction/rebuild from confusing **direct-manufacturer sourcing permission** with **Doba marketplace sourcing authority**.
 
-**DROPSHIP CAPABILITY DOES NOT EQUAL EBAY MARKETPLACE AUTHORIZATION.**
+These are separate source paths.
+
+**DIRECT-MANUFACTURER AUTHORIZATION RULES CONTROL DIRECT SOURCING.**  
+**DOBA PRODUCT-LEVEL MARKETPLACE/MAP RULES CONTROL DOBA-SOURCED LISTINGS.**
+
+A listing must not be removed solely because Elevation lacks direct eBay authorization from the manufacturer when the exact product is legitimately offered through Doba for eBay and the Doba product-level MAP/channel/availability/fulfillment controls pass.
+
+## Owner clarification — controlling eBay source rule
+
+For an exact SKU sourced through Doba:
+
+- separate direct-manufacturer eBay authorization is **not required as an Elevation direct-source gate**;
+- the Doba listing/source relationship is the operative supply path;
+- the exact Doba SKU must permit eBay or must not identify eBay as a prohibited marketplace;
+- Doba MAP or other product-level pricing rules must be followed;
+- current inventory, destination restrictions, fulfillment reliability and full landed economics must still pass;
+- any explicit product-level restriction that names eBay remains controlling;
+- a Doba-backed listing may remain live even when the corresponding manufacturer is not approved for **direct** eBay sourcing.
+
+This means Kingboss systems or other manufacturer-branded products already carried through Doba are **not automatically removal candidates** merely because direct Kingboss/manufacturer eBay permission is pending or unavailable.
 
 ## Current channel authorization
 
-| Supplier | Direct eBay Source State | Evidence / Control | eBay Action |
+| Supplier / Path | eBay Source State | Evidence / Control | eBay Action |
 |---|---|---|---|
-| VEVOR Direct | **PROHIBITED / CURRENT WRITTEN RESTRICTION** | VEVOR Business Development Manager explicitly stated VEVOR is not currently granting authorization for Amazon, Walmart, eBay, etc., and directed Elevation to start with its independent website. Elevation acknowledged that restriction in the same supplier thread. | Do not source/rebuild eBay listings from VEVOR Direct. Existing VEVOR-family eBay demand may be preserved as demand history only until another authorized source is proven. |
-| Renogy Direct | **PROHIBITED UNDER CURRENT DEALER TERMS** | Current Renogy dealer relationship is controlled for Elevation's direct website; third-party marketplace sales are not authorized. | Do not source Renogy direct for eBay. |
-| SOK Direct | **HOLD — EBAY PERMISSION NOT PROVEN** | Current SOK evidence proves authorized dealer relationship, website/MAP use, dropship support, downstream wholesale/reseller capability and Hawaii commercial permissions, but the current evidence set does not prove specific eBay marketplace authorization. | Do not migrate an eBay listing to direct SOK sourcing until written eBay/channel permission is verified. |
-| Kingboss Direct | **HOLD — EBAY PERMISSION NOT PROVEN** | Kingboss has approved Elevation for B2B wholesale and described reserved-stock one-piece dropship capability, but the current supplier response does not establish eBay marketplace authorization. | Do not migrate an eBay listing to direct Kingboss sourcing until written eBay/channel permission is verified. |
-| Doba | **AUTHORIZED SOURCE PATH BY PRODUCT / NOT DEFAULT CATALOG STRATEGY** | Doba has historically supplied marketplace orders but current economics/reliability vary by product. Doba is retired as blanket merchandising authority, not banned from completing valid current obligations. | Use only when exact product economics, availability and fulfillment reliability pass. No new blanket Doba catalog growth. |
+| VEVOR Direct | **PROHIBITED / CURRENT WRITTEN RESTRICTION** | VEVOR Business Development Manager explicitly stated VEVOR is not currently granting authorization for Amazon, Walmart, eBay, etc., and directed Elevation to start with its independent website. | Do not source eBay orders **directly from VEVOR**. This does **not** by itself require removal of an exact VEVOR-branded SKU legitimately sourced through Doba where Doba permits eBay and the listing passes MAP/economics/fulfillment controls. |
+| Renogy Direct | **PROHIBITED UNDER CURRENT DEALER TERMS** | Current Renogy dealer relationship does not authorize Elevation direct sourcing for third-party marketplace sales. | Do not source eBay orders **directly from Renogy** under the current dealer relationship. A distinct Doba-supplied SKU is evaluated under Doba product-level eBay/MAP controls instead of the direct Renogy gate. |
+| SOK Direct | **HOLD — EBAY DIRECT PERMISSION NOT PROVEN** | Current SOK evidence proves dealer/direct-site relationship but does not yet prove Elevation may source directly from SOK for eBay. | Do not migrate to **direct SOK sourcing** until written eBay/channel permission is verified. Existing or future Doba-sourced SOK-family products are evaluated independently under exact Doba SKU rules. |
+| Kingboss Direct | **HOLD — EBAY DIRECT PERMISSION NOT PROVEN** | Kingboss has approved Elevation for B2B wholesale/dropship capability, but direct eBay marketplace permission remains under clarification. | Do not migrate to **direct Kingboss sourcing** until written eBay/channel permission is verified. Do **not** remove Kingboss systems merely for this reason when the exact SKU remains a valid Doba eBay source path. |
+| Doba by exact SKU | **AUTHORIZED MARKETPLACE SOURCE PATH BY PRODUCT** | Doba supplies marketplace products under product-level MAP/channel/destination/availability rules. Manufacturer direct-source approval is a separate issue. | Keep/list exact Doba SKUs on eBay when eBay is permitted, MAP/channel restrictions pass, inventory/destination are executable, and contribution/fulfillment standards pass. |
 
-## VEVOR evidence
+## Doba retention rule
 
-The VEVOR supplier thread states, in substance, that VEVOR is not currently granting authorization for Amazon, Walmart, eBay, etc., and that Elevation can begin on its independent website.
+For every existing Doba-backed eBay listing, classify on the actual Doba product facts:
 
-Elevation replied that it would not list VEVOR products on Amazon, Walmart, eBay or other third-party marketplaces unless VEVOR later provides written authorization for a specific channel.
+**EXACT SKU → EBAY ALLOWED → MAP/PRICE COMPLIANT → INVENTORY → DESTINATION ROUTING → LANDED COST → POSITIVE CONTRIBUTION → FULFILLMENT RELIABILITY → KEEP / REPRICE / REBUILD / END.**
 
-This makes the eBay status an explicit current prohibition, not merely an evidence gap.
+Do **not** classify `END` merely because the underlying brand is Kingboss, VEVOR, Renogy, SOK, or another manufacturer whose **direct** eBay authorization is absent.
 
-## eBay rebuild rule
+A Doba-backed listing should be ended or rebuilt only for a real product-level reason such as:
 
-Before any direct-source replacement:
+- eBay explicitly prohibited for that Doba SKU;
+- MAP cannot be met profitably;
+- source cost destroys contribution;
+- inventory or destination routing is unreliable;
+- fulfillment performance is unacceptable;
+- listing demand is too weak to justify retention;
+- product identity/source mapping cannot be verified.
 
-**PROVEN DEMAND → WRITTEN EBAY CHANNEL AUTHORIZATION → EXACT SKU/SOURCE → CURRENT LANDED COST → POSITIVE CONTRIBUTION → SHIPPING/HANDLING PLAN → MANAGER PASS → LIST/KEEP.**
+## Direct-source replacement rule
 
-If a current Doba-dependent eBay listing has no authorized profitable replacement source, classify it `END / HOLD` or `END / REBUILD AFTER SOURCE APPROVAL` after any open customer obligation is safely closed.
+Direct sourcing remains a separate upgrade path. Before replacing Doba with a manufacturer-direct source:
 
-## No inference rule
+**PROVEN DEMAND → WRITTEN DIRECT EBAY CHANNEL AUTHORIZATION → EXACT SKU/SOURCE → CURRENT LANDED COST → POSITIVE CONTRIBUTION → SHIPPING/HANDLING PLAN → MANAGER PASS → SWITCH SOURCE.**
 
-Do not infer eBay authorization from any of the following by themselves:
+Until that direct authorization exists, keep a valid Doba source where it passes product-level controls rather than removing the listing solely because direct permission is missing.
+
+## No inference rule for direct sourcing
+
+Do not infer **direct-manufacturer eBay authorization** from any of the following by themselves:
 
 - dealer status;
 - wholesale approval;
@@ -49,4 +78,4 @@ Do not infer eBay authorization from any of the following by themselves:
 - MAP/pricing documentation;
 - Shopify/direct-site authorization.
 
-Marketplace permission must be explicit for the eBay channel.
+This no-inference rule applies to **direct manufacturer sourcing**. It does not invalidate a separate Doba marketplace source path for an exact SKU that Doba makes available for eBay under its product-level controls.
