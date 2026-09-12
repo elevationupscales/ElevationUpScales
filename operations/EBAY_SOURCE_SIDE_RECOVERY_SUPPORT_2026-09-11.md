@@ -33,6 +33,22 @@ No Doba confirmation/shipment email was found for these exact unresolved eBay or
 
 This does not prove the orders were never placed through another supplier/source. It means current Gmail evidence does **not** support assuming Doba fulfillment exists for them.
 
+## Back-seat organizer exact listing recon
+
+Current eBay correspondence pins the organizer sale to the same listing created on August 23, 2026:
+
+- eBay item: `168634275726`
+- Customer-facing price at listing creation: `$24.33`
+- Sale order: `02-15170-43443`
+- Sale price: `$24.33`
+- Ship-by date: September 16, 2026
+- Current Shopify connected-store search returns no exact `Universal Tactical Vehicle Back Seat Organizer` or `back seat organizer` product record.
+- Current Gmail source recon returns no Doba organizer/order confirmation and no supplier acceptance/tracking record tied to the exact order.
+
+Classification: **SOURCE UNRESOLVED / FULFILLMENT NOT PROVEN.**
+
+The lack of a Shopify record does not prove the eBay listing is invalid; it proves the Shopify catalog cannot be used as source evidence for this order. The dedicated eBay worker must preserve the live order until Seller Hub/source truth is verified and must not assume Doba, Shopify, VEVOR, or another supplier merely from product-title similarity.
+
 ## Control
 
 Until live Seller Hub and source records prove otherwise:
