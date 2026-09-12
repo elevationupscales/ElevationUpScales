@@ -3,145 +3,136 @@
 **Date:** 2026-09-12  
 **Role:** MPM 5 / Operating System Project Manager  
 **Owner:** Casey Young  
-**State:** RECONCILED — MULTI-CHANNEL SALES ARCHITECTURE / PAYPAL DIRECT-PATH PROTECTION  
+**State:** RECONCILED ARCHITECTURE / EXPANSION SEQUENCING SUPERSEDED BY EXISTING-SHOPS TUNING DIRECTIVE  
 
-## Owner direction
+## Current owner override
 
-Elevation UpScales should not depend on one sales channel. Use multiple complementary channels while preserving a reliable direct purchase path and keeping PayPal available to customers on Elevation-controlled checkout.
+The multi-channel architecture remains valid, but **new-channel expansion is not the current priority**.
 
-## Core rule
+Controlling execution now routes through:
+
+`MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md`
+
+Current rule:
+
+**TUNE EXISTING SHOPS FIRST → FIX CURRENT PRODUCT/PUBLICATION/ORDER/FULFILLMENT ISSUES → PROVE CLEAN OPERATING BASELINES → THEN RECONSIDER NEW CHANNELS.**
+
+This supersedes prior sequencing that put Meta or Google next for execution.
+
+## Preserved architecture
+
+Elevation should ultimately use complementary channels while preserving one product truth and one fulfillment owner per order:
 
 **ONE PRODUCT TRUTH → MULTIPLE SALES CHANNELS → CHANNEL-SPECIFIC AVAILABILITY/PRICING WHERE REQUIRED → ONE FULFILLMENT OWNER PER ORDER.**
 
-A product may be ACTIVE in Shopify without being customer-purchasable on a particular channel. Publication/sales-channel state must be verified independently from product status.
+A product may be ACTIVE in Shopify without being customer-purchasable on a particular channel. Publication/sales-channel state remains independent from product status.
 
-## Tier 1 — primary channels
+## Current execution scope — EXISTING SHOPS ONLY
 
-### 1. Elevation direct website + Shopify Online Store publication
+### Elevation direct website + Shopify Online Store
 
-**Role:** canonical direct-sales / trust / conversion hub.
+Primary direct-sales / trust / conversion hub.
 
-- Every `INTENDED PUBLIC` product should be published to the Shopify Online Store sales channel unless an exact source, compliance, shipping, MAP, fulfillment, or strategic hold applies.
-- ElevationUpScales.com remains the company-controlled customer experience and must consume the same trusted product truth.
-- Direct checkout must preserve PayPal as a working payment path.
-- Shopify-native checkout may provide cards / Shop Pay after Shopify Payments setup is fully active, but those methods must supplement rather than eliminate the PayPal option.
+Current tuning:
 
-**PAYPAL CONTROL:** current production `site/store-checkout.js` contains the dedicated PayPal SDK/order/capture path. Do not remove or subordinate this path merely because Shopify Payments is activated.
+- reconcile ACTIVE vs published products;
+- publish only `INTENDED PUBLIC` items;
+- verify public URL and exact variant buyability;
+- preserve native Shopify checkout;
+- preserve the custom Elevation PayPal path;
+- verify shipping/payment/customer-facing policy behavior;
+- remove stale or contradictory catalog state;
+- route only proven code defects to MASTER DEVELOPER.
 
-### 2. Google & YouTube
+### Shopify-installed surfaces
 
-**Role:** high-intent discovery / organic shopping acquisition.
+Includes already-installed surfaces such as Shop, Microsoft Copilot and Agentic storefront exposure.
 
-- Priority because eligible products can appear in unpaid Google product listings.
-- Sync only source-safe, customer-ready products.
-- Online Store publication, valid payment provider, policies, shipping, product identifiers and Merchant Center compliance must remain healthy.
-- Paid Google advertising remains blocked by the current owner no-paid-acquisition control; free listings are allowed.
+Current tuning:
 
-### 3. Facebook & Instagram by Meta
+- verify existing product exposure and eligibility;
+- correct zero-product or over-broad publication states;
+- verify product identity, price, availability, shipping and purchase path;
+- do not broaden catalog exposure merely to raise channel count.
 
-**Role:** social discovery / catalog sync / product tagging / website traffic.
+### eBay
 
-- Maintain catalog sync for approved products.
-- Use organic posts, product tagging and owned audience first.
-- Prefer the Elevation/Shopify website completion path where appropriate so company checkout controls remain available.
-- Paid Meta advertising remains blocked by the current owner no-paid-acquisition control.
+Keep as a distinct existing marketplace lane.
 
-## Tier 2 — selective native-order channels
+Current tuning:
 
-### 4. TikTok Shop
+- customer obligations first;
+- cash release;
+- stop repeat loss configurations;
+- contract to a small verified profitable core;
+- no bulk Shopify sync;
+- no Promoted Listings while owner paid-acquisition hold remains active.
 
-**Role:** native social-commerce sales + creator/affiliate engine.
+### TikTok Shop / Affiliate
 
-- Keep active because Elevation already has a dedicated TikTok Affiliate Growth lane.
-- Publish only exact SKUs whose source, fulfillment, inventory/orderability and contribution economics are cleared for TikTok.
-- TikTok can own the customer checkout on TikTok; do not require Elevation PayPal inside TikTok's platform-native checkout.
-- The direct Elevation PayPal path must remain available as a separate purchasing option for direct-site eligible products.
+Keep as an existing native social-commerce/creator lane.
 
-### 5. Shop
+Current tuning:
 
-**Role:** Shopify-native discovery / repeat purchase surface.
-
-- Add/activate after Shopify Payments onboarding is fully complete and Shop eligibility is confirmed.
-- Do not treat Shop as the immediate repair for current unpublished products.
-- Reconcile product publication intentionally before expanding Shop visibility.
-
-## Existing marketplace lane — preserve but do not broadly couple yet
-
-### 6. eBay
-
-**Role:** marketplace demand / liquidation / validated product sales.
-
-- Keep eBay as a distinct active sales channel under the existing eBay recovery lane.
-- Do **not** bulk-connect or bulk-republish the Shopify catalog into eBay while eBay customer/cash/profitability recovery remains open.
-- After eBay is stable, Shopify Marketplace Connect may be evaluated for selected SKUs only, with one connector and exact price/inventory/fulfillment controls.
-
-## Parallel specialty channel
+- do not replay the submitted seller-verification appeal absent external trigger;
+- audit auto-enrolled commission exposure;
+- keep only exact TikTok-eligible, contribution-safe products;
+- work warm creators and existing relationships before expansion;
+- no prohibited upfront acquisition spend.
 
 ### Fourthwall / Apparel
 
-- Preserve Fourthwall as a separate cash-light apparel channel where its native fulfillment is advantageous.
-- Do not force Fourthwall products into Shopify merely for channel count.
-- Shopify apparel should have one explicit fulfillment owner per SKU to prevent duplicate fulfillment paths.
+Preserve as an existing specialty/POD storefront.
 
-## Tier 3 — later expansion
+Current tuning:
 
-### Amazon / Walmart through Shopify Marketplace Connect
+- audit existing products;
+- fix weak margins/promos/payout readiness;
+- classify hero/test/hold/retire products;
+- preserve native fulfillment where it is working;
+- do not mass-migrate to Shopify.
 
-Evaluate only after:
+## Expansion backlog — HOLD
 
-1. direct-site publication and payment paths are stable;
-2. eBay recovery is stable;
-3. exact product identifiers (UPC/GTIN/MPN where required) are clean;
-4. supplier orderability and fulfillment are repeatable;
-5. marketplace-specific fees still leave positive contribution;
-6. inventory/price synchronization cannot create oversells or below-floor pricing.
+The following remain future opportunities only:
 
-Do not add marketplaces merely to increase channel count.
+- Facebook + Instagram by Meta installation;
+- Google & YouTube / Merchant Center installation;
+- Amazon;
+- Walmart;
+- new marketplace connectors;
+- new storefront creation for channel count.
+
+No installation/configuration campaign begins until MPM/Owner reopens expansion after current-shop tuning reaches a clean baseline.
 
 ## PayPal operating rule
 
 **PAYPAL MUST REMAIN AVAILABLE ON THE ELEVATION-CONTROLLED DIRECT PURCHASE PATH.**
 
-For the United States, Shopify's current native model integrates PayPal as PayPal Wallet through Shopify Payments rather than separate PayPal Express when Shopify Payments is used. Therefore:
+1. Preserve the current custom Elevation PayPal checkout.
+2. Shopify-native payment work is separate and may supplement, not eliminate, PayPal.
+3. External native marketplaces may use their own buyer payment methods.
+4. Do not make an external marketplace the only route for a product intended to be directly purchasable from Elevation without an explicit channel-only reason.
 
-1. preserve the existing custom Elevation PayPal checkout now;
-2. finish Shopify Payments account setup separately;
-3. after Shopify Payments is active, verify PayPal Wallet appears and completes correctly in Shopify-native checkout;
-4. do not remove the custom Elevation PayPal path solely because PayPal Wallet becomes available;
-5. external native marketplaces such as TikTok/eBay/Amazon may control their own buyer payment methods and are not required to expose Elevation's PayPal checkout internally;
-6. an external marketplace checkout must never become the only available purchase route for a product intended to be directly purchasable from Elevation unless the product has an explicit channel-only reason.
+## Current priority matrix
 
-## Channel priority matrix
+| Priority | Existing shop/surface | Current management disposition |
+|---|---|---|
+| P0 | Elevation direct + Shopify Online Store | TUNE PUBLICATION / PURCHASABILITY / CHECKOUT / PRODUCT TRUTH |
+| P0 parallel | eBay | CUSTOMER + CASH + LISTING PROFITABILITY TUNING |
+| P1 | TikTok Shop / Affiliate | CURRENT ACCOUNT + CATALOG + COMMISSION TUNING |
+| P1 | Fourthwall / Apparel | 29-PRODUCT ECONOMICS + PROMO + PAYOUT TUNING |
+| P1 | Shop / Microsoft Copilot / Agentic | AUDIT EXISTING EXPOSURE; NO BROAD EXPANSION |
+| HOLD | Meta / Google & YouTube | FUTURE EXPANSION AFTER CURRENT-SHOP BASELINE |
+| HOLD | Amazon / Walmart / new marketplaces | FUTURE EXPANSION AFTER CURRENT-SHOP BASELINE |
 
-| Priority | Channel | Primary purpose | Payment model | Current management disposition |
-|---|---|---|---|---|
-| P0 | Elevation direct + Shopify Online Store | Direct conversion / canonical retail | **PayPal protected** + cards/Shop Pay after activation | PRIMARY / REPAIR PUBLICATION FIRST |
-| P1 | Google & YouTube | High-intent free discovery | Redirect/native depending Google/YouTube experience | ACTIVATE/VERIFY AFTER PUBLICATION HEALTH |
-| P1 | Facebook & Instagram | Organic social catalog + traffic | Website/direct or eligible Meta checkout | ACTIVATE/VERIFY / ORGANIC FIRST |
-| P1 | TikTok Shop | Native social commerce + affiliates | TikTok-native checkout | SELECTIVE SKU EXPANSION |
-| P1/P2 | Shop | Shopify discovery / repeat buyers | Shopify-native | WAIT FOR SHOPIFY PAYMENTS ACTIVE |
-| P0 parallel | eBay | Existing marketplace revenue/recovery | eBay-managed checkout | PRESERVE SEPARATE / NO BULK SYNC YET |
-| P1 parallel | Fourthwall | Cash-light apparel | Fourthwall-native | PRESERVE SEPARATE |
-| Later | Amazon / Walmart | Marketplace reach | Marketplace-managed checkout | HOLD UNTIL OPERATIONS READY |
+## MPM disposition
 
-## Shopify Store Operations next return
-
-The Shopify Manager should return a channel-by-channel publication matrix for current intended products:
-
-**SKU → ACTIVE STATUS → ONLINE STORE → GOOGLE/YOUTUBE → META → TIKTOK → SHOP → OTHER → PUBLIC URL → VARIANT BUYABILITY → DIRECT PAYPAL ELIGIBILITY → HOLD REASON IF NOT PUBLISHED.**
-
-Do not blindly publish every ACTIVE item everywhere. Channel publication follows exact source, legal/compliance, destination, MAP/price, fulfillment and economics rules.
-
-## MPM 5 disposition
-
-**USE MORE THAN ONE SALES CHANNEL — APPROVED DIRECTION.**  
-**DIRECT SITE / ONLINE STORE = CANONICAL CORE.**  
-**GOOGLE + META = NEXT ACQUISITION CHANNELS.**  
-**TIKTOK = SELECTIVE NATIVE SALES CHANNEL.**  
-**SHOP = AFTER SHOPIFY PAYMENTS ACTIVATION.**  
-**EBAY = KEEP SEPARATE UNTIL RECOVERY STABLE.**  
+**MULTI-CHANNEL ARCHITECTURE = PRESERVED.**  
+**NEW-CHANNEL EXPANSION = HOLD.**  
+**EXISTING-SHOP TUNING = ACTIVE PRIORITY.**  
 **PAYPAL DIRECT PATH = PROTECTED.**
 
 Control phrase:
 
-**PUBLISH CORRECTLY → SELL WHERE CUSTOMERS ALREADY ARE → KEEP DIRECT PAYPAL AVAILABLE → CENTRALIZE PRODUCT TRUTH → ROUTE EACH ORDER TO ONE FULFILLMENT OWNER.**
+**TUNE BEFORE EXPANDING → FIX CURRENT STORES → CLEAN CURRENT CATALOGS → PROVE CURRENT PURCHASE PATHS → PROVE CURRENT FULFILLMENT → PROVE CURRENT PROFIT → THEN ADD REACH.**
