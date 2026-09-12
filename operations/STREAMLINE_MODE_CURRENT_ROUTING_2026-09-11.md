@@ -20,6 +20,7 @@ This is a short routing overlay. It does not replace the Master Workboard, Proje
 ### Do not wait on
 
 - unrelated eBay recovery;
+- TikTok verification repair;
 - one blocked Renogy SKU;
 - Kingboss full-catalog completion;
 - Hawaii freight work;
@@ -28,6 +29,36 @@ This is a short routing overlay. It does not replace the Master Workboard, Proje
 ### Current close target
 
 First verified **profitable** Elevation direct-site order completed through fulfillment.
+
+---
+
+## P0 ACCOUNT-COMPLIANCE EXCEPTION — TikTok Seller Verification Repair
+
+**Primary Manager:** Company Operations Manager  
+**RECON Support:** MASTER RECON OS / assigned RECON  
+**Ecommerce Oversight:** Peter Torres  
+**Worktree:** `TIKTOK_SELLER_VERIFICATION_REPAIR_CURRENT_WORKTREE.md`
+
+### Current verified issue
+
+- authenticated TikTok Seller Hub is open in Casey's local browser;
+- owner observed two IRS EIN uploads in the review where the document mapping is wrong/duplicated;
+- owner recorded the representative verification video but it was not uploaded correctly into the required Seller Center video field;
+- RECON recovered the correct Colorado wholesale sales-tax license and the prior TikTok upload map from the authorized private Gmail evidence archive;
+- no Seller Center edit or resubmission is claimed until the exact live review fields/attempt state are verified.
+
+### Execute
+
+**OPEN EXACT REVIEW → VERIFY CORRECTION/APPEAL + ATTEMPT COUNT + DEADLINE → MAP EVERY CURRENT FIELD → REPLACE DUPLICATE/MISPLACED EIN WITH THE CORRECT FIELD-SPECIFIC EVIDENCE → USE WHOLESALE LICENSE IN BUSINESS-LICENSE SLOT WHEN REQUESTED → VERIFY/UPLOAD REPRESENTATIVE VIDEO INTO VIDEO FIELD → PRE-SUBMIT RECON → SUBMIT ONCE → CAPTURE RECEIPT → MONITOR REVIEW.**
+
+### Controls
+
+- raw ID/tax/license/video files remain private;
+- Gmail may recover original evidence but is not the management-control surface;
+- do not falsely claim warehouse ownership;
+- do not use available paperwork merely to fill an unrelated slot;
+- one blocked verification field does not stop Shopify/eBay/vendor/logistics execution;
+- materially new legal/business representations remain owner-gated.
 
 ---
 
@@ -144,9 +175,18 @@ If attachment/source access fails, use File Availability Incident workflow.
 
 ## MASTER RECON OS
 
-**State:** STANDBY / ON-DEMAND INTEGRITY + SOURCE RECOVERY
+**State:** ACTIVE / BOUNDED TIKTOK VERIFICATION REPAIR SUPPORT
 
-Activate for:
+Current assignment:
+
+- verify TikTok evidence-source/version integrity;
+- preserve the exact recovered license/EIN/registration/ID evidence map privately;
+- detect duplicate/misplaced evidence;
+- compare live Seller Center fields against current TikTok requirements;
+- perform pre-submit QA;
+- return to STANDBY after the repair is submitted/receipted or an exact unresolved gate is routed.
+
+Also activate on demand for:
 
 - conflicting versions;
 - stale management/project state;
@@ -161,8 +201,10 @@ Do not use MASTER RECON for ordinary clean execution.
 
 ## Company Operations
 
-Owns cross-lane operational support:
+Owns cross-lane operational support and is the primary manager for the current TikTok verification repair:
 
+- live TikTok Seller Center evidence-field audit and repair;
+- factual verification resubmission + receipt after RECON PASS;
 - live customer/order recovery;
 - fulfillment/source exceptions;
 - file/source recovery coordination when an operational deadline exists;
@@ -188,4 +230,4 @@ Every lane uses:
 
 ## Current company control phrase
 
-**MAKE PROFITABLE SALES → FIX CUSTOMER OBLIGATIONS → PROTECT CASH → RECOVER SOURCE TRUTH → KEEP CLEAN WORK MOVING.**
+**MAKE PROFITABLE SALES → FIX CUSTOMER OBLIGATIONS → PROTECT CASH → REPAIR ACCOUNT COMPLIANCE WITH EXACT EVIDENCE → RECOVER SOURCE TRUTH → KEEP CLEAN WORK MOVING.**
