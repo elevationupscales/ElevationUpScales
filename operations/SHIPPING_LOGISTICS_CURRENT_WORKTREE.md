@@ -24,7 +24,7 @@ Receiving an email or quote does not equal rate acceptance, booking, contract ac
 
 | Provider / relationship | Type | Lifecycle | Verified current state | OPEN TASK / close condition | Next action |
 |---|---|---|---|---|---|
-| DHX / DGX | Hawaii / ocean / enterprise freight | PENDING PARTNER | Account executive has requested Elevation's shipment-detail packet and will route it to operations/senior pricing after receipt. | Shipment-detail packet must be reconciled from verified battery/shipment profiles before pricing review can complete. | Build/send only the verified public-safe operational shipment-detail packet under the automated-email matrix; do not invent dimensions/weights or accept terms. |
+| DHX / DGX | Hawaii / ocean / enterprise freight | PENDING PARTNER | Elevation sent the verified initial shipment-detail packet for SOK `SK12V100PC` and `SK48V100N`, then clarified Elevation as customer/logistics coordinator and SOK Battery as the legal shipper/responsible party for carrier paperwork. DHX acknowledged the updated information and returned a bounded clarification request. | DHX needs the already-verified dimensions expressed in inches and feet, the applicable SDS forms, and the final Hawaii destination ZIP before its review can move forward. | Shipping worker: convert only the verified manufacturer dimensions; retrieve the matching current SDS from the protected compliance source; obtain/confirm the exact destination ZIP; then send one consolidated factual reply. Do not invent missing facts, expose protected documents in public Git, accept a rate, or book freight. |
 | Logistics Plus | Hawaii warehousing / fulfillment / DG review | PENDING PARTNER | SOK safety documents have been routed to dangerous-goods and operations teams; provider review is active. Earlier volume/storage questions are superseded by the current review thread. | Provider must return capability/pricing/operating requirements after DG/operations review. | WAIT for current review; no duplicate follow-up unless a reasonable follow-up trigger is reached or provider requests more facts. |
 | Continental Battery Systems — Hawaii | Receiving / storage / customer pickup / local and outer-island handling | PENDING PARTNER | Provider has described prior comparable fulfillment capability and supplied a tentative receiving/storage/release structure. Elevation already replied with detailed operating questions. New-battery lane only; used lithium is not currently accepted. | Confirm exact receiving process, lithium-document requirements, release controls, handling limits, damage/claims process, onboarding requirements and confirmed commercial structure. | WAIT for reply to existing operating-detail request; do not resend. Use first exact low-voltage proof shipment only after transportation acceptance and required controls are verified. |
 | H2O Logistics / Pasha | Mainland-to-Hawaii battery freight coordination | PENDING PARTNER | H2O confirmed it will coordinate directly with Pasha under H2O's account. Hazmat/route pricing development remains active. | Exact model/packed-profile pricing and route acceptance remain to be proven for intended shipments. | Continue exact-SKU/profile qualification; do not duplicate already-supplied SOK data and do not estimate missing manufacturer-packed profiles. |
@@ -59,16 +59,25 @@ During the startup revenue phase, Shipping & Logistics supports direct Elevation
 
 Current executable order:
 
-1. reconcile/build the DHX shipment-detail packet from verified source data;
+1. complete the bounded DHX clarification set: verified dimensions in inches/feet + matching SDS + confirmed final Hawaii ZIP; then return one factual packet response;
 2. ingest any returned Logistics Plus DG/operations decision;
 3. continue exact-profile H2O/Pasha qualification where source data is available;
 4. compare existing Span Alaska / Approved Freight / Matson evidence for exact future routes without accepting terms;
 5. process Continental/CBS and R&R replies when received;
 6. leave marketplace-order logistics in lower-priority parallel service unless a protected-risk exception applies.
 
+## Latest Company Operations reconciliation — 2026-09-11
+
+- Gmail thread evidence verifies the initial DHX shipment-detail packet was sent after source reconciliation.
+- A follow-up clarified that Elevation UpScales is the customer/logistics coordinator and SOK Battery is the legal shipper/responsible party for carrier lithium paperwork.
+- DHX replied after receiving the updated information.
+- The remaining DHX request is bounded to three inputs: dimensions expressed in inches and feet, applicable SDS forms, and the final Hawaii destination ZIP.
+- No booking, rate acceptance, contract acceptance or public customer promise was made.
+- This reconciliation corrects the older Worktree state that still described the packet as not yet sent; it does not take the execution task away from the Shipping & Logistics Partner Worker.
+
 ## OPEN TASKS
 
-- DHX shipment-detail packet — ACTIVE / requires verified source assembly.
+- DHX / DGX — ACTIVE / PACKET SENT / CLARIFICATION REQUIRED: convert verified dimensions, supply matching SDS through the proper private channel, confirm final Hawaii ZIP, then reply once.
 - Logistics Plus — WAITING EXTERNAL REVIEW.
 - Continental/CBS — WAITING ON EXISTING OPERATING-DETAIL REPLY.
 - H2O/Pasha — ACTIVE exact-profile qualification; some source extraction may remain constrained.
