@@ -6,7 +6,8 @@
 **Manager:** Apparel Vendor Operations Manager  
 **Reports To:** Peter Torres — Ecommerce & Vendor Operations Manager  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
-**Program:** Elevation Apparel Vendor Program
+**Program:** Elevation Apparel Vendor Program  
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
 ## Objective
 
@@ -23,7 +24,7 @@ Apparel exists to do two jobs at once:
 |---|---|---|---|
 | Fourthwall | Existing Elevation Apparel storefront + POD fulfillment | ACTIVE / PROVEN FULFILLMENT | 29-product profit audit, payout readiness, promo cleanup, hero normalization |
 | Printful | POD production partner + direct Shopify candidate | PROVING / INTEGRATION CANDIDATE | Compare exact hero products, costs, quality, shipping and Shopify routing |
-| Spreadconnect | Shopify-compatible POD/fulfillment candidate | PROVING / INTEGRATION CANDIDATE | Compare hero equivalents + shipping/economics |
+| Spreadconnect | Shopify-compatible POD/fulfillment candidate | **DISCONNECTED / INSTALL + AUTH GATE** | Install/auth only through the proper Shopify + North America account path, then verify fulfillment service, exact branded assortment, cost and shipping |
 | Printify | Selective multi-provider POD candidate | WATCH / SELECTIVE | Use only when exact product/provider economics beat core providers |
 | Gelato | Selective/global POD candidate | WATCH / SELECTIVE | Activate only for justified product/geography advantage |
 
@@ -37,9 +38,11 @@ Target architecture: one Elevation Apparel shopping experience with supplier/pro
 
 Shopify Store Operations Worker owns Shopify execution. Apparel Vendor Operations Manager owns provider selection, economics and apparel product profitability.
 
+Spreadconnect is **not currently installed** in the connected Shopify store and no Spreadconnect fulfillment-service location is currently present. Do not represent Spreadconnect as live Shopify fulfillment until install/auth and live service verification are complete.
+
 ### TikTok Shop / Affiliate
 
-TikTok remains the primary creator-acquisition and viral-product opportunity lane for Apparel.
+TikTok remains the primary creator-acquisition and viral-product opportunity lane for Apparel when exact product/channel economics support it.
 
 TikTok execution owns creator invitations, affiliate setup, Seller Center actions and channel compliance.
 
@@ -53,6 +56,8 @@ Apparel Vendor Operations Manager continuously supplies:
 - sample/refundable-sample economics;
 - trend/viral priority;
 - backup provider when available.
+
+Performance-based affiliate commission funded only from an actual sale is not treated as prepaid advertising, but every SKU must remain positive-contribution after the commission and all other variable costs.
 
 ### Meta / Instagram / Facebook
 
@@ -84,8 +89,8 @@ Do not set commission by instinct alone.
 Use SKU-specific math; these are operating bands, not automatic promises:
 
 - `CORE PROFIT` — creator offer leaves target net contribution intact.
-- `AGGRESSIVE ACQUISITION` — higher commission justified by strong base margin and expected creator volume; still positive contribution unless Casey explicitly approves acquisition spend.
-- `TEST ONLY` — bounded creator/sample exposure while conversion is unproven.
+- `AGGRESSIVE ACQUISITION` — higher performance commission may be considered only when strong base margin leaves positive contribution; this does **not** authorize prepaid ads, boosts, retainers or flat-fee acquisition spend.
+- `TEST ONLY` — bounded creator/sample exposure while conversion is unproven and separately authorized where cash is required.
 - `HOLD` — current price/provider cannot safely support affiliate commission.
 
 Existing historical 20% creator commission is a useful starting reference, not a universal floor or ceiling. Recalculate by SKU before scaling.
@@ -136,7 +141,7 @@ Known starting points:
 
 1. **Audit all 29 Fourthwall products** into `CORE HERO / VIRAL TEST / FEMALE CREATOR / HOLD-REPRICE / RETIRE` with exact economics.
 2. **Build Shopify Apparel sourcing matrix** for the best 5–10 designs/products.
-3. **Compare Printful and Spreadconnect first** for exact or closest equivalent hero products; add Printify/Gelato only when useful.
+3. **Compare Printful and Spreadconnect first** for exact or closest equivalent hero products; Spreadconnect comparison remains install/auth gated until the live Shopify/NA account connection exists. Add Printify/Gelato only when useful.
 4. For every candidate, calculate **TikTok safe commission ceiling** and sample economics.
 5. Return a small creator-ready TikTok hero set rather than the full catalog.
 6. Maintain a rolling viral opportunity queue fed by TikTok/Marketing/Owner signals.
@@ -180,7 +185,7 @@ Track at minimum:
 - no mass migration of Fourthwall products to Shopify without provider/economics verification;
 - no duplicate TikTok account management;
 - no automatic Fourthwall custom-checkout bridge until fulfillment creation is proven;
-- no paid advertising until organic/affiliate economics demonstrate positive contribution or Casey explicitly approves acquisition spend.
+- **NO paid advertising, boosted posts, PPC, prepaid creator acquisition or other prepaid media until the capital-recovery hole is closed and Casey explicitly reopens paid acquisition.** Product-level economics alone do not reopen this gate.
 
 ## Close condition
 
@@ -196,4 +201,4 @@ This Worktree remains an ongoing operating lane. A cycle is healthy when:
 
 ## Control phrase
 
-**APPAREL IS THE CREATOR ENGINE → VENDORS COMPETE ON ECONOMICS → TIKTOK FINDS THE AUDIENCE → REALIZED PROFIT DECIDES WHAT SCALES.**
+**APPAREL IS THE CREATOR ENGINE → VENDORS COMPETE ON ECONOMICS → ORGANIC / PERFORMANCE-BASED CREATOR TRAFFIC NOW → REALIZED PROFIT DECIDES WHAT SCALES → PAID ADS STAY CLOSED UNTIL OWNER REOPENS AFTER RECOVERY.**
