@@ -6,7 +6,8 @@
 **Updated:** 2026-09-12 MDT  
 **Project Source:** `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`  
 **Master SOP:** `VEVOR_VENDOR_MASTER_SOP.md`  
-**Promotion Release:** `VEVOR_FIRST_SALE_PROMOTION_RELEASE_2026-09-12.md`
+**Promotion Release:** `VEVOR_FIRST_SALE_PROMOTION_RELEASE_2026-09-12.md`  
+**Latest RUN Verification:** `VEVOR_RUN_VERIFICATION_2026-09-12.md`
 
 ## Last verified state
 
@@ -19,15 +20,18 @@
 - Generic fulfillment questions are closed enough for first-order execution.
 - Ten-item first-sale shortlist fresh-check complete for the current source window.
 - Seven shortlist SKUs are current sellability holds and stay at the back of the refresh queue.
-- Three exact SKUs remain currently orderable and have passed a conservative protected-economics screen using current fallback evidence when authenticated PRO browsing was unavailable.
+- Three exact SKUs remain currently orderable and passed a conservative protected-economics screen using current fallback evidence when authenticated PRO browsing was unavailable.
 - Customer-facing Shopify prices were raised above the VEVOR public/MAP floor and publicly verified after the change.
-- Three exact SKUs are released as `PROMOTE — FREE/OWNED TRAFFIC ONLY`:
+- Three exact SKUs remain released as `PROMOTE — FREE/OWNED TRAFFIC ONLY`:
   - `XXKLJT124INCLJF0QV0` — Camper Levelers — $39.90
   - `AXLSTCQJDSYKAZ99C001V0` — A-Frame Trailer Jack — $54.90
   - `D25FT14IN20AHOGLOV1` — 25-ft Electric Drain Auger — $66.90
-- Peter / commerce was sent the bounded promotion handoff.
+- Latest material-change verification re-read the exact public VEVOR pages at $33.90 / $47.90 / $59.90 respectively; no supplier public-price increase crossed the Elevation customer prices.
+- Shopify recheck confirmed all three exact records remain ACTIVE at $39.90 / $54.90 / $66.90.
+- Peter / commerce has the bounded promotion handoff.
 - Paid acquisition remains blocked pending separately verified campaign economics/approval.
 - Latest Shopify order check returned zero orders.
+- No newer VEVOR supplier reply was found after the already reconciled supplier correspondence.
 - Supplier economics reply remains useful later evidence but is not a WAIT state.
 
 ## Current exact trigger
