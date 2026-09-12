@@ -1,7 +1,7 @@
 # ELEVATION UPSCALES — CODING STABILIZATION CURRENT WORKTREE
 
 **Date:** 2026-09-12
-**State:** ACTIVE / P0 TECHNICAL RECOVERY / MANAGEMENT PLAN INSTALLED
+**State:** ACTIVE / P0 TECHNICAL RECOVERY / MANAGEMENT PLAN INSTALLED / PHASE B IN EXECUTION
 **Reports To:** PM4 / MPM
 **Execution Owner:** MASTER DEVELOPER
 **Integrity Oversight:** MASTER RECON OS
@@ -30,6 +30,13 @@ The earlier `780247...` recovery pointer is historical evidence only and must no
 ## Lineage condition
 
 `main` and the production recovery lineage remain diverged.
+
+Current MASTER RECON comparison during Phase B execution:
+
+- accepted production/recovery: `89912be657d7e92c3582619005c0a110ad843577`;
+- current `main` at recon start: `b20157434368a4c3a0ce05a5e23e64727fca3c0b`;
+- merge base remains `c4126b819d2ddcd9b61ade955528b74cec24a161`;
+- comparison reports `main` with 123 commits on its side and accepted production with 12 commits on its side.
 
 Therefore:
 
@@ -77,9 +84,13 @@ Do not replay Phase A unless current live evidence shows a regression.
 
 ## Phase B — production ↔ `main` delta ledger
 
-**State: NEXT / P0**
+**State: IN EXECUTION / P0 / MASTER DEVELOPER ACTIVE**
 
-MASTER DEVELOPER must build a production-affecting file ledger from accepted production `89912be...` against current `main`.
+Owner confirmed MASTER DEVELOPER is actively executing Phase B.
+
+At the latest MASTER RECON sweep, no completed Phase B delta-ledger artifact had yet been committed to `main` or the recovery branch. This means Phase B is **active, not complete**. Do not infer completion from branch age, commit count, chat state, or an older developer receipt.
+
+MASTER DEVELOPER is building a production-affecting file ledger from accepted production `89912be...` against current `main`.
 
 Every divergence is classified:
 
@@ -100,9 +111,11 @@ Priority order:
 
 No commit is admitted because it is newer.
 
+**Phase B return gate:** Dev must return a durable ledger/artifact with the accepted baseline, comparison target, classified production-affecting files, unresolved UNKNOWN items and recommended REQUIRED RECOVERY sequence. MASTER RECON audits that return before PM4 accepts Phase B or opens Phase C execution.
+
 ## Phase C — one authoritative public commerce contract
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Build/reconcile one public eligibility contract that can determine:
 
@@ -124,7 +137,7 @@ Client-side filtering remains defense in depth only.
 
 ## Phase D — route / detail / checkout reconciliation
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Verify and deliberately map:
 
@@ -144,7 +157,7 @@ Working checkout is protected from unrelated refactors. Smoke tests do not submi
 
 ## Phase E — customer copy / protected homepage firewall
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Reconcile only reviewed protections required to ensure:
 
@@ -155,7 +168,7 @@ Reconcile only reviewed protections required to ensure:
 
 ## Phase F — release-system repair
 
-**State: OPEN / P0**
+**State: OPEN / NOT YET AUTHORIZED FOR EXECUTION**
 
 Required release controls:
 
@@ -192,11 +205,11 @@ Owns recovery sequence, priority, acceptance gates and freeze-release recommenda
 
 ### MASTER DEVELOPER
 
-Owns technical implementation on the recovery lineage, one root cause at a time.
+Owns Phase B technical execution and later recovery implementation only after the applicable phase is accepted/routed.
 
 ### MASTER RECON OS
 
-Owns lineage/drift/replay verification and management-state integrity. It does not become a second developer.
+Owns lineage/drift/replay verification and management-state integrity. It does not become a second developer and does not duplicate the Phase B ledger while Dev owns it.
 
 ### COM 2
 
@@ -217,17 +230,23 @@ Every website change is classified before coding:
 - **PROTECTED TOP CHANGE** → HOLD + route exact delta to Casey;
 - **UNCLEAR** → HOLD only that change; continue other repairs.
 
-## RUN loop
+## RUN / RECON loop
 
-**GIT FIRST → VERIFY ACCEPTED PRODUCTION SHA → VERIFY ISSUE #65 / MANAGEMENT PLAN → PICK HIGHEST-RISK OPEN ROOT CAUSE → FIX ON RECOVERY LINEAGE → QA → CONTROLLED DEPLOY IF REQUIRED → CANONICAL VERIFY → RECORD → NEXT ROOT CAUSE.**
+MASTER DEVELOPER:
+
+**GIT FIRST → VERIFY ACCEPTED PRODUCTION SHA → EXECUTE PHASE B LEDGER → RETURN DURABLE ARTIFACT → STOP AT PHASE GATE.**
+
+MASTER RECON during Phase B:
+
+**VERIFY HEADS → VERIFY BASELINE → VERIFY NO PARALLEL PRODUCTION MUTATION → VERIFY CONTROL POINTERS → WAIT FOR DEV RETURN → AUDIT LEDGER → PASS / REPAIR / ROUTE.**
 
 ## Current next action
 
-1. MASTER DEVELOPER: produce Phase B production-vs-`main` delta ledger from accepted production `89912be...`.
-2. MASTER RECON: verify all management/current-worktree pointers have advanced from historical `780247...` to accepted `89912be...` where they claim current production truth.
-3. PM4: suppress nonessential website feature routing into MASTER DEVELOPER while the freeze is active.
+1. MASTER DEVELOPER: continue Phase B production-vs-`main` delta ledger from accepted production `89912be...`; return the durable ledger when complete.
+2. MASTER RECON: do not duplicate the ledger; verify lineage/control state and audit the returned artifact when Dev commits it.
+3. PM4: suppress nonessential website feature routing into MASTER DEVELOPER while the freeze is active; do not authorize Phase C until Phase B is audited/accepted.
 4. COM 2: preserve active commerce/order/cash work; return only exact technical revenue blockers.
-5. After ledger, execute the highest-risk **REQUIRED RECOVERY** item and continue the RUN loop.
+5. Production/recovery branch remains pinned at `89912be...` unless an independently authorized customer/order emergency requires a controlled hotfix.
 
 ## Feature-freeze release gates
 
@@ -245,4 +264,4 @@ Freeze remains active until:
 10. PM4 recommends release;
 11. Casey explicitly releases the freeze.
 
-**STATUS:** ACTIVE / P0 / FEATURE FREEZE IN FORCE / ACCEPTED PRODUCTION `89912be...` / PHASE B NEXT.
+**STATUS:** ACTIVE / P0 / FEATURE FREEZE IN FORCE / ACCEPTED PRODUCTION `89912be...` / PHASE B IN EXECUTION / LEDGER RETURN PENDING.
