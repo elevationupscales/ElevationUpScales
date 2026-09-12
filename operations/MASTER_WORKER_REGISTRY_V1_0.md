@@ -24,7 +24,7 @@ When the first website PayPal order is verified, Hybrid Management records the t
 
 | Worker | Parent Project | Reporting Manager | Lane | Status | Current Worktree | Last Timestamp |
 |---|---|---|---|---|---|---|
-| MPM / Operating System Project Manager (PM3) | Operating System | Casey | Master Management | ACTIVE | Normal V1.0 master coordination / direct-site revenue + eBay P0 parallel recovery + vendor-project routing / Workboard business-state reconciliation; TikTok monitoring-only until external trigger | 2026-09-11 |
+| MPM / Operating System Project Manager (PM4) | Operating System | Casey | Master Management | ACTIVE | Normal V1.0 master coordination / direct-site revenue P0 + eBay P0 parallel recovery + vendor-project routing / Workboard business-state reconciliation; TikTok monitoring-only until external trigger | 2026-09-11 |
 | Company Project Manager | Company Project Management | MPM | Project Coordination | ACTIVE | Cross-Project continuity / placement / handoffs | 2026-09-11 |
 | Company Operations Manager | Company Operations | MPM | Operations | ACTIVE | Normal Company Operations execution / eBay P0 parallel recovery / vendor-logistics oversight; TikTok second appeal monitoring-only with no active repair execution | 2026-09-11 |
 | MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | STANDBY | On-demand OS integrity / source-version alignment / duplicate and terminal-worktree replay prevention; TikTok repair execution closed unless a verified external trigger reopens it | 2026-09-11 |
