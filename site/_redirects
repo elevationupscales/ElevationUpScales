@@ -11,6 +11,9 @@
 /admin-promotion.html /admin-promotion 301
 /admin-listings/ /admin-listings 308
 /admin-listings.html /admin-listings 301
+/ADMIN-LISTINGS /admin-listings 301
+/ADMIN-LISTINGS/ /admin-listings 308
+/ADMIN-LISTINGS.html /admin-listings 301
 /assets/new-client-coupon.webp / 301
 /index.html / 301
 /home-services.html /home-services 301
