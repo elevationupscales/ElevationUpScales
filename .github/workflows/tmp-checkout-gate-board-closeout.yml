@@ -1,0 +1,29 @@
+name: Temporary checkout-gate board closeout
+
+on:
+  push:
+    branches:
+      - ops/checkout-gate-live-closeout-0911
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ops/checkout-gate-live-closeout-0911
+      - name: Reconcile canonical board
+        run: |
+          set -euo pipefail
+          python .github/scripts/tmp_checkout_gate_board_closeout.py
+          rm .github/scripts/tmp_checkout_gate_board_closeout.py
+          rm .github/workflows/tmp-checkout-gate-board-closeout.yml
+          git diff --check
+          git config user.name 'elevationupscales'
+          git config user.email 'caseymyoung@gmail.com'
+          git add operations/CURRENT_WORK_BOARD.md .github/scripts/tmp_checkout_gate_board_closeout.py .github/workflows/tmp-checkout-gate-board-closeout.yml
+          git commit -m 'Ops: reconcile live checkout-gate closeout'
+          git push origin HEAD:ops/checkout-gate-live-closeout-0911
