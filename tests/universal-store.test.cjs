@@ -14,7 +14,9 @@ test('release 66 universal store architecture is wired', () => {
   assert.match(runtime, /\/api\/store\/catalog\?section=lithium-batteries/);
   assert.match(runtime, /\/api\/store-catalog\?section=rv-outdoor/);
   assert.match(runtime, /\/api\/sok\/catalog/);
-  assert.match(runtime, /supplier-managed, not Elevation on-hand stock/i);
+  assert.match(runtime, /Availability is confirmed as part of your order\./i);
+  assert.match(runtime, /Supplier-managed inventory; final availability is confirmed at order time\./i);
+  assert.doesNotMatch(runtime, /Supplier availability is validated before fulfillment\./i);
   assert.match(redirects, /\/lithium-batteries \/store\?department=lithium-batteries 301/);
   assert.match(redirects, /\/rv-store \/store\?department=rv-outdoor 301/);
 });
