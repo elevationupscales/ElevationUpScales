@@ -2,7 +2,8 @@
 
 **Version:** 1.0  
 **Effective:** 2026-09-11  
-**Status:** CONTROLLING VOCABULARY
+**Reconciled:** 2026-09-12  
+**Status:** CONTROLLING VOCABULARY / AUTHORITY-PROPAGATION AMENDMENT ALIGNED
 
 Each major term preserves a **Short Definition**, **OS Function**, and where needed an **Authority Boundary**.
 
@@ -30,19 +31,53 @@ Each major term preserves a **Short Definition**, **OS Function**, and where nee
 
 ## Workboard
 **Short Definition:** Management control surface.  
-**OS Function:** Tracks meaningful priority, ownership, state, gates and routing at the appropriate management level.
+**OS Function:** Tracks meaningful priority, ownership, state, gates and routing at the appropriate management level.  
+**Boundary:** Must be reconciled when verified owning-lane facts materially change management routing; higher placement does not authorize known-stale facts.
 
 ## Master Workboard
 **Short Definition:** High-level company operating board.  
-**OS Function:** Gives Hybrid Management one current cross-Project view without duplicating detailed Project task trees.
+**OS Function:** Gives Hybrid Management one current cross-Project view without duplicating detailed Project task trees.  
+**Boundary:** Owns reconciled cross-Project routing state, not every underlying factual detail.
+
+## Management Truth
+**Short Definition:** Current authorized priority, ownership, routing, gates and cross-Project control state.  
+**OS Function:** Tells the OS what should execute, in what order, under whose authority.  
+**Boundary:** Management truth must consume verified material facts; it cannot preserve a fact known to be stale simply because management outranks the fact source.
+
+## Objective / Factual Truth
+**Short Definition:** Verified real-world, platform, source, order, technical or owning-lane fact.  
+**OS Function:** Describes what is actually true within the fact source's proven scope.  
+**Boundary:** Factual freshness corrects stale facts but does not itself grant management priority or cross-Project authority.
+
+## Authority Propagation
+**Short Definition:** Controlled movement from verified fact to authorized management routing and back down to execution.  
+**OS Function:** `VERIFIED FACT → OWNING LANE → MANAGEMENT RECONCILES → MANAGEMENT ROUTES → AUTHORIZED WORKER EXECUTES → RESULT VERIFIED → CONTROL SURFACES UPDATED`.  
+**Boundary:** **NEW FACT ≠ NEW AUTHORITY.**
+
+## Control-Plane Drift
+**Short Definition:** Two or more controlling/routing surfaces disagree on material execution state.  
+**OS Function:** Flags mismatches in active phase, execution owner, terminal/open state, priority gate or accepted release/production pointer before conflicting work is routed.  
+**Response:** `STOP ONLY CONFLICTING ROUTING → VERIFY OBJECTIVE STATE → SYNC POINTER SET → PRESERVE UNRELATED WORK → CONTINUE`.
+
+## Incident / Stabilization / Freeze Control
+**Short Definition:** Temporary management control that subordinates lower-priority work to an active recovery/emergency sequence.  
+**OS Function:** Prevents ordinary backlog or feature work from competing with a verified P0/recovery lane.  
+**Boundary:** Preserves deferred work; does not silently delete it or permanently rewrite the MASTER S.O.P. unless separately amended.
 
 ## CURRENT_WORKTREE
 **Short Definition:** Current Project execution register.  
-**OS Function:** Holds detailed live Project work, task owner, status, last action, blocker/open reason and next action.
+**OS Function:** Holds detailed live Project work, task owner, status, last action, blocker/open reason and next action.  
+**Boundary:** Newer verified facts in a Worktree can defeat stale factual pointers, but the Worktree does not become cross-Project management authority.
+
+## Terminal Worktree
+**Short Definition:** Current Worktree state that has reached a verified terminal execution condition such as `CLOSED`, `EXECUTION CLOSED` or `SUBMITTED / WAITING`.  
+**OS Function:** Prevents stale Board/Registry/prompt/receipt pointers from replaying work already completed or moved to external wait.  
+**Boundary:** Reopens only from a valid trigger or higher-authority explicit direction.
 
 ## Worker Registry
 **Short Definition:** Central directory of active OS workers.  
-**OS Function:** Shows who exists, where they belong, current state, current Worktree and last timestamp without duplicating Project task details.
+**OS Function:** Shows who exists, where they belong, current state, current Worktree and last timestamp without duplicating Project task details.  
+**Boundary:** Registry state is an index/pointer, not a grant of authority and not a substitute for management priority or the owning Worktree.
 
 ## ACTIVE / IN PROGRESS
 **Short Definition:** Work is currently being executed.  
@@ -91,12 +126,12 @@ Each major term preserves a **Short Definition**, **OS Function**, and where nee
 ## Specialist
 **Short Definition:** Domain expert/advisory/execution worker.  
 **OS Function:** Provides focused expertise and bounded execution.  
-**Boundary:** Not a Project Manager by default; cannot independently reprioritize/take over the Project.
+**Boundary:** Not a Project Manager by default; cannot independently reprioritize/take over the Project. Newer data, broader tool access or a newer receipt does not elevate the role into management authority.
 
 ## MASTER RECON OS
 **Short Definition:** OS-wide reconciliation/integrity worker.  
 **OS Function:** Protects Operating System truth, drift control and recoverability.  
-**Boundary:** Not another manager and does not casually rewrite Hybrid Management control state.
+**Boundary:** Not another manager; may correct objective stale pointers within authorized RECON but does not invent new business priority/policy.
 
 ## Project RECON Worker
 **Short Definition:** Reconciliation worker bound to one Project.  
@@ -111,11 +146,11 @@ Each major term preserves a **Short Definition**, **OS Function**, and where nee
 ## MASTER DEVELOPER / Deployment Developer
 **Short Definition:** Shared technical build/deployment worker.  
 **OS Function:** Executes code, build/config, deployment and technical receipts according to approved operating truth.  
-**Boundary:** Does not own Master management priority/state.
+**Boundary:** Does not own Master management priority/state. Newer `main` code is not production authority merely because it is newer.
 
 ## GIT FIRST
 **Short Definition:** Lightweight freshness check before Git-aware RUN.  
-**OS Function:** Ensures workers resume from current Master Git/Project state rather than stale instructions.
+**OS Function:** Ensures workers resume from current Master Git/Project state rather than stale instructions; conflicting management/Worktree/release pointers trigger SYNC/RECON before conflicting execution.
 
 ## ANALYZE
 **Short Definition:** Understand it.  
@@ -130,8 +165,9 @@ Each major term preserves a **Short Definition**, **OS Function**, and where nee
 **OS Function:** Discover current facts/state before deciding or correcting. No correction by default.
 
 ## SYNC
-**Short Definition:** Make the OS agree with reality.  
-**OS Function:** Reconcile verified objective state, correcting within authority or leaving a RECON NOTE when direct correction is unavailable.
+**Short Definition:** Make the OS agree with verified reality and current valid authority.  
+**OS Function:** Reconcile objective state, correcting within authority or leaving a RECON NOTE when direct correction is unavailable.  
+**Boundary:** SYNC corrects state; it does not invent policy or cross-Project priority.
 
 ## RECON
 **Short Definition:** Targeted discovery + reconciliation cycle.  
@@ -143,8 +179,8 @@ Each major term preserves a **Short Definition**, **OS Function**, and where nee
 
 ## RUN
 **Short Definition:** Initiate/resume authorized work.  
-**OS Function:** Starts from current Project state and last verified Worktree, then continues until completion, wait/gate, or no executable work.  
-**Boundary:** Does not increase authority.
+**OS Function:** Starts from current management/Project state and last verified Worktree, then continues until completion, wait/gate, or no executable work.  
+**Boundary:** Does not increase authority; a stale RUN pointer cannot bypass a newer valid freeze, terminal Worktree or owner gate.
 
 ## STREAMLINE
 **Short Definition:** Remove friction from normal authorized work.  
