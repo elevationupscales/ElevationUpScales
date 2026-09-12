@@ -31,13 +31,26 @@ The Renogy activation sequence remains:
   - `RNG-INVT-2000-12V-P2-US`
   - `RNG-CTRL-RVR40`
 
-## Current execution attempt
+## Opera authenticated-state proof
 
-The required authenticated Partner Portal read-only check for `RSP100DCT-G1-US` and `RBM500-G3-US` was attempted again.
+Owner directed use of the connected Opera browser instead of TinyFish.
 
-The browser automation did not start because the connected TinyFish execution wallet remains below zero (`-$0.58`). This is a tooling/payment blocker, not a Renogy account/session failure and not evidence that the Partner Portal is unavailable.
+Opera directly verified an active authenticated Renogy Partner Portal session for Elevation UpScales, Inc. The portal home displays:
 
-No password reset, password creation, account-security change, order placement, payment-method change, tax-setting change, or other Renogy account mutation was attempted.
+- `Welcome to Renogy Partner Portal -- Elevation UpScales, Inc.`
+- account user `Casey Young`;
+- active portal navigation including Products, Shopping Cart, My Orders, My Invoices and Customer Support;
+- Renogy Sales Support as the Primary Account Manager.
+
+Therefore the prior TinyFish-wallet limitation is **not** a Renogy portal/account blocker and must not be carried forward as supplier-access state.
+
+The current Opera connector can read authenticated page content and navigate directly to URLs, but it does not currently expose a click/press action for the portal's SPA `Products` menu. Direct guesses `/products` and `/product` resolve to Renogy's internal lost-page state and are not treated as product/orderability evidence.
+
+No password reset, password creation, account-security change, order placement, payment-method change, tax-setting change, address change or other Renogy account mutation was attempted.
+
+## Supplier asset lane continuation
+
+Opera also confirmed the supplier-shared Renogy Product Assets library remains accessible in open Dropbox tabs. The `7.Accessory` asset folder exposes exact SKU-named subfolders and is usable as an approved-media source. Exact `RBM500-G3-US` asset identification remains open; no nearby or generic monitor image may be substituted.
 
 ## Activation control
 
@@ -45,16 +58,17 @@ No Renogy SKU was activated during this RUN because exact current dealer orderab
 
 Do not convert public retail availability into dealer availability. Do not activate from the public page alone.
 
-When browser execution is available again, resume directly at:
+Resume directly at the first available route that can invoke the authenticated Products navigation:
 
-1. read-only Partner Portal check for `RSP100DCT-G1-US`;
-2. read-only Partner Portal check for `RBM500-G3-US`;
-3. if clean, bind exact approved media;
-4. refresh public price reference and protected economics;
-5. activate each clean SKU individually;
-6. run public product → cart → checkout QA;
-7. record activation receipt and continue first-real-order proof.
+1. open Products inside the existing authenticated Opera Partner Portal session;
+2. verify `RSP100DCT-G1-US` exact dealer orderability / delayed-order state;
+3. verify `RBM500-G3-US` exact dealer orderability / delayed-order state;
+4. if clean, bind exact approved media;
+5. refresh public price reference and protected economics;
+6. activate each clean SKU individually;
+7. run public product → cart → checkout QA;
+8. record activation receipt and continue first-real-order proof.
 
 ## State
 
-**RENOGY: ACTIVE / TOOLING-GATED ONLY AT AUTHENTICATED PORTAL READ STEP / ALL OTHER VERIFIED STATE PRESERVED.**
+**RENOGY: ACTIVE / PARTNER PORTAL AUTHENTICATION VERIFIED IN OPERA / EXACT PRODUCT NAVIGATION ACTION STILL REQUIRED / ALL OTHER VERIFIED STATE PRESERVED.**
