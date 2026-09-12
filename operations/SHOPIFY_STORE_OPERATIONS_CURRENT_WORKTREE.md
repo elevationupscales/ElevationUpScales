@@ -24,6 +24,7 @@ Current startup close target:
 - Native Shopify storefront is public.
 - Native Shopify cart/checkout has been proven through payment-entry on a representative VEVOR product.
 - Current management state reports custom Elevation PayPal checkout live acceptance after the trusted-origin repair.
+- PR #133 / merge `97bd22023b0ae02ec5dbc11d6b5cb45ce6f6a7da` routes Universal Store direct `Buy Now` actions into the supported checkout source lanes: SOK/lithium products → `source=lithium`; RV/other currently supported direct items → `source=rv`. Do not restore the unsupported `source=universal` checkout route.
 - No synthetic paid order should be manufactured.
 - Current direct-site traffic is extremely low; recent Shopify analytics showed 8 sessions in the 7-day window at the measurement point, 1 cart addition, 1 checkout reached and 0 completed checkout.
 - Current referral traffic was direct/unknown; no measurable social-referral traffic was present at the measurement point.
