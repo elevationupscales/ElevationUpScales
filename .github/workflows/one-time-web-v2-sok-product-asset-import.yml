@@ -1,0 +1,65 @@
+name: One-time Web V2 SOK product asset import
+
+on:
+  push:
+    branches:
+      - work/web-v2-sok-product-image-cleanup-2026-09-13
+    paths:
+      - .github/workflows/one-time-web-v2-sok-product-asset-import.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/web-v2-sok-product-image-cleanup-2026-09-13
+          fetch-depth: 0
+
+      - name: Import exact owner-approved SOK product assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          SK12='site/assets/brands/sok/sk12v100pc/official-clean.png'
+          SK48='site/assets/brands/sok/sk48v100n/official-clean.png'
+          MODULE='apps/web-v2/src/sok-product-assets.js'
+          if [[ -f "$SK12" && -f "$SK48" && -f "$MODULE" ]]; then
+            echo 'Approved SOK assets already imported; no-op.'
+            exit 0
+          fi
+          mkdir -p "$(dirname "$SK12")" "$(dirname "$SK48")"
+          curl --fail --location --retry 4 --retry-all-errors \
+            'https://static.wixstatic.com/media/0fa809_0c4fccf4c42a4aa284c892d758ac3de7~mv2.png/v1/fit/w_960,h_960,q_90,enc_avif,quality_auto/0fa809_0c4fccf4c42a4aa284c892d758ac3de7~mv2.png' \
+            --output "$SK12"
+          curl --fail --location --retry 4 --retry-all-errors \
+            'https://static.wixstatic.com/media/0fa809_a15f5f76c4b94fb1bf5e0c01daee4086~mv2.png/v1/fit/w_960,h_960,q_90,enc_avif,quality_auto/0fa809_a15f5f76c4b94fb1bf5e0c01daee4086~mv2.png' \
+            --output "$SK48"
+          file "$SK12" "$SK48"
+          python - <<'PY'
+          from pathlib import Path
+          for path in [Path('site/assets/brands/sok/sk12v100pc/official-clean.png'), Path('site/assets/brands/sok/sk48v100n/official-clean.png')]:
+              data = path.read_bytes()
+              assert data[:8] == b'\x89PNG\r\n\x1a\n', f'{path}: not PNG'
+              width = int.from_bytes(data[16:20], 'big')
+              height = int.from_bytes(data[20:24], 'big')
+              color_type = data[25]
+              print(f'{path}: {width}x{height}, PNG color_type={color_type}, alpha={color_type in (4,6)}')
+              assert width >= 600 and height >= 600, f'{path}: unexpectedly small image'
+          PY
+          SK12_B64="$(base64 -w 0 "$SK12")"
+          SK48_B64="$(base64 -w 0 "$SK48")"
+          cat > "$MODULE" <<EOF
+          // Exact owner-approved SOK product imagery localized from official SOK/Wix product materials.
+          // Source provenance is recorded in operations/vendor-project-sources/SOK_PROJECT_SOURCE.md.
+          export const SOK_SK12V100PC_PNG_BASE64 = '${SK12_B64}';
+          export const SOK_SK48V100N_PNG_BASE64 = '${SK48_B64}';
+          EOF
+          sha256sum "$SK12" "$SK48"
+          git config user.name 'elevationupscales-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add "$SK12" "$SK48" "$MODULE"
+          git commit -m 'Web V2: localize official SOK product imagery'
+          git push origin HEAD:work/web-v2-sok-product-image-cleanup-2026-09-13
