@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web V2 SOK Product Merchandising QA</title></head>
-<body><pre id="status">Rendering exact Web V2 source…</pre>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web V2 SOK Product Merchandising Mobile QA</title><style>html,body{margin:0;background:#111;min-height:100%}.frame-wrap{width:390px;margin:12px auto;background:#02070a;border:1px solid #333}.frame-wrap iframe{display:block;width:390px;height:844px;border:0;background:#02070a}</style></head>
+<body><div class="frame-wrap"><iframe id="qa" title="390px mobile Web V2 SOK merchandising QA"></iframe></div>
 <script>
 (async()=>{
   const sha='4e76b6c8609360627ca3b27736561ebdd1d0dd96';
@@ -23,7 +23,7 @@
   const publicBase='https://raw.githubusercontent.com/elevationupscales/ElevationUpScales/'+sha+'/apps/web-v2/public';
   html=html.replaceAll('/assets/brands/sok/sk12v100pc/official-clean.png',publicBase+'/assets/brands/sok/sk12v100pc/official-clean.png');
   html=html.replaceAll('/assets/brands/sok/sk48v100n/official-clean.png',publicBase+'/assets/brands/sok/sk48v100n/official-clean.png');
-  document.open();document.write(html);document.close();
+  document.getElementById('qa').srcdoc=html;
 })().catch(error=>{document.body.innerHTML='<pre style="white-space:pre-wrap;color:#f66;background:#111;padding:20px">'+String(error.stack||error)+'</pre>'});
 </script>
 </body>
