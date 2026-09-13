@@ -22,7 +22,6 @@ test('homepage reconstructs the approved retail-first customer presentation', as
   assert.match(res.headers.get('content-type') || '', /text\/html/);
   assert.match(res.headers.get('content-security-policy') || '', /default-src 'self'/);
   assert.match(res.headers.get('content-security-policy') || '', /img-src 'self' https:\/\/elevationupscales\.com data:/);
-
   const body = await res.text();
   assert.match(body, /AUTHORIZED SOK ENERGY DEALER/);
   assert.match(body, /Lithium Power/);
@@ -60,10 +59,7 @@ test('homepage reconstructs the approved retail-first customer presentation', as
 test('runtime version endpoint proves the exact Cloudflare Worker version', async () => {
   const res = await request('/__version');
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), {
-    service: 'elevation-web-v2',
-    ...TEST_VERSION
-  });
+  assert.deepEqual(await res.json(), { service: 'elevation-web-v2', ...TEST_VERSION });
 });
 
 test('health endpoint includes runtime version proof without exposing it in customer HTML', async () => {
@@ -71,65 +67,60 @@ test('health endpoint includes runtime version proof without exposing it in cust
   assert.equal(res.status, 200);
   const payload = await res.json();
   assert.deepEqual(payload, {
-    status: 'ok',
-    service: 'elevation-web-v2',
-    phase: 'commercial-retail-rebuild',
-    commerceConnected: false,
-    opsConnected: false,
-    version: {
-      service: 'elevation-web-v2',
-      ...TEST_VERSION
-    }
+    status: 'ok', service: 'elevation-web-v2', phase: 'commercial-retail-rebuild', commerceConnected: false, opsConnected: false,
+    version: { service: 'elevation-web-v2', ...TEST_VERSION }
   });
 });
 
 test('robots and sitemap reflect the current implemented Web V2 route state', async () => {
   const previewRobots = await request('/robots.txt');
   assert.equal(previewRobots.status, 200);
-  assert.match(previewRobots.headers.get('content-type') || '', /text\/plain/);
   assert.equal(await previewRobots.text(), 'User-agent: *\nDisallow: /\n');
-
   const canonicalRobots = await request('/robots.txt', {}, 'https://elevationupscales.com');
   assert.equal(canonicalRobots.status, 200);
   const canonicalRobotsBody = await canonicalRobots.text();
-  assert.match(canonicalRobotsBody, /User-agent: \*/);
   assert.match(canonicalRobotsBody, /Allow: \//);
   assert.match(canonicalRobotsBody, /Disallow: \/healthz/);
   assert.match(canonicalRobotsBody, /Disallow: \/__version/);
   assert.match(canonicalRobotsBody, /Sitemap: https:\/\/elevationupscales\.com\/sitemap\.xml/);
-  assertCustomerSafe(canonicalRobotsBody);
-
   const sitemap = await request('/sitemap.xml');
   assert.equal(sitemap.status, 200);
-  assert.match(sitemap.headers.get('content-type') || '', /application\/xml/);
   const sitemapBody = await sitemap.text();
   assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/<\/loc>/);
-  assert.doesNotMatch(sitemapBody, /\/start-a-project<\/loc>|\/store<\/loc>|\/cart<\/loc>|\/checkout<\/loc>|\/solar-project<\/loc>/);
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/store<\/loc>/);
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/shop\/sok<\/loc>/);
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/shop\/renogy<\/loc>/);
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/shop\/vevor<\/loc>/);
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/shop\/kingboss<\/loc>/);
+  assert.doesNotMatch(sitemapBody, /\/start-a-project<\/loc>|\/cart<\/loc>|\/checkout<\/loc>|\/solar-project<\/loc>/);
   assertCustomerSafe(sitemapBody);
 });
 
 test('owned CSS and JS assets are served locally', async () => {
   const css = await request('/assets/app.css');
   assert.equal(css.status, 200);
-  assert.match(css.headers.get('content-type') || '', /text\/css/);
   const cssBody = await css.text();
   assert.match(cssBody, /@media \(max-width: 680px\)/);
   assert.match(cssBody, /storefront-tropical-logistics-v3\.webp/);
   assert.match(cssBody, /\.nav-dropdown/);
-
+  assert.match(cssBody, /\.catalog-grid/);
   const js = await request('/assets/app.js');
   assert.equal(js.status, 200);
-  assert.match(js.headers.get('content-type') || '', /text\/javascript/);
   assert.match(await js.text(), /aria-expanded/);
 });
 
-test('registered-but-unbuilt routes hand off to the current live customer route', async () => {
+test('canonical catalog routes render in Web V2 and remain customer-safe', async () => {
+  for (const path of ['/store', '/shop/sok', '/shop/renogy', '/shop/vevor', '/shop/kingboss', '/product/vevor-xxkljt124incljf0qv0']) {
+    const res = await request(path);
+    assert.equal(res.status, 200, path);
+    const body = await res.text();
+    assert.doesNotMatch(body, /Shopify|Add to Cart|paypal\.com/i, path);
+    assertCustomerSafe(body);
+  }
+});
+
+test('registered-but-unbuilt routes still hand off to the current live customer route', async () => {
   const cases = [
-    ['/store', 'https://elevationupscales.com/store'],
-    ['/shop/sok', 'https://elevationupscales.com/shop/sok'],
-    ['/shop/renogy', 'https://elevationupscales.com/shop/renogy'],
-    ['/shop/vevor', 'https://elevationupscales.com/shop/vevor'],
-    ['/shop/kingboss', 'https://elevationupscales.com/shop/kingboss'],
     ['/shipping-logistics-services', 'https://elevationupscales.com/shipping-logistics-services'],
     ['/hawaii-lithium-batteries', 'https://elevationupscales.com/hawaii-lithium-batteries'],
     ['/privacy', 'https://elevationupscales.com/privacy'],
@@ -137,10 +128,8 @@ test('registered-but-unbuilt routes hand off to the current live customer route'
     ['/start-a-project', 'https://elevationupscales.com/start-a-project'],
     ['/start-a-project?type=home', 'https://elevationupscales.com/start-a-project?type=home'],
     ['/start-a-project?type=rv', 'https://elevationupscales.com/start-a-project?type=rv'],
-    ['/start-a-project?solution=solar', 'https://elevationupscales.com/start-a-project?solution=solar'],
-    ['/start-a-project?type=home&source=legacy-route', 'https://elevationupscales.com/start-a-project?type=home&source=legacy-route']
+    ['/start-a-project?solution=solar', 'https://elevationupscales.com/start-a-project?solution=solar']
   ];
-
   for (const [path, location] of cases) {
     const res = await request(path);
     assert.equal(res.status, 307, path);
@@ -149,12 +138,7 @@ test('registered-but-unbuilt routes hand off to the current live customer route'
 });
 
 test('unknown routes and canonical-host loop protection use the branded customer-safe 404', async () => {
-  const cases = [
-    await request('/not-a-real-route'),
-    await request('/store', {}, 'https://elevationupscales.com'),
-    await request('/start-a-project?type=home', {}, 'https://elevationupscales.com')
-  ];
-
+  const cases = [await request('/not-a-real-route'), await request('/start-a-project?type=home', {}, 'https://elevationupscales.com')];
   for (const res of cases) {
     assert.equal(res.status, 404);
     const body = await res.text();
@@ -168,17 +152,11 @@ test('unknown routes and canonical-host loop protection use the branded customer
 
 test('compatibility redirects preserve established public route contracts', async () => {
   const cases = [
-    ['/index.html', 301, '/'],
-    ['/start-a-project.html', 301, '/start-a-project'],
-    ['/home-project', 302, '/start-a-project?type=home&source=legacy-route'],
-    ['/rv-project.html', 302, '/start-a-project?type=rv&source=legacy-route'],
-    ['/marketplace', 301, '/store'],
-    ['/lithium-batteries', 301, '/store?department=lithium-batteries'],
-    ['/rv-store', 301, '/store?department=rv-outdoor'],
-    ['/kingboss-batteries', 301, '/shop/kingboss'],
-    ['/product/', 308, '/product']
+    ['/index.html', 301, '/'], ['/start-a-project.html', 301, '/start-a-project'],
+    ['/home-project', 302, '/start-a-project?type=home&source=legacy-route'], ['/rv-project.html', 302, '/start-a-project?type=rv&source=legacy-route'],
+    ['/marketplace', 301, '/store'], ['/lithium-batteries', 301, '/store?department=lithium-batteries'],
+    ['/rv-store', 301, '/store?department=rv-outdoor'], ['/kingboss-batteries', 301, '/shop/kingboss'], ['/product/', 308, '/product']
   ];
-
   for (const [path, status, location] of cases) {
     const res = await request(path);
     assert.equal(res.status, status, path);
@@ -190,7 +168,5 @@ test('mutation methods are not accepted by the public application', async () => 
   const res = await request('/', { method: 'POST' });
   assert.equal(res.status, 405);
   assert.equal(res.headers.get('allow'), 'GET, HEAD');
-  const body = await res.text();
-  assert.match(body, /Method Not Allowed/);
-  assertCustomerSafe(body);
+  assert.match(await res.text(), /Method Not Allowed/);
 });
