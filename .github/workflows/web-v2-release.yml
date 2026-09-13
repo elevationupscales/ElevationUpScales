@@ -41,6 +41,7 @@ jobs:
   candidate:
     if: inputs.mode == 'candidate'
     runs-on: ubuntu-latest
+    environment: web-v2-release
     steps:
       - name: Validate immutable release request
         run: |
@@ -133,6 +134,7 @@ jobs:
   promote:
     if: inputs.mode == 'promote'
     runs-on: ubuntu-latest
+    environment: web-v2-release
     steps:
       - name: Validate promotion gate
         run: |
