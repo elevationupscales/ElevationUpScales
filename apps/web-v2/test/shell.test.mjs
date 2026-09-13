@@ -16,28 +16,37 @@ function assertCustomerSafe(body) {
   assert.doesNotMatch(body, /\bWeb V2\b|\bCommerce V2\b|\bOps V2\b|\bStep 4\b|\bPhase 1\b|current shell|not connected|will connect later|migration status|architecture explanation/i);
 }
 
-test('homepage renders customer-safe public navigation and SEO', async () => {
+test('homepage reconstructs the approved retail-first customer presentation', async () => {
   const res = await request('/');
   assert.equal(res.status, 200);
   assert.match(res.headers.get('content-type') || '', /text\/html/);
   assert.match(res.headers.get('content-security-policy') || '', /default-src 'self'/);
+  assert.match(res.headers.get('content-security-policy') || '', /img-src 'self' https:\/\/elevationupscales\.com data:/);
 
   const body = await res.text();
-  assert.match(body, /Power Beyond/);
+  assert.match(body, /AUTHORIZED SOK ENERGY DEALER/);
+  assert.match(body, /Lithium Power/);
+  assert.match(body, /for RV, Solar &amp; Backup/);
+  assert.match(body, /Shop Power &amp; Energy/);
   assert.match(body, /Start a Project/);
-  assert.match(body, /Explore by/);
-  assert.match(body, /Hawaii Logistics/);
-  assert.match(body, /href="\/solar-services"/);
+  assert.match(body, /Lithium Power <span>Solutions<\/span>/);
+  assert.match(body, /Featured SOK Systems/);
+  assert.match(body, /Battery Freight for Hawaii &amp; Alaska/);
   assert.match(body, /href="\/store"/);
+  assert.match(body, /href="\/shop\/sok"/);
   assert.match(body, /href="\/start-a-project"/);
-  assert.match(body, /href="\/what-we-do"/);
+  assert.match(body, /href="\/shipping-logistics-services"/);
+  assert.match(body, /href="\/hawaii-lithium-batteries"/);
   assert.match(body, /href="\/work-with-us"/);
   assert.match(body, /href="\/privacy"/);
   assert.match(body, /href="\/terms"/);
   assert.match(body, /rel="canonical" href="https:\/\/elevationupscales\.com\/"/);
   assert.match(body, /property="og:title"/);
-  assert.match(body, /ChatGPT Image Sep 6, 2026, 11_44_56 AM\.png/);
-  assert.match(body, /ChatGPT Image Sep 5, 2026, 04_15_53 PM\.png/);
+  assert.match(body, /storefront-tropical-logistics-v3\.webp/);
+  assert.match(body, /sok-wordmark-home-transparent\.webp/);
+  assert.match(body, /sk12v100pc\/home-hero\.webp/);
+  assert.match(body, /sk48v100n\/home-crop\.webp/);
+  assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
   assert.doesNotMatch(body, /paypal\.com|\/api\/checkout|\/api\/paypal|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
   assertCustomerSafe(body);
 });
@@ -97,7 +106,9 @@ test('owned CSS and JS assets are served locally', async () => {
   const css = await request('/assets/app.css');
   assert.equal(css.status, 200);
   assert.match(css.headers.get('content-type') || '', /text\/css/);
-  assert.match(await css.text(), /@media \(max-width: 680px\)/);
+  const cssBody = await css.text();
+  assert.match(cssBody, /@media \(max-width: 680px\)/);
+  assert.match(cssBody, /storefront-tropical-logistics-v3\.webp/);
 
   const js = await request('/assets/app.js');
   assert.equal(js.status, 200);
