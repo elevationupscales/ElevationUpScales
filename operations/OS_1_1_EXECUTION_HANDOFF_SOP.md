@@ -1,9 +1,9 @@
 # ELEVATION UPSCALES — OS 1.1 EXECUTION / HANDOFF SOP
 
-**Version:** 1.1  
+**Version:** 1.1.1  
 **Parent:** `operations/MASTER_SOP_V1_1.md`  
 **Owner:** Casey Young  
-**Status:** CANDIDATE UNTIL MERGED TO ACCEPTED `main`
+**Status:** ACCEPTED — EXECUTION LOOP GUARD ACTIVE
 
 ## Purpose
 
@@ -19,11 +19,31 @@ Do not assume a previously known SHA is still current.
 
 ## 2. Worker startup
 
-Default startup sequence:
+Default first-entry startup sequence:
 
 **IDENTIFY PROJECT/LANE → IDENTIFY REPORTING MANAGER → READ MASTER SOP → READ MASTER WORK BOARD → READ PROJECT SCOPE → READ PROJECT WORK BOARD/CURRENT_WORKTREE → READ CURRENT DIRECTIVE/GATE → CONFIRM ONE EXECUTION OWNER → RUN OR STANDBY.**
 
 Workers fit into the existing OS before creating new structure.
+
+This full startup sequence is for first entry, material reassignment or genuine state conflict. It is **not** a loop that must be replayed before every repository write or after every interrupted response.
+
+### 2A. Authorized development fast path
+
+Once a development worker has an accepted lane, active Worktree and bounded authorized task, use:
+
+**RE-RESOLVE `main` ONCE → READ ACTIVE WORKTREE + EXACT TASK CONTROL → CREATE/RECOVER BOUNDED BRANCH → IMPLEMENT → QA → RE-RESOLVE `main` ONCE BEFORE MERGE → RECONCILE IF NEEDED → MERGE → UPDATE WORKTREE → REPORT.**
+
+Rules:
+
+- create or recover the bounded work branch immediately after startup state is validated;
+- do not keep reading management files before the first mutation when the Worktree/task is already unambiguous;
+- do not reread the Master SOP, Worker Registry, global Work Board and unchanged lane controls repeatedly during one bounded task;
+- normal bounded development uses at most two `main` resolutions: startup and pre-merge;
+- perform an extra resolution/read only when a real race, source conflict, authority change or control-plane drift is detected;
+- source-specific truth checks required by the task remain mandatory and are not removed by this fast path;
+- QA and merge safety are preserved; this section removes redundant control ceremony, not technical verification.
+
+**FIRST EXECUTION RULE:** after the active task is verified, the next repository action should be branch creation/recovery or implementation—not another broad RECON pass.
 
 ## 3. RUN
 
@@ -40,6 +60,8 @@ Continue inside the authorized Scope until:
 - the lane is legitimately waiting on an external trigger.
 
 `RUN` never expands authority by itself.
+
+For an already-authorized bounded development task, `RUN` invokes the development fast path in §2A rather than restarting full worker onboarding.
 
 ## 4. Execution routing
 
@@ -76,7 +98,17 @@ When work is interrupted or reassigned:
 
 **SAFE-SAVE → RECORD LAST VERIFIED STATE → PRESERVE OPEN WORK → IDENTIFY NEW OWNER OR STANDBY STATE → UPDATE CURRENT POINTER → CONTINUE.**
 
-An interruption does not erase unfinished work.
+An interruption does not erase unfinished work and **an execution-window/context cutoff is not an owner gate**.
+
+### Interrupted-run continuation
+
+If an authorized development run ends before completion:
+
+- if a bounded branch/commit exists, recover it and continue from the last verified repository state;
+- if no mutation occurred, re-resolve current `main`, confirm the active Worktree/task has not materially changed, then create the bounded branch and begin implementation immediately;
+- do not replay full onboarding/recon unless the current state actually conflicts with the saved task;
+- do not spend the next run reconstructing a completion receipt for work that has not happened;
+- prioritize durable repository progress: **BRANCH/COMMIT → QA → MERGE → RECEIPT**.
 
 A replacement worker must not inherit temporary elevated authority merely because the prior worker had it.
 
@@ -89,6 +121,8 @@ If an external action times out, crashes or returns an uncertain result:
 - verify external state before retrying;
 - preserve the task as OPEN if unfinished;
 - do not blindly repeat financial, customer-facing, deployment or submission actions.
+
+A local execution/context cutoff before any external mutation is not an `UNKNOWN` external result; resume under §6.
 
 ## 8. Waiting state
 
@@ -121,6 +155,8 @@ Examples:
 
 Do not escalate routine executable work merely to obtain confirmation.
 
+An interrupted execution window is not escalation-worthy by itself.
+
 ## 10. Receipt discipline
 
 Create or update a durable receipt when an action materially changes business or control state, including:
@@ -135,6 +171,8 @@ Create or update a durable receipt when an action materially changes business or
 
 Routine micro-actions can remain in the owning Worktree or platform history.
 
+**A receipt is an output of completed work, never a prerequisite to beginning work.** Do not reserve execution capacity for a completion receipt before implementation, QA and merge exist. If an execution run is constrained, durable code/commit/QA progress takes priority over prose reporting.
+
 ## 11. Closure and standby
 
 When the assigned Scope is complete:
@@ -148,4 +186,4 @@ When the assigned Scope is complete:
 
 ## Control statement
 
-**RECOVER FROM GITHUB, NOT CHAT. EXECUTE ONE OWNER AT A TIME. HAND OFF VERIFIED STATE, NOT A STORY.**
+**RECOVER FROM GITHUB, NOT CHAT. RESOLVE ONCE → BRANCH → BUILD → QA → RESOLVE BEFORE MERGE → MERGE → REPORT. EXECUTE ONE OWNER AT A TIME. HAND OFF VERIFIED STATE, NOT A STORY.**
