@@ -1,0 +1,35 @@
+name: One-time Web V2 restore legacy SOK assets
+
+on:
+  push:
+    branches:
+      - work/web-v2-sok-product-image-cleanup-2026-09-13
+    paths:
+      - .github/workflows/one-time-web-v2-restore-legacy-sok-assets.yml
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/web-v2-sok-product-image-cleanup-2026-09-13
+          fetch-depth: 0
+
+      - name: Restore Legacy-owned SOK media unchanged from current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          git checkout origin/main -- \
+            site/assets/brands/sok/sk48v100n/hero.jpg \
+            site/assets/brands/sok/sk48v100n/home-crop.webp
+          git rm .github/workflows/one-time-web-v2-restore-legacy-sok-assets.yml
+          git config user.name 'elevationupscales-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add site/assets/brands/sok/sk48v100n/hero.jpg site/assets/brands/sok/sk48v100n/home-crop.webp
+          git commit -m 'Web V2: preserve Legacy SOK media files unchanged'
+          git push origin HEAD:work/web-v2-sok-product-image-cleanup-2026-09-13
