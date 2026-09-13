@@ -26,11 +26,12 @@ MPM 6 is the active company-oversight instance. Prior MPM iterations are histori
 | Priority | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|---|
 | **P0** | eBay stop-new-loss + customer/cash recovery | eBay Store Operations under Peter / Company Operations | **CRITICAL — LIVE LOSS EXPOSURE / APPROVED STOP-LOSS MUTATIONS NOT FULLY EXECUTED** | Follow `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`: set the listed failed/uncontrolled purchasable configurations to qty 0 through an action-capable Seller Hub surface, receipt-verify resulting state, identify the newly reported sale when its receipt posts, then continue customer/cash recovery. |
-| **P0** | Web V2 direct-commerce path | MPM 6 → Web V2 Commerce Developer | **ORDER + FULFILLMENT ROUTING ACTIVE** | Build bounded payment/durable-order/fulfillment handoff from merged server-validated checkout state. |
-| **P0** | Shopify conversion trust | Shopify Store Operations + DEV + Shipping/Company Ops | **ACTIVE** | Fix blurry/weak product imagery; resolve supplier-specific shipping truth; approve missing policies; add verified near-CTA confidence. |
 | **P0** | Owner communications / residual Google Voice forwarding | MPM 6 / Communications Recovery | **CRITICAL UNTIL VERIFIED CLOSED** | Verify direct inbound call + SMS after carrier/Google correction. |
+| **P0** | Shopify image-quality / conversion trust | Shopify Store Operations under Peter + DEV support | **ACTIVE — PAYMENT GREEN / BLURRY-MEDIA DEFECT OPEN** | Fix blurry/weak exact-SKU product imagery and rendering first; preserve payment state; do not substitute wrong/AI-redrawn product media. |
+| **P1** | Shopify shipping/policy/buy-box confidence | Shipping & Logistics + Vendor Projects → Shopify Store Operations / Company Ops | **ACTIVE / PARTIALLY HELD ON TRUTH + APPROVAL** | Resolve supplier-specific shipping truth; approve missing policy substance; then implement verified near-CTA confidence and re-smoke purchase path. |
 | **P1** | Existing-shop profitability tuning | Company Operations + channel workers | **ACTIVE** | Improve current sales channels before expansion; no broad paid acquisition. |
 | **P1** | Vendor source truth | Owning Vendor Projects | **ACTIVE SUPPORT** | Maintain exact SKU/price/MAP/stock/shipping/warranty/fulfillment/channel truth and resolve only their own gaps. |
+| **P2** | Web V2 remaining direct-commerce build | MPM 6 → Web V2 Commerce Developer | **ORDER + FULFILLMENT ROUTING ACTIVE IN PARALLEL** | Resume existing `work/web-v2-order-2026-09-13` branch from current worktree; build bounded payment/durable-order/fulfillment handoff without restarting discovery. |
 
 Waiting on one lane does not stop executable work in another lane.
 
@@ -51,6 +52,7 @@ Verified receipts:
 - Checkout review — **COMPLETE / MERGED** `f5d3ac7cc4b37e8211a3bb460a8507380b75803d` through PR #169.
 - Checkout candidate QA — **PASS**: Pull Request QA run 130 + Web V2 QA run 78.
 - Worktree advancement — PR #170 merged; current Worktree owns the next phase.
+- Existing bounded order branch — `work/web-v2-order-2026-09-13`; preserve/resume rather than create duplicate work.
 
 | Worker | Current State | Routing |
 |---|---|---|
@@ -67,7 +69,7 @@ Web V2 sequence:
 4. Product detail — **COMPLETE**
 5. Cart — **COMPLETE**
 6. Checkout review — **COMPLETE**
-7. **Order + fulfillment routing — P0 ACTIVE / CURRENT**
+7. **Order + fulfillment routing — ACTIVE / CURRENT IN ITS LANE**
 8. Hawaii/freight controls — queued where applicable
 9. Production-parity smoke — true release gate only
 10. Same-version cutover — owner acceptance required
@@ -134,8 +136,9 @@ Optional Clarity/domain polish remains behind image quality, shipping truth and 
 
 | Lane | Owner | State |
 |---|---|---|
-| Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — CONVERSION + TRUST TUNING** |
+| Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — P0 IMAGE QUALITY + P1 TRUST/SHIPPING/POLICY TUNING** |
 | eBay | eBay Store Operations / Peter / Company Ops | **P0 CRITICAL — LIVE LOSS EXPOSURE / ACTION-CAPABLE SELLER HUB MUTATION REQUIRED** |
+| Web V2 | Web V2 Commerce Developer under MPM 6 | **P2 BUILD — ORDER + FULFILLMENT ACTIVE IN PARALLEL** |
 | TikTok | TikTok execution under Peter | **ACTIVE UNDER RESTRICTION — NO APPEAL REPLAY / NO UNAUTHORIZED PAID SPEND** |
 | Fourthwall / Apparel | Apparel operations under Peter | **ACTIVE SEPARATE CHANNEL** |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** |
@@ -165,16 +168,17 @@ Optional Clarity/domain polish remains behind image quality, shipping truth and 
 
 1. The closest active Worktree owns phase sequencing.
 2. Global Board/Registry follow the Worktree; they do not route workers backward when they lag.
-3. One bounded task = one primary execution owner.
-4. Hold only the affected SKU/order/route when truth is missing.
-5. Vendor Projects own supplier truth; storefront workers do not infer it.
-6. `production-deploy` remains Legacy-only until Web V2 cutover is separately accepted.
-7. Release invariant remains: **ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE → SAME VERSION CUTOVER → LIVE VERIFY.**
-8. MPM 6 owns company oversight; MPM 5 and earlier instances are historical/reference.
-9. MASTER RECON returns to triggered integrity after correcting drift.
-10. eBay price/quantity/end controls are not complete until live Seller Hub reread verifies the resulting state; a recorded Git decision is not a Seller Hub mutation receipt.
-11. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
+3. Company priority stack remains P0 continuity/loss prevention → P1 conversion/profitability → P2 build/scale → P3 internal enhancement. An active P2 worker may continue in parallel; it does not displace P0/P1 management attention.
+4. One bounded task = one primary execution owner.
+5. Hold only the affected SKU/order/route when truth is missing.
+6. Vendor Projects own supplier truth; storefront workers do not infer it.
+7. `production-deploy` remains Legacy-only until Web V2 cutover is separately accepted.
+8. Release invariant remains: **ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE → SAME VERSION CUTOVER → LIVE VERIFY.**
+9. MPM 6 owns company oversight; MPM 5 and earlier instances are historical/reference.
+10. MASTER RECON returns to triggered integrity after correcting drift.
+11. eBay price/quantity/end controls are not complete until live Seller Hub reread verifies the resulting state; a recorded Git decision is not a Seller Hub mutation receipt.
+12. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
 
 ## Current control phrase
 
-**EBAY: STOP NEW LOSS EXPOSURE → RECEIPT-VERIFY SELLER HUB. WEB V2: CHECKOUT MERGED → ORDER + FULFILLMENT ACTIVE. SHOPIFY: PAYMENT GREEN → IMAGE/TRUST/SHIPPING/POLICY CONVERSION WORK. SELL → CONVERT → FULFILL → RECORD PROFIT.**
+**P0: STOP LOSS + PROTECT COMMUNICATIONS + FIX LIVE CONVERSION DEFECTS → P1: PROFITABILITY/TRUTH → P2: WEB V2 BUILD CONTINUES IN PARALLEL. SELL → CONVERT → FULFILL → RECORD PROFIT → FIX THE NEXT REAL BOTTLENECK.**
