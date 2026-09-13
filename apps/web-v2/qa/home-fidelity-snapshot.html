@@ -33,7 +33,9 @@
   html=html.replace('<link rel="stylesheet" href="/assets/app.css">','<style>'+window.__qa.styles+'\n'+window.__qa.navStyles+'\n'+window.__qa.homeFidelityStyles+'</style>');
   const safeClient=window.__qaClient.replace(/<\/script/gi,'<\\/script');
   html=html.replace('<script defer src="/assets/app.js"><' + '/script>','<script>'+safeClient+'<' + '/script>');
-  document.getElementById('qa').srcdoc=html;
+  const frame=document.getElementById('qa');
+  frame.onload=()=>setTimeout(()=>frame.contentWindow.scrollTo(0,760),350);
+  frame.srcdoc=html;
 })().catch(error=>{document.body.innerHTML='<pre style="white-space:pre-wrap;color:#f66;background:#111;padding:20px">'+String(error.stack||error)+'</pre>'});
 </script>
 </body>
