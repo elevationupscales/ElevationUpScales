@@ -1,6 +1,7 @@
-import { renderShell } from './shell.js';
-import { styles } from './styles.js';
 import { clientScript } from './client.js';
+import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
+import { renderNotFound, renderPublicPage } from './shell.js';
+import { styles } from './styles.js';
 
 const baseHeaders = {
   'Cache-Control': 'no-store',
@@ -31,6 +32,42 @@ function html(body, status = 200) {
   });
 }
 
+function redirect(location, status) {
+  return response(null, {
+    status,
+    headers: { Location: location }
+  });
+}
+
+function robotsText(url) {
+  if (url.origin !== CANONICAL_ORIGIN) {
+    return 'User-agent: *\nDisallow: /\n';
+  }
+
+  return [
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /healthz',
+    '',
+    `Sitemap: ${CANONICAL_ORIGIN}/sitemap.xml`,
+    ''
+  ].join('\n');
+}
+
+function sitemapXml() {
+  const entries = getSitemapRoutes()
+    .map((routeInfo) => `  <url><loc>${canonicalUrl(routeInfo)}</loc></url>`)
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+}
+
+function currentPublicBridge(url, routeInfo) {
+  if (!routeInfo || routeInfo.implemented) return null;
+  if (url.origin === CANONICAL_ORIGIN) return null;
+  return `${CANONICAL_ORIGIN}${routeInfo.path}${url.search}`;
+}
+
 export default {
   async fetch(request) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -52,6 +89,24 @@ export default {
       });
     }
 
+    if (url.pathname === '/robots.txt') {
+      return response(robotsText(url), {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
+
+    if (url.pathname === '/sitemap.xml') {
+      return response(sitemapXml(), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
+
     if (url.pathname === '/assets/app.css') {
       return response(styles, {
         headers: {
@@ -70,10 +125,21 @@ export default {
       });
     }
 
-    if (url.pathname === '/' || url.pathname === '/start-a-project') {
-      return html(renderShell({ startProject: url.pathname === '/start-a-project' }));
+    const compatibilityRedirect = resolveCompatibilityRedirect(url);
+    if (compatibilityRedirect) {
+      return redirect(compatibilityRedirect.location, compatibilityRedirect.status);
     }
 
-    return html(renderShell({ notFound: true }), 404);
+    const routeInfo = getPublicRoute(url.pathname);
+    if (routeInfo?.implemented) {
+      return html(renderPublicPage(routeInfo));
+    }
+
+    const bridgeLocation = currentPublicBridge(url, routeInfo);
+    if (bridgeLocation) {
+      return redirect(bridgeLocation, 307);
+    }
+
+    return html(renderNotFound(), 404);
   }
 };
