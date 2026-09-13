@@ -31,7 +31,7 @@ MPM 6 is the active company-oversight instance. Prior MPM iterations are histori
 | **P1** | Shopify shipping/policy/buy-box confidence | Shipping & Logistics + Vendor Projects → Shopify Store Operations / Company Ops | **ACTIVE / PARTIALLY HELD ON TRUTH + APPROVAL** | Resolve supplier-specific shipping truth; approve missing policy substance; then implement verified near-CTA confidence and re-smoke purchase path. |
 | **P1** | Existing-shop profitability tuning | Company Operations + channel workers | **ACTIVE** | Improve current sales channels before expansion; no broad paid acquisition. |
 | **P1** | Vendor source truth | Owning Vendor Projects | **ACTIVE SUPPORT** | Maintain exact SKU/price/MAP/stock/shipping/warranty/fulfillment/channel truth and resolve only their own gaps. |
-| **P2** | Web V2 remaining direct-commerce build | MPM 6 → Web V2 Commerce Developer | **ORDER + FULFILLMENT ROUTING ACTIVE IN PARALLEL** | Resume existing `work/web-v2-order-2026-09-13` branch from current worktree; build bounded payment/durable-order/fulfillment handoff without restarting discovery. |
+| **P2** | Web V2 remaining direct-commerce build | MPM 6 → Web V2 Commerce Developer | **HAWAII / FREIGHT + PAYMENT READINESS ACTIVE IN PARALLEL** | Follow `WEB_V2_CURRENT_WORKTREE.md`: connect authoritative shipping/freight + sales-tax/total authority and verify the exact `MARKETPLACE_DB` binding; preserve fail-closed payment activation until every charge-readiness gate and at least one orderable canonical SKU are proven. |
 
 Waiting on one lane does not stop executable work in another lane.
 
@@ -51,15 +51,16 @@ Verified receipts:
 - Cart — **COMPLETE / MERGED** `13b4411fc265a1f7b149ad9207059221fa53db32`.
 - Checkout review — **COMPLETE / MERGED** `f5d3ac7cc4b37e8211a3bb460a8507380b75803d` through PR #169.
 - Checkout candidate QA — **PASS**: Pull Request QA run 130 + Web V2 QA run 78.
-- Worktree advancement — PR #170 merged; current Worktree owns the next phase.
-- Existing bounded order branch — `work/web-v2-order-2026-09-13`; preserve/resume rather than create duplicate work.
+- Order + fulfillment handoff — **COMPLETE / MERGED** `cd8e21ef4a89c261a4580b683da54be8a896787a` through PR #172.
+- Order candidate QA — **PASS**: Pull Request QA run 134 + Web V2 QA run 90.
+- Worktree advancement — PR #173 merged as `e34740515a1fe7a1cf8ccb2fa0aa475bfe936d8c`; current Worktree owns freight/payment-readiness sequencing.
 
 | Worker | Current State | Routing |
 |---|---|---|
 | WEB DEVELOPER | **STANDBY / SUPPORT** | Preserve merged public/customer commerce path; support exact bounded UI defects. |
-| COMMERCE DEVELOPER | **ACTIVE / CURRENT — ORDER + FULFILLMENT ROUTING** | Server revalidation → PayPal/order mutation → durable Elevation order → exact supplier/SKU fulfillment route. |
-| RELEASE ENGINEER | **READY / SUPPORT** | Act only at true production-parity release gate. |
-| MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Wake only for real state, lineage, policy, supplier-truth or release conflicts. |
+| COMMERCE DEVELOPER | **ACTIVE / CURRENT — HAWAII / FREIGHT + PAYMENT READINESS** | Connect only authoritative shipping/freight + tax/total authority to the merged durable-order handoff; payment remains fail closed until runtime binding, amountDue and orderability gates are proven. |
+| RELEASE ENGINEER | **READY / SUPPORT** | Verify exact runtime bindings and act only at a true sandbox/release gate; never invent binding IDs. |
+| MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Wake only for real state, lineage, policy, supplier-truth, charge-authority or release conflicts. |
 
 Web V2 sequence:
 
@@ -69,17 +70,26 @@ Web V2 sequence:
 4. Product detail — **COMPLETE**
 5. Cart — **COMPLETE**
 6. Checkout review — **COMPLETE**
-7. **Order + fulfillment routing — ACTIVE / CURRENT IN ITS LANE**
-8. Hawaii/freight controls — queued where applicable
-9. Production-parity smoke — true release gate only
-10. Same-version cutover — owner acceptance required
-11. First real order — final revenue proof
+7. Order + fulfillment handoff — **COMPLETE / MERGED; PAYMENT ACTIVATION HELD**
+8. **Hawaii/freight + authoritative charge readiness — P0 ACTIVE / CURRENT IN ITS LANE**
+9. PayPal sandbox + durable-order proof — **QUEUED / GATED BY STEP 8 + RUNTIME BINDING**
+10. Production-parity smoke — true release gate only
+11. Same-version cutover — owner acceptance required
+12. First real order — final revenue proof
 
 Commerce integrity:
 
-**VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT → CART → SERVER-REVALIDATED CHECKOUT → PAYMENT / DURABLE ORDER → EXACT FULFILLMENT ROUTE. UNKNOWN TRUTH FAILS CLOSED FOR THE AFFECTED ITEM ONLY.**
+**VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT → CART → SERVER-REVALIDATED CHECKOUT → DURABLE ORDER → EXACT FULFILLMENT ROUTE → AUTHORITATIVE SHIPPING/TAX/TOTAL → PAYMENT READINESS. UNKNOWN TRUTH FAILS CLOSED FOR THE AFFECTED ITEM ONLY.**
 
-Do not reopen unchanged vendor files as a search loop.
+Current payment activation holds:
+
+- no verified committed `MARKETPLACE_DB` D1 binding identity;
+- no authoritative general-path shipping amount;
+- no authoritative Web V2 sales-tax amount/disposition;
+- therefore no verified final `amountDue`;
+- current canonical catalog has no orderable SKU.
+
+Do not reopen unchanged vendor files as a search loop and do not invent any of the held values above.
 
 ---
 
@@ -138,7 +148,7 @@ Optional Clarity/domain polish remains behind image quality, shipping truth and 
 |---|---|---|
 | Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — P0 IMAGE QUALITY + P1 TRUST/SHIPPING/POLICY TUNING** |
 | eBay | eBay Store Operations / Peter / Company Ops | **P0 CRITICAL — LIVE LOSS EXPOSURE / ACTION-CAPABLE SELLER HUB MUTATION REQUIRED** |
-| Web V2 | Web V2 Commerce Developer under MPM 6 | **P2 BUILD — ORDER + FULFILLMENT ACTIVE IN PARALLEL** |
+| Web V2 | Web V2 Commerce Developer under MPM 6 | **P2 BUILD — HAWAII / FREIGHT + PAYMENT READINESS ACTIVE IN PARALLEL** |
 | TikTok | TikTok execution under Peter | **ACTIVE UNDER RESTRICTION — NO APPEAL REPLAY / NO UNAUTHORIZED PAID SPEND** |
 | Fourthwall / Apparel | Apparel operations under Peter | **ACTIVE SEPARATE CHANNEL** |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** |
@@ -177,8 +187,9 @@ Optional Clarity/domain polish remains behind image quality, shipping truth and 
 9. MPM 6 owns company oversight; MPM 5 and earlier instances are historical/reference.
 10. MASTER RECON returns to triggered integrity after correcting drift.
 11. eBay price/quantity/end controls are not complete until live Seller Hub reread verifies the resulting state; a recorded Git decision is not a Seller Hub mutation receipt.
-12. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
+12. Payment readiness is not complete until authoritative shipping, tax, `amountDue`, exact runtime binding and at least one orderable canonical SKU are proven.
+13. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
 
 ## Current control phrase
 
-**P0: STOP LOSS + PROTECT COMMUNICATIONS + FIX LIVE CONVERSION DEFECTS → P1: PROFITABILITY/TRUTH → P2: WEB V2 BUILD CONTINUES IN PARALLEL. SELL → CONVERT → FULFILL → RECORD PROFIT → FIX THE NEXT REAL BOTTLENECK.**
+**P0: STOP LOSS + PROTECT COMMUNICATIONS + FIX LIVE CONVERSION DEFECTS → P1: PROFITABILITY/TRUTH → P2: WEB V2 FREIGHT + PAYMENT READINESS CONTINUES IN PARALLEL. SELL → CONVERT → FULFILL → RECORD PROFIT → FIX THE NEXT REAL BOTTLENECK.**
