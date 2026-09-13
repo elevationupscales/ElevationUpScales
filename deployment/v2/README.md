@@ -1,5 +1,13 @@
 # Elevation V2 Release Foundation
 
+## Controlling Web V2 SOP
+
+The owner-controlled Web V2 visual, customer-experience, brand, asset, and vendor-merchandising standard is:
+
+`deployment/v2/WEB-V2-SOP.md`
+
+The SOP does not replace this release foundation. Visual requirements remain subordinate to the accepted Web / Commerce / Ops architecture boundary and exact-version release controls.
+
 ## Release invariant
 
 One immutable Git SHA maps to one Cloudflare Worker Version ID. Opera accepts the immutable version-specific preview URL, and production promotes that already-created Version ID without rebuilding or re-uploading source.
