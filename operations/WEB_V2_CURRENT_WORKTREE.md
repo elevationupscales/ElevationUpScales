@@ -2,150 +2,156 @@
 
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
-**System:** Elevation Operating System 1.1  
-**Status:** **ACTIVE — PERMANENT FIRST-CLASS DEVELOPMENT LANE**  
-**Parent:** Operating System  
+**System:** Elevation OS 1.1  
+**Status:** **ACTIVE — COMMERCIAL RETAIL REBUILD / REVENUE FIRST**  
 **Reports To:** OS 1.1 Project Manager / MPM  
-**Accepted Step 4 application baseline:** `04ef81368732d95c81e8f439f14524df385a9f1e`  
-**Git freshness rule:** re-resolve the then-current `main` before every Web V2 task; control-only descendants do not change the accepted application baseline by themselves  
-**Legacy production pointer:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — **LEGACY ONLY**  
+**Current owner workflow:** `WEB_V2_COMMERCIAL_RETAIL_REBUILD_AND_RELEASE_WORKFLOW_2026-09-12.md`  
 **Visual control:** `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md`  
-**Release control:** `.github/workflows/web-v2-qa.yml` + `.github/workflows/web-v2-release.yml` + `deployment/v2/`
+**Legacy production:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — LEGACY ONLY / rollback reference  
+**Current source baseline before this reset:** `main = 7a55652a1a59226b40023050ad1aef04ab6e1577`
 
-## 1. Lane purpose
+## 1. Mission
 
-**WEB V2 DEVELOPMENT** is the permanent OS 1.1 lane for the new Elevation public web platform.
+Rebuild ElevationUpScales.com into the smallest complete commercial retail system that can sell authorized vendor products and explain Elevation's lithium/off-grid/freight/Hawaii specialty.
 
-This is one operating lane under the OS 1.1 Project Manager. It is **not** another management hierarchy and does not create another project-management system.
+The website must do this in order:
 
-Control relationship:
+**EXPLAIN → SHOP → PRODUCT → CART → PAYPAL → ORDER → FULFILL.**
 
-**CASEY → OS 1.1 PROJECT MANAGER → WEB V2 DEVELOPMENT**
+Do not turn Web V2 into another architecture demo, internal OS surface, generic services website or feature collection.
 
-Specialist worker responsibilities may be assigned inside this lane when required:
+## 2. Homepage rule
 
-- **WEB DEVELOPER** — public customer experience, responsive UI, public routes, accessibility, public-site behavior and implementation of the approved visual system.
-- **COMMERCE DEVELOPER** — future Commerce V2 catalog, SKU, pricing, availability, checkout, payment, orders and server-side commerce APIs.
-- **RELEASE ENGINEER** — exact-version QA/release mechanics, candidate identity, preview verification, promotion and rollback controls.
+The owner has locked the design direction:
 
-These are worker responsibilities, not permanent managers.
+**RECONSTRUCT THE CURRENT APPROVED HOMEPAGE LOOK — DO NOT REDESIGN IT.**
 
-## 2. Architecture boundary
+Preserve the approved hero, freight/logistics presentation, brand feel, visual hierarchy and mobile experience. Remove development-status/internal-system copy. Make the homepage retail-first and immediately explain lithium/off-grid supply, freight/logistics and Hawaii lithium access.
 
-Preserve the accepted separation:
+Primary CTA: **Shop**.  
+Secondary CTA: **Start a Project**.
 
-- **WEB V2** = public customer experience.
-- **COMMERCE V2** = catalog, SKU, price, inventory/availability, checkout, payment and order truth.
-- **OPS V2** = internal operations, catalog administration, vendor operations, orders, logistics, leads, analytics and management surfaces.
+## 3. Public minimum
 
-Development convenience may not collapse these responsibilities back into the Legacy monolith.
+Foreground routes only:
 
-Commerce must preserve:
+- `/`
+- `/store`
+- `/shop/<vendor>`
+- `/product/<id-or-slug>`
+- `/cart`
+- `/checkout`
+- `/shipping-logistics-services`
+- `/hawaii-lithium-batteries`
+- `/start-a-project`
+- `/privacy`
+- `/terms`
 
-**ONE SURFACE = ONE CHECKOUT OWNER = ONE PAYMENT / ORDER AUTHORITY.**
+Retire from foreground navigation any old marketplace/list-item/collector/vehicle-selling or unrelated feature surface that does not help customers buy, understand shipping, or start a relevant project.
 
-## 3. Development control loop
+## 4. Catalog rule
 
-Every bounded Web V2 task follows:
+One canonical Elevation product catalog. Vendor pages are filtered views of the same product truth.
 
-**VERIFY CURRENT MAIN → ONE BOUNDED TASK → ONE PRIMARY WORKER → BRANCH → QA → REVIEW → MERGE → UPDATE WORKTREE → NEXT**
+Vendor Project sources own exact supplier truth. Web V2/Commerce V2 consume only approved:
 
-Rules:
+- product identity / SKU;
+- title/specs/images;
+- sell price and MAP/floor state;
+- stock/orderability;
+- shipping/freight disposition;
+- warranty/returns owner;
+- fulfillment source;
+- channel authorization.
 
-1. One primary worker per task.
-2. No parallel duplicate Web V2 branches for the same objective.
-3. Finish/merge one bounded component before opening the next unless Casey explicitly authorizes parallel work.
-4. No Legacy site edits merely because Web V2 needs a feature.
-5. No Cloudflare mutation from an audit/recon task.
-6. No production deployment from a development task unless Casey explicitly authorizes deployment/promotion.
-7. No secrets committed to Git.
-8. No direct application build bypassing QA.
-9. No rebuild after candidate acceptance.
-10. `production-deploy` remains Legacy-only and never becomes the Web V2 runtime pointer.
-11. `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md` controls substantial Web V2 visual work.
-12. **Start a Project** remains a primary customer path alongside ecommerce.
-13. Commerce integration must preserve the checkout/payment/order authority boundary above.
+No duplicate vendor storefront architecture.
 
-## 4. Release identity model
+## 5. Checkout authority
 
-Permanent V2 release invariant:
+Elevation direct site owns its own transaction:
 
-**ONE GIT SHA → ONE CLOUDFLARE VERSION ID → ONE TESTED VERSIONED PREVIEW → THAT SAME VERSION ID IN PRODUCTION**
+**PRODUCT → CART → SERVER REVALIDATION → CHECKOUT REVIEW → PAYPAL ORDERS v2 → DURABLE ELEVATION ORDER → GUARDED CAPTURE/RECONCILIATION → FULFILLMENT ROUTE.**
 
-Runtime truth is recorded by:
+No silent Shopify fallback. Shopify/eBay/TikTok remain separate channel/order/payment surfaces.
 
-**GIT SHA + CLOUDFLARE VERSION ID + DEPLOYMENT ID**
+No raw card/CVV handling or storage.
 
-It is never inferred from `main`, `production-deploy`, a Cloudflare branch label or a rebuild.
+## 6. Shipping / Hawaii control
 
-Promotion uses the already-created tested Cloudflare Version ID. Rollback returns traffic to a previously accepted Worker Version ID. Worker rollback covers Worker code/version state only; future D1/R2/KV migrations require separate data-compatibility and rollback controls.
+Payment may proceed only when the exact item/destination has a valid shipping disposition.
 
-## 5. Owner command semantics for this lane
+Allowed states include parcel/known rate, supplier-controlled shipping, approved freight, approved Hawaii lithium route, or manual review/quote. Unknown freight or unapproved lithium routing fails closed before final charge.
 
-- **AUDIT / SCAN / CHECK / INSPECT** = read-only → evidence → report → stop.
-- **DESIGN** = architecture/documentation only.
-- **BUILD** = isolated implementation inside the authorized bounded task.
-- **RUN** = continue the currently authorized Worktree from the last verified state.
-- **DEPLOY** = deploy/promote only the approved candidate/version.
-- **STOP** = stop mutation and preserve state.
+## 7. New release system
 
-None of these commands increase authority beyond the currently authorized task/gate.
+Version preview is **diagnostic only** and is no longer the acceptance gate.
 
-## 6. Current verified phase
+Release invariant:
 
-Accepted Step 4 application baseline:
+**ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION PROMOTED / CUT OVER → LIVE VERIFY.**
 
-`04ef81368732d95c81e8f439f14524df385a9f1e`
+Runtime truth:
 
-This SHA contains the owner-accepted Step 4 merge. Later OS/control-only commits may advance `main`; they do not by themselves replace the accepted Web V2 application baseline. Every new task must re-resolve `main` before execution.
+**GIT SHA + CLOUDFLARE VERSION ID + DEPLOYMENT ID.**
 
-Completed and merged:
+### Bootstrap
 
-- Phase 0 architecture/recon — **COMPLETE**;
-- isolated `elevation-web-v2` Worker shell — **COMPLETE**;
-- exact-version release architecture — **COMPLETE**;
-- Web V2 release foundation — **COMPLETE / MERGED**;
-- owner-approved visual/customer-experience SOP — **COMPLETE / MERGED**;
-- Phase 1 Step 4 first real Web V2 application shell — **COMPLETE / MERGED** from accepted head `5020b2138b62c122fe62d353e366e6b3bab4c445`.
+Before V2 owns the root domain:
 
-Current lane state:
+**CANDIDATE → SMOKE-ONLY CUSTOM DOMAIN WITH PRODUCTION BINDINGS → RUNTIME VERSION PROOF → OWNER ACCEPTANCE → ROOT-DOMAIN CUTOVER TO SAME WORKER/VERSION → LIVE VERIFY.**
 
-**PHASE 1 — SOURCE + RELEASE FOUNDATION COMPLETE THROUGH STEP 4 / EXACT-VERSION CLOUDFLARE CANDIDATE IS NEXT.**
+### Steady state
 
-## 7. Current worker routing
+After V2 owns production:
 
-| Responsibility | Worker State | Current Task / Gate |
+**CANDIDATE → ACCEPTED VERSION 100% + CANDIDATE 0% → REAL PRODUCTION URL + `Cloudflare-Workers-Version-Overrides` → RUNTIME VERSION PROOF → OWNER ACCEPTANCE → CANDIDATE 100% → LIVE VERIFY.**
+
+Rollback restores the last accepted Version ID. No rebuild or re-upload after candidate acceptance.
+
+## 8. Current worker routing
+
+| Worker | State | Task |
 |---|---|---|
-| WEB DEVELOPER | **STANDBY — STEP 4 MERGED** | No new UI/application task is open. Resume only on the next bounded Web V2 build packet. |
-| RELEASE ENGINEER | **QUEUED / NEXT OWNER-GATED ACTION** | Prepare the exact-version candidate flow for the merged Web V2 shell. Cloudflare configuration/upload/promotion requires explicit authorization. |
-| COMMERCE DEVELOPER | **STANDBY / WAIT** | Commerce V2 integration is not yet authorized. |
+| WEB DEVELOPER | **ACTIVE / NEXT** | Reconstruct approved homepage exactly enough for owner visual acceptance; remove internal/development presentation; make retail/logistics positioning clear. |
+| COMMERCE DEVELOPER | **QUEUED IMMEDIATELY AFTER HOMEPAGE BASELINE** | Canonical catalog → vendor views → product detail → cart → PayPal Orders v2 → durable order → fulfillment handoff. |
+| RELEASE ENGINEER | **ACTIVE SUPPORT / NEW RELEASE SYSTEM** | Replace preview-gated acceptance with production-parity smoke workflow; preserve exact SHA/version identity and rollback. |
+| MASTER RECON OS | **ACTIVE FOR THIS RESET** | Validate deployment-system change and stop stale preview/architecture sequencing from reappearing. |
 
-**One current task = one primary worker.** The next task belongs to the Release Engineer when its Cloudflare gate is explicitly opened.
+## 9. Build sequence
 
-## 8. Current sequence
+1. **Homepage reconstruction** — owner-approved current look, hero and freight presentation.
+2. **Retail navigation** — Shop / Vendors / Freight & Hawaii / Start a Project; remove distractions.
+3. **Canonical vendor catalog** — approved supplier truth only.
+4. **Product detail** — normal commercial retail presentation.
+5. **Cart** — durable, editable, server-revalidated.
+6. **Checkout + PayPal** — PayPal Orders v2 + durable Elevation order + idempotency.
+7. **Fulfillment routing** — supplier/freight source recorded and operable.
+8. **Hawaii/freight gates** — fail closed where route/cost approval is missing.
+9. **Production-parity smoke** — exact candidate/runtime version proof.
+10. **Same-version cutover/promotion** — live verify + receipt.
+11. **First real order** — prove payment → order → source → fulfillment → realized margin.
 
-| Sequence | State | Next Control |
-|---|---|---|
-| Release foundation | **COMPLETE / MERGED** | Preserve. |
-| Visual SOP | **COMPLETE / MERGED** | Governs substantial visual work. |
-| Step 4 application shell | **COMPLETE / MERGED** | Accepted application baseline `04ef81368732d95c81e8f439f14524df385a9f1e`. |
-| Cloudflare exact-version candidate | **NEXT / OWNER-GATED** | Re-resolve the then-current `main`; configure only the explicitly authorized preview/credential prerequisites; upload one candidate from the exact approved source SHA; record Version ID + preview URL; do not promote without separate approval. |
-| Commerce V2 integration | **WAIT** | Do not start yet. |
-| Ops V2 | **WAIT** | Do not start yet. |
-| Legacy retirement | **NOT AUTHORIZED** | Legacy Safe Prod remains protected until later proof/cutover authority. |
+## 10. Holds
 
-## 9. Legacy separation
+Do not delay this sequence for:
 
-The existing `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md` controls Legacy production repair/stabilization only.
+- Ops V2 dashboards;
+- broad CMS/admin rebuild;
+- marketplace/list-a-vehicle systems;
+- collector features;
+- new social/channel expansion;
+- speculative AI commerce;
+- unrelated home-service expansion;
+- another visual redesign.
 
-It does not control Web V2 development and must not be used to route Web V2 work back through the abandoned Legacy audit/repair model.
+## 11. RUN
 
-Legacy production remains separately protected while Web V2 is built and proven beside it.
+`RUN` means:
 
-## 10. RUN
+**RE-RESOLVE MAIN → READ THIS WORKTREE → EXECUTE NEXT REVENUE-CRITICAL BOUNDED TASK → QA → MERGE → UPDATE WORKTREE → CONTINUE UNTIL TRUE GATE.**
 
-**GIT FIRST → READ CURRENT_WORK_BOARD → READ THIS WORKTREE → VERIFY CURRENT MAIN → VERIFY CURRENT OWNER GATE → ASSIGN ONE PRIMARY WORKER → EXECUTE ONE BOUNDED TASK → QA → REVIEW → MERGE → UPDATE THIS WORKTREE → STOP AT THE NEXT GATE.**
+Do not stop merely because a later phase is waiting if the next earlier phase is executable.
 
 ## Control phrase
 
-**ONE WEB DEVELOPMENT LANE → ONE CURRENT WORKTREE → ONE PRIMARY WORKER → VERIFY → BUILD → QA → MERGE → VERSION → PREVIEW → PROMOTE → NEXT.**
+**KEEP THE HOMEPAGE → SELL THE PARTNERS → CART → PAYPAL → ORDER → FULFILL → FREIGHT / HAWAII CONTROL → PRODUCTION-PARITY SMOKE → SAME VERSION LIVE → MAKE MONEY.**
