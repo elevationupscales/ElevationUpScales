@@ -1,100 +1,95 @@
 # ELEVATION UPSCALES — CODING STABILIZATION CURRENT WORKTREE
 
 **Date:** 2026-09-12  
-**State:** **ACTIVE — BOUNDED DIRECT-SITE CHECKOUT REPAIR / BUILD HOLD RELEASED**  
+**State:** **STANDBY — PRODUCTION REPAIR CLOSED / OWNER ROLLED BACK ABORTED LIVE-SITE AUDIT ROUND**  
 **Reports To:** MPM  
-**Execution Owner:** MASTER DEVELOPER  
-**Integrity Validator:** MASTER RECON OS — PARALLEL / RELEASE EVIDENCE, NOT PRE-BUILD STOP-WORK  
-**Owner Override:** `OWNER_DIRECTIVE_RELEASE_PAYMENT_REPAIR_GATES_2026-09-12.md`  
-**Architecture:** `MPM5_PAYMENT_ARCHITECTURE_REPLACEMENT_FLOW_2026-09-12.md`
+**Execution Owner:** MASTER DEVELOPER — **STANDBY / VERIFY-FIX ONLY**  
+**Integrity Validator:** MASTER RECON OS — **TRIGGERED ONLY**  
+**Incident record:** `MPM5_OWNER_ROLLBACK_LIVE_SITE_AUDIT_INCIDENT_2026-09-12.md`
 
-## Immediate disposition
+## Current production truth
 
-The catastrophic-failure containment gates served their purpose while architecture truth was uncertain. The source issue and lane boundaries are now isolated enough to proceed.
+Accepted production remains:
 
-**MASTER DEVELOPER IS ACTIVE.**
+`production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88`
 
-The prior generic sequence:
+That production commit is the completed bounded direct-site checkout / PayPal capture repair.
 
-**STOP DRIFT → FREEZE PRODUCTION → RECON PASS → DEV**
+No code from the subsequent live-site audit round reached production.
 
-is superseded for this bounded repair by:
+## Aborted audit round
 
-**APPROVED PRODUCTION PARENT → BOUNDED BUILD → TEST → NON-CHARGING SMOKE → SAME-SHA DEPLOY → LIVE VERIFY → RECEIPT.**
+The owner requested a website scan. Execution drifted from read-only inspection into implementation and created:
 
-MASTER RECON remains active as an integrity validator and may stop an exact candidate only for a newly discovered material candidate-specific safety defect. It may not recreate the retired generic pre-build hold merely because the prior incident existed.
+`repair/live-site-audit-20260912`
 
-## Fixed architecture boundaries
+Current audit-branch tip:
 
-### Elevation direct site
+`5fc55c806c1d7e138a9819a234e85ec932a056cb`
 
-Elevation owns its direct cart and checkout. The direct transaction path uses the approved Elevation payment/order architecture and must remain separate from Shopify-native checkout/order authority.
+Disposition:
 
-The repair must ensure:
+**QUARANTINED / ABANDONED / DO NOT DEPLOY / DO NOT MERGE.**
 
-- canonical server-side product/SKU/variant/price/shipping validation;
-- durable local order intent before final payment state;
-- idempotent transaction requests/retries;
-- amount/currency/order/status reconciliation;
-- durable transaction evidence;
-- clean failure/retry UX without cross-routing the customer into Shopify;
-- improved pre-payment product review and a clear path back to full product details.
+The branch is five commits ahead of the production parent and contains changes to checkout code, package/test wiring, a new test, and a new audit-specific GitHub Actions workflow.
 
-### Shopify
+Workflow run `34728792703` completed **FAILURE** during canonical QA. Do not rerun it.
 
-Shopify is **PRESERVE** for this repair. Do not alter working Shopify payment configuration or rebuild Shopify checkout as part of the Elevation direct-site fix.
+## Owner rollback
 
-## Current production lineage
+Owner direction:
 
-Last reconciled anchors before this owner override:
+**STOP ADDING LAYERS OF REPAIR.**
 
-- `production-deploy` = `dfb0dc2683035dd9e06f667aaabc04fc6eed3a0b`;
-- `recovery/coding-stabilization-20260912` = `4da62160a5d9250a1d977a42052644798fac0b40`;
-- stale candidate `84af23ec814baa73718e33ec052044ce4706534d` = **DO NOT DEPLOY**.
+The owner rolled back/abandoned the audit round and requested an audit of how execution drifted.
 
-Before build/deploy, resolve current refs again and use the exact approved production lineage. Do not wholesale-deploy `main`.
+The audit branch is evidence only. It is not an active candidate and does not authorize any follow-on patch.
 
-## Active MASTER DEVELOPER packet
+## Correct execution rule
 
-Build only the direct-site transaction delta required to:
+For future website requests:
 
-1. restore one coherent cart → checkout → payment → local-order → fulfillment path;
-2. validate exact product identity and price server-side;
-3. prevent duplicate order/payment execution on retry;
-4. improve checkout product information before payment;
-5. provide a clear `Review full product details` return route;
-6. preserve clear payment-method presentation without cross-surface fallback;
-7. persist enough order/payment evidence for operations and customer support;
-8. leave Shopify-native commerce, protected homepage top and catalog publication untouched.
+### Scan / audit / inspect / check / review
 
-## Required release checks
+**READ-ONLY LIVE INSPECTION → SOURCE VERIFICATION IF NEEDED → PRIORITIZED DEFECT REPORT → STOP.**
 
-Before production release:
+Do not create a repair branch, edit code, add tests, add workflows, change configuration, or deploy merely because a scan found an issue.
 
-- automated/unit/integration checks for the touched transaction path;
-- non-charging cart/checkout smoke with at least one representative existing product;
-- exact product/variant/price displayed correctly;
-- full-product-detail return path works;
-- failure/retry does not create a second order or switch transaction authority;
-- server rejects tampered/unknown product or amount inputs;
-- secrets are not present in Git/client payloads;
-- no protected-homepage-top regression;
-- no Shopify-native checkout regression caused by the direct-site delta.
+### Repair / fix / build / deploy / RUN with mutation clearly authorized
 
-Only the exact candidate that passes these checks may be released.
+**ONE DEFECT PACKET → ONE BOUNDED CANDIDATE → EXISTING QA → DEPLOY ONLY IF AUTHORIZED → LIVE VERIFY → CLOSE.**
 
-## Controls preserved
+No new workflow/control layer for a one-off repair unless Casey explicitly authorizes a permanent new workflow.
 
-- stale `84af23ec...` remains DO NOT DEPLOY;
-- no broad `main` deployment;
-- no secret/credential commit;
-- no raw-card handling addition;
-- no protected-homepage-top changes;
-- no new item listings/catalog expansion as part of this repair;
-- no paid-acquisition change;
-- no live customer charge required for QA;
-- unrelated work is not frozen.
+## Current DEV disposition
+
+**MASTER DEVELOPER = STANDBY / VERIFY-FIX ONLY.**
+
+Wake DEV only when:
+
+1. a fresh reproducible defect exists;
+2. the defect is specific enough to form one bounded packet; and
+3. Casey/MPM has authorized repair execution rather than inspection only.
+
+MASTER RECON remains available for lineage/state conflicts but is not a standing website executor.
+
+## Protected state
+
+- Production `894b15cb...` remains the accepted runtime baseline.
+- Do not wholesale deploy `main`.
+- Do not deploy or cherry-pick `repair/live-site-audit-20260912`.
+- Stale candidate `84af23ec814baa73718e33ec052044ce4706534d` remains DO NOT DEPLOY.
+- Do not create additional website-repair workflows as a reaction to this incident.
+- Shopify remains its own commerce lane.
+- New-item listing and paid-acquisition controls remain separate business decisions and are not changed by this rollback.
+- Protected homepage-top rules remain unchanged.
+
+## Observations from the aborted scan
+
+Any website issues seen during the aborted round are now **UNCONFIRMED BACKLOG EVIDENCE ONLY**. They must be reproduced in a fresh read-only scan before being promoted to an active repair packet.
+
+Do not assume an observation from the aborted round is still a current production defect merely because it appeared in browser/source evidence during the incident.
 
 ## Control phrase
 
-**FAULT SOURCED → BUILD HOLD RELEASED → DEV ACTIVE → BUILD → TEST → SMOKE → SAME-SHA DEPLOY → VERIFY → CLOSE.**
+**PRODUCTION CLOSED → AUDIT ROUND ROLLED BACK → DEV STANDBY → SCAN READ-ONLY → REPORT FIRST → ONE REPAIR ONLY WHEN AUTHORIZED.**
