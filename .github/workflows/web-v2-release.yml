@@ -1,0 +1,205 @@
+name: Web V2 Exact-Version Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Create candidate or promote an already-tested version
+        required: true
+        type: choice
+        options: [candidate, promote]
+      expected_sha:
+        description: Exact approved full 40-character Git SHA
+        required: true
+        type: string
+      version_id:
+        description: Existing Cloudflare Version ID; required for promote only
+        required: false
+        type: string
+      owner_confirmation:
+        description: Promotion requires exact PROMOTE
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-v2-exact-version-release
+  cancel-in-progress: false
+
+env:
+  WORKER_NAME: elevation-web-v2
+  EXPECTED_SHA: ${{ inputs.expected_sha }}
+  MODE: ${{ inputs.mode }}
+  VERSION_ID: ${{ inputs.version_id }}
+  OWNER_CONFIRMATION: ${{ inputs.owner_confirmation }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  candidate:
+    if: inputs.mode == 'candidate'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate immutable release request
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+
+      - name: Re-resolve main and require exact SHA
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned release toolchain
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Verify foundation and repository safety
+        run: |
+          set -euo pipefail
+          node deployment/v2/validate-foundation.mjs --release
+          node --test deployment/v2/release-policy.test.mjs
+          npm run qa:secrets
+          git diff --check
+          test -z "$(git status --porcelain)"
+
+      - name: Upload candidate version without deploying it
+        id: upload
+        run: |
+          set -euo pipefail
+          TAG="git-${EXPECTED_SHA:0:12}"
+          npx --prefix apps/web-v2 --no-install wrangler versions upload \
+            --config apps/web-v2/wrangler.jsonc \
+            --tag "$TAG" \
+            --message "git_sha=$EXPECTED_SHA" \
+            2>&1 | tee /tmp/web-v2-version-upload.txt
+          node deployment/v2/release-policy.mjs parse-upload \
+            --sha "$EXPECTED_SHA" \
+            --input /tmp/web-v2-version-upload.txt \
+            --receipt /tmp/web-v2-candidate-receipt.json | tee /tmp/web-v2-outputs.txt
+          cat /tmp/web-v2-outputs.txt >> "$GITHUB_OUTPUT"
+
+      - name: Verify Cloudflare records exact SHA/version mapping
+        env:
+          CREATED_VERSION_ID: ${{ steps.upload.outputs.version_id }}
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions view "$CREATED_VERSION_ID" \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
+          node deployment/v2/release-policy.mjs assert-version \
+            --sha "$EXPECTED_SHA" \
+            --version-id "$CREATED_VERSION_ID" \
+            --input /tmp/web-v2-version.json
+
+      - name: Candidate receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-v2-candidate-${{ inputs.expected_sha }}
+          path: /tmp/web-v2-candidate-receipt.json
+          if-no-files-found: error
+
+      - name: Release summary
+        env:
+          CREATED_VERSION_ID: ${{ steps.upload.outputs.version_id }}
+          PREVIEW_URL: ${{ steps.upload.outputs.preview_url }}
+        run: |
+          {
+            echo "### Web V2 candidate"
+            echo "Git SHA: $EXPECTED_SHA"
+            echo "Cloudflare Version ID: $CREATED_VERSION_ID"
+            echo "Immutable preview: $PREVIEW_URL"
+            echo "Production promotion: NOT PERFORMED"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  promote:
+    if: inputs.mode == 'promote'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate promotion gate
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$VERSION_ID"
+          test "$OWNER_CONFIRMATION" = "PROMOTE"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+
+      - name: Require exact accepted source identity
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned release toolchain only
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Verify the already-created candidate maps to the approved SHA
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions view "$VERSION_ID" \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
+          node deployment/v2/release-policy.mjs assert-version \
+            --sha "$EXPECTED_SHA" \
+            --version-id "$VERSION_ID" \
+            --input /tmp/web-v2-version.json
+
+      - name: Promote the existing tested Version ID
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            --config apps/web-v2/wrangler.jsonc \
+            --version-id "$VERSION_ID" \
+            --percentage 100 \
+            --message "promote git_sha=$EXPECTED_SHA version_id=$VERSION_ID" \
+            --yes
+
+      - name: Verify production deployment references same Version ID
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler deployments list \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-deployments.json
+          node deployment/v2/release-policy.mjs assert-deployment \
+            --version-id "$VERSION_ID" \
+            --input /tmp/web-v2-deployments.json
+
+      - name: Promotion summary
+        run: |
+          {
+            echo "### Web V2 promotion"
+            echo "Git SHA: $EXPECTED_SHA"
+            echo "Production Version ID: $VERSION_ID"
+            echo "Rebuild: NONE"
+            echo "Re-upload: NONE"
+          } >> "$GITHUB_STEP_SUMMARY"
