@@ -7,7 +7,8 @@
 **Active management instance:** **MPM 6 — Company Oversight**  
 **MPM 6 control:** `MPM6_COMPANY_OVERSIGHT_TAKEOVER_2026-09-13.md`  
 **Global state:** `CURRENT_WORK_BOARD.md`  
-**Web V2 lane control:** `WEB_V2_CURRENT_WORKTREE.md`
+**Web V2 lane control:** `WEB_V2_CURRENT_WORKTREE.md`  
+**eBay P0 incident control:** `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`
 
 ## Current owner operating standard
 
@@ -23,6 +24,7 @@
 - Vendor Projects own exact supplier/commercial truth.
 - Unknown or conflicting commercial truth fails closed for only the affected item/order/route; it does not block unrelated clean work.
 - Shopify, eBay, TikTok and Web V2 direct commerce remain distinct sales surfaces.
+- eBay listing price/quantity/end controls are complete only after live Seller Hub reread verifies the resulting state; Git-recorded approval alone is not an execution receipt.
 
 ## Mandatory worker registry
 
@@ -35,9 +37,9 @@
 | WEB DEVELOPER | Web V2 Development | MPM 6 / Web V2 lane | Public Customer Experience | **STANDBY / SUPPORT** | Preserve merged Web V2 public path; support exact bounded visual/UI defects. |
 | **COMMERCE DEVELOPER** | Web V2 Development | MPM 6 / Web V2 lane | Commerce V2 | **ACTIVE / CURRENT — ORDER + FULFILLMENT ROUTING** | Consume merged checkout + canonical catalog; server revalidate → payment/durable order → exact supplier/SKU fulfillment route. |
 | RELEASE ENGINEER | Web V2 Development | MPM 6 / Web V2 lane | Exact-Version Release | **READY / SUPPORT** | Act only at true production-parity release gate; same tested version promotes/cuts over. |
-| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations | Company Operations Manager / MPM 6 | Ecommerce & Vendor Operations | **ACTIVE** | Shopify conversion + eBay P0 + vendor revenue lanes; preserve channel separation. |
+| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations | Company Operations Manager / MPM 6 | Ecommerce & Vendor Operations | **ACTIVE — EBAY P0 OVERSIGHT + SHOPIFY CONVERSION + VENDOR REVENUE** | eBay emergency stop-loss execution is immediate channel priority; preserve Shopify/Web V2 separation and current listing/ad controls. |
 | Shopify Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | Shopify Store Operations | **ACTIVE — CONVERSION / TRUST TUNING** | Preserve payment green state; support product trust, shipping-profile implementation after truth, policy publication after approval and re-smoke. |
-| eBay Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations | **ACTIVE — P0 PARALLEL** | Customer obligations → cash release → loss prevention → profitable core. |
+| eBay Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations | **ACTIVE — P0 CRITICAL / LIVE LOSS EXPOSURE** | Follow `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`: stop new loss exposure through an action-capable Seller Hub surface; receipt-verify qty/state; identify new-sale receipt; protect customer obligations; then source/cost/reprice before reopening quantity. |
 | Apparel Vendor Operations Manager | Ecommerce & Vendor Operations | Peter Torres | Apparel / POD | **ACTIVE SEPARATE CHANNEL** | Existing Fourthwall tuning; no distracting expansion ahead of revenue priorities. |
 | TikTok Affiliate Growth Manager | Ecommerce & Vendor Operations | Peter Torres | Affiliate / Creator | **ACTIVE UNDER RESTRICTION** | Current-account/catalog economics only; no failed-appeal replay or unauthorized paid spend. |
 | SOK Project Operations Manager | SOK Project | Company Operations / MPM 6 | Vendor Operations | **ACTIVE PRIMARY SUPPLIER** | Exact SOK product/orderability/shipping/warranty truth; Lower-48 + Hawaii controls as proven. |
@@ -92,6 +94,14 @@ Current Shopify conversion work:
 
 Do not add traffic/paid spend to compensate for unresolved conversion/trust defects.
 
+## eBay emergency routing
+
+Current incident authority: `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`.
+
+Immediate control is **STOP NEW LOSS EXPOSURE BEFORE PRICE OPTIMIZATION**. Known failed/uncontrolled configurations that remain purchasable must be set to quantity zero through an action-capable authenticated Seller Hub surface, then live reread must verify the resulting state. The newly reported sale remains pending exact receipt identification until eBay posts the order; do not invent the order ID or fulfillment state.
+
+Customer obligations remain protected. Never cancel a verified shipped order, never invent tracking, and do not reopen quantity until exact source + current landed cost + MAP + destination + expected contribution clear the operating controls.
+
 ## Development integrity rule
 
 **VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT → CART → SERVER-REVALIDATED CHECKOUT → PAYMENT / DURABLE ORDER → EXACT FULFILLMENT ROUTE.**
@@ -123,4 +133,4 @@ No accepted candidate is rebuilt/re-uploaded before production acceptance.
 
 ## Current control phrase
 
-**MPM 6 ACTIVE → WEB V2 ORDER + FULFILLMENT ACTIVE → SHOPIFY CONVERSION TRUST ACTIVE → MASTER RECON TRIGGERED ONLY. SELL → CONVERT → FULFILL → RECORD PROFIT.**
+**MPM 6 ACTIVE → EBAY STOP NEW LOSS EXPOSURE → WEB V2 ORDER + FULFILLMENT ACTIVE → SHOPIFY CONVERSION TRUST ACTIVE → MASTER RECON TRIGGERED ONLY. SELL → CONVERT → FULFILL → RECORD PROFIT.**
