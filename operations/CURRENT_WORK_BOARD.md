@@ -7,6 +7,7 @@
 **MPM 6 control:** `MPM6_COMPANY_OVERSIGHT_TAKEOVER_2026-09-13.md`  
 **Web V2 development Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
 **Shopify conversion control:** `SHOPIFY_CONVERSION_CONFIDENCE_ROUTE_PACKET_2026-09-13.md`  
+**eBay P0 incident control:** `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`  
 **Profitability control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
 **Paid-acquisition control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
@@ -24,10 +25,10 @@ MPM 6 is the active company-oversight instance. Prior MPM iterations are histori
 
 | Priority | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|---|
+| **P0** | eBay stop-new-loss + customer/cash recovery | eBay Store Operations under Peter / Company Operations | **CRITICAL — LIVE LOSS EXPOSURE / APPROVED STOP-LOSS MUTATIONS NOT FULLY EXECUTED** | Follow `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`: set the listed failed/uncontrolled purchasable configurations to qty 0 through an action-capable Seller Hub surface, receipt-verify resulting state, identify the newly reported sale when its receipt posts, then continue customer/cash recovery. |
 | **P0** | Web V2 direct-commerce path | MPM 6 → Web V2 Commerce Developer | **ORDER + FULFILLMENT ROUTING ACTIVE** | Build bounded payment/durable-order/fulfillment handoff from merged server-validated checkout state. |
 | **P0** | Shopify conversion trust | Shopify Store Operations + DEV + Shipping/Company Ops | **ACTIVE** | Fix blurry/weak product imagery; resolve supplier-specific shipping truth; approve missing policies; add verified near-CTA confidence. |
 | **P0** | Owner communications / residual Google Voice forwarding | MPM 6 / Communications Recovery | **CRITICAL UNTIL VERIFIED CLOSED** | Verify direct inbound call + SMS after carrier/Google correction. |
-| **P0** | eBay customer/cash recovery | eBay Store Operations under Peter / Company Operations | **PARALLEL ACTIVE** | Customer obligations → cash release → loss prevention → profitable core. |
 | **P1** | Existing-shop profitability tuning | Company Operations + channel workers | **ACTIVE** | Improve current sales channels before expansion; no broad paid acquisition. |
 | **P1** | Vendor source truth | Owning Vendor Projects | **ACTIVE SUPPORT** | Maintain exact SKU/price/MAP/stock/shipping/warranty/fulfillment/channel truth and resolve only their own gaps. |
 
@@ -134,7 +135,7 @@ Optional Clarity/domain polish remains behind image quality, shipping truth and 
 | Lane | Owner | State |
 |---|---|---|
 | Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — CONVERSION + TRUST TUNING** |
-| eBay | eBay Store Operations / Peter / Company Ops | **P0 PARALLEL — CUSTOMER/CASH/PROFIT RECOVERY** |
+| eBay | eBay Store Operations / Peter / Company Ops | **P0 CRITICAL — LIVE LOSS EXPOSURE / ACTION-CAPABLE SELLER HUB MUTATION REQUIRED** |
 | TikTok | TikTok execution under Peter | **ACTIVE UNDER RESTRICTION — NO APPEAL REPLAY / NO UNAUTHORIZED PAID SPEND** |
 | Fourthwall / Apparel | Apparel operations under Peter | **ACTIVE SEPARATE CHANNEL** |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** |
@@ -171,8 +172,9 @@ Optional Clarity/domain polish remains behind image quality, shipping truth and 
 7. Release invariant remains: **ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE → SAME VERSION CUTOVER → LIVE VERIFY.**
 8. MPM 6 owns company oversight; MPM 5 and earlier instances are historical/reference.
 9. MASTER RECON returns to triggered integrity after correcting drift.
-10. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
+10. eBay price/quantity/end controls are not complete until live Seller Hub reread verifies the resulting state; a recorded Git decision is not a Seller Hub mutation receipt.
+11. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
 
 ## Current control phrase
 
-**WEB V2: CHECKOUT MERGED → ORDER + FULFILLMENT ACTIVE. SHOPIFY: PAYMENT GREEN → IMAGE/TRUST/SHIPPING/POLICY CONVERSION WORK. SELL → CONVERT → FULFILL → RECORD PROFIT.**
+**EBAY: STOP NEW LOSS EXPOSURE → RECEIPT-VERIFY SELLER HUB. WEB V2: CHECKOUT MERGED → ORDER + FULFILLMENT ACTIVE. SHOPIFY: PAYMENT GREEN → IMAGE/TRUST/SHIPPING/POLICY CONVERSION WORK. SELL → CONVERT → FULFILL → RECORD PROFIT.**
