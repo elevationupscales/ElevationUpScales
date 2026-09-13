@@ -13,7 +13,7 @@
     parts.push(await response.text());
   }
   let code=parts.join('\n').replace(/^import .*;\s*$/gm,'').replace(/\bexport\s+/g,'');
-  code += '\nwindow.__qa={renderPublicPage,styles,navStyles,homeFidelityStyles};';
+  code = '(()=>{'+code+'\nwindow.__qa={renderPublicPage,styles,navStyles,homeFidelityStyles};})()';
   (0,eval)(code);
   const routeInfo={path:'/',page:'home',title:'Elevation UpScales | Off-Grid Power • Supply • Logistics',description:'Elevation UpScales provides off-grid power, supply and logistics support for RV, solar, backup power, commercial systems and harder-to-serve markets.'};
   let html=window.__qa.renderPublicPage(routeInfo);
