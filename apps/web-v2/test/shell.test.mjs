@@ -16,46 +16,88 @@ function assertCustomerSafe(body) {
   assert.doesNotMatch(body, /\bWeb V2\b|\bCommerce V2\b|\bOps V2\b|\bStep 4\b|\bPhase 1\b|current shell|not connected|will connect later|migration status|architecture explanation/i);
 }
 
-test('homepage reconstructs the approved retail-first customer presentation', async () => {
+test('homepage reproduces the production presentation section-for-section', async () => {
   const res = await request('/');
   assert.equal(res.status, 200);
   assert.match(res.headers.get('content-type') || '', /text\/html/);
   assert.match(res.headers.get('content-security-policy') || '', /default-src 'self'/);
-  assert.match(res.headers.get('content-security-policy') || '', /img-src 'self' https:\/\/elevationupscales\.com data:/);
+  assert.match(res.headers.get('content-security-policy') || '', /img-src 'self' https:\/\/elevationupscales\.com/);
+
   const body = await res.text();
-  assert.match(body, /AUTHORIZED SOK ENERGY DEALER/);
-  assert.match(body, /Lithium Power/);
+  const sections = [
+    'AUTHORIZED SOK ENERGY DEALER',
+    'Lithium Power',
+    'AUTHORIZED BATTERY SUPPLY',
+    'SHOP BY SOLUTION',
+    'Featured SOK Systems',
+    'FREIGHT &amp; SHIPPING LOGISTICS',
+    'Power &amp; Outdoor <span>Products</span>',
+    'Shop the Store.',
+    'Build Your Power System.',
+    'Project &amp; Field Support.'
+  ];
+  let lastIndex = -1;
+  for (const marker of sections) {
+    const index = body.indexOf(marker);
+    assert.ok(index > lastIndex, `${marker} should appear in production order`);
+    lastIndex = index;
+  }
+
+  for (const label of ['Power', 'Shop', 'Projects', 'Services', 'Company']) {
+    assert.match(body, new RegExp(`<summary>${label}`));
+  }
+  assert.match(body, /Lithium Batteries/);
+  assert.match(body, /SOK Battery Systems/);
+  assert.match(body, /Solar System Builder/);
+  assert.match(body, /Freight &amp; Logistics/);
+  assert.match(body, /Work With Us/);
+  assert.match(body, /Marketplace/);
+
+  assert.match(body, /OFF-GRID POWER • SUPPLY • LOGISTICS/);
+  assert.match(body, /HAWAII &amp; ALASKA LOGISTICS REVIEW/);
+  assert.match(body, /RV • SOLAR • BACKUP • COMMERCIAL/);
   assert.match(body, /for RV, Solar &amp; Backup/);
-  assert.match(body, /Shop Power &amp; Energy/);
-  assert.match(body, /Start a Project/);
-  assert.match(body, /Lithium Power <span>Solutions<\/span>/);
-  assert.match(body, /Featured SOK Systems/);
-  assert.match(body, /Battery Freight for Hawaii &amp; Alaska/);
-  assert.match(body, /href="\/store"/);
-  assert.match(body, />Vendors</);
-  assert.match(body, /Freight & Hawaii/);
+  assert.match(body, /Explore Power Solutions/);
+  assert.match(body, /Shop Solar/);
+  assert.match(body, /View Battery/);
+  assert.match(body, /Purchase Options/);
+  assert.match(body, /Lithium Battery Freight/);
+  assert.match(body, /Hawaii Logistics/);
+  assert.match(body, /Alaska Logistics/);
+  assert.match(body, /Commercial Supply/);
+  assert.match(body, /HOME &amp; RV SERVICES/);
+  assert.match(body, /POWER SYSTEM SERVICES/);
+  assert.match(body, /SHIPPING &amp; LOGISTICS/);
+  assert.match(body, /Terms &amp; Business Disclosures/);
+  assert.match(body, /Report an Issue/);
+
+  assert.match(body, /href="\/store\?department=lithium-batteries"/);
   assert.match(body, /href="\/shop\/sok"/);
-  assert.match(body, /href="\/shop\/renogy"/);
-  assert.match(body, /href="\/shop\/vevor"/);
-  assert.match(body, /href="\/shop\/kingboss"/);
+  assert.match(body, /href="\/store\?department=rv-outdoor"/);
   assert.match(body, /href="\/start-a-project"/);
-  assert.match(body, /href="\/shipping-logistics-services"/);
+  assert.match(body, /href="\/shipping-logistics-services/);
   assert.match(body, /href="\/hawaii-lithium-batteries"/);
+  assert.match(body, /href="\/solar-project"/);
+  assert.match(body, /href="\/what-we-do/);
+  assert.match(body, /href="\/work-with-us"/);
+  assert.match(body, /href="\/marketplace"/);
   assert.match(body, /href="\/privacy"/);
   assert.match(body, /href="\/terms"/);
-  assert.doesNotMatch(body, /href="\/marketplace(?:\/|\"|\?)/);
-  assert.doesNotMatch(body, /href="\/work-with-us(?:\/|\"|\?)/);
+  assert.match(body, /href="\/report-an-issue"/);
+
   assert.match(body, /rel="canonical" href="https:\/\/elevationupscales\.com\/"/);
   assert.match(body, /property="og:title"/);
   assert.match(body, /storefront-tropical-logistics-v3\.webp/);
   assert.match(body, /sok-wordmark-home-transparent\.webp/);
-  assert.match(body, /sk12v100pc\/hero\.png/);
-  assert.match(body, /width="2160" height="2160"/);
-  assert.match(body, /sk48v100n\/home-crop\.webp/);
-  assert.match(body, /width="1000" height="265"/);
-  assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
-  assert.doesNotMatch(body, /href="\/sok\/sk12v100pc\/?"|href="\/sok\/sk48v100n\/?"/);
-  assert.doesNotMatch(body, /paypal\.com|\/api\/checkout|\/api\/paypal|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
+  assert.match(body, /sk12v100pc\/home-hero\.webp/);
+  assert.match(body, /48v-battery-cabinet\/hero\.webp/);
+  assert.match(body, /assets\/logo\.webp/);
+  assert.doesNotMatch(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
+
+  assert.match(body, /href="\/sok\/sk12v100pc\/"/);
+  assert.match(body, /href="\/sok\/sk48v100n\/"/);
+  assert.doesNotMatch(body, /href="\/checkout|paypal\.com|\/api\/checkout|\/api\/paypal|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
+  assert.doesNotMatch(body, />\s*\$[0-9]/);
   assertCustomerSafe(body);
 });
 
@@ -99,13 +141,16 @@ test('robots and sitemap reflect the current implemented Web V2 route state', as
   assertCustomerSafe(sitemapBody);
 });
 
-test('owned CSS and JS assets are served locally', async () => {
+test('owned CSS and JS assets include the scoped homepage fidelity layer', async () => {
   const css = await request('/assets/app.css');
   assert.equal(css.status, 200);
   const cssBody = await css.text();
-  assert.match(cssBody, /@media \(max-width: 680px\)/);
+  assert.match(cssBody, /@media \(max-width:680px\)/);
   assert.match(cssBody, /storefront-tropical-logistics-v3\.webp/);
-  assert.match(cssBody, /\.nav-dropdown/);
+  assert.match(cssBody, /\.reference-storefront-home \.utility-bar/);
+  assert.match(cssBody, /\.homepage-product-grid/);
+  assert.match(cssBody, /\.solar-feature-band/);
+  assert.match(cssBody, /\.fidelity-footer-grid/);
   assert.match(cssBody, /\.catalog-grid/);
   const js = await request('/assets/app.js');
   assert.equal(js.status, 200);
@@ -131,7 +176,7 @@ test('preview customer-experience routes render safely without a commerce bindin
   }
 });
 
-test('registered-but-unbuilt routes still hand off to the current live customer route', async () => {
+test('working Legacy routes remain bridged until their complete Web V2 slice exists', async () => {
   const cases = [
     ['/shipping-logistics-services', 'https://elevationupscales.com/shipping-logistics-services'],
     ['/hawaii-lithium-batteries', 'https://elevationupscales.com/hawaii-lithium-batteries'],
@@ -140,7 +185,9 @@ test('registered-but-unbuilt routes still hand off to the current live customer 
     ['/start-a-project', 'https://elevationupscales.com/start-a-project'],
     ['/start-a-project?type=home', 'https://elevationupscales.com/start-a-project?type=home'],
     ['/start-a-project?type=rv', 'https://elevationupscales.com/start-a-project?type=rv'],
-    ['/start-a-project?solution=solar', 'https://elevationupscales.com/start-a-project?solution=solar']
+    ['/start-a-project?solution=solar', 'https://elevationupscales.com/start-a-project?solution=solar'],
+    ['/sok/sk12v100pc/', 'https://elevationupscales.com/sok/sk12v100pc'],
+    ['/sok/sk48v100n/', 'https://elevationupscales.com/sok/sk48v100n']
   ];
   for (const [path, location] of cases) {
     const res = await request(path);
@@ -162,7 +209,7 @@ test('unknown routes and canonical-host loop protection use the branded customer
   }
 });
 
-test('compatibility redirects preserve established public route contracts', async () => {
+test('compatibility redirects preserve established public route contracts without reviving retired systems', async () => {
   const cases = [
     ['/index.html', 301, '/'], ['/start-a-project.html', 301, '/start-a-project'],
     ['/home-project', 302, '/start-a-project?type=home&source=legacy-route'], ['/rv-project.html', 302, '/start-a-project?type=rv&source=legacy-route'],
