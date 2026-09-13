@@ -1,4 +1,4 @@
-name: Web V2 Release Foundation QA
+name: Web V2 QA
 
 on:
   push:
@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  foundation:
+  web-v2:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -55,3 +55,7 @@ jobs:
           npm run qa:secrets
           git diff --check
           test -z "$(git status --porcelain)"
+
+      - name: Test Web V2 application shell
+        working-directory: apps/web-v2
+        run: npm test
