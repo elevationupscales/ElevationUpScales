@@ -6,7 +6,7 @@
 ## SK12V100PC — clear-case battery
 
 - Official source supplied/approved by owner: `https://static.wixstatic.com/media/0fa809_0c4fccf4c42a4aa284c892d758ac3de7~mv2.png/v1/fit/w_960,h_960,q_90,enc_avif,quality_auto/0fa809_0c4fccf4c42a4aa284c892d758ac3de7~mv2.png`
-- Localized repository asset: `site/assets/brands/sok/sk12v100pc/official-clean.png`
+- Localized repository asset: `apps/web-v2/public/assets/brands/sok/sk12v100pc/official-clean.png`
 - Web V2 same-origin path: `/assets/brands/sok/sk12v100pc/official-clean.png`
 - Retrieved: 2026-09-13
 - Format/dimensions: PNG RGBA, 960 × 960
@@ -15,7 +15,7 @@
 ## SK48V100N — 48V 100Ah server-rack LiFePO4 battery
 
 - Official source supplied/approved by owner: `https://static.wixstatic.com/media/0fa809_a15f5f76c4b94fb1bf5e0c01daee4086~mv2.png/v1/fit/w_960,h_960,q_90,enc_avif,quality_auto/0fa809_a15f5f76c4b94fb1bf5e0c01daee4086~mv2.png`
-- Localized repository asset: `site/assets/brands/sok/sk48v100n/official-clean.png`
+- Localized repository asset: `apps/web-v2/public/assets/brands/sok/sk48v100n/official-clean.png`
 - Web V2 same-origin path: `/assets/brands/sok/sk48v100n/official-clean.png`
 - Retrieved: 2026-09-13
 - Format/dimensions: PNG RGBA, 960 × 960

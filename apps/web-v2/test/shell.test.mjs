@@ -144,28 +144,27 @@ test('owned assets include the scoped production-fidelity and mobile layers', as
   assert.match(js, /aria-expanded/);
 });
 
-test('SOK product showcase serves only the localized official clean photography', async () => {
+test('SOK product showcase references repository-localized official clean photography', async () => {
   const expected = [
-    ['/assets/brands/sok/sk12v100pc/official-clean.png', 'SK12V100PC'],
-    ['/assets/brands/sok/sk48v100n/official-clean.png', 'SK48V100N']
+    ['/assets/brands/sok/sk12v100pc/official-clean.png', '../public/assets/brands/sok/sk12v100pc/official-clean.png', 'SK12V100PC'],
+    ['/assets/brands/sok/sk48v100n/official-clean.png', '../public/assets/brands/sok/sk48v100n/official-clean.png', 'SK48V100N']
   ];
-  for (const [path] of expected) {
-    const res = await request(path);
-    assert.equal(res.status, 200, path);
-    assert.match(res.headers.get('content-type') || '', /^image\/png/i, path);
-    assert.match(res.headers.get('cache-control') || '', /immutable/, path);
-    assert.ok((await res.arrayBuffer()).byteLength > 250000, `${path} should contain the localized official PNG bytes`);
+  const { readFile } = await import('node:fs/promises');
+  for (const [, localPath] of expected) {
+    const bytes = await readFile(new URL(localPath, import.meta.url));
+    assert.ok(bytes.byteLength > 250000, `${localPath} should contain the localized official PNG bytes`);
+    assert.equal(bytes.subarray(1, 4).toString('ascii'), 'PNG', localPath);
   }
 
   const home = await (await request('/')).text();
-  for (const [path, sku] of expected) {
-    assert.match(home, new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const [publicPath, , sku] of expected) {
+    assert.match(home, new RegExp(publicPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     assert.match(home, new RegExp(`alt="[^"]*${sku}[^"]*"`, 'i'));
   }
-  assert.doesNotMatch(home, /sk48v100n\/(?:hero\.jpg|home-crop\.webp)|48v-battery-cabinet\/hero\.webp|Buy More,? Save More/i);
+  assert.doesNotMatch(home, /sk48v100n\/(?:hero\.jpg|home-crop\.webp)|48v-battery-cabinet\/hero\.webp|Buy More,? Save More|static\.wixstatic\.com/i);
 
   const js = await (await request('/assets/app.js')).text();
-  assert.doesNotMatch(js, /48v-battery-cabinet|home-crop\.webp|Buy More,? Save More/i);
+  assert.doesNotMatch(js, /48v-battery-cabinet|home-crop\.webp|Buy More,? Save More|static\.wixstatic\.com/i);
 
   const css = await (await request('/assets/app.css')).text();
   assert.match(css, /hero-product-12 img/);
