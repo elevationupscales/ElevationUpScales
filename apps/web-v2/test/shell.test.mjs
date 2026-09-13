@@ -61,6 +61,31 @@ test('health endpoint keeps internal implementation state out of customer HTML',
   });
 });
 
+test('robots and sitemap reflect the current implemented Web V2 route state', async () => {
+  const previewRobots = await request('/robots.txt');
+  assert.equal(previewRobots.status, 200);
+  assert.match(previewRobots.headers.get('content-type') || '', /text\/plain/);
+  assert.equal(await previewRobots.text(), 'User-agent: *\nDisallow: /\n');
+
+  const canonicalRobots = await request('/robots.txt', {}, 'https://elevationupscales.com');
+  assert.equal(canonicalRobots.status, 200);
+  const canonicalRobotsBody = await canonicalRobots.text();
+  assert.match(canonicalRobotsBody, /User-agent: \*/);
+  assert.match(canonicalRobotsBody, /Allow: \//);
+  assert.match(canonicalRobotsBody, /Disallow: \/healthz/);
+  assert.match(canonicalRobotsBody, /Sitemap: https:\/\/elevationupscales\.com\/sitemap\.xml/);
+  assertCustomerSafe(canonicalRobotsBody);
+
+  const sitemap = await request('/sitemap.xml');
+  assert.equal(sitemap.status, 200);
+  assert.match(sitemap.headers.get('content-type') || '', /application\/xml/);
+  const sitemapBody = await sitemap.text();
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/<\/loc>/);
+  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/start-a-project<\/loc>/);
+  assert.doesNotMatch(sitemapBody, /\/store<\/loc>|\/cart<\/loc>|\/checkout<\/loc>|\/solar-project<\/loc>/);
+  assertCustomerSafe(sitemapBody);
+});
+
 test('owned CSS and JS assets are served locally', async () => {
   const css = await request('/assets/app.css');
   assert.equal(css.status, 200);
@@ -129,4 +154,7 @@ test('mutation methods are not accepted by the public application', async () => 
   const res = await request('/', { method: 'POST' });
   assert.equal(res.status, 405);
   assert.equal(res.headers.get('allow'), 'GET, HEAD');
+  const body = await res.text();
+  assert.match(body, /Method Not Allowed/);
+  assertCustomerSafe(body);
 });
