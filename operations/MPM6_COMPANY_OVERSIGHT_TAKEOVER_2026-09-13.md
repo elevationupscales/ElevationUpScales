@@ -69,17 +69,30 @@ P3 must not delay P0/P1.
 - Shopify, eBay, TikTok and direct Web V2 commerce remain distinct channel surfaces.
 - `production-deploy` is Legacy-only.
 - Web V2 releases use exact-version production-parity smoke before same-version cutover.
-- MASTER RECON wakes only for actual state, lineage, policy, supplier-truth, or release-integrity conflict.
+- MASTER RECON wakes only for actual state, lineage, policy, supplier-truth, charge-authority, or release-integrity conflict.
 
 ## Current company oversight pickup
 
-- Web V2 order + fulfillment handoff is complete / merged; Hawaii / Freight + Payment Readiness is the active commerce phase.
+- Web V2 preview-readiness implementation is complete / merged at `84e9a2b8986ddeebd9b13a087c0e520c9dd9599c` through PR #175.
+- Web V2 Worktree has advanced through PR #176 to **PREVIEW READY — RELEASE ENGINEER ACTIVE / EXACT-VERSION PREVIEW**.
+- Release Engineer now owns the next Web V2 action: current merged main → exact candidate → immutable exact-version preview → `/__version` proof → return preview receipt → stop before production promotion.
+- Freight/payment-readiness holds remain preserved as transaction-activation gates only; they do not block safe preview rendering.
 - Payment activation remains fail-closed until the exact `MARKETPLACE_DB` binding, authoritative shipping amount, authoritative sales-tax disposition/amount, verified `amountDue`, and at least one orderable canonical SKU are proven.
 - Shopify payment confidence is green; current conversion focus is image quality, shipping truth, policy trust and near-CTA confidence.
 - Shopify shipping profile mutation remains held until supplier-specific shipping truth is proven.
 - Blurry/weak storefront imagery is a P0 conversion-trust defect and should be corrected before optional analytics/domain polish.
 - Existing-channel profitability remains ahead of new-channel expansion.
 - Paid acquisition remains held unless Casey explicitly reopens it.
+
+## Web V2 current release control
+
+**STORE EXPERIENCE MERGED → PREVIEW READINESS MERGED → RELEASE ENGINEER ACTIVE → EXACT CANDIDATE → IMMUTABLE PREVIEW → `/__version` PROOF → OWNER VISUAL ACCEPTANCE.**
+
+Do not promote/cut over Web V2 production automatically. Owner visual acceptance remains required before production promotion.
+
+Release invariant remains:
+
+**ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION PROMOTED / CUT OVER → LIVE VERIFY.**
 
 ## Control phrase
 
