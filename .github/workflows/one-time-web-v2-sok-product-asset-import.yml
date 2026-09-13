@@ -28,7 +28,7 @@ jobs:
       - name: Apply bounded cleanup and verify tests
         run: |
           set -euo pipefail
-          python deployment/v2/one_time_sok_product_image_cleanup_v2.py
+          python deployment/v2/one_time_sok_product_image_cleanup_v3.py
           npm ci --ignore-scripts --prefix apps/web-v2
           npm --prefix apps/web-v2 test
           git diff --check
@@ -39,6 +39,7 @@ jobs:
           git rm .github/workflows/one-time-web-v2-sok-product-asset-import.yml
           git rm deployment/v2/one_time_sok_product_image_cleanup.py
           git rm deployment/v2/one_time_sok_product_image_cleanup_v2.py
+          git rm deployment/v2/one_time_sok_product_image_cleanup_v3.py
           git config user.name 'elevationupscales-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add apps/web-v2/src/client.js \
