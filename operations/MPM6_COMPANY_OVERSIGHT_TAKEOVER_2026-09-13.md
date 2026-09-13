@@ -73,7 +73,8 @@ P3 must not delay P0/P1.
 
 ## Current company oversight pickup
 
-- Web V2 checkout is complete / merged; Order + Fulfillment Routing is the active commerce phase.
+- Web V2 order + fulfillment handoff is complete / merged; Hawaii / Freight + Payment Readiness is the active commerce phase.
+- Payment activation remains fail-closed until the exact `MARKETPLACE_DB` binding, authoritative shipping amount, authoritative sales-tax disposition/amount, verified `amountDue`, and at least one orderable canonical SKU are proven.
 - Shopify payment confidence is green; current conversion focus is image quality, shipping truth, policy trust and near-CTA confidence.
 - Shopify shipping profile mutation remains held until supplier-specific shipping truth is proven.
 - Blurry/weak storefront imagery is a P0 conversion-trust defect and should be corrected before optional analytics/domain polish.
