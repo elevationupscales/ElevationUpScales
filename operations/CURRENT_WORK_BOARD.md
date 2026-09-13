@@ -54,14 +54,16 @@ Verified phase receipts:
 - Homepage reconstruction merged: `6940c32b5c1863d4b60be85427ccff3060e5d396`.
 - Retail-navigation focus merged: `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
 - Canonical catalog + product-detail foundation merged: `72694ae9ba5b9952c0460b9f90b380cffde4ff23`.
-- Worktree advanced to cart phase through merge `58820dd987179eeb703802013616f330080e536c`.
+- Cart merged: `13b4411fc265a1f7b149ad9207059221fa53db32`.
+- Worktree advanced to checkout through merge `4f56f00666437fbb185e2d43bba72492c123ed76`.
+- Cart candidate QA passed in Pull Request QA run 126 and Web V2 QA run 67.
 - Release-system reset remains complete / merged / QA pass; it does not move ahead of the commercial build.
 
 | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|
-| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — CART / COMMERCE PHASE.** Homepage, retail navigation, canonical catalog and product detail are merged. | Follow `WEB_V2_CURRENT_WORKTREE.md`: cart → PayPal/order → fulfillment/freight/Hawaii gates → production-parity release. |
-| Web V2 — WEB DEVELOPER | Web V2 Development | **STANDBY / SUPPORT — HOMEPAGE + RETAIL NAV + CATALOG + PRODUCT DETAIL MERGED** | Preserve merged public shell and product presentation; support exact bounded UI needs surfaced by Commerce. Do not reopen completed phases. |
-| Web V2 — COMMERCE DEVELOPER | Web V2 Development | **ACTIVE / CURRENT — CART** | Build cart from canonical product IDs only. Held/non-orderable products cannot become purchasable through client state; preserve later server-side revalidation. |
+| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — CHECKOUT / COMMERCE PHASE.** Homepage, retail navigation, canonical catalog, product detail and cart are merged. | Follow `WEB_V2_CURRENT_WORKTREE.md`: checkout → order/fulfillment → freight/Hawaii gates → production-parity release. |
+| Web V2 — WEB DEVELOPER | Web V2 Development | **STANDBY / SUPPORT — HOMEPAGE + RETAIL NAV + CATALOG + PRODUCT DETAIL + CART MERGED** | Preserve merged public shell and commerce presentation; support exact bounded UI needs surfaced by Commerce. Do not reopen completed phases. |
+| Web V2 — COMMERCE DEVELOPER | Web V2 Development | **ACTIVE / CURRENT — CHECKOUT** | Build direct-site checkout from merged cart and canonical product truth. Re-resolve server-side; non-orderable/changed products and unresolved shipping/destination state fail closed. |
 | Web V2 — RELEASE ENGINEER | Web V2 Development | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | Support only when the bounded commercial build reaches a true release gate. Preview remains diagnostic only. |
 | MASTER RECON OS | MPM | **STANDBY / TRIGGERED INTEGRITY** | Wake for state/lineage conflict, supplier-truth conflict affecting commerce control, worker drift, exact-candidate validation, release-integrity checks or owner-directed RECON. |
 | Legacy direct-site checkout / PayPal | MASTER DEV under MPM | **CLOSED / PRODUCTION ACCEPTED** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` | Preserve as Legacy fallback/reference while Web V2 is built. VERIFY-FIX only on fresh Legacy defect. |
@@ -101,10 +103,11 @@ Publication/discovery does not itself authorize purchase.
 | Retail navigation cleanup | **COMPLETE / MERGED** | Receipt `e2c9e3494bd932c2cde8b0d24e807cbb94706009`. Preserve Shop / approved vendor views / Freight & Hawaii / Start a Project. |
 | Canonical vendor catalog | **COMPLETE / MERGED** | Receipt `72694ae9ba5b9952c0460b9f90b380cffde4ff23`. Canonical product truth + vendor-filtered views; unknown commercial truth fails closed. |
 | Product detail | **COMPLETE / MERGED** | Same canonical records; held products visibly remain non-orderable. |
-| Cart | **P0 ACTIVE / CURRENT** | Canonical product IDs only; durable/editable customer cart; client state never overrides product/orderability authority. |
-| PayPal checkout + Elevation order | **QUEUED / AUTHORIZED** | PayPal Orders v2 + idempotency + durable order + capture/reconciliation after server revalidation. |
+| Cart | **COMPLETE / MERGED** | Receipt `13b4411fc265a1f7b149ad9207059221fa53db32`; canonical product IDs/quantities only; client state is not authority. |
+| Checkout | **P0 ACTIVE / CURRENT** | Server-side product/orderability/totals/shipping/destination revalidation; unresolved state fails closed before order advancement. |
+| PayPal + durable Elevation order | **QUEUED / AUTHORIZED** | PayPal Orders v2 + idempotency + durable order + guarded capture/reconciliation after checkout revalidation. |
 | Supplier/freight fulfillment handoff | **QUEUED** | Persist fulfillment source and route the order to the owning supplier/logistics lane. |
-| Freight/Hawaii lithium gate | **QUEUED** | Known shipping may sell; unresolved freight/unapproved lithium route fails closed before final charge. |
+| Freight/Hawaii lithium gate | **QUEUED / REQUIRED WHERE APPLICABLE** | Known shipping may sell; unresolved freight/unapproved lithium route fails closed before final charge. |
 | Production-parity release system | **COMPLETE / MERGED / QA PASS** | Release foundation/application QA passed; use only at the first true release gate. |
 | Same-version production acceptance | **WAIT FOR BUILT SITE + OWNER RELEASE** | No rebuild/re-upload. Cut over/promote exact smoke-tested version only after commercial build release readiness. |
 | First real direct-site order | **FINAL REVENUE PROOF** | Payment → durable order → supplier/freight → fulfillment → realized margin. |
@@ -128,7 +131,7 @@ Publication/discovery does not itself authorize purchase.
 |---|---|---|---|
 | Shopify Online Store | Shopify Store Operations + Owner | **PRESERVE — SEPARATE CHANNEL** | Preserve working Shopify checkout/payment configuration and current intentional staging. Do not make Shopify the Web V2 direct-site payment owner. |
 | Elevation direct site — Legacy runtime | MPM / MASTER DEV | **PRODUCTION ACCEPTED / FALLBACK / VERIFY-ONLY** | Preserve during Web V2 build/cutover. |
-| Web V2 | OS 1.1 Project Manager / Web V2 Development | **ACTIVE CART BUILD** | Consume merged canonical catalog/product detail directly; build cart without reopening unchanged vendor sources. |
+| Web V2 | OS 1.1 Project Manager / Web V2 Development | **ACTIVE CHECKOUT BUILD** | Consume merged cart + canonical catalog directly; build checkout without reopening unchanged vendor sources. |
 | VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact approved product/source/shipping/economics truth. Do not infer missing fields in Web V2. External channel expansion remains separately controlled. |
 | Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact dealer/orderability/backorder/cost/shipping/warranty truth. Do not infer missing fields in Web V2. |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** | Supply exact product/orderability/warranty truth; preserve Hawaii controls. |
@@ -142,7 +145,7 @@ Publication/discovery does not itself authorize purchase.
 
 | Work Item | State | Reopen Gate |
 |---|---|---|
-| **Web V2 authorized commerce build** | **ACTIVE / NOT HELD** | Held products remain non-orderable; cart/checkout must preserve canonical truth and server-side revalidation. |
+| **Web V2 authorized commerce build** | **ACTIVE / NOT HELD** | Held products remain non-orderable; checkout/payment must preserve canonical truth, destination eligibility and server-side revalidation. |
 | External marketplace / new-channel catalog expansion | **HOLD — CURRENT CHANNELS FIRST** | Casey/MPM explicitly reopens after current channel profitability/stability. |
 | New-channel expansion — Meta / Google & YouTube / Amazon / Walmart / additional marketplaces | **HOLD** | Existing channels stable/profitable + owner reopen. |
 | Paid advertising / prepaid media | **HOLD — OWNER CAPITAL-RECOVERY RULE** | Verified capital-recovery hole reaches zero and Casey explicitly reopens paid acquisition. |
@@ -170,6 +173,7 @@ Publication/discovery does not itself authorize purchase.
 - Web V2 homepage reconstruction — COMPLETE / MERGED at `6940c32b5c1863d4b60be85427ccff3060e5d396`.
 - Web V2 retail-navigation phase — COMPLETE / MERGED into `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
 - Web V2 canonical catalog + product-detail foundation — COMPLETE / MERGED at `72694ae9ba5b9952c0460b9f90b380cffde4ff23`.
+- Web V2 cart — COMPLETE / MERGED at `13b4411fc265a1f7b149ad9207059221fa53db32`.
 - Legacy direct-site checkout / PayPal bounded repair — CLOSED / PRODUCTION ACCEPTED at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
 - Web V2 production-parity release-system reset — COMPLETE / MERGED / QA PASS; do not rebuild the architecture or restore workers.dev acceptance.
 - Aborted Legacy audit branch `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` — OWNER ROLLED BACK / DO NOT DEPLOY / DO NOT MERGE.
@@ -182,9 +186,9 @@ Publication/discovery does not itself authorize purchase.
 ## Update discipline
 
 1. `WEB_V2_CURRENT_WORKTREE.md` owns Web V2 phase sequencing.
-2. Homepage, retail navigation, canonical catalog and product detail are complete; do not route workers backward without a fresh exact defect or owner change.
-3. Cart is the active phase and consumes the merged canonical catalog; unchanged vendor-source files are not cart inputs.
-4. Hold only the affected SKU/state when facts are missing; continue verified commerce work.
+2. Homepage, retail navigation, canonical catalog, product detail and cart are complete; do not route workers backward without a fresh exact defect or owner change.
+3. Checkout is the active phase and consumes the merged cart + canonical catalog; unchanged vendor-source files are not checkout inputs.
+4. Hold only the affected SKU/order state when facts are missing; continue verified commerce work.
 5. Catalog publication is authorized only from exact approved vendor/source truth; this does not reopen external marketplace expansion.
 6. Preview URLs are diagnostic only; production-parity smoke is the release acceptance path.
 7. One Web V2 Worktree, one primary worker per bounded task, no duplicate development branches for the same objective.
@@ -192,9 +196,9 @@ Publication/discovery does not itself authorize purchase.
 9. Shopify remains a separate channel, not a fallback checkout for Elevation direct-site transactions.
 10. No secrets in Git; no accepted candidate rebuild before promotion/cutover.
 11. Block only the exact blocked item and continue the next executable revenue-critical task.
-12. **HOMEPAGE COMPLETE → RETAIL NAV COMPLETE → CATALOG COMPLETE → PRODUCT DETAIL COMPLETE → CART ACTIVE → CHECKOUT → RELEASE ONLY AT A TRUE GATE.**
+12. **HOMEPAGE COMPLETE → RETAIL NAV COMPLETE → CATALOG COMPLETE → PRODUCT DETAIL COMPLETE → CART COMPLETE → CHECKOUT ACTIVE → ORDER/FULFILLMENT → RELEASE ONLY AT A TRUE GATE.**
 13. MASTER RECON returns to triggered integrity after correcting drift; it does not remain a standing executor.
 
 ## Current control phrase
 
-**HOMEPAGE MERGED → RETAIL NAV MERGED → CATALOG MERGED → PRODUCT DETAIL MERGED → CART ACTIVE → PAYPAL → ORDER → FULFILL → RELEASE AT TRUE GATE.**
+**HOMEPAGE MERGED → RETAIL NAV MERGED → CATALOG MERGED → PRODUCT DETAIL MERGED → CART MERGED → CHECKOUT ACTIVE → PAYPAL → ORDER → FULFILL → RELEASE AT TRUE GATE.**
