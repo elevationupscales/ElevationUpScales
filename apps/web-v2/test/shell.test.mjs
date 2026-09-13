@@ -2,8 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../src/index.js';
 
+const TEST_VERSION = {
+  id: '12345678-1234-4abc-8def-1234567890ab',
+  tag: 'git-0123456789ab',
+  timestamp: '2026-09-12T22:00:00.000Z'
+};
+
 async function request(path = '/', init = {}, origin = 'https://elevation-web-v2.test') {
-  return worker.fetch(new Request(`${origin}${path}`, init));
+  return worker.fetch(new Request(`${origin}${path}`, init), { CF_VERSION_METADATA: TEST_VERSION });
 }
 
 function assertCustomerSafe(body) {
@@ -36,16 +42,29 @@ test('homepage renders customer-safe public navigation and SEO', async () => {
   assertCustomerSafe(body);
 });
 
-test('health endpoint keeps internal implementation state out of customer HTML', async () => {
+test('runtime version endpoint proves the exact Cloudflare Worker version', async () => {
+  const res = await request('/__version');
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), {
+    service: 'elevation-web-v2',
+    ...TEST_VERSION
+  });
+});
+
+test('health endpoint includes runtime version proof without exposing it in customer HTML', async () => {
   const res = await request('/healthz');
   assert.equal(res.status, 200);
   const payload = await res.json();
   assert.deepEqual(payload, {
     status: 'ok',
     service: 'elevation-web-v2',
-    phase: 'phase-1-step-4-shell',
+    phase: 'commercial-retail-rebuild',
     commerceConnected: false,
-    opsConnected: false
+    opsConnected: false,
+    version: {
+      service: 'elevation-web-v2',
+      ...TEST_VERSION
+    }
   });
 });
 
@@ -61,6 +80,7 @@ test('robots and sitemap reflect the current implemented Web V2 route state', as
   assert.match(canonicalRobotsBody, /User-agent: \*/);
   assert.match(canonicalRobotsBody, /Allow: \//);
   assert.match(canonicalRobotsBody, /Disallow: \/healthz/);
+  assert.match(canonicalRobotsBody, /Disallow: \/__version/);
   assert.match(canonicalRobotsBody, /Sitemap: https:\/\/elevationupscales\.com\/sitemap\.xml/);
   assertCustomerSafe(canonicalRobotsBody);
 
