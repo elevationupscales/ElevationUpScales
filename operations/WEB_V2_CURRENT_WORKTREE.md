@@ -3,7 +3,7 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **System:** Elevation OS 1.1  
-**Status:** **ACTIVE — CANONICAL VENDOR CATALOG / COMMERCE PHASE**  
+**Status:** **ACTIVE — CART / COMMERCE PHASE**  
 **Reports To:** OS 1.1 Project Manager / MPM  
 **Current owner workflow:** `WEB_V2_COMMERCIAL_RETAIL_REBUILD_AND_RELEASE_WORKFLOW_2026-09-12.md`  
 **Visual control:** `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md`  
@@ -11,9 +11,8 @@
 **Accepted commercial-retail reset baseline:** `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`  
 **Homepage merge receipt:** `6940c32b5c1863d4b60be85427ccff3060e5d396`  
 **Retail-navigation merge receipt:** `e2c9e3494bd932c2cde8b0d24e807cbb94706009`  
-**Active catalog branch:** `work/web-v2-canonical-catalog-2026-09-13`  
-**Catalog branch state at OS RECON:** branch exists from `be9375b207ae1253902b6fe1786682c6fd6e8ada`; at RECON it was identical to then-current `main` with **0 implementation commits**. Do not recreate or replace this branch.  
-**Git freshness rule:** resolve current `main` once at bounded-task startup and once immediately before merge unless a real race/conflict appears.  
+**Canonical catalog + product-detail merge receipt:** `72694ae9ba5b9952c0460b9f90b380cffde4ff23`  
+**Catalog implementation branch:** `work/web-v2-canonical-catalog-2026-09-13` — **MERGED / CATALOG + PRODUCT DETAIL CLOSED**  
 **Execution-loop guard:** `OS_1_1_EXECUTION_HANDOFF_SOP.md` §2A / §6.
 
 ## 1. Mission
@@ -22,7 +21,7 @@ Build the smallest complete commercial retail system that can sell authorized ve
 
 **EXPLAIN → SHOP → PRODUCT → CART → PAYPAL → ORDER → FULFILL.**
 
-Homepage reconstruction and retail-navigation cleanup are complete. Preserve the approved visual baseline. Primary CTA remains **Shop**; secondary CTA remains **Start a Project**.
+Homepage reconstruction, retail-navigation cleanup, canonical catalog foundation, vendor filtering and product-detail foundation are complete. Preserve the approved visual baseline. Primary CTA remains **Shop**; secondary CTA remains **Start a Project**.
 
 ## 2. Public minimum
 
@@ -42,9 +41,9 @@ Foreground routes:
 
 Do not reopen visual redesign, marketplace, collector, broad CMS/admin, speculative AI commerce, new social-channel work, or unrelated service expansion while the revenue path is executable.
 
-## 3. Canonical catalog rule — ACTIVE
+## 3. Canonical catalog rule — MERGED / CONTROLLED
 
-One canonical Elevation product catalog. Vendor pages are filtered views of the same product truth.
+One canonical Elevation product catalog now exists in Web V2. Vendor pages derive from that canonical product truth; product detail resolves the same records.
 
 Owning Vendor Project/source truth remains authoritative for:
 
@@ -57,41 +56,40 @@ Owning Vendor Project/source truth remains authoritative for:
 - fulfillment source;
 - channel authorization.
 
-**FAIL CLOSED:** if a required commercial fact is not proven by the owning vendor source, do not infer it. Mark that field `UNVERIFIED` and keep the affected SKU non-orderable or explicitly gated.
+**FAIL CLOSED:** if a required commercial fact is not proven by the owning vendor source, do not infer it. The canonical catalog records that field as `UNVERIFIED` and keeps the affected SKU non-orderable.
 
-Unknown truth holds only the affected field/SKU/vendor. It does **not** block verified products or restart discovery.
+`orderable` is derived from required commercial truth; it is not an authored override. Vendor views and product-detail pages do not create sales authority independently.
 
-## 4. Vendor-source consumption guard — ACTIVE
+### Current bounded source holds
 
-This section controls the current vendor-file loop.
+The merged catalog intentionally contains the verified subset plus explicit holds:
 
-Vendor truth must remain authoritative, but vendor-file discovery is **finite**.
+- **SOK:** selected source proves the supplier relationship/control lane but not an exact public SKU publication record for this snapshot; no SOK SKU was invented and no SOK checkout was enabled.
+- **Renogy `RSP100DCT-US`:** hold approved media, current sell price, current MAP/floor and current supplier sellability. Exact backorder authority is preserved.
+- **Renogy `RBM500-US`:** hold approved media, current sell price, current MAP/floor and current supplier sellability. Exact backorder authority is preserved.
+- **Renogy `RBC2125DS-21W-US`:** hold approved media, current sell price, current MAP/floor, current supplier sellability and delayed-order authority.
+- **VEVOR `XXKLJT124INCLJF0QV0`:** source sell price is preserved; hold approved specs, approved media, exact current floor amount and exact delayed-order authority. Supplier sellability/price/MAP still requires live revalidation before purchase.
+- **VEVOR `AXLSTCQJDSYKAZ99C001V0`:** source sell price is preserved; hold approved specs, approved media, exact current floor amount and exact delayed-order authority. Supplier sellability/price/MAP still requires live revalidation before purchase.
+- **VEVOR `D25FT14IN20AHOGLOV1`:** source sell price is preserved; hold approved specs, approved media, exact current floor amount and exact delayed-order authority. Supplier sellability/price/MAP still requires live revalidation before purchase.
+- **Kingboss `D01027HH7BV` / Model 133:** exact linkage and 12V 100Ah identity are preserved; hold approved media, sell price, MAP/floor, delayed-order state, exact shipping disposition, warranty/returns ownership, selected fulfillment source and exact channel authorization.
 
-### Source boundary
+These holds belong to their owning Vendor Projects. Do not reopen unchanged vendor files merely to try to eliminate an `UNVERIFIED` state.
 
-For each bounded catalog task:
+## 4. Vendor-source consumption guard — CONTROLLED
 
-1. **RECOVER THE EXISTING IMPLEMENTATION BRANCH `work/web-v2-canonical-catalog-2026-09-13`; DO NOT CREATE ANOTHER CATALOG BRANCH.**
-2. Identify the owning Vendor Project/source pointer(s) needed for the current vendor/SKU set.
-3. Read each selected source state once and extract the commercial fields it actually proves.
-4. Materialize that result into the branch's catalog map/implementation state.
-5. If a required fact is absent, ambiguous, stale, or unsupported, record it as `UNVERIFIED` / non-orderable and continue.
-6. Do not recursively search for substitute evidence merely to turn an unknown field into a sellable assumption.
-7. Do not reopen an unchanged vendor file during the same bounded task.
-8. Re-read a vendor source only when its Git SHA/content state changed, the owning Vendor Project explicitly supplied a new pointer, or a concrete contradiction was discovered.
+Vendor truth remains authoritative, but vendor-file discovery is finite.
 
-### Stop conditions
+For a future bounded catalog refresh:
 
-Source reading for a vendor/SKU is complete when either:
-
-- the needed field is proven and recorded; or
-- the bounded authoritative source set does not prove it, so the field is `UNVERIFIED` and fails closed.
+1. identify the owning Vendor Project/source pointer needed for the affected vendor/SKU;
+2. read each changed/selected source state once;
+3. map only the commercial fields the source actually proves;
+4. absent/ambiguous/stale facts remain `UNVERIFIED` / non-orderable;
+5. do not recursively search for substitute evidence to manufacture sellability;
+6. do not reopen an unchanged vendor file during the same bounded task;
+7. reread only when its Git SHA/content changed, the owning Vendor Project supplied a new pointer, or a concrete contradiction was discovered.
 
 **ABSENT TRUTH IS A DATA STATE, NOT A SEARCH COMMAND.**
-
-Do not attempt to prove every vendor and every SKU before implementation begins. Build the verified subset first. A vendor with unresolved source truth may remain gated while other clean vendors/SKUs advance.
-
-Do not create a new vendor-management/indexing system merely to satisfy this phase. If a single source manifest is not already authoritative, use the owning Vendor Project's current pointers and apply this bounded-read rule.
 
 ## 5. Checkout authority
 
@@ -107,8 +105,8 @@ Payment may proceed only when the exact item/destination has a valid shipping di
 
 | Worker | State | Task |
 |---|---|---|
-| WEB DEVELOPER | **STANDBY / SUPPORT** | Preserve merged homepage + retail navigation; support bounded Commerce UI needs only. |
-| COMMERCE DEVELOPER | **ACTIVE / CURRENT — CANONICAL VENDOR CATALOG** | Recover `work/web-v2-canonical-catalog-2026-09-13`, consume bounded vendor truth once, then make an implementation commit that builds the verified catalog subset and gates unknown fields/SKUs. |
+| WEB DEVELOPER | **STANDBY / SUPPORT** | Preserve merged homepage + retail navigation + catalog/product-detail presentation; support bounded Commerce UI needs only. |
+| COMMERCE DEVELOPER | **ACTIVE / CURRENT — CART** | Build cart from canonical product IDs only. Non-orderable/`UNVERIFIED` products cannot become purchasable through client state. Preserve later server revalidation. |
 | RELEASE ENGINEER | **READY / SUPPORT** | Act only at a true release gate; preserve exact SHA/version identity and rollback. |
 | MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Wake only for actual state/lineage conflict, catalog-policy conflict, exact-candidate validation, release integrity, or owner-directed RECON. |
 
@@ -116,9 +114,9 @@ Payment may proceed only when the exact item/destination has a valid shipping di
 
 1. Homepage reconstruction — **COMPLETE / MERGED**.
 2. Retail navigation — **COMPLETE / MERGED**.
-3. Canonical vendor catalog — **P0 ACTIVE / CURRENT**.
-4. Product detail — **NEXT AFTER CATALOG FOUNDATION**.
-5. Cart — **QUEUED**.
+3. Canonical vendor catalog — **COMPLETE / MERGED**.
+4. Product detail — **COMPLETE / MERGED**.
+5. Cart — **P0 ACTIVE / CURRENT**.
 6. Checkout + PayPal — **QUEUED / AUTHORIZED**.
 7. Fulfillment routing — **QUEUED**.
 8. Hawaii/freight gates — **QUEUED**.
@@ -126,28 +124,25 @@ Payment may proceed only when the exact item/destination has a valid shipping di
 10. Same-version cutover/promotion — **OWNER ACCEPTANCE REQUIRED**.
 11. First real order — **FINAL REVENUE PROOF**.
 
-## 8. Implementation loop — ACTIVE
+## 8. Next implementation loop — CART
 
-Normal catalog loop:
+Cart is a customer convenience layer over canonical product identity; it is not commerce authority.
 
-**RE-RESOLVE `main` ONCE → READ THIS WORKTREE → RECOVER `work/web-v2-canonical-catalog-2026-09-13` → SELECT BOUNDED VENDOR SOURCE SET → READ EACH SOURCE STATE ONCE → MAP VERIFIED TRUTH / MARK UNKNOWN CLOSED → MAKE IMPLEMENTATION COMMIT → QA → RE-RESOLVE `main` BEFORE MERGE → RECONCILE → MERGE → UPDATE WORKTREE → REPORT.**
+Required controls:
 
-Hard guards:
+- cart line identity resolves by canonical product ID/SKU;
+- held/non-orderable products cannot be added as purchasable lines;
+- client-side quantity/price state is never authoritative;
+- cart display may use canonical snapshot data, but final sellability, price, shipping/freight, destination eligibility and delayed-order authority are revalidated server-side before checkout/payment;
+- no Shopify checkout fallback;
+- do not connect PayPal in the cart phase merely because the later checkout architecture is authorized;
+- preserve homepage, retail navigation, vendor views and product detail.
 
-- the catalog branch already exists; do not create a substitute branch;
-- the next durable branch change must be implementation/catalog state, not another recon-only or receipt-only commit;
-- do not reread unchanged Master SOP / Registry / global Board / release architecture;
-- do not repeatedly enumerate vendor directories/files after the bounded source set is chosen;
-- do not reopen unchanged vendor files to search again for absent data;
-- missing supplier facts hold only the affected SKU/vendor;
-- no completion receipt before implementation/QA exists;
-- an execution-window/context cutoff is not a blocker or owner gate;
-- recover existing branch/commit progress instead of restarting discovery;
-- normal bounded work uses at most two `main` resolutions unless a genuine race appears.
+Normal cart loop:
 
-Priority:
+**RESOLVE `main` ONCE → READ THIS WORKTREE → CREATE/RECOVER ONE BOUNDED CART BRANCH → CONSUME THE MERGED CANONICAL CATALOG → BUILD CART → QA → RECONCILE CURRENT BASE → MERGE → UPDATE WORKTREE → CONTINUE.**
 
-**RECOVER EXISTING BRANCH → SOURCE ONCE → MAP TRUTH → IMPLEMENTATION COMMIT → QA → MERGE → WORKTREE UPDATE → RECEIPT.**
+Do not reread unchanged vendor source files for cart implementation. The merged catalog is the cart's product input; vendor sources wake only for a changed product truth or a concrete contradiction.
 
 ## 9. Release invariant
 
@@ -155,18 +150,16 @@ The production-parity release system is already complete/merged/QA-passed.
 
 **ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION PROMOTED/CUT OVER → LIVE VERIFY.**
 
-Do not create a candidate merely because release machinery is ready.
+Do not create a candidate merely because release machinery is ready. Cart is not a release gate.
 
 ## 10. RUN
 
-`RUN` means:
+`RUN` now means:
 
-**RESOLVE MAIN ONCE → READ THIS WORKTREE → RECOVER `work/web-v2-canonical-catalog-2026-09-13` → CONSUME BOUNDED VENDOR SOURCES ONCE → UNKNOWN = UNVERIFIED/NON-ORDERABLE → MAKE ACTUAL CATALOG IMPLEMENTATION COMMIT → QA → RESOLVE MAIN BEFORE MERGE → MERGE → UPDATE WORKTREE → CONTINUE.**
+**RESOLVE MAIN ONCE → READ THIS WORKTREE → BOUNDED CART BRANCH → CANONICAL PRODUCT IDS ONLY → HELD PRODUCTS FAIL CLOSED → BUILD CART → QA → RECONCILE → MERGE → UPDATE WORKTREE → CONTINUE.**
 
-Do not stop the catalog for one missing vendor fact. Do not recurse through vendor files trying to eliminate every unknown. Route missing facts to the owning Vendor Project while verified catalog work continues.
-
-Do not report branch creation as catalog implementation. The branch already exists; progress now means changed catalog/product code or data plus QA.
+Do not restart catalog/vendor-source discovery unless a product truth actually changed.
 
 ## Control phrase
 
-**BRANCH EXISTS → SOURCE ONCE → MAP VERIFIED TRUTH → UNKNOWN = CLOSED → IMPLEMENT → QA → MERGE. VERIFIED PRODUCTS SELL; UNKNOWN TRUTH FAILS CLOSED.**
+**CATALOG MERGED → PRODUCT DETAIL MERGED → CART ACTIVE. CLIENT STATE IS NOT AUTHORITY; UNKNOWN TRUTH FAILS CLOSED.**
