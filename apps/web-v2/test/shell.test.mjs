@@ -92,7 +92,7 @@ test('homepage reproduces the owner-approved production presentation and visible
     '12V 100AH LiFePO4 Battery',
     'Rechargeable 200,000 Lumens LED Spotlight',
     '8L Hot Water Heater Tankless Instant Boiler Outdoor',
-    "Portable Walk-In Greenhouse 20' x 10' Hot House with Steel Hoops &amp; Windows",
+    'Portable Walk-In Greenhouse 20&#39; x 10&#39; Hot House with Steel Hoops &amp; Windows',
     '12V Electric Scissor Car Jack &amp; Impact Wrench',
     '12V Water Diaphragm Pump - 5.5 GPM &amp; 70 PSI Adjustable',
     'Heavy-Duty 5.3 Gallon Metal Fuel Can with Spout &amp; Comfort Handle'
