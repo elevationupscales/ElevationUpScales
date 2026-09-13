@@ -33,11 +33,11 @@ The website's revenue path is:
 
 Owner visual direction:
 
-- preserve/reconstruct the current approved homepage design rather than inventing a new concept;
-- preserve the approved hero and recent freight/logistics presentation;
-- make Shop the primary revenue CTA;
+- preserve the approved homepage design already merged in Web V2;
+- preserve the approved hero and freight/logistics presentation;
+- keep Shop as the primary revenue CTA;
 - keep Start a Project as a secondary path;
-- eliminate internal OS/developer language and non-revenue feature clutter from the public experience.
+- keep internal OS/developer language and non-revenue feature clutter out of the public experience.
 
 Direct-site payment authority:
 
@@ -49,29 +49,49 @@ Do not silently route direct-site customers into Shopify checkout. Shopify, eBay
 
 # CURRENT WEBSITE / DEV STATE
 
+Current verified `main` entering the active catalog phase:
+
+`e2c9e3494bd932c2cde8b0d24e807cbb94706009`
+
+Verified phase receipts:
+
+- Homepage reconstruction merged: `6940c32b5c1863d4b60be85427ccff3060e5d396`.
+- Retail-navigation focus merged into current `main`: `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
+- Release-system reset remains complete / merged / QA pass; it does not move ahead of the commercial build.
+
 | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|
-| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — COMMERCIAL RETAIL REBUILD / REVENUE FIRST.** Commercial-retail release reset accepted at `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`; every worker must still re-resolve current `main` before execution. | Follow `WEB_V2_CURRENT_WORKTREE.md`: homepage reconstruction → retail navigation → canonical vendor catalog → product detail → cart → PayPal/order → freight/Hawaii gates → production-parity release. |
-| Web V2 — WEB DEVELOPER | Web V2 Development | **ACTIVE / NEXT — HOMEPAGE RECONSTRUCTION** | Reconstruct the owner-approved current homepage look and retail/logistics message. No new visual concept and no skip-ahead to release. |
-| Web V2 — COMMERCE DEVELOPER | Web V2 Development | **QUEUED / AUTHORIZED AFTER HOMEPAGE BASELINE** | Build canonical vendor catalog, vendor views, product detail, cart, PayPal Orders v2, durable order and fulfillment handoff. |
-| Web V2 — RELEASE ENGINEER | Web V2 Development | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | Release-system reset is complete and QA-passed. Support a bounded build only when it reaches a true release gate; `workers.dev` preview is diagnostic only. |
-| MASTER RECON OS | MPM | **STANDBY / TRIGGERED INTEGRITY** | Wake for state/lineage conflict, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON. No standing website execution. |
+| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — CANONICAL VENDOR CATALOG / COMMERCE PHASE.** Homepage and retail navigation are merged. | Follow `WEB_V2_CURRENT_WORKTREE.md`: canonical vendor catalog → product detail → cart → PayPal/order → fulfillment/freight/Hawaii gates → production-parity release. |
+| Web V2 — WEB DEVELOPER | Web V2 Development | **STANDBY / SUPPORT — HOMEPAGE + RETAIL NAV MERGED** | Preserve merged public shell; support exact bounded UI needs surfaced by Commerce. Do not reopen homepage redesign or a competing nav branch. |
+| Web V2 — COMMERCE DEVELOPER | Web V2 Development | **ACTIVE / CURRENT — CANONICAL VENDOR CATALOG** | Build one canonical catalog from authoritative Vendor Project truth. Unverified commercial fields stay non-orderable rather than inferred. |
+| Web V2 — RELEASE ENGINEER | Web V2 Development | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | Support only when the bounded commercial build reaches a true release gate. Preview remains diagnostic only. |
+| MASTER RECON OS | MPM | **STANDBY / TRIGGERED INTEGRITY** | Wake for state/lineage conflict, supplier-truth conflict affecting catalog control, worker drift, exact-candidate validation, release-integrity checks or owner-directed RECON. |
 | Legacy direct-site checkout / PayPal | MASTER DEV under MPM | **CLOSED / PRODUCTION ACCEPTED** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` | Preserve as Legacy fallback/reference while Web V2 is built. VERIFY-FIX only on fresh Legacy defect. |
 | Aborted Legacy live-site audit round | MPM / MASTER DEV | **OWNER ROLLED BACK / QUARANTINED** — `repair/live-site-audit-20260912` at `5fc55c806c1d7e138a9819a234e85ec932a056cb` | DO NOT DEPLOY / DO NOT MERGE / DO NOT REPLAY. |
 
-Web V2 release invariant:
+---
 
-**ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION LIVE → VERIFY → RECEIPT.**
+# CANONICAL CATALOG CONTROL — ACTIVE
 
-Preview URLs are diagnostic only.
+One canonical Elevation catalog owns Web V2 product truth. Vendor pages are filtered views, not independent storefront truth.
 
-Bootstrap release before V2 owns the root domain:
+Vendor Projects own exact supplier facts. Commerce may consume only verified:
 
-**CANDIDATE → SMOKE-ONLY CUSTOM DOMAIN WITH PRODUCTION BINDINGS → EXACT RUNTIME VERSION PROOF → OWNER ACCEPTANCE → SAME WORKER/VERSION ROOT-DOMAIN CUTOVER → LIVE VERIFY.**
+- supplier/vendor identity;
+- SKU/product identity;
+- approved title/spec/media;
+- sell price and MAP/floor state;
+- stock/orderability/backorder state;
+- shipping/freight disposition;
+- warranty/returns owner;
+- fulfillment source;
+- channel authorization.
 
-Steady-state release after V2 owns production:
+**FAIL-CLOSED RULE:** missing or conflicting commercial truth does not get inferred. The affected SKU remains non-orderable or explicitly gated until its owning Vendor Project resolves the fact.
 
-**CANDIDATE → ACCEPTED VERSION 100% + CANDIDATE 0% → REAL PRODUCTION URL + VERSION OVERRIDE → EXACT RUNTIME VERSION PROOF → PROMOTE SAME VERSION TO 100% → LIVE VERIFY.**
+Do not stop the full catalog because one SKU is unresolved. Hold only the affected SKU/state, continue clean verified products, and route the missing fact back to its owning Vendor Project.
+
+Publication/discovery does not itself authorize purchase.
 
 ---
 
@@ -79,16 +99,16 @@ Steady-state release after V2 owns production:
 
 | Sequence | State | Routing |
 |---|---|---|
-| Homepage exact reconstruction | **P0 ACTIVE / NEXT** | Web Developer. Preserve approved hero/freight/brand look; retail-first copy. |
-| Retail navigation cleanup | **QUEUED** | Shop / Vendors / Freight & Hawaii / Start a Project. Remove public feature clutter. |
-| Canonical vendor catalog | **QUEUED / AUTHORIZED** | Commerce Developer. Use owning vendor Project truth; one canonical catalog, vendor-filtered views. |
-| Product detail | **QUEUED** | Commercial retail product page with exact SKU/spec/image/shipping/warranty state. |
+| Homepage exact reconstruction | **COMPLETE / MERGED** | Receipt `6940c32b5c1863d4b60be85427ccff3060e5d396`. Preserve; do not redesign. |
+| Retail navigation cleanup | **COMPLETE / MERGED** | Current `main = e2c9e3494bd932c2cde8b0d24e807cbb94706009`. Preserve Shop / approved vendor views / Freight & Hawaii / Start a Project. |
+| Canonical vendor catalog | **P0 ACTIVE / CURRENT** | Commerce Developer. Use owning Vendor Project truth; one canonical catalog, vendor-filtered views; unknown commercial truth fails closed. |
+| Product detail | **NEXT AFTER CATALOG FOUNDATION** | Commercial retail product page driven by the same canonical truth. |
 | Cart | **QUEUED** | Durable editable cart + server-side SKU/price/orderability revalidation. |
 | PayPal checkout + Elevation order | **QUEUED / AUTHORIZED** | PayPal Orders v2 + idempotency + durable order + capture/reconciliation. |
 | Supplier/freight fulfillment handoff | **QUEUED** | Persist fulfillment source and route the order to the owning supplier/logistics lane. |
 | Freight/Hawaii lithium gate | **QUEUED** | Known shipping may sell; unresolved freight/unapproved lithium route fails closed before final charge. |
-| Production-parity release system | **COMPLETE / MERGED / QA PASS** | Release foundation and application QA passed in run `34738843664`; exact Version ID + runtime `/__version` proof is ready for the first true release gate. |
-| Same-version production acceptance | **WAIT FOR BUILT SITE + OWNER RELEASE** | No rebuild/re-upload. Cut over/promote exact smoke-tested version only after the bounded site build reaches release readiness. |
+| Production-parity release system | **COMPLETE / MERGED / QA PASS** | Release foundation/application QA passed in run `34738843664`; use only at the first true release gate. |
+| Same-version production acceptance | **WAIT FOR BUILT SITE + OWNER RELEASE** | No rebuild/re-upload. Cut over/promote exact smoke-tested version only after commercial build release readiness. |
 | First real direct-site order | **FINAL REVENUE PROOF** | Payment → durable order → supplier/freight → fulfillment → realized margin. |
 
 ---
@@ -100,7 +120,7 @@ Steady-state release after V2 owns production:
 | Owner communications / residual Google Voice forwarding | MPM / Communications Recovery | **P0 CRITICAL — ACCOUNT RECOVERED / VOICE DELETED / RESIDUAL FORWARDING REMAINS** | Carrier/Google clear residual forwarding/state; verify direct inbound call + SMS. |
 | eBay customer/cash recovery + profitability contraction | eBay Store Operations under Peter / Company Operations | **P0 PARALLEL — CUSTOMER OBLIGATIONS + CASH RELEASE + LOSS PREVENTION** | Resolve shipment/cancellation/refund obligations and held-cash blockers; preserve positive-contribution core. |
 | Existing-shop tuning | MPM / Company Operations / owning channel workers | **ACTIVE — TUNE BEFORE EXPANDING** | Fix current channel product truth, purchase, fulfillment and realized-margin issues. |
-| Vendor source truth | Vendor Project managers/specialists | **ACTIVE / SUPPORTING WEB V2** | Maintain exact authorization/SKU/stock/MAP/cost/shipping/warranty/fulfillment truth for Web V2 catalog consumption. |
+| Vendor source truth | Vendor Project managers/specialists | **ACTIVE / SUPPORTING WEB V2 CATALOG** | Maintain exact authorization/SKU/stock/MAP/cost/shipping/warranty/fulfillment truth; resolve only their own supplier gaps. |
 
 ---
 
@@ -110,11 +130,11 @@ Steady-state release after V2 owns production:
 |---|---|---|---|
 | Shopify Online Store | Shopify Store Operations + Owner | **PRESERVE — SEPARATE CHANNEL** | Preserve working Shopify checkout/payment configuration and current intentional staging. Do not make Shopify the Web V2 direct-site payment owner. |
 | Elevation direct site — Legacy runtime | MPM / MASTER DEV | **PRODUCTION ACCEPTED / FALLBACK / VERIFY-ONLY** | Preserve during Web V2 build/cutover. |
-| Web V2 | OS 1.1 Project Manager / Web V2 Development | **ACTIVE COMMERCIAL RETAIL BUILD** | Build direct retail revenue path under current Worktree. |
-| VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact approved product/source/shipping/economics truth to canonical Web V2 catalog. External channel expansion remains separately controlled. |
-| Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact dealer/orderability/backorder/cost/shipping/warranty truth to Web V2 catalog. |
+| Web V2 | OS 1.1 Project Manager / Web V2 Development | **ACTIVE CANONICAL CATALOG BUILD** | Execute catalog phase under current Worktree, then product detail. |
+| VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact approved product/source/shipping/economics truth. Do not infer missing fields in Web V2. External channel expansion remains separately controlled. |
+| Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact dealer/orderability/backorder/cost/shipping/warranty truth. Do not infer missing fields in Web V2. |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** | Supply exact product/orderability/warranty truth; preserve Hawaii controls. |
-| Kingboss | Kingboss Project Operations Manager / Specialist | **ACTIVE STAGE-1 PROVING / CATALOG SOURCE WHEN APPROVED** | Continue exact SKU/MAP/channel/warranty/compliance reconciliation before publication. |
+| Kingboss | Kingboss Project Operations Manager / Specialist | **ACTIVE STAGE-1 PROVING / CATALOG SOURCE WHEN APPROVED** | Continue exact SKU/MAP/channel/warranty/compliance reconciliation before orderability/publication. |
 | Apparel / Fourthwall | Apparel Vendor Operations Manager | **ACTIVE SEPARATE APPAREL CHANNEL** | Preserve native fulfillment/economics; not a blocker to lithium/off-grid retail launch. |
 | TikTok Shop / Affiliate Growth | TikTok execution + TikTok Affiliate Growth Manager under Peter | **ACTIVE UNDER RESTRICTION / APPEAL TERMINAL-FAILED** | No appeal replay; current-shop tuning only. |
 
@@ -124,7 +144,7 @@ Steady-state release after V2 owns production:
 
 | Work Item | State | Reopen Gate |
 |---|---|---|
-| **Web V2 authorized vendor catalog build** | **ACTIVE / NOT HELD** | Exact supplier/project truth must exist before each SKU is published. |
+| **Web V2 authorized vendor catalog build** | **ACTIVE / NOT HELD** | Exact supplier/project truth must exist before a SKU becomes orderable. Unknown commercial facts fail closed per SKU. |
 | External marketplace / new-channel catalog expansion | **HOLD — CURRENT CHANNELS FIRST** | Casey/MPM explicitly reopens after current channel profitability/stability. |
 | New-channel expansion — Meta / Google & YouTube / Amazon / Walmart / additional marketplaces | **HOLD** | Existing channels stable/profitable + owner reopen. |
 | Paid advertising / prepaid media | **HOLD — OWNER CAPITAL-RECOVERY RULE** | Verified capital-recovery hole reaches zero and Casey explicitly reopens paid acquisition. |
@@ -142,12 +162,15 @@ Steady-state release after V2 owns production:
 - unrelated home-service expansion;
 - broad analytics redesign;
 - new social/channel expansion;
-- another homepage redesign.
+- another homepage redesign;
+- generic re-onboarding of already authorized vendors.
 
 ---
 
 # CLOSED / DO NOT RECREATE
 
+- Web V2 homepage reconstruction — COMPLETE / MERGED at `6940c32b5c1863d4b60be85427ccff3060e5d396`.
+- Web V2 retail-navigation phase — COMPLETE / MERGED into `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
 - Legacy direct-site checkout / PayPal bounded repair — CLOSED / PRODUCTION ACCEPTED at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
 - Web V2 production-parity release-system reset — COMPLETE / MERGED / QA PASS; do not rebuild the architecture or restore workers.dev acceptance.
 - Aborted Legacy audit branch `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` — OWNER ROLLED BACK / DO NOT DEPLOY / DO NOT MERGE.
@@ -159,17 +182,20 @@ Steady-state release after V2 owns production:
 
 ## Update discipline
 
-1. Owner website target above supersedes older Web V2 sequencing that kept Commerce V2 waiting behind preview acceptance.
-2. Web V2 catalog publication is authorized only from exact approved vendor/source truth; this does not reopen external marketplace expansion.
-3. Preview URLs are diagnostic only; production-parity smoke is the release acceptance path.
-4. One Web V2 Worktree, one primary worker per bounded task, no duplicate development branches for the same objective.
-5. Legacy production stays separately protected as rollback/fallback until Web V2 cutover is accepted.
-6. Shopify remains a separate channel, not a fallback checkout for Elevation direct-site transactions.
-7. No secrets in Git; no accepted candidate rebuild before promotion/cutover.
-8. Block only the exact blocked item and continue the next executable revenue-critical task.
-9. **HOMEPAGE FIRST → COMMERCE SECOND → RELEASE ONLY AT A TRUE GATE.** Passing release-system QA does not authorize premature candidate creation or production smoke.
-10. MASTER RECON returns to triggered integrity after correcting drift; it does not remain a standing executor.
+1. `WEB_V2_CURRENT_WORKTREE.md` owns Web V2 phase sequencing.
+2. Homepage and retail-navigation phases are complete; do not route workers backward without a fresh exact defect or owner change.
+3. Canonical catalog is the active phase; Vendor Projects own supplier truth and Web V2 does not invent missing commercial data.
+4. Hold only the affected SKU/state when facts are missing; continue verified catalog work.
+5. Catalog publication is authorized only from exact approved vendor/source truth; this does not reopen external marketplace expansion.
+6. Preview URLs are diagnostic only; production-parity smoke is the release acceptance path.
+7. One Web V2 Worktree, one primary worker per bounded task, no duplicate development branches for the same objective.
+8. Legacy production stays separately protected as rollback/fallback until Web V2 cutover is accepted.
+9. Shopify remains a separate channel, not a fallback checkout for Elevation direct-site transactions.
+10. No secrets in Git; no accepted candidate rebuild before promotion/cutover.
+11. Block only the exact blocked item and continue the next executable revenue-critical task.
+12. **HOMEPAGE COMPLETE → RETAIL NAV COMPLETE → CANONICAL CATALOG ACTIVE → PRODUCT → CART → CHECKOUT → RELEASE ONLY AT A TRUE GATE.**
+13. MASTER RECON returns to triggered integrity after correcting drift; it does not remain a standing executor.
 
 ## Current control phrase
 
-**KEEP THE HOMEPAGE → SELL THE PARTNERS → CART → PAYPAL → ORDER → FULFILL → FREIGHT / HAWAII CONTROL → PRODUCTION-PARITY SMOKE → SAME VERSION LIVE → MAKE MONEY.**
+**HOMEPAGE MERGED → RETAIL NAV MERGED → CANONICAL CATALOG ACTIVE → VERIFIED PRODUCTS SELL → UNKNOWN TRUTH FAILS CLOSED → PRODUCT → CART → PAYPAL → ORDER → FULFILL → RELEASE AT TRUE GATE.**
