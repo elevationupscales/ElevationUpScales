@@ -72,11 +72,12 @@ jobs:
         working-directory: apps/web-v2
         run: npm ci --ignore-scripts
 
-      - name: Verify foundation and repository safety
+      - name: Verify foundation, application shell and repository safety
         run: |
           set -euo pipefail
           node deployment/v2/validate-foundation.mjs --release
           node --test deployment/v2/release-policy.test.mjs
+          npm --prefix apps/web-v2 test
           npm run qa:secrets
           git diff --check
           test -z "$(git status --porcelain)"
