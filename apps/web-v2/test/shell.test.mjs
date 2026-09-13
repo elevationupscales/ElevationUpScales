@@ -12,7 +12,7 @@ function assertCustomerSafe(body) {
   assert.doesNotMatch(body, /\bWeb V2\b|\bCommerce V2\b|\bOps V2\b|\bStep 4\b|\bPhase 1\b|current shell|not connected|will connect later|migration status|architecture explanation/i);
 }
 
-test('homepage reproduces the production presentation section-for-section', async () => {
+test('homepage reproduces the owner-approved production presentation and visible copy', async () => {
   const res = await request('/');
   assert.equal(res.status, 200);
   assert.match(res.headers.get('content-type') || '', /text\/html/);
@@ -20,7 +20,17 @@ test('homepage reproduces the production presentation section-for-section', asyn
   assert.match(res.headers.get('content-security-policy') || '', /img-src 'self' https:\/\/elevationupscales\.com/);
   const body = await res.text();
 
-  const sections = ['AUTHORIZED SOK ENERGY DEALER', 'Lithium Power', 'AUTHORIZED BATTERY SUPPLY', 'SHOP BY SOLUTION', 'Featured SOK Systems', 'FREIGHT &amp; SHIPPING LOGISTICS', 'Power &amp; Outdoor <span>Products</span>', 'Shop the Store.', 'Build Your Power System.', 'Project &amp; Field Support.'];
+  const sections = [
+    'AUTHORIZED SOK ENERGY DEALER',
+    'Lithium Power',
+    'AUTHORIZED BATTERY SUPPLY',
+    'SHOP BY SOLUTION',
+    'FEATURED SOK SYSTEMS',
+    'FREIGHT &amp; SHIPPING LOGISTICS',
+    'SHOP THE STORE.',
+    'BUILD YOUR POWER SYSTEM.',
+    'PROJECT &amp; FIELD SUPPORT.'
+  ];
   let lastIndex = -1;
   for (const marker of sections) {
     const index = body.indexOf(marker);
@@ -29,22 +39,71 @@ test('homepage reproduces the production presentation section-for-section', asyn
   }
 
   for (const label of ['Power', 'Shop', 'Projects', 'Services', 'Company']) assert.match(body, new RegExp(`<summary>${label}`));
-  for (const copy of ['Lithium Batteries', 'SOK Battery Systems', 'Solar System Builder', 'Freight &amp; Logistics', 'Work With Us', 'Marketplace', 'OFF-GRID POWER • SUPPLY • LOGISTICS', 'HAWAII &amp; ALASKA LOGISTICS REVIEW', 'RV • SOLAR • BACKUP • COMMERCIAL', 'Explore Power Solutions', 'Shop Solar', 'View Battery', 'Purchase Options', 'Lithium Battery Freight', 'Hawaii Logistics', 'Alaska Logistics', 'Commercial Supply', 'Home &amp; RV Services', 'Power System Services', 'Shipping &amp; Logistics', 'Terms &amp; Business Disclosures', 'Report an Issue']) assert.match(body, new RegExp(copy));
+  for (const copy of [
+    'OFF-GRID POWER • SUPPLY • LOGISTICS',
+    'HAWAII &amp; ALASKA LOGISTICS REVIEW',
+    'RV • SOLAR • BACKUP • COMMERCIAL',
+    'Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping.',
+    'SHOP POWER &amp; ENERGY',
+    '12V lithium energy for RV and mobile systems.',
+    'Shop Batteries',
+    '12V, 24V &amp; 48V systems.',
+    'Build your energy independence.',
+    'Battery freight matched to product and destination.',
+    'Learn More',
+    'Current batteries and gear for the journey.',
+    'Keep what matters running.',
+    'Scalable power solutions.',
+    'Shop Commercial',
+    'View All SOK Products',
+    'View Battery',
+    'Purchase Options',
+    'Lithium Battery Freight',
+    'Hawaii Logistics',
+    'Alaska Logistics',
+    'Commercial Supply',
+    'Controlled review for 4+ batteries, rack storage and larger product-supply quantities.',
+    'Current lithium and RV &amp; Outdoor products from the live Elevation catalog.',
+    'Home &amp; RV Services',
+    'Power System Services',
+    'Shipping &amp; Logistics',
+    'Terms &amp; Business Disclosures',
+    'Report an Issue'
+  ]) assert.match(body, new RegExp(copy.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
 
-  for (const href of ['/store?department=lithium-batteries', '/shop/sok', '/store?department=rv-outdoor', '/start-a-project', '/shipping-logistics-services', '/hawaii-lithium-batteries', '/solar-project', '/what-we-do', '/work-with-us', '/marketplace', '/privacy', '/terms', '/report-an-issue']) assert.match(body, new RegExp(`href="${href.replace(/[?]/g, '\\?')}`));
+  for (const href of ['/store', '/store?department=lithium-batteries', '/shop/sok', '/store?department=rv-outdoor', '/start-a-project', '/shipping-logistics-services', '/hawaii-lithium-batteries', '/solar-project', '/what-we-do', '/work-with-us', '/marketplace', '/privacy', '/terms', '/report-an-issue']) assert.match(body, new RegExp(`href="${href.replace(/[?]/g, '\\?')}`));
 
   assert.match(body, /rel="canonical" href="https:\/\/elevationupscales\.com\/"/);
   assert.match(body, /property="og:title"/);
   assert.match(body, /storefront-tropical-logistics-v3\.webp/);
   assert.match(body, /sok-wordmark-home-transparent\.webp/);
   assert.match(body, /sk12v100pc\/home-hero\.webp/);
-  assert.match(body, /48v-battery-cabinet\/hero\.webp/);
-  assert.match(body, /assets\/logo\.webp/);
-  assert.doesNotMatch(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
+  assert.match(body, /sk48v100n\/home-crop\.webp/);
+  assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
+  assert.doesNotMatch(body, /assets\/logo\.webp/);
   assert.match(body, /href="\/sok\/sk12v100pc\/"/);
   assert.match(body, /href="\/sok\/sk48v100n\/"/);
+
+  for (const product of [
+    '100Ah LiFePO4 Battery',
+    '12V 100Ah LiFePO4 Battery',
+    '12V 100Ah Battery',
+    'Portable Solar Power Bank — 10000mAh',
+    '12V 100AH LiFePO4 Battery',
+    'Rechargeable 200,000 Lumens LED Spotlight',
+    '8L Hot Water Heater Tankless Instant Boiler Outdoor',
+    "Portable Walk-In Greenhouse 20' x 10' Hot House with Steel Hoops &amp; Windows",
+    '12V Electric Scissor Car Jack &amp; Impact Wrench',
+    '12V Water Diaphragm Pump - 5.5 GPM &amp; 70 PSI Adjustable',
+    'Heavy-Duty 5.3 Gallon Metal Fuel Can with Spout &amp; Comfort Handle'
+  ]) assert.match(body, new RegExp(product.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+
+  assert.doesNotMatch(body, /Power &amp; Outdoor <span>Products<\/span>|Power & Outdoor Products/i);
+  assert.doesNotMatch(body, /Explore Power Solutions|Explore Hawaii|Commercial Supply <span aria-hidden="true">→<\/span>/i);
   assert.doesNotMatch(body, /href="\/checkout|paypal\.com|\/api\/checkout|\/api\/paypal|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
   assert.doesNotMatch(body, />\s*\$[0-9]/);
+  assert.doesNotMatch(body, />\s*Buy Now\s*</i);
+  assert.match(body, /Catalog Options/);
   assertCustomerSafe(body);
 });
 
@@ -69,11 +128,14 @@ test('robots and sitemap reflect only implemented Web V2 routes', async () => {
   assert.doesNotMatch(sitemap, /\/start-a-project<\/loc>|\/cart<\/loc>|\/checkout<\/loc>|\/solar-project<\/loc>/);
 });
 
-test('owned assets include the scoped production-fidelity layer', async () => {
+test('owned assets include the scoped production-fidelity and mobile layers', async () => {
   const css = await (await request('/assets/app.css')).text();
-  assert.match(css, /@media \(max-width:680px\)/);
+  assert.match(css, /@media\(max-width:680px\)/);
   assert.match(css, /\.reference-storefront-home \.utility-bar/);
-  assert.match(css, /\.homepage-product-grid/);
+  assert.match(css, /\.reference-storefront-home \.brand>img/);
+  assert.match(css, /\.sok-products-grid/);
+  assert.match(css, /\.home-product-grid/);
+  assert.match(css, /grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
   assert.match(css, /\.solar-feature-band/);
   assert.match(css, /\.fidelity-footer-grid/);
   assert.match(css, /\.catalog-grid/);
