@@ -1,0 +1,23 @@
+name: Checkout Repair QA v2
+
+on:
+  push:
+    branches:
+      - repair/direct-checkout-paypal-20260912
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Focused non-charging checkout tests
+        run: node --test tests/store-checkout-capture-repair.test.mjs
+      - name: Canonical QA
+        run: npm run qa
+      - name: Diff integrity
+        run: git diff --check production-deploy...HEAD
