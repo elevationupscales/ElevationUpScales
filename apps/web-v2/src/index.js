@@ -1,5 +1,5 @@
 import { clientScript } from './client.js';
-import { getPublicRoute, resolveCompatibilityRedirect } from './routes.js';
+import { CANONICAL_ORIGIN, getPublicRoute, resolveCompatibilityRedirect } from './routes.js';
 import { renderNotFound, renderPublicPage } from './shell.js';
 import { styles } from './styles.js';
 
@@ -37,6 +37,12 @@ function redirect(location, status) {
     status,
     headers: { Location: location }
   });
+}
+
+function currentPublicBridge(url, routeInfo) {
+  if (!routeInfo || routeInfo.implemented) return null;
+  if (url.origin === CANONICAL_ORIGIN) return null;
+  return `${CANONICAL_ORIGIN}${routeInfo.path}${url.search}`;
 }
 
 export default {
@@ -86,6 +92,11 @@ export default {
     const routeInfo = getPublicRoute(url.pathname);
     if (routeInfo?.implemented) {
       return html(renderPublicPage(routeInfo));
+    }
+
+    const bridgeLocation = currentPublicBridge(url, routeInfo);
+    if (bridgeLocation) {
+      return redirect(bridgeLocation, 307);
     }
 
     return html(renderNotFound(), 404);
