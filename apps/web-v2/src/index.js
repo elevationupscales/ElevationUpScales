@@ -1,6 +1,7 @@
-import { renderShell } from './shell.js';
-import { styles } from './styles.js';
 import { clientScript } from './client.js';
+import { getPublicRoute, resolveCompatibilityRedirect } from './routes.js';
+import { renderNotFound, renderPublicPage } from './shell.js';
+import { styles } from './styles.js';
 
 const baseHeaders = {
   'Cache-Control': 'no-store',
@@ -28,6 +29,13 @@ function html(body, status = 200) {
   return response(body, {
     status,
     headers: { 'Content-Type': 'text/html; charset=utf-8' }
+  });
+}
+
+function redirect(location, status) {
+  return response(null, {
+    status,
+    headers: { Location: location }
   });
 }
 
@@ -70,10 +78,16 @@ export default {
       });
     }
 
-    if (url.pathname === '/' || url.pathname === '/start-a-project') {
-      return html(renderShell({ startProject: url.pathname === '/start-a-project' }));
+    const compatibilityRedirect = resolveCompatibilityRedirect(url);
+    if (compatibilityRedirect) {
+      return redirect(compatibilityRedirect.location, compatibilityRedirect.status);
     }
 
-    return html(renderShell({ notFound: true }), 404);
+    const routeInfo = getPublicRoute(url.pathname);
+    if (routeInfo?.implemented) {
+      return html(renderPublicPage(routeInfo));
+    }
+
+    return html(renderNotFound(), 404);
   }
 };
