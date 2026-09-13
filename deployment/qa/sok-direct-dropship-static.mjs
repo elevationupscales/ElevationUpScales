@@ -74,7 +74,13 @@ for(const token of ["inventory_confirmation_source","last_supplier_verified","su
   assert.equal(publicJson.includes(token),false,`public direct-checkout payload leaked ${token}`);
 }
 
-const checkout=fs.readFileSync("site/store-checkout-server.js","utf8");
+// The bounded PayPal repair wraps only capture; quote/create/config remain in the
+// delegated legacy module. Static contract checks therefore inspect both halves
+// of the runtime rather than treating the wrapper as the entire checkout source.
+const checkout=[
+  fs.readFileSync("site/store-checkout-server.js","utf8"),
+  fs.readFileSync("site/store-checkout-server-legacy.js","utf8"),
+].join("\n");
 assert.match(checkout,/quote\.availability\?\.paymentEligible === false/);
 assert.match(checkout,/not currently eligible for direct payment/);
 assert.equal(checkout.includes("Backorder replenishment and timing must be confirmed before payment."),false);
