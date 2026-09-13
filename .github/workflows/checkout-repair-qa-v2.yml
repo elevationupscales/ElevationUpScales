@@ -20,4 +20,4 @@ jobs:
       - name: Canonical QA
         run: npm run qa
       - name: Diff integrity
-        run: git diff --check production-deploy...HEAD
+        run: git diff --check origin/production-deploy...HEAD
