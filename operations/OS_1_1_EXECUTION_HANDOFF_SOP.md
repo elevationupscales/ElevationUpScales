@@ -3,57 +3,47 @@
 **Version:** 1.1  
 **Parent:** `operations/MASTER_SOP_V1_1.md`  
 **Owner:** Casey Young  
-**Status:** CANDIDATE UNTIL MERGED TO ACCEPTED `main`
+**Status:** ACTIVE WHEN PRESENT ON ACCEPTED `main`
 
 ## Purpose
 
 Define how OS 1.1 starts, resumes, hands off and recovers work without duplicate execution or dependence on chat memory.
 
-## 1. GIT FIRST
+## GIT FIRST
 
 Git-aware managers and workers begin with:
 
-**RE-RESOLVE CURRENT `main` → READ RELEVANT ACCEPTED CONTROL FILES → COMPARE TO CURRENT LANE STATE → EXECUTE OR RECONCILE.**
+**RE-RESOLVE CURRENT `main` → READ ACCEPTED CONTROL FILES → COMPARE TO CURRENT LANE STATE → EXECUTE OR RECONCILE.**
 
-Do not assume a previously known SHA is still current.
+Never assume an earlier SHA is still current.
 
-## 2. Worker startup
-
-Default startup sequence:
+## Worker startup
 
 **IDENTIFY PROJECT/LANE → IDENTIFY REPORTING MANAGER → READ MASTER SOP → READ MASTER WORK BOARD → READ PROJECT SCOPE → READ PROJECT WORK BOARD/CURRENT_WORKTREE → READ CURRENT DIRECTIVE/GATE → CONFIRM ONE EXECUTION OWNER → RUN OR STANDBY.**
 
 Workers fit into the existing OS before creating new structure.
 
-## 3. RUN
+## RUN
 
 `RUN` means:
 
 **VERIFY → FIX IF POSSIBLE → COMPLETE IF CLEAN → HOLD ONLY BLOCKED ITEM → MOVE ON.**
 
-Continue inside the authorized Scope until:
+Continue inside authorized Scope until the Scope completes, no executable action remains, an owner gate is reached, a required escalation is reached, or the lane is legitimately waiting on an external trigger.
 
-- the Scope is complete;
-- no executable action remains;
-- an owner gate is reached;
-- a required compliance/safety escalation is reached;
-- the lane is legitimately waiting on an external trigger.
+`RUN` never expands authority.
 
-`RUN` never expands authority by itself.
+## Routing
 
-## 4. Execution routing
-
-Operational workers operate their own platforms and lanes. Technical development, RECON and management are not automatic duplicate executors.
-
-Use the current streamlined routing principle:
+Operational workers operate their own platforms and lanes. DEV, RECON and management are not automatic duplicate executors.
 
 **OPERATORS OPERATE → RECON ON CONFLICT/GATE → DEV ON PROVEN CODE DEFECT → MANAGEMENT SEQUENCES → CLOSE WHAT IS DONE.**
 
-A lane routes DEV only when a bounded technical defect remains after operator/platform repair and the current manager accepts the routing.
+Route DEV only after operator/platform repair is exhausted, the remaining defect is bounded and reproducible, impact is identified, and the current manager accepts the routing.
 
-## 5. Handoff packet
+## Handoff packet
 
-A handoff must preserve enough state for immediate recovery. Minimum fields:
+A durable handoff preserves:
 
 - Project / lane;
 - reporting manager;
@@ -61,56 +51,40 @@ A handoff must preserve enough state for immediate recovery. Minimum fields:
 - current state;
 - primary execution owner;
 - last verified action;
-- current blocker/gate, if any;
+- blocker/gate if any;
 - next executable action;
 - verification required;
 - terminal/closure condition;
-- relevant Git paths, issue/PR/order/SKU identifiers where applicable;
+- relevant Git, issue, PR, order or SKU identifiers where applicable;
 - latest receipt/evidence pointer.
 
-Do not make the next worker reconstruct current state from a long transcript.
+The next worker should not need a long transcript to recover current state.
 
-## 6. Interruption and reassignment
+## Interruption and reassignment
 
-When work is interrupted or reassigned:
+**SAFE-SAVE → RECORD LAST VERIFIED STATE → PRESERVE OPEN WORK → IDENTIFY NEW OWNER OR STANDBY → UPDATE CURRENT POINTER → CONTINUE.**
 
-**SAFE-SAVE → RECORD LAST VERIFIED STATE → PRESERVE OPEN WORK → IDENTIFY NEW OWNER OR STANDBY STATE → UPDATE CURRENT POINTER → CONTINUE.**
+An interruption does not erase unfinished work. A replacement worker does not inherit temporary elevated authority merely because the prior worker had it.
 
-An interruption does not erase unfinished work.
+## Unknown external result
 
-A replacement worker must not inherit temporary elevated authority merely because the prior worker had it.
+If an external action times out, crashes or returns uncertain status:
 
-## 7. Unknown external result
-
-If an external action times out, crashes or returns an uncertain result:
-
-- stop repeating the action;
-- mark outcome `UNKNOWN` until verified;
+- stop repeating it;
+- mark result `UNKNOWN` until verified;
 - verify external state before retrying;
-- preserve the task as OPEN if unfinished;
+- preserve unfinished work as OPEN;
 - do not blindly repeat financial, customer-facing, deployment or submission actions.
 
-## 8. Waiting state
+## Waiting state
 
-Waiting work must name its resume trigger.
+Waiting work must name its resume trigger, such as supplier/customer response, carrier correction, owner approval, release result, inventory/price refresh or scheduled follow-up.
 
-Examples:
+Waiting does not reserve the whole lane when independent work remains executable.
 
-- supplier response;
-- customer response;
-- carrier correction;
-- owner approval;
-- release/QA result;
-- inventory/price refresh;
-- scheduled follow-up date.
+## Bounded escalation
 
-A waiting item does not reserve the whole lane if independent work remains executable.
-
-## 9. Bounded escalation
-
-Escalate only the decision or defect that exceeds the worker's authority.
-
-Examples:
+Escalate only what exceeds worker authority:
 
 - owner gate → Owner / MPM;
 - cross-project priority conflict → Operating System Project Manager;
@@ -119,32 +93,17 @@ Examples:
 - proven code defect → MASTER DEVELOPER through current manager;
 - release lineage/integrity conflict → MASTER RECON.
 
-Do not escalate routine executable work merely to obtain confirmation.
+Do not escalate routine executable work merely for confirmation.
 
-## 10. Receipt discipline
+## Receipt discipline
 
-Create or update a durable receipt when an action materially changes business or control state, including:
+Create or update durable evidence when an action materially changes business or control state, including production deployment, customer financial resolution, supplier/channel authorization, accepted gate change, terminal incident result, material external submission or release acceptance.
 
-- production deployment;
-- customer financial obligation resolution;
-- supplier/channel authorization change;
-- accepted manager/owner gate change;
-- terminal incident result;
-- material external submission;
-- release acceptance.
+Routine micro-actions may remain in the owning Worktree/platform history.
 
-Routine micro-actions can remain in the owning Worktree or platform history.
+## Closure and standby
 
-## 11. Closure and standby
-
-When the assigned Scope is complete:
-
-1. verify the closure condition;
-2. update the owning Worktree/Work Board;
-3. roll material state upward when required;
-4. retire stale active pointers;
-5. preserve the receipt/evidence;
-6. mark the worker `STANDBY` or route the next authorized Scope.
+When Scope completes: verify closure, update owning Worktree/Work Board, roll material state upward when needed, retire stale active pointers, preserve evidence, then mark the worker `STANDBY` or route the next authorized Scope.
 
 ## Control statement
 
