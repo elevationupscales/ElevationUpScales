@@ -11,6 +11,8 @@
 **Accepted commercial-retail reset baseline:** `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`  
 **Homepage merge receipt:** `6940c32b5c1863d4b60be85427ccff3060e5d396`  
 **Retail-navigation merge receipt:** `e2c9e3494bd932c2cde8b0d24e807cbb94706009`  
+**Active catalog branch:** `work/web-v2-canonical-catalog-2026-09-13`  
+**Catalog branch state at OS RECON:** branch exists from `be9375b207ae1253902b6fe1786682c6fd6e8ada`; at RECON it was identical to then-current `main` with **0 implementation commits**. Do not recreate or replace this branch.  
 **Git freshness rule:** resolve current `main` once at bounded-task startup and once immediately before merge unless a real race/conflict appears.  
 **Execution-loop guard:** `OS_1_1_EXECUTION_HANDOFF_SOP.md` §2A / §6.
 
@@ -69,7 +71,7 @@ Vendor truth must remain authoritative, but vendor-file discovery is **finite**.
 
 For each bounded catalog task:
 
-1. **CREATE OR RECOVER THE BOUNDED IMPLEMENTATION BRANCH FIRST.**
+1. **RECOVER THE EXISTING IMPLEMENTATION BRANCH `work/web-v2-canonical-catalog-2026-09-13`; DO NOT CREATE ANOTHER CATALOG BRANCH.**
 2. Identify the owning Vendor Project/source pointer(s) needed for the current vendor/SKU set.
 3. Read each selected source state once and extract the commercial fields it actually proves.
 4. Materialize that result into the branch's catalog map/implementation state.
@@ -106,7 +108,7 @@ Payment may proceed only when the exact item/destination has a valid shipping di
 | Worker | State | Task |
 |---|---|---|
 | WEB DEVELOPER | **STANDBY / SUPPORT** | Preserve merged homepage + retail navigation; support bounded Commerce UI needs only. |
-| COMMERCE DEVELOPER | **ACTIVE / CURRENT — CANONICAL VENDOR CATALOG** | Create/recover branch, consume bounded vendor truth once, build verified catalog subset, gate unknown fields/SKUs. |
+| COMMERCE DEVELOPER | **ACTIVE / CURRENT — CANONICAL VENDOR CATALOG** | Recover `work/web-v2-canonical-catalog-2026-09-13`, consume bounded vendor truth once, then make an implementation commit that builds the verified catalog subset and gates unknown fields/SKUs. |
 | RELEASE ENGINEER | **READY / SUPPORT** | Act only at a true release gate; preserve exact SHA/version identity and rollback. |
 | MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Wake only for actual state/lineage conflict, catalog-policy conflict, exact-candidate validation, release integrity, or owner-directed RECON. |
 
@@ -128,11 +130,12 @@ Payment may proceed only when the exact item/destination has a valid shipping di
 
 Normal catalog loop:
 
-**RE-RESOLVE `main` ONCE → READ THIS WORKTREE → CREATE/RECOVER BOUNDED BRANCH → SELECT BOUNDED VENDOR SOURCE SET → READ EACH SOURCE STATE ONCE → MAP VERIFIED TRUTH / MARK UNKNOWN CLOSED → BUILD VERIFIED SUBSET → QA → RE-RESOLVE `main` BEFORE MERGE → RECONCILE → MERGE → UPDATE WORKTREE → REPORT.**
+**RE-RESOLVE `main` ONCE → READ THIS WORKTREE → RECOVER `work/web-v2-canonical-catalog-2026-09-13` → SELECT BOUNDED VENDOR SOURCE SET → READ EACH SOURCE STATE ONCE → MAP VERIFIED TRUTH / MARK UNKNOWN CLOSED → MAKE IMPLEMENTATION COMMIT → QA → RE-RESOLVE `main` BEFORE MERGE → RECONCILE → MERGE → UPDATE WORKTREE → REPORT.**
 
 Hard guards:
 
-- branch creation/recovery precedes exhaustive vendor-file inspection;
+- the catalog branch already exists; do not create a substitute branch;
+- the next durable branch change must be implementation/catalog state, not another recon-only or receipt-only commit;
 - do not reread unchanged Master SOP / Registry / global Board / release architecture;
 - do not repeatedly enumerate vendor directories/files after the bounded source set is chosen;
 - do not reopen unchanged vendor files to search again for absent data;
@@ -144,7 +147,7 @@ Hard guards:
 
 Priority:
 
-**BRANCH → SOURCE ONCE → MAP TRUTH → BUILD → QA → MERGE → WORKTREE UPDATE → RECEIPT.**
+**RECOVER EXISTING BRANCH → SOURCE ONCE → MAP TRUTH → IMPLEMENTATION COMMIT → QA → MERGE → WORKTREE UPDATE → RECEIPT.**
 
 ## 9. Release invariant
 
@@ -158,10 +161,12 @@ Do not create a candidate merely because release machinery is ready.
 
 `RUN` means:
 
-**RESOLVE MAIN ONCE → READ THIS WORKTREE → CREATE/RECOVER CATALOG BRANCH → CONSUME BOUNDED VENDOR SOURCES ONCE → UNKNOWN = UNVERIFIED/NON-ORDERABLE → BUILD VERIFIED PRODUCTS → QA → RESOLVE MAIN BEFORE MERGE → MERGE → UPDATE WORKTREE → CONTINUE.**
+**RESOLVE MAIN ONCE → READ THIS WORKTREE → RECOVER `work/web-v2-canonical-catalog-2026-09-13` → CONSUME BOUNDED VENDOR SOURCES ONCE → UNKNOWN = UNVERIFIED/NON-ORDERABLE → MAKE ACTUAL CATALOG IMPLEMENTATION COMMIT → QA → RESOLVE MAIN BEFORE MERGE → MERGE → UPDATE WORKTREE → CONTINUE.**
 
 Do not stop the catalog for one missing vendor fact. Do not recurse through vendor files trying to eliminate every unknown. Route missing facts to the owning Vendor Project while verified catalog work continues.
 
+Do not report branch creation as catalog implementation. The branch already exists; progress now means changed catalog/product code or data plus QA.
+
 ## Control phrase
 
-**SOURCE ONCE → MAP VERIFIED TRUTH → UNKNOWN = CLOSED → BUILD VERIFIED SUBSET → QA → MERGE. VERIFIED PRODUCTS SELL; UNKNOWN TRUTH FAILS CLOSED.**
+**BRANCH EXISTS → SOURCE ONCE → MAP VERIFIED TRUTH → UNKNOWN = CLOSED → IMPLEMENT → QA → MERGE. VERIFIED PRODUCTS SELL; UNKNOWN TRUTH FAILS CLOSED.**
