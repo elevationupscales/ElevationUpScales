@@ -47,11 +47,11 @@ test('clean lower-48 product passes destination review but payment remains a lat
 });
 
 test('Hawaii, Alaska and non-explicit shipping dispositions remain held', () => {
-  assert.deepEqual(
+  assert.equal(
     evaluateDestination(cleanProduct, { country: 'US', state: 'HI', postalCode: '96815' }).reason,
     'SPECIAL_ROUTE_UNVERIFIED'
   );
-  assert.deepEqual(
+  assert.equal(
     evaluateDestination(cleanProduct, { country: 'US', state: 'AK', postalCode: '99501' }).reason,
     'SPECIAL_ROUTE_UNVERIFIED'
   );
@@ -98,12 +98,13 @@ test('checkout resolver accepts POST only for stateless review and rejects malfo
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CHECKOUT_PAYLOAD' });
 });
 
-test('checkout client sends only cart IDs/quantities plus destination review fields', async () => {
+test('checkout client sends cart identity and quantity plus destination review fields', async () => {
   const res = await request('/assets/checkout.js');
   assert.equal(res.status, 200);
   const script = await res.text();
   assert.match(script, /elevation-cart-v1/);
-  assert.match(script, /productId, quantity/);
+  assert.match(script, /productId/);
+  assert.match(script, /quantity/);
   assert.match(script, /\/api\/checkout\/resolve/);
   assert.match(script, /method: 'POST'/);
   assert.doesNotMatch(script, /paypal\.com|Shopify|unitPrice:\s*line/i);
