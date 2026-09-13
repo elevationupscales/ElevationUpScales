@@ -38,34 +38,22 @@ jobs:
 
           index_path = Path('apps/web-v2/src/index.js')
           text = index_path.read_text()
-          text = text.replace("import { SOK_SK12V100PC_PNG_BASE64, SOK_SK48V100N_PNG_BASE64 } from './sok-product-assets.js';\n", '')
-          helper = """const SOK_PRODUCT_IMAGE_ASSETS = new Map([
-            ['/assets/brands/sok/sk12v100pc/official-clean.png', SOK_SK12V100PC_PNG_BASE64],
-            ['/assets/brands/sok/sk48v100n/official-clean.png', SOK_SK48V100N_PNG_BASE64]
-          ]);
+          import_line = "import { SOK_SK12V100PC_PNG_BASE64, SOK_SK48V100N_PNG_BASE64 } from './sok-product-assets.js';\n"
+          if import_line not in text:
+              raise SystemExit('index.js: localized base64 import missing')
+          text = text.replace(import_line, '', 1)
 
-          function decodeBase64(encoded) {
-            const raw = atob(encoded);
-            const bytes = new Uint8Array(raw.length);
-            for (let index = 0; index < raw.length; index += 1) bytes[index] = raw.charCodeAt(index);
-            return bytes;
-          }
+          helper_start = text.find('const SOK_PRODUCT_IMAGE_ASSETS = new Map([')
+          helper_end = text.find('function response(body, init = {}) {', helper_start)
+          if helper_start < 0 or helper_end < 0:
+              raise SystemExit('index.js: embedded product-image helper bounds missing')
+          text = text[:helper_start] + text[helper_end:]
 
-          """
-          if helper not in text:
-              raise SystemExit('index.js: expected base64 helper block missing')
-          text = text.replace(helper, '')
-          route = """    const sokProductImage = SOK_PRODUCT_IMAGE_ASSETS.get(url.pathname);
-            if (sokProductImage) {
-              return response(decodeBase64(sokProductImage), {
-                headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=31536000, immutable' }
-              });
-            }
-
-          """
-          if route not in text:
-              raise SystemExit('index.js: expected embedded image route block missing')
-          text = text.replace(route, '')
+          route_start = text.find("    const sokProductImage = SOK_PRODUCT_IMAGE_ASSETS.get(url.pathname);")
+          route_end = text.find("    if (url.pathname === '/assets/app.css') {", route_start)
+          if route_start < 0 or route_end < 0:
+              raise SystemExit('index.js: embedded product-image route bounds missing')
+          text = text[:route_start] + text[route_end:]
           index_path.write_text(text)
 
           Path('apps/web-v2/wrangler.jsonc').write_text('''{
@@ -92,7 +80,7 @@ jobs:
               ['/assets/brands/sok/sk48v100n/official-clean.png', '../public/assets/brands/sok/sk48v100n/official-clean.png', 'SK48V100N']
             ];
             const { readFile } = await import('node:fs/promises');
-            for (const [publicPath, localPath] of expected) {
+            for (const [, localPath] of expected) {
               const bytes = await readFile(new URL(localPath, import.meta.url));
               assert.ok(bytes.byteLength > 250000, `${localPath} should contain the localized official PNG bytes`);
               assert.equal(bytes.subarray(1, 4).toString('ascii'), 'PNG', localPath);
