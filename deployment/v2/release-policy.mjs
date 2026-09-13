@@ -22,10 +22,9 @@ export function parseUploadOutput(text, sha) {
   assertFullSha(sha);
   const body = String(text || '');
   const version = body.match(UUID_RE)?.[0];
-  const previewUrl = body.match(PREVIEW_URL_RE)?.[0];
+  const previewUrl = body.match(PREVIEW_URL_RE)?.[0] || null;
   if (!version) throw new Error('Wrangler upload output did not expose a Cloudflare Version ID.');
-  if (!previewUrl) throw new Error('Wrangler upload output did not expose a version preview URL.');
-  if (!previewUrl.includes(`-${WORKER_NAME}.`)) {
+  if (previewUrl && !previewUrl.includes(`-${WORKER_NAME}.`)) {
     throw new Error(`Preview URL is not for ${WORKER_NAME}.`);
   }
   return { versionId: version, previewUrl };
@@ -46,10 +45,14 @@ export function assertVersionRecord(value, sha, versionId) {
   }
 }
 
+export function assertDeploymentContainsVersion(value, versionId) {
+  if (!deepContains(value, versionId)) throw new Error(`Deployment record does not contain Version ID ${versionId}.`);
+}
+
 export function assertDeploymentRecord(value, versionId) {
-  if (!deepContains(value, versionId)) throw new Error('Deployment record does not contain the promoted Version ID.');
+  assertDeploymentContainsVersion(value, versionId);
   const serialized = JSON.stringify(value);
-  if (!/(100(?:\.0+)?)\s*%?/.test(serialized)) {
+  if (!/(?:percentage|percent)[^0-9]{0,8}100(?:\.0+)?|100(?:\.0+)?\s*%/i.test(serialized)) {
     throw new Error('Deployment record does not show a 100% production promotion.');
   }
 }
@@ -60,9 +63,9 @@ export function draftReceipt({ sha, versionId, previewUrl }) {
     component: 'web-v2',
     git_sha: sha,
     cloudflare_version_id: versionId,
-    candidate_preview_url: previewUrl,
+    preview_diagnostic_url: previewUrl,
     qa_result: 'PASS',
-    opera_acceptance: 'PENDING',
+    production_parity_smoke: 'PENDING',
     owner_approval: 'PENDING',
     production_deployment_id: null,
     production_version_id: null,
@@ -86,13 +89,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const input = fs.readFileSync(arg('--input'), 'utf8');
       const parsed = parseUploadOutput(input, sha);
       fs.writeFileSync(arg('--receipt'), JSON.stringify(draftReceipt({ sha, ...parsed }), null, 2) + '\n');
-      process.stdout.write(`version_id=${parsed.versionId}\npreview_url=${parsed.previewUrl}\n`);
+      process.stdout.write(`version_id=${parsed.versionId}\npreview_url=${parsed.previewUrl || ''}\n`);
     } else if (command === 'assert-version') {
       const body = JSON.parse(fs.readFileSync(arg('--input'), 'utf8'));
       assertVersionRecord(body, arg('--sha'), arg('--version-id'));
     } else if (command === 'assert-deployment') {
       const body = JSON.parse(fs.readFileSync(arg('--input'), 'utf8'));
       assertDeploymentRecord(body, arg('--version-id'));
+    } else if (command === 'assert-deployment-contains') {
+      const body = JSON.parse(fs.readFileSync(arg('--input'), 'utf8'));
+      assertDeploymentContainsVersion(body, arg('--version-id'));
     } else {
       throw new Error(`Unknown release-policy command: ${command || '(missing)'}`);
     }
