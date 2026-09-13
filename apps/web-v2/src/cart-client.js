@@ -94,9 +94,13 @@ export const cartClientScript = `
 
     const summary = document.createElement('section');
     summary.className = 'cart-summary';
-    summary.innerHTML = '<div><span>Items</span><strong data-count></strong></div><div><span>Current subtotal</span><strong data-subtotal></strong></div><p>Availability, price, shipping and destination eligibility are checked again before payment.</p><button type="button" disabled>Continue to checkout</button>';
+    summary.innerHTML = '<div><span>Items</span><strong data-count></strong></div><div><span>Current subtotal</span><strong data-subtotal></strong></div><p>Availability, price, shipping and destination eligibility are checked again in checkout.</p><div data-checkout-action></div>';
     summary.querySelector('[data-count]').textContent = String(payload.itemCount || 0);
     summary.querySelector('[data-subtotal]').textContent = money(payload.subtotal);
+    const action = summary.querySelector('[data-checkout-action]');
+    action.innerHTML = payload.checkoutReady
+      ? '<a class="button button-primary" href="/checkout">Continue to checkout</a>'
+      : '<button type="button" disabled>Continue to checkout</button>';
     root.append(summary);
 
     writeCart(payload.lines.map(({ productId, quantity }) => ({ productId, quantity })));
