@@ -9,6 +9,7 @@ import { checkoutStyles } from './checkout-styles.js';
 import { resolveCheckout } from './checkout.js';
 import { createOrderFromCheckout, captureOrderPayment } from './order-service.js';
 import { catalogStyles } from './catalog-styles.js';
+import { homeFidelityStyles } from './home-fidelity-styles.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
 import { renderCatalogPage } from './catalog-pages.js';
@@ -21,7 +22,7 @@ const baseHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  'Content-Security-Policy': "default-src 'self'; img-src 'self' https://elevationupscales.com data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+  'Content-Security-Policy': "default-src 'self'; img-src 'self' https://elevationupscales.com https://image.doba.com https://img.vevorstatic.com https://image.vevor.com https://utedusjer.no https://s.alicdn.com https://i5.walmartimages.com https://mobileimages.lowes.com data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 };
 
 function response(body, init = {}) {
@@ -128,7 +129,7 @@ export default {
     }
 
     if (url.pathname === '/assets/app.css') {
-      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}\n${homeFidelityStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
     if (url.pathname === '/assets/app.js') {

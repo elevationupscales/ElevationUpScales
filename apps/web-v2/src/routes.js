@@ -28,27 +28,47 @@ export const PUBLIC_ROUTES = new Map([
 ]);
 
 export const PRIMARY_NAV = [
-  { label: 'Shop', href: '/store' },
-  { label: 'Vendors', children: [
-    { label: 'SOK Energy', href: '/shop/sok', description: 'Authorized battery systems' },
-    { label: 'Renogy', href: '/shop/renogy', description: 'Solar and off-grid power' },
-    { label: 'VEVOR', href: '/shop/vevor', description: 'Tools, equipment and outdoor products' },
-    { label: 'Kingboss', href: '/shop/kingboss', description: 'Lithium battery supply' }
+  { label: 'Power', children: [
+    { label: 'Lithium Batteries', href: '/store?department=lithium-batteries', description: '12V, 24V and 48V power' },
+    { label: 'SOK Battery Systems', href: '/shop/sok', description: 'Authorized SOK Energy Dealer' },
+    { label: 'Solar & Off-Grid', href: '/solar-project', description: 'Build around real power needs' },
+    { label: 'Hawaii Power', href: '/hawaii-lithium-batteries', description: 'Power options and freight review' },
+    { label: 'Alaska Logistics', href: '/shipping-logistics-services#alaska', description: 'Product and destination shipping review' }
   ]},
-  { label: 'Freight & Hawaii', children: [
-    { label: 'Shipping & Logistics', href: '/shipping-logistics-services', description: 'Destination and freight review' },
-    { label: 'Hawaii Lithium', href: '/hawaii-lithium-batteries', description: 'Lithium purchase and freight paths' }
+  { label: 'Shop', children: [
+    { label: 'Shop Lithium', href: '/store?department=lithium-batteries', description: 'Batteries and power storage' },
+    { label: 'Shop SOK', href: '/shop/sok', description: 'Battery systems and accessories' },
+    { label: 'RV & Outdoor', href: '/store?department=rv-outdoor', description: 'Travel, camping and RV gear' },
+    { label: 'Elevation Gear', href: '/store', description: 'Current Elevation catalog' }
   ]},
-  { label: 'Start a Project', href: '/start-a-project' }
+  { label: 'Projects', children: [
+    { label: 'Start a Project', href: '/start-a-project', description: 'Installation, repair or project support' },
+    { label: 'Solar System Builder', href: '/solar-project', description: 'Plan your power system' }
+  ]},
+  { label: 'Services', children: [
+    { label: 'Freight & Logistics', href: '/shipping-logistics-services', description: 'Hawaii, Alaska and destination support' },
+    { label: 'Home & RV Services', href: '/what-we-do#home-rv-services', description: 'Repair, restoration and upgrades' },
+    { label: 'Power & Solar Services', href: '/solar-services', description: 'Planning and troubleshooting' }
+  ]},
+  { label: 'Company', children: [
+    { label: 'About Elevation', href: '/what-we-do', description: 'Products, logistics and projects' },
+    { label: 'Work With Us', href: '/work-with-us', description: 'Creators, technicians and growth' },
+    { label: 'Marketplace', href: '/marketplace', description: 'Local listings route preserved through compatibility handling' }
+  ]}
 ];
 
 export const FOOTER_NAV = [
-  { label: 'Shop', href: '/store' },
-  { label: 'Shipping & Logistics', href: '/shipping-logistics-services' },
-  { label: 'Hawaii Lithium', href: '/hawaii-lithium-batteries' },
-  { label: 'Start a Project', href: '/start-a-project' },
+  { label: 'Lithium Batteries', href: '/store?department=lithium-batteries' },
+  { label: 'SOK Battery Systems', href: '/shop/sok' },
+  { label: 'RV & Outdoor', href: '/store?department=rv-outdoor' },
+  { label: 'Freight & Logistics', href: '/shipping-logistics-services' },
+  { label: 'Marketplace', href: '/marketplace' },
+  { label: 'What We Do', href: '/what-we-do' },
+  { label: 'Work With Us', href: '/work-with-us' },
   { label: 'Privacy', href: '/privacy' },
-  { label: 'Terms', href: '/terms' }
+  { label: 'Terms & Business Disclosures', href: '/terms' },
+  { label: 'Report an Issue', href: '/report-an-issue' },
+  { label: 'Start a Project', href: '/start-a-project' }
 ];
 
 const EXACT_REDIRECTS = new Map([
