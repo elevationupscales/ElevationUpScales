@@ -33,13 +33,19 @@ test('homepage reconstructs the approved retail-first customer presentation', as
   assert.match(body, /Featured SOK Systems/);
   assert.match(body, /Battery Freight for Hawaii &amp; Alaska/);
   assert.match(body, /href="\/store"/);
+  assert.match(body, />Vendors</);
+  assert.match(body, /Freight &amp; Hawaii/);
   assert.match(body, /href="\/shop\/sok"/);
+  assert.match(body, /href="\/shop\/renogy"/);
+  assert.match(body, /href="\/shop\/vevor"/);
+  assert.match(body, /href="\/shop\/kingboss"/);
   assert.match(body, /href="\/start-a-project"/);
   assert.match(body, /href="\/shipping-logistics-services"/);
   assert.match(body, /href="\/hawaii-lithium-batteries"/);
-  assert.match(body, /href="\/work-with-us"/);
   assert.match(body, /href="\/privacy"/);
   assert.match(body, /href="\/terms"/);
+  assert.doesNotMatch(body, /href="\/marketplace(?:\/|\"|\?)/);
+  assert.doesNotMatch(body, /href="\/work-with-us(?:\/|\"|\?)/);
   assert.match(body, /rel="canonical" href="https:\/\/elevationupscales\.com\/"/);
   assert.match(body, /property="og:title"/);
   assert.match(body, /storefront-tropical-logistics-v3\.webp/);
@@ -109,6 +115,7 @@ test('owned CSS and JS assets are served locally', async () => {
   const cssBody = await css.text();
   assert.match(cssBody, /@media \(max-width: 680px\)/);
   assert.match(cssBody, /storefront-tropical-logistics-v3\.webp/);
+  assert.match(cssBody, /\.nav-dropdown/);
 
   const js = await request('/assets/app.js');
   assert.equal(js.status, 200);
@@ -119,7 +126,12 @@ test('owned CSS and JS assets are served locally', async () => {
 test('registered-but-unbuilt routes hand off to the current live customer route', async () => {
   const cases = [
     ['/store', 'https://elevationupscales.com/store'],
-    ['/solar-services', 'https://elevationupscales.com/solar-services'],
+    ['/shop/sok', 'https://elevationupscales.com/shop/sok'],
+    ['/shop/renogy', 'https://elevationupscales.com/shop/renogy'],
+    ['/shop/vevor', 'https://elevationupscales.com/shop/vevor'],
+    ['/shop/kingboss', 'https://elevationupscales.com/shop/kingboss'],
+    ['/shipping-logistics-services', 'https://elevationupscales.com/shipping-logistics-services'],
+    ['/hawaii-lithium-batteries', 'https://elevationupscales.com/hawaii-lithium-batteries'],
     ['/privacy', 'https://elevationupscales.com/privacy'],
     ['/product?id=test', 'https://elevationupscales.com/product?id=test'],
     ['/start-a-project', 'https://elevationupscales.com/start-a-project'],
