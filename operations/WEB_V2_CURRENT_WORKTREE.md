@@ -3,108 +3,113 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **System:** Elevation OS 1.1  
-**Status:** **ACTIVE — HAWAII / FREIGHT + PAYMENT READINESS / COMMERCE PHASE**  
+**Status:** **PREVIEW READY — RELEASE ENGINEER ACTIVE / EXACT-VERSION PREVIEW**  
 **Reports To:** OS 1.1 Project Manager / MPM  
 **Legacy production:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — LEGACY ONLY / rollback reference  
 **Canonical catalog + product-detail merge receipt:** `72694ae9ba5b9952c0460b9f90b380cffde4ff23`  
 **Cart merge receipt:** `13b4411fc265a1f7b149ad9207059221fa53db32`  
 **Checkout merge receipt:** `f5d3ac7cc4b37e8211a3bb460a8507380b75803d`  
 **Order + fulfillment handoff merge receipt:** `cd8e21ef4a89c261a4580b683da54be8a896787a`  
-**Order implementation branch:** `work/web-v2-order-2026-09-13` — **MERGED / CLOSED**
+**Preview-readiness merge receipt:** `84e9a2b8986ddeebd9b13a087c0e520c9dd9599c`  
+**Preview-readiness branch:** `work/web-v2-preview-readiness-2026-09-13` — **MERGED / CLOSED**
 
 ## 1. Mission
 
-Build the smallest complete direct-commerce path:
+Build and verify the customer experience in this order:
 
 **EXPLAIN → SHOP → PRODUCT → CART → CHECKOUT → PAYMENT / ORDER → FULFILLMENT.**
 
-Homepage, retail navigation, canonical catalog, product detail, cart, checkout review, durable-order orchestration and fulfillment routing are merged. Payment activation remains fail-closed until every authoritative total and runtime binding is proven.
+Homepage, retail navigation, canonical catalog, product detail, cart, checkout review, durable-order orchestration and fulfillment routing are merged.
 
-## 2. Canonical authority
+The merged Web V2 application is now **safe to render in an exact-version preview** without falsely activating payment or orderability.
 
-Canonical product truth remains authoritative. Missing or `UNVERIFIED` commercial facts keep only the affected product/order non-orderable. Client/browser totals never create sales authority. Do not reopen unchanged vendor sources merely to eliminate a hold.
+## 2. Preview-readiness state — COMPLETE / MERGED
 
-## 3. Order + fulfillment handoff — MERGED / ACTIVATION HELD
+Preview-readiness controls now proven in the merged application:
 
-Merged controls:
+- normal storefront rendering does not require `MARKETPLACE_DB`;
+- homepage, store/vendor pages, product detail, cart and checkout render with commerce bindings absent;
+- current held/non-orderable products remain held and non-orderable;
+- no shipping, freight, tax, orderability or `amountDue` value was invented;
+- no live PayPal activation was added;
+- no Shopify checkout fallback was added;
+- no raw card/CVV handling exists;
+- `/__version` remains the exact Worker-version proof surface;
+- preview robots remain disallowed from indexing;
+- existing responsive desktop/tablet/mobile rules remain active;
+- featured SOK links remain inside the Web V2 preview via `/shop/sok` rather than escaping to legacy SOK product routes;
+- the approved SK12V100PC source was upgraded from the compressed homepage derivative to the clean 2160×2160 exact-SKU image;
+- SK48V100N retains the safe clean 1000×265 exact-SKU crop with corrected intrinsic dimensions; the 2000×2000 promotional image was rejected because it contains promotional pricing that is not authoritative for this preview.
 
-- final order preparation revalidates canonical product, orderability and destination state again;
-- checkout collects the customer contact and full U.S. shipping record required for a durable order;
-- exact vendor, Elevation SKU, supplier SKU and fulfillment source are preserved per line;
-- local order storage is created before provider-order creation when `MARKETPLACE_DB` is available;
-- PayPal Orders v2 create/capture use deterministic request IDs and an explicit idempotency key;
-- live PayPal remains locked unless `STORE_LIVE_CHECKOUT_ENABLED=true` in addition to live credentials;
-- capture reloads the durable order, revalidates canonical truth and compares stored authoritative totals before capture;
-- an already-captured order returns idempotently rather than calling the provider again;
-- order and capture APIs are same-origin POST only;
-- no raw card/CVV handling and no Shopify checkout fallback were introduced.
+QA receipt for preview-readiness implementation head `116823ac28f581538945a1463a7bcd4f658d19a9`:
 
-### Activation holds — CONTROLLED
+- **Web V2 QA #93 — PASS**;
+- **Pull Request QA #137 — PASS**, including canonical QA and tracked-repository credential scan.
 
-The merged runtime intentionally does **not** create a PayPal order under current production truth because:
+## 3. Commercial activation holds — STILL CONTROLLED
+
+These are payment/commerce activation gates. They **do not block exact preview rendering**:
 
 - Web V2 has no committed, verified `MARKETPLACE_DB` D1 binding identity;
-- authoritative shipping amount is not yet available for the general direct-order path;
+- authoritative shipping/freight amount is not yet available for the general direct-order path;
 - authoritative sales-tax amount/disposition is not yet approved/configured for the Web V2 order total;
-- therefore final `amountDue` remains unverified;
-- the current merged canonical catalog still has no orderable SKU.
+- final `amountDue` therefore remains unverified;
+- the current merged canonical catalog still has no verified orderable SKU;
+- PayPal sandbox/live durable-order proof remains pending the required charge/runtime gates.
 
-**DO NOT invent a D1 database ID, shipping amount, tax amount, orderability state or live-payment readiness to clear these holds.**
+**DO NOT invent a D1 database ID, shipping amount, freight amount, tax amount, orderability state, `amountDue`, Hawaii eligibility or payment readiness to clear these holds.**
 
 ## 4. Worker routing
 
 | Worker | State | Task |
 |---|---|---|
-| WEB DEVELOPER | **STANDBY / SUPPORT** | Preserve the merged customer-facing commerce path. |
-| COMMERCE DEVELOPER | **ACTIVE / CURRENT — HAWAII / FREIGHT + PAYMENT READINESS** | Connect authoritative shipping/freight and final-charge readiness to the merged order handoff without weakening fail-closed controls. |
-| RELEASE ENGINEER | **READY / SUPPORT** | Supply/verify exact runtime bindings and perform sandbox/release work only at a true gate; do not invent binding IDs. |
-| MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Wake only for real state, policy, lineage, charge-authority or release conflicts. |
+| WEB DEVELOPER | **STANDBY / PREVIEW BUILD COMPLETE** | No further mutation unless exact preview exposes a real rendering defect. |
+| COMMERCE DEVELOPER | **STANDBY / ACTIVATION WORK PRESERVED** | Resume authoritative freight/payment readiness after preview review; do not block preview. |
+| RELEASE ENGINEER | **ACTIVE / CURRENT — EXACT-VERSION PREVIEW** | Take current merged main, create one exact candidate, expose immutable preview, prove `/__version`, return preview URL + Git SHA + Cloudflare Version ID. Stop before production promotion. |
+| MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Wake only for a real lineage, release, charge-authority or preview integrity conflict. |
 
-## 5. Build sequence
+## 5. Release Engineer handoff
 
-1. Homepage — **COMPLETE / MERGED**.
-2. Retail navigation — **COMPLETE / MERGED**.
-3. Canonical vendor catalog — **COMPLETE / MERGED**.
-4. Product detail — **COMPLETE / MERGED**.
-5. Cart — **COMPLETE / MERGED**.
-6. Checkout review — **COMPLETE / MERGED**.
-7. Order + fulfillment handoff — **COMPLETE / MERGED; PAYMENT ACTIVATION HELD**.
-8. Hawaii/freight + authoritative charge readiness — **P0 ACTIVE / CURRENT**.
-9. PayPal sandbox + durable-order proof — **QUEUED / GATED BY STEP 8 + RUNTIME BINDING**.
-10. Production-parity smoke — **TRUE RELEASE GATE ONLY**.
-11. Same-version cutover/promotion — **OWNER ACCEPTANCE REQUIRED**.
-12. First real order — **FINAL REVENUE PROOF**.
+Target sequence:
 
-## 6. Next implementation loop — HAWAII / FREIGHT + PAYMENT READINESS
+**CURRENT MERGED MAIN → EXACT CANDIDATE → IMMUTABLE / EXACT-VERSION PREVIEW → `/__version` PROOF → OWNER VISUAL ACCEPTANCE.**
 
-Required controls:
-
-- consume the merged order handoff and canonical product identity; do not rebuild checkout/order architecture;
-- connect only authoritative shipping/freight amounts to the final order total;
-- Hawaii, Alaska, freight and quote-required routes remain held until the exact product/destination route is verified;
-- add/consume explicit sales-tax authority before `amountDue` can become payment-ready;
-- verify the exact existing `MARKETPLACE_DB` binding identity through the proper runtime/release source before activation; never guess a D1 ID;
-- preserve durable-order-before-provider creation and idempotent capture;
-- preserve exact supplier/SKU/fulfillment identity;
-- no Shopify checkout fallback and no raw card data;
-- do not reopen unchanged vendor sources unless product truth changed or a concrete contradiction exists.
-
-Normal loop:
-
-**RESOLVE `main` ONCE → READ THIS WORKTREE → ONE BOUNDED FREIGHT/PAYMENT-READINESS BRANCH → CONSUME MERGED ORDER HANDOFF → AUTHORITATIVE SHIPPING/FREIGHT + TAX/TOTAL GATES → QA → RECONCILE → MERGE → UPDATE WORKTREE → CONTINUE.**
-
-## 7. Release invariant
+Required release invariant remains:
 
 **ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION PROMOTED/CUT OVER → LIVE VERIFY.**
 
-Do not create a release candidate merely because the order handoff merged. Sandbox/payment activation requires the charge and runtime-binding gates above.
+For this handoff, stop after the immutable preview and version proof.
 
-## 8. RUN
+**DO NOT promote/cut over production automatically. OWNER ACCEPTANCE IS REQUIRED.**
 
-`RUN` now means:
+The existing `.github/workflows/web-v2-release.yml` is the candidate-upload path and already binds an exact 40-character Git SHA to the uploaded Cloudflare Worker Version ID. Do not replace that release architecture.
 
-**RESOLVE MAIN ONCE → READ THIS WORKTREE → BOUNDED FREIGHT/PAYMENT-READINESS BRANCH → PRESERVE CANONICAL ORDER HANDOFF → VERIFY AUTHORITATIVE SHIPPING/FREIGHT + TAX/TOTAL + RUNTIME BINDING GATES → QA → RECONCILE → MERGE → UPDATE WORKTREE → CONTINUE.**
+## 6. Visual acceptance target
+
+The preview must let Casey inspect:
+
+- homepage and responsive hero;
+- navigation;
+- store/vendor pages;
+- product detail and held-state presentation;
+- cart UX;
+- checkout UX;
+- desktop/mobile presentation;
+- trust copy;
+- Hawaii/freight presentation;
+- current customer-facing copy;
+- exact version identity.
+
+If a transaction-control dependency is unavailable, fail closed for the transaction while preserving the customer-facing preview.
+
+## 7. Next RUN meaning
+
+Until owner visual acceptance is returned, `RUN` for this Worktree means:
+
+**RELEASE ENGINEER → USE CURRENT MERGED MAIN → CREATE EXACT CANDIDATE → IMMUTABLE PREVIEW → PROVE `/__version` → RETURN PREVIEW RECEIPT → STOP BEFORE PRODUCTION.**
+
+After visual acceptance, commerce activation work may resume under a new bounded run without reopening completed storefront phases.
 
 ## Control phrase
 
-**CATALOG MERGED → PRODUCT DETAIL MERGED → CART MERGED → CHECKOUT MERGED → ORDER/FULFILLMENT HANDOFF MERGED → FREIGHT + PAYMENT READINESS ACTIVE. CLIENT STATE IS NOT AUTHORITY; UNKNOWN TRUTH FAILS CLOSED.**
+**STORE EXPERIENCE MERGED → PREVIEW READINESS MERGED → TRANSACTION HOLDS FAIL CLOSED → RELEASE ENGINEER ACTIVE FOR EXACT PREVIEW → OWNER VISUAL ACCEPTANCE BEFORE PRODUCTION.**
