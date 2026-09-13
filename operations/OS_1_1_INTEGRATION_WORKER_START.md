@@ -8,26 +8,30 @@
 
 ## MISSION
 
-Build Elevation OS 1.1 from the accepted OS 1.0 foundation. Do not restart OS 1.0 and do not create another management layer.
+Operate and extend Elevation OS 1.1 from the accepted OS 1.0 foundation. Do not restart OS 1.0, do not rebuild completed 1.1 release work, and do not create another management layer.
 
-OS 1.1 is an integration and streamlining release. Preserve accepted 1.0 controls while making current state, project scope, workboards, worktrees, and evidence easier for every manager and worker to interpret consistently.
+OS 1.1 is the integration and streamlining layer for current state, project scope, workboards, worktrees, and evidence.
 
 ## STARTUP
 
 Always re-resolve current `main`, then read:
 
 1. `operations/MASTER_SOP_V1_0.md`
-2. `operations/MASTER_OS_GLOSSARY_V1_0.md`
-3. `operations/MASTER_WORKER_REGISTRY_V1_0.md`
-4. `operations/CURRENT_WORK_BOARD.md`
-5. current manager/workstream directives relevant to the assigned lane
-6. `operations/MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md` when present/current
+2. `operations/MASTER_SOP_V1_1.md`
+3. `operations/OS_1_1_INTEGRATION_SPEC.md`
+4. `operations/OS_1_1_ACCEPTANCE_RECEIPT_2026-09-12.md`
+5. `operations/MASTER_OS_GLOSSARY_V1_0.md`
+6. `operations/MASTER_WORKER_REGISTRY_V1_0.md`
+7. `operations/MASTER_WORKER_REGISTRY_V1_1_ADDENDUM.md`
+8. `operations/CURRENT_WORK_BOARD.md`
+9. current manager/workstream directives relevant to the assigned lane
+10. `operations/MPM5_STREAMLINED_EXECUTION_MODE_2026-09-12.md` when present/current
 
 Then reconcile before changing anything.
 
 ## NON-REGRESSION RULES
 
-Preserve these OS 1.0 controls:
+Preserve these controls:
 
 - Casey remains final owner authority.
 - Management authority and factual evidence are separate.
@@ -83,18 +87,25 @@ When Casey or the reporting manager says `RUN`:
 
 Continue inside the authorized lane until no executable task remains, an owner gate is reached, a compliance/safety constraint requires escalation, or the scope is complete.
 
-## FIRST PRODUCTION ASSIGNMENT
+## CURRENT HANDOFF — RELEASE BUILD IS TERMINAL
 
-1. Reconcile OS 1.0 against current GitHub `main`.
-2. Create the OS 1.1 integration spec without weakening 1.0.
-3. Create a migration matrix for active management/workstream artifacts.
-4. Normalize Scope + Worktree + Work Board relationships.
-5. Identify duplicate/stale task pointers and protect terminal states.
-6. Update worker/manager handoff guidance only where required.
-7. Verify all changes against the source `main` SHA.
-8. Produce an OS 1.1 release receipt.
-9. Do not call 1.1 production/accepted until merged and verified on `main`.
+The initial OS 1.1 release build is complete and must not be recreated if the acceptance receipt is present on current `main`.
+
+Do not repeat the completed tasks of creating the 1.1 integration spec, migration matrix, registry addendum, master entry point, or release receipt unless a current authorized change specifically requires an edit.
+
+### Next production scope
+
+1. Re-resolve current `main` and confirm the accepted 1.1 control set.
+2. Read `CURRENT_WORK_BOARD.md` and identify active manager/project lanes.
+3. Reconcile each active lane against the 1.1 state-precedence model.
+4. Confirm one execution owner per work item.
+5. Add or normalize a bounded Scope where it improves recoverability.
+6. Normalize each current Worktree to executable next actions only.
+7. Identify stale/duplicate pointers and preserve terminal states.
+8. Keep project Work Boards subordinate to the master Work Board.
+9. Record state-changing results in the appropriate GitHub control artifact.
+10. Continue the next unblocked lane; do not stop company work because one lane is waiting.
 
 ## CONTROL STATEMENT
 
-**Build 1.1 from 1.0. Integrate and streamline; do not restart completed architecture. GitHub is the recoverable control surface, not chat memory.**
+**OS 1.0 is the foundation. OS 1.1 is accepted integration control. Migrate live work forward; do not rebuild terminal release work. GitHub is the recoverable control surface, not chat memory.**
