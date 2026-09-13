@@ -1,7 +1,7 @@
 {
   "name": "@elevation/web-v2",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "description": "Elevation Web V2 public customer-experience Worker shell and exact-version release tooling.",
   "devDependencies": {
