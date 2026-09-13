@@ -47,7 +47,7 @@ test('homepage reproduces the owner-approved production presentation and visible
     'SHOP POWER &amp; ENERGY',
     '12V lithium energy for RV and mobile systems.',
     'Shop Batteries',
-    '12V, 24V &amp; 48V systems.',
+    '12V, 24V & 48V systems.',
     'Build your energy independence.',
     'Battery freight matched to product and destination.',
     'Learn More',
