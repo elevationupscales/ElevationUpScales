@@ -69,26 +69,30 @@ P3 must not delay P0/P1.
 - Shopify, eBay, TikTok and direct Web V2 commerce remain distinct channel surfaces.
 - `production-deploy` is Legacy-only.
 - Web V2 releases use exact-version production-parity smoke before same-version cutover.
-- MASTER RECON wakes only for actual state, lineage, policy, supplier-truth, charge-authority, or release-integrity conflict.
+- MASTER RECON wakes only for actual state, lineage, policy, supplier-truth, charge-authority, preview-integrity, or release-integrity conflict.
 
 ## Current company oversight pickup
 
-- Web V2 preview-readiness implementation is complete / merged at `84e9a2b8986ddeebd9b13a087c0e520c9dd9599c` through PR #175.
-- Web V2 Worktree has advanced through PR #176 to **PREVIEW READY — RELEASE ENGINEER ACTIVE / EXACT-VERSION PREVIEW**.
-- Release Engineer now owns the next Web V2 action: current merged main → exact candidate → immutable exact-version preview → `/__version` proof → return preview receipt → stop before production promotion.
-- Freight/payment-readiness holds remain preserved as transaction-activation gates only; they do not block safe preview rendering.
-- Payment activation remains fail-closed until the exact `MARKETPLACE_DB` binding, authoritative shipping amount, authoritative sales-tax disposition/amount, verified `amountDue`, and at least one orderable canonical SKU are proven.
-- Shopify payment confidence is green; current conversion focus is image quality, shipping truth, policy trust and near-CTA confidence.
-- Shopify shipping profile mutation remains held until supplier-specific shipping truth is proven.
-- Blurry/weak storefront imagery is a P0 conversion-trust defect and should be corrected before optional analytics/domain polish.
+- Casey reviewed the exact Web V2 candidate built from `6dff0a7e65f3967d60040977c3c2693e430e56b4` / Cloudflare Version ID `e60f4bd0-285b-4b08-9b55-1db013be383e` and did **not** accept it as the final visual baseline.
+- Owner visual requirements are now canonical in `WEB_V2_OWNER_VISUAL_FIDELITY_REQUIREMENTS_2026-09-13.md`.
+- The current production homepage controls visible homepage presentation until Casey accepts a deliberate change.
+- Web V2 DEV is now the current execution owner for the bounded homepage fidelity repair on `work/web-v2-homepage-fidelity-repair-2026-09-13`.
+- OS RECON observed real repair work on that branch; latest observed head during recon was `aeec98f37766a8b6db3814c1111acc29b12ec279`.
+- The repair branch must reconcile current `main` so it consumes the owner visual-control file before final QA/merge.
+- Release Engineer is **standby** until the owner-fidelity repair merges; do not generate another candidate from the rejected visual baseline.
+- After DEV merge, Release Engineer creates one new exact candidate from the corrected SHA and returns immutable preview + `/__version` proof for Casey review.
+- Freight/payment-readiness holds remain preserved as transaction-activation gates only; they do not block the visual repair.
+- Cloudflare browser recon confirms the current Worker Bindings page exposes only `CF_VERSION_METADATA`; `MARKETPLACE_DB` is not currently connected.
+- Payment activation remains fail-closed until authoritative runtime binding, shipping, sales tax, verified `amountDue`, and orderable supplier truth are proven.
+- Shopify payment confidence remains green; Shopify conversion/trust work remains a separate channel lane.
 - Existing-channel profitability remains ahead of new-channel expansion.
 - Paid acquisition remains held unless Casey explicitly reopens it.
 
-## Web V2 current release control
+## Web V2 current control
 
-**STORE EXPERIENCE MERGED → PREVIEW READINESS MERGED → RELEASE ENGINEER ACTIVE → EXACT CANDIDATE → IMMUTABLE PREVIEW → `/__version` PROOF → OWNER VISUAL ACCEPTANCE.**
+**OWNER FIDELITY REPAIR ACTIVE → WEB DEV COMPLETES PRODUCTION-LIKE IMAGE/COPY/LAYOUT MATCH → QA / MERGE → RELEASE ENGINEER CREATES NEW EXACT CANDIDATE → `/__version` PROOF → CASEY OWNER REVIEW.**
 
-Do not promote/cut over Web V2 production automatically. Owner visual acceptance remains required before production promotion.
+Do not promote/cut over Web V2 production automatically. Casey is the final visual-acceptance authority.
 
 Release invariant remains:
 
