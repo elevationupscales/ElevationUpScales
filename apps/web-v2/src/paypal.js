@@ -37,6 +37,15 @@ function amountValue(amount) {
   return value.toFixed(2);
 }
 
+function safeReturnOrigin(value) {
+  try {
+    const parsed = new URL(String(value || ''));
+    return parsed.protocol === 'https:' ? parsed.origin : 'https://elevationupscales.com';
+  } catch {
+    return 'https://elevationupscales.com';
+  }
+}
+
 async function accessToken(env, fetchImpl) {
   if (!paypalConfigured(env)) throw new Error('PAYPAL_NOT_CONFIGURED');
   const clientId = clean(env.PAYPAL_CLIENT_ID, 300);
@@ -76,6 +85,7 @@ export async function createPaypalOrder(env, order, { fetchImpl = fetch } = {}) 
   const gate = paymentGate(env);
   if (!gate.ready) throw new Error(gate.reason);
   if (!order?.id || !order?.totals?.amountDue) throw new Error('INVALID_ORDER_DRAFT');
+  const returnOrigin = safeReturnOrigin(order.returnOrigin);
 
   const requestBody = {
     intent: 'CAPTURE',
@@ -86,21 +96,23 @@ export async function createPaypalOrder(env, order, { fetchImpl = fetch } = {}) 
         currency_code: clean(order.totals.amountDue.currency || 'USD', 3).toUpperCase(),
         value: amountValue(order.totals.amountDue),
         breakdown: {
-          item_total: {
-            currency_code: 'USD',
-            value: amountValue(order.totals.merchandiseSubtotal)
-          },
-          shipping: {
-            currency_code: 'USD',
-            value: amountValue(order.totals.shipping)
-          },
-          tax_total: {
-            currency_code: 'USD',
-            value: amountValue(order.totals.tax)
-          }
+          item_total: { currency_code: 'USD', value: amountValue(order.totals.merchandiseSubtotal) },
+          shipping: { currency_code: 'USD', value: amountValue(order.totals.shipping) },
+          tax_total: { currency_code: 'USD', value: amountValue(order.totals.tax) }
         }
       }
-    }]
+    }],
+    payment_source: {
+      paypal: {
+        experience_context: {
+          user_action: 'PAY_NOW',
+          shipping_preference: 'SET_PROVIDED_ADDRESS',
+          brand_name: 'Elevation UpScales, Inc.',
+          return_url: `${returnOrigin}/checkout?payment=return`,
+          cancel_url: `${returnOrigin}/checkout?payment=cancelled`
+        }
+      }
+    }
   };
 
   const { response, body } = await paypalRequest(
