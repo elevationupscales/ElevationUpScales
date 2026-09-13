@@ -34,7 +34,7 @@ test('homepage reconstructs the approved retail-first customer presentation', as
   assert.match(body, /Battery Freight for Hawaii &amp; Alaska/);
   assert.match(body, /href="\/store"/);
   assert.match(body, />Vendors</);
-  assert.match(body, /Freight &amp; Hawaii/);
+  assert.match(body, /Freight & Hawaii/);
   assert.match(body, /href="\/shop\/sok"/);
   assert.match(body, /href="\/shop\/renogy"/);
   assert.match(body, /href="\/shop\/vevor"/);
