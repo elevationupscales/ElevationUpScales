@@ -10,6 +10,8 @@ import { resolveCheckout } from './checkout.js';
 import { createOrderFromCheckout, captureOrderPayment } from './order-service.js';
 import { catalogStyles } from './catalog-styles.js';
 import { homeFidelityStyles } from './home-fidelity-styles.js';
+import { sokProductMerchandisingStyles } from './sok-product-merchandising-styles.js';
+import { SOK_SK12V100PC_PNG_BASE64, SOK_SK48V100N_PNG_BASE64 } from './sok-product-assets.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
 import { renderCatalogPage } from './catalog-pages.js';
@@ -24,6 +26,18 @@ const baseHeaders = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Content-Security-Policy': "default-src 'self'; img-src 'self' https://elevationupscales.com https://image.doba.com https://img.vevorstatic.com https://image.vevor.com https://utedusjer.no https://s.alicdn.com https://i5.walmartimages.com https://mobileimages.lowes.com data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 };
+
+const SOK_PRODUCT_IMAGE_ASSETS = new Map([
+  ['/assets/brands/sok/sk12v100pc/official-clean.png', SOK_SK12V100PC_PNG_BASE64],
+  ['/assets/brands/sok/sk48v100n/official-clean.png', SOK_SK48V100N_PNG_BASE64]
+]);
+
+function decodeBase64(encoded) {
+  const raw = atob(encoded);
+  const bytes = new Uint8Array(raw.length);
+  for (let index = 0; index < raw.length; index += 1) bytes[index] = raw.charCodeAt(index);
+  return bytes;
+}
 
 function response(body, init = {}) {
   const headers = new Headers(baseHeaders);
@@ -128,8 +142,15 @@ export default {
       return response(sitemapXml(), { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
+    const sokProductImage = SOK_PRODUCT_IMAGE_ASSETS.get(url.pathname);
+    if (sokProductImage) {
+      return response(decodeBase64(sokProductImage), {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=31536000, immutable' }
+      });
+    }
+
     if (url.pathname === '/assets/app.css') {
-      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}\n${homeFidelityStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}\n${homeFidelityStyles}\n${sokProductMerchandisingStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
     if (url.pathname === '/assets/app.js') {
