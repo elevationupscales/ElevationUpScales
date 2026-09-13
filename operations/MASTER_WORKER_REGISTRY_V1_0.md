@@ -2,100 +2,115 @@
 
 **Version:** 1.0  
 **Status:** CONTROLLING REGISTRY STANDARD / LIVE TABLE  
-**Current incident override:** `MPM5_OWNER_ROLLBACK_LIVE_SITE_AUDIT_INCIDENT_2026-09-12.md` — Legacy production repair only  
-**Web V2 lane control:** `WEB_V2_CURRENT_WORKTREE.md`
+**Effective:** 2026-09-13  
+**Owner:** Casey Young  
+**Active management instance:** **MPM 6 — Company Oversight**  
+**MPM 6 control:** `MPM6_COMPANY_OVERSIGHT_TAKEOVER_2026-09-13.md`  
+**Global state:** `CURRENT_WORK_BOARD.md`  
+**Web V2 lane control:** `WEB_V2_CURRENT_WORKTREE.md`  
+**eBay P0 incident control:** `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`
 
 ## Current owner operating standard
 
-- Profitability recovery remains active.
-- No paid acquisition until Casey explicitly reopens it.
-- Protected Legacy top homepage remains no-touch absent exact owner authorization or a genuine defect; Web V2 homepage work is separately controlled through its Worktree.
-- The bounded Legacy direct-site checkout / PayPal repair reached production and is closed at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
-- The subsequent Legacy live-site audit round was owner-rolled-back after execution drifted from scan into repair.
-- `repair/live-site-audit-20260912` at `5fc55c806c1d7e138a9819a234e85ec932a056cb` is **QUARANTINED / ABANDONED / DO NOT DEPLOY / DO NOT MERGE**.
-- Workflow run `34728792703` failed canonical QA and must not be rerun as a release path.
-- **MASTER DEVELOPER is STANDBY / VERIFY-FIX ONLY for Legacy production repair.** It does not own the permanent Web V2 development lane.
-- **WEB V2 DEVELOPMENT is ACTIVE as one permanent first-class OS 1.1 lane under the OS 1.1 Project Manager / MPM.**
-- Web V2 specialist roles are workers, not managers: WEB DEVELOPER, RELEASE ENGINEER and COMMERCE DEVELOPER.
-- Web V2 current control is `WEB_V2_CURRENT_WORKTREE.md`; `production-deploy` remains **LEGACY ONLY**.
-- The Web V2 commercial-retail release reset is accepted on `main` at `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`; release-foundation/application QA passed in run `34738843664`.
-- Web V2 homepage reconstruction is **COMPLETE / MERGED** at `6940c32b5c1863d4b60be85427ccff3060e5d396`.
-- Web V2 retail navigation is **COMPLETE / MERGED** on `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
-- Web V2 canonical catalog + product-detail foundation is **COMPLETE / MERGED** at `72694ae9ba5b9952c0460b9f90b380cffde4ff23`.
-- Web V2 cart is **COMPLETE / MERGED** at `13b4411fc265a1f7b149ad9207059221fa53db32`; Pull Request QA run 126 and Web V2 QA run 67 passed for the cart candidate.
-- **CHECKOUT is the ACTIVE Web V2 phase.** It consumes merged cart product IDs/quantities and re-resolves canonical product state server-side before an order can advance. Unknown product/orderability/shipping/destination truth fails closed.
-- **MASTER RECON OS is STANDBY / TRIGGERED INTEGRITY.** Wake for state/lineage conflict, supplier-truth conflict affecting commerce control, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON; it is not a standing website executor.
-- Shopify stays in its own commerce lane.
-- External marketplace/new-channel expansion and paid acquisition remain separately controlled.
+- MPM 6 is the active company-level oversight/routing instance under Casey Young.
+- MPM 5 and earlier MPM iterations are historical/reference and do not issue competing live control.
 - One task = one primary execution owner.
+- Waiting on one blocker does not stop unrelated executable work.
+- Profitability recovery remains active.
+- Paid acquisition remains held until Casey explicitly reopens it.
+- Web V2 is a permanent first-class development lane; its specialist workers are workers, not another management hierarchy.
+- `production-deploy` remains **LEGACY ONLY** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
+- MASTER RECON OS is **STANDBY / TRIGGERED INTEGRITY**, not a standing website executor.
+- Vendor Projects own exact supplier/commercial truth.
+- Unknown or conflicting commercial truth fails closed for only the affected item/order/route; it does not block unrelated clean work.
+- Shopify, eBay, TikTok and Web V2 direct commerce remain distinct sales surfaces.
+- eBay listing price/quantity/end controls are complete only after live Seller Hub reread verifies the resulting state; Git-recorded approval alone is not an execution receipt.
 
-## Mandatory fields
+## Mandatory worker registry
 
-| Worker | Parent Project | Reporting Manager | Lane | Status | Current Worktree / Routing | Last Timestamp |
-|---|---|---|---|---|---|---|
-| MPM / Operating System Project Manager | Operating System | Casey | Master Management | **ACTIVE — CONTROL / PRIORITIZATION** | `CURRENT_WORK_BOARD.md`; route Legacy stabilization separately from `WEB_V2_CURRENT_WORKTREE.md`; prevent duplicate development routing | 2026-09-13 |
-| Company Project Manager | Company Project Management | MPM | Project Coordination | ACTIVE | Cross-Project continuity / placement / handoffs; preserve unrelated work | 2026-09-13 |
-| Company Operations Manager / COM 2 | Company Operations | MPM | Operations / Commercial Consolidation | ACTIVE | Consolidate current-state evidence; support vendor/channel work; do not duplicate website implementation | 2026-09-13 |
-| MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | **STANDBY / TRIGGERED INTEGRITY** | Wake for state/lineage conflict, supplier-truth conflict affecting commerce control, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON | 2026-09-13 |
-| MASTER DEVELOPER / Deployment Developer | Operating System / Legacy Technical Lane | MPM / authorized management | Legacy Development / Deployment | **STANDBY / VERIFY-FIX ONLY** | `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`; Legacy repair only; not the Web V2 primary worker | 2026-09-13 |
-| WEB DEVELOPER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Web V2 / Public Customer Experience | **STANDBY / SUPPORT — HOMEPAGE + RETAIL NAV + CATALOG + PRODUCT DETAIL + CART MERGED** | `WEB_V2_CURRENT_WORKTREE.md`; preserve merged public shell and commerce presentation; support exact bounded UI needs surfaced by Commerce; do not reopen completed phases | 2026-09-13 |
-| RELEASE ENGINEER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Web V2 / Exact-Version Release | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | `WEB_V2_CURRENT_WORKTREE.md`; support only when the commercial build reaches a true release gate; preview is diagnostic, not acceptance authority | 2026-09-13 |
-| COMMERCE DEVELOPER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Commerce V2 | **ACTIVE / CURRENT — CHECKOUT** | `WEB_V2_CURRENT_WORKTREE.md`; build server-revalidated direct checkout from merged cart + canonical catalog; then PayPal Orders v2 → durable order → fulfillment | 2026-09-13 |
-| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE / PRESERVE | Shopify working-state preservation + eBay P0 + vendor revenue lanes; respect current listing/ad controls | 2026-09-13 |
-| Shopify Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres | Shopify Store Operations / Direct Commerce | **ACTIVE — PRESERVE / FACT SOURCE** | Preserve current working Shopify configuration; no cross-lane architecture experiments | 2026-09-13 |
-| eBay Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations / Marketplace Revenue | **ACTIVE — P0 PARALLEL** | Customer obligations → cash release → stop-loss/profitable core; respect current listing and paid-acquisition controls | 2026-09-13 |
-| Apparel Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations / Apparel | Peter Torres | Apparel / POD Profitability | ACTIVE | Existing Fourthwall tuning only; new provider/store/product expansion HOLD | 2026-09-13 |
-| TikTok Affiliate Growth Manager | Company Operations / Ecommerce & Vendor Operations / TikTok Affiliate | Peter Torres | Affiliate / Creator Acquisition | **ACTIVE UNDER RESTRICTION** | Fix current OOS/account/catalog/economics only; no unauthorized paid spend | 2026-09-13 |
-| SOK Project Operations Manager | SOK Supplier / Commerce / Hawaii Logistics / Warranty | Company Operations / MPM | Vendor Operations | ACTIVE | Lower-48 controlled commerce + Hawaii warranty/logistics proving; provide authoritative SOK product truth; no duplicate qualification | 2026-09-13 |
-| SOK RECON OS | SOK Project | SOK Project Operations Manager | Project RECON / Evidence | ACTIVE | Exact SOK source/media/Hawaii economics support; resolve supplier facts, not Web V2 implementation | 2026-09-13 |
-| VEVOR Project Operations Manager | VEVOR Supplier / Catalog / Shopify / Fulfillment | Company Operations / MPM | Vendor Operations | ACTIVE / PUBLICATION HOLD | Preserve current catalog/staging state; provide authoritative VEVOR source/orderability truth; activation only under owning-lane authority | 2026-09-13 |
-| VEVOR Reconciliation & Price-Control Specialist | VEVOR Project | VEVOR Project Operations Manager | Project RECON / Price Control | ACTIVE | Resolve existing economics/source exceptions; do not authorize Web V2 to infer missing commercial facts | 2026-09-13 |
-| Renogy Branch Operations Manager | Renogy Dealer / Catalog / Commerce Integration | Company Operations / MPM | Vendor Operations | ACTIVE / PUBLICATION HOLD | Preserve current active/draft state; provide authoritative dealer/orderability/warranty truth; activation only under owning-lane authority | 2026-09-13 |
-| Renogy Project Specialist | Renogy Project | Renogy Branch Operations Manager | Project Specialist / RECON | ACTIVE | Exact-SKU availability/warranty/source/media mapping only | 2026-09-13 |
-| Kingboss Project Operations Manager | Kingboss B2B Supplier Onboarding / Catalog / Commerce | Company Operations / MPM | Vendor Operations | ACTIVE | Stage-1 proving; provide only verified catalog facts; public orderability remains controlled | 2026-09-13 |
-| Kingboss Project Specialist | Kingboss B2B Supplier Onboarding / Catalog / Commerce | Kingboss Project Operations Manager | Project Specialist / RECON | ACTIVE | Exact SKU/image/compliance crosswalk + protected commercial gap reconciliation | 2026-09-13 |
-| Shipping & Logistics Partner Worker | Shipping & Logistics Project | Company Operations Manager | Shipping / Logistics Partners | ACTIVE | Existing Hawaii/logistics route state preserved; authoritative route truth supports Web V2 shipping gates | 2026-09-13 |
+| Worker / Manager | Parent | Reporting Manager | Lane | Current State | Current Routing |
+|---|---|---|---|---|---|
+| **MPM 6 — Company Oversight** | Operating System | Casey Young | Company Oversight / Master Management | **ACTIVE — CONTROLLING MANAGEMENT INSTANCE** | `CURRENT_WORK_BOARD.md`; prioritize revenue/customer continuity; route one execution owner; correct material drift only. |
+| Company Operations Manager / COM 2 | Company Operations | MPM 6 | Operations / Commercial Consolidation | **ACTIVE** | Cross-channel/vendor operations, policy substance, profitability and customer/fulfillment support; do not duplicate specialist implementation. |
+| MASTER RECON OS | Operating System | MPM 6 | OS Integrity / RECON | **STANDBY / TRIGGERED INTEGRITY** | Wake for real state/lineage/policy/supplier-truth/release conflicts or owner-directed RECON. |
+| MASTER DEVELOPER / Deployment Developer | Legacy Technical Lane | MPM 6 / authorized management | Legacy Development / Deployment | **STANDBY / VERIFY-FIX ONLY** | Legacy bounded repair only; not permanent Web V2 worker. |
+| WEB DEVELOPER | Web V2 Development | MPM 6 / Web V2 lane | Public Customer Experience | **STANDBY / SUPPORT** | Preserve merged Web V2 public path; support exact bounded visual/UI defects. |
+| **COMMERCE DEVELOPER** | Web V2 Development | MPM 6 / Web V2 lane | Commerce V2 | **ACTIVE / CURRENT — ORDER + FULFILLMENT ROUTING** | Consume merged checkout + canonical catalog; server revalidate → payment/durable order → exact supplier/SKU fulfillment route. |
+| RELEASE ENGINEER | Web V2 Development | MPM 6 / Web V2 lane | Exact-Version Release | **READY / SUPPORT** | Act only at true production-parity release gate; same tested version promotes/cuts over. |
+| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations | Company Operations Manager / MPM 6 | Ecommerce & Vendor Operations | **ACTIVE — EBAY P0 OVERSIGHT + SHOPIFY CONVERSION + VENDOR REVENUE** | eBay emergency stop-loss execution is immediate channel priority; preserve Shopify/Web V2 separation and current listing/ad controls. |
+| Shopify Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | Shopify Store Operations | **ACTIVE — CONVERSION / TRUST TUNING** | Preserve payment green state; support product trust, shipping-profile implementation after truth, policy publication after approval and re-smoke. |
+| eBay Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations | **ACTIVE — P0 CRITICAL / LIVE LOSS EXPOSURE** | Follow `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`: stop new loss exposure through an action-capable Seller Hub surface; receipt-verify qty/state; identify new-sale receipt; protect customer obligations; then source/cost/reprice before reopening quantity. |
+| Apparel Vendor Operations Manager | Ecommerce & Vendor Operations | Peter Torres | Apparel / POD | **ACTIVE SEPARATE CHANNEL** | Existing Fourthwall tuning; no distracting expansion ahead of revenue priorities. |
+| TikTok Affiliate Growth Manager | Ecommerce & Vendor Operations | Peter Torres | Affiliate / Creator | **ACTIVE UNDER RESTRICTION** | Current-account/catalog economics only; no failed-appeal replay or unauthorized paid spend. |
+| SOK Project Operations Manager | SOK Project | Company Operations / MPM 6 | Vendor Operations | **ACTIVE PRIMARY SUPPLIER** | Exact SOK product/orderability/shipping/warranty truth; Lower-48 + Hawaii controls as proven. |
+| SOK RECON OS | SOK Project | SOK Project Operations Manager | Project RECON | **ACTIVE SUPPORT** | Resolve exact source/media/economics facts only; do not implement Web V2. |
+| VEVOR Project Operations Manager | VEVOR Project | Company Operations / MPM 6 | Vendor Operations | **ACTIVE / CONTROLLED PUBLICATION** | Exact approved product/source/shipping/economics truth. |
+| VEVOR Reconciliation & Price-Control Specialist | VEVOR Project | VEVOR Project Operations Manager | Project RECON / Price Control | **ACTIVE SUPPORT** | Resolve price/source exceptions; no inferred commercial truth. |
+| Renogy Branch Operations Manager | Renogy Project | Company Operations / MPM 6 | Vendor Operations | **ACTIVE / CONTROLLED PUBLICATION** | Exact dealer/orderability/backorder/shipping/warranty truth. |
+| Renogy Project Specialist | Renogy Project | Renogy Branch Operations Manager | Project Specialist / RECON | **ACTIVE SUPPORT** | Exact-SKU availability/warranty/source/media mapping. |
+| Kingboss Project Operations Manager | Kingboss Project | Company Operations / MPM 6 | Vendor Operations | **ACTIVE STAGE-1 PROVING** | Exact SKU/MAP/channel/warranty/compliance truth before orderability. |
+| Kingboss Project Specialist | Kingboss Project | Kingboss Project Operations Manager | Project Specialist / RECON | **ACTIVE SUPPORT** | SKU/image/compliance crosswalk and protected commercial-gap reconciliation. |
+| Shipping & Logistics Partner Worker | Shipping & Logistics Project | Company Operations Manager / MPM 6 | Shipping / Logistics | **ACTIVE — ROUTE TRUTH AUTHORITY** | Supplier/destination/freight/Hawaii/lithium route truth; storefront workers must not guess. |
 
-## Web V2 permanent development lane
+## Web V2 current verified state
 
-Reporting relationship:
+Completed / merged:
 
-**CASEY → OS 1.1 PROJECT MANAGER / MPM → WEB V2 DEVELOPMENT**
+- Homepage — `6940c32b5c1863d4b60be85427ccff3060e5d396`.
+- Retail navigation — `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
+- Canonical catalog + product detail — `72694ae9ba5b9952c0460b9f90b380cffde4ff23`.
+- Cart — `13b4411fc265a1f7b149ad9207059221fa53db32`.
+- Checkout review — `f5d3ac7cc4b37e8211a3bb460a8507380b75803d` through PR #169.
+- Checkout QA — Pull Request QA run 130 + Web V2 QA run 78 **PASS**.
+- Worktree advancement — PR #170 merged into current control state.
 
-Web V2 is one operating lane. WEB DEVELOPER, RELEASE ENGINEER and COMMERCE DEVELOPER are specialist worker responsibilities inside that lane and do not create another management hierarchy.
+Current phase:
 
-Current verified state:
+**ORDER + FULFILLMENT ROUTING — P0 ACTIVE / CURRENT**
 
-- commercial-retail release reset accepted on `main` at `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`;
-- every bounded task resolves then-current `main` once at startup and reconciles current base before merge; receipt SHAs do not permit stale execution;
-- production-parity release foundation = complete / merged / QA PASS;
-- visual SOP = controlling for substantial visual work;
-- homepage reconstruction = complete / merged at `6940c32b5c1863d4b60be85427ccff3060e5d396`;
-- retail-navigation phase = complete / merged at `e2c9e3494bd932c2cde8b0d24e807cbb94706009`;
-- canonical catalog + product detail = complete / merged at `72694ae9ba5b9952c0460b9f90b380cffde4ff23`;
-- cart = complete / merged at `13b4411fc265a1f7b149ad9207059221fa53db32`;
-- Pull Request QA run 126 and Web V2 QA run 67 passed for the merged cart candidate;
-- COMMERCE DEVELOPER = **active now on CHECKOUT**;
-- checkout consumes merged cart identities/quantities and re-resolves current canonical product state server-side before order advancement;
-- non-orderable, changed, malformed, unknown-shipping, or ineligible-destination states fail closed;
-- unchanged vendor-source files are not checkout inputs unless product truth actually changes or a concrete contradiction appears;
-- WEB DEVELOPER = support/standby for exact bounded public-UI needs from Commerce;
-- RELEASE ENGINEER = ready / supporting only when the bounded commercial build reaches its true release gate;
-- Vendor Projects remain authoritative for SKU, price/MAP, stock/orderability, shipping, warranty, fulfillment and channel truth;
-- missing or conflicting supplier truth keeps only the affected SKU/order state closed; it does not justify guessing or blocking unrelated clean commerce work;
-- workers.dev/version previews = diagnostics only, not acceptance authority;
-- Ops V2 = hold behind revenue path;
-- Legacy retirement = not authorized.
+Normal loop:
 
-Development loop:
+**RESOLVE CURRENT MAIN ONCE → READ `WEB_V2_CURRENT_WORKTREE.md` → ONE BOUNDED ORDER BRANCH → SERVER REVALIDATION → PAYMENT / DURABLE ORDER / EXACT FULFILLMENT ROUTING → QA → RECONCILE → MERGE → UPDATE WORKTREE → NEXT.**
 
-**VERIFY CURRENT MAIN → ONE BOUNDED TASK → ONE PRIMARY WORKER → AUTHORITATIVE PRODUCT TRUTH → QA → REVIEW → MERGE → UPDATE WORKTREE → NEXT.**
+Do not reopen completed checkout merely because order creation needs its validated state.
 
-Catalog/cart/checkout integrity rule:
+## Shopify conversion routing
 
-**VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT RECORD → CART REFERENCES PRODUCT ID → CHECKOUT SERVER-REVALIDATES PRODUCT + ORDERABILITY + TOTALS + SHIPPING/DESTINATION. UNKNOWN / CONFLICTING COMMERCIAL TRUTH → FAIL CLOSED → ROUTE FACT GAP TO OWNING LANE → CONTINUE CLEAN WORK.**
+Payment confidence is currently green:
 
-Release invariant:
+- payout destination `6453` verified;
+- Shopify Payments accepts payments and receives payouts;
+- card + PayPal checkout pass;
+- accelerated PayPal live;
+- abandoned-checkout recovery active.
+
+Current Shopify conversion work:
+
+1. **P0 blurry/weak image correction** — DEV/rendering/media-mapping defect audit.
+2. Supplier-specific shipping truth — Shipping & Logistics + Vendor Projects.
+3. Refund/Return, Shipping and Terms substance — Owner / Company Operations approval.
+4. Verified near-CTA confidence layer — DEV after facts/policies are available.
+5. Re-smoke purchase path → first real order → fulfillment → actual contribution/profit record.
+
+Do not add traffic/paid spend to compensate for unresolved conversion/trust defects.
+
+## eBay emergency routing
+
+Current incident authority: `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`.
+
+Immediate control is **STOP NEW LOSS EXPOSURE BEFORE PRICE OPTIMIZATION**. Known failed/uncontrolled configurations that remain purchasable must be set to quantity zero through an action-capable authenticated Seller Hub surface, then live reread must verify the resulting state. The newly reported sale remains pending exact receipt identification until eBay posts the order; do not invent the order ID or fulfillment state.
+
+Customer obligations remain protected. Never cancel a verified shipped order, never invent tracking, and do not reopen quantity until exact source + current landed cost + MAP + destination + expected contribution clear the operating controls.
+
+## Development integrity rule
+
+**VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT → CART → SERVER-REVALIDATED CHECKOUT → PAYMENT / DURABLE ORDER → EXACT FULFILLMENT ROUTE.**
+
+**UNKNOWN / CONFLICTING TRUTH → FAIL CLOSED FOR AFFECTED ITEM → ROUTE FACT GAP TO OWNING LANE → CONTINUE CLEAN WORK.**
+
+Vendor-source reading remains bounded. Absent truth is a data state, not a search command.
+
+## Release invariant
 
 **ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION PROMOTED / CUT OVER → LIVE VERIFY.**
 
@@ -103,39 +118,19 @@ Runtime truth:
 
 **GIT SHA + CLOUDFLARE VERSION ID + DEPLOYMENT ID.**
 
-No accepted candidate is rebuilt or re-uploaded before production acceptance.
+No accepted candidate is rebuilt/re-uploaded before production acceptance.
 
-## Legacy website execution rule after owner rollback
+## Replay guards
 
-### Scan / audit / inspect / check / review
+- `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` = **ABANDONED / DO NOT DEPLOY / DO NOT MERGE**.
+- workflow `34728792703` = **FAILED / DO NOT REPLAY AS RELEASE PATH**.
+- `84af23ec814baa73718e33ec052044ce4706534d` = **RETIRED / DO NOT DEPLOY**.
+- Legacy production `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` remains the accepted fallback/reference.
+- `production-deploy` remains Legacy-only.
+- Shopify is not a fallback checkout for Web V2 direct-site transactions.
+- Do not restore Commerce-WAIT or workers.dev preview acceptance.
+- Do not infer supplier truth to accelerate orderability.
 
-Default to:
+## Current control phrase
 
-**READ-ONLY INSPECTION → EVIDENCE → PRIORITIZED DEFECT REPORT → STOP.**
-
-Do not create branches, edit code, add tests, add workflows, change configuration, or deploy solely because an inspection found an issue.
-
-### Repair / fix / build / deploy / RUN when mutation is clearly authorized
-
-Use:
-
-**ONE DEFECT PACKET → ONE BOUNDED CANDIDATE → EXISTING QA → AUTHORIZED DEPLOY → LIVE VERIFY → CLOSE.**
-
-Do not create a new QA/deployment workflow for a one-off Legacy defect unless Casey explicitly authorizes a new permanent workflow/control.
-
-This Legacy repair rule does not replace the Web V2 development loop in `WEB_V2_CURRENT_WORKTREE.md`.
-
-## Replay guard
-
-- `repair/live-site-audit-20260912` at `5fc55c806c1d7e138a9819a234e85ec932a056cb` = **ABANDONED / DO NOT DEPLOY / DO NOT MERGE**.
-- Workflow run `34728792703` = **FAILED / DO NOT RERUN AS RELEASE PATH**.
-- `84af23ec814baa73718e33ec052044ce4706534d` remains DO NOT DEPLOY.
-- Legacy production `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` remains the accepted direct-checkout repair baseline.
-- `production-deploy` remains Legacy-only and must never represent Web V2 runtime promotion.
-- Shopify remains its own payment/commerce lane.
-- External channel expansion and paid acquisition remain separate management decisions.
-- Do not restore the old Commerce-WAIT gate or workers.dev preview-acceptance sequence.
-- Do not reopen completed homepage/navigation/catalog/product-detail/cart phases merely because checkout needs product identity, totals or bounded UI support.
-- Do not infer supplier commercial truth to accelerate orderability.
-
-**HOMEPAGE COMPLETE → RETAIL NAV COMPLETE → CATALOG COMPLETE → PRODUCT DETAIL COMPLETE → CART COMPLETE → CHECKOUT ACTIVE → ORDER/FULFILLMENT → RELEASE ONLY AT A TRUE GATE → RECON TRIGGERED ONLY.**
+**MPM 6 ACTIVE → EBAY STOP NEW LOSS EXPOSURE → WEB V2 ORDER + FULFILLMENT ACTIVE → SHOPIFY CONVERSION TRUST ACTIVE → MASTER RECON TRIGGERED ONLY. SELL → CONVERT → FULFILL → RECORD PROFIT.**
