@@ -31,7 +31,7 @@ A website mutation requires a separately authorized build/repair/deploy action. 
 
 | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|
-| **Web V2 Development** | OS 1.1 Project Manager / MPM → one primary specialist worker | **ACTIVE / PERMANENT LANE — STEP 4 MERGED**. Current accepted `main = 04ef81368732d95c81e8f439f14524df385a9f1e`. Release foundation, visual SOP and first application shell are merged. | **NEXT / OWNER-GATED:** exact-version Cloudflare candidate from current accepted SHA. Re-resolve `main`, use Release Engineer as the primary worker, preserve exact-version identity, and stop before promotion unless separately authorized. |
+| **Web V2 Development** | OS 1.1 Project Manager / MPM → one primary specialist worker | **ACTIVE / PERMANENT LANE — STEP 4 MERGED.** Accepted Step 4 application baseline = `04ef81368732d95c81e8f439f14524df385a9f1e`. Release foundation, visual SOP and first application shell are merged. Current `main` must be re-resolved before each new task because later control-only commits may advance it without changing the accepted application baseline. | **NEXT / OWNER-GATED:** exact-version Cloudflare candidate. Re-resolve `main`, use Release Engineer as the primary worker, preserve exact-version identity, and stop before promotion unless separately authorized. |
 | Web V2 — WEB DEVELOPER | Web V2 Development | **STANDBY — STEP 4 COMPLETE / MERGED** | No new UI/application branch until a new bounded build packet is authorized. |
 | Web V2 — RELEASE ENGINEER | Web V2 Development | **QUEUED / NEXT OWNER-GATED ACTION** | Cloudflare exact-version candidate is next. No Cloudflare mutation or production promotion from this management-sync task. |
 | Web V2 — COMMERCE DEVELOPER | Web V2 Development | **STANDBY / WAIT** | Commerce V2 integration remains waiting; do not jump forward. |
@@ -89,7 +89,7 @@ Web V2 release invariant:
 |---|---|---|
 | Release foundation | **COMPLETE / MERGED** | Preserve exact-version release machinery. |
 | Visual/customer-experience SOP | **COMPLETE / MERGED** | `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md` controls substantial visual work. |
-| Step 4 application shell | **COMPLETE / MERGED** | Accepted in current `main = 04ef81368732d95c81e8f439f14524df385a9f1e`. |
+| Step 4 application shell | **COMPLETE / MERGED** | Accepted application baseline = `04ef81368732d95c81e8f439f14524df385a9f1e`; future work re-resolves current `main`. |
 | Cloudflare exact-version candidate | **NEXT / OWNER-GATED** | Release Engineer primary. No rebuild after candidate acceptance; no promotion without explicit owner authorization. |
 | Commerce V2 integration | **WAIT** | Commerce Developer standby. |
 | Ops V2 | **WAIT** | Do not start yet. |
