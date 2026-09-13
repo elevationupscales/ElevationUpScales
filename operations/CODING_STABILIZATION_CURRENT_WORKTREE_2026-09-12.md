@@ -1,5 +1,10 @@
 # ELEVATION UPSCALES — CODING STABILIZATION CURRENT WORKTREE
 
+> **OS 1.1 SCOPE BOUNDARY — 2026-09-12**  
+> This Worktree controls **Legacy production repair/stabilization only**. It does **not** control the permanent Web V2 development lane.  
+> Web V2 current control is `WEB_V2_CURRENT_WORKTREE.md`.  
+> Do not route Web V2 work back through the abandoned Legacy audit/repair model, MASTER DEVELOPER standby lane, or `production-deploy`.
+
 **Date:** 2026-09-12  
 **State:** **STANDBY — PRODUCTION REPAIR CLOSED / OWNER ROLLED BACK ABORTED LIVE-SITE AUDIT ROUND**  
 **Reports To:** MPM  
@@ -9,13 +14,15 @@
 
 ## Current production truth
 
-Accepted production remains:
+Accepted Legacy production remains:
 
 `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88`
 
 That production commit is the completed bounded direct-site checkout / PayPal capture repair.
 
 No code from the subsequent live-site audit round reached production.
+
+`production-deploy` is **LEGACY ONLY** and must not be used as the Web V2 runtime pointer.
 
 ## Aborted audit round
 
@@ -45,9 +52,9 @@ The owner rolled back/abandoned the audit round and requested an audit of how ex
 
 The audit branch is evidence only. It is not an active candidate and does not authorize any follow-on patch.
 
-## Correct execution rule
+## Correct Legacy execution rule
 
-For future website requests:
+For Legacy production requests:
 
 ### Scan / audit / inspect / check / review
 
@@ -59,37 +66,43 @@ Do not create a repair branch, edit code, add tests, add workflows, change confi
 
 **ONE DEFECT PACKET → ONE BOUNDED CANDIDATE → EXISTING QA → DEPLOY ONLY IF AUTHORIZED → LIVE VERIFY → CLOSE.**
 
-No new workflow/control layer for a one-off repair unless Casey explicitly authorizes a permanent new workflow.
+No new workflow/control layer for a one-off Legacy repair unless Casey explicitly authorizes a permanent new workflow.
+
+Web V2 development follows `WEB_V2_CURRENT_WORKTREE.md` and its exact-version release model instead of this Legacy repair loop.
 
 ## Current DEV disposition
 
-**MASTER DEVELOPER = STANDBY / VERIFY-FIX ONLY.**
+**MASTER DEVELOPER = STANDBY / VERIFY-FIX ONLY FOR LEGACY PRODUCTION.**
 
-Wake DEV only when:
+Wake MASTER DEVELOPER only when:
 
-1. a fresh reproducible defect exists;
+1. a fresh reproducible Legacy defect exists;
 2. the defect is specific enough to form one bounded packet; and
-3. Casey/MPM has authorized repair execution rather than inspection only.
+3. Casey/MPM has authorized Legacy repair execution rather than inspection only.
 
 MASTER RECON remains available for lineage/state conflicts but is not a standing website executor.
 
+Web V2 specialist workers are routed through `WEB_V2_CURRENT_WORKTREE.md` and do not wake this Legacy lane.
+
 ## Protected state
 
-- Production `894b15cb...` remains the accepted runtime baseline.
-- Do not wholesale deploy `main`.
+- Legacy production `894b15cb...` remains the accepted runtime baseline.
+- Do not wholesale deploy `main` to Legacy production.
 - Do not deploy or cherry-pick `repair/live-site-audit-20260912`.
 - Stale candidate `84af23ec814baa73718e33ec052044ce4706534d` remains DO NOT DEPLOY.
-- Do not create additional website-repair workflows as a reaction to this incident.
+- Do not create additional Legacy website-repair workflows as a reaction to this incident.
+- `production-deploy` remains Legacy-only.
+- Web V2 remains separate and is controlled by `WEB_V2_CURRENT_WORKTREE.md`.
 - Shopify remains its own commerce lane.
 - New-item listing and paid-acquisition controls remain separate business decisions and are not changed by this rollback.
-- Protected homepage-top rules remain unchanged.
+- Protected Legacy homepage-top rules remain unchanged.
 
 ## Observations from the aborted scan
 
-Any website issues seen during the aborted round are now **UNCONFIRMED BACKLOG EVIDENCE ONLY**. They must be reproduced in a fresh read-only scan before being promoted to an active repair packet.
+Any Legacy website issues seen during the aborted round are now **UNCONFIRMED BACKLOG EVIDENCE ONLY**. They must be reproduced in a fresh read-only scan before being promoted to an active Legacy repair packet.
 
 Do not assume an observation from the aborted round is still a current production defect merely because it appeared in browser/source evidence during the incident.
 
 ## Control phrase
 
-**PRODUCTION CLOSED → AUDIT ROUND ROLLED BACK → DEV STANDBY → SCAN READ-ONLY → REPORT FIRST → ONE REPAIR ONLY WHEN AUTHORIZED.**
+**LEGACY PRODUCTION CLOSED → AUDIT ROUND ROLLED BACK → MASTER DEV STANDBY → WEB V2 ROUTED SEPARATELY → SCAN READ-ONLY → REPORT FIRST → ONE LEGACY REPAIR ONLY WHEN AUTHORIZED.**
