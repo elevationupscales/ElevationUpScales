@@ -15,7 +15,7 @@ const routeInfo = {
 };
 let html = renderPublicPage(routeInfo);
 html = html.replace('<link rel="stylesheet" href="/assets/app.css">', `<style>${styles}\n${navStyles}\n${homeFidelityStyles}</style>`);
-html = html.replace('<script defer src="/assets/app.js"></script>', '');
+html = html.replace('<script defer src="/assets/app.js"><' + '/script>', '');
 document.open();
 document.write(html);
 document.close();
