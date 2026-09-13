@@ -86,7 +86,7 @@ function documentHead(routeInfo, { notFound = false } = {}) {
   <meta name="twitter:image" content="${socialImage}">
   <title>${escapeHtml(title)}</title>
   <link rel="preload" as="image" href="${asset('/assets/hero/storefront-tropical-logistics-v3.webp')}">
-  <link rel="preload" as="image" href="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp?v=20260910-1')}">
+  <link rel="preload" as="image" href="${asset('/assets/brands/sok/sk12v100pc/hero.png')}">
   <link rel="stylesheet" href="/assets/app.css">
   <script defer src="/assets/app.js"></script>`;
 }
@@ -164,12 +164,12 @@ function homeMain() {
         </div>
         <div class="storefront-visual" aria-label="SOK lithium battery systems">
           <img class="sok-wordmark" src="${asset('/assets/brands/sok/sok-wordmark-home-transparent.webp?v=20260910-1')}" alt="SOK Battery" width="620" height="190">
-          <a class="hero-product hero-product-12" href="/sok/sk12v100pc/" aria-label="View SOK SK12V100PC">
-            <img src="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp?v=20260910-1')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900">
+          <a class="hero-product hero-product-12" href="/shop/sok" aria-label="View the SOK catalog for SK12V100PC">
+            <img src="${asset('/assets/brands/sok/sk12v100pc/hero.png')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="2160" height="2160">
             <span><b>SK12V100PC</b><small>12.8V 100Ah</small></span>
           </a>
-          <a class="hero-product hero-product-48" href="/sok/sk48v100n/" aria-label="View SOK SK48V100N">
-            <img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="500" height="500">
+          <a class="hero-product hero-product-48" href="/shop/sok" aria-label="View the SOK catalog for SK48V100N">
+            <img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="1000" height="265">
             <span><b>SK48V100N</b><small>51.2V 100Ah rack platform</small></span>
           </a>
         </div>
@@ -202,18 +202,18 @@ function homeMain() {
           <a class="button button-outline" href="/shop/sok">View All SOK Products <span aria-hidden="true">→</span></a>
         </div>
         <article class="product-card">
-          <a href="/sok/sk12v100pc/" class="product-image"><img src="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900"></a>
+          <a href="/shop/sok" class="product-image" aria-label="View the SOK catalog for SK12V100PC"><img src="${asset('/assets/brands/sok/sk12v100pc/hero.png')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="2160" height="2160"></a>
           <p class="product-kicker">12V • RV • MOBILE POWER</p>
           <h3>SOK SK12V100PC</h3>
           <p>12.8V · 100Ah · 1280Wh.</p>
-          <a class="text-link" href="/sok/sk12v100pc/">View Battery <span aria-hidden="true">→</span></a>
+          <a class="text-link" href="/shop/sok">View SOK Catalog <span aria-hidden="true">→</span></a>
         </article>
         <article class="product-card">
-          <a href="/sok/sk48v100n/" class="product-image"><img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="500" height="500"></a>
+          <a href="/shop/sok" class="product-image" aria-label="View the SOK catalog for SK48V100N"><img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="1000" height="265"></a>
           <p class="product-kicker">48V • SOLAR • RACK STORAGE</p>
           <h3>SOK SK48V100N</h3>
           <p>51.2V · 100Ah · 5.12kWh.</p>
-          <a class="text-link" href="/sok/sk48v100n/">View Battery <span aria-hidden="true">→</span></a>
+          <a class="text-link" href="/shop/sok">View SOK Catalog <span aria-hidden="true">→</span></a>
         </article>
       </div>
     </section>

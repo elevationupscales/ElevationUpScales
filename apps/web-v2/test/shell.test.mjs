@@ -49,9 +49,12 @@ test('homepage reconstructs the approved retail-first customer presentation', as
   assert.match(body, /property="og:title"/);
   assert.match(body, /storefront-tropical-logistics-v3\.webp/);
   assert.match(body, /sok-wordmark-home-transparent\.webp/);
-  assert.match(body, /sk12v100pc\/home-hero\.webp/);
+  assert.match(body, /sk12v100pc\/hero\.png/);
+  assert.match(body, /width="2160" height="2160"/);
   assert.match(body, /sk48v100n\/home-crop\.webp/);
+  assert.match(body, /width="1000" height="265"/);
   assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
+  assert.doesNotMatch(body, /href="\/sok\/sk12v100pc\/?"|href="\/sok\/sk48v100n\/?"/);
   assert.doesNotMatch(body, /paypal\.com|\/api\/checkout|\/api\/paypal|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
   assertCustomerSafe(body);
 });
@@ -116,6 +119,15 @@ test('canonical catalog routes render in Web V2 and remain customer-safe', async
     const body = await res.text();
     assert.doesNotMatch(body, /Shopify|Add to Cart|paypal\.com/i, path);
     assertCustomerSafe(body);
+  }
+});
+
+test('preview customer-experience routes render safely without a commerce binding', async () => {
+  for (const path of ['/', '/store', '/shop/sok', '/shop/renogy', '/shop/vevor', '/shop/kingboss', '/product/vevor-xxkljt124incljf0qv0', '/cart', '/checkout']) {
+    const res = await request(path);
+    assert.equal(res.status, 200, path);
+    const body = await res.text();
+    assert.doesNotMatch(body, /Shopify|cardNumber|card_number|cvv|cvc/i, path);
   }
 });
 
