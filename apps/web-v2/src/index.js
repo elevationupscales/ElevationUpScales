@@ -48,6 +48,7 @@ function robotsText(url) {
     'User-agent: *',
     'Allow: /',
     'Disallow: /healthz',
+    'Disallow: /__version',
     '',
     `Sitemap: ${CANONICAL_ORIGIN}/sitemap.xml`,
     ''
@@ -68,8 +69,18 @@ function currentPublicBridge(url, routeInfo) {
   return `${CANONICAL_ORIGIN}${routeInfo.path}${url.search}`;
 }
 
+function versionPayload(env) {
+  const meta = env?.CF_VERSION_METADATA || {};
+  return {
+    service: 'elevation-web-v2',
+    id: meta.id || null,
+    tag: meta.tag || null,
+    timestamp: meta.timestamp || null
+  };
+}
+
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return response('Method Not Allowed', {
         status: 405,
@@ -79,13 +90,18 @@ export default {
 
     const url = new URL(request.url);
 
+    if (url.pathname === '/__version') {
+      return json(versionPayload(env));
+    }
+
     if (url.pathname === '/healthz') {
       return json({
         status: 'ok',
         service: 'elevation-web-v2',
-        phase: 'phase-1-step-4-shell',
+        phase: 'commercial-retail-rebuild',
         commerceConnected: false,
-        opsConnected: false
+        opsConnected: false,
+        version: versionPayload(env)
       });
     }
 
