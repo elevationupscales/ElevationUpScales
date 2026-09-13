@@ -10,7 +10,7 @@ const route = (path, title, description, options = {}) => ({
 
 export const PUBLIC_ROUTES = new Map([
   ['/', route('/', 'Elevation UpScales | Off-Grid Power • Supply • Logistics', 'Elevation UpScales provides off-grid power, supply and logistics support for RV, solar, backup power, commercial systems and harder-to-serve markets.', { implemented: true, page: 'home' })],
-  ['/start-a-project', route('/start-a-project', 'Start a Project | Elevation UpScales', 'Start a project with Elevation UpScales for power, property, RV, solar, off-grid or logistics needs.', { implemented: true, page: 'start-project' })],
+  ['/start-a-project', route('/start-a-project', 'Start a Project | Elevation UpScales', 'Start a project with Elevation UpScales for power, property, RV, solar, off-grid or logistics needs.', { page: 'start-project' })],
   ['/store', route('/store', 'Shop | Elevation UpScales', 'Shop power, battery, RV, outdoor and Elevation products.')],
   ['/product', route('/product', 'Product Details | Elevation UpScales', 'View product details from Elevation UpScales.')],
   ['/cart', route('/cart', 'Cart | Elevation UpScales', 'Review items selected from Elevation UpScales.')],
