@@ -6,7 +6,8 @@
 **Status:** **ACTIVE — PERMANENT FIRST-CLASS DEVELOPMENT LANE**  
 **Parent:** Operating System  
 **Reports To:** OS 1.1 Project Manager / MPM  
-**Current Git authority:** `main = 04ef81368732d95c81e8f439f14524df385a9f1e`  
+**Accepted Step 4 application baseline:** `04ef81368732d95c81e8f439f14524df385a9f1e`  
+**Git freshness rule:** re-resolve the then-current `main` before every Web V2 task; control-only descendants do not change the accepted application baseline by themselves  
 **Legacy production pointer:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — **LEGACY ONLY**  
 **Visual control:** `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md`  
 **Release control:** `.github/workflows/web-v2-qa.yml` + `.github/workflows/web-v2-release.yml` + `deployment/v2/`
@@ -92,9 +93,11 @@ None of these commands increase authority beyond the currently authorized task/g
 
 ## 6. Current verified phase
 
-Current accepted Git truth after Step 4 merge:
+Accepted Step 4 application baseline:
 
-`main = 04ef81368732d95c81e8f439f14524df385a9f1e`
+`04ef81368732d95c81e8f439f14524df385a9f1e`
+
+This SHA contains the owner-accepted Step 4 merge. Later OS/control-only commits may advance `main`; they do not by themselves replace the accepted Web V2 application baseline. Every new task must re-resolve `main` before execution.
 
 Completed and merged:
 
@@ -125,8 +128,8 @@ Current lane state:
 |---|---|---|
 | Release foundation | **COMPLETE / MERGED** | Preserve. |
 | Visual SOP | **COMPLETE / MERGED** | Governs substantial visual work. |
-| Step 4 application shell | **COMPLETE / MERGED** | Accepted in current `main`. |
-| Cloudflare exact-version candidate | **NEXT / OWNER-GATED** | Re-resolve `main`; configure only the explicitly authorized preview/credential prerequisites; upload one candidate from the exact accepted SHA; record Version ID + preview URL; do not promote without separate approval. |
+| Step 4 application shell | **COMPLETE / MERGED** | Accepted application baseline `04ef81368732d95c81e8f439f14524df385a9f1e`. |
+| Cloudflare exact-version candidate | **NEXT / OWNER-GATED** | Re-resolve the then-current `main`; configure only the explicitly authorized preview/credential prerequisites; upload one candidate from the exact approved source SHA; record Version ID + preview URL; do not promote without separate approval. |
 | Commerce V2 integration | **WAIT** | Do not start yet. |
 | Ops V2 | **WAIT** | Do not start yet. |
 | Legacy retirement | **NOT AUTHORIZED** | Legacy Safe Prod remains protected until later proof/cutover authority. |
