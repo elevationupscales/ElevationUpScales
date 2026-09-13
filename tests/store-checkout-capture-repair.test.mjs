@@ -40,7 +40,7 @@ function makeDb(initialOrder) {
             async run() {
               state.updates.push({ sql: normalized, args });
               if (!state.order || !/UPDATE eus_store_orders/i.test(normalized)) return { success: true };
-              if (/RECONCILIATION_HOLD/i.test(normalized)) {
+              if (args[1] === "RECONCILIATION_HOLD") {
                 state.order.paypal_capture_id = args[0];
                 state.order.payment_status = args[1];
                 state.order.paid_at = null;
