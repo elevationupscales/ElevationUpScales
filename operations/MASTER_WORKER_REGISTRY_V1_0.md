@@ -34,9 +34,9 @@
 | Company Operations Manager / COM 2 | Company Operations | MPM 6 | Operations / Commercial Consolidation | **ACTIVE** | Cross-channel/vendor operations, policy substance, profitability and customer/fulfillment support; do not duplicate specialist implementation. |
 | MASTER RECON OS | Operating System | MPM 6 | OS Integrity / RECON | **STANDBY / TRIGGERED INTEGRITY** | Wake for real state/lineage/policy/supplier-truth/charge-authority/release conflicts or owner-directed RECON. |
 | MASTER DEVELOPER / Deployment Developer | Legacy Technical Lane | MPM 6 / authorized management | Legacy Development / Deployment | **STANDBY / VERIFY-FIX ONLY** | Legacy bounded repair only; not permanent Web V2 worker. |
-| WEB DEVELOPER | Web V2 Development | MPM 6 / Web V2 lane | Public Customer Experience | **STANDBY / SUPPORT** | Preserve merged Web V2 public path; support exact bounded visual/UI defects. |
-| **COMMERCE DEVELOPER** | Web V2 Development | MPM 6 / Web V2 lane | Commerce V2 | **ACTIVE / CURRENT — HAWAII / FREIGHT + PAYMENT READINESS** | Consume merged order handoff; connect only authoritative shipping/freight + tax/total authority; verify exact runtime binding; preserve fail-closed payment activation until all charge-readiness gates and at least one orderable SKU are proven. |
-| RELEASE ENGINEER | Web V2 Development | MPM 6 / Web V2 lane | Exact-Version Release | **READY / SUPPORT** | Verify exact runtime bindings and act only at true sandbox/production-parity release gates; same tested version promotes/cuts over. |
+| WEB DEVELOPER | Web V2 Development | MPM 6 / Web V2 lane | Public Customer Experience | **STANDBY / PREVIEW BUILD COMPLETE** | No further mutation unless exact preview exposes a real rendering defect. |
+| COMMERCE DEVELOPER | Web V2 Development | MPM 6 / Web V2 lane | Commerce V2 | **STANDBY / ACTIVATION WORK PRESERVED** | Resume authoritative freight/payment readiness after preview review; do not block preview; preserve all transaction fail-closed gates. |
+| **RELEASE ENGINEER** | Web V2 Development | MPM 6 / Web V2 lane | Exact-Version Release | **ACTIVE / CURRENT — EXACT-VERSION PREVIEW** | Use current merged main, create one exact candidate, expose immutable preview, prove `/__version`, return preview URL + Git SHA + Cloudflare Version ID, and stop before production promotion for owner visual acceptance. |
 | Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations | Company Operations Manager / MPM 6 | Ecommerce & Vendor Operations | **ACTIVE — EBAY P0 OVERSIGHT + SHOPIFY CONVERSION + VENDOR REVENUE** | eBay emergency stop-loss execution is immediate channel priority; preserve Shopify/Web V2 separation and current listing/ad controls. |
 | Shopify Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | Shopify Store Operations | **ACTIVE — CONVERSION / TRUST TUNING** | Preserve payment green state; support product trust, shipping-profile implementation after truth, policy publication after approval and re-smoke. |
 | eBay Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations | **ACTIVE — P0 CRITICAL / LIVE LOSS EXPOSURE** | Follow `EBAY_P0_PRICE_CONTROL_INCIDENT_2026-09-13.md`: stop new loss exposure through an action-capable Seller Hub surface; receipt-verify qty/state; identify new-sale receipt; protect customer obligations; then source/cost/reprice before reopening quantity. |
@@ -64,25 +64,30 @@ Completed / merged:
 - Checkout QA — Pull Request QA run 130 + Web V2 QA run 78 **PASS**.
 - Order + fulfillment handoff — `cd8e21ef4a89c261a4580b683da54be8a896787a` through PR #172.
 - Order QA — Pull Request QA run 134 + Web V2 QA run 90 **PASS**.
-- Worktree advancement — PR #173 merged as `e34740515a1fe7a1cf8ccb2fa0aa475bfe936d8c`.
+- Preview-readiness implementation — `84e9a2b8986ddeebd9b13a087c0e520c9dd9599c` through PR #175.
+- Preview-readiness QA — Web V2 QA #93 + Pull Request QA #137 **PASS**, including canonical QA and credential scan.
+- Preview handoff — PR #176 merged as `bfd6cddbdbb07dfabcf92020e1e412d1e363d83e`.
 
 Current phase:
 
-**HAWAII / FREIGHT + PAYMENT READINESS — P0 ACTIVE / CURRENT IN THE WEB V2 LANE**
+**PREVIEW READY — RELEASE ENGINEER ACTIVE / EXACT-VERSION PREVIEW**
 
-Activation holds remain controlled:
+Current exact-preview loop:
+
+**CURRENT MERGED MAIN → EXACT CANDIDATE → IMMUTABLE / EXACT-VERSION PREVIEW → `/__version` PROOF → OWNER VISUAL ACCEPTANCE.**
+
+For this run, Release Engineer stops after immutable preview + version proof. Production promotion/cutover remains owner-gated.
+
+Transaction activation holds remain controlled and are not preview-rendering blockers:
 
 - exact `MARKETPLACE_DB` D1 binding identity not yet verified;
 - authoritative shipping amount not yet available for the general direct-order path;
 - authoritative sales-tax amount/disposition not yet approved/configured;
 - final `amountDue` therefore remains unverified;
-- current merged canonical catalog still has no orderable SKU.
+- current merged canonical catalog still has no orderable SKU;
+- PayPal sandbox/live durable-order proof remains pending these charge/runtime gates.
 
-Normal loop:
-
-**RESOLVE CURRENT MAIN ONCE → READ `WEB_V2_CURRENT_WORKTREE.md` → ONE BOUNDED FREIGHT/PAYMENT-READINESS BRANCH → CONSUME MERGED ORDER HANDOFF → AUTHORITATIVE SHIPPING/FREIGHT + TAX/TOTAL + RUNTIME-BINDING GATES → QA → RECONCILE → MERGE → UPDATE WORKTREE → NEXT.**
-
-Do not reopen completed checkout/order architecture merely because charge readiness needs authoritative amounts or bindings.
+Do not reopen completed checkout/order architecture merely because charge readiness still needs authoritative amounts or bindings.
 
 ## Shopify conversion routing
 
@@ -140,7 +145,8 @@ No accepted candidate is rebuilt/re-uploaded before production acceptance.
 - Shopify is not a fallback checkout for Web V2 direct-site transactions.
 - Do not restore Commerce-WAIT or workers.dev preview acceptance.
 - Do not infer supplier truth to accelerate orderability or payment readiness.
+- Exact preview does not authorize production promotion.
 
 ## Current control phrase
 
-**MPM 6 ACTIVE → EBAY STOP NEW LOSS EXPOSURE → WEB V2 FREIGHT + PAYMENT READINESS ACTIVE → SHOPIFY CONVERSION TRUST ACTIVE → MASTER RECON TRIGGERED ONLY. SELL → CONVERT → FULFILL → RECORD PROFIT.**
+**MPM 6 ACTIVE → EBAY STOP NEW LOSS EXPOSURE → WEB V2 PREVIEW READY / RELEASE ENGINEER ACTIVE → SHOPIFY CONVERSION TRUST ACTIVE → MASTER RECON TRIGGERED ONLY. STORE EXPERIENCE MERGED → PREVIEW READINESS MERGED → EXACT PREVIEW → OWNER VISUAL ACCEPTANCE BEFORE PRODUCTION.**
