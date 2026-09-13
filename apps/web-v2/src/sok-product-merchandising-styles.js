@@ -1,6 +1,6 @@
 export const sokProductMerchandisingStyles = `
 /* Issue #185 — clean official SOK product photography only. No commerce authority lives here. */
-/* Product media is served from repository-localized same-origin assets; vendor URLs remain provenance only. */
+/* Product media is served from repository-localized Worker static assets; vendor URLs remain provenance only. */
 .reference-storefront-home .hero-product-12 img,
 .reference-storefront-home .hero-product-48 img{
   width:calc(100% - 12px);
