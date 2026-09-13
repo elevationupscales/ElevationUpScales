@@ -25,4 +25,6 @@
 
 These are exact localized bytes from the owner-approved official SOK product-material URLs. No AI redraw, generated battery render, SKU substitution, embedded promotional pricing, or supplier sale-banner artwork is authorized. Web V2 presents the two SKUs as one clean product family using consistent neutral image containers, contain-fit, whitespace, padding, and card proportions.
 
+The Wix/SOK URLs above are retained only as provenance. Customer-facing Web V2 uses the repository-localized same-origin asset paths so the exact release candidate does not depend on a vendor hotlink.
+
 The prior SK48V100N supplier promotional artwork (house/night scene and volume-pricing message) is not used by the Web V2 homepage/storefront presentation after this change. Existing commerce and supplier authority remain unchanged.
