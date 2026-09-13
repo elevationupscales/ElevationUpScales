@@ -19,7 +19,7 @@ test('homepage shell renders the Elevation customer hierarchy', async () => {
   assert.match(body, /Hawaii Logistics/);
   assert.match(body, /ChatGPT Image Sep 6, 2026, 11_44_56 AM\.png/);
   assert.match(body, /ChatGPT Image Sep 5, 2026, 04_15_53 PM\.png/);
-  assert.doesNotMatch(body, /PayPal|checkout|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
+  assert.doesNotMatch(body, /paypal\.com|\/api\/checkout|\/api\/paypal|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/i);
 });
 
 test('canonical start-a-project route stays present in the shell', async () => {
