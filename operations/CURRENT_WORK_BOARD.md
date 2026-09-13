@@ -4,9 +4,9 @@
 **Effective:** 2026-09-12  
 **Owner:** Casey Young  
 **State Owner:** Operating System Project Manager  
-**Current incident control:** `MPM5_OWNER_ROLLBACK_LIVE_SITE_AUDIT_INCIDENT_2026-09-12.md` — Legacy production repair only  
 **Legacy coding stabilization Worktree:** `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`  
 **Web V2 development Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
+**Web V2 owner workflow:** `WEB_V2_COMMERCIAL_RETAIL_REBUILD_AND_RELEASE_WORKFLOW_2026-09-12.md`  
 **Commerce tuning control:** `MPM5_EXISTING_SHOPS_TUNING_DIRECTIVE_2026-09-12.md`  
 **Profitability control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
 **Paid-acquisition control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
@@ -19,11 +19,31 @@ Management loop:
 
 **KNOW → RECONCILE → PRIORITIZE → ROUTE → VERIFY → UPDATE → CLOSE**
 
-Website inspection rule:
+Website inspection remains read-only by default. Website mutation is authorized only through the current Web V2 build/release lane or a separately authorized bounded Legacy repair.
 
-**SCAN / AUDIT / INSPECT / CHECK = READ-ONLY → EVIDENCE → REPORT → STOP.**
+---
 
-A website mutation requires a separately authorized build/repair/deploy action. Web V2 and Legacy production are separate development/runtime lanes and may not be collapsed for convenience.
+# OWNER WEBSITE TARGET — CURRENT
+
+ElevationUpScales.com is being rebuilt as a **commercial online retailer for authorized vendor products** with Elevation's lithium/off-grid/RV/freight/Hawaii specialty as the public positioning.
+
+The website's revenue path is:
+
+**HOMEPAGE → VENDOR/PRODUCT DISCOVERY → PRODUCT → CART → PAYPAL → ELEVATION ORDER → SUPPLIER/FREIGHT FULFILLMENT.**
+
+Owner visual direction:
+
+- preserve/reconstruct the current approved homepage design rather than inventing a new concept;
+- preserve the approved hero and recent freight/logistics presentation;
+- make Shop the primary revenue CTA;
+- keep Start a Project as a secondary path;
+- eliminate internal OS/developer language and non-revenue feature clutter from the public experience.
+
+Direct-site payment authority:
+
+**ElevationUpScales.com direct orders = Elevation-owned checkout + PayPal Orders v2 + durable Elevation order.**
+
+Do not silently route direct-site customers into Shopify checkout. Shopify, eBay and TikTok remain separate channel surfaces.
 
 ---
 
@@ -31,28 +51,45 @@ A website mutation requires a separately authorized build/repair/deploy action. 
 
 | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|
-| **Web V2 Development** | OS 1.1 Project Manager / MPM → one primary specialist worker | **ACTIVE / PERMANENT LANE — STEP 4 MERGED.** Accepted Step 4 application baseline = `04ef81368732d95c81e8f439f14524df385a9f1e`. Release foundation, visual SOP and first application shell are merged. Current `main` must be re-resolved before each new task because later control-only commits may advance it without changing the accepted application baseline. | **NEXT / OWNER-GATED:** exact-version Cloudflare candidate. Re-resolve `main`, use Release Engineer as the primary worker, preserve exact-version identity, and stop before promotion unless separately authorized. |
-| Web V2 — WEB DEVELOPER | Web V2 Development | **STANDBY — STEP 4 COMPLETE / MERGED** | No new UI/application branch until a new bounded build packet is authorized. |
-| Web V2 — RELEASE ENGINEER | Web V2 Development | **QUEUED / NEXT OWNER-GATED ACTION** | Cloudflare exact-version candidate is next. No Cloudflare mutation or production promotion from this management-sync task. |
-| Web V2 — COMMERCE DEVELOPER | Web V2 Development | **STANDBY / WAIT** | Commerce V2 integration remains waiting; do not jump forward. |
-| Legacy direct-site checkout / PayPal P0 | MASTER DEV under MPM | **CLOSED / PRODUCTION ACCEPTED** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` | VERIFY-FIX ONLY if a fresh reproducible Legacy defect is proven and repair is authorized. Do not reopen from stale audit evidence. |
-| Aborted Legacy live-site audit round | MPM / MASTER DEV | **OWNER ROLLED BACK / QUARANTINED** — `repair/live-site-audit-20260912` at `5fc55c806c1d7e138a9819a234e85ec932a056cb` | **DO NOT DEPLOY / DO NOT MERGE / DO NOT RERUN QA.** Retain as incident evidence only. |
-| MASTER DEVELOPER | MPM | **STANDBY / LEGACY VERIFY-FIX ONLY** | Legacy production repair only. Do not route Web V2 development through this stale Legacy repair lane. |
-| MASTER RECON OS | MPM | **STANDBY / TRIGGERED INTEGRITY** | Use only for state/lineage conflicts, owner-directed RECON, or exact-candidate validation when routed. |
-
-Web V2 control relationship:
-
-**CASEY → OS 1.1 PROJECT MANAGER / MPM → WEB V2 DEVELOPMENT**
-
-Web V2 development loop:
-
-**VERIFY CURRENT MAIN → ONE BOUNDED TASK → ONE PRIMARY WORKER → BRANCH → QA → REVIEW → MERGE → UPDATE WORKTREE → NEXT.**
+| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — COMMERCIAL RETAIL REBUILD / REVENUE FIRST.** Current source `main` before this reset = `7a55652a1a59226b40023050ad1aef04ab6e1577`. | Follow `WEB_V2_CURRENT_WORKTREE.md`: homepage reconstruction → retail navigation → canonical vendor catalog → product detail → cart → PayPal/order → freight/Hawaii gates → production-parity release. |
+| Web V2 — WEB DEVELOPER | Web V2 Development | **ACTIVE / NEXT** | Reconstruct the owner-approved current homepage look and retail/logistics message. No new visual concept. |
+| Web V2 — COMMERCE DEVELOPER | Web V2 Development | **QUEUED / AUTHORIZED AFTER HOMEPAGE BASELINE** | Build canonical vendor catalog, vendor views, product detail, cart, PayPal Orders v2, durable order and fulfillment handoff. |
+| Web V2 — RELEASE ENGINEER | Web V2 Development | **ACTIVE SUPPORT — RELEASE SYSTEM RESET** | Use production-parity smoke workflow. `workers.dev` preview is diagnostic only, not acceptance authority. |
+| MASTER RECON OS | MPM | **ACTIVE FOR DEPLOYMENT/WORKTREE RESET** | Validate production-parity release system and prevent stale preview-first / Commerce-WAIT state from returning. |
+| Legacy direct-site checkout / PayPal | MASTER DEV under MPM | **CLOSED / PRODUCTION ACCEPTED** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` | Preserve as Legacy fallback/reference while Web V2 is built. VERIFY-FIX only on fresh Legacy defect. |
+| Aborted Legacy live-site audit round | MPM / MASTER DEV | **OWNER ROLLED BACK / QUARANTINED** — `repair/live-site-audit-20260912` at `5fc55c806c1d7e138a9819a234e85ec932a056cb` | DO NOT DEPLOY / DO NOT MERGE / DO NOT REPLAY. |
 
 Web V2 release invariant:
 
-**ONE GIT SHA → ONE CLOUDFLARE VERSION ID → ONE TESTED VERSIONED PREVIEW → THAT SAME VERSION ID IN PRODUCTION.**
+**ONE APPROVED GIT SHA → ONE CLOUDFLARE VERSION ID → PRODUCTION-PARITY SMOKE OF THAT EXACT VERSION → SAME VERSION LIVE → VERIFY → RECEIPT.**
 
-`production-deploy` remains **LEGACY ONLY** and does not represent Web V2 runtime state.
+Preview URLs are diagnostic only.
+
+Bootstrap release before V2 owns the root domain:
+
+**CANDIDATE → SMOKE-ONLY CUSTOM DOMAIN WITH PRODUCTION BINDINGS → EXACT RUNTIME VERSION PROOF → OWNER ACCEPTANCE → SAME WORKER/VERSION ROOT-DOMAIN CUTOVER → LIVE VERIFY.**
+
+Steady-state release after V2 owns production:
+
+**CANDIDATE → ACCEPTED VERSION 100% + CANDIDATE 0% → REAL PRODUCTION URL + VERSION OVERRIDE → EXACT RUNTIME VERSION PROOF → PROMOTE SAME VERSION TO 100% → LIVE VERIFY.**
+
+---
+
+# WEB V2 BUILD SEQUENCE
+
+| Sequence | State | Routing |
+|---|---|---|
+| Homepage exact reconstruction | **P0 ACTIVE / NEXT** | Web Developer. Preserve approved hero/freight/brand look; retail-first copy. |
+| Retail navigation cleanup | **QUEUED** | Shop / Vendors / Freight & Hawaii / Start a Project. Remove public feature clutter. |
+| Canonical vendor catalog | **QUEUED / AUTHORIZED** | Commerce Developer. Use owning vendor Project truth; one canonical catalog, vendor-filtered views. |
+| Product detail | **QUEUED** | Commercial retail product page with exact SKU/spec/image/shipping/warranty state. |
+| Cart | **QUEUED** | Durable editable cart + server-side SKU/price/orderability revalidation. |
+| PayPal checkout + Elevation order | **QUEUED / AUTHORIZED** | PayPal Orders v2 + idempotency + durable order + capture/reconciliation. |
+| Supplier/freight fulfillment handoff | **QUEUED** | Persist fulfillment source and route the order to the owning supplier/logistics lane. |
+| Freight/Hawaii lithium gate | **QUEUED** | Known shipping may sell; unresolved freight/unapproved lithium route fails closed before final charge. |
+| Production-parity smoke | **BUILT ON CURRENT RECON BRANCH / QA PENDING** | Exact Version ID + runtime `/__version` proof. |
+| Same-version production acceptance | **WAIT FOR BUILT SITE + OWNER RELEASE** | No rebuild/re-upload. Cut over/promote exact smoke-tested version. |
+| First real direct-site order | **FINAL REVENUE PROOF** | Payment → durable order → supplier/freight → fulfillment → realized margin. |
 
 ---
 
@@ -61,39 +98,25 @@ Web V2 release invariant:
 | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|
 | Owner communications / residual Google Voice forwarding | MPM / Communications Recovery | **P0 CRITICAL — ACCOUNT RECOVERED / VOICE DELETED / RESIDUAL FORWARDING REMAINS** | Carrier/Google clear residual forwarding/state; verify direct inbound call + SMS. |
-| eBay customer/cash recovery + profitability contraction | eBay Store Operations under Peter / Company Operations | **P0 PARALLEL — CUSTOMER OBLIGATIONS + CASH RELEASE + LOSS PREVENTION** | Resolve shipment/cancellation/refund obligations and held-cash blockers; preserve only source-safe positive-contribution core. |
-| Existing-shop tuning | MPM / Company Operations / owning channel workers | **ACTIVE — TUNE BEFORE EXPANDING** | Fix current product truth, publication, purchase, fulfillment and realized-margin issues before adding reach. |
-| Vendor-channel + intake audit | MPM / Company Operations + vendor managers | **ACTIVE / CONTROLLED** | Vendor identity → authorization → exact SKU → source → stock → MAP/floor → landed cost → shipping → warranty/returns → channel eligibility → publication → checkout → fulfillment → realized margin. |
+| eBay customer/cash recovery + profitability contraction | eBay Store Operations under Peter / Company Operations | **P0 PARALLEL — CUSTOMER OBLIGATIONS + CASH RELEASE + LOSS PREVENTION** | Resolve shipment/cancellation/refund obligations and held-cash blockers; preserve positive-contribution core. |
+| Existing-shop tuning | MPM / Company Operations / owning channel workers | **ACTIVE — TUNE BEFORE EXPANDING** | Fix current channel product truth, purchase, fulfillment and realized-margin issues. |
+| Vendor source truth | Vendor Project managers/specialists | **ACTIVE / SUPPORTING WEB V2** | Maintain exact authorization/SKU/stock/MAP/cost/shipping/warranty/fulfillment truth for Web V2 catalog consumption. |
 
 ---
 
-# EXISTING SHOP / CHANNEL STATE — PRESERVE, DO NOT EXPAND
+# EXISTING SHOP / CHANNEL STATE
 
 | Lane | Owner | Current State | Next |
 |---|---|---|---|
-| Shopify Online Store | Shopify Store Operations + Owner | **PRESERVE — SHOPIFY PAYMENTS ACCEPTING PAYMENTS / RECEIVING PAYOUTS / 53 PUBLIC / 50 VEVOR STAGING HOLD** | Preserve working Shopify checkout/payment configuration. Keep intentional staging hidden. No cross-lane payment experiments. |
-| Elevation direct site — Legacy runtime | MPM / MASTER DEV | **PRODUCTION ACCEPTED / VERIFY-ONLY** | Preserve Legacy Safe Prod while Web V2 is built beside it. Fresh scans are read-only unless Legacy repair is separately authorized. |
-| Web V2 | OS 1.1 Project Manager / Web V2 Development | **ACTIVE DEVELOPMENT / NOT PRODUCTION** | Continue only through `WEB_V2_CURRENT_WORKTREE.md`. Next is exact-version candidate after explicit Cloudflare gate; no Legacy route/domain replacement yet. |
-| VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE EXISTING CATALOG / PUBLICATION HOLD** | Preserve current sellable set and staging hold; real order triggers exact source/cost/MAP/shipping recheck. |
-| Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE EXISTING CATALOG / PUBLICATION HOLD — 2 ACTIVE / 4 DRAFT** | Preserve current state; real order triggers exact dealer/orderability/backorder/cost/shipping recheck. |
-| SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** | Lower-48 controlled commerce + Hawaii warranty/logistics proving continue; do not restart generic qualification. |
-| Kingboss | Kingboss Project Operations Manager / Specialist | **ACTIVE STAGE-1 PROVING** | Continue source/catalog/SKU/MAP/channel/warranty/compliance reconciliation; no speculative commitment. |
-| Apparel / Fourthwall | Apparel Vendor Operations Manager | **ACTIVE — EXISTING 29-PRODUCT FOURTHWALL TUNING** | Payout/promo/copy/economics cleanup; preserve native fulfillment. |
-| TikTok Shop / Affiliate Growth | TikTok execution + TikTok Affiliate Growth Manager under Peter | **ACTIVE UNDER RESTRICTION / APPEAL TERMINAL-FAILED** | No appeal replay. Fix current OOS/account/catalog/economics only; preserve clean fulfillment/support. |
-
----
-
-# WEB V2 CURRENT SEQUENCE
-
-| Milestone | State | Routing |
-|---|---|---|
-| Release foundation | **COMPLETE / MERGED** | Preserve exact-version release machinery. |
-| Visual/customer-experience SOP | **COMPLETE / MERGED** | `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md` controls substantial visual work. |
-| Step 4 application shell | **COMPLETE / MERGED** | Accepted application baseline = `04ef81368732d95c81e8f439f14524df385a9f1e`; future work re-resolves current `main`. |
-| Cloudflare exact-version candidate | **NEXT / OWNER-GATED** | Release Engineer primary. No rebuild after candidate acceptance; no promotion without explicit owner authorization. |
-| Commerce V2 integration | **WAIT** | Commerce Developer standby. |
-| Ops V2 | **WAIT** | Do not start yet. |
-| Legacy retirement | **NOT AUTHORIZED** | Legacy production remains protected. |
+| Shopify Online Store | Shopify Store Operations + Owner | **PRESERVE — SEPARATE CHANNEL** | Preserve working Shopify checkout/payment configuration and current intentional staging. Do not make Shopify the Web V2 direct-site payment owner. |
+| Elevation direct site — Legacy runtime | MPM / MASTER DEV | **PRODUCTION ACCEPTED / FALLBACK / VERIFY-ONLY** | Preserve during Web V2 build/cutover. |
+| Web V2 | OS 1.1 Project Manager / Web V2 Development | **ACTIVE COMMERCIAL RETAIL BUILD** | Build direct retail revenue path under current Worktree. |
+| VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact approved product/source/shipping/economics truth to canonical Web V2 catalog. External channel expansion remains separately controlled. |
+| Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE SUPPLIER/CATALOG SOURCE** | Supply exact dealer/orderability/backorder/cost/shipping/warranty truth to Web V2 catalog. |
+| SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** | Supply exact product/orderability/warranty truth; preserve Hawaii controls. |
+| Kingboss | Kingboss Project Operations Manager / Specialist | **ACTIVE STAGE-1 PROVING / CATALOG SOURCE WHEN APPROVED** | Continue exact SKU/MAP/channel/warranty/compliance reconciliation before publication. |
+| Apparel / Fourthwall | Apparel Vendor Operations Manager | **ACTIVE SEPARATE APPAREL CHANNEL** | Preserve native fulfillment/economics; not a blocker to lithium/off-grid retail launch. |
+| TikTok Shop / Affiliate Growth | TikTok execution + TikTok Affiliate Growth Manager under Peter | **ACTIVE UNDER RESTRICTION / APPEAL TERMINAL-FAILED** | No appeal replay; current-shop tuning only. |
 
 ---
 
@@ -101,55 +124,49 @@ Web V2 release invariant:
 
 | Work Item | State | Reopen Gate |
 |---|---|---|
-| New item listings / catalog expansion | **HOLD** | Casey/MPM explicitly releases after current store/vendor-channel truth is clean. |
-| Vendor storefront + channel-catalog architecture | **PLANNED HOLD** | Existing-shop and vendor-channel intake baselines must be clean first. |
-| New-channel expansion — Meta / Google & YouTube / Amazon / Walmart / additional marketplaces | **HOLD — CURRENT STORE FIRST** | Existing shops reach clean product/publication/purchase/fulfillment/profitability baselines and Casey/MPM explicitly reopen expansion. |
-| Paid advertising / prepaid media | **HOLD — OWNER CAPITAL-RECOVERY RULE** | Verified capital-recovery hole reaches zero **and** Casey explicitly reopens paid acquisition. |
-| Protected Legacy homepage top | **NO TOUCH** | Exact owner authorization or a fresh, reproducible genuine defect. Web V2 visual work follows its separately approved visual SOP and lane Worktree. |
+| **Web V2 authorized vendor catalog build** | **ACTIVE / NOT HELD** | Exact supplier/project truth must exist before each SKU is published. |
+| External marketplace / new-channel catalog expansion | **HOLD — CURRENT CHANNELS FIRST** | Casey/MPM explicitly reopens after current channel profitability/stability. |
+| New-channel expansion — Meta / Google & YouTube / Amazon / Walmart / additional marketplaces | **HOLD** | Existing channels stable/profitable + owner reopen. |
+| Paid advertising / prepaid media | **HOLD — OWNER CAPITAL-RECOVERY RULE** | Verified capital-recovery hole reaches zero and Casey explicitly reopens paid acquisition. |
+| Legacy homepage mutation | **NO TOUCH** | Fresh Legacy defect + exact authorization. Web V2 is the authorized rebuild lane. |
+| Broad Ops V2/admin/dashboard rebuild | **HOLD BEHIND REVENUE PATH** | Web V2 retail purchase path is functional and accepted first. |
 
 ---
 
-# WAITING / PRESERVED
+# NOT FOREGROUND / DO NOT DELAY REVENUE BUILD
 
-- SolarStock USA quote / direct-job-site qualification — waiting on supplier response.
-- Logistics Plus Hawaii storage / fulfillment qualification — waiting on provider terms.
-- R&R Solar Hawaii proof-support relationship — waiting on partner response.
-- H2O Logistics Hawaii / Pasha backup route — existing source/access blocker remains.
-- Warranty Fulfillment shared service — continue through real supplier cases; must not block commerce.
-- Lithium Buyer Network prospecting — P3 parallel; must not displace P0/P1 and does not authorize paid acquisition.
-- Internal `sales@` tracking reliability — P3 end-of-flow.
+- marketplace/list-a-vehicle systems;
+- collector features;
+- large CMS/admin platform;
+- speculative AI/agentic commerce;
+- unrelated home-service expansion;
+- broad analytics redesign;
+- new social/channel expansion;
+- another homepage redesign.
 
 ---
 
 # CLOSED / DO NOT RECREATE
 
-- Direct-site checkout / PayPal bounded repair — **CLOSED / PRODUCTION ACCEPTED** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
-- Aborted audit repair branch `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` — **OWNER ROLLED BACK / DO NOT DEPLOY / DO NOT MERGE**.
-- Audit workflow run `34728792703` — **FAILED / DO NOT RERUN AS RELEASE PATH**.
-- Owner-created stale candidate `84af23ec814baa73718e33ec052044ce4706534d` — **RETIRED / DO NOT DEPLOY**.
-- Shopify Payments onboarding `Complete setup` blocker — closed/stale; authenticated state is Accepting payments / Receiving payouts.
-- Shopify 50-product generic-publication blocker — closed as VEVOR intentional staging hold / do not bulk publish.
-- TikTok high-risk-shop appeal — failed / cannot appeal again; do not replay.
-- VEVOR PRO registration/feed/tax-exemption/A-tier/current qualified B-tier onboarding — completed; do not restart.
-- Renogy dealer onboarding/W-9/portal setup — completed; do not restart.
-- SOK generic supplier qualification/media/Hawaii warranty-input intake — completed; do not duplicate.
+- Legacy direct-site checkout / PayPal bounded repair — CLOSED / PRODUCTION ACCEPTED at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
+- Aborted Legacy audit branch `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` — OWNER ROLLED BACK / DO NOT DEPLOY / DO NOT MERGE.
+- Audit workflow run `34728792703` — FAILED / DO NOT RERUN AS RELEASE PATH.
+- Stale candidate `84af23ec814baa73718e33ec052044ce4706534d` — RETIRED / DO NOT DEPLOY.
+- Shopify Payments `Complete setup` blocker — closed/stale; authenticated state accepts payments/receives payouts.
+- TikTok verification appeal replay — terminal failed / do not recreate.
+- Generic vendor re-onboarding for already authorized suppliers — do not restart.
 
 ## Update discipline
 
-1. Newer owner/MPM/owning-lane state supersedes stale board text.
-2. `SCAN`, `AUDIT`, `INSPECT`, and `CHECK` are read-only by default; evidence does not itself authorize mutation.
-3. `DESIGN` is architecture/documentation only; `BUILD` is isolated implementation; `RUN` resumes the authorized Worktree; `DEPLOY` acts only on an approved candidate/version; `STOP` stops mutation.
-4. Do not create a new QA/deployment workflow for a one-off Legacy defect unless Casey explicitly authorizes a permanent new control.
-5. Closed Legacy production work remains closed until a fresh reproducible defect exists and repair execution is authorized.
-6. Web V2 uses one current Worktree and one primary worker per bounded task; no duplicate branches for the same objective.
-7. No Web V2 production deployment occurs from a development task unless explicitly authorized.
-8. Web V2 never uses `production-deploy` as a runtime promotion pointer.
-9. No secrets are committed to Git; no accepted candidate is rebuilt before promotion.
-10. Block only the exact blocked item; unrelated executable work continues.
-11. Shopify remains its own commerce/payment lane.
-12. New listings, channel expansion and paid acquisition remain separate management controls.
-13. Commerce integration must preserve **one surface = one checkout owner = one payment/order authority**.
+1. Owner website target above supersedes older Web V2 sequencing that kept Commerce V2 waiting behind preview acceptance.
+2. Web V2 catalog publication is authorized only from exact approved vendor/source truth; this does not reopen external marketplace expansion.
+3. Preview URLs are diagnostic only; production-parity smoke is the release acceptance path.
+4. One Web V2 Worktree, one primary worker per bounded task, no duplicate development branches for the same objective.
+5. Legacy production stays separately protected as rollback/fallback until Web V2 cutover is accepted.
+6. Shopify remains a separate channel, not a fallback checkout for Elevation direct-site transactions.
+7. No secrets in Git; no accepted candidate rebuild before promotion/cutover.
+8. Block only the exact blocked item and continue the next executable revenue-critical task.
 
 ## Current control phrase
 
-**LEGACY PRODUCTION PRESERVED → WEB V2 ACTIVE / SEPARATE → ONE CURRENT WORKTREE → ONE PRIMARY WORKER → VERIFY → BUILD → QA → MERGE → VERSION → PREVIEW → PROMOTE → NEXT.**
+**KEEP THE HOMEPAGE → SELL THE PARTNERS → CART → PAYPAL → ORDER → FULFILL → FREIGHT / HAWAII CONTROL → PRODUCTION-PARITY SMOKE → SAME VERSION LIVE → MAKE MONEY.**
