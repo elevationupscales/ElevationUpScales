@@ -18,7 +18,7 @@ function header(currentPath) {
     const active = href === currentPath ? ' aria-current="page"' : '';
     return `<a href="${href}"${active}>${escapeHtml(label)}</a>`;
   }).join('');
-  return `<header class="catalog-topnav"><div class="catalog-nav-inner"><a class="catalog-brand" href="/">Elevation UpScales</a><nav aria-label="Primary retail navigation">${links}</nav></div></header>`;
+  return `<header class="catalog-topnav"><div class="catalog-nav-inner"><a class="catalog-brand" href="/">Elevation UpScales</a><nav aria-label="Primary retail navigation">${links}</nav><a class="catalog-cart-link" href="/cart">Cart</a></div></header>`;
 }
 
 function footer() {
@@ -33,7 +33,8 @@ function head(routeInfo) {
 <meta name="description" content="${escapeHtml(routeInfo.description)}">
 <link rel="canonical" href="${escapeHtml(canonicalUrl(routeInfo))}">
 <title>${escapeHtml(routeInfo.title)}</title>
-<link rel="stylesheet" href="/assets/app.css">`;
+<link rel="stylesheet" href="/assets/app.css">
+<script defer src="/assets/cart.js"></script>`;
 }
 
 function formatPrice(price) {
@@ -155,7 +156,7 @@ function productMain(productId) {
         <h1>${escapeHtml(product.title)}</h1>
         <p class="catalog-price">${escapeHtml(formatPrice(product.sellPrice))}</p>
         ${product.orderable
-          ? '<p class="status">Orderable through Elevation direct commerce.</p>'
+          ? `<div><p class="status">Orderable through Elevation direct commerce.</p><button class="button button-primary" type="button" data-add-to-cart="${escapeHtml(product.id)}">Add to Cart</button></div>`
           : `<div class="catalog-hold"><strong>Verification hold — checkout disabled.</strong><p>This product remains non-orderable until all required source facts are verified.</p><ul>${product.missingFacts.map((field) => `<li>${escapeHtml(missingLabel(field))}</li>`).join('')}</ul></div>`}
       </article>
       <aside class="catalog-facts"><h2>Product verification</h2><dl>
