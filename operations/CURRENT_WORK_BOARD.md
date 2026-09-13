@@ -51,11 +51,11 @@ Do not silently route direct-site customers into Shopify checkout. Shopify, eBay
 
 | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|
-| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — COMMERCIAL RETAIL REBUILD / REVENUE FIRST.** Current source `main` before this reset = `7a55652a1a59226b40023050ad1aef04ab6e1577`. | Follow `WEB_V2_CURRENT_WORKTREE.md`: homepage reconstruction → retail navigation → canonical vendor catalog → product detail → cart → PayPal/order → freight/Hawaii gates → production-parity release. |
-| Web V2 — WEB DEVELOPER | Web V2 Development | **ACTIVE / NEXT** | Reconstruct the owner-approved current homepage look and retail/logistics message. No new visual concept. |
+| **Web V2 Development** | OS 1.1 Project Manager / MPM → Web V2 workers | **P0 ACTIVE — COMMERCIAL RETAIL REBUILD / REVENUE FIRST.** Commercial-retail release reset accepted at `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`; every worker must still re-resolve current `main` before execution. | Follow `WEB_V2_CURRENT_WORKTREE.md`: homepage reconstruction → retail navigation → canonical vendor catalog → product detail → cart → PayPal/order → freight/Hawaii gates → production-parity release. |
+| Web V2 — WEB DEVELOPER | Web V2 Development | **ACTIVE / NEXT — HOMEPAGE RECONSTRUCTION** | Reconstruct the owner-approved current homepage look and retail/logistics message. No new visual concept and no skip-ahead to release. |
 | Web V2 — COMMERCE DEVELOPER | Web V2 Development | **QUEUED / AUTHORIZED AFTER HOMEPAGE BASELINE** | Build canonical vendor catalog, vendor views, product detail, cart, PayPal Orders v2, durable order and fulfillment handoff. |
-| Web V2 — RELEASE ENGINEER | Web V2 Development | **ACTIVE SUPPORT — RELEASE SYSTEM RESET** | Use production-parity smoke workflow. `workers.dev` preview is diagnostic only, not acceptance authority. |
-| MASTER RECON OS | MPM | **ACTIVE FOR DEPLOYMENT/WORKTREE RESET** | Validate production-parity release system and prevent stale preview-first / Commerce-WAIT state from returning. |
+| Web V2 — RELEASE ENGINEER | Web V2 Development | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | Release-system reset is complete and QA-passed. Support a bounded build only when it reaches a true release gate; `workers.dev` preview is diagnostic only. |
+| MASTER RECON OS | MPM | **STANDBY / TRIGGERED INTEGRITY** | Wake for state/lineage conflict, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON. No standing website execution. |
 | Legacy direct-site checkout / PayPal | MASTER DEV under MPM | **CLOSED / PRODUCTION ACCEPTED** at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88` | Preserve as Legacy fallback/reference while Web V2 is built. VERIFY-FIX only on fresh Legacy defect. |
 | Aborted Legacy live-site audit round | MPM / MASTER DEV | **OWNER ROLLED BACK / QUARANTINED** — `repair/live-site-audit-20260912` at `5fc55c806c1d7e138a9819a234e85ec932a056cb` | DO NOT DEPLOY / DO NOT MERGE / DO NOT REPLAY. |
 
@@ -87,8 +87,8 @@ Steady-state release after V2 owns production:
 | PayPal checkout + Elevation order | **QUEUED / AUTHORIZED** | PayPal Orders v2 + idempotency + durable order + capture/reconciliation. |
 | Supplier/freight fulfillment handoff | **QUEUED** | Persist fulfillment source and route the order to the owning supplier/logistics lane. |
 | Freight/Hawaii lithium gate | **QUEUED** | Known shipping may sell; unresolved freight/unapproved lithium route fails closed before final charge. |
-| Production-parity smoke | **BUILT ON CURRENT RECON BRANCH / QA PENDING** | Exact Version ID + runtime `/__version` proof. |
-| Same-version production acceptance | **WAIT FOR BUILT SITE + OWNER RELEASE** | No rebuild/re-upload. Cut over/promote exact smoke-tested version. |
+| Production-parity release system | **COMPLETE / MERGED / QA PASS** | Release foundation and application QA passed in run `34738843664`; exact Version ID + runtime `/__version` proof is ready for the first true release gate. |
+| Same-version production acceptance | **WAIT FOR BUILT SITE + OWNER RELEASE** | No rebuild/re-upload. Cut over/promote exact smoke-tested version only after the bounded site build reaches release readiness. |
 | First real direct-site order | **FINAL REVENUE PROOF** | Payment → durable order → supplier/freight → fulfillment → realized margin. |
 
 ---
@@ -149,6 +149,7 @@ Steady-state release after V2 owns production:
 # CLOSED / DO NOT RECREATE
 
 - Legacy direct-site checkout / PayPal bounded repair — CLOSED / PRODUCTION ACCEPTED at `894b15cb12bf75a6a8e81b916e2a9bc2de858f88`.
+- Web V2 production-parity release-system reset — COMPLETE / MERGED / QA PASS; do not rebuild the architecture or restore workers.dev acceptance.
 - Aborted Legacy audit branch `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` — OWNER ROLLED BACK / DO NOT DEPLOY / DO NOT MERGE.
 - Audit workflow run `34728792703` — FAILED / DO NOT RERUN AS RELEASE PATH.
 - Stale candidate `84af23ec814baa73718e33ec052044ce4706534d` — RETIRED / DO NOT DEPLOY.
@@ -166,6 +167,8 @@ Steady-state release after V2 owns production:
 6. Shopify remains a separate channel, not a fallback checkout for Elevation direct-site transactions.
 7. No secrets in Git; no accepted candidate rebuild before promotion/cutover.
 8. Block only the exact blocked item and continue the next executable revenue-critical task.
+9. **HOMEPAGE FIRST → COMMERCE SECOND → RELEASE ONLY AT A TRUE GATE.** Passing release-system QA does not authorize premature candidate creation or production smoke.
+10. MASTER RECON returns to triggered integrity after correcting drift; it does not remain a standing executor.
 
 ## Current control phrase
 
