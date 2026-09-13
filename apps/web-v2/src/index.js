@@ -1,4 +1,8 @@
 import { clientScript } from './client.js';
+import { cartClientScript } from './cart-client.js';
+import { renderCartPage } from './cart-page.js';
+import { cartStyles } from './cart-styles.js';
+import { parseCartItems, resolveCartLines } from './cart.js';
 import { catalogStyles } from './catalog-styles.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
@@ -75,12 +79,24 @@ export default {
     }
 
     if (url.pathname === '/assets/app.css') {
-      return response(`${styles}\n${navStyles}\n${catalogStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
     if (url.pathname === '/assets/app.js') {
       return response(clientScript, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
+
+    if (url.pathname === '/assets/cart.js') {
+      return response(cartClientScript, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+    }
+
+    if (url.pathname === '/api/cart/resolve') {
+      const requestedLines = parseCartItems(url.searchParams.get('items'));
+      if (requestedLines === null) return json({ error: 'INVALID_CART_PAYLOAD' }, 400);
+      return json(resolveCartLines(requestedLines));
+    }
+
+    if (url.pathname === '/cart') return html(renderCartPage());
 
     const compatibilityRedirect = resolveCompatibilityRedirect(url);
     if (compatibilityRedirect) return redirect(compatibilityRedirect.location, compatibilityRedirect.status);
