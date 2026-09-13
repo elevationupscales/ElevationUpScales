@@ -8,7 +8,8 @@
 **Current owner workflow:** `WEB_V2_COMMERCIAL_RETAIL_REBUILD_AND_RELEASE_WORKFLOW_2026-09-12.md`  
 **Visual control:** `WEB_V2_VISUAL_SYSTEM_SOP_V1_0.md`  
 **Legacy production:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — LEGACY ONLY / rollback reference  
-**Current source baseline before this reset:** `main = 7a55652a1a59226b40023050ad1aef04ab6e1577`
+**Accepted commercial-retail reset baseline:** `9442ffc679b00b8c9b87ff4c6fbb0664b5728881`  
+**Git freshness rule:** re-resolve then-current `main` before every bounded task; later control-only descendants do not change the owner build order by themselves.
 
 ## 1. Mission
 
@@ -84,6 +85,8 @@ Allowed states include parcel/known rate, supplier-controlled shipping, approved
 
 ## 7. New release system
 
+The production-parity release-system reset is **COMPLETE / MERGED / QA PASS**. QA run `34738843664` passed the release foundation and Web V2 application tests.
+
 Version preview is **diagnostic only** and is no longer the acceptance gate.
 
 Release invariant:
@@ -108,14 +111,16 @@ After V2 owns production:
 
 Rollback restores the last accepted Version ID. No rebuild or re-upload after candidate acceptance.
 
+Do not create a candidate or smoke deployment merely because the release machinery is ready. Release begins only when the bounded site build reaches its true release gate.
+
 ## 8. Current worker routing
 
 | Worker | State | Task |
 |---|---|---|
-| WEB DEVELOPER | **ACTIVE / NEXT** | Reconstruct approved homepage exactly enough for owner visual acceptance; remove internal/development presentation; make retail/logistics positioning clear. |
-| COMMERCE DEVELOPER | **QUEUED IMMEDIATELY AFTER HOMEPAGE BASELINE** | Canonical catalog → vendor views → product detail → cart → PayPal Orders v2 → durable order → fulfillment handoff. |
-| RELEASE ENGINEER | **ACTIVE SUPPORT / NEW RELEASE SYSTEM** | Replace preview-gated acceptance with production-parity smoke workflow; preserve exact SHA/version identity and rollback. |
-| MASTER RECON OS | **ACTIVE FOR THIS RESET** | Validate deployment-system change and stop stale preview/architecture sequencing from reappearing. |
+| WEB DEVELOPER | **ACTIVE / NEXT — HOMEPAGE RECONSTRUCTION** | Reconstruct approved homepage exactly enough for owner visual acceptance; remove internal/development presentation; make retail/logistics positioning clear. Do not skip ahead to release. |
+| COMMERCE DEVELOPER | **AUTHORIZED / QUEUED IMMEDIATELY AFTER HOMEPAGE BASELINE** | Canonical catalog → vendor views → product detail → cart → PayPal Orders v2 → durable order → fulfillment handoff. |
+| RELEASE ENGINEER | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | Release system is already built and QA-passed. Preserve exact SHA/version identity and rollback; act when a bounded build reaches a true release gate. Do not recreate preview-gated architecture. |
+| MASTER RECON OS | **STANDBY / TRIGGERED INTEGRITY** | Reset is complete. Wake for state/lineage conflict, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON. |
 
 ## 9. Build sequence
 
@@ -151,6 +156,8 @@ Do not delay this sequence for:
 **RE-RESOLVE MAIN → READ THIS WORKTREE → EXECUTE NEXT REVENUE-CRITICAL BOUNDED TASK → QA → MERGE → UPDATE WORKTREE → CONTINUE UNTIL TRUE GATE.**
 
 Do not stop merely because a later phase is waiting if the next earlier phase is executable.
+
+Do not skip the active homepage baseline to start release work. After homepage acceptance, route directly into authorized Commerce work rather than restoring an obsolete Commerce WAIT gate.
 
 ## Control phrase
 
