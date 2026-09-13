@@ -1,5 +1,5 @@
 import { clientScript } from './client.js';
-import { CANONICAL_ORIGIN, getPublicRoute, resolveCompatibilityRedirect } from './routes.js';
+import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
 import { renderNotFound, renderPublicPage } from './shell.js';
 import { styles } from './styles.js';
 
@@ -39,6 +39,29 @@ function redirect(location, status) {
   });
 }
 
+function robotsText(url) {
+  if (url.origin !== CANONICAL_ORIGIN) {
+    return 'User-agent: *\nDisallow: /\n';
+  }
+
+  return [
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /healthz',
+    '',
+    `Sitemap: ${CANONICAL_ORIGIN}/sitemap.xml`,
+    ''
+  ].join('\n');
+}
+
+function sitemapXml() {
+  const entries = getSitemapRoutes()
+    .map((routeInfo) => `  <url><loc>${canonicalUrl(routeInfo)}</loc></url>`)
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+}
+
 function currentPublicBridge(url, routeInfo) {
   if (!routeInfo || routeInfo.implemented) return null;
   if (url.origin === CANONICAL_ORIGIN) return null;
@@ -63,6 +86,24 @@ export default {
         phase: 'phase-1-step-4-shell',
         commerceConnected: false,
         opsConnected: false
+      });
+    }
+
+    if (url.pathname === '/robots.txt') {
+      return response(robotsText(url), {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
+
+    if (url.pathname === '/sitemap.xml') {
+      return response(sitemapXml(), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
       });
     }
 
