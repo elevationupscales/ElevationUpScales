@@ -60,7 +60,8 @@ Web V2 is one operating lane. WEB DEVELOPER, RELEASE ENGINEER and COMMERCE DEVEL
 
 Current verified state:
 
-- current accepted `main` = `04ef81368732d95c81e8f439f14524df385a9f1e`;
+- accepted Step 4 application baseline = `04ef81368732d95c81e8f439f14524df385a9f1e`;
+- future Web V2 work must re-resolve the then-current `main`; management/control-only descendants do not replace the accepted application baseline by themselves;
 - release foundation = complete / merged;
 - visual SOP = complete / merged;
 - Step 4 application shell = complete / merged;
