@@ -2,57 +2,69 @@ import { CANONICAL_ORIGIN, PRIMARY_NAV, canonicalUrl } from './routes.js';
 
 const LEGACY_ASSET_ORIGIN = 'https://elevationupscales.com';
 const asset = (path) => `${LEGACY_ASSET_ORIGIN}${path}`;
+const BRAND_WORDMARK = asset('/assets/brand/Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT.webp?v=20260910-1');
 
 const solutionCards = [
-  ['Lithium Batteries', 'LiFePO4 systems for RV, solar, backup and off-grid use.', '/store?department=lithium-batteries', 'Shop Lithium'],
-  ['SOK Battery Systems', '12V, 24V and 48V systems from Elevation’s primary authorized battery partner.', '/shop/sok', 'Shop SOK'],
-  ['Solar & Off-Grid', 'Build around batteries, charging and real power needs.', '/solar-project', 'Shop Solar'],
-  ['Hawaii Power & Logistics', 'Battery supply and destination review for Hawaii.', '/hawaii-lithium-batteries', 'Explore Hawaii'],
-  ['RV & Outdoor', 'Travel, camping, RV and practical outdoor equipment.', '/store?department=rv-outdoor', 'Shop RV & Outdoor'],
-  ['Backup Power', 'Battery storage and power systems for backup applications.', '/shop/sok', 'Shop Backup Power'],
-  ['Commercial Power', 'Rack storage and larger product-supply quantities.', '/shop/sok', 'Commercial Supply']
+  ['Lithium Batteries', '12V lithium energy for RV and mobile systems.', '/store?department=lithium-batteries', 'Shop Batteries'],
+  ['SOK Battery Systems', '12V, 24V & 48V systems.', '/shop/sok', 'Shop SOK'],
+  ['Solar & Off-Grid', 'Build your energy independence.', '/solar-project', 'Shop Solar'],
+  ['Hawaii Power & Logistics', 'Battery freight matched to product and destination.', '/hawaii-lithium-batteries', 'Learn More'],
+  ['RV & Outdoor', 'Current batteries and gear for the journey.', '/store?department=rv-outdoor', 'Shop RV & Outdoor'],
+  ['Backup Power', 'Keep what matters running.', '/shop/sok', 'Shop Backup Power'],
+  ['Commercial Power', 'Scalable power solutions.', '/shop/sok', 'Shop Commercial']
 ];
 
-const productGrid = [
+const lithiumProducts = [
   {
-    group: 'LITHIUM', title: '100Ah LiFePO4 Battery', image: asset('/assets/brands/sok/sk12v100pc/hero.png'),
-    href: '/shop/sok', alt: 'SOK SK12V100PC 100Ah LiFePO4 battery'
+    title: '100Ah LiFePO4 Battery', spec: '1280Wh', image: asset('/assets/brands/sok/sk12v100pc/hero.png'),
+    detailHref: '/sok/sk12v100pc/', catalogHref: '/shop/sok', alt: 'SOK SK12V100PC 100Ah LiFePO4 battery'
   },
   {
-    group: 'LITHIUM', title: '100Ah LiFePO4 Rack Battery', image: asset('/assets/brands/sok/sk48v100n/hero.jpg'),
-    href: '/shop/sok', alt: 'SOK SK48V100N 100Ah rack battery'
+    title: '100Ah LiFePO4 Battery', spec: '5120Wh', image: asset('/assets/brands/sok/sk48v100n/hero.jpg'),
+    detailHref: '/sok/sk48v100n/', catalogHref: '/shop/sok', alt: 'SOK SK48V100N 100Ah LiFePO4 battery'
   },
   {
-    group: 'LITHIUM', title: '12V 100Ah LiFePO4 Battery', image: 'https://image.doba.com/dg-PAqmVRKWNJYH/d0102x39tjv.jpg',
-    href: '/store?q=12V%20100Ah%20LiFePO4%20Battery', alt: '12V 100Ah LiFePO4 battery'
+    title: '12V 100Ah LiFePO4 Battery', spec: '1280Wh · 100A BMS', image: 'https://image.doba.com/dg-PAqmVRKWNJYH/d0102x39tjv.jpg',
+    detailHref: '/store?q=12V%20100Ah%20LiFePO4%20Battery', catalogHref: '/store?q=12V%20100Ah%20LiFePO4%20Battery', alt: '12V 100Ah LiFePO4 battery'
   },
   {
-    group: 'LITHIUM', title: 'Portable Solar Power Bank — 10000mAh', image: 'https://image.doba.com/dg-atDvVcHCbYoq/d01027h729u.jpg',
-    href: '/store?q=Portable%20Solar%20Power%20Bank', alt: 'Portable solar power bank'
+    title: '12V 100Ah Battery', spec: 'For solar & off-grid storage', image: 'https://image.doba.com/dg-IiqrDjeSMcJQ/d0102x33ppw.jpg',
+    detailHref: '/store?q=12V%20100Ah%20Battery', catalogHref: '/store?q=12V%20100Ah%20Battery', alt: '12V 100Ah battery for solar and off-grid storage'
   },
   {
-    group: 'RV & OUTDOOR', title: 'Rechargeable 200,000 Lumens LED Spotlight', image: 'https://img.vevorstatic.com/us/DGYWSJGDXDTKA7G1TV9/goods_img_big-v1/rechargeable-spotlight-m100-1.2.jpg?format=webp&timestamp=1731314531000',
-    href: '/store?q=Rechargeable%20Spotlight', alt: 'Rechargeable LED spotlight'
+    title: 'Portable Solar Power Bank — 10000mAh', spec: 'For solar & off-grid storage', image: 'https://image.doba.com/dg-atDvVcHCbYoq/d01027h729u.jpg',
+    detailHref: '/store?q=Portable%20Solar%20Power%20Bank', catalogHref: '/store?q=Portable%20Solar%20Power%20Bank', alt: 'Portable solar power bank'
   },
   {
-    group: 'RV & OUTDOOR', title: '8L Hot Water Heater Tankless Instant Boiler Outdoor', image: 'https://utedusjer.no/cdn/shop/products/8liter-min.jpg?v=1654023433&width=1024',
-    href: '/store?q=8L%20Hot%20Water%20Heater', alt: '8L outdoor tankless hot water heater'
+    title: '12V 100AH LiFePO4 Battery', spec: 'For RV & mobile power', image: 'https://image.doba.com/dg-NcbPvsCQYJok/d01027hh5xy.jpg',
+    detailHref: '/store?q=12V%20100AH%20LiFePO4%20Battery', catalogHref: '/store?q=12V%20100AH%20LiFePO4%20Battery', alt: '12V 100Ah LiFePO4 battery for RV and mobile power'
+  }
+];
+
+const rvProducts = [
+  {
+    title: 'Rechargeable 200,000 Lumens LED Spotlight', spec: 'For Outdoor Use', image: 'https://img.vevorstatic.com/us/DGYWSJGDXDTKA7G1TV9/goods_img_big-v1/rechargeable-spotlight-m100-1.2.jpg?format=webp&timestamp=1731314531000',
+    detailHref: '/store?q=Rechargeable%20200%2C000%20Lumens%20LED%20Spotlight', catalogHref: '/store?department=rv-outdoor', alt: 'Rechargeable LED spotlight'
   },
   {
-    group: 'RV & OUTDOOR', title: "Portable Walk-In Greenhouse 20' x 10'", image: 'https://image.vevor.com/us/YDSDWS20107FTYBYXV0/original_img-v3/tunnel-greenhouse-m100-1.1.jpg?timestamp=1670940797747',
-    href: '/store?q=Portable%20Walk-In%20Greenhouse', alt: 'Portable walk-in greenhouse'
+    title: '8L Hot Water Heater Tankless Instant Boiler Outdoor', spec: 'RV Essentials & Water', image: 'https://utedusjer.no/cdn/shop/products/8liter-min.jpg?v=1654023433&width=1024',
+    detailHref: '/store?q=8L%20Hot%20Water%20Heater%20Tankless%20Instant%20Boiler%20Outdoor', catalogHref: '/store?department=rv-outdoor', alt: '8L outdoor tankless hot water heater'
   },
   {
-    group: 'RV & OUTDOOR', title: '12V Electric Scissor Car Jack & Impact Wrench', image: 'https://s.alicdn.com/@sc04/kf/H90a98af76a91418698eb173453b5254e8/Factory-Price-Tool-Car-12-Volt-2T-35CM-Scissor-Jack-Electric-Wrench-Suit-with-Hydraulic-Repair-Kit-for-Suv.jpg',
-    href: '/store?q=12V%20Electric%20Scissor%20Car%20Jack', alt: '12V electric scissor car jack and impact wrench kit'
+    title: "Portable Walk-In Greenhouse 20' x 10' Hot House with Steel Hoops & Windows", spec: 'Camping & Shelter', image: 'https://image.vevor.com/us/YDSDWS20107FTYBYXV0/original_img-v3/tunnel-greenhouse-m100-1.1.jpg?timestamp=1670940797747',
+    detailHref: '/store?q=Portable%20Walk-In%20Greenhouse', catalogHref: '/store?department=rv-outdoor', alt: 'Portable walk-in greenhouse'
   },
   {
-    group: 'RV & OUTDOOR', title: '12V Water Diaphragm Pump — 5.5 GPM', image: 'https://i5.walmartimages.com/seo/12V-DC-Water-Diaphragm-Pump-5-5-GPM-Flow-70-PSI-Adjustable-Pressure-1-2-Inch-MNPT-Self-Priming-Sprayer-Pump-Pressure-Switch-RV-Camper-Marine-Boat-Law_40f43dd1-549d-4fdc-8f7d-09eb9ce7335e.284e7e762ebd053ff57d3a6a81651e3b.jpeg',
-    href: '/store?q=12V%20Water%20Diaphragm%20Pump', alt: '12V water diaphragm pump'
+    title: '12V Electric Scissor Car Jack & Impact Wrench', spec: 'For Easy Tire Changes', image: 'https://s.alicdn.com/@sc04/kf/H90a98af76a91418698eb173453b5254e8/Factory-Price-Tool-Car-12-Volt-2T-35CM-Scissor-Jack-Electric-Wrench-Suit-with-Hydraulic-Repair-Kit-for-Suv.jpg',
+    detailHref: '/store?q=12V%20Electric%20Scissor%20Car%20Jack', catalogHref: '/store?department=rv-outdoor', alt: '12V electric scissor car jack and impact wrench kit'
   },
   {
-    group: 'RV & OUTDOOR', title: 'Heavy-Duty 5.3 Gallon Metal Fuel Can', image: 'https://mobileimages.lowes.com/productimages/a4c0c39c-7115-4e98-9513-904d908abebf/63612904.jpg',
-    href: '/store?q=Heavy-Duty%20Metal%20Fuel%20Can', alt: 'Heavy-duty metal fuel can'
+    title: '12V Water Diaphragm Pump - 5.5 GPM & 70 PSI Adjustable', spec: 'Solar & Off-Grid', image: 'https://i5.walmartimages.com/seo/12V-DC-Water-Diaphragm-Pump-5-5-GPM-Flow-70-PSI-Adjustable-Pressure-1-2-Inch-MNPT-Self-Priming-Sprayer-Pump-Pressure-Switch-RV-Camper-Marine-Boat-Law_40f43dd1-549d-4fdc-8f7d-09eb9ce7335e.284e7e762ebd053ff57d3a6a81651e3b.jpeg',
+    detailHref: '/store?q=12V%20Water%20Diaphragm%20Pump', catalogHref: '/store?department=rv-outdoor', alt: '12V water diaphragm pump'
+  },
+  {
+    title: 'Heavy-Duty 5.3 Gallon Metal Fuel Can with Spout & Comfort Handle', spec: 'Automotive, ATV & Towing', image: 'https://mobileimages.lowes.com/productimages/a4c0c39c-7115-4e98-9513-904d908abebf/63612904.jpg',
+    detailHref: '/store?q=Heavy-Duty%205.3%20Gallon%20Metal%20Fuel%20Can', catalogHref: '/store?department=rv-outdoor', alt: 'Heavy-duty metal fuel can'
   }
 ];
 
@@ -81,16 +93,20 @@ function solutionMarkup() {
     </article>`).join('');
 }
 
-function productGridMarkup() {
-  return productGrid.map(({ group, title, image, href, alt }) => `
-    <article class="homepage-product-card">
-      <a class="homepage-product-card__media" href="${href}" aria-label="View ${escapeHtml(title)} in the Elevation catalog">
-        <img src="${image}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async">
+function commerceProductMarkup(products) {
+  return products.map(({ title, spec, image, detailHref, catalogHref, alt }) => `
+    <article class="home-product-card">
+      <a class="home-product-card__image" href="${detailHref}" aria-label="View ${escapeHtml(title)}">
+        <img src="${image}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
       </a>
-      <div class="homepage-product-card__body">
-        <p class="product-kicker">${group}</p>
-        <h3><a href="${href}">${escapeHtml(title)}</a></h3>
-        <a class="text-link" href="${href}">View Details <span aria-hidden="true">→</span></a>
+      <div class="home-product-card__body">
+        <h4><a href="${detailHref}">${escapeHtml(title)}</a></h4>
+        <p>${escapeHtml(spec)}</p>
+        <div class="home-product-card__authority-slot" aria-hidden="true"></div>
+        <div class="home-product-card__actions">
+          <a class="button button-primary" href="${catalogHref}">Catalog Options</a>
+          <a class="button button-outline" href="${detailHref}">View Details</a>
+        </div>
       </div>
     </article>`).join('');
 }
@@ -123,6 +139,7 @@ function documentHead(routeInfo, { notFound = false } = {}) {
   <title>${escapeHtml(title)}</title>
   <link rel="preload" as="image" href="${asset('/assets/hero/storefront-tropical-logistics-v3.webp')}">
   <link rel="preload" as="image" href="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp?v=20260910-1')}">
+  <link rel="preload" as="image" href="${BRAND_WORDMARK}">
   <link rel="stylesheet" href="/assets/app.css">
   <script defer src="/assets/app.js"></script>`;
 }
@@ -134,15 +151,14 @@ function headerMarkup(currentPath) {
     <div class="utility-inner shell-width">
       <span class="utility-signal">OFF-GRID POWER • SUPPLY • LOGISTICS</span>
       <a href="/shipping-logistics-services">HAWAII &amp; ALASKA LOGISTICS REVIEW</a>
-      <span>RV • SOLAR • BACKUP • COMMERCIAL</span>
+      <span class="utility-applications">RV • SOLAR • BACKUP • COMMERCIAL</span>
       <span class="utility-contact"><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a></span>
     </div>
   </div>
   <header class="site-header">
     <div class="shell-width nav-row">
       <a class="brand" href="/" aria-label="Elevation UpScales, Inc. home">
-        <img src="${asset('/assets/logo.webp')}" alt="Elevation UpScales, Inc." width="900" height="900">
-        <span class="brand-copy"><strong>Elevation UpScales</strong><small>Off-Grid Power • Supply • Logistics</small></span>
+        <img src="${BRAND_WORDMARK}" alt="Elevation UpScales, Inc. — Off-Grid Power, Supply, Logistics" width="1024" height="341">
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav id="primary-nav" class="primary-nav" aria-label="Primary shopping navigation">${navMarkup(currentPath)}</nav>
@@ -161,24 +177,24 @@ function footerMarkup() {
   <footer class="site-footer reference-footer">
     <div class="shell-width footer-grid fidelity-footer-grid">
       <div class="footer-brand-block fidelity-footer-brand">
-        <img src="${asset('/assets/logo.webp')}" alt="Elevation UpScales, Inc." width="900" height="900">
-        <div><strong>Elevation UpScales, Inc.</strong><p>RV Batteries • Lithium Energy • Supply • Logistics</p><span>Colorado corporation • Colorado sales-tax licensed</span></div>
+        <img src="${BRAND_WORDMARK}" alt="Elevation UpScales, Inc." width="1024" height="341">
+        <div><strong>ELEVATION UPSCALES, INC.</strong><p>RV Batteries • Lithium Energy • Supply • Logistics</p><span>Colorado corporation • Colorado sales-tax licensed</span></div>
       </div>
-      <nav class="footer-link-group" aria-label="Power and shopping"><strong>Power &amp; Shop</strong>
+      <nav class="footer-link-group" aria-label="Power and shopping"><strong>POWER &amp; SHOP</strong>
         <a href="/store?department=lithium-batteries">Lithium Batteries</a>
         <a href="/shop/sok">SOK Battery Systems</a>
         <a href="/store?department=rv-outdoor">RV &amp; Outdoor</a>
         <a href="/shipping-logistics-services">Freight &amp; Logistics</a>
         <a href="/marketplace">Marketplace</a>
       </nav>
-      <nav class="footer-link-group" aria-label="Company and legal"><strong>Company &amp; Legal</strong>
+      <nav class="footer-link-group" aria-label="Company and legal"><strong>COMPANY &amp; LEGAL</strong>
         <a href="/what-we-do">What We Do</a>
         <a href="/work-with-us">Work With Us</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms &amp; Business Disclosures</a>
         <a href="/report-an-issue">Report an Issue</a>
       </nav>
-      <div class="footer-contact"><strong>Contact</strong><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a class="button button-outline" href="/start-a-project">Start a Project</a></div>
+      <div class="footer-contact"><strong>CONTACT</strong><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a class="button button-outline" href="/start-a-project">Start a Project</a></div>
       <p class="copyright">© <span data-current-year>2026</span> Elevation UpScales, Inc. · Colorado Springs, Colorado.</p>
     </div>
   </footer>`;
@@ -192,9 +208,9 @@ function homeMain() {
         <div class="storefront-copy">
           <p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p>
           <h1 id="storefront-title">Lithium Power<br><span>for RV, Solar &amp; Backup</span></h1>
-          <p class="storefront-lead">Shop SOK lithium batteries and power systems for RV, solar, backup and off-grid use.</p>
+          <p class="storefront-lead">Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping. We aim to make dependable power products easier to buy and move, including streamlined fulfillment to Hawaii, Alaska, and select international markets where supplier, carrier, and compliance requirements support it.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="/store?department=lithium-batteries">Explore Power Solutions <span aria-hidden="true">→</span></a>
+            <a class="button button-primary" href="/store">Shop Power &amp; Energy <span aria-hidden="true">→</span></a>
             <a class="button button-outline" href="/start-a-project">Start a Project</a>
           </div>
           <nav class="usecase-grid" aria-label="Power solution shortcuts">
@@ -212,7 +228,7 @@ function homeMain() {
             <span><b>SK12V100PC</b><small>12.8V 100Ah</small></span>
           </a>
           <a class="hero-product hero-product-48" href="/sok/sk48v100n/" aria-label="View SOK SK48V100N">
-            <img src="${asset('/assets/brands/sok/48v-battery-cabinet/hero.webp?v=20260910-1')}" alt="SOK 48V rack storage cabinet" width="500" height="500">
+            <img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="1000" height="265">
             <span><b>SK48V100N</b><small>51.2V 100Ah rack platform</small></span>
           </a>
         </div>
@@ -225,64 +241,69 @@ function homeMain() {
       <a class="trust-item" href="tel:+12088134998"><strong>SUPPORT</strong><span>Call Elevation: 208-813-4998</span></a>
     </section>
 
-    <section class="section shell-width solutions-section" id="solutions">
-      <div class="section-heading"><div><p class="eyebrow">SHOP BY SOLUTION</p><h2>Lithium Power <span>Solutions</span></h2></div><a class="text-link section-link" href="/store">View All Products <span aria-hidden="true">→</span></a></div>
+    <section class="section shell-width solutions-section" id="solutions" aria-labelledby="solutions-title">
+      <div class="section-heading"><div><p class="eyebrow">SHOP BY SOLUTION</p><h2 id="solutions-title">Lithium Power <span>Solutions</span></h2></div><a class="text-link section-link" href="/store">View All Products <span aria-hidden="true">→</span></a></div>
       <div class="solution-grid">${solutionMarkup()}</div>
     </section>
 
-    <section class="sok-feature">
-      <div class="shell-width sok-feature-grid">
-        <div class="sok-feature-copy"><p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p><h2>Featured SOK Systems</h2><p>SOK is Elevation’s primary authorized battery partner for mobile power, solar, backup and larger off-grid storage.</p><a class="button button-outline" href="/shop/sok">View SOK Catalog</a></div>
-        <article class="product-card">
-          <a href="/sok/sk12v100pc/" class="product-image" aria-label="View SOK SK12V100PC"><img src="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900"></a>
-          <p class="product-kicker">12V • RV • MOBILE POWER</p><h3>SOK SK12V100PC</h3><p>12.8V · 100Ah · 1280Wh.</p>
-          <div class="product-actions"><a class="button button-primary" href="/sok/sk12v100pc/">View Battery</a><a class="button button-outline" href="/shop/sok">Purchase Options</a></div>
-        </article>
-        <article class="product-card">
-          <a href="/sok/sk48v100n/" class="product-image" aria-label="View SOK SK48V100N"><img src="${asset('/assets/brands/sok/48v-battery-cabinet/hero.webp')}" alt="SOK 48V rack storage cabinet" width="500" height="500"></a>
-          <p class="product-kicker">48V • SOLAR • RACK STORAGE</p><h3>SOK SK48V100N</h3><p>51.2V · 100Ah · 5.12kWh.</p>
-          <div class="product-actions"><a class="button button-primary" href="/sok/sk48v100n/">View Battery</a><a class="button button-outline" href="/shop/sok">Purchase Options</a></div>
-        </article>
+    <section class="sok-feature" aria-labelledby="sok-feature-title">
+      <div class="shell-width">
+        <div class="sok-feature-head"><div><h2 id="sok-feature-title">FEATURED SOK SYSTEMS</h2><p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p><p>SOK is Elevation’s primary authorized battery partner for mobile power, solar, backup and larger off-grid storage.</p></div><a class="button button-outline" href="/shop/sok">View All SOK Products <span aria-hidden="true">→</span></a></div>
+        <div class="sok-products-grid">
+          <article class="product-card product-card-horizontal">
+            <a href="/sok/sk12v100pc/" class="product-image" aria-label="View SOK SK12V100PC"><img src="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900"></a>
+            <div class="product-card-copy"><p class="product-kicker">12V • RV • MOBILE POWER</p><h3>SOK SK12V100PC</h3><p>12.8V · 100Ah · 1280Wh.</p>
+              <div class="product-actions"><a class="button button-primary" href="/sok/sk12v100pc/">View Battery</a><a class="button button-outline" href="/shop/sok">Purchase Options</a></div>
+            </div>
+          </article>
+          <article class="product-card product-card-horizontal">
+            <a href="/sok/sk48v100n/" class="product-image" aria-label="View SOK SK48V100N"><img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="1000" height="265"></a>
+            <div class="product-card-copy"><p class="product-kicker">48V • SOLAR • RACK STORAGE</p><h3>SOK SK48V100N</h3><p>51.2V · 100Ah · 5.12kWh.</p>
+              <div class="product-actions"><a class="button button-primary" href="/sok/sk48v100n/">View Battery</a><a class="button button-outline" href="/shop/sok">Purchase Options</a></div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
-    <section class="logistics-section" id="logistics">
+    <section class="logistics-section" id="logistics" aria-labelledby="logistics-title">
       <div class="shell-width logistics-grid">
-        <div class="logistics-copy"><p class="eyebrow">FREIGHT &amp; SHIPPING LOGISTICS</p><h2>Battery Freight for Hawaii &amp; Alaska.</h2><p>Elevation coordinates the product, quantity, destination and supplier documentation needed to review the right path for lithium batteries and other harder-to-move power equipment.</p>
-          <div class="logistics-path-inline" aria-label="Controlled logistics review path"><span><b>01</b> Product</span><span><b>02</b> Quantity</span><span><b>03</b> Destination</span><span><b>04</b> Tracking Info</span></div>
+        <div class="logistics-copy"><p class="eyebrow">FREIGHT &amp; SHIPPING LOGISTICS</p><h2 id="logistics-title">BATTERY FREIGHT FOR HAWAII &amp; ALASKA.</h2><p>Elevation coordinates the product, quantity, destination and supplier documentation needed to review the right path for lithium batteries and other harder-to-move power equipment.</p>
+          <div class="logistics-path-inline" aria-label="Controlled logistics review path"><span><b>01</b> Product</span><span><b>02</b> Quantity</span><span><b>03</b> Destination</span><span><b>04</b> Freight Review<small>Tracking Info</small></span></div>
           <div class="logistics-actions"><a class="button button-primary" href="/hawaii-lithium-batteries">Hawaii Purchase Options</a><a class="button button-outline" href="/shipping-logistics-services#alaska">Alaska Logistics Review</a><a class="button button-outline" href="/shop/sok">Commercial &amp; Multi-Battery</a></div>
         </div>
         <div class="logistics-lanes">
-          <article><small>01</small><h3>Lithium Battery Freight</h3><p>Freight support when a battery order does not fit ordinary parcel fulfillment.</p></article>
-          <article><small>02</small><h3>Hawaii Logistics</h3><p>Exact-product, destination and quantity review through the current purchase-options path.</p></article>
-          <article><small>03</small><h3>Alaska Logistics</h3><p>Product and destination confirmation before a shipping path is represented.</p></article>
-          <article><small>04</small><h3>Commercial Supply</h3><p>Controlled review for multi-battery, rack storage and larger product-supply quantities.</p></article>
+          <article><small>01</small><h3>LITHIUM BATTERY FREIGHT</h3><p>Freight support when a battery order does not fit ordinary parcel fulfillment.</p></article>
+          <article><small>02</small><h3>HAWAII LOGISTICS</h3><p>Exact-product, destination and quantity review through the current Purchase Options path.</p></article>
+          <article><small>03</small><h3>ALASKA LOGISTICS</h3><p>Product and destination confirmation before a shipping path is represented.</p></article>
+          <article><small>04</small><h3>COMMERCIAL SUPPLY</h3><p>Controlled review for 4+ batteries, rack storage and larger product-supply quantities.</p></article>
         </div>
       </div>
-    </section>
-
-    <section class="homepage-products section shell-width" aria-labelledby="current-products-title">
-      <div class="section-heading"><div><p class="eyebrow">CURRENT PRODUCTS</p><h2 id="current-products-title">Power &amp; Outdoor <span>Products</span></h2></div><a class="text-link section-link" href="/store">Shop All <span aria-hidden="true">→</span></a></div>
-      <div class="homepage-product-grid">${productGridMarkup()}</div>
     </section>
 
     <section class="home-commerce" aria-labelledby="home-commerce-title">
       <div class="shell-width">
-        <div class="home-commerce-head"><p class="eyebrow">CURRENT PRODUCTS</p><h2 id="home-commerce-title">Shop the Store.</h2><p>Current lithium and RV &amp; Outdoor paths from the Elevation catalog.</p></div>
-        <div class="home-commerce-group"><div class="home-commerce-group-head"><h3>Lithium Batteries</h3><div class="product-actions"><a class="button button-outline" href="/shop/sok">SOK Energy</a><a class="button button-outline" href="/store?department=lithium-batteries">Shop All Lithium</a></div></div><div class="store-category-row"><a href="/shop/sok" class="store-category-card store-category-sok"><span><small>AUTHORIZED SOK ENERGY DEALER</small><strong>SOK Battery Systems</strong><em>12V, 24V and 48V storage</em></span></a><a href="/store?department=lithium-batteries" class="store-category-card store-category-lithium"><span><small>LITHIUM ENERGY</small><strong>Lithium Batteries</strong><em>RV, solar, backup and off-grid</em></span></a></div></div>
-        <div class="home-commerce-group"><div class="home-commerce-group-head"><h3>RV &amp; Outdoor</h3><a class="button button-outline" href="/store?department=rv-outdoor">Shop All RV &amp; Outdoor</a></div><div class="store-category-row"><a href="/store?department=rv-outdoor" class="store-category-card store-category-rv"><span><small>MOBILE &amp; OUTDOOR</small><strong>RV &amp; Outdoor</strong><em>Travel, camping and practical equipment</em></span></a><a href="/store" class="store-category-card store-category-gear"><span><small>FULL CATALOG</small><strong>Shop Elevation</strong><em>Browse current verified-source records</em></span></a></div></div>
+        <div class="home-commerce-head"><p class="eyebrow">CURRENT PRODUCTS</p><h2 id="home-commerce-title">SHOP THE STORE.</h2><p>Current lithium and RV &amp; Outdoor products from the live Elevation catalog.</p></div>
+        <div class="home-commerce-group">
+          <div class="home-commerce-group-head"><h3>LITHIUM BATTERIES</h3><div class="product-actions"><a class="button button-outline" href="/shop/sok">SOK ENERGY</a><a class="button button-outline" href="/store?department=lithium-batteries">SHOP ALL LITHIUM</a></div></div>
+          <div class="home-product-grid">${commerceProductMarkup(lithiumProducts)}</div>
+        </div>
+        <div class="home-commerce-group">
+          <div class="home-commerce-group-head"><h3>RV &amp; OUTDOOR</h3><a class="button button-outline" href="/store?department=rv-outdoor">SHOP ALL RV &amp; OUTDOOR</a></div>
+          <div class="home-product-grid">${commerceProductMarkup(rvProducts)}</div>
+        </div>
       </div>
     </section>
 
-    <section class="solar-builder-section section">
-      <div class="shell-width solar-feature-band"><div class="solar-feature-media" role="img" aria-label="RV and off-grid solar power system"></div><div class="solar-feature-copy"><p class="eyebrow">SOLAR SYSTEM BUILDER</p><h2>Build Your Power System.</h2><p>Plan battery, solar and inverter needs in one place, then match the system to available Elevation products.</p><div class="hero-actions"><a class="button button-primary" href="/solar-project">Use Solar System Builder</a><a class="button button-outline" href="/shop/sok">Shop Battery Systems</a></div></div></div>
+    <section class="solar-builder-section section" aria-labelledby="solar-builder-title">
+      <div class="shell-width solar-feature-band"><div class="solar-feature-media" role="img" aria-label="RV and off-grid solar power system"></div><div class="solar-feature-copy"><p class="eyebrow">SOLAR SYSTEM BUILDER</p><h2 id="solar-builder-title">BUILD YOUR POWER SYSTEM.</h2><p>Plan battery, solar and inverter needs in one place, then match the system to available Elevation products.</p><div class="hero-actions"><a class="button button-primary" href="/solar-project">USE SOLAR SYSTEM BUILDER</a><a class="button button-outline" href="/shop/sok">SHOP BATTERY SYSTEMS</a></div></div></div>
     </section>
 
     <section class="services-section section" aria-labelledby="services-title">
-      <div class="shell-width"><div class="services-head"><p class="eyebrow">FIELD SERVICES</p><h2 id="services-title">Project &amp; Field Support.</h2><p>Repairs, power-system support and logistics when you need more than a product.</p></div><div class="support-grid">
-        <article class="support-card"><small>HOME + RV</small><h3>Home &amp; RV Services</h3><p>Home repairs, restoration, RV repair, inspections and upgrades.</p><a href="/what-we-do#home-rv-services">Home &amp; RV Services →</a></article>
-        <article class="support-card"><small>SOLAR + OFF-GRID</small><h3>Power System Services</h3><p>System planning, battery upgrades and troubleshooting.</p><a href="/solar-services">View Power Services →</a></article>
-        <article class="support-card"><small>FREIGHT + SUPPLY</small><h3>Shipping &amp; Logistics</h3><p>Lithium freight, destination review and commercial product-supply coordination.</p><a href="/shipping-logistics-services">View Logistics Services →</a></article>
+      <div class="shell-width"><div class="services-head"><p class="eyebrow">FIELD SERVICES</p><h2 id="services-title">PROJECT &amp; FIELD SUPPORT.</h2><p>Repairs, power-system support and logistics when you need more than a product.</p></div><div class="support-grid">
+        <article class="support-card"><small>HOME + RV</small><h3>HOME &amp; RV SERVICES</h3><p>Home repairs, restoration, RV repair, inspections and upgrades.</p><a href="/what-we-do#home-rv-services">Home &amp; RV Services →</a></article>
+        <article class="support-card"><small>SOLAR + OFF-GRID</small><h3>POWER SYSTEM SERVICES</h3><p>System planning, battery upgrades and troubleshooting.</p><a href="/solar-services">View Power Services →</a></article>
+        <article class="support-card"><small>FREIGHT + SUPPLY</small><h3>SHIPPING &amp; LOGISTICS</h3><p>Lithium freight, destination review and commercial product-supply coordination.</p><a href="/shipping-logistics-services">View Logistics Services →</a></article>
       </div><div class="marketplace-note"><span>Looking for local/community listings instead of Elevation catalog products?</span><a href="/marketplace">Visit Marketplace →</a></div></div>
     </section>`;
 }
