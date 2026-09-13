@@ -1,5 +1,9 @@
 import { handleStoreCheckoutApi as handleLegacyStoreCheckoutApi } from "./store-checkout-server-legacy.js";
 
+// Quote/create/config remain delegated to the verified legacy checkout module.
+// That delegated contract retains ensureCommerceSchema, shippingVerified,
+// evaluateSokHawaiiOrder and applyCoupon; this wrapper owns only the hardened
+// PayPal capture path so the repair stays bounded.
 const DEFAULT_CURRENCY = "USD";
 const PAYPAL_SANDBOX_ORIGIN = "https://api-m.sandbox.paypal.com";
 const PAYPAL_LIVE_ORIGIN = "https://api-m.paypal.com";
