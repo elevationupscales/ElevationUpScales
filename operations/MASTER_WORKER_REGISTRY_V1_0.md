@@ -22,7 +22,8 @@
 - Web V2 homepage reconstruction is **COMPLETE / MERGED** at `6940c32b5c1863d4b60be85427ccff3060e5d396`.
 - Web V2 retail navigation is **COMPLETE / MERGED** on `e2c9e3494bd932c2cde8b0d24e807cbb94706009`.
 - Web V2 canonical catalog + product-detail foundation is **COMPLETE / MERGED** at `72694ae9ba5b9952c0460b9f90b380cffde4ff23`.
-- **CART is the ACTIVE Web V2 phase.** It consumes merged canonical product IDs only. Held/non-orderable products remain closed; client-side cart state cannot manufacture orderability, price authority, shipping authority or delayed-order authority.
+- Web V2 cart is **COMPLETE / MERGED** at `13b4411fc265a1f7b149ad9207059221fa53db32`; Pull Request QA run 126 and Web V2 QA run 67 passed for the cart candidate.
+- **CHECKOUT is the ACTIVE Web V2 phase.** It consumes merged cart product IDs/quantities and re-resolves canonical product state server-side before an order can advance. Unknown product/orderability/shipping/destination truth fails closed.
 - **MASTER RECON OS is STANDBY / TRIGGERED INTEGRITY.** Wake for state/lineage conflict, supplier-truth conflict affecting commerce control, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON; it is not a standing website executor.
 - Shopify stays in its own commerce lane.
 - External marketplace/new-channel expansion and paid acquisition remain separately controlled.
@@ -37,9 +38,9 @@
 | Company Operations Manager / COM 2 | Company Operations | MPM | Operations / Commercial Consolidation | ACTIVE | Consolidate current-state evidence; support vendor/channel work; do not duplicate website implementation | 2026-09-13 |
 | MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | **STANDBY / TRIGGERED INTEGRITY** | Wake for state/lineage conflict, supplier-truth conflict affecting commerce control, worker drift, exact-candidate validation, release-integrity checks, or owner-directed RECON | 2026-09-13 |
 | MASTER DEVELOPER / Deployment Developer | Operating System / Legacy Technical Lane | MPM / authorized management | Legacy Development / Deployment | **STANDBY / VERIFY-FIX ONLY** | `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`; Legacy repair only; not the Web V2 primary worker | 2026-09-13 |
-| WEB DEVELOPER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Web V2 / Public Customer Experience | **STANDBY / SUPPORT — HOMEPAGE + RETAIL NAV + CATALOG + PRODUCT DETAIL MERGED** | `WEB_V2_CURRENT_WORKTREE.md`; preserve merged public shell and product presentation; support exact bounded UI needs surfaced by Commerce; do not reopen completed phases | 2026-09-13 |
+| WEB DEVELOPER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Web V2 / Public Customer Experience | **STANDBY / SUPPORT — HOMEPAGE + RETAIL NAV + CATALOG + PRODUCT DETAIL + CART MERGED** | `WEB_V2_CURRENT_WORKTREE.md`; preserve merged public shell and commerce presentation; support exact bounded UI needs surfaced by Commerce; do not reopen completed phases | 2026-09-13 |
 | RELEASE ENGINEER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Web V2 / Exact-Version Release | **READY / ACTIVE SUPPORT — PRODUCTION-PARITY RELEASE** | `WEB_V2_CURRENT_WORKTREE.md`; support only when the commercial build reaches a true release gate; preview is diagnostic, not acceptance authority | 2026-09-13 |
-| COMMERCE DEVELOPER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Commerce V2 | **ACTIVE / CURRENT — CART** | `WEB_V2_CURRENT_WORKTREE.md`; build cart from canonical product IDs only; held products cannot become purchasable through client state; then server-revalidated checkout → PayPal Orders v2 → durable order → fulfillment | 2026-09-13 |
+| COMMERCE DEVELOPER | Operating System / Web V2 Development | OS 1.1 Project Manager / MPM | Commerce V2 | **ACTIVE / CURRENT — CHECKOUT** | `WEB_V2_CURRENT_WORKTREE.md`; build server-revalidated direct checkout from merged cart + canonical catalog; then PayPal Orders v2 → durable order → fulfillment | 2026-09-13 |
 | Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE / PRESERVE | Shopify working-state preservation + eBay P0 + vendor revenue lanes; respect current listing/ad controls | 2026-09-13 |
 | Shopify Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres | Shopify Store Operations / Direct Commerce | **ACTIVE — PRESERVE / FACT SOURCE** | Preserve current working Shopify configuration; no cross-lane architecture experiments | 2026-09-13 |
 | eBay Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations / Marketplace Revenue | **ACTIVE — P0 PARALLEL** | Customer obligations → cash release → stop-loss/profitable core; respect current listing and paid-acquisition controls | 2026-09-13 |
@@ -72,14 +73,16 @@ Current verified state:
 - homepage reconstruction = complete / merged at `6940c32b5c1863d4b60be85427ccff3060e5d396`;
 - retail-navigation phase = complete / merged at `e2c9e3494bd932c2cde8b0d24e807cbb94706009`;
 - canonical catalog + product detail = complete / merged at `72694ae9ba5b9952c0460b9f90b380cffde4ff23`;
-- Pull Request QA run 124 and Web V2 QA run 59 passed for the merged catalog/product-detail candidate;
-- COMMERCE DEVELOPER = **active now on CART**;
-- cart consumes the merged canonical catalog directly; unchanged vendor-source files are not cart inputs;
-- client-side cart quantity/price/orderability state is never authoritative; server revalidation remains required before checkout/payment;
+- cart = complete / merged at `13b4411fc265a1f7b149ad9207059221fa53db32`;
+- Pull Request QA run 126 and Web V2 QA run 67 passed for the merged cart candidate;
+- COMMERCE DEVELOPER = **active now on CHECKOUT**;
+- checkout consumes merged cart identities/quantities and re-resolves current canonical product state server-side before order advancement;
+- non-orderable, changed, malformed, unknown-shipping, or ineligible-destination states fail closed;
+- unchanged vendor-source files are not checkout inputs unless product truth actually changes or a concrete contradiction appears;
 - WEB DEVELOPER = support/standby for exact bounded public-UI needs from Commerce;
 - RELEASE ENGINEER = ready / supporting only when the bounded commercial build reaches its true release gate;
 - Vendor Projects remain authoritative for SKU, price/MAP, stock/orderability, shipping, warranty, fulfillment and channel truth;
-- missing or conflicting supplier truth keeps only the affected SKU/state non-orderable; it does not justify guessing or blocking the whole verified commerce path;
+- missing or conflicting supplier truth keeps only the affected SKU/order state closed; it does not justify guessing or blocking unrelated clean commerce work;
 - workers.dev/version previews = diagnostics only, not acceptance authority;
 - Ops V2 = hold behind revenue path;
 - Legacy retirement = not authorized.
@@ -88,9 +91,9 @@ Development loop:
 
 **VERIFY CURRENT MAIN → ONE BOUNDED TASK → ONE PRIMARY WORKER → AUTHORITATIVE PRODUCT TRUTH → QA → REVIEW → MERGE → UPDATE WORKTREE → NEXT.**
 
-Catalog/cart integrity rule:
+Catalog/cart/checkout integrity rule:
 
-**VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT RECORD → CART MAY REFERENCE PRODUCT ID. UNKNOWN / CONFLICTING COMMERCIAL TRUTH → NON-ORDERABLE → CART CANNOT MANUFACTURE PURCHASE AUTHORITY → ROUTE FACT GAP TO OWNING VENDOR PROJECT → CONTINUE CLEAN SKUS.**
+**VERIFIED SUPPLIER TRUTH → CANONICAL PRODUCT RECORD → CART REFERENCES PRODUCT ID → CHECKOUT SERVER-REVALIDATES PRODUCT + ORDERABILITY + TOTALS + SHIPPING/DESTINATION. UNKNOWN / CONFLICTING COMMERCIAL TRUTH → FAIL CLOSED → ROUTE FACT GAP TO OWNING LANE → CONTINUE CLEAN WORK.**
 
 Release invariant:
 
@@ -132,7 +135,7 @@ This Legacy repair rule does not replace the Web V2 development loop in `WEB_V2_
 - Shopify remains its own payment/commerce lane.
 - External channel expansion and paid acquisition remain separate management decisions.
 - Do not restore the old Commerce-WAIT gate or workers.dev preview-acceptance sequence.
-- Do not reopen completed homepage/navigation/catalog/product-detail phases merely because cart needs product identity or bounded UI support.
+- Do not reopen completed homepage/navigation/catalog/product-detail/cart phases merely because checkout needs product identity, totals or bounded UI support.
 - Do not infer supplier commercial truth to accelerate orderability.
 
-**HOMEPAGE COMPLETE → RETAIL NAV COMPLETE → CATALOG COMPLETE → PRODUCT DETAIL COMPLETE → CART ACTIVE → CHECKOUT → RELEASE ONLY AT A TRUE GATE → RECON TRIGGERED ONLY.**
+**HOMEPAGE COMPLETE → RETAIL NAV COMPLETE → CATALOG COMPLETE → PRODUCT DETAIL COMPLETE → CART COMPLETE → CHECKOUT ACTIVE → ORDER/FULFILLMENT → RELEASE ONLY AT A TRUE GATE → RECON TRIGGERED ONLY.**
