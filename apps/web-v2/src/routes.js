@@ -125,6 +125,10 @@ export function getPublicRoute(pathname) {
   return null;
 }
 
+export function getSitemapRoutes() {
+  return [...PUBLIC_ROUTES.values()].filter(({ implemented, indexable = true }) => implemented && indexable);
+}
+
 export function resolveCompatibilityRedirect(url) {
   const exact = EXACT_REDIRECTS.get(url.pathname);
   if (exact) return exact;
