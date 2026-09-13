@@ -22,9 +22,23 @@ const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character)
 }[character]));
 
 function navMarkup(currentPath) {
-  return PRIMARY_NAV.map(({ label, href }) => {
-    const active = href === currentPath ? ' aria-current="page"' : '';
-    return `<a href="${href}"${active}>${label}</a>`;
+  return PRIMARY_NAV.map((item) => {
+    if (Array.isArray(item.children) && item.children.length) {
+      const active = item.children.some(({ href }) => href === currentPath) ? ' data-active="true"' : '';
+      const childLinks = item.children.map(({ label, href, description }) => `
+        <a href="${href}">
+          <strong>${label}</strong>
+          ${description ? `<small>${description}</small>` : ''}
+        </a>`).join('');
+      return `
+        <details class="nav-menu"${active}>
+          <summary>${item.label}<span class="nav-caret" aria-hidden="true">⌄</span></summary>
+          <div class="nav-dropdown">${childLinks}</div>
+        </details>`;
+    }
+
+    const active = item.href === currentPath ? ' aria-current="page"' : '';
+    return `<a class="nav-link" href="${item.href}"${active}>${item.label}</a>`;
   }).join('');
 }
 

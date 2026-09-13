@@ -34,17 +34,31 @@ export const PUBLIC_ROUTES = new Map([
 ]);
 
 export const PRIMARY_NAV = [
-  { label: 'Power', href: '/solar-services' },
   { label: 'Shop', href: '/store' },
-  { label: 'Projects', href: '/start-a-project' },
-  { label: 'Services', href: '/what-we-do' },
-  { label: 'Company', href: '/work-with-us' }
+  {
+    label: 'Vendors',
+    children: [
+      { label: 'SOK Energy', href: '/shop/sok', description: 'Authorized battery systems' },
+      { label: 'Renogy', href: '/shop/renogy', description: 'Solar and off-grid power' },
+      { label: 'VEVOR', href: '/shop/vevor', description: 'Tools, equipment and outdoor products' },
+      { label: 'Kingboss', href: '/shop/kingboss', description: 'Lithium battery supply' }
+    ]
+  },
+  {
+    label: 'Freight & Hawaii',
+    children: [
+      { label: 'Shipping & Logistics', href: '/shipping-logistics-services', description: 'Destination and freight review' },
+      { label: 'Hawaii Lithium', href: '/hawaii-lithium-batteries', description: 'Lithium purchase and freight paths' }
+    ]
+  },
+  { label: 'Start a Project', href: '/start-a-project' }
 ];
 
 export const FOOTER_NAV = [
+  { label: 'Shop', href: '/store' },
+  { label: 'Shipping & Logistics', href: '/shipping-logistics-services' },
+  { label: 'Hawaii Lithium', href: '/hawaii-lithium-batteries' },
   { label: 'Start a Project', href: '/start-a-project' },
-  { label: 'Other Ways We Can Help', href: '/other-ways-we-can-help' },
-  { label: 'Work With Us', href: '/work-with-us' },
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' }
 ];

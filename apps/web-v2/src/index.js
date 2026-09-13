@@ -1,4 +1,5 @@
 import { clientScript } from './client.js';
+import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
 import { renderNotFound, renderPublicPage } from './shell.js';
 import { styles } from './styles.js';
@@ -124,7 +125,7 @@ export default {
     }
 
     if (url.pathname === '/assets/app.css') {
-      return response(styles, {
+      return response(`${styles}\n${navStyles}`, {
         headers: {
           'Content-Type': 'text/css; charset=utf-8',
           'Cache-Control': 'public, max-age=300'
