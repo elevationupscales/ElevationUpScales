@@ -3,6 +3,10 @@ import { cartClientScript } from './cart-client.js';
 import { renderCartPage } from './cart-page.js';
 import { cartStyles } from './cart-styles.js';
 import { parseCartItems, resolveCartLines } from './cart.js';
+import { checkoutClientScript } from './checkout-client.js';
+import { renderCheckoutPage } from './checkout-page.js';
+import { checkoutStyles } from './checkout-styles.js';
+import { resolveCheckout } from './checkout.js';
 import { catalogStyles } from './catalog-styles.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
@@ -58,11 +62,23 @@ function versionPayload(env) {
 
 export default {
   async fetch(request, env) {
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
+    const url = new URL(request.url);
+    const checkoutResolvePost = url.pathname === '/api/checkout/resolve' && request.method === 'POST';
+
+    if (request.method !== 'GET' && request.method !== 'HEAD' && !checkoutResolvePost) {
       return response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' } });
     }
 
-    const url = new URL(request.url);
+    if (checkoutResolvePost) {
+      let payload;
+      try {
+        payload = await request.json();
+      } catch {
+        return json({ error: 'INVALID_CHECKOUT_PAYLOAD' }, 400);
+      }
+      if (!payload || !Array.isArray(payload.items)) return json({ error: 'INVALID_CHECKOUT_PAYLOAD' }, 400);
+      return json(resolveCheckout(payload.items, payload.destination));
+    }
 
     if (url.pathname === '/__version') return json(versionPayload(env));
 
@@ -79,7 +95,7 @@ export default {
     }
 
     if (url.pathname === '/assets/app.css') {
-      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
     if (url.pathname === '/assets/app.js') {
@@ -90,6 +106,10 @@ export default {
       return response(cartClientScript, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
+    if (url.pathname === '/assets/checkout.js') {
+      return response(checkoutClientScript, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+    }
+
     if (url.pathname === '/api/cart/resolve') {
       const requestedLines = parseCartItems(url.searchParams.get('items'));
       if (requestedLines === null) return json({ error: 'INVALID_CART_PAYLOAD' }, 400);
@@ -97,6 +117,7 @@ export default {
     }
 
     if (url.pathname === '/cart') return html(renderCartPage());
+    if (url.pathname === '/checkout') return html(renderCheckoutPage());
 
     const compatibilityRedirect = resolveCompatibilityRedirect(url);
     if (compatibilityRedirect) return redirect(compatibilityRedirect.location, compatibilityRedirect.status);
