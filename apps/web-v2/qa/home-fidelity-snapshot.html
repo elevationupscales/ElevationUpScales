@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web V2 Homepage Fidelity QA</title></head>
+<body>
+<script type="module">
+import { renderPublicPage } from '../src/shell.js';
+import { styles } from '../src/styles.js';
+import { navStyles } from '../src/nav-styles.js';
+import { homeFidelityStyles } from '../src/home-fidelity-styles.js';
+const routeInfo = {
+  path: '/',
+  page: 'home',
+  title: 'Elevation UpScales | Off-Grid Power • Supply • Logistics',
+  description: 'Elevation UpScales provides off-grid power, supply and logistics support for RV, solar, backup power, commercial systems and harder-to-serve markets.'
+};
+let html = renderPublicPage(routeInfo);
+html = html.replace('<link rel="stylesheet" href="/assets/app.css">', `<style>${styles}\n${navStyles}\n${homeFidelityStyles}</style>`);
+html = html.replace('<script defer src="/assets/app.js"></script>', '');
+document.open();
+document.write(html);
+document.close();
+</script>
+</body>
+</html>
