@@ -1,23 +1,36 @@
-name: Web V2 Exact-Version Release
+name: Web V2 Production-Parity Release
 
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Create candidate or promote an already-tested version
+        description: Candidate, bootstrap smoke, production smoke, promote, or rollback
         required: true
         type: choice
-        options: [candidate, promote]
+        options: [candidate, bootstrap-smoke, production-smoke, promote, rollback]
       expected_sha:
-        description: Exact approved full 40-character Git SHA
+        description: Exact approved full 40-character Git SHA on current main
         required: true
         type: string
       version_id:
-        description: Existing Cloudflare Version ID; required for promote only
+        description: Candidate Cloudflare Version ID; required except candidate mode
         required: false
         type: string
+      baseline_version_id:
+        description: Last accepted Cloudflare Version ID; required for production-smoke and rollback
+        required: false
+        type: string
+      smoke_url:
+        description: Production-parity base URL for smoke modes, e.g. https://v2.elevationupscales.com or https://elevationupscales.com
+        required: false
+        type: string
+      smoke_paths:
+        description: Space-separated GET paths that must return success
+        required: false
+        default: '/ /healthz'
+        type: string
       owner_confirmation:
-        description: Promotion requires exact PROMOTE
+        description: Smoke requires SMOKE; promote requires PROMOTE; rollback requires ROLLBACK
         required: false
         type: string
 
@@ -25,7 +38,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: web-v2-exact-version-release
+  group: web-v2-production-parity-release
   cancel-in-progress: false
 
 env:
@@ -33,6 +46,9 @@ env:
   EXPECTED_SHA: ${{ inputs.expected_sha }}
   MODE: ${{ inputs.mode }}
   VERSION_ID: ${{ inputs.version_id }}
+  BASELINE_VERSION_ID: ${{ inputs.baseline_version_id }}
+  SMOKE_URL: ${{ inputs.smoke_url }}
+  SMOKE_PATHS: ${{ inputs.smoke_paths }}
   OWNER_CONFIRMATION: ${{ inputs.owner_confirmation }}
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -43,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: web-v2-release
     steps:
-      - name: Validate immutable release request
+      - name: Validate immutable candidate request
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = "refs/heads/main"
@@ -56,7 +72,7 @@ jobs:
           ref: ${{ inputs.expected_sha }}
           fetch-depth: 0
 
-      - name: Re-resolve main and require exact SHA
+      - name: Require exact current main
         run: |
           set -euo pipefail
           git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
@@ -73,7 +89,7 @@ jobs:
         working-directory: apps/web-v2
         run: npm ci --ignore-scripts
 
-      - name: Verify foundation, application shell and repository safety
+      - name: Run release QA
         run: |
           set -euo pipefail
           node deployment/v2/validate-foundation.mjs --release
@@ -83,7 +99,7 @@ jobs:
           git diff --check
           test -z "$(git status --porcelain)"
 
-      - name: Upload candidate version without deploying it
+      - name: Upload exact candidate without deploying it
         id: upload
         run: |
           set -euo pipefail
@@ -99,7 +115,7 @@ jobs:
             --receipt /tmp/web-v2-candidate-receipt.json | tee /tmp/web-v2-outputs.txt
           cat /tmp/web-v2-outputs.txt >> "$GITHUB_OUTPUT"
 
-      - name: Verify Cloudflare records exact SHA/version mapping
+      - name: Verify Cloudflare version maps to exact SHA
         env:
           CREATED_VERSION_ID: ${{ steps.upload.outputs.version_id }}
         run: |
@@ -118,7 +134,7 @@ jobs:
           path: /tmp/web-v2-candidate-receipt.json
           if-no-files-found: error
 
-      - name: Release summary
+      - name: Candidate summary
         env:
           CREATED_VERSION_ID: ${{ steps.upload.outputs.version_id }}
           PREVIEW_URL: ${{ steps.upload.outputs.preview_url }}
@@ -127,9 +143,200 @@ jobs:
             echo "### Web V2 candidate"
             echo "Git SHA: $EXPECTED_SHA"
             echo "Cloudflare Version ID: $CREATED_VERSION_ID"
-            echo "Immutable preview: $PREVIEW_URL"
-            echo "Production promotion: NOT PERFORMED"
+            echo "Preview diagnostic URL: ${PREVIEW_URL:-none}"
+            echo "Preview acceptance gate: NOT REQUIRED"
+            echo "Production-parity smoke: PENDING"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  bootstrap-smoke:
+    if: inputs.mode == 'bootstrap-smoke'
+    runs-on: ubuntu-latest
+    environment: web-v2-release
+    steps:
+      - name: Validate owner-authorized bootstrap smoke
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$VERSION_ID"
+          test "$OWNER_CONFIRMATION" = "SMOKE"
+          [[ "$SMOKE_URL" =~ ^https:// ]]
+          case "${SMOKE_URL%/}" in
+            https://elevationupscales.com|https://www.elevationupscales.com)
+              echo "Bootstrap smoke must use a non-customer production-parity custom domain." >&2
+              exit 1
+              ;;
+          esac
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned release toolchain
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Verify exact source and candidate identity
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+          npx --prefix apps/web-v2 --no-install wrangler versions view "$VERSION_ID" \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
+          node deployment/v2/release-policy.mjs assert-version \
+            --sha "$EXPECTED_SHA" --version-id "$VERSION_ID" --input /tmp/web-v2-version.json
+
+      - name: Deploy exact candidate to smoke-only Worker target
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            "$VERSION_ID@100" \
+            --config apps/web-v2/wrangler.jsonc \
+            --message "bootstrap-smoke git_sha=$EXPECTED_SHA version_id=$VERSION_ID" \
+            --yes
+
+      - name: Verify deployed Version ID
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler deployments list \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-deployments.json
+          node deployment/v2/release-policy.mjs assert-deployment \
+            --version-id "$VERSION_ID" --input /tmp/web-v2-deployments.json
+
+      - name: Production-parity bootstrap smoke
+        run: |
+          set -euo pipefail
+          BASE="${SMOKE_URL%/}"
+          OVERRIDE="Cloudflare-Workers-Version-Overrides: ${WORKER_NAME}=\"${VERSION_ID}\""
+          for attempt in 1 2 3 4 5; do
+            ACTUAL="$(curl -fsSL -H "$OVERRIDE" "$BASE/__version" | jq -r '.id // empty' || true)"
+            if [ "$ACTUAL" = "$VERSION_ID" ]; then break; fi
+            sleep 2
+          done
+          test "$ACTUAL" = "$VERSION_ID"
+          for path in $SMOKE_PATHS; do
+            curl -fsSL --retry 2 -H "$OVERRIDE" -o /dev/null "$BASE$path"
+          done
+          jq -n \
+            --arg sha "$EXPECTED_SHA" \
+            --arg version "$VERSION_ID" \
+            --arg url "$BASE" \
+            '{mode:"bootstrap-smoke",git_sha:$sha,version_id:$version,smoke_url:$url,result:"PASS"}' \
+            > /tmp/web-v2-smoke-receipt.json
+
+      - name: Bootstrap smoke receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-v2-bootstrap-smoke-${{ inputs.expected_sha }}
+          path: /tmp/web-v2-smoke-receipt.json
+          if-no-files-found: error
+
+  production-smoke:
+    if: inputs.mode == 'production-smoke'
+    runs-on: ubuntu-latest
+    environment: web-v2-release
+    steps:
+      - name: Validate owner-authorized production smoke
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$VERSION_ID"
+          test -n "$BASELINE_VERSION_ID"
+          test "$VERSION_ID" != "$BASELINE_VERSION_ID"
+          test "$OWNER_CONFIRMATION" = "SMOKE"
+          [[ "$SMOKE_URL" =~ ^https:// ]]
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned release toolchain
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Verify exact source and candidate identity
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+          npx --prefix apps/web-v2 --no-install wrangler versions view "$VERSION_ID" \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
+          node deployment/v2/release-policy.mjs assert-version \
+            --sha "$EXPECTED_SHA" --version-id "$VERSION_ID" --input /tmp/web-v2-version.json
+
+      - name: Put candidate in production deployment at zero percent
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            "$BASELINE_VERSION_ID@100" "$VERSION_ID@0" \
+            --config apps/web-v2/wrangler.jsonc \
+            --message "production-smoke git_sha=$EXPECTED_SHA candidate=$VERSION_ID baseline=$BASELINE_VERSION_ID" \
+            --yes
+          npx --prefix apps/web-v2 --no-install wrangler deployments list \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-split-deployment.json
+          node deployment/v2/release-policy.mjs assert-deployment-contains \
+            --version-id "$BASELINE_VERSION_ID" --input /tmp/web-v2-split-deployment.json
+          node deployment/v2/release-policy.mjs assert-deployment-contains \
+            --version-id "$VERSION_ID" --input /tmp/web-v2-split-deployment.json
+
+      - name: Smoke exact zero-percent candidate on production zone
+        run: |
+          set -euo pipefail
+          BASE="${SMOKE_URL%/}"
+          OVERRIDE="Cloudflare-Workers-Version-Overrides: ${WORKER_NAME}=\"${VERSION_ID}\""
+          for attempt in 1 2 3 4 5; do
+            ACTUAL="$(curl -fsSL -H "$OVERRIDE" "$BASE/__version" | jq -r '.id // empty' || true)"
+            if [ "$ACTUAL" = "$VERSION_ID" ]; then break; fi
+            sleep 2
+          done
+          test "$ACTUAL" = "$VERSION_ID"
+          for path in $SMOKE_PATHS; do
+            curl -fsSL --retry 2 -H "$OVERRIDE" -o /dev/null "$BASE$path"
+          done
+          jq -n \
+            --arg sha "$EXPECTED_SHA" \
+            --arg version "$VERSION_ID" \
+            --arg baseline "$BASELINE_VERSION_ID" \
+            --arg url "$BASE" \
+            '{mode:"production-smoke",git_sha:$sha,version_id:$version,baseline_version_id:$baseline,smoke_url:$url,result:"PASS"}' \
+            > /tmp/web-v2-smoke-receipt.json
+
+      - name: Production smoke receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-v2-production-smoke-${{ inputs.expected_sha }}
+          path: /tmp/web-v2-smoke-receipt.json
+          if-no-files-found: error
+
+      - name: Restore accepted baseline if smoke fails
+        if: failure()
+        run: |
+          npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            "$BASELINE_VERSION_ID@100" \
+            --config apps/web-v2/wrangler.jsonc \
+            --message "automatic smoke rollback baseline=$BASELINE_VERSION_ID" \
+            --yes
 
   promote:
     if: inputs.mode == 'promote'
@@ -151,12 +358,64 @@ jobs:
           ref: ${{ inputs.expected_sha }}
           fetch-depth: 0
 
-      - name: Require exact accepted source identity
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned release toolchain
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Require exact source and candidate identity
         run: |
           set -euo pipefail
           git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+          npx --prefix apps/web-v2 --no-install wrangler versions view "$VERSION_ID" \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
+          node deployment/v2/release-policy.mjs assert-version \
+            --sha "$EXPECTED_SHA" --version-id "$VERSION_ID" --input /tmp/web-v2-version.json
+
+      - name: Promote same tested Version ID to 100 percent
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            "$VERSION_ID@100" \
+            --config apps/web-v2/wrangler.jsonc \
+            --message "promote git_sha=$EXPECTED_SHA version_id=$VERSION_ID" \
+            --yes
+          npx --prefix apps/web-v2 --no-install wrangler deployments list \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-deployments.json
+          node deployment/v2/release-policy.mjs assert-deployment \
+            --version-id "$VERSION_ID" --input /tmp/web-v2-deployments.json
+
+      - name: Promotion summary
+        run: |
+          {
+            echo "### Web V2 production promotion"
+            echo "Git SHA: $EXPECTED_SHA"
+            echo "Production Version ID: $VERSION_ID"
+            echo "Rebuild: NONE"
+            echo "Re-upload: NONE"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  rollback:
+    if: inputs.mode == 'rollback'
+    runs-on: ubuntu-latest
+    environment: web-v2-release
+    steps:
+      - name: Validate rollback gate
+        run: |
+          set -euo pipefail
+          test -n "$BASELINE_VERSION_ID"
+          test "$OWNER_CONFIRMATION" = "ROLLBACK"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v5
         with:
@@ -164,45 +423,19 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web-v2/package-lock.json
 
-      - name: Install pinned release toolchain only
+      - name: Install pinned release toolchain
         working-directory: apps/web-v2
         run: npm ci --ignore-scripts
 
-      - name: Verify the already-created candidate maps to the approved SHA
-        run: |
-          set -euo pipefail
-          npx --prefix apps/web-v2 --no-install wrangler versions view "$VERSION_ID" \
-            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
-          node deployment/v2/release-policy.mjs assert-version \
-            --sha "$EXPECTED_SHA" \
-            --version-id "$VERSION_ID" \
-            --input /tmp/web-v2-version.json
-
-      - name: Promote the existing tested Version ID
+      - name: Restore last accepted Version ID
         run: |
           set -euo pipefail
           npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            "$BASELINE_VERSION_ID@100" \
             --config apps/web-v2/wrangler.jsonc \
-            --version-id "$VERSION_ID" \
-            --percentage 100 \
-            --message "promote git_sha=$EXPECTED_SHA version_id=$VERSION_ID" \
+            --message "owner rollback baseline=$BASELINE_VERSION_ID" \
             --yes
-
-      - name: Verify production deployment references same Version ID
-        run: |
-          set -euo pipefail
           npx --prefix apps/web-v2 --no-install wrangler deployments list \
-            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-deployments.json
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-rollback.json
           node deployment/v2/release-policy.mjs assert-deployment \
-            --version-id "$VERSION_ID" \
-            --input /tmp/web-v2-deployments.json
-
-      - name: Promotion summary
-        run: |
-          {
-            echo "### Web V2 promotion"
-            echo "Git SHA: $EXPECTED_SHA"
-            echo "Production Version ID: $VERSION_ID"
-            echo "Rebuild: NONE"
-            echo "Re-upload: NONE"
-          } >> "$GITHUB_STEP_SUMMARY"
+            --version-id "$BASELINE_VERSION_ID" --input /tmp/web-v2-rollback.json
