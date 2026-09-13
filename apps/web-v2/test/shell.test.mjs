@@ -36,18 +36,6 @@ test('homepage renders customer-safe public navigation and SEO', async () => {
   assertCustomerSafe(body);
 });
 
-test('start-a-project is an honest customer action without a fabricated form', async () => {
-  const res = await request('/start-a-project');
-  assert.equal(res.status, 200);
-  const body = await res.text();
-  assert.match(body, /START A PROJECT/);
-  assert.match(body, /Call 208-813-4998/);
-  assert.match(body, /mailto:casey@elevationupscales\.com\?subject=Start%20a%20Project/);
-  assert.match(body, /rel="canonical" href="https:\/\/elevationupscales\.com\/start-a-project"/);
-  assert.doesNotMatch(body, /<form\b/i);
-  assertCustomerSafe(body);
-});
-
 test('health endpoint keeps internal implementation state out of customer HTML', async () => {
   const res = await request('/healthz');
   assert.equal(res.status, 200);
@@ -81,8 +69,7 @@ test('robots and sitemap reflect the current implemented Web V2 route state', as
   assert.match(sitemap.headers.get('content-type') || '', /application\/xml/);
   const sitemapBody = await sitemap.text();
   assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/<\/loc>/);
-  assert.match(sitemapBody, /<loc>https:\/\/elevationupscales\.com\/start-a-project<\/loc>/);
-  assert.doesNotMatch(sitemapBody, /\/store<\/loc>|\/cart<\/loc>|\/checkout<\/loc>|\/solar-project<\/loc>/);
+  assert.doesNotMatch(sitemapBody, /\/start-a-project<\/loc>|\/store<\/loc>|\/cart<\/loc>|\/checkout<\/loc>|\/solar-project<\/loc>/);
   assertCustomerSafe(sitemapBody);
 });
 
@@ -103,7 +90,12 @@ test('registered-but-unbuilt routes hand off to the current live customer route'
     ['/store', 'https://elevationupscales.com/store'],
     ['/solar-services', 'https://elevationupscales.com/solar-services'],
     ['/privacy', 'https://elevationupscales.com/privacy'],
-    ['/product?id=test', 'https://elevationupscales.com/product?id=test']
+    ['/product?id=test', 'https://elevationupscales.com/product?id=test'],
+    ['/start-a-project', 'https://elevationupscales.com/start-a-project'],
+    ['/start-a-project?type=home', 'https://elevationupscales.com/start-a-project?type=home'],
+    ['/start-a-project?type=rv', 'https://elevationupscales.com/start-a-project?type=rv'],
+    ['/start-a-project?solution=solar', 'https://elevationupscales.com/start-a-project?solution=solar'],
+    ['/start-a-project?type=home&source=legacy-route', 'https://elevationupscales.com/start-a-project?type=home&source=legacy-route']
   ];
 
   for (const [path, location] of cases) {
@@ -116,7 +108,8 @@ test('registered-but-unbuilt routes hand off to the current live customer route'
 test('unknown routes and canonical-host loop protection use the branded customer-safe 404', async () => {
   const cases = [
     await request('/not-a-real-route'),
-    await request('/store', {}, 'https://elevationupscales.com')
+    await request('/store', {}, 'https://elevationupscales.com'),
+    await request('/start-a-project?type=home', {}, 'https://elevationupscales.com')
   ];
 
   for (const res of cases) {
