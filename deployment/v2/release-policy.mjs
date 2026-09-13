@@ -37,6 +37,39 @@ function deepContains(value, needle) {
   return false;
 }
 
+function objectVersionId(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  for (const key of ['id', 'version_id', 'versionId']) {
+    if (typeof value[key] === 'string') return value[key];
+  }
+  return null;
+}
+
+function objectPercentage(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  for (const key of ['percentage', 'percent']) {
+    if (typeof value[key] === 'number') return value[key];
+    if (typeof value[key] === 'string' && value[key].trim() !== '') {
+      const parsed = Number.parseFloat(value[key]);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+function containsVersionAtPercentage(value, versionId, percentage) {
+  if (Array.isArray(value)) {
+    return value.some((item) => containsVersionAtPercentage(item, versionId, percentage));
+  }
+  if (!value || typeof value !== 'object') return false;
+
+  if (objectVersionId(value) === versionId && objectPercentage(value) === percentage) {
+    return true;
+  }
+
+  return Object.values(value).some((item) => containsVersionAtPercentage(item, versionId, percentage));
+}
+
 export function assertVersionRecord(value, sha, versionId) {
   assertFullSha(sha);
   if (!deepContains(value, versionId)) throw new Error('Cloudflare version record does not contain the expected Version ID.');
@@ -51,9 +84,8 @@ export function assertDeploymentContainsVersion(value, versionId) {
 
 export function assertDeploymentRecord(value, versionId) {
   assertDeploymentContainsVersion(value, versionId);
-  const serialized = JSON.stringify(value);
-  if (!/(?:percentage|percent)[^0-9]{0,8}100(?:\.0+)?|100(?:\.0+)?\s*%/i.test(serialized)) {
-    throw new Error('Deployment record does not show a 100% production promotion.');
+  if (!containsVersionAtPercentage(value, versionId, 100)) {
+    throw new Error(`Deployment record does not show Version ID ${versionId} at 100% traffic.`);
   }
 }
 
