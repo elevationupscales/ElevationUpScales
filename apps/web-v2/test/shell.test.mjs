@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../src/index.js';
 
-async function request(path = '/', init = {}) {
-  return worker.fetch(new Request(`https://elevation-web-v2.test${path}`, init));
+async function request(path = '/', init = {}, origin = 'https://elevation-web-v2.test') {
+  return worker.fetch(new Request(`${origin}${path}`, init));
 }
 
 function assertCustomerSafe(body) {
@@ -73,10 +73,29 @@ test('owned CSS and JS assets are served locally', async () => {
   assert.match(await js.text(), /aria-expanded/);
 });
 
-test('unknown and registered-but-unbuilt routes use the branded customer-safe 404', async () => {
-  for (const path of ['/not-a-real-route', '/store', '/solar-services', '/privacy']) {
+test('registered-but-unbuilt routes hand off to the current live customer route', async () => {
+  const cases = [
+    ['/store', 'https://elevationupscales.com/store'],
+    ['/solar-services', 'https://elevationupscales.com/solar-services'],
+    ['/privacy', 'https://elevationupscales.com/privacy'],
+    ['/product?id=test', 'https://elevationupscales.com/product?id=test']
+  ];
+
+  for (const [path, location] of cases) {
     const res = await request(path);
-    assert.equal(res.status, 404, path);
+    assert.equal(res.status, 307, path);
+    assert.equal(res.headers.get('location'), location, path);
+  }
+});
+
+test('unknown routes and canonical-host loop protection use the branded customer-safe 404', async () => {
+  const cases = [
+    await request('/not-a-real-route'),
+    await request('/store', {}, 'https://elevationupscales.com')
+  ];
+
+  for (const res of cases) {
+    assert.equal(res.status, 404);
     const body = await res.text();
     assert.match(body, /404 • PAGE NOT FOUND/);
     assert.match(body, /We couldn’t find that page/);
