@@ -207,6 +207,33 @@ Do not build broad infrastructure before revenue-critical customer paths.
 - live verification;
 - accepted receipt.
 
+## 8A. IMPLEMENTATION LOOP — NO PRE-BUILD RECON SPIN
+
+Once `WEB_V2_CURRENT_WORKTREE.md` names a phase **ACTIVE / CURRENT** and the worker is authorized, the worker must execute that phase instead of repeatedly reconstructing management state.
+
+Use:
+
+**RE-RESOLVE `main` ONCE → READ ACTIVE WORKTREE + EXACT PHASE/SOURCE FILES → CREATE/RECOVER BOUNDED BRANCH → IMPLEMENT → QA → RE-RESOLVE `main` ONCE BEFORE MERGE → RECONCILE → MERGE → UPDATE WORKTREE → REPORT.**
+
+This workflow specifically rejects the failure loop:
+
+**RESOLVE → READ ALL CONTROL FILES → RECON AGAIN → PREPARE RECEIPT → EXECUTION WINDOW ENDS → NO BRANCH → REPEAT.**
+
+Instead:
+
+- full OS onboarding is not repeated after lane/task authority is already established;
+- branch creation/recovery occurs immediately after the active task is verified;
+- broad repository discovery stops once the exact implementation surface is known;
+- authoritative supplier-source reads are task work and remain required;
+- receipt composition occurs only after durable implementation/QA/merge state exists;
+- an execution-window/context cutoff is not an owner gate;
+- if no mutation occurred on an interrupted run, the next run rechecks only current `main` and the active Worktree, then branches/builds;
+- if durable branch/commit progress exists, resume it rather than restarting discovery;
+- normal bounded implementation uses two `main` resolutions maximum unless a real race/conflict is detected;
+- when execution capacity is constrained, prioritize **BRANCH/COMMIT → QA → MERGE → WORKTREE UPDATE → RECEIPT**.
+
+MASTER RECON is not part of the normal inner development loop. Trigger RECON only for actual control/state conflict, supplier-truth conflict that changes catalog policy, lineage ambiguity, or release-integrity gates.
+
 ## 9. WHAT IS NOT FOREGROUND
 
 Do not delay revenue launch for:
@@ -220,6 +247,8 @@ Do not delay revenue launch for:
 - speculative AI/agentic commerce;
 - large CMS/admin architecture beyond what is required to maintain catalog truth;
 - unrelated home-service feature expansion.
+
+Do not delay implementation for repeated management-file rereads after the current Worktree/task is already unambiguous.
 
 ## 10. CLOSE CONDITION
 
@@ -237,4 +266,4 @@ This workflow is complete when:
 
 ## CONTROL PHRASE
 
-**KEEP THE HOMEPAGE → SELL THE PARTNERS → CART → PAYPAL → ORDER → FULFILL → FREIGHT / HAWAII CONTROL → PRODUCTION-PARITY SMOKE → SAME VERSION LIVE → MAKE MONEY.**
+**RESOLVE ONCE → BRANCH → BUILD → QA → RESOLVE BEFORE MERGE → MERGE → REPORT. KEEP THE HOMEPAGE → SELL THE PARTNERS → CART → PAYPAL → ORDER → FULFILL → FREIGHT / HAWAII CONTROL → PRODUCTION-PARITY SMOKE → SAME VERSION LIVE → MAKE MONEY.**
