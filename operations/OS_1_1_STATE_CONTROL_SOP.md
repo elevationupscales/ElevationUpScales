@@ -3,7 +3,7 @@
 **Version:** 1.1  
 **Parent:** `operations/MASTER_SOP_V1_1.md`  
 **Owner:** Casey Young  
-**Status:** CANDIDATE UNTIL MERGED TO ACCEPTED `main`
+**Status:** ACTIVE WHEN PRESENT ON ACCEPTED `main`
 
 ## Purpose
 
