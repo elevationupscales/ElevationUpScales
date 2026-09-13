@@ -7,6 +7,7 @@ import { checkoutClientScript } from './checkout-client.js';
 import { renderCheckoutPage } from './checkout-page.js';
 import { checkoutStyles } from './checkout-styles.js';
 import { resolveCheckout } from './checkout.js';
+import { createOrderFromCheckout, captureOrderPayment } from './order-service.js';
 import { catalogStyles } from './catalog-styles.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
@@ -39,6 +40,16 @@ function html(body, status = 200) {
 
 function redirect(location, status) { return response(null, { status, headers: { Location: location } }); }
 
+function mutationOriginAllowed(request) {
+  const origin = request.headers.get('Origin');
+  if (!origin) return false;
+  try {
+    return new URL(origin).origin === new URL(request.url).origin;
+  } catch {
+    return false;
+  }
+}
+
 function robotsText(url) {
   if (url.origin !== CANONICAL_ORIGIN) return 'User-agent: *\nDisallow: /\n';
   return ['User-agent: *', 'Allow: /', 'Disallow: /healthz', 'Disallow: /__version', '', `Sitemap: ${CANONICAL_ORIGIN}/sitemap.xml`, ''].join('\n');
@@ -64,8 +75,12 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const checkoutResolvePost = url.pathname === '/api/checkout/resolve' && request.method === 'POST';
+    const orderCreatePost = url.pathname === '/api/order/create' && request.method === 'POST';
+    const orderCaptureMatch = url.pathname.match(/^\/api\/order\/paypal\/([A-Z0-9-]{8,80})\/capture$/i);
+    const orderCapturePost = Boolean(orderCaptureMatch) && request.method === 'POST';
+    const allowedMutation = checkoutResolvePost || orderCreatePost || orderCapturePost;
 
-    if (request.method !== 'GET' && request.method !== 'HEAD' && !checkoutResolvePost) {
+    if (request.method !== 'GET' && request.method !== 'HEAD' && !allowedMutation) {
       return response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' } });
     }
 
@@ -78,6 +93,24 @@ export default {
       }
       if (!payload || !Array.isArray(payload.items)) return json({ error: 'INVALID_CHECKOUT_PAYLOAD' }, 400);
       return json(resolveCheckout(payload.items, payload.destination));
+    }
+
+    if (orderCreatePost) {
+      if (!mutationOriginAllowed(request)) return json({ error: 'CROSS_ORIGIN_ORDER_DENIED' }, 403);
+      let payload;
+      try {
+        payload = await request.json();
+      } catch {
+        return json({ error: 'INVALID_ORDER_PAYLOAD' }, 400);
+      }
+      const result = await createOrderFromCheckout(payload, env);
+      return json(result.body, result.status);
+    }
+
+    if (orderCapturePost) {
+      if (!mutationOriginAllowed(request)) return json({ error: 'CROSS_ORIGIN_CAPTURE_DENIED' }, 403);
+      const result = await captureOrderPayment(orderCaptureMatch[1], env);
+      return json(result.body, result.status);
     }
 
     if (url.pathname === '/__version') return json(versionPayload(env));

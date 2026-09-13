@@ -15,17 +15,23 @@ export function renderCheckoutPage() {
 <body>
 <header class="catalog-topnav"><div class="catalog-nav-inner"><a class="catalog-brand" href="/">Elevation UpScales</a><nav aria-label="Checkout navigation"><a href="/store">Shop</a><a href="/cart">Cart</a><a href="/checkout" aria-current="page">Checkout</a></nav></div></header>
 <main id="main" class="catalog-main"><div class="catalog-shell">
-<section class="catalog-hero"><p>DIRECT ELEVATION COMMERCE</p><h1>Checkout Review</h1><p>Your cart is revalidated against current Elevation product truth, then the destination is checked before an order can advance. No browser price or availability state is trusted.</p></section>
+<section class="catalog-hero"><p>DIRECT ELEVATION COMMERCE</p><h1>Checkout Review</h1><p>Your cart is revalidated against current Elevation product truth, then the destination and final order controls are checked before payment. No browser price or availability state is trusted.</p></section>
 <section class="checkout-layout">
 <form class="checkout-destination" data-checkout-form>
-<h2>Destination eligibility</h2>
+<h2>Contact & shipping</h2>
+<label>Email <input type="email" name="email" autocomplete="email" required></label>
+<label>Phone <input type="tel" name="phone" autocomplete="tel"></label>
+<label>Full name <input name="fullName" autocomplete="name" required></label>
+<label>Address <input name="address1" autocomplete="address-line1" required></label>
+<label>Address line 2 <input name="address2" autocomplete="address-line2"></label>
+<label>City <input name="city" autocomplete="address-level2" required></label>
 <input type="hidden" name="country" value="US">
 <label>State <input name="state" autocomplete="address-level1" maxlength="2" pattern="[A-Za-z]{2}" required placeholder="CO"></label>
 <label>ZIP code <input name="postalCode" autocomplete="postal-code" inputmode="numeric" required placeholder="80903"></label>
 <button type="submit">Review checkout</button>
-<p class="checkout-help">Hawaii, Alaska, freight and other special routes remain held unless the exact product route is verified.</p>
+<p class="checkout-help">Hawaii, Alaska, freight and other special routes remain held unless the exact product route is verified. Payment cannot begin until shipping, tax and final amount due are authoritative.</p>
 </form>
-<section class="checkout-review" data-checkout-root aria-live="polite"><div class="cart-empty"><h2>Enter a destination</h2><p>We will re-check the saved cart and destination before anything can advance.</p></div></section>
+<section class="checkout-review" data-checkout-root aria-live="polite"><div class="cart-empty"><h2>Enter your details</h2><p>We will re-check the saved cart and destination before anything can advance.</p></div></section>
 </section>
 </div></main>
 <footer class="catalog-footer"><div class="catalog-nav-inner"><a href="/store">Shop</a><a href="/cart">Cart</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><span>© 2026 Elevation UpScales, Inc.</span></div></footer>
