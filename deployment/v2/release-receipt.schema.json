@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elevationupscales.com/schemas/v2-release-receipt.json",
+  "title": "Elevation V2 Release Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "component",
+    "git_sha",
+    "cloudflare_version_id",
+    "candidate_preview_url",
+    "qa_result",
+    "opera_acceptance",
+    "owner_approval",
+    "production_deployment_id",
+    "production_version_id",
+    "live_smoke",
+    "created_at"
+  ],
+  "properties": {
+    "component": {"enum": ["web-v2", "commerce-v2", "ops-v2"]},
+    "git_sha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "cloudflare_version_id": {"type": "string", "minLength": 8},
+    "candidate_preview_url": {"type": "string", "format": "uri", "pattern": "^https://.+\\.workers\\.dev/?$"},
+    "qa_result": {"enum": ["PASS", "FAIL", "PENDING"]},
+    "opera_acceptance": {"enum": ["PASS", "FAIL", "PENDING"]},
+    "owner_approval": {"enum": ["PASS", "PENDING"]},
+    "production_deployment_id": {"type": ["string", "null"]},
+    "production_version_id": {"type": ["string", "null"]},
+    "live_smoke": {"enum": ["PASS", "FAIL", "PENDING"]},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}
