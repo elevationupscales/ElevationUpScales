@@ -18,6 +18,9 @@ export const clientScript = `
     });
   }
 
+  const hero48Image = document.querySelector('.reference-storefront-home .hero-product-48 img');
+  if (hero48Image) hero48Image.src = 'https://elevationupscales.com/assets/brands/sok/48v-battery-cabinet/hero.webp?v=20260910-1';
+
   const year = document.querySelector('[data-current-year]');
   if (year) year.textContent = String(new Date().getFullYear());
 })();
