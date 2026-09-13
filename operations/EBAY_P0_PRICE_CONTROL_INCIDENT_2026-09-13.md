@@ -50,7 +50,7 @@ The Sep. 11 Phase 1 screen established that 9/9 matched candidates fail the 30% 
 | `168634908211` / `D01027RQ3N2` 6000W inverter | $499.00 | **1** | END / HOLD |
 | `168639989005` / `D010277UEBX` battery box | $52.55 | **1** | END / REBUILD |
 
-**7 of these 9 failed-screen configurations remain purchasable.**
+**8 of these 9 failed-screen configurations remain purchasable.**
 
 Additional known weak/unverified configurations still purchasable:
 
