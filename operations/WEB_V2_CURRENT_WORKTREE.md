@@ -12,7 +12,8 @@
 **Current verified build baseline:** `main = e2c9e3494bd932c2cde8b0d24e807cbb94706009`  
 **Homepage merge receipt:** `6940c32b5c1863d4b60be85427ccff3060e5d396`  
 **Retail-navigation merge receipt:** `e2c9e3494bd932c2cde8b0d24e807cbb94706009`  
-**Git freshness rule:** re-resolve then-current `main` before every bounded task; later control-only descendants do not change the owner build order by themselves.
+**Git freshness rule:** re-resolve then-current `main` before every bounded task; later control-only descendants do not change the owner build order by themselves.  
+**Execution-loop guard:** `OS_1_1_EXECUTION_HANDOFF_SOP.md` §2A / §6 — one startup resolve, branch/build immediately, second resolve only before merge unless real drift appears.
 
 ## 1. Mission
 
@@ -165,16 +166,42 @@ Do not delay the active catalog sequence for:
 - another visual redesign;
 - generic supplier re-onboarding where an owning Vendor Project already exists.
 
-## 11. RUN
+## 11. Execution-loop guard — ACTIVE
+
+For the currently authorized canonical-catalog task, do **not** replay full OS onboarding or broad RECON after the active Worktree is verified.
+
+Normal implementation loop:
+
+**RE-RESOLVE CURRENT `main` ONCE → READ THIS WORKTREE + EXACT CATALOG SOURCE/TASK FILES → CREATE OR RECOVER THE BOUNDED CATALOG BRANCH → IMPLEMENT → QA → RE-RESOLVE `main` ONCE BEFORE MERGE → RECONCILE CONCURRENT CHANGES → MERGE → UPDATE THIS WORKTREE → REPORT.**
+
+Hard guards:
+
+- branch creation/recovery is the first durable repository action after startup verification;
+- do not reread unchanged Master SOP / Registry / global Board / release architecture before beginning catalog implementation;
+- do not run MASTER RECON again unless a real state conflict, supplier-truth conflict, lineage race or release-integrity issue appears;
+- do not prepare a completion receipt before implementation and QA exist;
+- an execution-window/context cutoff is **not** a blocker or owner gate;
+- if a prior attempt ended with no branch or commit, the next run checks current `main` + this Worktree once, then creates the branch and builds;
+- if a branch/commit already exists, recover it instead of restarting discovery;
+- supplier truth verification remains required, but missing supplier facts hold only the affected SKU and do not restart management discovery;
+- normal bounded work uses no more than two `main` resolutions unless a genuine race is detected.
+
+Priority under constrained execution:
+
+**DURABLE PROGRESS FIRST: BRANCH/COMMIT → QA → MERGE → WORKTREE UPDATE → RECEIPT.**
+
+## 12. RUN
 
 `RUN` means:
 
-**RE-RESOLVE MAIN → READ THIS WORKTREE → EXECUTE THE ACTIVE CANONICAL CATALOG TASK → USE ONLY AUTHORITATIVE SUPPLIER TRUTH → FAIL CLOSED ON UNKNOWN COMMERCIAL FIELDS → QA → MERGE → UPDATE WORKTREE → CONTINUE TO PRODUCT DETAIL WHEN CLEAN.**
+**RE-RESOLVE MAIN ONCE → READ THIS WORKTREE + EXACT TASK SOURCES → CREATE/RECOVER BOUNDED BRANCH → EXECUTE THE ACTIVE CANONICAL CATALOG TASK → USE ONLY AUTHORITATIVE SUPPLIER TRUTH → FAIL CLOSED ON UNKNOWN COMMERCIAL FIELDS → QA → RE-RESOLVE MAIN BEFORE MERGE → MERGE → UPDATE WORKTREE → CONTINUE TO PRODUCT DETAIL WHEN CLEAN.**
 
 Do not stop the whole catalog because one SKU or vendor has missing truth. Hold only the affected SKU/state, continue clean verified products, and route the missing fact back to its owning Vendor Project.
 
 Do not skip from catalog work to release merely because the release machinery is ready.
 
+Do not return an execution-window/context-limit status as the completion result when executable repository work remains. Preserve any durable progress and resume through the same bounded branch.
+
 ## Control phrase
 
-**HOMEPAGE MERGED → RETAIL NAV MERGED → CANONICAL CATALOG ACTIVE → VERIFIED PRODUCTS SELL → UNKNOWN TRUTH FAILS CLOSED → PRODUCT → CART → PAYPAL → ORDER → FULFILL → RELEASE AT TRUE GATE.**
+**RESOLVE ONCE → BRANCH → BUILD → QA → RESOLVE BEFORE MERGE → MERGE → REPORT. HOMEPAGE MERGED → RETAIL NAV MERGED → CANONICAL CATALOG ACTIVE → VERIFIED PRODUCTS SELL → UNKNOWN TRUTH FAILS CLOSED → PRODUCT → CART → PAYPAL → ORDER → FULFILL → RELEASE AT TRUE GATE.**
