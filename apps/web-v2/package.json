@@ -1,12 +1,14 @@
 {
   "name": "@elevation/web-v2",
   "private": true,
-  "version": "0.0.0",
-  "description": "Elevation Web V2 release tooling foundation. Application source is introduced in Phase 1 Step 4.",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Elevation Web V2 public customer-experience Worker shell and exact-version release tooling.",
   "devDependencies": {
     "wrangler": "4.129.0"
   },
   "scripts": {
+    "test": "node --test test/*.test.mjs",
     "wrangler": "wrangler",
     "release:upload": "wrangler versions upload --config wrangler.jsonc",
     "release:versions": "wrangler versions list --config wrangler.jsonc --json"
