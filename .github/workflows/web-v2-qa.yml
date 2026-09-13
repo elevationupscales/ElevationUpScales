@@ -1,0 +1,83 @@
+name: Web V2 Release Foundation QA
+
+on:
+  push:
+    branches:
+      - 'work/web-v2-*'
+    paths:
+      - 'apps/web-v2/**'
+      - 'deployment/v2/**'
+      - '.github/workflows/web-v2-qa.yml'
+      - '.github/workflows/web-v2-release.yml'
+  pull_request:
+    paths:
+      - 'apps/web-v2/**'
+      - 'deployment/v2/**'
+      - '.github/workflows/web-v2-qa.yml'
+      - '.github/workflows/web-v2-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Generate missing lockfile for first foundation pass
+        id: lock
+        working-directory: apps/web-v2
+        run: |
+          set -euo pipefail
+          if test -f package-lock.json; then
+            echo "generated=false" >> "$GITHUB_OUTPUT"
+          else
+            npm install --package-lock-only --ignore-scripts
+            echo "generated=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Export generated lockfile
+        if: steps.lock.outputs.generated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-v2-package-lock
+          path: apps/web-v2/package-lock.json
+          if-no-files-found: error
+
+      - name: Install exact locked Wrangler when lock is committed
+        if: steps.lock.outputs.generated == 'false'
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Verify exact Wrangler pin when lock is committed
+        if: steps.lock.outputs.generated == 'false'
+        working-directory: apps/web-v2
+        run: |
+          set -euo pipefail
+          VERSION="$(npx --no-install wrangler --version)"
+          echo "$VERSION"
+          [[ "$VERSION" == *"4.129.0"* ]]
+
+      - name: Validate release foundation contract
+        run: |
+          set -euo pipefail
+          node deployment/v2/validate-foundation.mjs
+          node --test deployment/v2/release-policy.test.mjs
+          npm run qa:secrets
+          git diff --check
+
+      - name: Require a clean tree once lockfile is committed
+        if: steps.lock.outputs.generated == 'false'
+        run: test -z "$(git status --porcelain)"
+
+      - name: Lockfile bootstrap notice
+        if: steps.lock.outputs.generated == 'true'
+        run: |
+          echo "LOCKFILE_BOOTSTRAP_REQUIRED"
+          echo "Commit the generated package-lock artifact, then require a second green QA run."
