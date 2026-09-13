@@ -31,7 +31,7 @@ test('checkout re-resolves current canonical cart state and held products fail c
   assert.equal(result.totals.amountDue, null);
 });
 
-test('clean lower-48 product passes destination review but payment remains a later phase', () => {
+test('clean lower-48 product passes destination review but payment remains server-gated', () => {
   const result = resolveCheckout(
     [{ productId: 'clean-product', quantity: 2, unitPrice: { amount: 0.01 } }],
     { country: 'US', state: 'co', postalCode: '80903' },
@@ -62,7 +62,7 @@ test('Hawaii, Alaska and non-explicit shipping dispositions remain held', () => 
   );
 });
 
-test('checkout route is live, noindex, and contains no payment or Shopify fallback', async () => {
+test('checkout route is live, noindex, and loads no third-party payment script or Shopify fallback', async () => {
   const res = await request('/checkout');
   assert.equal(res.status, 200);
   const body = await res.text();
@@ -70,7 +70,8 @@ test('checkout route is live, noindex, and contains no payment or Shopify fallba
   assert.match(body, /data-checkout-form/);
   assert.match(body, /name="robots" content="noindex,nofollow"/);
   assert.match(body, /\/assets\/checkout\.js/);
-  assert.doesNotMatch(body, /paypal\.com|Shopify|\/api\/paypal/i);
+  assert.match(body, /Payment cannot begin until shipping, tax and final amount due are authoritative/);
+  assert.doesNotMatch(body, /https:\/\/.*paypal\.com|Shopify|\/api\/paypal/i);
 });
 
 test('checkout resolver accepts POST only for stateless review and rejects malformed payloads', async () => {
@@ -98,7 +99,7 @@ test('checkout resolver accepts POST only for stateless review and rejects malfo
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CHECKOUT_PAYLOAD' });
 });
 
-test('checkout client sends cart identity and quantity plus destination review fields', async () => {
+test('checkout client uses server order APIs and retains provider and card-data guards', async () => {
   const res = await request('/assets/checkout.js');
   assert.equal(res.status, 200);
   const script = await res.text();
@@ -106,6 +107,9 @@ test('checkout client sends cart identity and quantity plus destination review f
   assert.match(script, /productId/);
   assert.match(script, /quantity/);
   assert.match(script, /\/api\/checkout\/resolve/);
-  assert.match(script, /method: 'POST'/);
-  assert.doesNotMatch(script, /paypal\.com|Shopify|unitPrice:\s*line/i);
+  assert.match(script, /\/api\/order\/create/);
+  assert.match(script, /\/api\/order\/paypal\//);
+  assert.match(script, /elevation-checkout-idempotency-v1/);
+  assert.match(script, /endsWith\('paypal\.com'\)/);
+  assert.doesNotMatch(script, /Shopify|unitPrice:\s*line|cardNumber|card_number|cvv|cvc/i);
 });
