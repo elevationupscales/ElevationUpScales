@@ -1,0 +1,21 @@
+name: Live Site Audit Repair QA
+
+on:
+  push:
+    branches:
+      - repair/live-site-audit-20260912
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Canonical QA
+        run: npm run qa
+      - name: Diff integrity
+        run: git diff --check origin/production-deploy...HEAD
