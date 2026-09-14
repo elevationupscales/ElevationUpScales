@@ -1,18 +1,17 @@
 import { CANONICAL_ORIGIN, PRIMARY_NAV, canonicalUrl } from './routes.js';
-import { semanticIcon } from './semantic-icons.js';
 
 const LEGACY_ASSET_ORIGIN = 'https://elevationupscales.com';
 const asset = (path) => `${LEGACY_ASSET_ORIGIN}${path}`;
-const BRAND_WORDMARK = '/assets/brand/elevation-wordmark.webp';
+const BRAND_WORDMARK = asset('/assets/brand/Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT.webp?v=20260910-1');
 
 const solutionCards = [
-  { title: 'Lithium Batteries', copy: 'Reliable lithium power for RV, mobile and backup systems.', href: '/store?department=lithium-batteries', label: 'Shop Batteries', image: '/assets/brands/sok/sk12v100pc/official-clean.png' },
-  { title: 'SOK Battery Systems', copy: '12V, 24V & 48V systems from Elevation’s authorized battery partner.', href: '/shop/sok', label: 'Shop SOK', image: '/assets/brands/sok/sk48v100n/official-clean.png' },
-  { title: 'Solar & Off-Grid', copy: 'Build your energy independence with solar and storage.', href: '/solar-project', label: 'Shop Solar', icon: 'solar' },
-  { title: 'Hawaii Power & Logistics', copy: 'Battery freight matched to product, quantity and destination.', href: '/hawaii-lithium-batteries', label: 'Learn More', image: '/assets/hero/hawaii-ocean-freight.webp' },
-  { title: 'RV & Outdoor', copy: 'Power, repair and gear for life on the road.', href: '/store?department=rv-outdoor', label: 'Shop RV & Outdoor', image: '/assets/hero/store-rv-mountains.webp' },
-  { title: 'Backup Power', copy: 'Keep critical systems running with resilient stored energy.', href: '/shop/sok', label: 'Shop Backup Power', icon: 'backup' },
-  { title: 'Commercial Power', copy: 'Scalable power and supply support for larger applications.', href: '/shop/sok', label: 'Shop Commercial', icon: 'commercial' }
+  ['Lithium Batteries', '12V lithium energy for RV and mobile systems.', '/store?department=lithium-batteries', 'Shop Batteries'],
+  ['SOK Battery Systems', '12V, 24V & 48V systems.', '/shop/sok', 'Shop SOK'],
+  ['Solar & Off-Grid', 'Build your energy independence.', '/solar-project', 'Shop Solar'],
+  ['Hawaii Power & Logistics', 'Battery freight matched to product and destination.', '/hawaii-lithium-batteries', 'Learn More'],
+  ['RV & Outdoor', 'Current batteries and gear for the journey.', '/store?department=rv-outdoor', 'Shop RV & Outdoor'],
+  ['Backup Power', 'Keep what matters running.', '/shop/sok', 'Shop Backup Power'],
+  ['Commercial Power', 'Scalable power solutions.', '/shop/sok', 'Shop Commercial']
 ];
 
 const lithiumProducts = [
@@ -86,17 +85,12 @@ function navMarkup(currentPath) {
 }
 
 function solutionMarkup() {
-  return solutionCards.map(({ title, copy, href, label, image, icon }) => {
-    const visual = image
-      ? `<img class="solution-card__image" src="${image}" alt="" loading="lazy" decoding="async">`
-      : `<div class="solution-card__icon-visual" aria-hidden="true">${semanticIcon(icon)}</div>`;
-    return `
-    <article class="solution-card solution-card--visual">
-      ${visual}
-      <div class="solution-card__shade" aria-hidden="true"></div>
-      <div class="solution-card__content"><h3>${title}</h3><p>${copy}</p><a href="${href}" class="text-link">${label} <span aria-hidden="true">→</span></a></div>
-    </article>`;
-  }).join('');
+  return solutionCards.map(([title, copy, href, label]) => `
+    <article class="solution-card">
+      <h3>${title}</h3>
+      <p>${copy}</p>
+      <a href="${href}" class="text-link">${label} <span aria-hidden="true">→</span></a>
+    </article>`).join('');
 }
 
 function commerceProductMarkup(products) {
@@ -117,10 +111,6 @@ function commerceProductMarkup(products) {
     </article>`).join('');
 }
 
-function shortcutIcon(kind) {
-  return semanticIcon(kind);
-}
-
 function documentHead(routeInfo, { notFound = false } = {}) {
   const title = notFound ? 'Page Not Found | Elevation UpScales' : routeInfo.title;
   const description = notFound
@@ -129,7 +119,7 @@ function documentHead(routeInfo, { notFound = false } = {}) {
   const canonical = notFound ? '' : `\n  <link rel="canonical" href="${canonicalUrl(routeInfo)}">`;
   const robots = notFound ? '\n  <meta name="robots" content="noindex,follow">' : '';
   const pageUrl = notFound ? CANONICAL_ORIGIN : canonicalUrl(routeInfo);
-  const socialImage = `${CANONICAL_ORIGIN}/assets/hero/power-social.webp`;
+  const socialImage = asset('/assets/elevation-lithium-social-card.webp');
 
   return `
   <meta charset="utf-8">
@@ -147,7 +137,7 @@ function documentHead(routeInfo, { notFound = false } = {}) {
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <meta name="twitter:image" content="${socialImage}">
   <title>${escapeHtml(title)}</title>
-  <link rel="preload" as="image" href="${'/assets/hero/home-tropical.webp'}">
+  <link rel="preload" as="image" href="${asset('/assets/hero/storefront-tropical-logistics-v3.webp')}">
   <link rel="preload" as="image" href="${'/assets/brands/sok/sk12v100pc/official-clean.png'}">
   <link rel="preload" as="image" href="${BRAND_WORDMARK}">
   <link rel="stylesheet" href="/assets/app.css">
@@ -217,23 +207,22 @@ function homeMain() {
       <div class="shell-width storefront-grid">
         <div class="storefront-copy">
           <p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p>
-          <h1 id="storefront-title">Power Beyond<br><span>the Grid.</span></h1>
-          <p class="storefront-lead">Off-grid power, supply and logistics for RV, solar, backup power and harder-to-serve markets — backed by real product and project support from Elevation UpScales.</p>
+          <h1 id="storefront-title">Lithium Power<br><span>for RV, Solar &amp; Backup</span></h1>
+          <p class="storefront-lead">Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping. We aim to make dependable power products easier to buy and move, including streamlined fulfillment to Hawaii, Alaska, and select international markets where supplier, carrier, and compliance requirements support it.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="/store">Shop Power &amp; Energy <span aria-hidden="true">→</span></a>
             <a class="button button-outline" href="/start-a-project">Start a Project</a>
           </div>
           <nav class="usecase-grid" aria-label="Power solution shortcuts">
-            <a href="/store?department=lithium-batteries">${shortcutIcon('lithium')}<span>Lithium Batteries</span></a>
-            <a href="/solar-project">${shortcutIcon('solar')}<span>Solar &amp; Off-Grid</span></a>
-            <a href="/store?department=rv-outdoor">${shortcutIcon('rv')}<span>RV &amp; Outdoor</span></a>
-            <a href="/shop/sok">${shortcutIcon('backup')}<span>Backup Power</span></a>
-            <a href="/shop/sok">${shortcutIcon('commercial')}<span>Commercial Solutions</span></a>
-            <a href="/hawaii-lithium-batteries">${shortcutIcon('hawaii')}<span>Hawaii Logistics</span></a>
+            <a href="/store?department=lithium-batteries">Lithium Batteries</a>
+            <a href="/shop/sok">SOK Battery Systems</a>
+            <a href="/store?department=rv-outdoor">RV &amp; Outdoor</a>
+            <a href="/solar-project">Solar &amp; Off-Grid</a>
+            <a href="/shop/sok">Backup Power</a>
           </nav>
         </div>
         <div class="storefront-visual" aria-label="SOK lithium battery systems">
-          <img class="sok-wordmark" src="${'/assets/brands/sok/sok-wordmark.webp'}" alt="SOK Battery" width="620" height="190">
+          <img class="sok-wordmark" src="${asset('/assets/brands/sok/sok-wordmark-home-transparent.webp?v=20260910-1')}" alt="SOK Battery" width="620" height="190">
           <a class="hero-product hero-product-12" href="/sok/sk12v100pc/" aria-label="View SOK SK12V100PC">
             <img src="${'/assets/brands/sok/sk12v100pc/official-clean.png'}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900">
             <span><b>SK12V100PC</b><small>12.8V 100Ah</small></span>
@@ -247,9 +236,9 @@ function homeMain() {
     </section>
 
     <section class="trust-strip" aria-label="Elevation customer support highlights">
-      <div class="trust-item"><span class="trust-icon">${shortcutIcon('trusted')}</span><div><strong>TRUSTED BRANDS</strong><span>Premium power solutions from approved suppliers.</span></div></div>
-      <a class="trust-item" href="/shipping-logistics-services"><span class="trust-icon">${shortcutIcon('freight')}</span><div><strong>HAWAII READY</strong><span>Logistics support for harder-to-serve markets.</span></div></a>
-      <a class="trust-item" href="tel:+12088134998"><span class="trust-icon">${shortcutIcon('support')}</span><div><strong>REAL SUPPORT</strong><span>208-813-4998</span></div></a>
+      <div class="trust-item"><strong>AUTHORIZED BATTERY SUPPLY</strong><span>SOK systems for RV, solar and storage.</span></div>
+      <a class="trust-item" href="/shipping-logistics-services"><strong>HAWAII &amp; ALASKA</strong><span>Destination review for harder-to-serve markets.</span></a>
+      <a class="trust-item" href="tel:+12088134998"><strong>SUPPORT</strong><span>Call Elevation: 208-813-4998</span></a>
     </section>
 
     <section class="section shell-width solutions-section" id="solutions" aria-labelledby="solutions-title">
@@ -262,7 +251,7 @@ function homeMain() {
         <div class="sok-feature-head"><div><h2 id="sok-feature-title">FEATURED SOK SYSTEMS</h2><p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p><p>SOK is Elevation’s primary authorized battery partner for mobile power, solar, backup and larger off-grid storage.</p></div><a class="button button-outline" href="/shop/sok">View All SOK Products <span aria-hidden="true">→</span></a></div>
         <div class="sok-products-grid">
           <article class="product-card product-card-horizontal">
-            <a href="/sok/sk12v100pc/" class="product-image" aria-label="View SOK SK12V100PC"><img src="${'/assets/brands/sok/sk12v100pc/official-clean.png'}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900"></a>
+            <a href="/sok/sk12v100pc/" class="product-image" aria-label="View SOK SK12V100PC"><img src="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900"></a>
             <div class="product-card-copy"><p class="product-kicker">12V • RV • MOBILE POWER</p><h3>SOK SK12V100PC</h3><p>12.8V · 100Ah · 1280Wh.</p>
               <div class="product-actions"><a class="button button-primary" href="/sok/sk12v100pc/">View Battery</a><a class="button button-outline" href="/shop/sok">Purchase Options</a></div>
             </div>
