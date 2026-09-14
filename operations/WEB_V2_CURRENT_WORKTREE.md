@@ -3,24 +3,27 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **System:** Elevation OS 1.1  
-**Status:** **OWNER-ACCEPTED VISUAL BASELINE LOCKED — IMAGE COMPLETION ACTIVE — WEB DEVELOPER CURRENT**  
-**Reports To:** OS 1.1 Project Manager / MPM 6  
+**Status:** **OWNER-ACCEPTED VISUAL BASELINE LOCKED — BASELINE RESTORATION / CUTOVER FIRST — SECTION MEDIA PATCHES AFTER**  
+**Reports To:** OS 1.1 Project Manager / MPM 7  
 **Owner visual control:** `WEB_V2_OWNER_VISUAL_FIDELITY_REQUIREMENTS_2026-09-13.md`  
 **Closeout directive:** `WEB_V2_PRODUCTION_FIDELITY_CLOSEOUT_DIRECTIVE_2026-09-13.md`  
 **Latest owner-accepted visual baseline:** `e9cbaacc49443637e2241be7948ea93a3848557f`  
 **Prior accepted checkpoint:** `cbb9e59707ee07dcb6c84d566156ff36d658924d`  
 **Rejected later candidate:** `4bc2d0874db74133be3a76aee8d6db33504b6bfa` / Cloudflare `41bbca73-fb38-4f0f-87b3-a24b3f1801d0`  
+**Historical earlier approved candidate:** `6dff0a7e65f3967d60040977c3c2693e430e56b4` / Cloudflare `e60f4bd0-285b-4b08-9b55-1db013be383e` — predates controlling `e9cbaacc...`; do not promote as substitute  
 **Legacy production:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — LEGACY ONLY / rollback reference
 
 ## 1. Mission
 
-Close the Web V2 visual lane without another redesign.
+Put the already owner-approved Web V2 presentation on the release path **before** reopening broad image cleanup.
 
-Casey accepted two Web V2 visual checkpoints before the later rejected candidate. The unresolved work was **imaging**, not copy/layout/composition approval.
+Casey accepted the Web V2 visual presentation at `e9cbaacc...`. The later problem was image/icon/media completion and post-baseline visual drift, not rejection of the accepted copy, layout, hierarchy, CTAs, section structure or vendor-catalog architecture.
 
-Therefore the controlling path is:
+The prior closeout sequence attempted to finish many images before release. Owner direction now changes sequencing:
 
-**LAST OWNER-ACCEPTED WEB V2 (`e9cbaacc...`) → FREEZE COPY/LAYOUT/CTAS/SECTION STRUCTURE → FINISH IMAGES → QA → ONE NEW EXACT CANDIDATE → CASEY REVIEW.**
+**CURRENT MAIN → RESTORE `e9cbaacc...` VISUAL CONTRACT ONLY → PRESERVE LATER SAFE NONVISUAL / COMMERCE WORK → QA → MERGE → ONE EXACT CURRENT-MAIN CANDIDATE → VERIFY RESTORATION → PRODUCTION-PARITY SMOKE → PROMOTE SAME VERSION → THEN REPAIR IMAGES/ICONS ONE SECTION AT A TIME.**
+
+This is **not** a wholesale repository rollback and **not** another redesign.
 
 ## 2. Accepted visual lineage
 
@@ -36,13 +39,13 @@ Scope established the accepted homepage copy/layout/proportions/SOK treatment wh
 PR #184 — `Web V2: fix homepage hero image rendering`  
 Merge SHA: `e9cbaacc49443637e2241be7948ea93a3848557f`
 
-This repair explicitly preserved accepted homepage copy, CTAs, routes, commerce behavior and sizing/positioning while addressing hero imagery.
+This repair explicitly preserved accepted homepage copy, CTAs, routes, commerce behavior and sizing/positioning while addressing the hero image.
 
-**This is the latest owner-accepted visual baseline.**
+**This is the latest owner-accepted visual baseline and the visual contract to restore.**
 
-## 3. Rejected later candidate
+## 3. Later candidates / closeout work
 
-The later candidate is technically valid but visually rejected:
+### Rejected later candidate — do not promote
 
 - Git SHA: `4bc2d0874db74133be3a76aee8d6db33504b6bfa`;
 - GitHub Actions candidate run: `#8 / 34803391129`;
@@ -52,110 +55,137 @@ The later candidate is technically valid but visually rejected:
 - owner visual acceptance: **FAIL / HOLD**;
 - production promotion: NONE.
 
-Git shows this candidate is 39 commits beyond `e9cbaacc...` and includes material visual-shell changes. Those later visual changes are **not owner-approved** merely because QA passed.
+Git shows this candidate is materially beyond `e9cbaacc...` and includes visual-shell changes that were not owner-approved merely because technical QA passed.
 
-Do not promote, retry, production-smoke, or treat that candidate as accepted.
+**Do not promote, retry, production-smoke, or treat `4bc2d087...` as accepted.**
 
-## 4. Scope freeze
+### PR #194 image closeout — useful source, not the owner visual baseline
 
-### Preserve from `e9cbaacc...`
+PR #194 attempted to restore the `e9cbaacc...` owner-accepted presentation while localizing and repairing approved media. It may contain safe image assets or mappings worth retaining, but it does **not** supersede `e9cbaacc...` as the visual authority.
 
-- accepted homepage copy;
-- accepted CTA wording;
-- accepted section order;
-- accepted header/navigation treatment;
-- accepted card/category structure;
-- accepted spacing/hierarchy/button treatment;
-- accepted responsive composition;
-- accepted Web V2 routes and commerce behavior.
+Retain later media only when it can be placed into the exact accepted slot without changing composition, identity, section structure, typography, navigation, spacing or CTA behavior.
 
-### Remaining authorized visual work
+### Earlier immutable candidate — historical only
 
-Images only, including:
+The release workflow successfully created Cloudflare Version `e60f4bd0-285b-4b08-9b55-1db013be383e` from `6dff0a7e...`. That checkpoint was owner-approved at the time, but the accepted visual baseline later advanced to `e9cbaacc...`.
 
-- missing/broken hero imagery;
-- SOK logo/product-image quality;
-- exact SK12V100PC and SK48V100N imagery;
-- category-specific images;
-- Hawaii/Alaska/freight imagery;
-- Featured SOK imagery;
-- homepage product-grid imagery;
-- Shop the Store imagery;
-- Build Your Power System imagery;
-- Project & Field Support imagery;
-- wrong source paths/mappings;
-- blur/thumbnail-resolution defects;
-- crop/aspect/object-fit/responsive image defects.
+Therefore **do not promote `e60f4bd0...` as a shortcut**. It proves the release system worked; it is not the controlling visual target.
 
-Later clean exact-SKU media improvements may be retained only when they occupy the same accepted visual slot without changing composition or identity.
+## 4. Baseline restoration scope
 
-### Not authorized
+### Restore / preserve from `e9cbaacc...`
 
-- new headline or CTA copy;
-- new visual system;
-- semantic-icon substitution for intended image slots without owner approval;
-- generic image reuse across unrelated sections;
-- section/card/navigation redesign;
-- commerce/payment/shipping/tax/orderability changes as part of this visual closeout;
-- wholesale repository revert.
+- homepage copy;
+- CTA wording;
+- section order;
+- header/navigation treatment;
+- card/category structure;
+- typography and hierarchy;
+- spacing and sizing;
+- button treatment;
+- responsive composition;
+- accepted hero treatment;
+- accepted Web V2 routes and customer-facing behavior.
 
-## 5. Accepted commerce foundation — do not reopen
+### Preserve forward from current main
 
-Preserve:
+Do **not** reset current main to the old commit. Preserve later safe nonvisual work, including:
 
-- canonical catalog + product detail — `72694ae9ba5b9952c0460b9f90b380cffde4ff23`;
-- cart — `13b4411fc265a1f7b149ad9207059221fa53db32`;
-- checkout review — `f5d3ac7cc4b37e8211a3bb460a8507380b75803d`;
-- order + fulfillment handoff — `cd8e21ef4a89c261a4580b683da54be8a896787a`;
-- preview/release architecture;
-- exact-SKU / fail-closed commercial safety.
+- canonical catalog + product detail;
+- cart;
+- checkout review;
+- order + fulfillment handoff;
+- release architecture;
+- exact-SKU / fail-closed commercial safety;
+- verified vendor/catalog truth that does not alter the accepted visual contract;
+- operational documentation and unrelated company work.
 
-Transaction activation holds remain separate and do not block image completion.
+The implementation is a **visual restoration patch on current main**, not `git reset`, wholesale revert, historical branch promotion, or deletion of later commerce work.
 
-## 6. Worker routing
+## 5. Baseline restoration gate
+
+Before the baseline-restoration PR can merge, return PASS/FAIL for:
+
+- customer-facing homepage layout matches `e9cbaacc...`;
+- copy/CTAs/section order match `e9cbaacc...`;
+- header/navigation treatment matches `e9cbaacc...`;
+- card/category structure and spacing match `e9cbaacc...`;
+- hero presentation matches the accepted baseline;
+- current canonical catalog/product routes remain present;
+- cart/checkout/order foundations remain intact;
+- no supplier, price, shipping, tax, warranty, MAP or orderability truth is changed as part of visual restoration;
+- Web V2 QA PASS;
+- canonical PR QA PASS;
+- desktop comparison PASS;
+- 390px technical comparison PASS.
+
+A missing or imperfect downstream image is **not** a reason to redesign or delay the accepted baseline unless it blocks basic usability or creates false product identity.
+
+## 6. Release sequence — baseline first
+
+The existing `web-v2-release.yml` requires the candidate/promote SHA to equal **current `main`**. Therefore the historical `e9cbaacc...` commit cannot be promoted directly while main has advanced.
+
+Required release path:
+
+1. merge the bounded visual-restoration patch into current main;
+2. create one immutable candidate from that exact current-main SHA;
+3. verify candidate-to-SHA identity and `/__version`;
+4. verify the restored presentation against `e9cbaacc...`;
+5. run production-parity smoke using the exact candidate and accepted baseline controls;
+6. promote the **same tested Cloudflare Version ID** to production;
+7. live-verify key routes and runtime identity;
+8. freeze that release as the Web V2 production visual baseline.
+
+No release-flow modification is authorized merely to bypass the exact-current-main invariant.
+
+## 7. Post-cutover image / icon strategy — section scoped
+
+Once the approved baseline is live, image and icon work becomes a sequence of **bounded section patches**, not another full-site visual closeout.
+
+Each section patch must:
+
+- name exactly one homepage/customer-facing section or one tightly coupled image group;
+- change only that section's image/icon assets, mappings, crop/object-fit/responsive rules, and the minimum code required to render them;
+- preserve copy, CTAs, dimensions, section order, navigation, layout and visual system unless Casey explicitly approves a change;
+- use exact product/vendor identity where applicable;
+- avoid generic image reuse across unrelated sections;
+- avoid semantic-icon substitution for an intended photo/product image unless Casey approves it;
+- hold only the unresolved asset instead of redesigning around it;
+- run targeted desktop + 390px visual QA plus canonical Web V2/PR QA;
+- produce a small diff and a section-specific receipt.
+
+Suggested section order after cutover:
+
+1. hero / primary product imagery;
+2. SOK branding + exact SK12V100PC / SK48V100N slots;
+3. category tiles;
+4. Featured SOK / homepage product grid;
+5. Shop the Store;
+6. Build Your Power System;
+7. Hawaii / Alaska / freight;
+8. Project & Field Support;
+9. remaining icons / decorative media.
+
+**Technical note:** Cloudflare Worker releases are immutable whole-version artifacts. A section patch may still require a new Worker version to go live, but the **code and visual scope must remain section-bounded**. Do not treat each media correction as authority to rebuild or visually retune the entire site.
+
+## 8. Worker routing
 
 | Worker | State | Task |
 |---|---|---|
-| **WEB DEVELOPER** | **ACTIVE / CURRENT — IMAGE COMPLETION ONLY** | Start from current `main`; use `e9cbaacc...` as visual reference; remove post-baseline visual drift only where needed; preserve later safe nonvisual work; complete the intended images in the accepted slots; desktop + 390px QA; merge; hand back. |
-| **MASTER RECON OS** | **TRIGGERED / CONTROL ONLY** | Enforce accepted-baseline lineage and anti-drift; identify stale pointers; verify DEV receipt; do not choose design/copy/assets. |
-| **RELEASE ENGINEER** | **STANDBY** | Wait for DEV image-completion merge. Then make one new exact candidate + immutable preview + `/__version`; return to Casey; stop. |
-| COMMERCE DEVELOPER | **STANDBY / ACTIVATION WORK PRESERVED** | Do not reopen checkout/order/payment architecture during visual closeout. |
+| **WEB DEVELOPER** | **ACTIVE — BASELINE RESTORATION FIRST** | Start from current `main`; restore the `e9cbaacc...` visual contract only; preserve later safe nonvisual/catalog/commerce work; QA; merge; stop. Do **not** continue broad image closeout in the same PR. |
+| **MASTER RECON OS** | **TRIGGERED / CONTROL ONLY** | Enforce `e9cbaacc...` lineage, current-main preservation, and anti-drift. Verify that restoration does not roll back commerce or broaden visual scope. |
+| **RELEASE ENGINEER** | **STANDBY UNTIL RESTORATION MERGE** | From exact restored current main: candidate → identity proof → restoration verification → production-parity smoke → same-version promotion → live verify. |
+| **WEB DEVELOPER — MEDIA PASSES** | **QUEUED AFTER CUTOVER** | One section/image group per bounded branch/PR. No broad visual redesign or full-site image sweep. |
+| COMMERCE DEVELOPER | **STANDBY / FOUNDATION PRESERVED** | Do not reopen checkout/order/payment architecture during visual restoration or media passes. |
 
-## 7. Required DEV receipt
+## 9. Next RUN meaning
 
-Before merge, return PASS/FAIL for:
+**WEB DEVELOPER → CURRENT MAIN → RESTORE `e9cbaacc...` VISUAL CONTRACT ONLY → PRESERVE FORWARD COMMERCE/CATALOG → QA → MERGE → RELEASE ENGINEER → ONE EXACT CURRENT-MAIN CANDIDATE → RESTORATION VERIFY → PRODUCTION-PARITY SMOKE → SAME-VERSION PROMOTION → LIVE VERIFY → SECTION MEDIA PASSES.**
 
-- accepted copy/layout/CTAs unchanged from `e9cbaacc...`;
-- hero image renders correctly;
-- SOK branding sharp/original-quality;
-- SK12V100PC correct and uncropped;
-- SK48V100N correct and uncropped;
-- category imagery complete or exact slot explicitly held;
-- freight imagery complete;
-- Featured SOK imagery complete;
-- product-grid imagery complete;
-- Shop the Store imagery complete;
-- Build Your Power System imagery complete;
-- Project & Field Support imagery complete;
-- no wrong-SKU media;
-- no blurry thumbnail derivatives used as large assets;
-- desktop same-layout comparison PASS;
-- 390px mobile same-layout comparison PASS;
-- Web V2 QA PASS;
-- canonical PR QA PASS.
+## 10. Release invariant
 
-If an image cannot be safely sourced, hold only that image slot and report it. **Do not redesign around the missing image.**
-
-## 8. Next RUN meaning
-
-**WEB DEVELOPER → CURRENT MAIN → VISUAL REFERENCE `e9cbaacc...` → FREEZE ACCEPTED LAYOUT/COPY → COMPLETE IMAGING ONLY → QA → MERGE → RELEASE ENGINEER → ONE NEW EXACT CANDIDATE → CASEY REVIEW → STOP.**
-
-No production promotion before owner acceptance.
-
-## 9. Release invariant
-
-**ONE OWNER-ACCEPTED VISUAL SHA → ONE EXACT CLOUDFLARE VERSION → OWNER VISUAL ACCEPTANCE → PRODUCTION-PARITY SMOKE → SAME VERSION CUTOVER → LIVE VERIFY.**
+**OWNER-ACCEPTED VISUAL CONTRACT + CURRENT SAFE COMMERCE/CATALOG → ONE EXACT CURRENT-MAIN CLOUDFLARE VERSION → VERIFY → SMOKE → SAME VERSION CUTOVER → SECTION-SCOPED MEDIA PATCHES ONLY.**
 
 ## Control phrase
 
-**`e9cbaacc...` IS THE LAST ACCEPTED VISUAL BASELINE → IMAGES ARE THE REMAINING DEFECT → NO MORE REDESIGN → DEV FINISHES IMAGES → RELEASE ENGINEER MAKES ONE CANDIDATE → CASEY ACCEPTS → CLOSE.**
+**`e9cbaacc...` IS THE LAST OWNER-ACCEPTED VISUAL BASELINE → RESTORE THAT PRESENTATION ON CURRENT MAIN → PROMOTE THE RESTORED BASELINE ONCE → REPAIR IMAGES/ICONS SECTION BY SECTION → NO MORE WHOLE-SITE VISUAL REBUILDS.**
