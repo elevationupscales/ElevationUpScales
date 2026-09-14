@@ -16,11 +16,11 @@ const solutionCards = [
 
 const lithiumProducts = [
   {
-    title: '100Ah LiFePO4 Battery', spec: '1280Wh', image: asset('/assets/brands/sok/sk12v100pc/hero.png'),
+    title: '100Ah LiFePO4 Battery', spec: '1280Wh', image: '/assets/brands/sok/sk12v100pc/official-clean.png',
     detailHref: '/sok/sk12v100pc/', catalogHref: '/shop/sok', alt: 'SOK SK12V100PC 100Ah LiFePO4 battery'
   },
   {
-    title: '100Ah LiFePO4 Battery', spec: '5120Wh', image: asset('/assets/brands/sok/sk48v100n/hero.jpg'),
+    title: '100Ah LiFePO4 Battery', spec: '5120Wh', image: '/assets/brands/sok/sk48v100n/official-clean.png',
     detailHref: '/sok/sk48v100n/', catalogHref: '/shop/sok', alt: 'SOK SK48V100N 100Ah LiFePO4 battery'
   },
   {
@@ -138,7 +138,7 @@ function documentHead(routeInfo, { notFound = false } = {}) {
   <meta name="twitter:image" content="${socialImage}">
   <title>${escapeHtml(title)}</title>
   <link rel="preload" as="image" href="${asset('/assets/hero/storefront-tropical-logistics-v3.webp')}">
-  <link rel="preload" as="image" href="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp?v=20260910-1')}">
+  <link rel="preload" as="image" href="${'/assets/brands/sok/sk12v100pc/official-clean.png'}">
   <link rel="preload" as="image" href="${BRAND_WORDMARK}">
   <link rel="stylesheet" href="/assets/app.css">
   <script defer src="/assets/app.js"></script>`;
@@ -224,11 +224,11 @@ function homeMain() {
         <div class="storefront-visual" aria-label="SOK lithium battery systems">
           <img class="sok-wordmark" src="${asset('/assets/brands/sok/sok-wordmark-home-transparent.webp?v=20260910-1')}" alt="SOK Battery" width="620" height="190">
           <a class="hero-product hero-product-12" href="/sok/sk12v100pc/" aria-label="View SOK SK12V100PC">
-            <img src="${asset('/assets/brands/sok/sk12v100pc/home-hero.webp?v=20260910-1')}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900">
+            <img src="${'/assets/brands/sok/sk12v100pc/official-clean.png'}" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900">
             <span><b>SK12V100PC</b><small>12.8V 100Ah</small></span>
           </a>
           <a class="hero-product hero-product-48" href="/sok/sk48v100n/" aria-label="View SOK SK48V100N">
-            <img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="1000" height="265">
+            <img src="${'/assets/brands/sok/sk48v100n/official-clean.png'}" alt="SOK SK48V100N rack battery" width="1000" height="265">
             <span><b>SK48V100N</b><small>51.2V 100Ah rack platform</small></span>
           </a>
         </div>
@@ -257,7 +257,7 @@ function homeMain() {
             </div>
           </article>
           <article class="product-card product-card-horizontal">
-            <a href="/sok/sk48v100n/" class="product-image" aria-label="View SOK SK48V100N"><img src="${asset('/assets/brands/sok/sk48v100n/home-crop.webp')}" alt="SOK SK48V100N rack battery" width="1000" height="265"></a>
+            <a href="/sok/sk48v100n/" class="product-image" aria-label="View SOK SK48V100N"><img src="${'/assets/brands/sok/sk48v100n/official-clean.png'}" alt="SOK SK48V100N rack battery" width="1000" height="265"></a>
             <div class="product-card-copy"><p class="product-kicker">48V • SOLAR • RACK STORAGE</p><h3>SOK SK48V100N</h3><p>51.2V · 100Ah · 5.12kWh.</p>
               <div class="product-actions"><a class="button button-primary" href="/sok/sk48v100n/">View Battery</a><a class="button button-outline" href="/shop/sok">Purchase Options</a></div>
             </div>

@@ -77,8 +77,9 @@ test('homepage reproduces the owner-approved production presentation and visible
   assert.match(body, /property="og:title"/);
   assert.match(body, /storefront-tropical-logistics-v3\.webp/);
   assert.match(body, /sok-wordmark-home-transparent\.webp/);
-  assert.match(body, /sk12v100pc\/home-hero\.webp/);
-  assert.match(body, /sk48v100n\/home-crop\.webp/);
+  assert.match(body, /sk12v100pc\/official-clean\.png/);
+  assert.match(body, /sk48v100n\/official-clean\.png/);
+  assert.doesNotMatch(body, /sk48v100n\/(?:hero\.jpg|home-crop\.webp)|48v-battery-cabinet\/hero\.webp|Buy More,? Save More/i);
   assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
   assert.doesNotMatch(body, /assets\/logo\.webp/);
   assert.match(body, /href="\/sok\/sk12v100pc\/"/);
@@ -141,6 +142,34 @@ test('owned assets include the scoped production-fidelity and mobile layers', as
   assert.match(css, /\.catalog-grid/);
   const js = await (await request('/assets/app.js')).text();
   assert.match(js, /aria-expanded/);
+});
+
+test('SOK product showcase references repository-localized official clean photography', async () => {
+  const expected = [
+    ['/assets/brands/sok/sk12v100pc/official-clean.png', '../public/assets/brands/sok/sk12v100pc/official-clean.png', 'SK12V100PC'],
+    ['/assets/brands/sok/sk48v100n/official-clean.png', '../public/assets/brands/sok/sk48v100n/official-clean.png', 'SK48V100N']
+  ];
+  const { readFile } = await import('node:fs/promises');
+  for (const [, localPath] of expected) {
+    const bytes = await readFile(new URL(localPath, import.meta.url));
+    assert.ok(bytes.byteLength > 250000, `${localPath} should contain the localized official PNG bytes`);
+    assert.equal(bytes.subarray(1, 4).toString('ascii'), 'PNG', localPath);
+  }
+
+  const home = await (await request('/')).text();
+  for (const [publicPath, , sku] of expected) {
+    assert.match(home, new RegExp(publicPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(home, new RegExp(`alt="[^"]*${sku}[^"]*"`, 'i'));
+  }
+  assert.doesNotMatch(home, /sk48v100n\/(?:hero\.jpg|home-crop\.webp)|48v-battery-cabinet\/hero\.webp|Buy More,? Save More|static\.wixstatic\.com/i);
+
+  const js = await (await request('/assets/app.js')).text();
+  assert.doesNotMatch(js, /48v-battery-cabinet|home-crop\.webp|Buy More,? Save More|static\.wixstatic\.com/i);
+
+  const css = await (await request('/assets/app.css')).text();
+  assert.match(css, /hero-product-12 img/);
+  assert.match(css, /hero-product-48 img/);
+  assert.match(css, /background:#f3f5f5/);
 });
 
 test('canonical catalog routes remain customer-safe', async () => {
