@@ -8,7 +8,7 @@ const BRAND_WORDMARK = '/assets/brand/elevation-wordmark.webp';
 const solutionCards = [
   { title: 'Lithium Batteries', copy: 'Reliable lithium power for RV, mobile and backup systems.', href: '/store?department=lithium-batteries', label: 'Shop Batteries', image: '/assets/brands/sok/sk12v100pc/official-clean.png' },
   { title: 'SOK Battery Systems', copy: '12V, 24V & 48V systems from Elevation’s authorized battery partner.', href: '/shop/sok', label: 'Shop SOK', image: '/assets/brands/sok/sk48v100n/official-clean.png' },
-  { title: 'Solar & Off-Grid', copy: 'Build your energy independence with solar and storage.', href: '/solar-project', label: 'Shop Solar', image: '/assets/hero/power-social.webp' },
+  { title: 'Solar & Off-Grid', copy: 'Build your energy independence with solar and storage.', href: '/solar-project', label: 'Shop Solar', icon: 'solar' },
   { title: 'Hawaii Power & Logistics', copy: 'Battery freight matched to product, quantity and destination.', href: '/hawaii-lithium-batteries', label: 'Learn More', image: '/assets/hero/hawaii-ocean-freight.webp' },
   { title: 'RV & Outdoor', copy: 'Power, repair and gear for life on the road.', href: '/store?department=rv-outdoor', label: 'Shop RV & Outdoor', image: '/assets/hero/store-rv-mountains.webp' },
   { title: 'Backup Power', copy: 'Keep critical systems running with resilient stored energy.', href: '/shop/sok', label: 'Shop Backup Power', icon: 'backup' },

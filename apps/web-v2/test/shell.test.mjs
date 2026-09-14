@@ -228,7 +228,6 @@ test('semantic visuals match their destinations without misleading reuse', async
   for (const assetPath of [
     '/assets/brands/sok/sk12v100pc/official-clean.png',
     '/assets/brands/sok/sk48v100n/official-clean.png',
-    '/assets/hero/power-social.webp',
     '/assets/hero/hawaii-ocean-freight.webp',
     '/assets/hero/store-rv-mountains.webp'
   ]) assert.ok(home.includes(assetPath), assetPath);
@@ -241,6 +240,8 @@ test('semantic visuals match their destinations without misleading reuse', async
 
   const shellSource = await readFile(new URL('../src/shell.js', import.meta.url), 'utf8');
   const catalogSource = await readFile(new URL('../src/catalog-pages.js', import.meta.url), 'utf8');
+  assert.match(shellSource, /title: 'Solar & Off-Grid'[\s\S]{0,220}icon: 'solar'/);
+  assert.match(catalogSource, /title: 'Solar Panels'[\s\S]{0,160}icon: 'solar'/);
   assert.match(shellSource, /title: 'Backup Power'[\s\S]{0,220}icon: 'backup'/);
   assert.match(shellSource, /title: 'Commercial Power'[\s\S]{0,220}icon: 'commercial'/);
   assert.doesNotMatch(shellSource, /title: 'Commercial Power'[\s\S]{0,220}home-tropical\.webp/);
