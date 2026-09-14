@@ -1,5 +1,5 @@
 name: One-time Web V2 final visual QA
-# Re-capture after bounded icon/image destination semantic repair.
+# Final desktop/mobile capture after solar semantic fallback.
 on:
   push:
     branches:
