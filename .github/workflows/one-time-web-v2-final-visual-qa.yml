@@ -1,0 +1,48 @@
+name: One-time Web V2 final visual QA
+
+on:
+  push:
+    branches:
+      - work/web-v2-final-functional-visual-finish-2026-09-13
+    paths:
+      - .github/workflows/one-time-web-v2-final-visual-qa.yml
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/web-v2-final-functional-visual-finish-2026-09-13
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+      - run: npm ci --ignore-scripts --prefix apps/web-v2
+      - name: Start local Worker
+        shell: bash
+        run: |
+          cd apps/web-v2
+          npx wrangler dev --local --port 8787 --ip 127.0.0.1 > /tmp/wrangler.log 2>&1 &
+          echo $! > /tmp/wrangler.pid
+          for i in {1..45}; do curl -fsS http://127.0.0.1:8787/healthz >/dev/null && exit 0; sleep 1; done
+          cat /tmp/wrangler.log
+          exit 1
+      - name: Install browser and capture desktop/mobile screenshots
+        shell: bash
+        run: |
+          npx -y playwright@1.55.0 install --with-deps chromium
+          mkdir -p visual-qa
+          npx -y playwright@1.55.0 screenshot --browser chromium --viewport-size="1536,960" --full-page http://127.0.0.1:8787/ visual-qa/home-desktop.png
+          npx -y playwright@1.55.0 screenshot --browser chromium --viewport-size="390,844" --full-page http://127.0.0.1:8787/ visual-qa/home-mobile.png
+          npx -y playwright@1.55.0 screenshot --browser chromium --viewport-size="1536,960" --full-page http://127.0.0.1:8787/store visual-qa/store-desktop.png
+          npx -y playwright@1.55.0 screenshot --browser chromium --viewport-size="390,844" --full-page http://127.0.0.1:8787/store visual-qa/store-mobile.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-v2-final-visual-qa
+          path: visual-qa/*.png
+          if-no-files-found: error
