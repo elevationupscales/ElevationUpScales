@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web V2 Final Visual QA</title><style>html,body{margin:0;background:#111}#frame{display:block;border:0;width:100%;height:100vh;background:#02080b}.mobile-shell{width:390px;margin:0 auto;height:844px;border:1px solid #333}.mobile-shell #frame{width:390px;height:844px}</style></head><body><div id="wrap"><iframe id="frame" title="Web V2 visual QA"></iframe></div><script>
+(async()=>{
+ const params=new URLSearchParams(location.search);const page=params.get('page')||'home';const mobile=params.get('mobile')==='1';if(mobile)document.getElementById('wrap').className='mobile-shell';
+ const branch='work/web-v2-final-functional-visual-finish-2026-09-13';const root='https://raw.githubusercontent.com/elevationupscales/ElevationUpScales/'+branch+'/apps/web-v2/';const src=root+'src/';
+ const files=page==='store'?['routes.js','catalog.js','catalog-styles.js','final-visual-styles.js','catalog-pages.js']:['routes.js','styles.js','nav-styles.js','home-fidelity-styles.js','sok-product-merchandising-styles.js','final-visual-styles.js','shell.js'];
+ const parts=[];for(const f of files){const r=await fetch(src+f+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(f+':'+r.status);parts.push(await r.text())}
+ let code=parts.join('\n').replace(/^import .*;\s*$/gm,'').replace(/\bexport\s+/g,'');
+ if(page==='store')code+='\nwindow.__qa={renderCatalogPage,catalogStyles,finalVisualStyles};';else code+='\nwindow.__qa={renderPublicPage,styles,navStyles,homeFidelityStyles,sokProductMerchandisingStyles,finalVisualStyles};';
+ (0,eval)(code);
+ const assetBase=root+'public/assets/';const rewrite=s=>s.replaceAll('url(\'/assets/','url(\''+assetBase).replaceAll('url("/assets/','url("'+assetBase).replaceAll('src="/assets/','src="'+assetBase).replaceAll('href="/assets/','href="'+assetBase);
+ let html,css;
+ if(page==='store'){
+   const route={path:'/store',page:'store',title:'Shop | Elevation UpScales',description:'Shop verified-source power, battery, RV, outdoor and equipment product records from Elevation UpScales.'};html=window.__qa.renderCatalogPage(route,new URL('https://elevation-web-v2.test/store'));css=window.__qa.catalogStyles+'\n'+window.__qa.finalVisualStyles;
+ }else{
+   const route={path:'/',page:'home',title:'Elevation UpScales | Off-Grid Power • Supply • Logistics',description:'Elevation UpScales provides off-grid power, supply and logistics support for RV, solar, backup power, commercial systems and harder-to-serve markets.'};html=window.__qa.renderPublicPage(route);css=window.__qa.styles+'\n'+window.__qa.navStyles+'\n'+window.__qa.homeFidelityStyles+'\n'+window.__qa.sokProductMerchandisingStyles+'\n'+window.__qa.finalVisualStyles;
+ }
+ html=html.replace('<link rel="stylesheet" href="/assets/app.css">','<style>'+rewrite(css)+'</style>').replace(/<script[^>]*src="\/assets\/[^"]+"[^>]*><\/script>/g,'');html=rewrite(html);document.getElementById('frame').srcdoc=html;
+})().catch(e=>document.body.innerHTML='<pre style="color:#f66;white-space:pre-wrap">'+String(e.stack||e)+'</pre>');
+</script></body></html>
