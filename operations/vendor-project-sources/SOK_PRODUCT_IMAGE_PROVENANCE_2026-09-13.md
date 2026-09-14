@@ -15,8 +15,9 @@
 ## SK48V100N — 48V 100Ah server-rack LiFePO4 battery
 
 - Official source supplied/approved by owner: `https://static.wixstatic.com/media/0fa809_a15f5f76c4b94fb1bf5e0c01daee4086~mv2.png/v1/fit/w_960,h_960,q_90,enc_avif,quality_auto/0fa809_a15f5f76c4b94fb1bf5e0c01daee4086~mv2.png`
-- Localized repository asset: `apps/web-v2/public/assets/brands/sok/sk48v100n/official-clean.png`
-- Web V2 same-origin path: `/assets/brands/sok/sk48v100n/official-clean.png`
+- Localized Web V2 asset: `apps/web-v2/public/assets/brands/sok/sk48v100n/official-clean.png`
+- Canonical site media copy: `site/assets/brands/sok/sk48v100n/official-clean.png`
+- Customer path: `/assets/brands/sok/sk48v100n/official-clean.png`
 - Retrieved: 2026-09-13
 - Format/dimensions: PNG RGBA, 960 × 960
 - SHA-256: `74c9e5dc78a949821ee4d674f2713da5310baa16b558b52fc4d265896007cc0a`
@@ -27,4 +28,6 @@ These are exact localized bytes from the owner-approved official SOK product-mat
 
 The Wix/SOK URLs above are retained only as provenance. Customer-facing Web V2 uses the repository-localized same-origin asset paths so the exact release candidate does not depend on a vendor hotlink.
 
-The prior SK48V100N supplier promotional artwork (house/night scene and volume-pricing message) is not used by the Web V2 homepage/storefront presentation after this change. Existing commerce and supplier authority remain unchanged.
+The canonical SOK full-line media reference for SK48V100N is aligned to the same clean official image bytes. The retired house/night supplier promotion assets are not part of the current presentation source.
+
+Existing commerce, pricing, MAP, supplier, shipping, orderability, payment, and checkout authority remain unchanged.
