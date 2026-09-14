@@ -1,15 +1,13 @@
 name: One-time Web V2 final visual QA
-
+# Re-capture after final same-origin asset rendering correction.
 on:
   push:
     branches:
       - work/web-v2-final-functional-visual-finish-2026-09-13
     paths:
       - .github/workflows/one-time-web-v2-final-visual-qa.yml
-
 permissions:
   contents: read
-
 jobs:
   visual:
     runs-on: ubuntu-latest
