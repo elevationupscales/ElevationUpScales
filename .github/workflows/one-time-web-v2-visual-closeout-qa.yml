@@ -48,3 +48,4 @@ jobs:
           name: web-v2-visual-closeout-qa
           path: visual-qa/*.png
           if-no-files-found: error
+# rerun after final image-slot/catalog closeout
