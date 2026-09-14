@@ -85,7 +85,7 @@ function storeCategoryCards() {
     ['Accessories', '/store?q=accessories', '/assets/hero/hawaii-ocean-freight.webp'],
     ['Commercial', '/store?q=commercial', '/assets/hero/home-tropical.webp']
   ];
-  return cards.map(([title, href, image]) => `<a class="store-category-card" href="${href}"><span class="store-category-media" style="background-image:linear-gradient(180deg,rgba(2,8,11,.02),rgba(2,8,11,.72)),url('${image}')"></span><strong>${title}</strong></a>`).join('');
+  return cards.map(([title, href, image]) => `<a class="store-category-card" href="${href}"><img class="store-category-image" src="${image}" alt="" loading="lazy" decoding="async"><span class="store-category-shade" aria-hidden="true"></span><strong>${title}</strong></a>`).join('');
 }
 
 function featuredProducts() {

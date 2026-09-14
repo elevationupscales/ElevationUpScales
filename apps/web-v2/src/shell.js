@@ -87,7 +87,8 @@ function navMarkup(currentPath) {
 function solutionMarkup() {
   return solutionCards.map(({ title, copy, href, label, image }) => `
     <article class="solution-card solution-card--visual">
-      <div class="solution-card__media" style="background-image:linear-gradient(180deg,rgba(2,8,11,.06),rgba(2,8,11,.88)),url('${image}')" role="img" aria-label="${escapeHtml(title)}"></div>
+      <img class="solution-card__image" src="${image}" alt="" loading="lazy" decoding="async">
+      <div class="solution-card__shade" aria-hidden="true"></div>
       <div class="solution-card__content"><h3>${title}</h3><p>${copy}</p><a href="${href}" class="text-link">${label} <span aria-hidden="true">→</span></a></div>
     </article>`).join('');
 }

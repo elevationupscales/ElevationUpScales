@@ -186,7 +186,8 @@ test('final visual implementation owns release-critical imagery and functional s
   const home = await (await request('/')).text();
   assert.match(home, /Power Beyond/);
   assert.match(home, /shortcut-icon/);
-  assert.match(home, /solution-card__media/);
+  assert.match(home, /solution-card__image/);
+  assert.doesNotMatch(home, /solution-card__media[^>]*style=/);
   assert.match(home, /\/assets\/brand\/elevation-wordmark\.webp/);
   assert.match(home, /\/assets\/brands\/sok\/sok-wordmark\.webp/);
   assert.doesNotMatch(home, /Buy More,? Save More|sk48v100n\/home-crop|sk48v100n\/hero\.jpg/i);
@@ -207,6 +208,7 @@ test('final visual implementation owns release-critical imagery and functional s
   assert.match(css, /\/assets\/hero\/home-tropical\.webp/);
   assert.match(css, /\/assets\/hero\/store-rv-mountains\.webp/);
   assert.match(css, /store-category-grid/);
+  assert.match(css, /store-category-image/);
   assert.match(css, /@media\(max-width:680px\)/);
 });
 
