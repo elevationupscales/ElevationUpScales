@@ -1,6 +1,17 @@
 export const sokProductMerchandisingStyles = `
 /* Issue #185 — clean official SOK product photography only. No commerce authority lives here. */
 /* Product media is served from repository-localized Worker static assets; legacy supplier artwork remains outside this presentation lane. */
+.reference-storefront-home .brand,
+.reference-footer .footer-brand-block{
+  background-image:url('/assets/brand/elevation-wordmark.webp');
+  background-repeat:no-repeat;
+  background-position:left center;
+  background-size:contain;
+}
+.reference-storefront-home .brand>img,
+.reference-footer .footer-brand-block>img{
+  opacity:0;
+}
 .reference-storefront-home .hero-product-12 img,
 .reference-storefront-home .hero-product-48 img{
   width:calc(100% - 12px);
