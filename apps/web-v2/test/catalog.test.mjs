@@ -53,7 +53,8 @@ test('orderability is derived and recursive UNVERIFIED values fail closed', () =
 test('store and vendor views derive from the canonical catalog without Shopify fallback', () => {
   const storeRoute = getPublicRoute('/store');
   const storeHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store'));
-  assert.match(storeHtml, /Elevation Product Catalog/);
+  assert.match(storeHtml, /Power Your RV/);
+  assert.match(storeHtml, /Featured Products/);
   assert.match(storeHtml, /RSP100DCT-US/);
   assert.match(storeHtml, /XXKLJT124INCLJF0QV0/);
   assert.match(storeHtml, /D01027HH7BV/);
