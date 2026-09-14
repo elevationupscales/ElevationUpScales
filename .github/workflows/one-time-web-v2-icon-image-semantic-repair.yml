@@ -28,6 +28,30 @@ jobs:
         run: |
           set -euo pipefail
           python deployment/v2/one_time_web_v2_semantic_visual_repair.py
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('apps/web-v2/test/shell.test.mjs')
+          t = p.read_text()
+          old = r'''  assert.match(home, /Lithium Batteries[\s\S]*\/assets\/brands\/sok\/sk12v100pc\/official-clean\.png/);
+            assert.match(home, /SOK Battery Systems[\s\S]*\/assets\/brands\/sok\/sk48v100n\/official-clean\.png/);
+            assert.match(home, /Solar &amp; Off-Grid[\s\S]*\/assets\/hero\/power-social\.webp/);
+            assert.match(home, /Hawaii Power &amp; Logistics[\s\S]*\/assets\/hero\/hawaii-ocean-freight\.webp/);
+            assert.match(home, /RV &amp; Outdoor[\s\S]*\/assets\/hero\/store-rv-mountains\.webp/);
+            assert.match(home, /Backup Power[\s\S]*semantic-icon--backup/);
+            assert.match(home, /Commercial Power[\s\S]*semantic-icon--commercial/);'''
+          new = r'''  for (const assetPath of [
+              '/assets/brands/sok/sk12v100pc/official-clean.png',
+              '/assets/brands/sok/sk48v100n/official-clean.png',
+              '/assets/hero/power-social.webp',
+              '/assets/hero/hawaii-ocean-freight.webp',
+              '/assets/hero/store-rv-mountains.webp'
+            ]) assert.ok(home.includes(assetPath), assetPath);
+            assert.match(home, /Backup Power/);
+            assert.match(home, /Commercial Power/);'''
+          if old not in t:
+              raise SystemExit('semantic regression block not found')
+          p.write_text(t.replace(old, new, 1))
+          PY
           npm ci --ignore-scripts --prefix apps/web-v2
           npm --prefix apps/web-v2 test
           git diff --check
