@@ -212,6 +212,46 @@ test('final visual implementation owns release-critical imagery and functional s
   assert.match(css, /@media\(max-width:680px\)/);
 });
 
+test('semantic visuals match their destinations without misleading reuse', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const home = await (await request('/')).text();
+  const store = await (await request('/store')).text();
+
+  for (const kind of ['lithium', 'solar', 'rv', 'backup', 'commercial', 'hawaii', 'trusted', 'freight', 'support']) {
+    assert.match(home, new RegExp(`semantic-icon--${kind}`), `homepage should render ${kind} semantic icon`);
+  }
+  for (const destination of [
+    '/store?department=lithium-batteries', '/solar-project', '/store?department=rv-outdoor',
+    '/shop/sok', '/hawaii-lithium-batteries'
+  ]) assert.match(home, new RegExp(`href="${destination.replace(/[?]/g, '\\?')}`));
+
+  for (const assetPath of [
+    '/assets/brands/sok/sk12v100pc/official-clean.png',
+    '/assets/brands/sok/sk48v100n/official-clean.png',
+    '/assets/hero/power-social.webp',
+    '/assets/hero/hawaii-ocean-freight.webp',
+    '/assets/hero/store-rv-mountains.webp'
+  ]) assert.ok(home.includes(assetPath), assetPath);
+  assert.match(home, /Backup Power/);
+  assert.match(home, /Commercial Power/);
+
+  for (const marker of ['semantic-icon--inverter', 'semantic-icon--accessories', 'semantic-icon--commercial', 'Inverters & Charging', 'Accessories', 'Commercial']) {
+    assert.ok(store.includes(marker), marker);
+  }
+
+  const shellSource = await readFile(new URL('../src/shell.js', import.meta.url), 'utf8');
+  const catalogSource = await readFile(new URL('../src/catalog-pages.js', import.meta.url), 'utf8');
+  assert.match(shellSource, /title: 'Backup Power'[\s\S]{0,220}icon: 'backup'/);
+  assert.match(shellSource, /title: 'Commercial Power'[\s\S]{0,220}icon: 'commercial'/);
+  assert.doesNotMatch(shellSource, /title: 'Commercial Power'[\s\S]{0,220}home-tropical\.webp/);
+  assert.doesNotMatch(catalogSource, /title: 'Accessories'[\s\S]{0,180}hawaii-ocean-freight\.webp/);
+  assert.doesNotMatch(catalogSource, /title: 'Commercial'[\s\S]{0,180}(?:home-tropical|project-support)\.webp/);
+  assert.match(catalogSource, /title: 'Inverters & Charging'[\s\S]{0,160}icon: 'inverter'/);
+  assert.match(catalogSource, /title: 'Accessories'[\s\S]{0,160}icon: 'accessories'/);
+  assert.match(catalogSource, /title: 'Commercial'[\s\S]{0,160}icon: 'commercial'/);
+  assert.doesNotMatch(`${home}\n${store}`, /Buy More,? Save More|sk48v100n\/home-crop|sk48v100n\/hero\.jpg|Victron/i);
+});
+
 test('canonical catalog routes remain customer-safe', async () => {
   for (const path of ['/store', '/shop/sok', '/shop/renogy', '/shop/vevor', '/shop/kingboss', '/product/vevor-xxkljt124incljf0qv0']) {
     const res = await request(path);

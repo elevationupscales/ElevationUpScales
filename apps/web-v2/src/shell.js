@@ -1,4 +1,5 @@
 import { CANONICAL_ORIGIN, PRIMARY_NAV, canonicalUrl } from './routes.js';
+import { semanticIcon } from './semantic-icons.js';
 
 const LEGACY_ASSET_ORIGIN = 'https://elevationupscales.com';
 const asset = (path) => `${LEGACY_ASSET_ORIGIN}${path}`;
@@ -10,8 +11,8 @@ const solutionCards = [
   { title: 'Solar & Off-Grid', copy: 'Build your energy independence with solar and storage.', href: '/solar-project', label: 'Shop Solar', image: '/assets/hero/power-social.webp' },
   { title: 'Hawaii Power & Logistics', copy: 'Battery freight matched to product, quantity and destination.', href: '/hawaii-lithium-batteries', label: 'Learn More', image: '/assets/hero/hawaii-ocean-freight.webp' },
   { title: 'RV & Outdoor', copy: 'Power, repair and gear for life on the road.', href: '/store?department=rv-outdoor', label: 'Shop RV & Outdoor', image: '/assets/hero/store-rv-mountains.webp' },
-  { title: 'Backup Power', copy: 'Keep critical systems running with resilient stored energy.', href: '/shop/sok', label: 'Shop Backup Power', image: '/assets/hero/project-support.webp' },
-  { title: 'Commercial Power', copy: 'Scalable power and supply support for larger applications.', href: '/shop/sok', label: 'Shop Commercial', image: '/assets/hero/home-tropical.webp' }
+  { title: 'Backup Power', copy: 'Keep critical systems running with resilient stored energy.', href: '/shop/sok', label: 'Shop Backup Power', icon: 'backup' },
+  { title: 'Commercial Power', copy: 'Scalable power and supply support for larger applications.', href: '/shop/sok', label: 'Shop Commercial', icon: 'commercial' }
 ];
 
 const lithiumProducts = [
@@ -85,12 +86,17 @@ function navMarkup(currentPath) {
 }
 
 function solutionMarkup() {
-  return solutionCards.map(({ title, copy, href, label, image }) => `
+  return solutionCards.map(({ title, copy, href, label, image, icon }) => {
+    const visual = image
+      ? `<img class="solution-card__image" src="${image}" alt="" loading="lazy" decoding="async">`
+      : `<div class="solution-card__icon-visual" aria-hidden="true">${semanticIcon(icon)}</div>`;
+    return `
     <article class="solution-card solution-card--visual">
-      <img class="solution-card__image" src="${image}" alt="" loading="lazy" decoding="async">
+      ${visual}
       <div class="solution-card__shade" aria-hidden="true"></div>
       <div class="solution-card__content"><h3>${title}</h3><p>${copy}</p><a href="${href}" class="text-link">${label} <span aria-hidden="true">→</span></a></div>
-    </article>`).join('');
+    </article>`;
+  }).join('');
 }
 
 function commerceProductMarkup(products) {
@@ -112,15 +118,7 @@ function commerceProductMarkup(products) {
 }
 
 function shortcutIcon(kind) {
-  const icons = {
-    lithium: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20 4 10 25h10l-3 19 21-27H27l5-13Z"/></svg>',
-    solar: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 18h30l4 20H5l4-20Zm5 0 2-8h16l2 8M11 25h30M8 32h34M18 18l-2 20M30 18l2 20"/></svg>',
-    rv: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 14h28l8 9v12H5V14Zm28 4v9h8M13 35a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm22 0a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>',
-    backup: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="m5 24 19-16 19 16M10 21v22h28V21M18 43V29h12v14"/></svg>',
-    commercial: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 43V24l12-7v26M19 43V11l22-6v38M26 17h7M26 25h7M26 33h7"/></svg>',
-    hawaii: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="18"/><path d="M24 43V25m0 0c-7-8-13-5-16-2m16 2c7-8 13-5 16-2m-16 2c-4-11 0-17 4-20m-4 20c4-11 0-17-4-20"/></svg>'
-  };
-  return `<span class="shortcut-icon shortcut-icon--${kind}">${icons[kind] || ''}</span>`;
+  return semanticIcon(kind);
 }
 
 function documentHead(routeInfo, { notFound = false } = {}) {
@@ -249,9 +247,9 @@ function homeMain() {
     </section>
 
     <section class="trust-strip" aria-label="Elevation customer support highlights">
-      <div class="trust-item"><span class="trust-icon">${shortcutIcon('backup')}</span><div><strong>TRUSTED BRANDS</strong><span>Premium power solutions from approved suppliers.</span></div></div>
-      <a class="trust-item" href="/shipping-logistics-services"><span class="trust-icon">${shortcutIcon('rv')}</span><div><strong>HAWAII READY</strong><span>Logistics support for harder-to-serve markets.</span></div></a>
-      <a class="trust-item" href="tel:+12088134998"><span class="trust-icon">${shortcutIcon('hawaii')}</span><div><strong>REAL SUPPORT</strong><span>208-813-4998</span></div></a>
+      <div class="trust-item"><span class="trust-icon">${shortcutIcon('trusted')}</span><div><strong>TRUSTED BRANDS</strong><span>Premium power solutions from approved suppliers.</span></div></div>
+      <a class="trust-item" href="/shipping-logistics-services"><span class="trust-icon">${shortcutIcon('freight')}</span><div><strong>HAWAII READY</strong><span>Logistics support for harder-to-serve markets.</span></div></a>
+      <a class="trust-item" href="tel:+12088134998"><span class="trust-icon">${shortcutIcon('support')}</span><div><strong>REAL SUPPORT</strong><span>208-813-4998</span></div></a>
     </section>
 
     <section class="section shell-width solutions-section" id="solutions" aria-labelledby="solutions-title">
