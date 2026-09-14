@@ -1,0 +1,21 @@
+from pathlib import Path
+
+shell_path = Path('apps/web-v2/test/shell.test.mjs')
+text = shell_path.read_text()
+text = text.replace("    'Lithium Power',\n    'AUTHORIZED BATTERY SUPPLY',", "    'Power Beyond',\n    'TRUSTED BRANDS',")
+text = text.replace("    'Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping.',", "    'Off-grid power, supply and logistics for RV, solar, backup power and harder-to-serve markets',")
+text = text.replace("    '12V lithium energy for RV and mobile systems.',", "    'Reliable lithium power for RV, mobile and backup systems.',")
+text = text.replace("    '12V, 24V & 48V systems.',", "    '12V, 24V & 48V systems from Elevation’s authorized battery partner.',")
+text = text.replace("    'Build your energy independence.',", "    'Build your energy independence with solar and storage.',")
+text = text.replace("    'Battery freight matched to product and destination.',", "    'Battery freight matched to product, quantity and destination.',")
+text = text.replace("    'Current batteries and gear for the journey.',", "    'Power, repair and gear for life on the road.',")
+text = text.replace("    'Keep what matters running.',", "    'Keep critical systems running with resilient stored energy.',")
+text = text.replace("    'Scalable power solutions.',", "    'Scalable power and supply support for larger applications.',")
+text = text.replace("  assert.match(body, /storefront-tropical-logistics-v3\\.webp/);", "  assert.match(body, /\\/assets\\/hero\\/home-tropical\\.webp/);")
+text = text.replace("  assert.match(body, /sok-wordmark-home-transparent\\.webp/);", "  assert.match(body, /\\/assets\\/brands\\/sok\\/sok-wordmark\\.webp/);")
+text = text.replace("  assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\\.webp/);", "  assert.match(body, /\\/assets\\/brand\\/elevation-wordmark\\.webp/);")
+shell_path.write_text(text)
+
+catalog_path = Path('apps/web-v2/test/catalog.test.mjs')
+text = catalog_path.read_text().replace("  assert.match(storeHtml, /Elevation Product Catalog/);", "  assert.match(storeHtml, /Power Your RV/);\n  assert.match(storeHtml, /Featured Products/);")
+catalog_path.write_text(text)
