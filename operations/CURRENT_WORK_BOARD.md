@@ -3,12 +3,13 @@
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
 **Effective:** 2026-09-14  
 **Owner:** Casey Young  
-**State Owner:** **MPM 7 — Company Oversight**  
-**MPM 7 control:** `MPM7_COMPANY_OVERSIGHT_TAKEOVER_2026-09-14.md`  
+**State Owner:** **MPM 8 — Company Oversight**  
+**MPM 8 control:** `MPM8_COMPANY_OVERSIGHT_TAKEOVER_2026-09-14.md`  
 **Web V2 development Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
 **Web V2 DEV OS recovery workflow:** `WEB_V2_DEV_OS_RECOVERY_WORKFLOW_2026-09-14.md`  
 **eBay incident correction:** `COM2_EBAY_FALSE_COMPLETION_CORRECTION_2026-09-14.md`  
 **Shopify operations Worktree:** `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md`  
+**Renogy Shopify launch control:** `SHOPIFY_RENOGY_CONTROLLED_LAUNCH_DIRECTIVE_2026-09-14.md`  
 **Profitability control:** `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md`  
 **Paid-acquisition control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
@@ -18,7 +19,7 @@
 
 **KNOW → RECONCILE → PRIORITIZE → ROUTE → VERIFY → UPDATE → CONTINUE**
 
-MPM 7 is the active company-oversight instance. MPM 6 and earlier MPM iterations are historical/reference and must not issue competing live control.
+MPM 8 is the active company-oversight instance. MPM 7 and earlier MPM iterations are historical/reference and must not issue competing live control.
 
 Waiting on an authenticated, external, owner, or release gate in one lane does not stop executable clean work in another lane.
 
@@ -45,8 +46,9 @@ Current management posture:
 5. **P1 — Web V2 cutover:** after Phase B merges, create one exact immutable current-main candidate → verify Git SHA / Cloudflare Version ID → `/__version` → production-parity smoke → promote the same tested Version ID → live verify.
 6. **P1 — Web V2 media completion after cutover:** images/icons are repaired one section or tightly coupled media group at a time. No more sitewide image/icon closeout passes.
 7. **P1 — Shopify:** close `/pages/part-request` exact active-theme/version/public-visibility proof while preserving green payment state.
-8. **P1 — vendor catalog readiness:** advance verified catalog inputs only — Renogy next-five controlled evidence; VEVOR current PRO economics/tax truth; Doba destination/economics checks; SunGoldPower and Phocos owner-ready application preparation.
-9. **P1 — profitability/cross-channel verification:** continue after the customer/release gates above are moving or externally blocked.
+8. **P1 — Renogy Shopify controlled revenue:** preserve accepted live products; reconcile `RBM500-G3-US` without duplication; advance only clean exact SKUs under `SHOPIFY_RENOGY_CONTROLLED_LAUNCH_DIRECTIVE_2026-09-14.md`.
+9. **P1 — vendor catalog readiness:** advance verified catalog inputs only — VEVOR current PRO economics/tax truth; Doba destination/economics checks; SunGoldPower and Phocos owner-ready application preparation.
+10. **P1 — profitability/cross-channel verification:** continue after the customer/release gates above are moving or externally blocked.
 
 **Marketplace / Create-a-Listing transition rule:** current Legacy redirects remain transitional. Do not patch them as isolated Legacy defects while Web V2 takes final storefront/vendor-catalog route ownership.
 
@@ -56,15 +58,15 @@ Current management posture:
 
 | Priority | Work Item | Owner | Current State | Next Action |
 |---|---|---|---|---|
-| **P0** | Owner communications / residual Google Voice forwarding | MPM 7 / Communications Recovery | **OPEN — AUTHENTICATED LIVE VERIFICATION REQUIRED** | Verify direct inbound call, SMS and voicemail after carrier/Google correction. Do not blind-loop retries or claim closure without live proof. |
+| **P0** | Owner communications / residual Google Voice forwarding | MPM 8 / Communications Recovery | **OPEN — AUTHENTICATED LIVE VERIFICATION REQUIRED** | Verify direct inbound call, SMS and voicemail after carrier/Google correction. Do not blind-loop retries or claim closure without live proof. |
 | **P0** | eBay live customer + seller-state verification | eBay Store Operations under Peter / Company Operations | **OPEN — AUTHENTICATED VERIFICATION ONLY** | Verify order `20-15123-05140` in Seller Hub for shipment/tracking vs recovery action, then verify seller identity + live listing/price state. No repeat price/quantity/end mutation unless a live mismatch is proven. |
-| **P1** | Web V2 owner-reviewed recovery | Web V2 DEV OS under MPM 7 | **PHASE A ACTIVE / OWNER-REVIEWED STATE LOCKED** | Start from `e0db198...`; verify parent `a2c0de22...`; verify QA run `34799915010`; reproduce four accepted screenshots; fix only homepage hero, store hero and genuinely broken icons; return receipt; stop for Casey. |
+| **P1** | Web V2 owner-reviewed recovery | Web V2 DEV OS under MPM 8 | **PHASE A ACTIVE / OWNER-REVIEWED STATE LOCKED** | Start from `e0db198...`; verify parent `a2c0de22...`; verify QA run `34799915010`; reproduce four accepted screenshots; fix only homepage hero, store hero and genuinely broken icons; return receipt; stop for Casey. |
 | **P1** | Web V2 forward-port + cutover | Web V2 DEV OS / Release Engineer | **BLOCKED ON PHASE A OWNER APPROVAL** | After approval only: current main → approved visual delta only → preserve commerce/catalog/release → QA → merge → exact candidate → smoke → same-version promotion → live verify. |
 | **P1** | Web V2 section-scoped image/icon completion | Web V2 specialist lane | **QUEUED AFTER BASELINE CUTOVER** | One named section/media group per bounded branch/PR. Preserve approved layout/copy/CTAs/navigation/dimensions; change only required assets/mappings/minimum render rules. |
 | **P1** | Shopify `/pages/part-request` active-theme/version/visibility proof | Shopify Store Operations under Peter | **ROUTE PASSED / VERSION-VISIBILITY PROOF PENDING** | Verify exact active-theme/version/public visibility; close only from direct proof. Preserve green payment state. |
-| **P1** | Vendor catalog readiness / commerce truth | Vendor Projects + Shopify Store Operations + Web V2 | **ACTIVE / CONTROLLED** | Feed Web V2/current commerce surfaces only verified vendor truth. Renogy next-five remain individually gated; VEVOR uses current PRO economics; Doba route/destination economics verified per affected order/SKU; prepare SunGoldPower and Phocos applications for owner review without inventing attestations. |
+| **P1** | Vendor catalog readiness / commerce truth | Vendor Projects + Shopify Store Operations + Web V2 | **ACTIVE / CONTROLLED** | Feed Web V2/current commerce surfaces only verified vendor truth. Renogy publication follows the current exact-SKU controlled-launch directive; VEVOR uses current PRO economics; Doba route/destination economics verified per affected order/SKU; prepare SunGoldPower and Phocos applications for owner review without inventing attestations. |
 | **P1** | Shopify conversion / trust / profitability | Shopify Store Operations + Shipping & Logistics + Vendor Projects | **ACTIVE** | Improve product/media/shipping/policy/buy-box truth without guessing supplier or legal/commercial facts. Coordinate catalog truth with Web V2 rather than duplicating architecture work. |
-| **P1** | Renogy Shopify controlled launch | Renogy Project + Shopify Store Operations | **1 LIVE / NEXT FIVE CONTROLLED DRAFTS** | Preserve accepted 10W maintainer at $39.99. Advance next-five drafts only after exact media, price, stock/orderability, shipping and warranty truth clears per SKU. |
+| **P1** | Renogy Shopify controlled launch | Renogy Project + Shopify Store Operations | **CONTROLLED LAUNCH ACTIVE — MULTIPLE PUBLIC PRODUCTS / SKU-SPECIFIC HOLDS** | Preserve the 10W maintainer at $39.99 and the verified 3000W inverter at $414.99. Reconcile `RBM500-G3-US` without duplication. Advance the 400W suitcase only after approved media + shipping economics; advance the 50A charger only with positive contribution; keep 100W panel + canonical 200W RV kit on controlled backorder/preorder hold until delayed-order/economics/fulfillment truth clears. |
 | **P1** | Existing-channel profitability + price source-of-truth | Company Operations + channel workers + Vendor Projects | **ACTIVE** | Improve existing channels before expansion; protect contribution margin; no broad paid acquisition. |
 | **P1** | GitHub branch protection | Owner/admin-capable GitHub surface | **OWNER / ADMIN ACTION REQUIRED** | Enable protection when an authorized admin-capable surface is available. Do not misreport unsupported admin access as completion. |
 | **P1** | Cross-channel live verification | Company Operations + owning channel workers | **ACTIVE / BOUNDED** | Verify only materially open live states; no duplicate audits of accepted work. |
@@ -145,7 +147,7 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 - **Doba:** SKU `D01027H21KW` has destination eligibility restrictions; verify customer destination and current economics before fulfillment.
 - **SunGoldPower:** dealer relationship is receptive and an installer/dealer application is available. Management may prefill known facts; owner reviews/signs attestations and license/tax claims.
 - **Phocos:** New Client Application received. Management may prepare it and an initial product-family shortlist, but sensitive/company-attestation fields remain owner-verified and must not be invented.
-- **Renogy:** the 10W maintainer remains accepted live at **$39.99**; the next five remain controlled drafts with individual media/price/stock/shipping/warranty gates.
+- **Renogy:** direct Shopify Renogy sales are owner-approved under exact-SKU/truth/economics gates. The 10W maintainer remains accepted live at **$39.99**. `RNG-INVT-3000-12V-P2-G3-US` is verified live/purchaseable at **$414.99**, dealer cost **$305.99**, gross spread before payment/fulfillment costs **$109.00**. `RBM500-G3-US` is already public and must not be duplicated. `RSP400LSC-G1-US` and `RBC2125DS-21W-G3-US` remain gated; `RSP100DCT-G1-US` and canonical `RNG-KIT-RV200D-ADV30-US` remain controlled backorder/preorder holds. Renogy marketplace expansion remains blocked absent separate written authorization.
 
 ---
 
@@ -153,14 +155,14 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 
 | Lane | Owner | State |
 |---|---|---|
-| Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — PAYMENT GREEN / EVIDENCE + CONVERSION + PROFITABILITY TUNING** |
+| Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — PAYMENT GREEN / EVIDENCE + CONVERSION + PROFITABILITY TUNING / RENOGY CONTROLLED LAUNCH** |
 | eBay | eBay Store Operations / Peter / Company Ops | **P0 OPEN — CUSTOMER + SELLER AUTHENTICATED VERIFICATION** |
-| Web V2 | Web V2 DEV OS under MPM 7 | **ACTIVE — `e0db198...` OWNER REVIEW STATE / `a2c0de22...` VISUAL BASELINE / PHASE A RECOVERY** |
+| Web V2 | Web V2 DEV OS under MPM 8 | **ACTIVE — `e0db198...` OWNER REVIEW STATE / `a2c0de22...` VISUAL BASELINE / PHASE A RECOVERY** |
 | TikTok | TikTok execution under Peter | **ACTIVE UNDER RESTRICTION — NO APPEAL REPLAY / NO UNAUTHORIZED PAID SPEND; COUNSEL LANE OWNER-GATED** |
 | Fourthwall / Apparel | Apparel operations under Peter | **ACTIVE SEPARATE CHANNEL** |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** |
 | VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE SUPPLIER / CONTROLLED PUBLICATION / CURRENT PRO ECONOMICS REQUIRED** |
-| Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE — 1 SHOPIFY SKU LIVE / NEXT FIVE CONTROLLED** |
+| Renogy | Renogy Branch Operations Manager / Specialist | **ACTIVE — CONTROLLED SHOPIFY LAUNCH / MULTIPLE PUBLIC PRODUCTS / SKU-SPECIFIC HOLDS** |
 | Kingboss | Kingboss Project Operations Manager / Specialist | **ACTIVE STAGE-1 PROVING** |
 | SunGoldPower | Vendor intake under Company Operations / Peter | **APPLICATION RECEIVED — OWNER-READY PREP AUTHORIZED** |
 | Phocos | Vendor intake under Company Operations / Peter | **APPLICATION RECEIVED — OWNER-READY PREP + SKU SHORTLIST REQUIRED** |
@@ -190,7 +192,10 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 - stale candidate `84af23ec814baa73718e33ec052044ce4706534d` — **RETIRED / DO NOT DEPLOY**.
 - Shopify Payments incomplete/setup blocker — **CLOSED / STALE** unless fresh live evidence proves otherwise.
 - Do not repeat corrected eBay mutation without authenticated mismatch proof.
-- Do not publish all Renogy drafts because one SKU launched successfully.
+- Do not publish blocked Renogy SKUs merely because another Renogy SKU is live.
+- Do not duplicate `RBM500-G3-US`.
+- Do not substitute stale `RKIT200RV-A30DT1-US` for canonical `RNG-KIT-RV200D-ADV30-US`.
+- Renogy third-party marketplaces remain blocked absent separate written authorization.
 - Do not infer supplier, shipping, tax, lithium, warranty, MAP, policy or landed-cost truth.
 - Preserve any work item explicitly time-gated **not before 2026-09-21** unless Casey changes that gate.
 
@@ -208,12 +213,12 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 8. A Git decision/receipt is not a substitute for live marketplace, communications or production-runtime verification when live proof is the gate.
 9. Web V2 recovery authority is `e0db198...` review state + `a2c0de22...` visual code. Recover historical appearance first; after owner approval, forward-port only approved visual delta to current main.
 10. After cutover, image/icon work is section-scoped. A whole immutable Worker artifact may be released technically, but code/visual delta stays bounded to the named section.
-11. MPM 7 owns company oversight; earlier MPM instances are historical/reference.
+11. MPM 8 owns company oversight; MPM 7 and earlier MPM instances are historical/reference.
 12. MASTER RECON remains triggered integrity support, not a standing duplicate manager.
 13. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
 
 ## Current next-unblocked route
 
-Voice and eBay remain P0 but are authenticated-evidence gated. Unless newer Git truth supersedes this board, MPM 7 routes the next unblocked internal work to:
+Voice and eBay remain P0 but are authenticated-evidence gated. Unless newer Git truth supersedes this board, MPM 8 routes the next unblocked internal work to:
 
-**WEB V2 PHASE A: `e0db198...` + `a2c0de22...` → REPRODUCE OWNER QA → FIX ONLY HOME HERO / STORE HERO / ACTUALLY BROKEN ICONS → OWNER REVIEW → PHASE B CURRENT-MAIN FORWARD-PORT → QA / MERGE → EXACT CANDIDATE → SMOKE → SAME-VERSION CUTOVER → SECTION-SCOPED MEDIA PASSES → SHOPIFY `/pages/part-request` PROOF → VENDOR CATALOG READINESS → PROFITABILITY / CHANNEL VERIFICATION.**
+**WEB V2 PHASE A: `e0db198...` + `a2c0de22...` → REPRODUCE OWNER QA → FIX ONLY HOME HERO / STORE HERO / ACTUALLY BROKEN ICONS → OWNER REVIEW → PHASE B CURRENT-MAIN FORWARD-PORT → QA / MERGE → EXACT CANDIDATE → SMOKE → SAME-VERSION CUTOVER → SECTION-SCOPED MEDIA PASSES → SHOPIFY `/pages/part-request` PROOF → RENOGY CONTROLLED REVENUE / VENDOR CATALOG READINESS → PROFITABILITY / CHANNEL VERIFICATION.**
