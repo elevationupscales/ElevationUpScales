@@ -35,6 +35,19 @@ export const sokProductMerchandisingStyles = `
   object-fit:contain;
   object-position:center;
 }
+/* Image-closeout only: preserve the accepted e9cbaacc visual treatment while using repository-localized media in the existing background slots. */
+.reference-storefront-home .storefront-scene{
+  background:linear-gradient(90deg,rgba(0,5,9,.94) 0%,rgba(0,8,13,.84) 29%,rgba(2,15,23,.3) 58%,rgba(0,6,10,.42) 100%),linear-gradient(180deg,rgba(0,0,0,.01),rgba(0,6,10,.18) 64%,rgba(0,6,10,.78)),url('/assets/hero/home-tropical.webp') center 44%/cover no-repeat;
+}
+.reference-storefront-home .sok-feature::before{
+  background:url('/assets/hero/home-tropical.webp') center 46%/cover no-repeat;
+}
+.reference-storefront-home .logistics-section::before{
+  background:url('/assets/hero/hawaii-ocean-freight.webp') center/cover no-repeat;
+}
+.reference-storefront-home .solar-feature-media{
+  background:linear-gradient(0deg,rgba(1,8,12,.24),rgba(1,8,12,.12)),url('/assets/hero/store-rv-mountains.webp') center/cover no-repeat;
+}
 @media(max-width:920px){
   .reference-storefront-home .hero-product-12 img,
   .reference-storefront-home .hero-product-48 img{
