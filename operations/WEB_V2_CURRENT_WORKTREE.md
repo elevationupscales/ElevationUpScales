@@ -3,189 +3,273 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **System:** Elevation OS 1.1  
-**Status:** **OWNER-ACCEPTED VISUAL BASELINE LOCKED — BASELINE RESTORATION / CUTOVER FIRST — SECTION MEDIA PATCHES AFTER**  
+**Status:** **OWNER-REVIEWED RECOVERY STATE LOCKED — RECOVER → OWNER QA → FORWARD-PORT → CUTOVER → SECTION MEDIA PASSES**  
 **Reports To:** OS 1.1 Project Manager / MPM 7  
+**Controlling DEV OS workflow:** `WEB_V2_DEV_OS_RECOVERY_WORKFLOW_2026-09-14.md`  
 **Owner visual control:** `WEB_V2_OWNER_VISUAL_FIDELITY_REQUIREMENTS_2026-09-13.md`  
-**Closeout directive:** `WEB_V2_PRODUCTION_FIDELITY_CLOSEOUT_DIRECTIVE_2026-09-13.md`  
-**Latest owner-accepted visual baseline:** `e9cbaacc49443637e2241be7948ea93a3848557f`  
-**Prior accepted checkpoint:** `cbb9e59707ee07dcb6c84d566156ff36d658924d`  
-**Rejected later candidate:** `4bc2d0874db74133be3a76aee8d6db33504b6bfa` / Cloudflare `41bbca73-fb38-4f0f-87b3-a24b3f1801d0`  
-**Historical earlier approved candidate:** `6dff0a7e65f3967d60040977c3c2693e430e56b4` / Cloudflare `e60f4bd0-285b-4b08-9b55-1db013be383e` — predates controlling `e9cbaacc...`; do not promote as substitute  
-**Legacy production:** `production-deploy = 894b15cb12bf75a6a8e81b916e2a9bc2de858f88` — LEGACY ONLY / rollback reference
+**Prior closeout directive:** `WEB_V2_PRODUCTION_FIDELITY_CLOSEOUT_DIRECTIVE_2026-09-13.md` — historical/reference only where consistent with this worktree
 
-## 1. Mission
+---
 
-Put the already owner-approved Web V2 presentation on the release path **before** reopening broad image cleanup.
+# 1. CONTROLLING RECOVERY STATE
 
-Casey accepted the Web V2 visual presentation at `e9cbaacc...`. The later problem was image/icon/media completion and post-baseline visual drift, not rejection of the accepted copy, layout, hierarchy, CTAs, section structure or vendor-catalog architecture.
+OS RECON recovered and Git verification confirmed the exact owner-reviewed visual state.
 
-The prior closeout sequence attempted to finish many images before release. Owner direction now changes sequencing:
+## Owner-reviewed QA checkpoint
 
-**CURRENT MAIN → RESTORE `e9cbaacc...` VISUAL CONTRACT ONLY → PRESERVE LATER SAFE NONVISUAL / COMMERCE WORK → QA → MERGE → ONE EXACT CURRENT-MAIN CANDIDATE → VERIFY RESTORATION → PRODUCTION-PARITY SMOKE → PROMOTE SAME VERSION → THEN REPAIR IMAGES/ICONS ONE SECTION AT A TIME.**
+**`e0db19829ec3c36b4caaa503f5b9f7bcde38d868`**  
+Commit: `QA: recapture after asset-render correction`
 
-This is **not** a wholesale repository rollback and **not** another redesign.
+This is the branch/review state Casey saw and accepted as essentially good other than remaining hero/image/icon misuse.
 
-## 2. Accepted visual lineage
+## Visual implementation beneath that checkpoint
 
-### Accepted checkpoint 1
+**`a2c0de22b7c18320603b196f0b3f6401fe4e7b40`**  
+Commit: `Web V2: fix final visual asset rendering`
 
-PR #183 — `Web V2: owner homepage fidelity repair`  
-Merge SHA: `cbb9e59707ee07dcb6c84d566156ff36d658924d`
+`e0db198...` is a direct child of `a2c0de22...` and only changes the one-time QA workflow.
 
-Scope established the accepted homepage copy/layout/proportions/SOK treatment while preserving commerce safety.
+Therefore:
 
-### Accepted checkpoint 2 — controlling baseline
+**OWNER-REVIEWED RECOVERY STATE = `e0db198...`**  
+**VISUAL CODE BASELINE = `a2c0de22...`**
 
-PR #184 — `Web V2: fix homepage hero image rendering`  
-Merge SHA: `e9cbaacc49443637e2241be7948ea93a3848557f`
+Do not use one SHA to describe both roles.
 
-This repair explicitly preserved accepted homepage copy, CTAs, routes, commerce behavior and sizing/positioning while addressing the hero image.
+---
 
-**This is the latest owner-accepted visual baseline and the visual contract to restore.**
+# 2. OWNER QA PROOF
 
-## 3. Later candidates / closeout work
+GitHub Actions:
 
-### Rejected later candidate — do not promote
+**Run `34799915010` — `One-time Web V2 final visual QA` — SUCCESS**
 
-- Git SHA: `4bc2d0874db74133be3a76aee8d6db33504b6bfa`;
-- GitHub Actions candidate run: `#8 / 34803391129`;
-- Cloudflare Version ID: `41bbca73-fb38-4f0f-87b3-a24b3f1801d0`;
-- candidate QA: PASS;
-- `/__version`: PASS;
-- owner visual acceptance: **FAIL / HOLD**;
-- production promotion: NONE.
+Captured owner-review views:
 
-Git shows this candidate is materially beyond `e9cbaacc...` and includes visual-shell changes that were not owner-approved merely because technical QA passed.
+- `/` — desktop `1536 × 960`, full page;
+- `/` — mobile `390 × 844`, full page;
+- `/store` — desktop `1536 × 960`, full page;
+- `/store` — mobile `390 × 844`, full page.
 
-**Do not promote, retry, production-smoke, or treat `4bc2d087...` as accepted.**
+Artifact:
 
-### PR #194 image closeout — useful source, not the owner visual baseline
+**`web-v2-final-visual-qa`**
 
-PR #194 attempted to restore the `e9cbaacc...` owner-accepted presentation while localizing and repairing approved media. It may contain safe image assets or mappings worth retaining, but it does **not** supersede `e9cbaacc...` as the visual authority.
+This run supersedes earlier attempts to identify `e9cbaacc...` as the final recovery target.
 
-Retain later media only when it can be placed into the exact accepted slot without changing composition, identity, section structure, typography, navigation, spacing or CTA behavior.
+---
 
-### Earlier immutable candidate — historical only
+# 3. SUPERSEDED / HISTORICAL VISUAL REFERENCES
 
-The release workflow successfully created Cloudflare Version `e60f4bd0-285b-4b08-9b55-1db013be383e` from `6dff0a7e...`. That checkpoint was owner-approved at the time, but the accepted visual baseline later advanced to `e9cbaacc...`.
+The following are valid historical checkpoints but are **not** the controlling recovery target:
 
-Therefore **do not promote `e60f4bd0...` as a shortcut**. It proves the release system worked; it is not the controlling visual target.
+- `e9cbaacc49443637e2241be7948ea93a3848557f` — earlier owner-accepted homepage/hero checkpoint;
+- `d81844556a62b27e3040e94a8ca7eae6ccb7fcd9` — earlier SOK homepage image repair;
+- `6dff0a7e65f3967d60040977c3c2693e430e56b4` / Cloudflare `e60f4bd0-285b-4b08-9b55-1db013be383e` — older immutable candidate;
+- PR #194 — later image-closeout work; useful only for narrow evidence/assets, not visual authority.
 
-## 4. Baseline restoration scope
+Do not route DEV back to these as the final baseline.
 
-### Restore / preserve from `e9cbaacc...`
+---
 
-- homepage copy;
+# 4. VERIFIED DRIFT BOUNDARY
+
+By:
+
+**`f532741933d842213716b8d1bee1a3fecd8e6442`**  
+Commit: `QA: capture semantic icon and image repair`
+
+Git shows that state was already **6 commits ahead of `e0db198...`**.
+
+That later sequence expanded into broader visual-system work, including shell/catalog/style/icon machinery.
+
+**DO NOT CONTINUE FORWARD FROM THAT DRIFTED STATE AS THE PRIMARY RECOVERY METHOD.**
+
+Later commits may be mined only for one proven isolated asset fix when the change can be separated cleanly from surrounding drift.
+
+---
+
+# 5. OWNER SCOPE
+
+The accepted visual system is locked.
+
+Remaining authorized visual work is limited to:
+
+1. **homepage hero imagery/use;**
+2. **store hero imagery/use;**
+3. **genuinely missing/broken icons.**
+
+Everything else remains closed unless Casey reopens it.
+
+### Explicitly prohibited
+
+- catalog redesign;
+- broad `shell.js` restructure;
+- store architecture redesign;
+- new card system;
+- copy rewrite;
+- CTA rewrite;
+- section-order changes;
+- sitewide typography/spacing retuning;
+- new semantic-icon system;
+- broad visual cleanup disguised as an image repair;
+- cart/checkout/order/payment redesign;
+- supplier/pricing/shipping/tax/warranty/MAP/orderability changes;
+- wholesale replay of the six post-`e0db198...` commits.
+
+**No catalog redesign. No shell restructure. No new store architecture. No new card system. No copy rewrite.**
+
+---
+
+# 6. RECOVERY MODEL
+
+Because the owner-reviewed checkpoint is historical while the current release workflow requires candidate/smoke/promotion to use exact current `main`, the job is intentionally split into two phases.
+
+## Phase A — recover the approved visual state
+
+Start a bounded recovery/reference branch from:
+
+**`e0db19829ec3c36b4caaa503f5b9f7bcde38d868`**
+
+Use `a2c0de22...` as the visual-code baseline beneath it.
+
+On that branch:
+
+- reproduce the four accepted QA views;
+- identify only homepage hero, store hero and genuinely broken icons;
+- apply the smallest possible corrections;
+- preserve everything else byte-for-byte where practical;
+- recapture the same four views;
+- return a receipt to Casey;
+- **STOP FOR OWNER APPROVAL.**
+
+Do not merge the historical branch directly backward over current `main`.
+
+## Phase B — forward-port the approved visual delta
+
+Only after Casey approves Phase A:
+
+- re-resolve current `main`;
+- create one bounded forward-port branch from current `main`;
+- port only the owner-approved visual delta;
+- preserve current safe catalog/cart/checkout/order/release architecture;
+- run canonical source and visual QA;
+- merge only if visual parity + commerce safety pass.
+
+This protects both the approved appearance and later safe functional work.
+
+---
+
+# 7. PHASE A RUN LOOP
+
+**GIT FIRST → VERIFY `e0db198...` → VERIFY PARENT `a2c0de22...` → VERIFY QA RUN `34799915010` SUCCESS → CREATE/RECOVER HISTORICAL RECOVERY BRANCH → RUN BASELINE TESTS → CAPTURE FOUR BASELINE VIEWS → FIX ONLY HOMEPAGE HERO / STORE HERO / BROKEN ICONS → TEST → CAPTURE FOUR AFTER VIEWS → RETURN RECEIPT → STOP FOR CASEY.**
+
+Required owner-review screenshots:
+
+- home desktop `1536 × 960`;
+- home mobile `390 × 844`;
+- store desktop `1536 × 960`;
+- store mobile `390 × 844`.
+
+Required receipt:
+
+- branch;
+- baseline SHA;
+- result SHA;
+- changed files;
+- exact reason for every changed file;
+- source tests;
+- `git diff --check`;
+- four before/after screenshots;
+- explicit confirmation that catalog/shell/card/copy architecture was not broadened.
+
+---
+
+# 8. PHASE B RUN LOOP
+
+After Casey accepts Phase A:
+
+**RE-RESOLVE CURRENT MAIN → NEW BOUNDED FORWARD-PORT BRANCH → APPLY ONLY APPROVED VISUAL DELTA → VERIFY CATALOG / PRODUCT / CART / CHECKOUT / ORDER / RELEASE FOUNDATIONS → RUN FOUR-VIEWPORT QA → CANONICAL PR QA → MERGE → STOP FOR RELEASE.**
+
+No historical branch is merged wholesale into current main.
+
+---
+
+# 9. RELEASE LOOP
+
+After Phase B merges:
+
+**EXACT CURRENT MAIN → CANONICAL WEB V2 QA → ONE IMMUTABLE CLOUDFLARE CANDIDATE → SHA/VERSION ID PROOF → `/__version` → VISUAL PARITY CHECK → PRODUCTION-PARITY SMOKE → PROMOTE SAME VERSION ID → LIVE VERIFY → FREEZE AS PRODUCTION BASELINE.**
+
+Do not weaken the current-main release invariant.
+
+Do not directly promote a historical SHA or historical Cloudflare version as a shortcut.
+
+### Existing rejected candidate guard
+
+`4bc2d0874db74133be3a76aee8d6db33504b6bfa` / Cloudflare `41bbca73-fb38-4f0f-87b3-a24b3f1801d0` remains:
+
+**VISUALLY REJECTED / DO NOT PROMOTE / DO NOT REPLAY.**
+
+---
+
+# 10. POST-CUTOVER MEDIA STRATEGY
+
+After the approved recovery is live, image/icon work is **section scoped**.
+
+One named section or tightly coupled media group per bounded branch/PR.
+
+Recommended sequence:
+
+1. homepage hero;
+2. store hero;
+3. SOK product imagery;
+4. category tiles;
+5. Featured / homepage product cards;
+6. Shop the Store;
+7. Build Your Power System;
+8. Hawaii / Alaska / freight;
+9. Project & Field Support;
+10. remaining genuinely broken icons/decorative media.
+
+Each media patch must preserve:
+
+- copy;
 - CTA wording;
 - section order;
-- header/navigation treatment;
-- card/category structure;
-- typography and hierarchy;
-- spacing and sizing;
-- button treatment;
-- responsive composition;
-- accepted hero treatment;
-- accepted Web V2 routes and customer-facing behavior.
+- navigation;
+- component dimensions;
+- accepted visual composition;
+- current commerce behavior.
 
-### Preserve forward from current main
+Cloudflare Worker deployment remains an immutable whole-version artifact. **Section-scoped means the code/visual delta is bounded, not partial Worker deployment.**
 
-Do **not** reset current main to the old commit. Preserve later safe nonvisual work, including:
+---
 
-- canonical catalog + product detail;
-- cart;
-- checkout review;
-- order + fulfillment handoff;
-- release architecture;
-- exact-SKU / fail-closed commercial safety;
-- verified vendor/catalog truth that does not alter the accepted visual contract;
-- operational documentation and unrelated company work.
-
-The implementation is a **visual restoration patch on current main**, not `git reset`, wholesale revert, historical branch promotion, or deletion of later commerce work.
-
-## 5. Baseline restoration gate
-
-Before the baseline-restoration PR can merge, return PASS/FAIL for:
-
-- customer-facing homepage layout matches `e9cbaacc...`;
-- copy/CTAs/section order match `e9cbaacc...`;
-- header/navigation treatment matches `e9cbaacc...`;
-- card/category structure and spacing match `e9cbaacc...`;
-- hero presentation matches the accepted baseline;
-- current canonical catalog/product routes remain present;
-- cart/checkout/order foundations remain intact;
-- no supplier, price, shipping, tax, warranty, MAP or orderability truth is changed as part of visual restoration;
-- Web V2 QA PASS;
-- canonical PR QA PASS;
-- desktop comparison PASS;
-- 390px technical comparison PASS.
-
-A missing or imperfect downstream image is **not** a reason to redesign or delay the accepted baseline unless it blocks basic usability or creates false product identity.
-
-## 6. Release sequence — baseline first
-
-The existing `web-v2-release.yml` requires the candidate/promote SHA to equal **current `main`**. Therefore the historical `e9cbaacc...` commit cannot be promoted directly while main has advanced.
-
-Required release path:
-
-1. merge the bounded visual-restoration patch into current main;
-2. create one immutable candidate from that exact current-main SHA;
-3. verify candidate-to-SHA identity and `/__version`;
-4. verify the restored presentation against `e9cbaacc...`;
-5. run production-parity smoke using the exact candidate and accepted baseline controls;
-6. promote the **same tested Cloudflare Version ID** to production;
-7. live-verify key routes and runtime identity;
-8. freeze that release as the Web V2 production visual baseline.
-
-No release-flow modification is authorized merely to bypass the exact-current-main invariant.
-
-## 7. Post-cutover image / icon strategy — section scoped
-
-Once the approved baseline is live, image and icon work becomes a sequence of **bounded section patches**, not another full-site visual closeout.
-
-Each section patch must:
-
-- name exactly one homepage/customer-facing section or one tightly coupled image group;
-- change only that section's image/icon assets, mappings, crop/object-fit/responsive rules, and the minimum code required to render them;
-- preserve copy, CTAs, dimensions, section order, navigation, layout and visual system unless Casey explicitly approves a change;
-- use exact product/vendor identity where applicable;
-- avoid generic image reuse across unrelated sections;
-- avoid semantic-icon substitution for an intended photo/product image unless Casey approves it;
-- hold only the unresolved asset instead of redesigning around it;
-- run targeted desktop + 390px visual QA plus canonical Web V2/PR QA;
-- produce a small diff and a section-specific receipt.
-
-Suggested section order after cutover:
-
-1. hero / primary product imagery;
-2. SOK branding + exact SK12V100PC / SK48V100N slots;
-3. category tiles;
-4. Featured SOK / homepage product grid;
-5. Shop the Store;
-6. Build Your Power System;
-7. Hawaii / Alaska / freight;
-8. Project & Field Support;
-9. remaining icons / decorative media.
-
-**Technical note:** Cloudflare Worker releases are immutable whole-version artifacts. A section patch may still require a new Worker version to go live, but the **code and visual scope must remain section-bounded**. Do not treat each media correction as authority to rebuild or visually retune the entire site.
-
-## 8. Worker routing
+# 11. WORKER ROUTING
 
 | Worker | State | Task |
 |---|---|---|
-| **WEB DEVELOPER** | **ACTIVE — BASELINE RESTORATION FIRST** | Start from current `main`; restore the `e9cbaacc...` visual contract only; preserve later safe nonvisual/catalog/commerce work; QA; merge; stop. Do **not** continue broad image closeout in the same PR. |
-| **MASTER RECON OS** | **TRIGGERED / CONTROL ONLY** | Enforce `e9cbaacc...` lineage, current-main preservation, and anti-drift. Verify that restoration does not roll back commerce or broaden visual scope. |
-| **RELEASE ENGINEER** | **STANDBY UNTIL RESTORATION MERGE** | From exact restored current main: candidate → identity proof → restoration verification → production-parity smoke → same-version promotion → live verify. |
-| **WEB DEVELOPER — MEDIA PASSES** | **QUEUED AFTER CUTOVER** | One section/image group per bounded branch/PR. No broad visual redesign or full-site image sweep. |
-| COMMERCE DEVELOPER | **STANDBY / FOUNDATION PRESERVED** | Do not reopen checkout/order/payment architecture during visual restoration or media passes. |
+| **WEB V2 DEVELOPMENT / DEV OS** | **ACTIVE — PHASE A RECOVERY** | Start from `e0db198...`; verify `a2c0de22...`; reproduce owner QA; fix only homepage hero, store hero, genuinely broken icons; return receipt; stop. |
+| **MASTER RECON OS** | **TRIGGERED CONTROL SUPPORT** | Enforce recovered lineage and anti-drift. Validate that later six-commit visual expansion is not replayed wholesale. |
+| **MPM 7** | **CONTROL / ROUTING** | Hold scope, reconcile receipt, route Casey owner review, authorize Phase B only after owner approval. |
+| **RELEASE ENGINEER** | **STANDBY** | No candidate/promotion until Phase A owner approval + Phase B forward-port merge. |
+| **COMMERCE DEVELOPMENT** | **PRESERVE / NO REOPEN** | Current safe catalog/cart/checkout/order/payment architecture is preserved during recovery. |
 
-## 9. Next RUN meaning
+---
 
-**WEB DEVELOPER → CURRENT MAIN → RESTORE `e9cbaacc...` VISUAL CONTRACT ONLY → PRESERVE FORWARD COMMERCE/CATALOG → QA → MERGE → RELEASE ENGINEER → ONE EXACT CURRENT-MAIN CANDIDATE → RESTORATION VERIFY → PRODUCTION-PARITY SMOKE → SAME-VERSION PROMOTION → LIVE VERIFY → SECTION MEDIA PASSES.**
+# 12. NEXT RUN MEANING
 
-## 10. Release invariant
+When Casey says **RUN** in the DEV OS/Web V2 lane:
 
-**OWNER-ACCEPTED VISUAL CONTRACT + CURRENT SAFE COMMERCE/CATALOG → ONE EXACT CURRENT-MAIN CLOUDFLARE VERSION → VERIFY → SMOKE → SAME VERSION CUTOVER → SECTION-SCOPED MEDIA PATCHES ONLY.**
+**VERIFY `e0db198...` / `a2c0de22...` / RUN `34799915010` → CREATE OR RECOVER PHASE-A BRANCH FROM `e0db198...` → RECAPTURE OWNER QA → FIX HOMEPAGE HERO + STORE HERO + ONLY GENUINELY BROKEN ICONS → RECAPTURE → RETURN RECEIPT → STOP FOR OWNER REVIEW.**
 
-## Control phrase
+After Casey approves:
 
-**`e9cbaacc...` IS THE LAST OWNER-ACCEPTED VISUAL BASELINE → RESTORE THAT PRESENTATION ON CURRENT MAIN → PROMOTE THE RESTORED BASELINE ONCE → REPAIR IMAGES/ICONS SECTION BY SECTION → NO MORE WHOLE-SITE VISUAL REBUILDS.**
+**CURRENT MAIN → FORWARD-PORT ONLY APPROVED VISUAL DELTA → PRESERVE FUNCTIONAL FOUNDATION → QA → MERGE → EXACT CURRENT-MAIN CANDIDATE → SMOKE → SAME-VERSION PROMOTION → SECTION MEDIA PASSES.**
+
+---
+
+# 13. CONTROL PHRASE
+
+**`e0db198...` IS THE OWNER-REVIEWED RECOVERY STATE. `a2c0de22...` IS THE VISUAL CODE UNDER IT. RECOVER THAT BUILD, FIX ONLY THE HERO / STORE HERO / ACTUALLY BROKEN ICONS, STOP FOR OWNER APPROVAL, THEN FORWARD-PORT ONLY THE APPROVED VISUAL DELTA TO CURRENT MAIN. DO NOT CONTINUE THE SIX-COMMIT VISUAL DRIFT.**
