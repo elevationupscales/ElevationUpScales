@@ -31,23 +31,24 @@ Do not describe the company as offline because one communications, seller-proof,
 
 Current management posture:
 
-**P0 PROTECT COMMUNICATIONS + CLOSE LIVE EBAY CUSTOMER/SELLER RISK → P1 FINALIZE WEB V2 VENDOR-CATALOG RELEASE PATH + SHOPIFY EVIDENCE → VENDOR CATALOG READINESS / PROFITABILITY → P2 SCALE.**
+**P0 PROTECT COMMUNICATIONS + CLOSE LIVE EBAY CUSTOMER/SELLER RISK → P1 RESTORE + CUT OVER OWNER-APPROVED WEB V2 BASELINE → SECTION-SCOPED MEDIA REPAIR + SHOPIFY/VENDOR CATALOG TRUTH → PROFITABILITY → P2 SCALE.**
 
 ---
 
 # TODAY'S CONTROLLED WORKFLOW — 2026-09-14
 
-Today is a **finish-and-verify day**, not a website architecture restart.
+Today remains a **finish-and-verify day**, but Web V2 sequencing is corrected to the actual owner-approved baseline.
 
 1. **P0 — eBay:** authenticated Seller Hub verification for remaining live customer/seller risk, including order `20-15123-05140` and the corrected seller-row/listing state. Order `10-15134-90489` is customer-refund closed; do not reopen that refund as unfinished work.
 2. **P0 — owner communications:** verify direct inbound call, SMS and voicemail after the Google Voice/carrier correction. No closure without live proof.
-3. **P1 — Web V2:** advance the already rebuilt vendor-catalog storefront from accepted source truth to a fresh immutable release candidate. Do not restart visual architecture and do not patch Legacy Marketplace/Create Listing routes in isolation.
-4. **P1 — Web V2 final review/cutover preparation:** run exact candidate QA, verify catalog routes/media/data truth, then route the exact candidate to owner review. Production promotion remains separately gated.
-5. **P1 — Shopify:** close `/pages/part-request` exact active-theme/version/public-visibility proof while preserving green payment state.
-6. **P1 — vendor catalog readiness:** advance verified catalog inputs only — Renogy next-five controlled evidence; VEVOR corrected PRO economics/tax truth; Doba destination/economics checks; SunGoldPower and Phocos owner-ready application preparation.
-7. **P1 — profitability/cross-channel verification:** continue after the customer/release gates above are moving or externally blocked.
+3. **P1 — Web V2 baseline restoration:** current `main` remains the code base. Restore the customer-facing visual contract from owner-accepted SHA `e9cbaacc49443637e2241be7948ea93a3848557f` without resetting or discarding later safe catalog/cart/checkout/order/release work.
+4. **P1 — Web V2 cutover:** after the bounded restoration merges and QA passes, create one exact immutable current-main candidate → verify visual equivalence/runtime identity → production-parity smoke → promote the same tested Version ID → live verify.
+5. **P1 — Web V2 media completion after cutover:** images/icons are repaired **one section or tightly coupled image group at a time**. No more whole-site visual closeout/rebuild passes.
+6. **P1 — Shopify:** close `/pages/part-request` exact active-theme/version/public-visibility proof while preserving green payment state.
+7. **P1 — vendor catalog readiness:** advance verified catalog inputs only — Renogy next-five controlled evidence; VEVOR current PRO economics/tax truth; Doba destination/economics checks; SunGoldPower and Phocos owner-ready application preparation.
+8. **P1 — profitability/cross-channel verification:** continue after the customer/release gates above are moving or externally blocked.
 
-**Marketplace / Create-a-Listing transition rule:** the current Legacy redirects are not a standalone repair target. The website is being replaced by Web V2 specifically to house and merchandise vendor catalogs more cleanly. Final route ownership belongs to Web V2 release finalization.
+**Marketplace / Create-a-Listing transition rule:** the current Legacy redirects remain transitional. Do not patch them as isolated Legacy defects while Web V2 takes final storefront/vendor-catalog route ownership.
 
 ---
 
@@ -57,7 +58,8 @@ Today is a **finish-and-verify day**, not a website architecture restart.
 |---|---|---|---|---|
 | **P0** | Owner communications / residual Google Voice forwarding | MPM 7 / Communications Recovery | **OPEN — AUTHENTICATED LIVE VERIFICATION REQUIRED** | Verify direct inbound call, SMS and voicemail after carrier/Google correction. Do not blind-loop retries or claim closure without live proof. |
 | **P0** | eBay live customer + seller-state verification | eBay Store Operations under Peter / Company Operations | **OPEN — AUTHENTICATED VERIFICATION ONLY** | Verify order `20-15123-05140` in Seller Hub for shipment/tracking vs recovery action, then verify seller identity + live listing/price state. No repeat price/quantity/end mutation unless a live mismatch is proven. |
-| **P1** | Web V2 vendor-catalog storefront finalization / release path | Web V2 specialist lane under MPM 7 | **REBUILT / OWNER-ACCEPTED VISUAL-CATALOG BASELINE / FRESH FINAL CANDIDATE REQUIRED** | Preserve PR #194 (`b5e37244ca98d3fcd306424da4557d5e9c4a6675`) as accepted visual/catalog closeout. Workflow run #8 successfully created an immutable candidate from older SHA `4bc2d0874db74133be3a76aee8d6db33504b6bfa`; because PR #194 landed afterward, do not promote that candidate. Re-resolve current main, create a fresh immutable candidate through `web-v2-release.yml`, run release QA, verify catalog routes/media/data truth, then obtain owner acceptance before production promotion. |
+| **P1** | Web V2 approved-baseline restoration + cutover | Web V2 specialist lane under MPM 7 | **OWNER-APPROVED VISUAL BASELINE IDENTIFIED / RESTORATION TO CURRENT MAIN REQUIRED** | `e9cbaacc49443637e2241be7948ea93a3848557f` is the latest owner-accepted visual baseline. Restore only that visual contract onto current main while preserving later safe nonvisual/catalog/commerce work. QA → merge → exact current-main candidate → verify → production-parity smoke → same-version promotion → live verify. |
+| **P1** | Web V2 section-scoped image/icon completion | Web V2 specialist lane | **QUEUED AFTER BASELINE CUTOVER** | One section/image group per bounded branch/PR. Change only its assets/mappings/minimum render rules; preserve approved layout/copy/CTAs/navigation/section dimensions. Whole Worker versions may still be required technically, but visual/code scope stays section-bounded. |
 | **P1** | Shopify `/pages/part-request` active-theme/version/visibility proof | Shopify Store Operations under Peter | **ROUTE PASSED / VERSION-VISIBILITY PROOF PENDING** | Verify exact active-theme/version/public visibility; close only from direct proof. Preserve green payment state. |
 | **P1** | Vendor catalog readiness / commerce truth | Vendor Projects + Shopify Store Operations + Web V2 | **ACTIVE / CONTROLLED** | Feed Web V2 and current commerce surfaces only verified vendor truth. Renogy next-five remain individually gated; VEVOR economics must use current PRO terms; Doba route/destination economics must be verified per affected order/SKU; prepare SunGoldPower and Phocos applications for owner review without inventing attestations. |
 | **P1** | Shopify conversion / trust / profitability | Shopify Store Operations + Shipping & Logistics + Vendor Projects | **ACTIVE** | Improve product/media/shipping/policy/buy-box truth without guessing supplier or legal/commercial facts. Coordinate catalog truth with Web V2 rather than duplicating storefront architecture work. |
@@ -71,31 +73,39 @@ Today is a **finish-and-verify day**, not a website architecture restart.
 
 # WEB V2 — VERIFIED DEVELOPMENT / RELEASE STATE
 
-## Accepted rebuild
+## Owner-approved visual source
 
-PR #194 merged the owner-accepted Web V2 visual/catalog closeout at `b5e37244ca98d3fcd306424da4557d5e9c4a6675`.
+The authoritative `WEB_V2_CURRENT_WORKTREE.md` identifies:
 
-The merge restored the accepted homepage presentation, localized approved SOK/hero/freight/RV/brand media, held unverifiable remote product media in place, retained the catalog presentation, preserved commerce/release safety, and passed Web V2 plus canonical PR QA including a 390px technical check.
+- latest owner-accepted visual baseline: `e9cbaacc49443637e2241be7948ea93a3848557f`;
+- prior accepted checkpoint: `cbb9e59707ee07dcb6c84d566156ff36d658924d`;
+- later candidate `4bc2d0874db74133be3a76aee8d6db33504b6bfa` / Cloudflare `41bbca73-fb38-4f0f-87b3-a24b3f1801d0`: **OWNER VISUAL FAIL / HOLD / DO NOT PROMOTE**.
 
-**The rebuild itself is accepted. Do not restart visual architecture without a fresh defect or owner direction. The remaining website work is release finalization, catalog truth, route verification and cutover preparation.**
+`e9cbaacc...` preserves the approved homepage copy, CTAs, routes, commerce behavior and production-matched sizing/positioning while fixing the bounded hero-image rendering defect. This is the presentation Casey approved before the later broad imaging/icon closeout work.
 
-Passing the 390px technical QA does not reopen mobile as a separate owner design/rebuild scope.
+### Correction to prior board wording
 
-## Immutable candidate status
+PR #194 is **not** the owner visual authority. It is a later image-closeout attempt that explicitly tried to restore the `e9cbaacc...` owner-accepted presentation while localizing/repairing media. Safe media improvements from PR #194 may be retained, but only inside the exact accepted slots and without changing composition or identity.
 
-Web V2 Production-Parity Release workflow run #8 completed the **candidate** job successfully for SHA `4bc2d0874db74133be3a76aee8d6db33504b6bfa`:
+The earlier immutable candidate `6dff0a7e...` / Cloudflare `e60f4bd0-285b-4b08-9b55-1db013be383e` also predates the controlling `e9cbaacc...` baseline and is **not** the shortcut promotion target.
 
-- immutable-candidate request validated;
-- exact-current-main check passed for that run;
-- release QA passed;
-- exact candidate uploaded **without deployment**;
-- Cloudflare version-to-SHA mapping verified;
-- candidate receipt/summary completed;
-- `promote`, `production-smoke`, `rollback`, and `bootstrap-smoke` jobs were skipped.
+## Why historical `e9cbaacc...` cannot be directly promoted
 
-PR #194 merged afterward. Therefore the run-#8 candidate is now **SUPERSEDED / DO NOT PROMOTE**. The next release action is a fresh candidate from current accepted V2 truth, not production promotion of the older candidate.
+The current `web-v2-release.yml` release invariant requires `expected_sha` to equal exact current `main` for candidate, smoke and promotion. Current main has advanced beyond the historical accepted SHA.
 
-The Web V2 specialist worktree remains authoritative for detailed phase sequencing, but newer merged receipts and this Board defeat stale pointers that would route DEV backward to already accepted visual work.
+Therefore:
+
+- **do not reset main to `e9cbaacc...`;**
+- **do not weaken/bypass the release workflow;**
+- **do not promote an older Cloudflare version as a shortcut.**
+
+Instead, restore the `e9cbaacc...` visual contract on top of current main, preserving later safe commerce/catalog/release work, then create and promote one exact current-main immutable candidate.
+
+## Post-cutover media operating rule
+
+After the restored baseline is live, image/icon fixes are section-scoped. Each patch names one section/image group, changes only its relevant asset/mapping/crop/object-fit/minimum render code, runs targeted visual QA plus canonical QA, and produces a small receipt.
+
+Cloudflare Worker deployment remains an immutable whole-version artifact by architecture. **“Section scoped” means the code/visual delta is bounded; it does not mean deploying partial Worker bytecode.**
 
 ---
 
@@ -125,8 +135,8 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 |---|---|---|
 | Shopify | Shopify Store Operations / Peter / Company Ops | **ACTIVE — PAYMENT GREEN / EVIDENCE + CONVERSION + PROFITABILITY TUNING** |
 | eBay | eBay Store Operations / Peter / Company Ops | **P0 OPEN — CUSTOMER + SELLER AUTHENTICATED VERIFICATION** |
-| Web V2 | Web V2 specialist lane under MPM 7 | **ACTIVE — REBUILT + ACCEPTED VISUAL/CATALOG BASELINE; FRESH IMMUTABLE CANDIDATE + FINAL CUTOVER GATES REMAIN** |
-| TikTok | TikTok execution under Peter | **ACTIVE UNDER RESTRICTION — NO APPEAL REPLAY / NO UNAUTHORIZED PAID SPEND; COUNSEL PRICING OUTREACH WAITING** |
+| Web V2 | Web V2 specialist lane under MPM 7 | **ACTIVE — `e9cbaacc...` OWNER VISUAL BASELINE LOCKED; RESTORE ON CURRENT MAIN → CUTOVER → SECTION MEDIA PATCHES** |
+| TikTok | TikTok execution under Peter | **ACTIVE UNDER RESTRICTION — NO APPEAL REPLAY / NO UNAUTHORIZED PAID SPEND; COUNSEL LANE OWNER-GATED** |
 | Fourthwall / Apparel | Apparel operations under Peter | **ACTIVE SEPARATE CHANNEL** |
 | SOK | SOK Project Operations Manager / SOK RECON OS | **ACTIVE PRIMARY SUPPLIER** |
 | VEVOR | VEVOR Project Operations Manager / Specialist | **ACTIVE SUPPLIER / CONTROLLED PUBLICATION / CURRENT PRO ECONOMICS REQUIRED** |
@@ -145,8 +155,12 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 - Broad Ops V2/admin/dashboard rebuild — **HOLD behind revenue path**.
 - Legacy homepage mutation — **NO TOUCH absent an exact fresh defect authorization**.
 - Current Legacy Marketplace / Create-a-Listing redirects — **TRANSITIONAL; DO NOT PATCH IN ISOLATION WHILE WEB V2 FINAL ROUTE OWNERSHIP IS BEING COMPLETED**.
-- `production-deploy` remains **LEGACY ONLY** until separately accepted Web V2 cutover control says otherwise.
-- Web V2 candidate `4bc2d0874db74133be3a76aee8d6db33504b6bfa` — **SUCCESSFUL HISTORICAL CANDIDATE / SUPERSEDED BY PR #194 / DO NOT PROMOTE**.
+- `production-deploy` remains **LEGACY ONLY** until accepted Web V2 cutover control says otherwise.
+- `e9cbaacc49443637e2241be7948ea93a3848557f` — **OWNER-ACCEPTED VISUAL AUTHORITY / REFERENCE; DO NOT WHOLESALE RESET REPOSITORY TO THIS SHA**.
+- `4bc2d0874db74133be3a76aee8d6db33504b6bfa` / Cloudflare `41bbca73-fb38-4f0f-87b3-a24b3f1801d0` — **VISUALLY REJECTED / DO NOT PROMOTE / DO NOT REPLAY**.
+- `6dff0a7e65f3967d60040977c3c2693e430e56b4` / Cloudflare `e60f4bd0-285b-4b08-9b55-1db013be383e` — **HISTORICAL EARLIER APPROVED CANDIDATE / NOT CONTROLLING PROMOTION TARGET**.
+- PR #194 media assets — **MAY BE REUSED ONLY WHERE THEY FIT THE `e9cbaacc...` ACCEPTED SLOT WITHOUT VISUAL DRIFT**.
+- Do not combine all remaining image/icon fixes into another sitewide visual-rebuild PR after baseline cutover.
 - `repair/live-site-audit-20260912` / `5fc55c806c1d7e138a9819a234e85ec932a056cb` — **ABANDONED / DO NOT DEPLOY / DO NOT MERGE**.
 - workflow `34728792703` — **FAILED / DO NOT REPLAY AS RELEASE PATH**.
 - stale candidate `84af23ec814baa73718e33ec052044ce4706534d` — **RETIRED / DO NOT DEPLOY**.
@@ -162,19 +176,20 @@ Order `20-15123-05140` remains an authenticated Seller Hub verification target b
 
 1. The closest active Worktree owns specialist phase sequencing.
 2. Global Board/Registry follow newer accepted worktree/Git receipts; they do not route workers backward when stale.
-3. Company priority remains P0 continuity/loss prevention → P1 Web V2/vendor-catalog completion + conversion/profitability/truth → P2 scale → P3 internal enhancement.
+3. Company priority remains P0 continuity/loss prevention → P1 Web V2 approved-baseline cutover + vendor/catalog conversion/profitability/truth → P2 scale → P3 internal enhancement.
 4. One bounded task = one primary execution owner.
-5. Hold only the affected SKU/order/route when truth is missing.
+5. Hold only the affected SKU/order/route/image slot when truth is missing.
 6. Vendor Projects own supplier truth; storefront workers do not infer it.
 7. Live execution is complete only when the required action-capable surface provides the required proof.
-8. A Git decision/receipt is not a substitute for a live marketplace or communications verification when live proof is the actual gate.
-9. A successful Web V2 candidate upload is not production deployment. Exact accepted source → fresh immutable candidate → QA → owner acceptance → promotion remains the cutover sequence.
-10. MPM 7 owns company oversight; MPM 6 and earlier instances are historical/reference.
-11. MASTER RECON remains triggered integrity support, not a standing duplicate manager.
-12. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
+8. A Git decision/receipt is not a substitute for live marketplace, communications or production-runtime verification when live proof is the actual gate.
+9. Web V2 historical visual authority is `e9cbaacc...`, but release source must be exact current main. Restore the accepted visual contract forward; do not roll the repository backward.
+10. After baseline cutover, image/icon work is section-scoped. A whole immutable Worker artifact may be released technically, but the code/visual delta must stay bounded to the named section.
+11. MPM 7 owns company oversight; MPM 6 and earlier instances are historical/reference.
+12. MASTER RECON remains triggered integrity support, not a standing duplicate manager.
+13. **HOLD ONLY THE BLOCKED ITEM → KEEP THE COMPANY MOVING.**
 
 ## Current next-unblocked route
 
 Voice and eBay remain P0 but are authenticated-evidence gated. Unless newer Git truth supersedes this board, MPM 7 routes the next unblocked internal work to:
 
-**WEB V2 FRESH IMMUTABLE CANDIDATE + VENDOR-CATALOG ROUTE/TRUTH VERIFICATION → SHOPIFY `/pages/part-request` VERSION/VISIBILITY PROOF → VENDOR CATALOG READINESS (RENOGY / VEVOR / DOBA / SUNGOLDPOWER / PHOCOS) → PROFITABILITY / CHANNEL VERIFICATION.**
+**WEB V2 RESTORE `e9cbaacc...` VISUAL CONTRACT ON CURRENT MAIN → QA / MERGE → EXACT CANDIDATE → RESTORATION VERIFY → PRODUCTION-PARITY SMOKE → SAME-VERSION CUTOVER → SECTION-SCOPED IMAGE/ICON PASSES → SHOPIFY `/pages/part-request` PROOF → VENDOR CATALOG READINESS → PROFITABILITY / CHANNEL VERIFICATION.**
