@@ -49,8 +49,17 @@ jobs:
             assert.match(home, /Backup Power/);
             assert.match(home, /Commercial Power/);'''
           if old not in t:
-              raise SystemExit('semantic regression block not found')
-          p.write_text(t.replace(old, new, 1))
+              raise SystemExit('homepage semantic regression block not found')
+          t = t.replace(old, new, 1)
+          old_store = r'''  assert.match(store, /Inverters &amp; Charging[\s\S]*semantic-icon--inverter|semantic-icon--inverter[\s\S]*Inverters &amp; Charging/);
+            assert.match(store, /Accessories[\s\S]*semantic-icon--accessories|semantic-icon--accessories[\s\S]*Accessories/);
+            assert.match(store, /Commercial[\s\S]*semantic-icon--commercial|semantic-icon--commercial[\s\S]*Commercial/);'''
+          new_store = r'''  for (const marker of ['semantic-icon--inverter', 'semantic-icon--accessories', 'semantic-icon--commercial', 'Inverters & Charging', 'Accessories', 'Commercial']) {
+              assert.ok(store.includes(marker), marker);
+            }'''
+          if old_store not in t:
+              raise SystemExit('store semantic regression block not found')
+          p.write_text(t.replace(old_store, new_store, 1))
           PY
           npm ci --ignore-scripts --prefix apps/web-v2
           npm --prefix apps/web-v2 test
