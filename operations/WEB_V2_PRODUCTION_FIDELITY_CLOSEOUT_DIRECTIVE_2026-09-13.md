@@ -1,17 +1,37 @@
-# ELEVATION UPSCALES — WEB V2 PRODUCTION-FIDELITY CLOSEOUT DIRECTIVE
+# ELEVATION UPSCALES — WEB V2 ACCEPTED-VISUAL CLOSEOUT DIRECTIVE
 
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **System:** Elevation OS 1.1  
 **Authority:** OWNER-DIRECTED / CLOSEOUT CONTROL  
 **Date:** 2026-09-13  
-**Applies To:** Web V2 homepage only  
+**Applies To:** Web V2 visible homepage + remaining image completion only  
 
-## 1. Owner decision
+## 1. Owner correction
 
-The exact Web V2 candidate built from current `main` SHA `4bc2d0874db74133be3a76aee8d6db33504b6bfa` is **REJECTED FOR VISUAL FIDELITY** and must not be promoted.
+The prior interpretation that Web V2 must return all the way to the current Legacy production homepage is **SUPERSEDED**.
 
-Candidate evidence retained only:
+Casey had already accepted two Web V2 visual checkpoints before the later rejected candidate. The unresolved problem at that point was **imaging completion**, not permission to redesign the accepted page.
+
+Accepted checkpoints:
+
+1. PR #183 — `Web V2: owner homepage fidelity repair`  
+   Merge SHA: `cbb9e59707ee07dcb6c84d566156ff36d658924d`
+
+2. PR #184 — `Web V2: fix homepage hero image rendering`  
+   Merge SHA: `e9cbaacc49443637e2241be7948ea93a3848557f`
+
+**Latest accepted visual baseline: `e9cbaacc49443637e2241be7948ea93a3848557f`.**
+
+PR #184 explicitly preserved the accepted homepage copy, CTAs, routes, commerce behavior and production-matched sizing/positioning while attempting the hero-image repair.
+
+Therefore:
+
+**DO NOT REDESIGN. DO NOT RETURN TO AN EARLIER VISUAL SYSTEM. DO NOT CHANGE ACCEPTED COPY/LAYOUT. FINISH THE IMAGING ON TOP OF THE LAST OWNER-ACCEPTED VERSION.**
+
+## 2. Rejected later candidate
+
+The later exact candidate is **REJECTED FOR VISUAL DRIFT** and must not be promoted:
 
 - Git SHA: `4bc2d0874db74133be3a76aee8d6db33504b6bfa`
 - GitHub Actions run: `#8 / 34803391129`
@@ -21,151 +41,148 @@ Candidate evidence retained only:
 - owner visual approval: `FAIL / HOLD`
 - production deployment: **NONE**
 
-Do not retry, promote, production-smoke, or reinterpret this candidate as accepted.
+The rejection is not a rejection of Web V2 generally. It is a rejection of the visual changes made after the accepted `e9cbaacc...` baseline.
 
-## 2. Why it failed
+## 3. Drift boundary
 
-The candidate is materially different from the current production homepage. The production homepage remains the visual source of truth under `WEB_V2_OWNER_VISUAL_FIDELITY_REQUIREMENTS_2026-09-13.md`.
+Git comparison shows `4bc2d087...` is 39 commits ahead of `e9cbaacc...` and introduced material visual-shell changes, including new wordmark/hero assets, semantic icons, a new final-visual style layer and substantial `shell.js` changes.
 
-Visible drift includes, at minimum:
+Those later visual changes must not be treated as owner-approved merely because their QA passed.
 
-- candidate hero: **“Power Beyond the Grid.”**
-- production hero: **“Lithium Power” / “for RV, Solar & Backup”**
-- candidate CTA: **“Shop Power & Energy”**
-- production CTA: **“Explore Power Solutions →”**
-- candidate uses a materially different homepage presentation and owned visual set rather than reproducing the production composition.
+QA PASS proves implementation/test integrity; it does **not** override the owner visual gate.
 
-This is not a minor asset-rendering issue. It is a presentation-control failure.
+## 4. Governing visual target
 
-## 3. Governing acceptance target
+For closeout, the visible owner-approved reference is the Web V2 state at:
 
-The current production homepage at `https://elevationupscales.com/` controls visible homepage presentation until Casey explicitly accepts a deliberate redesign.
+**`e9cbaacc49443637e2241be7948ea93a3848557f`**
 
-The Web V2 implementation may modernize routing, catalog, checkout, payment/order, and fulfillment underneath the page, but the visible homepage must remain recognizably the same approved Elevation website.
+Use `cbb9e597...` as the immediately prior accepted reference where needed.
 
-The production homepage currently includes this controlling visible sequence and wording:
+Legacy production remains useful as an asset/source reference where the accepted Web V2 version intentionally matched production, but it is **not** permission to discard owner-approved Web V2 refinements.
 
-1. utility/header and current navigation treatment;
-2. **AUTHORIZED SOK ENERGY DEALER**;
-3. **Lithium Power** / **for RV, Solar & Backup**;
-4. body copy: **“Shop SOK lithium batteries and power systems for RV, solar, backup and off-grid use.”**;
-5. primary CTA: **“Explore Power Solutions →”**;
-6. secondary CTA: **“Start a Project”**;
-7. category shortcut row;
-8. SOK hero/product treatment;
-9. authorized-dealer / supply / logistics support treatment;
-10. **Shop by Category.**;
-11. **Battery Freight for Hawaii & Alaska.**;
-12. Authorized SOK section with SK12V100PC and SK48V100N;
-13. **Shop the Store.**;
-14. **Build Your Power System.**;
-15. **Project & Field Support.**;
-16. production-like footer branding, density and links.
+## 5. Remaining scope = imaging completion
 
-Copy, section order, imagery purpose, scale, hierarchy, button treatment and responsive rhythm are part of acceptance.
+The remaining visual work is bounded to getting the intended imagery to render correctly inside the accepted layout.
 
-## 4. Scope freeze
+DEV may repair:
 
-This closeout is **NOT** another visual-system redesign.
+- missing/broken hero imagery;
+- incorrect image source paths;
+- wrong asset mapping;
+- low-resolution or blurred source usage;
+- crop/aspect/object-fit defects;
+- category-specific image gaps;
+- SOK logo/product-image quality;
+- Hawaii/Alaska/freight imagery;
+- Shop by Category imagery;
+- Featured SOK imagery;
+- Shop the Store imagery;
+- Build Your Power System imagery;
+- Project & Field Support imagery;
+- responsive image rendering on desktop/mobile.
 
-DEV may change only what is necessary to make the Web V2 homepage visibly match production while preserving already-accepted Web V2 commerce architecture.
+DEV may use later exact-SKU clean media improvements **only when they fit the same accepted visual slot and do not change the accepted composition or product identity**.
 
-### Preserve
+## 6. Scope freeze
 
-- current Web V2 routing and commerce architecture;
+### Preserve exactly from the accepted baseline
+
+- accepted homepage copy;
+- accepted CTA wording;
+- accepted section order;
+- accepted navigation/header treatment;
+- accepted card/category structure;
+- accepted spacing/hierarchy/button treatment;
+- accepted responsive composition;
+- Web V2 routing and commerce behavior underneath;
 - canonical catalog/product/cart/checkout/order work;
 - exact-SKU / fail-closed commercial safety;
-- current release architecture;
-- correct clean SOK factual product imagery where it can be placed without changing the approved production composition;
-- existing non-homepage work unless a homepage dependency requires a bounded fix.
+- release architecture.
 
 ### Do not
 
-- rewrite homepage copy;
-- invent a new headline, CTA, category treatment or section order;
-- call a new dark/cyan composition “accepted” unless Casey explicitly accepts it;
-- replace production imagery with semantic icons merely because the icon is cleaner;
-- substitute generic or higher-resolution imagery when it changes the approved presentation;
-- redesign header/footer density;
-- reopen commerce/payment architecture;
-- change shipping, tax, MAP, orderability, inventory, PayPal, D1, fulfillment or Legacy production;
-- create another candidate before DEV returns production-vs-Web-V2 comparison evidence.
+- invent new headline/CTA copy;
+- introduce a new dark/cyan visual system or any other redesign;
+- replace intended photography/product imagery with semantic icons merely because an image is difficult;
+- reuse generic images across unrelated categories;
+- change section order or card architecture;
+- alter pricing, MAP, inventory, shipping, tax, orderability, PayPal, D1, fulfillment or Legacy production;
+- create another exact candidate before image QA is complete.
 
-## 5. RECON lane — control only
+## 7. RECON lane — control only
 
-MASTER RECON must stop acting as a design interpreter.
+MASTER RECON owns lineage and anti-drift control only:
 
-RECON owns only:
+- confirm `e9cbaacc...` as latest owner-accepted visual baseline;
+- identify visual changes after that baseline;
+- separate safe nonvisual/current-main work from rejected visual drift;
+- verify DEV did not redesign while repairing images;
+- sync Worktree/Board/Registry pointers after terminal receipts.
 
-- confirm current `main` and rejected candidate lineage;
-- confirm this directive and the owner fidelity requirements are the controlling visual authority;
-- identify stale pointers that would route DEV or Release Engineer backward/sideways;
-- verify the resulting DEV receipt against the owner acceptance target;
-- sync control pointers after terminal evidence.
+RECON must not choose alternate copy, composition, icons or design direction.
 
-RECON must not authorize alternative wording, alternative composition, semantic redesign, or “equivalent” visuals.
+## 8. DEV lane — one bounded image-completion branch
 
-## 6. DEV lane — one bounded correction
+WEB DEVELOPER is the sole implementation owner.
 
-WEB DEVELOPER is the sole implementation owner for closeout.
+Start from current `main` so accepted later commerce/control work is not lost, but restore the **visible homepage behavior/composition** to the last owner-accepted `e9cbaacc...` baseline and carry forward only compatible safe improvements.
 
-Start from current `main` so no accepted commerce/release work is lost. Create/recover one bounded homepage-fidelity branch and make the smallest correction necessary.
+Required path:
 
-Required implementation target:
+**CURRENT MAIN → USE `e9cbaacc...` AS VISUAL REFERENCE → REMOVE/SUPERSEDE POST-BASELINE VISUAL DRIFT → COMPLETE IMAGES IN EXISTING ACCEPTED SLOTS → DESKTOP + 390PX MOBILE QA → MERGE → RELEASE ENGINEER**
 
-**CURRENT MAIN → RESTORE PRODUCTION-VISIBLE HOMEPAGE COPY + SECTION ORDER + ASSET PURPOSE + LAYOUT RHYTHM → PRESERVE WEB V2 FUNCTIONAL ROUTES UNDERNEATH → QA → SAME-VIEWPORT COMPARISON → MERGE → HAND BACK**
+Do not wholesale revert the repository. Reconcile the visual files only.
 
-The earlier owner-fidelity work may be used as reference, but do not wholesale-revert current `main` and do not discard later safe commerce/media fixes.
+## 9. Required image receipt
 
-## 7. DEV acceptance checklist before merge
+Before merge, DEV must return PASS/FAIL for:
 
-DEV must return a checklist with PASS/FAIL for each:
-
-- production hero eyebrow/text reproduced;
-- production hero headline reproduced;
-- production hero body copy reproduced;
-- **Explore Power Solutions →** reproduced;
-- **Start a Project** preserved;
-- header/nav visually production-like;
-- category shortcut row production-like;
-- SOK hero/product treatment production-like;
-- Shop by Category section production-like;
-- Hawaii/Alaska freight section production-like;
-- SOK SK12V100PC + SK48V100N presentation production-like;
-- Shop the Store section production-like;
-- Build Your Power System section production-like;
-- Project & Field Support section production-like;
-- footer production-like;
-- no wrong-SKU media;
-- no material product crop loss;
-- no new unsupported commercial claims;
-- desktop comparison PASS;
-- 390px mobile comparison PASS;
+- accepted hero copy/layout unchanged;
+- hero image renders correctly;
+- SOK branding sharp/original-quality;
+- SK12V100PC image correct and uncropped;
+- SK48V100N image correct and uncropped;
+- each category has the intended unique visual or an explicit owner hold;
+- Hawaii/Alaska/freight image renders;
+- Shop by Category imagery renders;
+- Featured SOK imagery renders;
+- homepage product-grid imagery renders;
+- Shop the Store imagery renders;
+- Build Your Power System imagery renders;
+- Project & Field Support imagery renders;
+- no wrong-SKU images;
+- no blurry thumbnail derivatives used as large display assets;
+- no semantic icon substituted for an image slot without owner approval;
+- desktop same-layout comparison to `e9cbaacc...` PASS;
+- 390px mobile same-layout comparison PASS;
 - Web V2 QA PASS;
 - canonical PR QA PASS.
 
-If any visible item differs materially from production, do not call the repair complete.
+If an intended image cannot be sourced safely, **hold that exact image slot and report it**. Do not redesign the section to hide the gap.
 
-## 8. Release Engineer lane
+## 10. Release Engineer lane
 
-RELEASE ENGINEER remains **STANDBY** until DEV merges the bounded production-fidelity correction.
+RELEASE ENGINEER remains **STANDBY** until the image-completion repair is merged.
 
-Then and only then:
+Then:
 
 **CORRECTED MERGED SHA → ONE NEW EXACT CLOUDFLARE VERSION → IMMUTABLE PREVIEW → `/__version` PROOF → CASEY VISUAL REVIEW → STOP.**
 
-No production-parity smoke and no production promotion before Casey accepts the visual candidate.
+No production-parity smoke and no production promotion before Casey accepts the new candidate.
 
-## 9. Closeout rule
+## 11. Closeout rule
 
-This work closes when all of the following are true:
+Close Web V2 visual work when:
 
-1. DEV merge is complete and QA is green;
-2. next exact candidate is built from that corrected merged SHA;
-3. `/__version` proves the exact Cloudflare Version ID;
-4. Casey visually accepts that candidate;
-5. only after owner acceptance may release flow advance to the separately controlled production-parity smoke / same-version cutover gate.
+1. accepted `e9cbaacc...` composition is preserved;
+2. intended images are complete or explicitly owner-held one-by-one;
+3. desktop/mobile QA is green;
+4. one new exact candidate is generated;
+5. Casey visually accepts it.
+
+Only then may the release lane advance to the separately controlled production-parity smoke / same-version cutover gate.
 
 ## Control phrase
 
-**PRODUCTION IS THE VISUAL BASELINE → RECON CONTROLS STATE, NOT DESIGN → DEV MAKES ONE BOUNDED FIDELITY CORRECTION → RELEASE ENGINEER MAKES ONE NEW EXACT CANDIDATE → CASEY ACCEPTS OR REJECTS → NO PROMOTION BEFORE ACCEPTANCE.**
+**LAST OWNER-ACCEPTED WEB V2 = `e9cbaacc...` → FREEZE COPY/LAYOUT → FINISH IMAGES ONLY → NO REDESIGN → ONE NEW EXACT CANDIDATE → CASEY ACCEPTS → THEN RELEASE.**
