@@ -28,6 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           python deployment/v2/one_time_final_functional_visual_finish.py
+          python deployment/v2/final_visual_test_patch.py
           npm ci --ignore-scripts --prefix apps/web-v2
           npm --prefix apps/web-v2 test
           git diff --check
@@ -37,6 +38,7 @@ jobs:
           set -euo pipefail
           git rm .github/workflows/one-time-web-v2-final-functional-visual-finish.yml
           git rm deployment/v2/one_time_final_functional_visual_finish.py
+          git rm deployment/v2/final_visual_test_patch.py
           git config user.name 'elevationupscales-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
