@@ -21,7 +21,7 @@ test('accepted e9cbaacc homepage copy and composition markers remain locked', as
   assert.equal((usecase.match(/<a /g) || []).length, 5);
 });
 
-test('existing homepage image slots use clean or localized media without changing layout rules', async () => {
+test('existing homepage image slots use clean, localized, or explicit verification-hold media without changing layout rules', async () => {
   const body = await (await request('/')).text();
   const css = await (await request('/assets/app.css')).text();
   for (const path of [
@@ -34,9 +34,24 @@ test('existing homepage image slots use clean or localized media without changin
     '/assets/hero/store-rv-mountains.webp'
   ]) assert.match(css, new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(css, /center 44%\/cover no-repeat/);
+  assert.match(css, /home-product-card__image:has\(img\[src\^="http"\]\)/);
+  assert.match(css, /VERIFICATION PENDING/);
   assert.match(css, /@media\(max-width:680px\)/);
   assert.match(css, /height:140px/);
   assert.doesNotMatch(css, /grid-template-columns:repeat\(7,minmax\(0,1fr\)\)|font-size:clamp\(3\.2rem,6\.2vw,6\.9rem\)/);
+});
+
+test('current catalog presentation remains styled without reintroducing rejected homepage visual overrides', async () => {
+  const store = await (await request('/store')).text();
+  const css = await (await request('/assets/app.css')).text();
+  assert.match(store, /class="store-hero"/);
+  assert.match(store, /class="store-category-grid"/);
+  assert.match(store, /class="catalog-grid catalog-featured-grid"/);
+  assert.match(css, /\.store-hero\{position:relative;min-height:570px/);
+  assert.match(css, /\.store-category-grid\{display:grid;grid-template-columns:repeat\(6,1fr\)/);
+  assert.match(css, /\.catalog-card-media\{display:block;height:190px/);
+  assert.match(css, /\.store-category-icon-visual \.semantic-icon\{width:78px;height:78px/);
+  assert.doesNotMatch(css, /reference-storefront-home \.solution-grid\{grid-template-columns:repeat\(7/);
 });
 
 test('localized closeout assets are present as non-empty repository files', async () => {
