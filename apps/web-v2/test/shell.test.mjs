@@ -22,8 +22,8 @@ test('homepage reproduces the owner-approved production presentation and visible
 
   const sections = [
     'AUTHORIZED SOK ENERGY DEALER',
-    'Lithium Power',
-    'AUTHORIZED BATTERY SUPPLY',
+    'Power Beyond',
+    'TRUSTED BRANDS',
     'SHOP BY SOLUTION',
     'FEATURED SOK SYSTEMS',
     'FREIGHT &amp; SHIPPING LOGISTICS',
@@ -43,17 +43,17 @@ test('homepage reproduces the owner-approved production presentation and visible
     'OFF-GRID POWER • SUPPLY • LOGISTICS',
     'HAWAII &amp; ALASKA LOGISTICS REVIEW',
     'RV • SOLAR • BACKUP • COMMERCIAL',
-    'Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping.',
+    'Off-grid power, supply and logistics for RV, solar, backup power and harder-to-serve markets',
     'SHOP POWER &amp; ENERGY',
-    '12V lithium energy for RV and mobile systems.',
+    'Reliable lithium power for RV, mobile and backup systems.',
     'Shop Batteries',
-    '12V, 24V & 48V systems.',
-    'Build your energy independence.',
-    'Battery freight matched to product and destination.',
+    '12V, 24V & 48V systems from Elevation’s authorized battery partner.',
+    'Build your energy independence with solar and storage.',
+    'Battery freight matched to product, quantity and destination.',
     'Learn More',
-    'Current batteries and gear for the journey.',
-    'Keep what matters running.',
-    'Scalable power solutions.',
+    'Power, repair and gear for life on the road.',
+    'Keep critical systems running with resilient stored energy.',
+    'Scalable power and supply support for larger applications.',
     'Shop Commercial',
     'View All SOK Products',
     'View Battery',
@@ -75,12 +75,12 @@ test('homepage reproduces the owner-approved production presentation and visible
 
   assert.match(body, /rel="canonical" href="https:\/\/elevationupscales\.com\/"/);
   assert.match(body, /property="og:title"/);
-  assert.match(body, /storefront-tropical-logistics-v3\.webp/);
-  assert.match(body, /sok-wordmark-home-transparent\.webp/);
+  assert.match(body, /\/assets\/hero\/home-tropical\.webp/);
+  assert.match(body, /\/assets\/brands\/sok\/sok-wordmark\.webp/);
   assert.match(body, /sk12v100pc\/official-clean\.png/);
   assert.match(body, /sk48v100n\/official-clean\.png/);
   assert.doesNotMatch(body, /sk48v100n\/(?:hero\.jpg|home-crop\.webp)|48v-battery-cabinet\/hero\.webp|Buy More,? Save More/i);
-  assert.match(body, /Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT\.webp/);
+  assert.match(body, /\/assets\/brand\/elevation-wordmark\.webp/);
   assert.doesNotMatch(body, /assets\/logo\.webp/);
   assert.match(body, /href="\/sok\/sk12v100pc\/"/);
   assert.match(body, /href="\/sok\/sk48v100n\/"/);
@@ -170,6 +170,87 @@ test('SOK product showcase references repository-localized official clean photog
   assert.match(css, /hero-product-12 img/);
   assert.match(css, /hero-product-48 img/);
   assert.match(css, /background:#f3f5f5/);
+});
+
+test('final visual implementation owns release-critical imagery and functional store UI', async () => {
+  const { readFile } = await import('node:fs/promises');
+  for (const rel of [
+    '../public/assets/brand/elevation-wordmark.webp',
+    '../public/assets/hero/home-tropical.webp',
+    '../public/assets/hero/store-rv-mountains.webp',
+    '../public/assets/brands/sok/sok-wordmark.webp',
+    '../public/assets/brands/sok/sk12v100pc/official-clean.png',
+    '../public/assets/brands/sok/sk48v100n/official-clean.png'
+  ]) assert.ok((await readFile(new URL(rel, import.meta.url))).byteLength > 10000, rel);
+
+  const home = await (await request('/')).text();
+  assert.match(home, /Power Beyond/);
+  assert.match(home, /shortcut-icon/);
+  assert.match(home, /solution-card__image/);
+  assert.doesNotMatch(home, /solution-card__media[^>]*style=/);
+  assert.match(home, /\/assets\/brand\/elevation-wordmark\.webp/);
+  assert.match(home, /\/assets\/brands\/sok\/sok-wordmark\.webp/);
+  assert.doesNotMatch(home, /Buy More,? Save More|sk48v100n\/home-crop|sk48v100n\/hero\.jpg/i);
+
+  const store = await (await request('/store')).text();
+  assert.match(store, /AUTHORIZED OFF-GRID POWER &amp; RV SUPPLY/);
+  assert.match(store, /Power Your RV/);
+  assert.match(store, /Featured Products/);
+  assert.match(store, /Product image pending verification/);
+  assert.match(store, /renogy-rsp100dct-us/);
+  assert.match(store, /VEVOR/);
+  assert.match(store, /WINEGARD/);
+  assert.doesNotMatch(store, /Victron/i);
+  assert.match(store, /href="\/shop\/sok"/);
+  assert.match(store, /href="\/start-a-project"/);
+
+  const css = await (await request('/assets/app.css')).text();
+  assert.match(css, /\/assets\/hero\/home-tropical\.webp/);
+  assert.match(css, /\/assets\/hero\/store-rv-mountains\.webp/);
+  assert.match(css, /store-category-grid/);
+  assert.match(css, /store-category-image/);
+  assert.match(css, /@media\(max-width:680px\)/);
+});
+
+test('semantic visuals match their destinations without misleading reuse', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const home = await (await request('/')).text();
+  const store = await (await request('/store')).text();
+
+  for (const kind of ['lithium', 'solar', 'rv', 'backup', 'commercial', 'hawaii', 'trusted', 'freight', 'support']) {
+    assert.match(home, new RegExp(`semantic-icon--${kind}`), `homepage should render ${kind} semantic icon`);
+  }
+  for (const destination of [
+    '/store?department=lithium-batteries', '/solar-project', '/store?department=rv-outdoor',
+    '/shop/sok', '/hawaii-lithium-batteries'
+  ]) assert.match(home, new RegExp(`href="${destination.replace(/[?]/g, '\\?')}`));
+
+  for (const assetPath of [
+    '/assets/brands/sok/sk12v100pc/official-clean.png',
+    '/assets/brands/sok/sk48v100n/official-clean.png',
+    '/assets/hero/hawaii-ocean-freight.webp',
+    '/assets/hero/store-rv-mountains.webp'
+  ]) assert.ok(home.includes(assetPath), assetPath);
+  assert.match(home, /Backup Power/);
+  assert.match(home, /Commercial Power/);
+
+  for (const marker of ['semantic-icon--inverter', 'semantic-icon--accessories', 'semantic-icon--commercial', 'Inverters & Charging', 'Accessories', 'Commercial']) {
+    assert.ok(store.includes(marker), marker);
+  }
+
+  const shellSource = await readFile(new URL('../src/shell.js', import.meta.url), 'utf8');
+  const catalogSource = await readFile(new URL('../src/catalog-pages.js', import.meta.url), 'utf8');
+  assert.match(shellSource, /title: 'Solar & Off-Grid'[\s\S]{0,220}icon: 'solar'/);
+  assert.match(catalogSource, /title: 'Solar Panels'[\s\S]{0,160}icon: 'solar'/);
+  assert.match(shellSource, /title: 'Backup Power'[\s\S]{0,220}icon: 'backup'/);
+  assert.match(shellSource, /title: 'Commercial Power'[\s\S]{0,220}icon: 'commercial'/);
+  assert.doesNotMatch(shellSource, /title: 'Commercial Power'[\s\S]{0,220}home-tropical\.webp/);
+  assert.doesNotMatch(catalogSource, /title: 'Accessories'[\s\S]{0,180}hawaii-ocean-freight\.webp/);
+  assert.doesNotMatch(catalogSource, /title: 'Commercial'[\s\S]{0,180}(?:home-tropical|project-support)\.webp/);
+  assert.match(catalogSource, /title: 'Inverters & Charging'[\s\S]{0,160}icon: 'inverter'/);
+  assert.match(catalogSource, /title: 'Accessories'[\s\S]{0,160}icon: 'accessories'/);
+  assert.match(catalogSource, /title: 'Commercial'[\s\S]{0,160}icon: 'commercial'/);
+  assert.doesNotMatch(`${home}\n${store}`, /Buy More,? Save More|sk48v100n\/home-crop|sk48v100n\/hero\.jpg|Victron/i);
 });
 
 test('canonical catalog routes remain customer-safe', async () => {
