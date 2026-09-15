@@ -2,6 +2,8 @@ import { FOOTER_NAV, PRIMARY_NAV, canonicalUrl } from './routes.js';
 import { semanticIcon } from './semantic-icons.js';
 import { CATALOG_PRODUCTS, UNVERIFIED, VENDORS, getProductById, getProductsByVendor, getVendor, searchCatalog } from './catalog.js';
 
+const SUPPORT_EMAIL = 'casey@elevationupscales.com';
+
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character) => ({
   '&': '&amp;',
   '<': '&lt;',
@@ -39,33 +41,53 @@ function head(routeInfo) {
 }
 
 function formatPrice(price) {
-  if (!price || price === UNVERIFIED || typeof price.amount !== 'number') return 'Price verification pending';
+  if (!price || price === UNVERIFIED || typeof price.amount !== 'number') return null;
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: price.currency || 'USD' }).format(price.amount);
 }
 
-function missingLabel(field) {
-  return ({
-    specs: 'approved product specifications',
-    media: 'approved product media',
-    sellPrice: 'current sell price',
-    priceFloor: 'current MAP / advertised-price floor',
-    stockState: 'current supplier sellability',
-    backorderState: 'authorized delayed-order state',
-    shippingDisposition: 'shipping / freight disposition',
-    warrantyReturnsOwnership: 'warranty / returns ownership',
-    fulfillmentSource: 'fulfillment source',
-    channelAuthorization: 'channel authorization'
-  })[field] || field;
+function productPrice(product) {
+  return formatPrice(product.sellPrice) || 'Contact us for current price';
+}
+
+function customerAvailability(product) {
+  if (product.orderable) return 'Available to order';
+  if (product.stockState === 'PREORDER_AUTHORIZED' || product.backorderState === 'PREORDER_AUTHORIZED') return 'Preorder available';
+  if (product.stockState === 'BACKORDER_AUTHORIZED' || product.backorderState === 'BACKORDER_AUTHORIZED') return 'Backorder available';
+  return 'Contact us for availability';
+}
+
+function customerShipping(product) {
+  const value = String(product.shippingDisposition || '');
+  if (!value || value === UNVERIFIED) return 'Shipping confirmed before payment';
+  if (/HAWAII/i.test(value)) return 'Hawaii shipping available for this item';
+  if (/LOWER_48/i.test(value)) return 'Ships within the contiguous U.S.';
+  if (/US_WAREHOUSE|DROPSHIP|VERIFIED_ROUTE/i.test(value)) return 'Supplier-direct shipping available';
+  return 'Shipping confirmed before payment';
+}
+
+function customerWarranty(product) {
+  const value = String(product.warrantyReturnsOwnership || '');
+  if (!value || value === UNVERIFIED) return 'Elevation support available';
+  if (/RENOGY/i.test(value)) return 'Elevation support with Renogy warranty routing';
+  if (/SOK/i.test(value)) return 'Elevation support with SOK warranty routing';
+  return 'Elevation support available';
+}
+
+function supportHref(product, prefix = 'Product question') {
+  const subject = encodeURIComponent(`${prefix}: ${product.vendorName} ${product.sku}`);
+  const body = encodeURIComponent(`Hi Elevation UpScales,\n\nI'm interested in this item:\n${product.vendorName} ${product.sku}\n${product.title}\n\nPlease send current availability and purchasing options.\n`);
+  return `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
 }
 
 function card(product) {
-  const state = product.orderable ? 'Orderable' : 'Verification hold — not currently orderable';
+  const price = productPrice(product);
+  const state = customerAvailability(product);
   const media = product.media && product.media !== UNVERIFIED
     ? `<img src="${escapeHtml(product.media)}" alt="${escapeHtml(product.title)}">`
-    : '<div class="catalog-media-pending" role="img" aria-label="Product image pending verification"><span>PRODUCT IMAGE</span><strong>VERIFICATION PENDING</strong></div>';
+    : '<div class="catalog-media-pending" role="img" aria-label="Product image coming soon"><span>PRODUCT IMAGE</span><strong>COMING SOON</strong></div>';
   return `<article class="catalog-card" data-product-id="${escapeHtml(product.id)}">
     <a class="catalog-card-media" href="/product/${encodeURIComponent(product.id)}">${media}</a>
-    <div class="catalog-card-body"><span class="vendor">${escapeHtml(product.vendorName)}</span><span class="sku">${escapeHtml(product.sku)}</span><h2>${escapeHtml(product.title)}</h2><div class="price">${escapeHtml(formatPrice(product.sellPrice))}</div><div class="status">${state}</div><a href="/product/${encodeURIComponent(product.id)}">View product details →</a></div>
+    <div class="catalog-card-body"><span class="vendor">${escapeHtml(product.vendorName)}</span><span class="sku">${escapeHtml(product.sku)}</span><h2>${escapeHtml(product.title)}</h2><div class="price">${escapeHtml(price)}</div><div class="status">${escapeHtml(state)}</div><a href="/product/${encodeURIComponent(product.id)}">View product →</a></div>
   </article>`;
 }
 
@@ -95,7 +117,19 @@ function storeCategoryCards() {
 }
 
 function featuredProducts() {
-  return CATALOG_PRODUCTS.slice(0, 6).map(card).join('');
+  const prioritized = [...CATALOG_PRODUCTS].sort((left, right) => Number(right.orderable) - Number(left.orderable));
+  return prioritized.slice(0, 6).map(card).join('');
+}
+
+function vendorCatalogSections(products) {
+  return VENDORS.map((vendor) => {
+    const vendorProducts = products.filter((product) => product.vendorId === vendor.id);
+    if (!vendorProducts.length) return '';
+    return `<section class="vendor-catalog-section" aria-labelledby="vendor-${vendor.id}-title">
+      <div class="store-section-heading"><div><p>SHOP BY VENDOR</p><h2 id="vendor-${vendor.id}-title">${escapeHtml(vendor.name)}</h2></div><a href="/shop/${vendor.id}">View ${escapeHtml(vendor.name)} →</a></div>
+      <div class="catalog-grid">${vendorProducts.map(card).join('')}</div>
+    </section>`;
+  }).join('');
 }
 
 function storeMain(url) {
@@ -106,12 +140,12 @@ function storeMain(url) {
 
   return `<main id="main" class="catalog-main store-main">
     <section class="store-hero" aria-labelledby="store-title"><div class="store-hero-overlay"></div><div class="catalog-shell store-hero-content"><p class="store-eyebrow">AUTHORIZED OFF-GRID POWER &amp; RV SUPPLY</p><h1 id="store-title">Power Your RV.<br>Build Your Off-Grid System.<br><span>Buy With Confidence.</span></h1><p>Lithium batteries, solar, charging and RV equipment from trusted manufacturers — backed by real product and project support from Elevation UpScales.</p><div class="store-hero-actions"><a class="store-primary" href="/shop/sok">SHOP POWER &amp; ENERGY →</a><a class="store-secondary" href="/start-a-project">Start a Project</a></div></div></section>
-    <section class="store-trust" aria-label="Store trust highlights"><div><strong>✓</strong><span><b>Authorized Dealer</b><small>Approved supplier relationships</small></span></div><div><strong>▤</strong><span><b>Shipping Support</b><small>Route review for available products</small></span></div><div><strong>◉</strong><span><b>Real Support</b><small>208-813-4998</small></span></div><div><strong>★</strong><span><b>Trusted Products</b><small>Curated supplier catalog</small></span></div></section>
+    <section class="store-trust" aria-label="Store trust highlights"><div><strong>✓</strong><span><b>Authorized Dealer</b><small>Approved supplier relationships</small></span></div><div><strong>▤</strong><span><b>Shipping Support</b><small>Simple help when a special route is needed</small></span></div><div><strong>◉</strong><span><b>Real Support</b><small>208-813-4998</small></span></div><div><strong>★</strong><span><b>Vendor Catalog</b><small>Current products organized by supplier</small></span></div></section>
     <div class="catalog-shell store-content">
       <section class="store-shopby" aria-labelledby="store-shop-title"><div class="store-section-heading"><h2 id="store-shop-title">Shop the <span>Store</span></h2><a href="/store">View All Products →</a></div><div class="store-category-grid">${storeCategoryCards()}</div></section>
-      <section class="store-featured" aria-labelledby="featured-title"><div class="store-section-heading"><div><p>CURATED CATALOG</p><h2 id="featured-title">Featured Products</h2></div></div><div class="catalog-grid catalog-featured-grid">${featuredProducts()}</div></section>
+      <section class="store-featured" aria-labelledby="featured-title"><div class="store-section-heading"><div><p>CURRENT VENDOR CATALOG</p><h2 id="featured-title">Featured Products</h2></div></div><div class="catalog-grid catalog-featured-grid">${featuredProducts()}</div></section>
       <section class="dealer-trust" aria-label="Approved dealer relationships"><p>AUTHORIZED &amp; APPROVED BRAND RELATIONSHIPS</p><div><strong>SOK BATTERY</strong><strong>RENOGY</strong><strong>VEVOR</strong><strong>WINEGARD</strong></div></section>
-      <section class="full-catalog" aria-labelledby="catalog-title"><div class="store-section-heading"><div><p>FULL CATALOG</p><h2 id="catalog-title">Find the right product.</h2></div></div>${vendorFilters(vendorParam)}${query ? `<p>Search results for <strong>${escapeHtml(query)}</strong></p>` : ''}<section class="catalog-grid" aria-label="Product catalog">${products.length ? products.map(card).join('') : '<div class="catalog-empty">No verified-source product records match this view.</div>'}</section></section>
+      <section class="full-catalog" aria-labelledby="catalog-title"><div class="store-section-heading"><div><p>ONE CATALOG • ORGANIZED BY VENDOR</p><h2 id="catalog-title">Find the right product.</h2></div></div>${vendorFilters(vendorParam)}${query ? `<p>Search results for <strong>${escapeHtml(query)}</strong></p>` : ''}${products.length ? vendorCatalogSections(products) : '<div class="catalog-empty">No products match this search. <a href="mailto:casey@elevationupscales.com">Email us and we’ll help find the right item.</a></div>'}</section>
     </div>
   </main>`;
 }
@@ -120,51 +154,35 @@ function vendorMain(vendorId) {
   const vendor = getVendor(vendorId);
   if (!vendor) return null;
   const products = getProductsByVendor(vendor.id);
-  const emptyCopy = vendor.id === 'sok'
-    ? 'The selected SOK project source confirms the supplier relationship and operating controls, but it does not contain an exact SKU publication record for this catalog snapshot. No SOK checkout is enabled from incomplete source truth.'
-    : 'No exact product records are cleared from the selected vendor source snapshot.';
+  const emptyCopy = `We're adding current ${vendor.name} products from our approved vendor catalog. Email us for current availability or a specific model.`;
 
   return `<main id="main" class="catalog-main"><div class="catalog-shell">
     <section class="catalog-hero">
-      <p>VENDOR CATALOG</p>
+      <p>SHOP BY VENDOR</p>
       <h1>${escapeHtml(vendor.name)}</h1>
-      <p>Only exact product records supported by the selected vendor-project source snapshot appear here. Missing required facts remain on hold rather than being inferred.</p>
+      <p>Shop current ${escapeHtml(vendor.name)} products available through Elevation UpScales. Need a model you don't see yet? Contact us and we'll check the current vendor catalog.</p>
     </section>
     ${vendorFilters(vendor.id)}
     <section class="catalog-grid" aria-label="${escapeHtml(vendor.name)} products">
-      ${products.length ? products.map(card).join('') : `<div class="catalog-empty">${escapeHtml(emptyCopy)}</div>`}
+      ${products.length ? products.map(card).join('') : `<div class="catalog-empty"><p>${escapeHtml(emptyCopy)}</p><a href="mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`${vendor.name} product request`)}">Email us about a ${escapeHtml(vendor.name)} item →</a></div>`}
     </section>
   </div></main>`;
 }
 
-function valueText(value) {
-  if (value === UNVERIFIED || value === null || value === undefined) return 'Verification pending';
-  if (typeof value === 'object') {
-    if (value.summary) return value.summary;
-    if (typeof value.amount === 'number') return formatPrice(value);
-    if (value.policy) return `${value.policy.replaceAll('_', ' ')} — ${value.amount === UNVERIFIED ? 'amount verification pending' : value.amount}`;
-    return Object.values(value).join(' · ');
-  }
-  return String(value).replaceAll('_', ' ');
+function specsText(value) {
+  if (!value || value === UNVERIFIED) return 'Details available on request';
+  if (typeof value === 'object' && value.summary) return value.summary;
+  if (typeof value === 'string') return value.replaceAll('_', ' ');
+  return 'Details available on request';
 }
 
 function productMain(productId) {
   const product = getProductById(productId);
   if (!product) return null;
-  const facts = [
-    ['Vendor', product.vendorName],
-    ['SKU', product.sku],
-    ['Supplier identity', product.supplierSku || product.sku],
-    ['Specifications', product.specs],
-    ['Price', product.sellPrice],
-    ['MAP / floor', product.priceFloor],
-    ['Supplier sellability', product.stockState],
-    ['Delayed-order state', product.backorderState],
-    ['Shipping', product.shippingDisposition],
-    ['Warranty / returns', product.warrantyReturnsOwnership],
-    ['Fulfillment', product.fulfillmentSource],
-    ['Authorized channel', product.channelAuthorization]
-  ];
+  const price = productPrice(product);
+  const availability = customerAvailability(product);
+  const shipping = customerShipping(product);
+  const warranty = customerWarranty(product);
 
   return `<main id="main" class="catalog-main"><div class="catalog-shell">
     <a href="/shop/${product.vendorId}">← Back to ${escapeHtml(product.vendorName)}</a>
@@ -173,13 +191,20 @@ function productMain(productId) {
         <p class="vendor">${escapeHtml(product.vendorName)}</p>
         <p class="sku">${escapeHtml(product.sku)}</p>
         <h1>${escapeHtml(product.title)}</h1>
-        <p class="catalog-price">${escapeHtml(formatPrice(product.sellPrice))}</p>
+        <p class="catalog-price">${escapeHtml(price)}</p>
+        <p class="status">${escapeHtml(availability)}</p>
         ${product.orderable
-          ? `<div><p class="status">Orderable through Elevation direct commerce.</p><button class="button button-primary" type="button" data-add-to-cart="${escapeHtml(product.id)}">Add to Cart</button></div>`
-          : `<div class="catalog-hold"><strong>Verification hold — checkout disabled.</strong><p>This product remains non-orderable until all required source facts are verified.</p><ul>${product.missingFacts.map((field) => `<li>${escapeHtml(missingLabel(field))}</li>`).join('')}</ul></div>`}
+          ? `<div><button class="button button-primary" type="button" data-add-to-cart="${escapeHtml(product.id)}">Add to Cart</button></div>`
+          : `<div class="catalog-hold"><strong>Need this item?</strong><p>Contact Elevation for current availability and purchasing options.</p><a class="button button-primary" href="${supportHref(product)}">Email us about this item</a></div>`}
+        <p><a href="${supportHref(product, 'Hawaii shipping question')}">Hawaii or special shipping? Email us about this item →</a></p>
       </article>
-      <aside class="catalog-facts"><h2>Product verification</h2><dl>
-        ${facts.map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(valueText(value))}</dd>`).join('')}
+      <aside class="catalog-facts"><h2>Product details</h2><dl>
+        <dt>Brand</dt><dd>${escapeHtml(product.vendorName)}</dd>
+        <dt>Model / SKU</dt><dd>${escapeHtml(product.sku)}</dd>
+        <dt>Key details</dt><dd>${escapeHtml(specsText(product.specs))}</dd>
+        <dt>Availability</dt><dd>${escapeHtml(availability)}</dd>
+        <dt>Shipping</dt><dd>${escapeHtml(shipping)}</dd>
+        <dt>Support</dt><dd>${escapeHtml(warranty)}</dd>
       </dl></aside>
     </section>
   </div></main>`;
