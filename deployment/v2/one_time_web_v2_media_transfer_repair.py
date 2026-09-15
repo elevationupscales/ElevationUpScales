@@ -82,6 +82,24 @@ if catalog.count(old_store) != 1:
 catalog = catalog.replace(semantic_import, '', 1).replace(old_store, new_store, 1)
 catalog_path.write_text(catalog)
 
+closeout_path = ROOT / 'apps/web-v2/test/image-closeout.test.mjs'
+closeout = closeout_path.read_text()
+old_lock = """  assert.doesNotMatch(body, /Power Beyond|TRUSTED BRANDS|HAWAII READY|REAL SUPPORT|Commercial Solutions|shortcut-icon|solution-card--visual/i);"""
+new_lock = """  assert.doesNotMatch(body, /Power Beyond|TRUSTED BRANDS|HAWAII READY|REAL SUPPORT|Commercial Solutions|shortcut-icon/i);
+  for (const media of [
+    '/assets/brands/sok/sk12v100pc/official-clean.png',
+    '/assets/brands/sok/sk48v100n/official-clean.png',
+    '/assets/hero/power-social.webp',
+    '/assets/hero/hawaii-ocean-freight.webp',
+    '/assets/hero/store-rv-mountains.webp',
+    '/assets/hero/project-support.webp',
+    '/assets/hero/home-tropical.webp'
+  ]) assert.ok(body.includes(`class=\"solution-card__image\" src=\"${media}\"`), media);"""
+if closeout.count(old_lock) != 1:
+    raise SystemExit('image-closeout visual-lock anchor mismatch')
+closeout = closeout.replace(old_lock, new_lock, 1)
+closeout_path.write_text(closeout)
+
 required_assets = [
     'apps/web-v2/public/assets/brands/sok/sk12v100pc/official-clean.png',
     'apps/web-v2/public/assets/brands/sok/sk48v100n/official-clean.png',
@@ -118,4 +136,4 @@ for media in store_expected:
     if media not in catalog:
         raise SystemExit(f'store media binding missing after repair: {media}')
 
-print('Web V2 media transfer repair applied: 7 homepage solution images + 3 store category images.')
+print('Web V2 media transfer repair applied: 7 homepage solution images + 3 store category images; visual lock updated to require restored homepage media.')
