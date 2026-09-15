@@ -37,6 +37,7 @@
 | **MPM 7 — Company Oversight** | Operating System | Casey Young | Historical Management | **INACTIVE / SUPERSEDED BY MPM 8** | Historical/reference only; no competing live control. |
 | **MPM 6 — Company Oversight** | Operating System | Casey Young | Historical Management | **INACTIVE / SUPERSEDED** | Historical/reference only; no competing live control. |
 | Company Operations Manager / COM 2 | Company Operations | MPM 8 | Operations / Commercial Consolidation | **ACTIVE** | Cross-channel/vendor operations, policy substance, profitability and customer/fulfillment support; do not duplicate specialist implementation. |
+| Finance Operations & Reconciliation Worker | Company Operations | Company Operations Manager / MPM 8 | Finance Operations / Reconciliation | **ACTIVE — MONTHLY CLOSE / TRANSACTION MATCHING** | `FINANCE_OPERATIONS_CURRENT_WORKTREE.md`; reconcile finance email → transaction → order/vendor, maintain private line-item statements, keep public Git sanitized, and route protected actions to Casey. |
 | MASTER RECON OS | Operating System | MPM 8 | OS Integrity / RECON | **STANDBY / TRIGGERED INTEGRITY** | Wake for real state/lineage/policy/supplier-truth/charge-authority/release conflicts or owner-directed RECON. |
 | MASTER DEVELOPER / Deployment Developer | Legacy Technical Lane | MPM 8 / authorized management | Legacy Development / Deployment | **STANDBY / VERIFY-FIX ONLY** | Legacy bounded repair only; not permanent Web V2 worker. |
 | WEB DEVELOPER | Web V2 Development | MPM 8 / Web V2 lane | Public Customer Experience | **SPECIALIST / FOLLOW CURRENT WORKTREE** | Desktop visual P0 accepted; mutate only for a fresh exact defect or current Worktree task. Mobile scope stays closed unless Casey reopens it. |
@@ -74,6 +75,7 @@ A historical MPM may be read for continuity but must not override newer accepted
 - eBay current incident state: `COM2_EBAY_FALSE_COMPLETION_CORRECTION_2026-09-14.md`.
 - Shopify current specialist state: `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` plus later route/version receipts.
 - Renogy current state: `SHOPIFY_RENOGY_CONTROLLED_LAUNCH_DIRECTIVE_2026-09-14.md` plus current Renogy source/launch receipts.
+- Finance Operations current state: `FINANCE_OPERATIONS_CURRENT_WORKTREE.md`.
 
 ## Global routing rule
 
