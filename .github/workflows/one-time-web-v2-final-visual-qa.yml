@@ -1,5 +1,5 @@
 name: One-time Web V2 owner recovery QA
-# Phase A recovery branch: reproduce e0db198 owner-reviewed viewports before and after bounded hero/icon repair.
+# Owner hard gate: recovery QA only. No merge, candidate, deployment, production pointer, or Legacy action.
 on:
   push:
     branches:
@@ -9,8 +9,10 @@ on:
       - apps/web-v2/src/sok-product-merchandising-styles.js
       - apps/web-v2/src/final-visual-styles.js
       - apps/web-v2/test/owner-recovery-hero.test.mjs
+      - apps/web-v2/public/assets/hero/store-rv-solar-technician-clean.webp
+      - apps/web-v2/public/assets/hero/.store-hero-chunk-*.txt
 permissions:
-  contents: read
+  contents: write
 jobs:
   visual:
     runs-on: ubuntu-latest
@@ -18,6 +20,26 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: work/web-v2-owner-recovery-e0db198-2026-09-14
+      - name: Materialize owner-reviewed clean store hero asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          hero_dir="apps/web-v2/public/assets/hero"
+          target="$hero_dir/store-rv-solar-technician-clean.webp"
+          if compgen -G "$hero_dir/.store-hero-chunk-*.txt" > /dev/null; then
+            cat "$hero_dir"/.store-hero-chunk-*.txt | base64 --decode > "$target"
+            file "$target" | grep -q 'Web/P image'
+            test "$(stat -c%s "$target")" -gt 50000
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$target"
+            git rm -f "$hero_dir"/.store-hero-chunk-*.txt
+            git rm -f --ignore-unmatch "$hero_dir/store-rv-solar-technician-clean.webp.b64"
+            git commit -m "Web V2 recovery: materialize owner-reviewed clean store hero"
+            git push origin HEAD:work/web-v2-owner-recovery-e0db198-2026-09-14
+          fi
+          file "$target" | grep -q 'Web/P image'
+          test "$(stat -c%s "$target")" -gt 50000
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
