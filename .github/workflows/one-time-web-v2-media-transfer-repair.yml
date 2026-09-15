@@ -1,0 +1,42 @@
+name: One-time Web V2 media transfer repair
+
+on:
+  push:
+    branches:
+      - work/web-v2-media-transfer-repair-2026-09-16
+    paths:
+      - .github/workflows/one-time-web-v2-media-transfer-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/web-v2-media-transfer-repair-2026-09-16
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Apply bounded media repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python deployment/v2/one_time_web_v2_media_transfer_repair.py
+          npm ci --ignore-scripts --prefix apps/web-v2
+          npm --prefix apps/web-v2 test
+          git diff --check
+      - name: Commit repair and remove one-time helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/one-time-web-v2-media-transfer-repair.yml
+          git rm deployment/v2/one_time_web_v2_media_transfer_repair.py
+          git config user.name 'elevationupscales-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add apps/web-v2/src/shell.js apps/web-v2/src/catalog-pages.js
+          git commit -m 'Web V2: restore transferred section media'
+          git push origin HEAD:work/web-v2-media-transfer-repair-2026-09-16
