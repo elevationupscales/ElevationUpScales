@@ -22,7 +22,7 @@ test('homepage reproduces the owner-approved production presentation and visible
 
   const sections = [
     'AUTHORIZED SOK ENERGY DEALER',
-    'Power Beyond',
+    'Lithium Power',
     'AUTHORIZED BATTERY SUPPLY',
     'SHOP BY SOLUTION',
     'FEATURED SOK SYSTEMS',
