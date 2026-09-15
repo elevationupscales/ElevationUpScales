@@ -1,0 +1,89 @@
+name: One-time minimal background media repair
+
+on:
+  push:
+    branches:
+      - work/web-v2-minimal-background-media-repair-2026-09-15
+    paths:
+      - .github/workflows/one-time-minimal-background-media-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/web-v2-minimal-background-media-repair-2026-09-15
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Apply CSS-only media backgrounds
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          home_path = Path('apps/web-v2/src/home-fidelity-styles.js')
+          home = home_path.read_text()
+          home_anchor = ".reference-storefront-home .solution-card .text-link{width:max-content;padding:8px 10px;border:1px solid rgba(5,199,242,.35);border-radius:6px;color:#eafaff}\n"
+          home_insert = """/* Restored section background media only. Existing card markup and behavior remain unchanged. */
+          .reference-storefront-home .solution-card:nth-child(1){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/brands/sok/sk12v100pc/official-clean.png') center/cover no-repeat}
+          .reference-storefront-home .solution-card:nth-child(2){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/brands/sok/sk48v100n/official-clean.png') center/cover no-repeat}
+          .reference-storefront-home .solution-card:nth-child(3){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/power-social.webp') center/cover no-repeat}
+          .reference-storefront-home .solution-card:nth-child(4){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/hawaii-ocean-freight.webp') center/cover no-repeat}
+          .reference-storefront-home .solution-card:nth-child(5){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/store-rv-mountains.webp') center/cover no-repeat}
+          .reference-storefront-home .solution-card:nth-child(6){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/project-support.webp') center/cover no-repeat}
+          .reference-storefront-home .solution-card:nth-child(7){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/home-tropical.webp') center/cover no-repeat}
+          """
+          if home.count(home_anchor) != 1:
+              raise SystemExit('homepage CSS anchor mismatch')
+          if 'Restored section background media only' in home:
+              raise SystemExit('homepage repair already present')
+          home_path.write_text(home.replace(home_anchor, home_anchor + home_insert, 1))
+
+          store_path = Path('apps/web-v2/src/sok-product-merchandising-styles.js')
+          store = store_path.read_text()
+          store_anchor = ".store-category-icon-visual .semantic-icon{width:78px;height:78px;color:#21d4ff;filter:drop-shadow(0 0 16px rgba(0,191,243,.16))}\n"
+          store_insert = """/* Restore only the missing photo backgrounds behind the existing semantic icons. */
+          .store-category-card:nth-child(3) .store-category-icon-visual{background:linear-gradient(180deg,rgba(3,20,28,.34),rgba(3,20,28,.82)),url('/assets/hero/project-support.webp') center/cover no-repeat}
+          .store-category-card:nth-child(5) .store-category-icon-visual{background:linear-gradient(180deg,rgba(3,20,28,.34),rgba(3,20,28,.82)),url('/assets/hero/hawaii-ocean-freight.webp') center/cover no-repeat}
+          .store-category-card:nth-child(6) .store-category-icon-visual{background:linear-gradient(180deg,rgba(3,20,28,.34),rgba(3,20,28,.82)),url('/assets/hero/home-tropical.webp') center/cover no-repeat}
+          """
+          if store.count(store_anchor) != 1:
+              raise SystemExit('store CSS anchor mismatch')
+          if 'Restore only the missing photo backgrounds' in store:
+              raise SystemExit('store repair already present')
+          store_path.write_text(store.replace(store_anchor, store_anchor + store_insert, 1))
+          PY
+
+          for asset in \
+            apps/web-v2/public/assets/brands/sok/sk12v100pc/official-clean.png \
+            apps/web-v2/public/assets/brands/sok/sk48v100n/official-clean.png \
+            apps/web-v2/public/assets/hero/power-social.webp \
+            apps/web-v2/public/assets/hero/hawaii-ocean-freight.webp \
+            apps/web-v2/public/assets/hero/store-rv-mountains.webp \
+            apps/web-v2/public/assets/hero/project-support.webp \
+            apps/web-v2/public/assets/hero/home-tropical.webp; do
+            test -s "$asset"
+          done
+
+          npm ci --ignore-scripts --prefix apps/web-v2
+          npm --prefix apps/web-v2 test
+          git diff --check
+
+          test "$(git diff --name-only | sort)" = $'apps/web-v2/src/home-fidelity-styles.js\napps/web-v2/src/sok-product-merchandising-styles.js'
+      - name: Commit two-file repair and remove helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/one-time-minimal-background-media-repair.yml
+          git config user.name 'elevationupscales-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add apps/web-v2/src/home-fidelity-styles.js apps/web-v2/src/sok-product-merchandising-styles.js
+          git commit -m 'Web V2: restore missing background media only'
+          git push origin HEAD:work/web-v2-minimal-background-media-repair-2026-09-15
