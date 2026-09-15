@@ -25,29 +25,41 @@ test('universal catalog preserves exact current vendor subset identities', () =>
   assert.deepEqual(getProductsByVendor('vevor').map(({ sku }) => sku), ['XXKLJT124INCLJF0QV0', 'AXLSTCQJDSYKAZ99C001V0', 'D25FT14IN20AHOGLOV1']);
 });
 
-test('current incomplete source records remain non-orderable until required purchase facts clear', () => {
-  for (const product of CATALOG_PRODUCTS) {
-    assert.equal(product.orderable, false, product.id);
-    assert.ok(product.missingFacts.length > 0, product.id);
-    for (const field of product.missingFacts) assert.ok(REQUIRED_ORDERABILITY_FIELDS.includes(field));
-  }
-  assert.ok(getProductById('vevor-xxkljt124incljf0qv0').missingFacts.includes('specs'));
+test('current source subset remains non-orderable until transaction-critical facts and current sellability clear', () => {
+  for (const product of CATALOG_PRODUCTS) assert.equal(product.orderable, false, product.id);
   assert.ok(getProductById('renogy-rsp100dct-us').missingFacts.includes('sellPrice'));
   assert.ok(getProductById('kingboss-d01027hh7bv').missingFacts.includes('channelAuthorization'));
+  assert.equal(getProductById('vevor-xxkljt124incljf0qv0').missingFacts.includes('specs'), false);
+  assert.equal(getProductById('vevor-xxkljt124incljf0qv0').orderable, false, 'stale source-snapshot sellability is not current orderability');
 });
 
-test('orderability is derived from canonical server product state', () => {
-  const clean = Object.fromEntries(REQUIRED_ORDERABILITY_FIELDS.map((field) => [field, 'VERIFIED']));
-  Object.assign(clean, {
-    vendorId: 'test', sku: 'TEST-1', title: 'Test product', specs: { summary: 'Verified spec' }, media: ['verified.jpg'],
-    sellPrice: { currency: 'USD', amount: 10 }, priceFloor: { policy: 'VERIFIED', amount: 9 }, stockState: 'IN_STOCK_VERIFIED',
-    backorderState: 'NOT_AUTHORIZED', shippingDisposition: 'VERIFIED_ROUTE', warrantyReturnsOwnership: 'VERIFIED_OWNER',
-    fulfillmentSource: 'VERIFIED_SOURCE', channelAuthorization: 'ELEVATION_DIRECT_WEBSITE'
-  });
+test('only transaction-critical facts are blanket orderability gates', () => {
+  assert.deepEqual(REQUIRED_ORDERABILITY_FIELDS, [
+    'vendorId', 'sku', 'title', 'sellPrice', 'stockState', 'shippingDisposition', 'fulfillmentSource', 'channelAuthorization'
+  ]);
+  const clean = {
+    vendorId: 'test',
+    sku: 'TEST-1',
+    title: 'Test product',
+    specs: UNVERIFIED,
+    media: UNVERIFIED,
+    sellPrice: { currency: 'USD', amount: 10 },
+    priceFloor: UNVERIFIED,
+    stockState: 'IN_STOCK_VERIFIED',
+    backorderState: UNVERIFIED,
+    shippingDisposition: 'VERIFIED_ROUTE',
+    warrantyReturnsOwnership: UNVERIFIED,
+    fulfillmentSource: 'VERIFIED_SOURCE',
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE'
+  };
   assert.equal(evaluateOrderability(clean), true);
-  const missingFloor = { ...clean, priceFloor: { policy: 'VERIFIED', amount: UNVERIFIED } };
-  assert.equal(evaluateOrderability(missingFloor), false);
-  assert.deepEqual(missingRequiredFacts(missingFloor), ['priceFloor']);
+  assert.deepEqual(missingRequiredFacts(clean), []);
+
+  for (const required of REQUIRED_ORDERABILITY_FIELDS) {
+    const held = { ...clean, [required]: UNVERIFIED };
+    assert.equal(evaluateOrderability(held), false, required);
+    assert.ok(missingRequiredFacts(held).includes(required), required);
+  }
 });
 
 test('store is one universal catalog organized by vendor', () => {
