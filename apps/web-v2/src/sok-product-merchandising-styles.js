@@ -113,7 +113,7 @@ export const sokProductMerchandisingStyles = `
 .catalog-search button{border:0;background:none;color:#21d4ff;font-size:1.35rem;padding:6px 12px}
 .catalog-cart-link,.catalog-project-link{color:#fff;text-decoration:none;font-weight:800}
 .catalog-project-link{border:2px solid #0fd1ff;border-radius:9px;padding:12px 17px;color:#15d8ff!important}
-.store-hero{position:relative;min-height:570px;display:flex;align-items:center;background:url('/assets/hero/store-rv-mountains.webp') center 48%/cover no-repeat}
+.store-hero{position:relative;min-height:570px;display:flex;align-items:center;background:url('/assets/hero/store-rv-solar-technician-clean.webp') center 48%/cover no-repeat}
 .store-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,8,11,.9) 0%,rgba(2,8,11,.67) 44%,rgba(2,8,11,.12) 75%)}
 .store-hero-content{position:relative;z-index:2;padding:70px 0}
 .store-eyebrow{color:#bdeeff!important;font-weight:850;letter-spacing:.2em;text-transform:uppercase}
