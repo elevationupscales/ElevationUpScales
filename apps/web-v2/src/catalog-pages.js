@@ -79,7 +79,7 @@ function vendorFilters(activeVendor = '') {
 function storeCategoryCards() {
   const cards = [
     ['SOK Batteries', '/shop/sok', '/assets/brands/sok/sk12v100pc/official-clean.png'],
-    ['Solar Panels', '/shop/renogy', '/assets/hero/power-social.webp'],
+    ['Solar Panels', '/shop/renogy', '/assets/hero/store-rv-solar-technician-clean.webp'],
     ['Inverters & Charging', '/shop/renogy', '/assets/hero/project-support.webp'],
     ['RV & Outdoor', '/store?department=rv-outdoor', '/assets/hero/store-rv-mountains.webp'],
     ['Accessories', '/store?q=accessories', '/assets/hero/hawaii-ocean-freight.webp'],
