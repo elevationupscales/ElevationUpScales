@@ -1,17 +1,15 @@
 export const UNVERIFIED = 'UNVERIFIED';
 
+// Only facts that can make a direct transaction unsafe are allowed to block checkout.
+// Rich media, extended specs, warranty detail, MAP metadata and other operational
+// enrichment remain valuable catalog data, but they are not blanket purchase gates.
 export const REQUIRED_ORDERABILITY_FIELDS = Object.freeze([
   'vendorId',
   'sku',
   'title',
-  'specs',
-  'media',
   'sellPrice',
-  'priceFloor',
   'stockState',
-  'backorderState',
   'shippingDisposition',
-  'warrantyReturnsOwnership',
   'fulfillmentSource',
   'channelAuthorization'
 ]);
