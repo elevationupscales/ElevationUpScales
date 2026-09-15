@@ -10,6 +10,11 @@ export const sokProductMerchandisingStyles = `
   content:url('https://elevationupscales.com/assets/brands/sok/sk48v100n/home-crop.webp?v=20260910-1');
 }
 
+/* Store hero recovery uses the owner-reviewed RV + mountains + solar + technician scene. */
+.store-hero{
+  background-image:url('/assets/hero/store-rv-solar-technician-clean.webp')!important;
+}
+
 /* Product merchandising remains repository-localized and does not override hero composition. */
 .reference-storefront-home .product-card-horizontal .product-image{
   background:#f3f5f5;
