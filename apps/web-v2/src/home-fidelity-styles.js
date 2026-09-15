@@ -108,6 +108,14 @@ export const homeFidelityStyles = `
 .reference-storefront-home .solution-card h3{margin:0 0 9px;color:#fff;font-size:1rem;line-height:1.08;text-transform:uppercase}
 .reference-storefront-home .solution-card p{flex:1;margin:0 0 17px;color:var(--f-muted-2);font-size:.78rem;line-height:1.45}
 .reference-storefront-home .solution-card .text-link{width:max-content;padding:8px 10px;border:1px solid rgba(5,199,242,.35);border-radius:6px;color:#eafaff}
+/* Restored section background media only. Existing card markup and behavior remain unchanged. */
+.reference-storefront-home .solution-card:nth-child(1){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/brands/sok/sk12v100pc/official-clean.png') center/cover no-repeat}
+.reference-storefront-home .solution-card:nth-child(2){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/brands/sok/sk48v100n/official-clean.png') center/cover no-repeat}
+.reference-storefront-home .solution-card:nth-child(3){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/power-social.webp') center/cover no-repeat}
+.reference-storefront-home .solution-card:nth-child(4){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/hawaii-ocean-freight.webp') center/cover no-repeat}
+.reference-storefront-home .solution-card:nth-child(5){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/store-rv-mountains.webp') center/cover no-repeat}
+.reference-storefront-home .solution-card:nth-child(6){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/project-support.webp') center/cover no-repeat}
+.reference-storefront-home .solution-card:nth-child(7){background:linear-gradient(180deg,rgba(2,9,13,.58),rgba(2,9,13,.9)),url('/assets/hero/home-tropical.webp') center/cover no-repeat}
 
 /* Featured SOK — heading band plus two horizontal product cards, as production. */
 .reference-storefront-home .sok-feature{position:relative;padding:58px 0 64px;background:#031016;border-block:1px solid var(--f-line);overflow:hidden;isolation:isolate}

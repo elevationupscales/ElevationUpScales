@@ -144,6 +144,10 @@ export const sokProductMerchandisingStyles = `
 .store-category-card strong{position:absolute;left:14px;bottom:14px;z-index:2;font-size:.96rem}
 .store-category-icon-visual{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(0,191,243,.17),rgba(3,20,28,.96) 62%,#06141a)}
 .store-category-icon-visual .semantic-icon{width:78px;height:78px;color:#21d4ff;filter:drop-shadow(0 0 16px rgba(0,191,243,.16))}
+/* Restore only the missing photo backgrounds behind the existing semantic icons. */
+.store-category-card:nth-child(3) .store-category-icon-visual{background:linear-gradient(180deg,rgba(3,20,28,.34),rgba(3,20,28,.82)),url('/assets/hero/project-support.webp') center/cover no-repeat}
+.store-category-card:nth-child(5) .store-category-icon-visual{background:linear-gradient(180deg,rgba(3,20,28,.34),rgba(3,20,28,.82)),url('/assets/hero/hawaii-ocean-freight.webp') center/cover no-repeat}
+.store-category-card:nth-child(6) .store-category-icon-visual{background:linear-gradient(180deg,rgba(3,20,28,.34),rgba(3,20,28,.82)),url('/assets/hero/home-tropical.webp') center/cover no-repeat}
 .store-featured,.dealer-trust,.full-catalog{margin-top:56px}
 .catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .catalog-featured-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
