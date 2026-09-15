@@ -16,16 +16,7 @@ test('accepted e9cbaacc homepage copy and composition markers remain locked', as
   assert.match(body, /AUTHORIZED BATTERY SUPPLY/);
   assert.match(body, /HAWAII &amp; ALASKA/);
   assert.match(body, /<a href="\/shop\/sok">SOK Battery Systems<\/a>/);
-  assert.doesNotMatch(body, /Power Beyond|TRUSTED BRANDS|HAWAII READY|REAL SUPPORT|Commercial Solutions|shortcut-icon/i);
-  for (const media of [
-    '/assets/brands/sok/sk12v100pc/official-clean.png',
-    '/assets/brands/sok/sk48v100n/official-clean.png',
-    '/assets/hero/power-social.webp',
-    '/assets/hero/hawaii-ocean-freight.webp',
-    '/assets/hero/store-rv-mountains.webp',
-    '/assets/hero/project-support.webp',
-    '/assets/hero/home-tropical.webp'
-  ]) assert.ok(body.includes(`class="solution-card__image" src="${media}"`), media);
+  assert.doesNotMatch(body, /Power Beyond|TRUSTED BRANDS|HAWAII READY|REAL SUPPORT|Commercial Solutions|shortcut-icon|solution-card--visual/i);
   const usecase = body.match(/<nav class="usecase-grid"[\s\S]*?<\/nav>/)?.[0] || '';
   assert.equal((usecase.match(/<a /g) || []).length, 5);
 });
