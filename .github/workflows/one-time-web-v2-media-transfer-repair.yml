@@ -6,6 +6,7 @@ on:
       - work/web-v2-media-transfer-repair-2026-09-16
     paths:
       - .github/workflows/one-time-web-v2-media-transfer-repair.yml
+      - deployment/v2/one_time_web_v2_media_transfer_repair.py
 
 permissions:
   contents: write
@@ -37,6 +38,6 @@ jobs:
           git rm deployment/v2/one_time_web_v2_media_transfer_repair.py
           git config user.name 'elevationupscales-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add apps/web-v2/src/shell.js apps/web-v2/src/catalog-pages.js
+          git add apps/web-v2/src/shell.js apps/web-v2/src/catalog-pages.js apps/web-v2/test/image-closeout.test.mjs
           git commit -m 'Web V2: restore transferred section media'
           git push origin HEAD:work/web-v2-media-transfer-repair-2026-09-16
