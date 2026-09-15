@@ -26,20 +26,22 @@ jobs:
           set -euo pipefail
           hero_dir="apps/web-v2/public/assets/hero"
           target="$hero_dir/store-rv-solar-technician-clean.webp"
-          if compgen -G "$hero_dir/.store-hero-chunk-*.txt" > /dev/null; then
-            cat "$hero_dir"/.store-hero-chunk-*.txt | base64 --decode > "$target"
+          if test -f "$hero_dir/.store-hero-chunk-00.txt"; then
+            cat "$hero_dir"/.store-hero-chunk-{00..09}.txt | tr -d '[:space:]' | sed 's/=$//' | base64 --decode > "$target"
             file "$target" | grep -q 'Web/P image'
-            test "$(stat -c%s "$target")" -gt 50000
+            test "$(stat -c%s "$target")" -eq 59364
+            echo '975dbe4e50f6d1535b58ff2f4bd7310fcc640b9964064a1c1a831fb408b20287  '"$target" | sha256sum -c -
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add "$target"
-            git rm -f "$hero_dir"/.store-hero-chunk-*.txt
+            git rm -f "$hero_dir"/.store-hero-chunk-{00..09}.txt
             git rm -f --ignore-unmatch "$hero_dir/store-rv-solar-technician-clean.webp.b64"
             git commit -m "Web V2 recovery: materialize owner-reviewed clean store hero"
             git push origin HEAD:work/web-v2-owner-recovery-e0db198-2026-09-14
           fi
           file "$target" | grep -q 'Web/P image'
-          test "$(stat -c%s "$target")" -gt 50000
+          test "$(stat -c%s "$target")" -eq 59364
+          echo '975dbe4e50f6d1535b58ff2f4bd7310fcc640b9964064a1c1a831fb408b20287  '"$target" | sha256sum -c -
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
