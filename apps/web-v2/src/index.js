@@ -10,6 +10,7 @@ import { resolveCheckout } from './checkout.js';
 import { createOrderFromCheckout, captureOrderPayment } from './order-service.js';
 import { catalogStyles } from './catalog-styles.js';
 import { homeFidelityStyles } from './home-fidelity-styles.js';
+import { homepageCloseoutStyles } from './homepage-closeout-styles.js';
 import { sokProductMerchandisingStyles } from './sok-product-merchandising-styles.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
@@ -130,7 +131,7 @@ export default {
     }
 
     if (url.pathname === '/assets/app.css') {
-      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}\n${homeFidelityStyles}\n${sokProductMerchandisingStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+      return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}\n${homeFidelityStyles}\n${sokProductMerchandisingStyles}\n${homepageCloseoutStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
     if (url.pathname === '/assets/app.js') {
