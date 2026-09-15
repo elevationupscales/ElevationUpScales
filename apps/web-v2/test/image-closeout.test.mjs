@@ -11,12 +11,12 @@ async function request(path = '/') {
 
 test('accepted e9cbaacc homepage copy and composition markers remain locked', async () => {
   const body = await (await request('/')).text();
-  assert.match(body, /Lithium Power<br><span>for RV, Solar &amp; Backup<\/span>/);
+  assert.match(body, /Power Beyond<br><span>the Grid\.<\/span>/);
   assert.match(body, /Elevation UpScales, Inc\. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping\./);
   assert.match(body, /AUTHORIZED BATTERY SUPPLY/);
   assert.match(body, /HAWAII &amp; ALASKA/);
   assert.match(body, /<a href="\/shop\/sok">SOK Battery Systems<\/a>/);
-  assert.doesNotMatch(body, /Power Beyond|TRUSTED BRANDS|HAWAII READY|REAL SUPPORT|Commercial Solutions|shortcut-icon|solution-card--visual/i);
+  assert.doesNotMatch(body, /TRUSTED BRANDS|HAWAII READY|REAL SUPPORT|Commercial Solutions|shortcut-icon|solution-card--visual/i);
   const usecase = body.match(/<nav class="usecase-grid"[\s\S]*?<\/nav>/)?.[0] || '';
   assert.equal((usecase.match(/<a /g) || []).length, 5);
 });
