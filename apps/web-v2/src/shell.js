@@ -207,7 +207,7 @@ function homeMain() {
       <div class="shell-width storefront-grid">
         <div class="storefront-copy">
           <p class="eyebrow">AUTHORIZED SOK ENERGY DEALER</p>
-          <h1 id="storefront-title">Lithium Power<br><span>for RV, Solar &amp; Backup</span></h1>
+          <h1 id="storefront-title">Power Beyond<br><span>the Grid.</span></h1>
           <p class="storefront-lead">Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping. We aim to make dependable power products easier to buy and move, including streamlined fulfillment to Hawaii, Alaska, and select international markets where supplier, carrier, and compliance requirements support it.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="/store">Shop Power &amp; Energy <span aria-hidden="true">→</span></a>
