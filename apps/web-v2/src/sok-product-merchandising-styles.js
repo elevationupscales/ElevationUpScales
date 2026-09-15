@@ -54,7 +54,13 @@ export const sokProductMerchandisingStyles = `
   background:url('/assets/hero/home-tropical.webp') center 46%/cover no-repeat;
 }
 .reference-storefront-home .logistics-section::before{
-  background:url('/assets/hero/hawaii-ocean-freight.webp') center/cover no-repeat;
+  background:url('https://elevationupscales.com/assets/elevation-lithium-social-card.webp') center/cover no-repeat;
+  opacity:.46;
+  filter:saturate(.9) contrast(1.06);
+  transform:scale(1.03);
+}
+.reference-storefront-home .logistics-section::after{
+  background:linear-gradient(90deg,#041115 0%,rgba(4,17,21,.9) 48%,rgba(4,17,21,.38) 100%);
 }
 .reference-storefront-home .solar-feature-media{
   background:linear-gradient(0deg,rgba(1,8,12,.24),rgba(1,8,12,.12)),url('/assets/hero/store-rv-mountains.webp') center/cover no-repeat;
@@ -113,7 +119,7 @@ export const sokProductMerchandisingStyles = `
 .catalog-search button{border:0;background:none;color:#21d4ff;font-size:1.35rem;padding:6px 12px}
 .catalog-cart-link,.catalog-project-link{color:#fff;text-decoration:none;font-weight:800}
 .catalog-project-link{border:2px solid #0fd1ff;border-radius:9px;padding:12px 17px;color:#15d8ff!important}
-.store-hero{position:relative;min-height:570px;display:flex;align-items:center;background:url('/assets/hero/store-rv-solar-technician-clean.webp') center 48%/cover no-repeat}
+.store-hero{position:relative;min-height:570px;display:flex;align-items:center;background:#02080b url('/assets/hero/store-rv-solar-technician-clean.webp') right center/auto 100% no-repeat}
 .store-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,8,11,.9) 0%,rgba(2,8,11,.67) 44%,rgba(2,8,11,.12) 75%)}
 .store-hero-content{position:relative;z-index:2;padding:70px 0}
 .store-eyebrow{color:#bdeeff!important;font-weight:850;letter-spacing:.2em;text-transform:uppercase}
@@ -207,7 +213,7 @@ export const sokProductMerchandisingStyles = `
   .catalog-brand img{height:52px}
   .catalog-search{grid-column:1/-1;grid-row:2;width:100%}
   .catalog-project-link{display:none}
-  .store-hero{min-height:600px;background-position:62% center}
+  .store-hero{min-height:600px;background-size:auto 100%;background-position:62% center}
   .store-hero-overlay{background:linear-gradient(180deg,rgba(2,8,11,.75),rgba(2,8,11,.9))}
   .store-hero-content{padding:46px 0}
   .store-hero h1{font-size:3rem}
