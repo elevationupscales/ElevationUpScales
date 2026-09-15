@@ -46,6 +46,25 @@ export const sokProductMerchandisingStyles = `
 .reference-storefront-home .home-product-card__image:has(img[src*="/assets/brands/sok/"]){
   background:#f3f5f5!important;
 }
+.reference-storefront-home .home-product-card__image:has(img[src^="http"])::before{
+  content:"PRODUCT IMAGE\A SUPPLIER CATALOG";
+  white-space:pre;
+  position:absolute;
+  inset:0;
+  z-index:0;
+  display:grid;
+  place-content:center;
+  text-align:center;
+  color:#7eaebb;
+  font-size:.6rem;
+  line-height:1.5;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.reference-storefront-home .home-product-card__image img{
+  position:relative;
+  z-index:1;
+}
 .reference-storefront-home .home-product-card__image[data-media-state="unavailable"]{
   background:linear-gradient(145deg,#0a2732,#041118)!important;
 }
@@ -92,6 +111,14 @@ export const sokProductMerchandisingStyles = `
     height:205px;
     padding:16px;
   }
+  .reference-storefront-home .home-product-card__image:has(img[src^="http"]){
+    height:145px!important;
+  }
   .catalog-card-media:has(.catalog-media-pending){height:104px!important}
+}
+@media(max-width:430px){
+  .reference-storefront-home .home-product-card__image:has(img[src^="http"]){
+    height:150px!important;
+  }
 }
 `;
