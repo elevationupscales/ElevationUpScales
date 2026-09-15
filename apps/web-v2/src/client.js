@@ -18,26 +18,6 @@ export const clientScript = `
     });
   }
 
-  const productMedia = document.querySelectorAll('.home-product-card__image img');
-  const markMediaState = (image) => {
-    const frame = image.closest('.home-product-card__image');
-    if (!frame) return;
-    if (image.complete && image.naturalWidth > 0) {
-      frame.dataset.mediaState = 'ready';
-      return;
-    }
-    if (image.complete && image.naturalWidth === 0) frame.dataset.mediaState = 'unavailable';
-  };
-
-  productMedia.forEach((image) => {
-    image.addEventListener('load', () => markMediaState(image), { once: true });
-    image.addEventListener('error', () => {
-      const frame = image.closest('.home-product-card__image');
-      if (frame) frame.dataset.mediaState = 'unavailable';
-    }, { once: true });
-    markMediaState(image);
-  });
-
   const year = document.querySelector('[data-current-year]');
   if (year) year.textContent = String(new Date().getFullYear());
 })();
