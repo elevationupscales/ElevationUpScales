@@ -8,6 +8,7 @@ on:
       - .github/workflows/one-time-web-v2-final-visual-qa.yml
       - apps/web-v2/src/sok-product-merchandising-styles.js
       - apps/web-v2/src/final-visual-styles.js
+      - apps/web-v2/src/catalog-pages.js
       - apps/web-v2/test/owner-recovery-hero.test.mjs
       - apps/web-v2/public/assets/hero/store-rv-solar-technician-clean.webp
       - apps/web-v2/public/assets/hero/.store-hero-chunk-*.txt
