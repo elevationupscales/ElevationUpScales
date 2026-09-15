@@ -5,13 +5,13 @@ const asset = (path) => `${LEGACY_ASSET_ORIGIN}${path}`;
 const BRAND_WORDMARK = asset('/assets/brand/Elevation_UpScales_Inc_Blue_LithiumShop_FINAL_FONT.webp?v=20260910-1');
 
 const solutionCards = [
-  ['Lithium Batteries', '12V lithium energy for RV and mobile systems.', '/store?department=lithium-batteries', 'Shop Batteries'],
-  ['SOK Battery Systems', '12V, 24V & 48V systems.', '/shop/sok', 'Shop SOK'],
-  ['Solar & Off-Grid', 'Build your energy independence.', '/solar-project', 'Shop Solar'],
-  ['Hawaii Power & Logistics', 'Battery freight matched to product and destination.', '/hawaii-lithium-batteries', 'Learn More'],
-  ['RV & Outdoor', 'Current batteries and gear for the journey.', '/store?department=rv-outdoor', 'Shop RV & Outdoor'],
-  ['Backup Power', 'Keep what matters running.', '/shop/sok', 'Shop Backup Power'],
-  ['Commercial Power', 'Scalable power solutions.', '/shop/sok', 'Shop Commercial']
+  ['Lithium Batteries', '12V lithium energy for RV and mobile systems.', '/store?department=lithium-batteries', 'Shop Batteries', '/assets/brands/sok/sk12v100pc/official-clean.png'],
+  ['SOK Battery Systems', '12V, 24V & 48V systems.', '/shop/sok', 'Shop SOK', '/assets/brands/sok/sk48v100n/official-clean.png'],
+  ['Solar & Off-Grid', 'Build your energy independence.', '/solar-project', 'Shop Solar', '/assets/hero/power-social.webp'],
+  ['Hawaii Power & Logistics', 'Battery freight matched to product and destination.', '/hawaii-lithium-batteries', 'Learn More', '/assets/hero/hawaii-ocean-freight.webp'],
+  ['RV & Outdoor', 'Current batteries and gear for the journey.', '/store?department=rv-outdoor', 'Shop RV & Outdoor', '/assets/hero/store-rv-mountains.webp'],
+  ['Backup Power', 'Keep what matters running.', '/shop/sok', 'Shop Backup Power', '/assets/hero/project-support.webp'],
+  ['Commercial Power', 'Scalable power solutions.', '/shop/sok', 'Shop Commercial', '/assets/hero/home-tropical.webp']
 ];
 
 const lithiumProducts = [
@@ -85,11 +85,11 @@ function navMarkup(currentPath) {
 }
 
 function solutionMarkup() {
-  return solutionCards.map(([title, copy, href, label]) => `
-    <article class="solution-card">
-      <h3>${title}</h3>
-      <p>${copy}</p>
-      <a href="${href}" class="text-link">${label} <span aria-hidden="true">→</span></a>
+  return solutionCards.map(([title, copy, href, label, image]) => `
+    <article class="solution-card solution-card--visual">
+      <img class="solution-card__image" src="${image}" alt="" loading="lazy" decoding="async">
+      <div class="solution-card__shade" aria-hidden="true"></div>
+      <div class="solution-card__content"><h3>${title}</h3><p>${copy}</p><a href="${href}" class="text-link">${label} <span aria-hidden="true">→</span></a></div>
     </article>`).join('');
 }
 

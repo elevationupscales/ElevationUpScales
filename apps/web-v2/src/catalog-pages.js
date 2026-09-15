@@ -1,5 +1,4 @@
 import { FOOTER_NAV, PRIMARY_NAV, canonicalUrl } from './routes.js';
-import { semanticIcon } from './semantic-icons.js';
 import { CATALOG_PRODUCTS, UNVERIFIED, VENDORS, getProductById, getProductsByVendor, getVendor, searchCatalog } from './catalog.js';
 
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character) => ({
@@ -79,19 +78,14 @@ function vendorFilters(activeVendor = '') {
 
 function storeCategoryCards() {
   const cards = [
-    { title: 'SOK Batteries', href: '/shop/sok', image: '/assets/brands/sok/sk12v100pc/official-clean.png' },
-    { title: 'Solar Panels', href: '/shop/renogy', image: '/assets/hero/store-rv-solar-technician-clean.webp' },
-    { title: 'Inverters & Charging', href: '/shop/renogy', icon: 'inverter' },
-    { title: 'RV & Outdoor', href: '/store?department=rv-outdoor', image: '/assets/hero/store-rv-mountains.webp' },
-    { title: 'Accessories', href: '/store?q=accessories', icon: 'accessories' },
-    { title: 'Commercial', href: '/store?q=commercial', icon: 'commercial' }
+    ['SOK Batteries', '/shop/sok', '/assets/brands/sok/sk12v100pc/official-clean.png'],
+    ['Solar Panels', '/shop/renogy', '/assets/hero/store-rv-solar-technician-clean.webp'],
+    ['Inverters & Charging', '/shop/renogy', '/assets/hero/project-support.webp'],
+    ['RV & Outdoor', '/store?department=rv-outdoor', '/assets/hero/store-rv-mountains.webp'],
+    ['Accessories', '/store?q=accessories', '/assets/hero/hawaii-ocean-freight.webp'],
+    ['Commercial', '/store?q=commercial', '/assets/hero/home-tropical.webp']
   ];
-  return cards.map(({ title, href, image, icon }) => {
-    const visual = image
-      ? `<img class="store-category-image" src="${image}" alt="" loading="lazy" decoding="async">`
-      : `<span class="store-category-icon-visual" aria-hidden="true">${semanticIcon(icon)}</span>`;
-    return `<a class="store-category-card" href="${href}">${visual}<span class="store-category-shade" aria-hidden="true"></span><strong>${title}</strong></a>`;
-  }).join('');
+  return cards.map(([title, href, image]) => `<a class="store-category-card" href="${href}"><img class="store-category-image" src="${image}" alt="" loading="lazy" decoding="async"><span class="store-category-shade" aria-hidden="true"></span><strong>${title}</strong></a>`).join('');
 }
 
 function featuredProducts() {
