@@ -1,6 +1,5 @@
 import { getProductById } from './catalog.js';
 
-const NO_GENERAL_SALES_TAX_STATES = new Set(['DE', 'MT', 'NH', 'OR']);
 const LOWER48_EXCLUDED_STATES = new Set(['AK', 'HI']);
 const SOK_LOWER48_SHIPPING_CENTS_PER_BATTERY = 2799;
 
@@ -8,8 +7,8 @@ function money(cents) {
   return { currency: 'USD', amount: Math.round(cents) / 100 };
 }
 
-function parseTaxRates(env) {
-  const raw = String(env?.STORE_SALES_TAX_BPS_JSON || '').trim();
+function parseJsonObject(value) {
+  const raw = String(value || '').trim();
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw);
@@ -19,13 +18,24 @@ function parseTaxRates(env) {
   }
 }
 
+function parseNexusStates(env) {
+  const raw = String(env?.STORE_TAX_NEXUS_STATES || 'CO');
+  return new Set(raw.split(',').map((value) => value.trim().toUpperCase()).filter((value) => /^[A-Z]{2}$/.test(value)));
+}
+
 function configuredTaxBps(env, shippingAddress) {
   const state = String(shippingAddress?.state || '').trim().toUpperCase();
   const postalCode = String(shippingAddress?.postalCode || '').trim().slice(0, 5);
-  if (NO_GENERAL_SALES_TAX_STATES.has(state)) return 0;
+  const nexusStates = parseNexusStates(env);
 
-  const rates = parseTaxRates(env);
-  const candidates = [postalCode, state];
+  // Elevation only collects in states where it has explicitly declared a collection obligation.
+  // Colorado is the default physical-nexus state. Additional states must be added deliberately.
+  if (!nexusStates.has(state)) return 0;
+
+  // Nexus destinations require an authoritative configured destination rate.
+  // A state-wide fallback is intentionally not accepted because local rates can vary by address.
+  const rates = parseJsonObject(env?.STORE_SALES_TAX_BPS_JSON);
+  const candidates = [`${state}:${postalCode}`, postalCode];
   for (const key of candidates) {
     const value = Number(rates[key]);
     if (Number.isFinite(value) && value >= 0 && value <= 10000) return Math.round(value);
