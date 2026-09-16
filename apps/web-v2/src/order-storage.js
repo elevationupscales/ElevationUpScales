@@ -13,7 +13,7 @@ function parseJson(value, fallback) {
 }
 
 function dbFromEnv(env) {
-  const db = env?.MARKETPLACE_DB;
+  const db = env?.ELEVATION_COMMERCE_DB || env?.MARKETPLACE_DB;
   if (!db || typeof db.prepare !== 'function') throw new Error('ORDER_STORAGE_NOT_CONFIGURED');
   return db;
 }
