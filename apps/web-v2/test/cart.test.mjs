@@ -75,7 +75,7 @@ test('cart route resolves the bounded pilot catalog without third-party fallback
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CART_PAYLOAD' });
 });
 
-test('cart client supports Buy Now and stores only product IDs and quantities', async () => {
+test('cart client supports Buy Now, inline Add to Cart, and stores only product IDs and quantities', async () => {
   const res = await request('/assets/cart.js');
   assert.equal(res.status, 200);
   const script = await res.text();
@@ -84,6 +84,6 @@ test('cart client supports Buy Now and stores only product IDs and quantities', 
   assert.match(script, /\/api\/cart\/resolve/);
   assert.match(script, /data-buy-now/);
   assert.match(script, /window\.location\.assign\('\/checkout'\)/);
-  assert.match(script, /Shipping is covered to the Lower 48/);
+  assert.match(script, /Added ✓/);
   assert.doesNotMatch(script, /paypal\.com|Shopify|unitPrice:\s*line/i);
 });

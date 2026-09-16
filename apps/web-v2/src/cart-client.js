@@ -31,7 +31,13 @@ export const cartClientScript = `
       const productId = String(button.dataset.addToCart || '').toLowerCase();
       if (!productId) return;
       addProduct(productId);
-      window.location.assign('/cart');
+      const original = button.textContent;
+      button.textContent = 'Added ✓';
+      button.disabled = true;
+      setTimeout(() => {
+        button.textContent = original || 'Add to Cart';
+        button.disabled = false;
+      }, 900);
     });
   });
 
@@ -58,14 +64,14 @@ export const cartClientScript = `
     if (payload.blocked?.length) {
       const notice = document.createElement('div');
       notice.className = 'cart-notice';
-      notice.textContent = 'One or more saved items are no longer available and were removed from your cart.';
+      notice.textContent = 'An unavailable item was removed from your cart.';
       root.append(notice);
     }
 
     if (!payload.lines?.length) {
       const empty = document.createElement('div');
       empty.className = 'cart-empty';
-      empty.innerHTML = '<h2>Your cart is empty</h2><p>Add a product when you are ready to order.</p><a href="/store">Continue shopping →</a>';
+      empty.innerHTML = '<h2>Your cart is empty</h2><a href="/store">Keep shopping →</a>';
       root.append(empty);
       writeCart([]);
       return;
@@ -77,8 +83,7 @@ export const cartClientScript = `
     payload.lines.forEach((line) => {
       const row = document.createElement('article');
       row.className = 'cart-line';
-      row.innerHTML = '<div><p class="vendor"></p><h2></h2><p class="sku"></p></div><div class="cart-line-controls"><label>Quantity <input type="number" min="1" max="20"></label><strong></strong><button type="button">Remove</button></div>';
-      row.querySelector('.vendor').textContent = line.vendorName;
+      row.innerHTML = '<div><h2></h2><p class="sku"></p></div><div class="cart-line-controls"><label>Qty <input type="number" min="1" max="20"></label><strong></strong><button type="button">Remove</button></div>';
       row.querySelector('h2').textContent = line.title;
       row.querySelector('.sku').textContent = line.sku;
       row.querySelector('strong').textContent = money(line.lineTotal);
@@ -103,13 +108,14 @@ export const cartClientScript = `
 
     const summary = document.createElement('section');
     summary.className = 'cart-summary';
-    summary.innerHTML = '<div><span>Items</span><strong data-count></strong></div><div><span>Subtotal</span><strong data-subtotal></strong></div><p>Shipping is covered to the Lower 48 on eligible listings.</p><div data-checkout-action></div>';
-    summary.querySelector('[data-count]').textContent = String(payload.itemCount || 0);
+    summary.innerHTML = '<div><span>Subtotal</span><strong data-subtotal></strong></div><a class="button button-primary" data-checkout-link href="/checkout">Checkout</a>';
     summary.querySelector('[data-subtotal]').textContent = money(payload.subtotal);
-    const action = summary.querySelector('[data-checkout-action]');
-    action.innerHTML = payload.checkoutReady
-      ? '<a class="button button-primary" href="/checkout">Checkout</a>'
-      : '<button type="button" disabled>Checkout unavailable</button>';
+    const checkout = summary.querySelector('[data-checkout-link]');
+    if (!payload.checkoutReady) {
+      checkout.removeAttribute('href');
+      checkout.setAttribute('aria-disabled', 'true');
+      checkout.textContent = 'Checkout unavailable';
+    }
     root.append(summary);
 
     writeCart(payload.lines.map(({ productId, quantity }) => ({ productId, quantity })));
@@ -126,7 +132,7 @@ export const cartClientScript = `
       root.replaceChildren();
       const error = document.createElement('div');
       error.className = 'cart-empty';
-      error.innerHTML = '<h2>Cart unavailable</h2><p>Please try again or return to the store.</p><a href="/store">Return to the store →</a>';
+      error.innerHTML = '<h2>Cart unavailable</h2><a href="/store">Return to store →</a>';
       root.append(error);
     } finally {
       root.removeAttribute('aria-busy');

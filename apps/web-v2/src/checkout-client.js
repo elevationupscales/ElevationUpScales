@@ -1,6 +1,7 @@
 export const checkoutClientScript = `
 (() => {
-  const STORAGE_KEY = 'elevation-cart-v1';
+  const CART_KEY = 'elevation-cart-v1';
+  const CHECKOUT_KEY = 'elevation-checkout-profile-v1';
   const IDEMPOTENCY_KEY = 'elevation-checkout-idempotency-v1';
   const form = document.querySelector('[data-checkout-form]');
   const root = document.querySelector('[data-checkout-root]');
@@ -8,7 +9,7 @@ export const checkoutClientScript = `
 
   function readCart() {
     try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const parsed = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
       if (!Array.isArray(parsed)) return [];
       return parsed
         .map((line) => ({ productId: String(line?.productId || '').toLowerCase(), quantity: Number(line?.quantity) }))
@@ -16,6 +17,32 @@ export const checkoutClientScript = `
     } catch {
       return [];
     }
+  }
+
+  function readProfile() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CHECKOUT_KEY) || '{}');
+      return saved && typeof saved === 'object' ? saved : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveProfile() {
+    const data = new FormData(form);
+    const profile = {};
+    ['email','phone','fullName','address1','address2','city','state','postalCode'].forEach((name) => {
+      profile[name] = String(data.get(name) || '').trim();
+    });
+    localStorage.setItem(CHECKOUT_KEY, JSON.stringify(profile));
+  }
+
+  function restoreProfile() {
+    const profile = readProfile();
+    Object.entries(profile).forEach(([name, value]) => {
+      const field = form.elements.namedItem(name);
+      if (field && typeof value === 'string' && !field.value) field.value = value;
+    });
   }
 
   const money = (price) => new Intl.NumberFormat('en-US', {
@@ -35,7 +62,7 @@ export const checkoutClientScript = `
         address1: String(data.get('address1') || ''),
         address2: String(data.get('address2') || ''),
         city: String(data.get('city') || ''),
-        countryCode: String(data.get('country') || 'US'),
+        countryCode: 'US',
         state: String(data.get('state') || ''),
         postalCode: String(data.get('postalCode') || '')
       }
@@ -76,22 +103,19 @@ export const checkoutClientScript = `
         body: JSON.stringify({ ...orderPayload, idempotencyKey: idempotencyFor(orderPayload) })
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        appendNotice('Payment unavailable', 'We could not start payment for this order yet. No charge was made.');
-        return;
-      }
-      if (!payload.approveUrl) {
-        appendNotice('Payment unavailable', 'We could not open the secure payment page. No charge was made.');
+      if (!response.ok || !payload.approveUrl) {
+        appendNotice('Payment unavailable', 'We could not start PayPal. No charge was made.');
         return;
       }
       const approval = new URL(payload.approveUrl);
       if (approval.protocol !== 'https:' || !approval.hostname.endsWith('paypal.com')) {
-        appendNotice('Payment unavailable', 'We could not open the secure payment page. No charge was made.');
+        appendNotice('Payment unavailable', 'We could not open PayPal. No charge was made.');
         return;
       }
+      saveProfile();
       window.location.assign(approval.href);
     } catch {
-      appendNotice('Payment unavailable', 'We could not start secure payment. No charge was made.');
+      appendNotice('Payment unavailable', 'We could not start PayPal. No charge was made.');
     } finally {
       root.removeAttribute('aria-busy');
     }
@@ -100,44 +124,57 @@ export const checkoutClientScript = `
   function render(payload, orderPayload) {
     root.replaceChildren();
 
-    if (payload.blocked?.length || payload.destinationBlocked?.length) {
-      appendNotice('Checkout unavailable', 'One or more items in this order are not available for this delivery address.');
-    }
-
     if (!payload.lines?.length) {
       const empty = document.createElement('div');
       empty.className = 'cart-empty';
-      empty.innerHTML = '<h2>No available items</h2><p>Your cart does not contain an item that can be purchased right now.</p><a href="/store">Return to the store →</a>';
+      empty.innerHTML = '<h2>Your cart is empty</h2><a href="/store">Return to store →</a>';
       root.append(empty);
       return;
     }
 
-    const lines = document.createElement('div');
-    lines.className = 'cart-lines';
-    payload.lines.forEach((line) => {
-      const row = document.createElement('article');
-      row.className = 'cart-line';
-      row.innerHTML = '<div><p class="vendor"></p><h2></h2><p class="sku"></p></div><div class="cart-line-controls"><span data-qty></span><strong></strong></div>';
-      row.querySelector('.vendor').textContent = line.vendorName;
-      row.querySelector('h2').textContent = line.title;
-      row.querySelector('.sku').textContent = line.sku;
-      row.querySelector('[data-qty]').textContent = 'Qty ' + line.quantity;
-      row.querySelector('strong').textContent = money(line.lineTotal);
-      lines.append(row);
-    });
-    root.append(lines);
-
     const summary = document.createElement('section');
     summary.className = 'cart-summary';
-    summary.innerHTML = '<div><span>Subtotal</span><strong data-subtotal></strong></div><div><span>Lower 48 shipping</span><strong>Covered on eligible listings</strong></div><div><span>Tax</span><strong>Confirmed before payment</strong></div><p data-status></p><button type="button" data-prepare-payment disabled>Pay Securely with PayPal</button>';
+    summary.innerHTML = '<div><span>Items</span><strong data-count></strong></div><div><span>Subtotal</span><strong data-subtotal></strong></div><div><span>Shipping + tax</span><strong>Confirmed before PayPal</strong></div><button type="button" data-prepare-payment disabled>Pay with PayPal</button>';
+    summary.querySelector('[data-count]').textContent = String(payload.lines.reduce((total, line) => total + Number(line.quantity || 0), 0));
     summary.querySelector('[data-subtotal]').textContent = money(payload.totals?.merchandiseSubtotal);
-    summary.querySelector('[data-status]').textContent = payload.checkoutReady
-      ? 'Your order is ready for final total confirmation.'
-      : 'This order cannot continue yet.';
     const prepare = summary.querySelector('[data-prepare-payment]');
     prepare.disabled = !payload.checkoutReady;
     if (payload.checkoutReady) prepare.addEventListener('click', () => prepareOrder(orderPayload));
     root.append(summary);
+
+    if (!payload.checkoutReady) appendNotice('Checkout unavailable', 'This order cannot continue for this address yet.');
+  }
+
+  async function resolveCheckout() {
+    const data = new FormData(form);
+    const orderPayload = orderPayloadFromForm(data);
+    saveProfile();
+    root.setAttribute('aria-busy', 'true');
+    try {
+      const response = await fetch('/api/checkout/resolve', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: orderPayload.items,
+          destination: {
+            country: 'US',
+            state: orderPayload.shipping.state,
+            postalCode: orderPayload.shipping.postalCode
+          }
+        })
+      });
+      if (!response.ok) throw new Error('checkout resolve failed');
+      render(await response.json(), orderPayload);
+    } catch {
+      root.replaceChildren();
+      const error = document.createElement('div');
+      error.className = 'cart-empty';
+      error.innerHTML = '<h2>Checkout unavailable</h2><a href="/cart">Return to cart →</a>';
+      root.append(error);
+    } finally {
+      root.removeAttribute('aria-busy');
+    }
   }
 
   async function captureReturnedPayment() {
@@ -145,7 +182,7 @@ export const checkoutClientScript = `
     const state = params.get('payment');
     const token = String(params.get('token') || '');
     if (state === 'cancelled') {
-      appendNotice('Payment cancelled', 'Your payment was cancelled. No charge was made.');
+      appendNotice('Payment cancelled', 'No charge was made. Your cart and delivery details are still saved on this device.');
       return;
     }
     if (state !== 'return' || !/^[A-Z0-9-]{8,80}$/i.test(token)) return;
@@ -160,57 +197,31 @@ export const checkoutClientScript = `
       });
       root.replaceChildren();
       if (!response.ok) {
-        appendNotice('Payment needs attention', 'We could not confirm the returned payment automatically. Please contact Elevation UpScales for help.');
+        appendNotice('Payment needs attention', 'We could not confirm the returned payment automatically. Please contact Elevation UpScales.');
         return;
       }
       const complete = document.createElement('div');
       complete.className = 'cart-empty';
-      complete.innerHTML = '<h2>Order confirmed</h2><p>Your payment was recorded and your order is ready for fulfillment.</p><a href="/store">Continue shopping →</a>';
+      complete.innerHTML = '<h2>Order confirmed</h2><p>Your order is ready for fulfillment.</p><a href="/store">Continue shopping →</a>';
       root.append(complete);
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(CART_KEY);
       sessionStorage.removeItem(IDEMPOTENCY_KEY);
       history.replaceState({}, '', '/checkout');
     } catch {
-      appendNotice('Payment needs attention', 'We could not confirm the returned payment automatically. Please contact Elevation UpScales for help.');
+      appendNotice('Payment needs attention', 'We could not confirm the returned payment automatically. Please contact Elevation UpScales.');
     } finally {
       root.removeAttribute('aria-busy');
     }
   }
 
+  form.addEventListener('input', saveProfile);
+  form.addEventListener('change', saveProfile);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const data = new FormData(form);
-    const orderPayload = orderPayloadFromForm(data);
-    const checkoutBody = {
-      items: orderPayload.items,
-      destination: {
-        country: orderPayload.shipping.countryCode,
-        state: orderPayload.shipping.state,
-        postalCode: orderPayload.shipping.postalCode
-      }
-    };
-
-    root.setAttribute('aria-busy', 'true');
-    try {
-      const response = await fetch('/api/checkout/resolve', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutBody)
-      });
-      if (!response.ok) throw new Error('checkout resolve failed');
-      render(await response.json(), orderPayload);
-    } catch {
-      root.replaceChildren();
-      const error = document.createElement('div');
-      error.className = 'cart-empty';
-      error.innerHTML = '<h2>Checkout unavailable</h2><p>Please try again or return to your cart.</p><a href="/cart">Return to cart →</a>';
-      root.append(error);
-    } finally {
-      root.removeAttribute('aria-busy');
-    }
+    await resolveCheckout();
   });
 
+  restoreProfile();
   captureReturnedPayment();
 })();
 `;
