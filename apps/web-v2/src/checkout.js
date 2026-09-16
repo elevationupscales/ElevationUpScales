@@ -8,7 +8,21 @@ const CONTIGUOUS_US_STATES = new Set([
 const LOWER_48_DISPOSITIONS = new Set([
   'LOWER_48_SUPPLIER_SHIPPING_VERIFIED',
   'LOWER_48_VERIFIED',
-  'CONTIGUOUS_US_VERIFIED'
+  'CONTIGUOUS_US_VERIFIED',
+  'US_WAREHOUSE_DROPSHIP_ROUTE_VERIFIED',
+  'US_ALL_50_STATES_VERIFIED'
+]);
+
+const HAWAII_DISPOSITIONS = new Set([
+  'HAWAII_SUPPLIER_SHIPPING_VERIFIED',
+  'HAWAII_DIRECT_VERIFIED',
+  'US_ALL_50_STATES_VERIFIED'
+]);
+
+const ALASKA_DISPOSITIONS = new Set([
+  'ALASKA_SUPPLIER_SHIPPING_VERIFIED',
+  'ALASKA_DIRECT_VERIFIED',
+  'US_ALL_50_STATES_VERIFIED'
 ]);
 
 function normalizeDestination(destination = {}) {
@@ -31,15 +45,25 @@ export function evaluateDestination(product, destination) {
   const normalized = normalizeDestination(destination);
   if (!normalized) return { eligible: false, reason: 'INVALID_DESTINATION', destination: null };
 
-  if (normalized.state === 'AK' || normalized.state === 'HI') {
-    return { eligible: false, reason: 'SPECIAL_ROUTE_UNVERIFIED', destination: normalized };
+  const disposition = product?.shippingDisposition;
+
+  if (normalized.state === 'HI') {
+    return HAWAII_DISPOSITIONS.has(disposition)
+      ? { eligible: true, reason: null, destination: normalized }
+      : { eligible: false, reason: 'HAWAII_CONTACT_REQUIRED', destination: normalized };
+  }
+
+  if (normalized.state === 'AK') {
+    return ALASKA_DISPOSITIONS.has(disposition)
+      ? { eligible: true, reason: null, destination: normalized }
+      : { eligible: false, reason: 'ALASKA_CONTACT_REQUIRED', destination: normalized };
   }
 
   if (!CONTIGUOUS_US_STATES.has(normalized.state)) {
     return { eligible: false, reason: 'DESTINATION_UNVERIFIED', destination: normalized };
   }
 
-  if (!LOWER_48_DISPOSITIONS.has(product?.shippingDisposition)) {
+  if (!LOWER_48_DISPOSITIONS.has(disposition)) {
     return { eligible: false, reason: 'DESTINATION_ROUTE_UNVERIFIED', destination: normalized };
   }
 

@@ -19,7 +19,7 @@ const cleanProduct = {
 
 const lookup = (id) => id === cleanProduct.id ? cleanProduct : null;
 
-test('checkout re-resolves current canonical cart state and held products fail closed', () => {
+test('checkout re-resolves current server cart state and unavailable products stay out of payment', () => {
   const result = resolveCheckout(
     [{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1 }],
     { country: 'US', state: 'CO', postalCode: '80903' }
@@ -31,7 +31,7 @@ test('checkout re-resolves current canonical cart state and held products fail c
   assert.equal(result.totals.amountDue, null);
 });
 
-test('clean lower-48 product passes destination review but payment remains server-gated', () => {
+test('clean lower-48 product passes destination review while final charges remain server-side', () => {
   const result = resolveCheckout(
     [{ productId: 'clean-product', quantity: 2, unitPrice: { amount: 0.01 } }],
     { country: 'US', state: 'co', postalCode: '80903' },
@@ -46,35 +46,41 @@ test('clean lower-48 product passes destination review but payment remains serve
   assert.equal(result.totals.amountDue, null);
 });
 
-test('Hawaii, Alaska and non-explicit shipping dispositions remain held', () => {
+test('Hawaii and Alaska eligibility are product-specific instead of blanket blocked', () => {
   assert.equal(
     evaluateDestination(cleanProduct, { country: 'US', state: 'HI', postalCode: '96815' }).reason,
-    'SPECIAL_ROUTE_UNVERIFIED'
+    'HAWAII_CONTACT_REQUIRED'
   );
   assert.equal(
     evaluateDestination(cleanProduct, { country: 'US', state: 'AK', postalCode: '99501' }).reason,
-    'SPECIAL_ROUTE_UNVERIFIED'
+    'ALASKA_CONTACT_REQUIRED'
   );
-  const warehouseOnly = { ...cleanProduct, shippingDisposition: 'US_WAREHOUSE_DROPSHIP_ROUTE_VERIFIED' };
+  const hawaiiReady = { ...cleanProduct, shippingDisposition: 'HAWAII_SUPPLIER_SHIPPING_VERIFIED' };
   assert.equal(
-    evaluateDestination(warehouseOnly, { country: 'US', state: 'CO', postalCode: '80903' }).reason,
-    'DESTINATION_ROUTE_UNVERIFIED'
+    evaluateDestination(hawaiiReady, { country: 'US', state: 'HI', postalCode: '96815' }).eligible,
+    true
   );
+  const allStates = { ...cleanProduct, shippingDisposition: 'US_ALL_50_STATES_VERIFIED' };
+  assert.equal(evaluateDestination(allStates, { country: 'US', state: 'HI', postalCode: '96815' }).eligible, true);
+  assert.equal(evaluateDestination(allStates, { country: 'US', state: 'AK', postalCode: '99501' }).eligible, true);
+  const warehouse = { ...cleanProduct, shippingDisposition: 'US_WAREHOUSE_DROPSHIP_ROUTE_VERIFIED' };
+  assert.equal(evaluateDestination(warehouse, { country: 'US', state: 'CO', postalCode: '80903' }).eligible, true);
 });
 
-test('checkout route is live, noindex, and loads no third-party payment script or Shopify fallback', async () => {
+test('checkout route is customer-safe, noindex, and loads no third-party payment script or Shopify fallback', async () => {
   const res = await request('/checkout');
   assert.equal(res.status, 200);
   const body = await res.text();
-  assert.match(body, /Checkout Review/);
+  assert.match(body, /Secure Checkout/i);
+  assert.match(body, /Continue to PayPal/);
   assert.match(body, /data-checkout-form/);
   assert.match(body, /name="robots" content="noindex,nofollow"/);
   assert.match(body, /\/assets\/checkout\.js/);
-  assert.match(body, /Payment cannot begin until shipping, tax and final amount due are authoritative/);
+  assert.doesNotMatch(body, /authoritative|product truth|revalidat|orderability|source snapshot/i);
   assert.doesNotMatch(body, /https:\/\/.*paypal\.com|Shopify|\/api\/paypal/i);
 });
 
-test('checkout resolver accepts POST only for stateless review and rejects malformed payloads', async () => {
+test('checkout resolver accepts POST only for server review and rejects malformed payloads', async () => {
   const payload = {
     items: [{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1 }],
     destination: { country: 'US', state: 'CO', postalCode: '80903' }
@@ -99,7 +105,7 @@ test('checkout resolver accepts POST only for stateless review and rejects malfo
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CHECKOUT_PAYLOAD' });
 });
 
-test('checkout client uses server order APIs and retains provider and card-data guards', async () => {
+test('checkout client goes from address review directly toward PayPal and retains payment safety guards', async () => {
   const res = await request('/assets/checkout.js');
   assert.equal(res.status, 200);
   const script = await res.text();
@@ -111,5 +117,7 @@ test('checkout client uses server order APIs and retains provider and card-data 
   assert.match(script, /\/api\/order\/paypal\//);
   assert.match(script, /elevation-checkout-idempotency-v1/);
   assert.match(script, /endsWith\('paypal\.com'\)/);
-  assert.doesNotMatch(script, /Shopify|unitPrice:\s*line|cardNumber|card_number|cvv|cvc/i);
+  assert.match(script, /HAWAII_CONTACT_REQUIRED/);
+  assert.match(script, /await prepareOrder\(orderPayload\)/);
+  assert.doesNotMatch(script, /authoritative totals|fulfillment controls|canonical orderability|Shopify|unitPrice:\s*line|cardNumber|card_number|cvv|cvc/i);
 });

@@ -2,6 +2,7 @@ export const checkoutClientScript = `
 (() => {
   const STORAGE_KEY = 'elevation-cart-v1';
   const IDEMPOTENCY_KEY = 'elevation-checkout-idempotency-v1';
+  const SUPPORT_EMAIL = 'casey@elevationupscales.com';
   const form = document.querySelector('[data-checkout-form]');
   const root = document.querySelector('[data-checkout-root]');
   if (!form || !root) return;
@@ -55,7 +56,7 @@ export const checkoutClientScript = `
     }
   }
 
-  function appendNotice(title, message) {
+  function appendNotice(title, message, link = null) {
     const notice = document.createElement('div');
     notice.className = 'cart-notice';
     const heading = document.createElement('h2');
@@ -63,7 +64,24 @@ export const checkoutClientScript = `
     const copy = document.createElement('p');
     copy.textContent = message;
     notice.append(heading, copy);
+    if (link) {
+      const action = document.createElement('a');
+      action.className = 'button button-primary';
+      action.href = link.href;
+      action.textContent = link.label;
+      notice.append(action);
+    }
     root.prepend(notice);
+  }
+
+  function supportLink(orderPayload, label = 'Email us about this order') {
+    const subject = encodeURIComponent('Website order help');
+    const lines = orderPayload.items.map((item) => item.productId + ' × ' + item.quantity).join('\n');
+    const body = encodeURIComponent(
+      'Hi Elevation UpScales,\n\nI need help completing this website order.\n\nItems:\n' + lines +
+      '\n\nDestination: ' + orderPayload.shipping.state + ' ' + orderPayload.shipping.postalCode + '\n'
+    );
+    return { href: 'mailto:' + SUPPORT_EMAIL + '?subject=' + subject + '&body=' + body, label };
   }
 
   async function prepareOrder(orderPayload) {
@@ -78,23 +96,23 @@ export const checkoutClientScript = `
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
         const message = response.status === 409
-          ? 'The order is still on hold because one or more authoritative totals or fulfillment controls are not verified. No payment order was created.'
-          : 'Secure payment is not available for this order right now. No charge was made.';
-        appendNotice('Payment not started', message);
+          ? 'We could not finish the shipping, tax, or final total for this order online. No charge was made.'
+          : 'Secure payment is temporarily unavailable. No charge was made.';
+        appendNotice('We need a little help to finish this order', message, supportLink(orderPayload));
         return;
       }
       if (!payload.approveUrl) {
-        appendNotice('Payment not started', 'The payment provider did not return an approval path. No charge was made.');
+        appendNotice('Payment unavailable', 'PayPal did not return a secure payment link. No charge was made.', supportLink(orderPayload));
         return;
       }
       const approval = new URL(payload.approveUrl);
       if (approval.protocol !== 'https:' || !approval.hostname.endsWith('paypal.com')) {
-        appendNotice('Payment not started', 'The payment approval destination was rejected. No charge was made.');
+        appendNotice('Payment unavailable', 'We could not open the secure PayPal payment page. No charge was made.', supportLink(orderPayload));
         return;
       }
       window.location.assign(approval.href);
     } catch {
-      appendNotice('Payment unavailable', 'We could not prepare secure payment. No charge was made.');
+      appendNotice('Payment unavailable', 'We could not connect to secure payment. No charge was made.', supportLink(orderPayload));
     } finally {
       root.removeAttribute('aria-busy');
     }
@@ -103,16 +121,25 @@ export const checkoutClientScript = `
   function render(payload, orderPayload) {
     root.replaceChildren();
 
-    if (payload.blocked?.length || payload.destinationBlocked?.length) {
-      appendNotice('Checkout hold', 'This cart or destination does not currently pass Elevation checkout controls. No order or payment was created.');
+    if (payload.blocked?.length) {
+      appendNotice('An item is not available online', 'One or more items in your cart cannot be purchased online right now.', supportLink(orderPayload, 'Email us about the item'));
+    }
+
+    if (payload.destinationBlocked?.length) {
+      const reasons = payload.destinationBlocked.map((item) => item.reason);
+      const hawaii = reasons.includes('HAWAII_CONTACT_REQUIRED');
+      const alaska = reasons.includes('ALASKA_CONTACT_REQUIRED');
+      if (hawaii) appendNotice('Hawaii shipping available', 'This item needs a quick Hawaii shipping check before purchase.', supportLink(orderPayload, 'Email us about Hawaii shipping'));
+      else if (alaska) appendNotice('Alaska shipping available', 'This item needs a quick Alaska shipping check before purchase.', supportLink(orderPayload, 'Email us about Alaska shipping'));
+      else appendNotice('Shipping needs a quick check', 'We need to confirm shipping for this item and destination before purchase.', supportLink(orderPayload));
     }
 
     if (!payload.lines?.length) {
       const empty = document.createElement('div');
       empty.className = 'cart-empty';
-      empty.innerHTML = '<h2>No purchasable items</h2><p>The current saved cart does not contain products that pass canonical orderability checks.</p><a href="/store">Return to the store →</a>';
+      empty.innerHTML = '<h2>No items ready for checkout</h2><p>Please return to the store or contact us for help.</p><a href="/store">Return to the store →</a>';
       root.append(empty);
-      return;
+      return false;
     }
 
     const lines = document.createElement('div');
@@ -132,15 +159,14 @@ export const checkoutClientScript = `
 
     const summary = document.createElement('section');
     summary.className = 'cart-summary';
-    summary.innerHTML = '<div><span>Merchandise subtotal</span><strong data-subtotal></strong></div><div><span>Shipping</span><strong>Verified before payment</strong></div><div><span>Tax</span><strong>Verified before payment</strong></div><p data-status></p><button type="button" data-prepare-payment disabled>Prepare secure payment</button>';
+    summary.innerHTML = '<div><span>Merchandise</span><strong data-subtotal></strong></div><div><span>Shipping</span><strong>Confirmed before payment</strong></div><div><span>Tax</span><strong>Confirmed before payment</strong></div><p data-status></p>';
     summary.querySelector('[data-subtotal]').textContent = money(payload.totals?.merchandiseSubtotal);
     summary.querySelector('[data-status]').textContent = payload.checkoutReady
-      ? 'Product and destination review passed. The order service will perform the final authoritative total, storage and fulfillment checks before PayPal can be created.'
-      : 'Checkout cannot advance until every product and destination control passes.';
-    const prepare = summary.querySelector('[data-prepare-payment]');
-    prepare.disabled = !payload.checkoutReady;
-    if (payload.checkoutReady) prepare.addEventListener('click', () => prepareOrder(orderPayload));
+      ? 'Opening secure PayPal checkout…'
+      : 'Contact us if you need help completing this order.';
     root.append(summary);
+
+    return Boolean(payload.checkoutReady);
   }
 
   async function captureReturnedPayment() {
@@ -148,7 +174,7 @@ export const checkoutClientScript = `
     const state = params.get('payment');
     const token = String(params.get('token') || '');
     if (state === 'cancelled') {
-      appendNotice('Payment cancelled', 'The PayPal approval was cancelled. No new capture was requested.');
+      appendNotice('Payment cancelled', 'Your PayPal payment was cancelled. You can try again whenever you’re ready.');
       return;
     }
     if (state !== 'return' || !/^[A-Z0-9-]{8,80}$/i.test(token)) return;
@@ -164,18 +190,18 @@ export const checkoutClientScript = `
       const payload = await response.json().catch(() => ({}));
       root.replaceChildren();
       if (!response.ok) {
-        appendNotice('Payment reconciliation hold', 'The returned payment could not be safely reconciled. No duplicate capture was attempted.');
+        appendNotice('We’re confirming your payment', 'We could not finish confirming the returned payment automatically. Please contact Elevation and do not submit a second payment.', { href: 'mailto:' + SUPPORT_EMAIL + '?subject=' + encodeURIComponent('Payment confirmation help'), label: 'Contact Elevation' });
         return;
       }
       const complete = document.createElement('div');
       complete.className = 'cart-empty';
-      complete.innerHTML = '<h2>Payment recorded</h2><p>Your Elevation order is recorded and ready for fulfillment routing.</p><a href="/store">Return to the store →</a>';
+      complete.innerHTML = '<h2>Thank you for your order</h2><p>Your payment is recorded and your Elevation order is ready for fulfillment. We’ll send the next update as your order moves forward.</p><a href="/store">Continue shopping →</a>';
       root.append(complete);
       localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(IDEMPOTENCY_KEY);
       history.replaceState({}, '', '/checkout');
     } catch {
-      appendNotice('Payment reconciliation unavailable', 'We could not safely reconcile the returned payment. No duplicate capture was attempted.');
+      appendNotice('We’re confirming your payment', 'We could not finish confirming the returned payment automatically. Please contact Elevation and do not submit a second payment.', { href: 'mailto:' + SUPPORT_EMAIL + '?subject=' + encodeURIComponent('Payment confirmation help'), label: 'Contact Elevation' });
     } finally {
       root.removeAttribute('aria-busy');
     }
@@ -203,13 +229,12 @@ export const checkoutClientScript = `
         body: JSON.stringify(checkoutBody)
       });
       if (!response.ok) throw new Error('checkout resolve failed');
-      render(await response.json(), orderPayload);
+      const payload = await response.json();
+      const ready = render(payload, orderPayload);
+      if (ready) await prepareOrder(orderPayload);
     } catch {
       root.replaceChildren();
-      const error = document.createElement('div');
-      error.className = 'cart-empty';
-      error.innerHTML = '<h2>Checkout unavailable</h2><p>We could not verify this checkout review. No order or payment was created.</p><a href="/cart">Return to cart →</a>';
-      root.append(error);
+      appendNotice('Checkout temporarily unavailable', 'Please try again in a moment or contact Elevation for help.', supportLink(orderPayload));
     } finally {
       root.removeAttribute('aria-busy');
     }

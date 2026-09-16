@@ -49,14 +49,14 @@ export const cartClientScript = `
     if (payload.blocked?.length) {
       const notice = document.createElement('div');
       notice.className = 'cart-notice';
-      notice.textContent = 'One or more saved items no longer pass current product verification and were removed from the purchasable cart.';
+      notice.textContent = 'One or more items are no longer available to purchase online and were removed from your cart.';
       root.append(notice);
     }
 
     if (!payload.lines?.length) {
       const empty = document.createElement('div');
       empty.className = 'cart-empty';
-      empty.innerHTML = '<h2>Your cart is empty</h2><p>Only products that pass current Elevation verification can appear as purchasable cart items.</p><a href="/store">Continue shopping →</a>';
+      empty.innerHTML = '<h2>Your cart is empty</h2><p>Browse the store to add products.</p><a href="/store">Continue shopping →</a>';
       root.append(empty);
       writeCart([]);
       return;
@@ -94,13 +94,13 @@ export const cartClientScript = `
 
     const summary = document.createElement('section');
     summary.className = 'cart-summary';
-    summary.innerHTML = '<div><span>Items</span><strong data-count></strong></div><div><span>Current subtotal</span><strong data-subtotal></strong></div><p>Availability, price, shipping and destination eligibility are checked again in checkout.</p><div data-checkout-action></div>';
+    summary.innerHTML = '<div><span>Items</span><strong data-count></strong></div><div><span>Subtotal</span><strong data-subtotal></strong></div><p>Shipping and tax are confirmed during checkout.</p><div data-checkout-action></div>';
     summary.querySelector('[data-count]').textContent = String(payload.itemCount || 0);
     summary.querySelector('[data-subtotal]').textContent = money(payload.subtotal);
     const action = summary.querySelector('[data-checkout-action]');
     action.innerHTML = payload.checkoutReady
-      ? '<a class="button button-primary" href="/checkout">Continue to checkout</a>'
-      : '<button type="button" disabled>Continue to checkout</button>';
+      ? '<a class="button button-primary" href="/checkout">Checkout</a>'
+      : '<a class="button button-outline" href="/store">Continue shopping</a>';
     root.append(summary);
 
     writeCart(payload.lines.map(({ productId, quantity }) => ({ productId, quantity })));
@@ -117,7 +117,7 @@ export const cartClientScript = `
       root.replaceChildren();
       const error = document.createElement('div');
       error.className = 'cart-empty';
-      error.innerHTML = '<h2>Cart unavailable</h2><p>We could not verify the saved cart right now. No payment action was taken.</p><a href="/store">Return to the store →</a>';
+      error.innerHTML = '<h2>Cart temporarily unavailable</h2><p>Please try again in a moment or contact Elevation for help.</p><a href="/store">Return to the store →</a>';
       root.append(error);
     } finally {
       root.removeAttribute('aria-busy');

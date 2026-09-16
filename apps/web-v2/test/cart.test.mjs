@@ -14,7 +14,7 @@ test('cart parser accepts arrays only and rejects malformed client payloads', ()
   assert.equal(parseCartItems('not-json'), null);
 });
 
-test('current held canonical products cannot become purchasable through cart state', () => {
+test('current unavailable catalog products cannot become purchasable through cart state', () => {
   const result = resolveCartLines([
     { productId: 'vevor-xxkljt124incljf0qv0', quantity: 1, unitPrice: { currency: 'USD', amount: 0.01 } },
     { productId: 'renogy-rsp100dct-us', quantity: 2 }
@@ -26,7 +26,7 @@ test('current held canonical products cannot become purchasable through cart sta
   assert.deepEqual(result.blocked.map(({ reason }) => reason), ['PRODUCT_NOT_ORDERABLE', 'PRODUCT_NOT_ORDERABLE']);
 });
 
-test('cart derives price and identity from canonical product truth, never client price state', () => {
+test('cart derives price and identity from server catalog state, never client price state', () => {
   const canonical = {
     id: 'clean-product',
     vendorName: 'Verified Vendor',
@@ -47,7 +47,7 @@ test('cart derives price and identity from canonical product truth, never client
   assert.equal(result.subtotal.amount, 24.68);
 });
 
-test('unknown products and invalid quantities fail closed', () => {
+test('unknown products and invalid quantities stay out of checkout', () => {
   const result = resolveCartLines([
     { productId: 'unknown', quantity: 1 },
     { productId: 'vevor-xxkljt124incljf0qv0', quantity: 0 },
@@ -58,14 +58,15 @@ test('unknown products and invalid quantities fail closed', () => {
   assert.deepEqual(result.blocked.map(({ reason }) => reason), ['INVALID_QUANTITY', 'INVALID_QUANTITY', 'UNKNOWN_PRODUCT']);
 });
 
-test('cart route and same-origin resolver are live without checkout or payment fallback', async () => {
+test('cart route and same-origin resolver are live without payment-provider coupling', async () => {
   const cart = await request('/cart');
   assert.equal(cart.status, 200);
   const body = await cart.text();
   assert.match(body, /Your Cart/);
+  assert.match(body, /Review your items/);
   assert.match(body, /data-cart-root/);
   assert.match(body, /\/assets\/cart\.js/);
-  assert.doesNotMatch(body, /Shopify|paypal\.com|\/api\/paypal/i);
+  assert.doesNotMatch(body, /product truth|sales authority|canonical|Shopify|paypal\.com|\/api\/paypal/i);
 
   const items = encodeURIComponent(JSON.stringify([{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1 }]));
   const resolved = await request(`/api/cart/resolve?items=${items}`);
@@ -80,13 +81,13 @@ test('cart route and same-origin resolver are live without checkout or payment f
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CART_PAYLOAD' });
 });
 
-test('cart client stores only product IDs and quantities and uses the server resolver', async () => {
+test('cart client stores only product IDs and quantities and presents a simple checkout action', async () => {
   const res = await request('/assets/cart.js');
   assert.equal(res.status, 200);
   const script = await res.text();
   assert.match(script, /localStorage/);
   assert.match(script, /productId, quantity/);
   assert.match(script, /\/api\/cart\/resolve/);
-  assert.match(script, /Continue to checkout/);
-  assert.doesNotMatch(script, /paypal\.com|Shopify|unitPrice:\s*line/i);
+  assert.match(script, />Checkout</);
+  assert.doesNotMatch(script, /product verification|sales authority|canonical|paypal\.com|Shopify|unitPrice:\s*line/i);
 });
