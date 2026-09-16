@@ -110,29 +110,31 @@ export async function createPaypalOrder(env, order, { fetchImpl = fetch } = {}) 
   if (!gate.ready) throw new Error(gate.reason);
   if (!order?.id || !order?.totals?.amountDue) throw new Error('INVALID_ORDER_DRAFT');
   const returnOrigin = safeReturnOrigin(order.returnOrigin);
-  const shipping = paypalShippingAddress(order.shippingAddress);
+  const shipping = order.shippingAddress ? paypalShippingAddress(order.shippingAddress) : null;
+
+  const purchaseUnit = {
+    reference_id: clean(order.id, 80),
+    custom_id: clean(order.id, 80),
+    amount: {
+      currency_code: clean(order.totals.amountDue.currency || 'USD', 3).toUpperCase(),
+      value: amountValue(order.totals.amountDue),
+      breakdown: {
+        item_total: { currency_code: 'USD', value: amountValue(order.totals.merchandiseSubtotal) },
+        shipping: { currency_code: 'USD', value: amountValue(order.totals.shipping) },
+        tax_total: { currency_code: 'USD', value: amountValue(order.totals.tax) }
+      }
+    }
+  };
+  if (shipping) purchaseUnit.shipping = shipping;
 
   const requestBody = {
     intent: 'CAPTURE',
-    purchase_units: [{
-      reference_id: clean(order.id, 80),
-      custom_id: clean(order.id, 80),
-      shipping,
-      amount: {
-        currency_code: clean(order.totals.amountDue.currency || 'USD', 3).toUpperCase(),
-        value: amountValue(order.totals.amountDue),
-        breakdown: {
-          item_total: { currency_code: 'USD', value: amountValue(order.totals.merchandiseSubtotal) },
-          shipping: { currency_code: 'USD', value: amountValue(order.totals.shipping) },
-          tax_total: { currency_code: 'USD', value: amountValue(order.totals.tax) }
-        }
-      }
-    }],
+    purchase_units: [purchaseUnit],
     payment_source: {
       paypal: {
         experience_context: {
           user_action: 'PAY_NOW',
-          shipping_preference: 'SET_PROVIDED_ADDRESS',
+          shipping_preference: shipping ? 'SET_PROVIDED_ADDRESS' : 'GET_FROM_FILE',
           brand_name: 'Elevation UpScales, Inc.',
           return_url: `${returnOrigin}/checkout?payment=return`,
           cancel_url: `${returnOrigin}/checkout?payment=cancelled`
