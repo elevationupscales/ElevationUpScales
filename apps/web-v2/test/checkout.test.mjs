@@ -81,9 +81,9 @@ test('checkout route is live, noindex, simple and free of specialty-logistics co
   const res = await request('/checkout');
   assert.equal(res.status, 200);
   const body = await res.text();
-  assert.match(body, /Complete Your Order/);
-  assert.match(body, /Shipping is covered to the Lower 48/);
-  assert.match(body, /Continue to Payment/);
+  assert.match(body, /<h1>Checkout<\/h1>/);
+  assert.match(body, /Contact & delivery/);
+  assert.match(body, /Saved on this device/);
   assert.match(body, /data-checkout-form/);
   assert.match(body, /name="robots" content="noindex,nofollow"/);
   assert.match(body, /\/assets\/checkout\.js/);
@@ -116,11 +116,14 @@ test('checkout resolver accepts POST only for stateless review and rejects malfo
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CHECKOUT_PAYLOAD' });
 });
 
-test('checkout client uses server order APIs and retains provider and card-data guards', async () => {
+test('checkout client uses server order APIs, persists non-payment profile data, and retains card-data guards', async () => {
   const res = await request('/assets/checkout.js');
   assert.equal(res.status, 200);
   const script = await res.text();
   assert.match(script, /elevation-cart-v1/);
+  assert.match(script, /elevation-checkout-profile-v1/);
+  assert.match(script, /localStorage\.setItem\(CHECKOUT_KEY/);
+  assert.match(script, /restoreProfile/);
   assert.match(script, /productId/);
   assert.match(script, /quantity/);
   assert.match(script, /\/api\/checkout\/resolve/);
@@ -128,7 +131,7 @@ test('checkout client uses server order APIs and retains provider and card-data 
   assert.match(script, /\/api\/order\/paypal\//);
   assert.match(script, /elevation-checkout-idempotency-v1/);
   assert.match(script, /endsWith\('paypal\.com'\)/);
-  assert.match(script, /Pay Securely with PayPal/);
+  assert.match(script, /Pay with PayPal/);
   assert.doesNotMatch(script, /canonical orderability|authoritative totals|checkout controls/i);
   assert.doesNotMatch(script, /Shopify|unitPrice:\s*line|cardNumber|card_number|cvv|cvc/i);
 });
