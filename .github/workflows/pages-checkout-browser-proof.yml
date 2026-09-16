@@ -1,0 +1,57 @@
+name: Pages Checkout Browser Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/pages-checkout-browser-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Prove live SOK checkout client
+        run: |
+          cat > /tmp/proof.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({headless:true});
+          const page = await browser.newPage();
+          const consoleErrors=[];
+          const failed=[];
+          page.on('console', msg => { if (msg.type()==='error') consoleErrors.push(msg.text()); });
+          page.on('pageerror', err => consoleErrors.push(`PAGEERROR ${err.message}`));
+          page.on('requestfailed', req => failed.push(`${req.method()} ${req.url()} :: ${req.failure()?.errorText || ''}`));
+          const url='https://elevationupscales.com/checkout/?id=sok-sk12v100pc&name=SOK+SK12V100PC+12.8V+100Ah+1280Wh+LiFePO4+Battery&source=lithium';
+          const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+          console.log('PAGE_HTTP', response?.status());
+          await page.waitForTimeout(8000);
+          const product=(await page.locator('#checkout-product').textContent())?.trim();
+          const status=(await page.locator('#checkout-status').textContent())?.trim();
+          const total=(await page.locator('#checkout-total').textContent())?.trim();
+          const paypalVisible=await page.locator('#checkout-paypal').isVisible().catch(()=>false);
+          const paypalFrames=page.frames().filter(f=>/paypal/i.test(f.url())).map(f=>f.url());
+          console.log('PRODUCT', product);
+          console.log('STATUS', status);
+          console.log('TOTAL', total);
+          console.log('PAYPAL_VISIBLE', paypalVisible);
+          console.log('PAYPAL_FRAMES', JSON.stringify(paypalFrames));
+          console.log('CONSOLE_ERRORS', JSON.stringify(consoleErrors));
+          console.log('REQUEST_FAILURES', JSON.stringify(failed));
+          await page.screenshot({path:'/tmp/checkout.png',fullPage:true});
+          await browser.close();
+          if (!product || /Loading item/i.test(product)) process.exit(2);
+          if (!status || /Loading checkout/i.test(status)) process.exit(3);
+          if (!paypalVisible) process.exit(4);
+          EOF
+          node /tmp/proof.mjs
