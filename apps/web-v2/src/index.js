@@ -7,6 +7,7 @@ import { checkoutClientScript } from './checkout-client.js';
 import { renderCheckoutPage } from './checkout-page.js';
 import { checkoutStyles } from './checkout-styles.js';
 import { resolveCheckout } from './checkout.js';
+import { saveCheckoutRecovery } from './checkout-recovery.js';
 import { createOrderFromCheckout, captureOrderPayment } from './order-service.js';
 import { catalogStyles } from './catalog-styles.js';
 import { homeFidelityStyles } from './home-fidelity-styles.js';
@@ -78,10 +79,11 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const checkoutResolvePost = url.pathname === '/api/checkout/resolve' && request.method === 'POST';
+    const checkoutRecoveryPost = url.pathname === '/api/checkout/recovery' && request.method === 'POST';
     const orderCreatePost = url.pathname === '/api/order/create' && request.method === 'POST';
     const orderCaptureMatch = url.pathname.match(/^\/api\/order\/paypal\/([A-Z0-9-]{8,80})\/capture$/i);
     const orderCapturePost = Boolean(orderCaptureMatch) && request.method === 'POST';
-    const allowedMutation = checkoutResolvePost || orderCreatePost || orderCapturePost;
+    const allowedMutation = checkoutResolvePost || checkoutRecoveryPost || orderCreatePost || orderCapturePost;
 
     if (request.method !== 'GET' && request.method !== 'HEAD' && !allowedMutation) {
       return response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' } });
@@ -96,6 +98,39 @@ export default {
       }
       if (!payload || !Array.isArray(payload.items)) return json({ error: 'INVALID_CHECKOUT_PAYLOAD' }, 400);
       return json(resolveCheckout(payload.items, payload.destination));
+    }
+
+    if (checkoutRecoveryPost) {
+      if (!mutationOriginAllowed(request)) return json({ error: 'CROSS_ORIGIN_CHECKOUT_RECOVERY_DENIED' }, 403);
+      let payload;
+      try {
+        payload = await request.json();
+      } catch {
+        return json({ error: 'INVALID_CHECKOUT_RECOVERY_PAYLOAD' }, 400);
+      }
+      if (!payload || !Array.isArray(payload.items) || !payload.customer || !payload.shipping) {
+        return json({ error: 'INVALID_CHECKOUT_RECOVERY_PAYLOAD' }, 400);
+      }
+      const cart = resolveCartLines(payload.items);
+      if (!cart.lines.length) return json({ error: 'NO_RECOVERABLE_CART_LINES' }, 400);
+      try {
+        const recovery = await saveCheckoutRecovery(env, {
+          recoveryKey: payload.recoveryKey,
+          status: payload.status,
+          customer: payload.customer,
+          shipping: payload.shipping,
+          lines: cart.lines,
+          subtotal: cart.subtotal,
+          failureReason: payload.failureReason,
+          providerOrderId: payload.providerOrderId,
+          localOrderId: payload.localOrderId
+        });
+        return json({ recovery }, 200);
+      } catch (error) {
+        const code = String(error?.message || 'CHECKOUT_RECOVERY_FAILED');
+        const status = code === 'CHECKOUT_RECOVERY_STORAGE_NOT_CONFIGURED' ? 503 : 400;
+        return json({ error: code }, status);
+      }
     }
 
     if (orderCreatePost) {
