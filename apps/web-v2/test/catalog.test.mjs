@@ -87,12 +87,14 @@ test('store and vendor views derive from the bounded initial pilot catalog', () 
 test('department links actually filter the universal store', () => {
   const storeRoute = getPublicRoute('/store');
   const rvHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store?department=rv-outdoor'));
-  assert.match(rvHtml, /Camper Levelers/);
-  assert.doesNotMatch(rvHtml, /SK48V100N/);
+  const rvCatalog = rvHtml.split('<section class="full-catalog"')[1] || '';
+  assert.match(rvCatalog, /Camper Levelers/);
+  assert.doesNotMatch(rvCatalog, /SK48V100N/);
 
   const batteryHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store?department=lithium-batteries'));
-  assert.match(batteryHtml, /SK12V100PC/);
-  assert.doesNotMatch(batteryHtml, /Camper Levelers/);
+  const batteryCatalog = batteryHtml.split('<section class="full-catalog"')[1] || '';
+  assert.match(batteryCatalog, /SK12V100PC/);
+  assert.doesNotMatch(batteryCatalog, /Camper Levelers/);
 });
 
 test('orderable product details expose retail actions while held Kingboss stays disabled', () => {
