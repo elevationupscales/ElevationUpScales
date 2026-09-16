@@ -14,51 +14,44 @@ test('cart parser accepts arrays only and rejects malformed client payloads', ()
   assert.equal(parseCartItems('not-json'), null);
 });
 
-test('current held canonical products cannot become purchasable through cart state', () => {
+test('Kingboss verification pilot cannot become purchasable through cart state', () => {
   const result = resolveCartLines([
-    { productId: 'vevor-xxkljt124incljf0qv0', quantity: 1, unitPrice: { currency: 'USD', amount: 0.01 } },
-    { productId: 'renogy-rsp100dct-us', quantity: 2 }
+    { productId: 'kingboss-d01027hh7bv', quantity: 1, unitPrice: { currency: 'USD', amount: 0.01 } }
   ]);
   assert.deepEqual(result.lines, []);
   assert.equal(result.itemCount, 0);
   assert.equal(result.subtotal.amount, 0);
   assert.equal(result.checkoutReady, false);
-  assert.deepEqual(result.blocked.map(({ reason }) => reason), ['PRODUCT_NOT_ORDERABLE', 'PRODUCT_NOT_ORDERABLE']);
+  assert.deepEqual(result.blocked.map(({ reason }) => reason), ['PRODUCT_NOT_ORDERABLE']);
 });
 
-test('cart derives price and identity from canonical product truth, never client price state', () => {
-  const canonical = {
-    id: 'clean-product',
-    vendorName: 'Verified Vendor',
-    sku: 'SKU-1',
-    title: 'Verified Product',
-    sellPrice: { currency: 'USD', amount: 12.34 },
-    orderable: true
-  };
+test('pilot catalog derives price and identity from canonical product truth, never client price state', () => {
   const result = resolveCartLines([
-    { productId: 'CLEAN-PRODUCT', quantity: 2, unitPrice: { currency: 'USD', amount: 0.01 }, title: 'Tampered title' }
-  ], (id) => id === canonical.id ? canonical : null);
+    { productId: 'sok-sk12v100pc', quantity: 2, unitPrice: { currency: 'USD', amount: 0.01 }, title: 'Tampered title' },
+    { productId: 'vevor-xxkljt124incljf0qv0', quantity: 1, unitPrice: { currency: 'USD', amount: 0.01 } }
+  ]);
 
   assert.equal(result.checkoutReady, true);
-  assert.equal(result.itemCount, 2);
-  assert.equal(result.lines[0].title, 'Verified Product');
-  assert.equal(result.lines[0].unitPrice.amount, 12.34);
-  assert.equal(result.lines[0].lineTotal.amount, 24.68);
-  assert.equal(result.subtotal.amount, 24.68);
+  assert.equal(result.itemCount, 3);
+  assert.equal(result.lines[0].title, 'Premium 12V 100Ah Bluetooth LiFePO4 Battery — SK12V100PC');
+  assert.equal(result.lines[0].unitPrice.amount, 319);
+  assert.equal(result.lines[0].lineTotal.amount, 638);
+  assert.equal(result.lines[1].unitPrice.amount, 39.90);
+  assert.equal(result.subtotal.amount, 677.90);
 });
 
 test('unknown products and invalid quantities fail closed', () => {
   const result = resolveCartLines([
     { productId: 'unknown', quantity: 1 },
     { productId: 'vevor-xxkljt124incljf0qv0', quantity: 0 },
-    { productId: 'renogy-rsp100dct-us', quantity: CART_QUANTITY_LIMIT + 1 }
+    { productId: 'renogy-rng-invt-3000-12v-p2-g3-us', quantity: CART_QUANTITY_LIMIT + 1 }
   ]);
   assert.deepEqual(result.lines, []);
   assert.equal(result.checkoutReady, false);
   assert.deepEqual(result.blocked.map(({ reason }) => reason), ['INVALID_QUANTITY', 'INVALID_QUANTITY', 'UNKNOWN_PRODUCT']);
 });
 
-test('cart route and same-origin resolver are live without checkout or payment fallback', async () => {
+test('cart route resolves the bounded pilot catalog without third-party fallback', async () => {
   const cart = await request('/cart');
   assert.equal(cart.status, 200);
   const body = await cart.text();
@@ -67,13 +60,14 @@ test('cart route and same-origin resolver are live without checkout or payment f
   assert.match(body, /\/assets\/cart\.js/);
   assert.doesNotMatch(body, /Shopify|paypal\.com|\/api\/paypal/i);
 
-  const items = encodeURIComponent(JSON.stringify([{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1 }]));
+  const items = encodeURIComponent(JSON.stringify([{ productId: 'sok-sk12v100pc', quantity: 1 }]));
   const resolved = await request(`/api/cart/resolve?items=${items}`);
   assert.equal(resolved.status, 200);
   const payload = await resolved.json();
-  assert.deepEqual(payload.lines, []);
-  assert.equal(payload.blocked[0].reason, 'PRODUCT_NOT_ORDERABLE');
-  assert.equal(payload.checkoutReady, false);
+  assert.equal(payload.lines.length, 1);
+  assert.equal(payload.lines[0].sku, 'SK12V100PC');
+  assert.equal(payload.lines[0].unitPrice.amount, 319);
+  assert.equal(payload.checkoutReady, true);
 
   const malformed = await request('/api/cart/resolve?items=not-json');
   assert.equal(malformed.status, 400);

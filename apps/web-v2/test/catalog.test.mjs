@@ -13,27 +13,39 @@ import {
 import { renderCatalogPage } from '../src/catalog-pages.js';
 import { getPublicRoute } from '../src/routes.js';
 
-test('canonical catalog preserves exact verified subset identities without inventing SOK SKUs', () => {
-  assert.equal(CATALOG_PRODUCTS.length, 7);
-  assert.deepEqual(getProductsByVendor('sok'), []);
-  assert.equal(getVendor('sok').unresolvedFacts[0], 'exactSkuIdentity');
-  assert.equal(getProductById('renogy-rsp100dct-us').sku, 'RSP100DCT-US');
-  assert.equal(getProductById('renogy-rsp100dct-us').supplierSku, 'RSP100DCT-G1-US');
-  assert.equal(getProductById('renogy-rbm500-us').supplierSku, 'RBM500-G3-US');
-  assert.equal(getProductById('renogy-rbc2125ds-21w-us').supplierSku, 'RBC2125DS-21W-G3-US');
-  assert.equal(getProductById('kingboss-d01027hh7bv').supplierSku, 'Model 133');
-  assert.deepEqual(getProductsByVendor('vevor').map(({ sku }) => sku), ['XXKLJT124INCLJF0QV0', 'AXLSTCQJDSYKAZ99C001V0', 'D25FT14IN20AHOGLOV1']);
+test('initial vendor pilot is 9 SOK plus one record per remaining launch vendor', () => {
+  assert.equal(CATALOG_PRODUCTS.length, 12);
+  assert.deepEqual(getProductsByVendor('sok').map(({ sku }) => sku), [
+    'SK12V100PC',
+    'SK12V100H',
+    'SK12V206H',
+    'SK12V206PH',
+    'SK24V100',
+    'SK12V280H',
+    'SK12V314PH',
+    'SK24V150PH',
+    'SK48V100N'
+  ]);
+  assert.deepEqual(getVendor('sok').unresolvedFacts, []);
+  assert.deepEqual(getProductsByVendor('renogy').map(({ sku }) => sku), ['RNG-INVT-3000-12V-P2-G3-US']);
+  assert.deepEqual(getProductsByVendor('vevor').map(({ sku }) => sku), ['XXKLJT124INCLJF0QV0']);
+  assert.deepEqual(getProductsByVendor('kingboss').map(({ sku }) => sku), ['D01027HH7BV']);
+  assert.equal(getProductById('kingboss-d01027hh7bv').supplierSku, UNVERIFIED);
 });
 
-test('all source gaps fail closed and cannot become orderable', () => {
-  for (const product of CATALOG_PRODUCTS) {
-    assert.equal(product.orderable, false, product.id);
-    assert.ok(product.missingFacts.length > 0, product.id);
-    for (const field of product.missingFacts) assert.ok(REQUIRED_ORDERABILITY_FIELDS.includes(field));
-  }
-  assert.ok(getProductById('vevor-xxkljt124incljf0qv0').missingFacts.includes('specs'));
-  assert.ok(getProductById('renogy-rsp100dct-us').missingFacts.includes('sellPrice'));
-  assert.ok(getProductById('kingboss-d01027hh7bv').missingFacts.includes('channelAuthorization'));
+test('launch-ready pilot records are orderable while Kingboss remains fail-closed', () => {
+  const orderable = CATALOG_PRODUCTS.filter(({ orderable }) => orderable);
+  assert.equal(orderable.length, 11);
+  assert.equal(getProductsByVendor('sok').every(({ orderable }) => orderable), true);
+  assert.equal(getProductById('renogy-rng-invt-3000-12v-p2-g3-us').orderable, true);
+  assert.equal(getProductById('vevor-xxkljt124incljf0qv0').orderable, true);
+
+  const kingboss = getProductById('kingboss-d01027hh7bv');
+  assert.equal(kingboss.orderable, false);
+  assert.ok(kingboss.missingFacts.length > 0);
+  assert.ok(kingboss.missingFacts.includes('media'));
+  assert.ok(kingboss.missingFacts.includes('channelAuthorization'));
+  for (const field of kingboss.missingFacts) assert.ok(REQUIRED_ORDERABILITY_FIELDS.includes(field));
 });
 
 test('orderability is derived and recursive UNVERIFIED values fail closed', () => {
@@ -50,31 +62,38 @@ test('orderability is derived and recursive UNVERIFIED values fail closed', () =
   assert.deepEqual(missingRequiredFacts(missingFloor), ['priceFloor']);
 });
 
-test('store and vendor views derive from the canonical catalog without Shopify fallback', () => {
+test('store and vendor views derive from the bounded initial pilot catalog', () => {
   const storeRoute = getPublicRoute('/store');
   const storeHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store'));
   assert.match(storeHtml, /Power Your RV/);
   assert.match(storeHtml, /Featured Products/);
-  assert.match(storeHtml, /RSP100DCT-US/);
+  assert.match(storeHtml, /SK12V100PC/);
+  assert.match(storeHtml, /RNG-INVT-3000-12V-P2-G3-US/);
   assert.match(storeHtml, /XXKLJT124INCLJF0QV0/);
   assert.match(storeHtml, /D01027HH7BV/);
-  assert.doesNotMatch(storeHtml, /Add to Cart|Shopify/i);
+
   const vevorHtml = renderCatalogPage(getPublicRoute('/shop/vevor'), new URL('https://test.example/shop/vevor'));
   assert.match(vevorHtml, /Camper Levelers/);
-  assert.doesNotMatch(vevorHtml, /RSP100DCT-US/);
+  assert.doesNotMatch(vevorHtml, /RNG-INVT-3000-12V-P2-G3-US/);
+
   const sokHtml = renderCatalogPage(getPublicRoute('/shop/sok'), new URL('https://test.example/shop/sok'));
-  assert.match(sokHtml, /No SOK checkout is enabled/);
-  assert.doesNotMatch(sokHtml, /SK12V100PC|SK48V100N/);
+  assert.match(sokHtml, /SK12V100PC/);
+  assert.match(sokHtml, /SK48V100N/);
+  assert.doesNotMatch(sokHtml, /No SOK checkout is enabled/);
 });
 
-test('product detail renders verified facts and holds missing facts without checkout', () => {
-  const route = getPublicRoute('/product/vevor-xxkljt124incljf0qv0');
-  assert.equal(route.implemented, true);
-  const page = renderCatalogPage(route, new URL('https://test.example/product/vevor-xxkljt124incljf0qv0'));
-  assert.match(page, /XXKLJT124INCLJF0QV0/);
-  assert.match(page, /\$39\.90/);
-  assert.match(page, /Verification hold — checkout disabled/);
-  assert.match(page, /approved product specifications/);
-  assert.match(page, /current MAP \/ advertised-price floor/);
-  assert.doesNotMatch(page, /Add to Cart|Shopify|paypal\.com/i);
+test('orderable product details expose cart action while held Kingboss stays disabled', () => {
+  const vevorRoute = getPublicRoute('/product/vevor-xxkljt124incljf0qv0');
+  assert.equal(vevorRoute.implemented, true);
+  const vevorPage = renderCatalogPage(vevorRoute, new URL('https://test.example/product/vevor-xxkljt124incljf0qv0'));
+  assert.match(vevorPage, /XXKLJT124INCLJF0QV0/);
+  assert.match(vevorPage, /\$39\.90/);
+  assert.match(vevorPage, /Orderable through Elevation direct commerce/);
+  assert.match(vevorPage, /Add to Cart/);
+
+  const heldRoute = getPublicRoute('/product/kingboss-d01027hh7bv');
+  const heldPage = renderCatalogPage(heldRoute, new URL('https://test.example/product/kingboss-d01027hh7bv'));
+  assert.match(heldPage, /Verification hold — checkout disabled/);
+  assert.match(heldPage, /approved product media/);
+  assert.doesNotMatch(heldPage, /data-add-to-cart/);
 });

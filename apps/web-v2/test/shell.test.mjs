@@ -176,8 +176,10 @@ test('canonical catalog routes remain customer-safe', async () => {
   for (const path of ['/store', '/shop/sok', '/shop/renogy', '/shop/vevor', '/shop/kingboss', '/product/vevor-xxkljt124incljf0qv0']) {
     const res = await request(path);
     assert.equal(res.status, 200, path);
+    assert.match(res.headers.get('content-security-policy') || '', /https:\/\/cdn\.shopify\.com/);
     const body = await res.text();
-    assert.doesNotMatch(body, /Shopify|paypal\.com/i, path);
+    const customerSafetyBody = body.replace(/https:\/\/cdn\.shopify\.com\/[^"'<>\s]+/gi, '');
+    assert.doesNotMatch(customerSafetyBody, /Shopify|paypal\.com/i, path);
     assertCustomerSafe(body);
   }
 });

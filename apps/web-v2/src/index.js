@@ -24,7 +24,7 @@ const baseHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  'Content-Security-Policy': "default-src 'self'; img-src 'self' https://elevationupscales.com https://image.doba.com https://img.vevorstatic.com https://image.vevor.com https://utedusjer.no https://s.alicdn.com https://i5.walmartimages.com https://mobileimages.lowes.com data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+  'Content-Security-Policy': "default-src 'self'; img-src 'self' https://elevationupscales.com https://cdn.shopify.com https://image.doba.com https://img.vevorstatic.com https://image.vevor.com https://utedusjer.no https://s.alicdn.com https://i5.walmartimages.com https://mobileimages.lowes.com data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 };
 
 function response(body, init = {}) {

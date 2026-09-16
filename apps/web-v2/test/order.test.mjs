@@ -30,9 +30,9 @@ const charges = () => ({
   amountDue: { currency: 'USD', amount: 281 }
 });
 
-test('current canonical holds cannot reach order or payment readiness', () => {
+test('held Kingboss pilot cannot reach order or payment readiness', () => {
   const result = resolveOrderHandoff(
-    [{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1, unitPrice: { amount: 0.01 } }],
+    [{ productId: 'kingboss-d01027hh7bv', quantity: 1, unitPrice: { amount: 0.01 } }],
     customer,
     shipping
   );

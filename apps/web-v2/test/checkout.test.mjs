@@ -19,15 +19,30 @@ const cleanProduct = {
 
 const lookup = (id) => id === cleanProduct.id ? cleanProduct : null;
 
-test('checkout re-resolves current canonical cart state and held products fail closed', () => {
+test('Kingboss verification pilot fails closed during checkout re-resolution', () => {
   const result = resolveCheckout(
-    [{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1 }],
+    [{ productId: 'kingboss-d01027hh7bv', quantity: 1 }],
     { country: 'US', state: 'CO', postalCode: '80903' }
   );
   assert.deepEqual(result.lines, []);
   assert.equal(result.blocked[0].reason, 'PRODUCT_NOT_ORDERABLE');
   assert.equal(result.checkoutReady, false);
   assert.equal(result.paymentReady, false);
+  assert.equal(result.totals.amountDue, null);
+});
+
+test('SOK pilot product resolves for lower-48 checkout while payment stays server-gated', () => {
+  const result = resolveCheckout(
+    [{ productId: 'sok-sk12v100pc', quantity: 1 }],
+    { country: 'US', state: 'CO', postalCode: '80903' }
+  );
+  assert.equal(result.checkoutReady, true);
+  assert.equal(result.paymentReady, false);
+  assert.equal(result.lines[0].sku, 'SK12V100PC');
+  assert.equal(result.lines[0].unitPrice.amount, 319);
+  assert.equal(result.totals.merchandiseSubtotal.amount, 319);
+  assert.equal(result.totals.shipping, null);
+  assert.equal(result.totals.tax, null);
   assert.equal(result.totals.amountDue, null);
 });
 
@@ -76,7 +91,7 @@ test('checkout route is live, noindex, and loads no third-party payment script o
 
 test('checkout resolver accepts POST only for stateless review and rejects malformed payloads', async () => {
   const payload = {
-    items: [{ productId: 'vevor-xxkljt124incljf0qv0', quantity: 1 }],
+    items: [{ productId: 'kingboss-d01027hh7bv', quantity: 1 }],
     destination: { country: 'US', state: 'CO', postalCode: '80903' }
   };
   const res = await request('/api/checkout/resolve', {
