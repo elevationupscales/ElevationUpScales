@@ -14,7 +14,8 @@ const RETAIL_NAV = Object.freeze([
   { label: 'Shop', href: '/store' },
   { label: 'SOK', href: '/shop/sok' },
   { label: 'Renogy', href: '/shop/renogy' },
-  { label: 'VEVOR', href: '/shop/vevor' }
+  { label: 'VEVOR', href: '/shop/vevor' },
+  { label: 'SunGoldPower', href: '/shop/sungoldpower' }
 ]);
 
 function header(currentPath) {
@@ -86,8 +87,8 @@ function vendorFilters(activeVendor = '') {
 function storeCategoryCards() {
   const cards = [
     { title: 'SOK Batteries', href: '/shop/sok', image: '/assets/brands/sok/sk12v100pc/official-clean.png' },
-    { title: 'Solar & Charging', href: '/shop/renogy', image: '/assets/hero/store-rv-solar-technician-clean.webp' },
-    { title: 'Inverters & Charging', href: '/shop/renogy', icon: 'inverter' },
+    { title: 'Solar & Charging', href: '/shop/sungoldpower', image: '/assets/hero/store-rv-solar-technician-clean.webp' },
+    { title: 'Inverters & Charging', href: '/shop/sungoldpower', icon: 'inverter' },
     { title: 'RV & Outdoor', href: '/store?department=rv-outdoor', image: '/assets/hero/store-rv-mountains.webp' },
     { title: 'Accessories', href: '/store?q=accessories', icon: 'accessories' },
     { title: 'Commercial', href: '/store?q=commercial', icon: 'commercial' }
@@ -132,7 +133,7 @@ function storeMain(url) {
     <div class="catalog-shell store-content">
       <section class="store-shopby" aria-labelledby="store-shop-title"><div class="store-section-heading"><h2 id="store-shop-title">Shop the <span>Store</span></h2><a href="/store">View All Products →</a></div><div class="store-category-grid">${storeCategoryCards()}</div></section>
       <section class="store-featured" aria-labelledby="featured-title"><div class="store-section-heading"><div><p>FEATURED PRODUCTS</p><h2 id="featured-title">Ready to Shop</h2></div></div><div class="catalog-grid catalog-featured-grid">${featuredProducts()}</div></section>
-      <section class="dealer-trust" aria-label="Approved dealer relationships"><p>AUTHORIZED &amp; APPROVED BRAND RELATIONSHIPS</p><div><strong>SOK BATTERY</strong><strong>RENOGY</strong><strong>VEVOR</strong><strong>WINEGARD</strong></div></section>
+      <section class="dealer-trust" aria-label="Approved dealer relationships"><p>AUTHORIZED &amp; APPROVED BRAND RELATIONSHIPS</p><div><strong>SOK BATTERY</strong><strong>RENOGY</strong><strong>SUNGOLDPOWER</strong><strong>VEVOR</strong><strong>WINEGARD</strong></div></section>
       <section class="full-catalog" aria-labelledby="catalog-title"><div class="store-section-heading"><div><p>ALL PRODUCTS</p><h2 id="catalog-title">Find the right product.</h2></div></div>${vendorFilters(vendorParam)}${query ? `<p>Search results for <strong>${escapeHtml(query)}</strong></p>` : ''}<section class="catalog-grid" aria-label="Product catalog">${products.length ? products.map(card).join('') : '<div class="catalog-empty">No products match this view right now.</div>'}</section></section>
     </div>
   </main>`;
