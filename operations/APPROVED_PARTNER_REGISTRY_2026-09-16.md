@@ -1,25 +1,27 @@
-# Elevation UpScales — Approved Partner Registry
+# Elevation UpScales — Authorized Dealer Registry
 
 **Date:** 2026-09-16
-**Purpose:** name-level source of truth for customer-facing partner/brand presentation. Product listings are not required for a brand to appear in this registry, but relationship wording must remain factually supported.
+**Purpose:** name-level source of truth for customer-facing authorized-dealer brand presentation. Product listings are not required for a brand to appear in this registry.
 
-## Current verified approved / active commercial relationships
+## Current authorized dealer brands
 
-| Brand | Verified relationship state | Catalog direction |
+| Brand | Relationship | Catalog direction |
 |---|---|---|
-| SOK Energy | Authorized dealer / active primary battery supplier | Core / active |
-| Renogy | Approved Dealer Partner | Core / expand |
-| SunGoldPower | Distributor review passed; website listing authorized | Core / expand |
-| Winegard | Reseller application approved and agreement completed | Core RV/connectivity / name shell first |
-| Phocos | Dealer/reseller account set up and ready to move forward | Core solar support / name shell first |
-| Kingboss | B2B wholesale approved; direct commercial structure still being reconciled | Secondary / name shell only until product/commercial gates clear |
-| VEVOR | Active direct commercial / PRO dropship relationship | Back burner / maintain existing only |
+| SOK Energy | Authorized Dealer | Core / active |
+| Renogy | Authorized Dealer | Core / expand |
+| SunGoldPower | Authorized Dealer | Core / expand |
+| Winegard | Authorized Dealer | Core RV/connectivity / name shell first |
+| Phocos | Authorized Dealer | Core solar support / name shell first |
+| Kingboss | Authorized Dealer | Secondary / name shell only until product/commercial gates clear |
+| VEVOR | Authorized Dealer | Back burner / maintain existing only |
 
-## Not in approved-partner roster yet
+## Not in authorized-dealer roster yet
 
-Do not present prospects, application-stage suppliers, logistics providers, marketplaces, or fulfillment platforms as approved product-brand partners unless separate approval evidence exists. This includes application/review lanes such as Signature Solar and Dometic unless a later verified approval supersedes this file.
+Do not present prospects, application-stage suppliers, logistics providers, marketplaces, or fulfillment platforms as authorized dealers unless a later verified approval supersedes this file. This includes application/review lanes such as Signature Solar and Dometic.
 
 ## Public presentation rule
+
+Customer-facing relationship wording for the seven brands above is **Authorized Dealer**. Internal operating states such as pricing verified, media received, dropship active, catalog live, back burner, hold, or Hawaii qualification remain separate operational controls and must not replace the public dealer relationship label.
 
 Partner names may be introduced before product listings exist. Name-only presentation must not imply that a specific SKU is currently orderable, stocked, dropship-ready, or authorized for a specific marketplace unless those exact product/channel facts are verified separately.
 
@@ -33,4 +35,4 @@ Partner names may be introduced before product listings exist. Name-only present
 6. Kingboss — secondary/held
 7. VEVOR — back burner/maintain only
 
-**CONTROL:** BUILD THE VERIFIED PARTNER NAMES INTO THE BRAND SYSTEM FIRST. ACTIVATE PRODUCTS ONLY WHEN SKU-LEVEL PRICE, CHANNEL, FULFILLMENT, MEDIA, AND ORDERABILITY FACTS ARE VERIFIED.
+**CONTROL:** PRESENT ALL SEVEN VERIFIED BRANDS AS AUTHORIZED DEALERS. BUILD THE BRAND NAMES INTO THE STORE FIRST. ACTIVATE PRODUCTS ONLY WHEN SKU-LEVEL PRICE, CHANNEL, FULFILLMENT, MEDIA, AND ORDERABILITY FACTS ARE VERIFIED.
