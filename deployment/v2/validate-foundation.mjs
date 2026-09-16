@@ -16,12 +16,28 @@ if (wrangler.preview_urls !== true) fail('Preview URLs may remain enabled for di
 if (wrangler.workers_dev !== true) fail('workers.dev must remain available during isolated migration.');
 if (wrangler.version_metadata?.binding !== 'CF_VERSION_METADATA') fail('Version metadata binding is required for exact smoke proof.');
 
+// Commerce activation is the first explicit post-foundation data/runtime gate.
+// Keep it narrowly pinned so later infrastructure cannot arrive silently.
+const allowedVars = {
+  PAYPAL_ENV: 'live',
+  STORE_LIVE_CHECKOUT_ENABLED: 'true'
+};
+if (JSON.stringify(wrangler.vars || {}) !== JSON.stringify(allowedVars)) {
+  fail('Web V2 commerce runtime vars must remain pinned to the approved live-checkout gate.');
+}
+
+const d1 = wrangler.d1_databases;
+if (!Array.isArray(d1) || d1.length !== 1) fail('Exactly one approved commerce D1 binding is required.');
+if (d1[0]?.binding !== 'ELEVATION_COMMERCE_DB') fail('Unexpected commerce D1 binding name.');
+if (d1[0]?.database_name !== 'elevation-upscales-marketplace') fail('Unexpected commerce D1 database name.');
+if (d1[0]?.database_id !== 'f615a6ca-ebe6-4004-869e-848732fec000') fail('Unexpected commerce D1 database id.');
+
 const forbiddenWranglerKeys = [
-  'routes', 'route', 'custom_domains', 'd1_databases', 'kv_namespaces',
-  'r2_buckets', 'vars', 'services', 'durable_objects', 'queues', 'workflows'
+  'routes', 'route', 'custom_domains', 'kv_namespaces',
+  'r2_buckets', 'services', 'durable_objects', 'queues', 'workflows'
 ];
 for (const key of forbiddenWranglerKeys) {
-  if (Object.prototype.hasOwnProperty.call(wrangler, key)) fail(`Route/data binding must be introduced through an explicit later gate, not the release foundation: ${key}`);
+  if (Object.prototype.hasOwnProperty.call(wrangler, key)) fail(`Route/data binding must be introduced through an explicit later gate, not the current commerce gate: ${key}`);
 }
 
 const release = read('.github/workflows/web-v2-release.yml');
