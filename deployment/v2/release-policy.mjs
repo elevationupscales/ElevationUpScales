@@ -4,6 +4,8 @@ export const WORKER_NAME = 'elevation-web-v2';
 export const WRANGLER_VERSION = '4.129.0';
 export const FULL_SHA_RE = /^[a-f0-9]{40}$/;
 export const UUID_RE = /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i;
+export const WORKER_VERSION_ID_RE = /Worker Version ID:\s*([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i;
+export const LEGACY_VERSION_ID_RE = /(?:^|\n)Version ID:\s*([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i;
 export const PREVIEW_URL_RE = /https:\/\/[^\s\"'<>]+\.workers\.dev\/?/i;
 
 export function assertFullSha(value) {
@@ -21,9 +23,9 @@ export function releaseTag(sha) {
 export function parseUploadOutput(text, sha) {
   assertFullSha(sha);
   const body = String(text || '');
-  const version = body.match(UUID_RE)?.[0];
+  const version = body.match(WORKER_VERSION_ID_RE)?.[1] || body.match(LEGACY_VERSION_ID_RE)?.[1] || null;
   const previewUrl = body.match(PREVIEW_URL_RE)?.[0] || null;
-  if (!version) throw new Error('Wrangler upload output did not expose a Cloudflare Version ID.');
+  if (!version) throw new Error('Wrangler upload output did not expose a Cloudflare Worker Version ID.');
   if (previewUrl && !previewUrl.includes(`-${WORKER_NAME}.`)) {
     throw new Error(`Preview URL is not for ${WORKER_NAME}.`);
   }
