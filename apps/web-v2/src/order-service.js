@@ -1,5 +1,6 @@
 import { getProductById } from './catalog.js';
-import { resolveOrderHandoff, unresolvedChargeState } from './order.js';
+import { resolveOrderHandoff } from './order.js';
+import { createLower48ChargeResolver } from './lower48-charges.js';
 import { createPaypalOrder, capturePaypalOrder, paymentGate, paypalMode } from './paypal.js';
 import { attachProviderOrder, createDirectOrder, loadDirectOrder, markOrderCaptured } from './order-storage.js';
 
@@ -28,13 +29,14 @@ function sameMoney(left, right) {
 
 export async function createOrderFromCheckout(payload, env, {
   productLookup = getProductById,
-  chargeResolver = unresolvedChargeState,
+  chargeResolver = null,
   storage = { createDirectOrder, attachProviderOrder },
   payment = { createPaypalOrder }
 } = {}) {
   if (!payload || !Array.isArray(payload.items)) return { status: 400, body: { error: 'INVALID_ORDER_PAYLOAD' } };
 
-  const draft = resolveOrderHandoff(payload.items, payload.customer, payload.shipping, { productLookup, chargeResolver });
+  const resolver = chargeResolver || createLower48ChargeResolver(env, productLookup);
+  const draft = resolveOrderHandoff(payload.items, payload.customer, payload.shipping, { productLookup, chargeResolver: resolver });
   if (!draft.orderReady || !draft.paymentReady) {
     return { status: 409, body: { error: 'ORDER_NOT_PAYMENT_READY', ...safeDraft(draft) } };
   }
@@ -90,7 +92,7 @@ export async function createOrderFromCheckout(payload, env, {
 
 export async function captureOrderPayment(providerOrderId, env, {
   productLookup = getProductById,
-  chargeResolver = unresolvedChargeState,
+  chargeResolver = null,
   storage = { loadDirectOrder, markOrderCaptured },
   payment = { capturePaypalOrder }
 } = {}) {
@@ -117,7 +119,8 @@ export async function captureOrderPayment(providerOrderId, env, {
   }
 
   const requestedLines = order.items.map((item) => ({ productId: item.productId, quantity: item.quantity }));
-  const draft = resolveOrderHandoff(requestedLines, order.customer, order.shippingAddress, { productLookup, chargeResolver });
+  const resolver = chargeResolver || createLower48ChargeResolver(env, productLookup);
+  const draft = resolveOrderHandoff(requestedLines, order.customer, order.shippingAddress, { productLookup, chargeResolver: resolver });
   if (!draft.orderReady || !draft.paymentReady) {
     return { status: 409, body: { error: 'ORDER_REVALIDATION_FAILED', ...safeDraft(draft) } };
   }
