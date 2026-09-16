@@ -56,6 +56,7 @@ test('cart route resolves the bounded pilot catalog without third-party fallback
   assert.equal(cart.status, 200);
   const body = await cart.text();
   assert.match(body, /Your Cart/);
+  assert.match(body, /Review your items and continue to checkout/);
   assert.match(body, /data-cart-root/);
   assert.match(body, /\/assets\/cart\.js/);
   assert.doesNotMatch(body, /Shopify|paypal\.com|\/api\/paypal/i);
@@ -74,13 +75,15 @@ test('cart route resolves the bounded pilot catalog without third-party fallback
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CART_PAYLOAD' });
 });
 
-test('cart client stores only product IDs and quantities and uses the server resolver', async () => {
+test('cart client supports Buy Now and stores only product IDs and quantities', async () => {
   const res = await request('/assets/cart.js');
   assert.equal(res.status, 200);
   const script = await res.text();
   assert.match(script, /localStorage/);
   assert.match(script, /productId, quantity/);
   assert.match(script, /\/api\/cart\/resolve/);
-  assert.match(script, /Continue to checkout/);
+  assert.match(script, /data-buy-now/);
+  assert.match(script, /window\.location\.assign\('\/checkout'\)/);
+  assert.match(script, /Shipping is covered to the Lower 48/);
   assert.doesNotMatch(script, /paypal\.com|Shopify|unitPrice:\s*line/i);
 });
