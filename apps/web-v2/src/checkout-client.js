@@ -3,6 +3,7 @@ export const checkoutClientScript = `
   const CART_KEY = 'elevation-cart-v1';
   const CHECKOUT_KEY = 'elevation-checkout-profile-v1';
   const IDEMPOTENCY_KEY = 'elevation-checkout-idempotency-v1';
+  const RECOVERY_KEY = 'elevation-checkout-recovery-id-v1';
   const form = document.querySelector('[data-checkout-form]');
   const root = document.querySelector('[data-checkout-root]');
   if (!form || !root) return;
@@ -45,6 +46,18 @@ export const checkoutClientScript = `
     });
   }
 
+  function recoveryKey() {
+    try {
+      let key = localStorage.getItem(RECOVERY_KEY) || '';
+      if (/^[A-Za-z0-9._:-]{12,120}$/.test(key)) return key;
+      key = crypto.randomUUID ? 'recovery-' + crypto.randomUUID() : 'recovery-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+      localStorage.setItem(RECOVERY_KEY, key);
+      return key;
+    } catch {
+      return 'recovery-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+    }
+  }
+
   const money = (price) => new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: price?.currency || 'USD'
@@ -67,6 +80,26 @@ export const checkoutClientScript = `
         postalCode: String(data.get('postalCode') || '')
       }
     };
+  }
+
+  async function recordRecovery(status, orderPayload, extras = {}) {
+    try {
+      await fetch('/api/checkout/recovery', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recoveryKey: recoveryKey(),
+          status,
+          items: orderPayload.items,
+          customer: orderPayload.customer,
+          shipping: orderPayload.shipping,
+          ...extras
+        })
+      });
+    } catch {
+      // Recovery telemetry must never block checkout.
+    }
   }
 
   function idempotencyFor(payload) {
@@ -104,17 +137,23 @@ export const checkoutClientScript = `
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.approveUrl) {
+        await recordRecovery('PAYMENT_START_FAILED', orderPayload, { failureReason: String(payload.error || 'PAYPAL_ORDER_CREATE_FAILED') });
         appendNotice('Payment unavailable', 'We could not start PayPal. No charge was made.');
         return;
       }
       const approval = new URL(payload.approveUrl);
       if (approval.protocol !== 'https:' || !approval.hostname.endsWith('paypal.com')) {
+        await recordRecovery('PAYMENT_START_FAILED', orderPayload, { failureReason: 'INVALID_PAYPAL_APPROVAL_URL' });
         appendNotice('Payment unavailable', 'We could not open PayPal. No charge was made.');
         return;
       }
+      await recordRecovery('PAYMENT_ORDER_CREATED', orderPayload, {
+        providerOrderId: String(payload.providerOrderId || '')
+      });
       saveProfile();
       window.location.assign(approval.href);
     } catch {
+      await recordRecovery('PAYMENT_START_FAILED', orderPayload, { failureReason: 'PAYMENT_START_EXCEPTION' });
       appendNotice('Payment unavailable', 'We could not start PayPal. No charge was made.');
     } finally {
       root.removeAttribute('aria-busy');
@@ -149,6 +188,7 @@ export const checkoutClientScript = `
     const data = new FormData(form);
     const orderPayload = orderPayloadFromForm(data);
     saveProfile();
+    await recordRecovery('CHECKOUT_STARTED', orderPayload);
     root.setAttribute('aria-busy', 'true');
     try {
       const response = await fetch('/api/checkout/resolve', {
@@ -165,8 +205,13 @@ export const checkoutClientScript = `
         })
       });
       if (!response.ok) throw new Error('checkout resolve failed');
-      render(await response.json(), orderPayload);
+      const payload = await response.json();
+      if (!payload.checkoutReady) {
+        await recordRecovery('CHECKOUT_RESOLVE_FAILED', orderPayload, { failureReason: 'CHECKOUT_NOT_READY' });
+      }
+      render(payload, orderPayload);
     } catch {
+      await recordRecovery('CHECKOUT_RESOLVE_FAILED', orderPayload, { failureReason: 'CHECKOUT_RESOLVE_EXCEPTION' });
       root.replaceChildren();
       const error = document.createElement('div');
       error.className = 'cart-empty';
@@ -181,7 +226,9 @@ export const checkoutClientScript = `
     const params = new URLSearchParams(window.location.search);
     const state = params.get('payment');
     const token = String(params.get('token') || '');
+    const orderPayload = orderPayloadFromForm(new FormData(form));
     if (state === 'cancelled') {
+      await recordRecovery('PAYMENT_CANCELLED', orderPayload, { providerOrderId: token, failureReason: 'PAYPAL_CANCELLED' });
       appendNotice('Payment cancelled', 'No charge was made. Your cart and delivery details are still saved on this device.');
       return;
     }
@@ -197,17 +244,21 @@ export const checkoutClientScript = `
       });
       root.replaceChildren();
       if (!response.ok) {
+        await recordRecovery('PAYMENT_START_FAILED', orderPayload, { providerOrderId: token, failureReason: 'PAYPAL_CAPTURE_CONFIRMATION_FAILED' });
         appendNotice('Payment needs attention', 'We could not confirm the returned payment automatically. Please contact Elevation UpScales.');
         return;
       }
+      await recordRecovery('PAYMENT_COMPLETED', orderPayload, { providerOrderId: token });
       const complete = document.createElement('div');
       complete.className = 'cart-empty';
       complete.innerHTML = '<h2>Order confirmed</h2><p>Your order is ready for fulfillment.</p><a href="/store">Continue shopping →</a>';
       root.append(complete);
       localStorage.removeItem(CART_KEY);
+      localStorage.removeItem(RECOVERY_KEY);
       sessionStorage.removeItem(IDEMPOTENCY_KEY);
       history.replaceState({}, '', '/checkout');
     } catch {
+      await recordRecovery('PAYMENT_START_FAILED', orderPayload, { providerOrderId: token, failureReason: 'PAYPAL_CAPTURE_EXCEPTION' });
       appendNotice('Payment needs attention', 'We could not confirm the returned payment automatically. Please contact Elevation UpScales.');
     } finally {
       root.removeAttribute('aria-busy');
