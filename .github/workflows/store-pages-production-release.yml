@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       expected_sha:
-        description: Exact current main SHA containing the approved store fix
+        description: Exact current main SHA containing the approved store release
         required: true
         type: string
       confirmation:
@@ -53,18 +53,26 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
 
-      - name: HARD GATE — homepage source must be byte-identical to locked homepage
+      - name: HARD GATE — homepage source remains exactly locked
         run: |
           set -euo pipefail
           ACTUAL="$(git hash-object site/index.html)"
           echo "Homepage blob: $ACTUAL"
           test "$ACTUAL" = "$LOCKED_HOME_BLOB"
 
-      - name: Snapshot currently-live homepage bytes
+      - name: Snapshot currently-live homepage semantics
         run: |
           set -euo pipefail
           curl -fsSL --retry 5 --retry-delay 2 "$LIVE_ORIGIN/" -o /tmp/home-before.html
-          sha256sum /tmp/home-before.html | tee /tmp/home-before.sha
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          src = Path('/tmp/home-before.html').read_text()
+          src = re.sub(r'(/cdn-cgi/l/email-protection#)[0-9a-fA-F]+', r'\1CFEMAIL', src)
+          src = re.sub(r'(data-cfemail=")[0-9a-fA-F]+(")', r'\1CFEMAIL\2', src)
+          Path('/tmp/home-before.normalized.html').write_text(src)
+          PY
+          sha256sum /tmp/home-before.normalized.html | tee /tmp/home-before.sha
           grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/home-before.html
 
       - name: Validate only the commerce release surface
@@ -106,19 +114,50 @@ jobs:
             --commit-hash "$EXPECTED_SHA" \
             2>&1 | tee /tmp/pages-deploy.txt
 
-      - name: HARD GATE — live homepage must remain byte-identical after deployment
+      - name: Capture Cloudflare Pages deployment receipt
+        id: pages_receipt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          curl -fsS \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments" \
+            -o /tmp/pages-deployments.json
+          jq -e '.success == true' /tmp/pages-deployments.json >/dev/null
+          DEPLOYMENT="$(jq -c --arg sha "$EXPECTED_SHA" '[.result[] | select(.deployment_trigger.metadata.commit_hash == $sha)] | sort_by(.created_on) | reverse | .[0]' /tmp/pages-deployments.json)"
+          test "$DEPLOYMENT" != "null"
+          DEPLOYMENT_ID="$(jq -r '.id' <<<"$DEPLOYMENT")"
+          DEPLOYMENT_URL="$(jq -r '.url' <<<"$DEPLOYMENT")"
+          echo "deployment_id=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
+          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
+          echo "Cloudflare Pages deployment ID: $DEPLOYMENT_ID"
+          echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
+
+      - name: HARD GATE — homepage semantics remain unchanged after deployment
         run: |
           set -euo pipefail
           BEFORE="$(cut -d' ' -f1 /tmp/home-before.sha)"
           AFTER=""
           for attempt in 1 2 3 4 5 6; do
             curl -fsSL --retry 2 "$LIVE_ORIGIN/" -o /tmp/home-after.html
-            AFTER="$(sha256sum /tmp/home-after.html | cut -d' ' -f1)"
+            python3 - <<'PY'
+          import re
+          from pathlib import Path
+          src = Path('/tmp/home-after.html').read_text()
+          src = re.sub(r'(/cdn-cgi/l/email-protection#)[0-9a-fA-F]+', r'\1CFEMAIL', src)
+          src = re.sub(r'(data-cfemail=")[0-9a-fA-F]+(")', r'\1CFEMAIL\2', src)
+          Path('/tmp/home-after.normalized.html').write_text(src)
+          PY
+            AFTER="$(sha256sum /tmp/home-after.normalized.html | cut -d' ' -f1)"
             [ "$AFTER" = "$BEFORE" ] && break
             sleep 5
           done
-          echo "Homepage before: $BEFORE"
-          echo "Homepage after:  $AFTER"
+          echo "Homepage normalized before: $BEFORE"
+          echo "Homepage normalized after:  $AFTER"
           test "$AFTER" = "$BEFORE"
 
       - name: Prove live Pages checkout backend for SOK SK12V100PC
@@ -137,13 +176,17 @@ jobs:
       - name: Release summary
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          DEPLOYMENT_ID: ${{ steps.pages_receipt.outputs.deployment_id }}
+          DEPLOYMENT_URL: ${{ steps.pages_receipt.outputs.deployment_url }}
         run: |
           {
             echo '### STORE PAGES PRODUCTION RELEASE'
             echo "Project: $PROJECT_NAME"
             echo "Git SHA: $EXPECTED_SHA"
+            echo "Cloudflare Pages deployment ID: $DEPLOYMENT_ID"
+            echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
             echo "Homepage source blob: $LOCKED_HOME_BLOB"
-            echo 'Homepage bytes before/after: IDENTICAL'
+            echo 'Homepage normalized before/after: IDENTICAL'
             echo 'SOK SK12V100PC live quote: PASS'
             echo 'PayPal live config: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
