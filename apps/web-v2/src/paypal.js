@@ -46,6 +46,30 @@ function safeReturnOrigin(value) {
   }
 }
 
+function paypalShippingAddress(shippingAddress) {
+  const address = shippingAddress || {};
+  if (!clean(address.fullName, 120) || !clean(address.address1, 180) || !clean(address.city, 120) ||
+      !/^[A-Z]{2}$/.test(clean(address.state, 2).toUpperCase()) ||
+      !/^\d{5}(?:-\d{4})?$/.test(clean(address.postalCode, 30)) ||
+      clean(address.countryCode || 'US', 2).toUpperCase() !== 'US') {
+    throw new Error('INVALID_PAYPAL_SHIPPING_ADDRESS');
+  }
+
+  const postalAddress = {
+    address_line_1: clean(address.address1, 180),
+    admin_area_2: clean(address.city, 120),
+    admin_area_1: clean(address.state, 2).toUpperCase(),
+    postal_code: clean(address.postalCode, 30),
+    country_code: 'US'
+  };
+  if (clean(address.address2, 180)) postalAddress.address_line_2 = clean(address.address2, 180);
+
+  return {
+    name: { full_name: clean(address.fullName, 120) },
+    address: postalAddress
+  };
+}
+
 async function accessToken(env, fetchImpl) {
   if (!paypalConfigured(env)) throw new Error('PAYPAL_NOT_CONFIGURED');
   const clientId = clean(env.PAYPAL_CLIENT_ID, 300);
@@ -86,12 +110,14 @@ export async function createPaypalOrder(env, order, { fetchImpl = fetch } = {}) 
   if (!gate.ready) throw new Error(gate.reason);
   if (!order?.id || !order?.totals?.amountDue) throw new Error('INVALID_ORDER_DRAFT');
   const returnOrigin = safeReturnOrigin(order.returnOrigin);
+  const shipping = paypalShippingAddress(order.shippingAddress);
 
   const requestBody = {
     intent: 'CAPTURE',
     purchase_units: [{
       reference_id: clean(order.id, 80),
       custom_id: clean(order.id, 80),
+      shipping,
       amount: {
         currency_code: clean(order.totals.amountDue.currency || 'USD', 3).toUpperCase(),
         value: amountValue(order.totals.amountDue),
