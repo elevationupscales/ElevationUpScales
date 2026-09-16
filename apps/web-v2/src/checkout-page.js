@@ -5,7 +5,7 @@ export function renderCheckoutPage() {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07161c">
-<meta name="description" content="Review destination eligibility and current product totals before an Elevation UpScales order advances.">
+<meta name="description" content="Complete your Elevation UpScales order securely.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://elevationupscales.com/checkout">
 <title>Checkout | Elevation UpScales</title>
@@ -15,10 +15,10 @@ export function renderCheckoutPage() {
 <body>
 <header class="catalog-topnav"><div class="catalog-nav-inner"><a class="catalog-brand" href="/">Elevation UpScales</a><nav aria-label="Checkout navigation"><a href="/store">Shop</a><a href="/cart">Cart</a><a href="/checkout" aria-current="page">Checkout</a></nav></div></header>
 <main id="main" class="catalog-main"><div class="catalog-shell">
-<section class="catalog-hero"><p>DIRECT ELEVATION COMMERCE</p><h1>Checkout Review</h1><p>Your cart is revalidated against current Elevation product truth, then the destination and final order controls are checked before payment. No browser price or availability state is trusted.</p></section>
+<section class="catalog-hero"><p>SECURE CHECKOUT</p><h1>Complete Your Order</h1><p>Shipping is covered to the Lower 48 on eligible listings.</p></section>
 <section class="checkout-layout">
 <form class="checkout-destination" data-checkout-form>
-<h2>Contact & shipping</h2>
+<h2>Delivery details</h2>
 <label>Email <input type="email" name="email" autocomplete="email" required></label>
 <label>Phone <input type="tel" name="phone" autocomplete="tel"></label>
 <label>Full name <input name="fullName" autocomplete="name" required></label>
@@ -28,10 +28,10 @@ export function renderCheckoutPage() {
 <input type="hidden" name="country" value="US">
 <label>State <input name="state" autocomplete="address-level1" maxlength="2" pattern="[A-Za-z]{2}" required placeholder="CO"></label>
 <label>ZIP code <input name="postalCode" autocomplete="postal-code" inputmode="numeric" required placeholder="80903"></label>
-<button type="submit">Review checkout</button>
-<p class="checkout-help">Hawaii, Alaska, freight and other special routes remain held unless the exact product route is verified. Payment cannot begin until shipping, tax and final amount due are authoritative.</p>
+<button type="submit">Continue to Payment</button>
+<p class="checkout-help">Your order total is confirmed before payment.</p>
 </form>
-<section class="checkout-review" data-checkout-root aria-live="polite"><div class="cart-empty"><h2>Enter your details</h2><p>We will re-check the saved cart and destination before anything can advance.</p></div></section>
+<section class="checkout-review" data-checkout-root aria-live="polite"><div class="cart-empty"><h2>Ready when you are</h2><p>Enter your delivery details to continue.</p></div></section>
 </section>
 </div></main>
 <footer class="catalog-footer"><div class="catalog-nav-inner"><a href="/store">Shop</a><a href="/cart">Cart</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><span>© 2026 Elevation UpScales, Inc.</span></div></footer>
