@@ -70,7 +70,12 @@ export async function createOrderFromCheckout(payload, env, {
 
   let providerOrder;
   try {
-    providerOrder = await payment.createPaypalOrder(env, { id: stored.order.id, totals: draft.totals });
+    providerOrder = await payment.createPaypalOrder(env, {
+      id: stored.order.id,
+      totals: draft.totals,
+      shippingAddress: draft.shippingAddress,
+      returnOrigin: payload.returnOrigin
+    });
   } catch (error) {
     return { status: 502, body: { error: clean(error?.message, 120) || 'PAYMENT_PROVIDER_UNAVAILABLE', orderReference: stored.order.id } };
   }
