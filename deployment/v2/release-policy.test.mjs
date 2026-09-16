@@ -26,12 +26,21 @@ test('derives a stable SHA tag', () => {
 
 test('parses Worker version identity and keeps preview URL as optional diagnostics', () => {
   assert.deepEqual(
-    parseUploadOutput(`Version ID: ${VERSION}\nPreview URL: ${URL}`, SHA),
+    parseUploadOutput(`Worker Version ID: ${VERSION}\nVersion Preview URL: ${URL}`, SHA),
     { versionId: VERSION, previewUrl: URL }
   );
   assert.deepEqual(
     parseUploadOutput(`Version ID: ${VERSION}`, SHA),
     { versionId: VERSION, previewUrl: null }
+  );
+});
+
+test('ignores unrelated UUIDs before the explicit Worker version line', () => {
+  const unrelatedDatabaseId = 'f615a6ca-ebe6-4004-869e-848732fec000';
+  const output = `database_id: "${unrelatedDatabaseId}"\nWorker Version ID: ${VERSION}\nVersion Preview URL: ${URL}`;
+  assert.deepEqual(
+    parseUploadOutput(output, SHA),
+    { versionId: VERSION, previewUrl: URL }
   );
 });
 
