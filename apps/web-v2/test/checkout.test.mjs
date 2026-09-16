@@ -116,17 +116,55 @@ test('checkout resolver accepts POST only for stateless review and rejects malfo
   assert.deepEqual(await malformed.json(), { error: 'INVALID_CHECKOUT_PAYLOAD' });
 });
 
-test('checkout client uses server order APIs, persists non-payment profile data, and retains card-data guards', async () => {
+test('checkout recovery endpoint is same-origin, canonical-cart based, and fails safely without D1', async () => {
+  const payload = {
+    recoveryKey: 'recovery-test-1234567890',
+    status: 'CHECKOUT_STARTED',
+    items: [{ productId: 'sok-sk12v100pc', quantity: 1, unitPrice: { amount: 0.01 } }],
+    customer: { email: 'buyer@example.com', phone: '2085550100' },
+    shipping: {
+      fullName: 'Test Buyer',
+      address1: '123 Main St',
+      address2: '',
+      city: 'Boise',
+      state: 'ID',
+      postalCode: '83702',
+      countryCode: 'US'
+    }
+  };
+
+  const denied = await request('/api/checkout/recovery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: 'https://evil.example' },
+    body: JSON.stringify(payload)
+  });
+  assert.equal(denied.status, 403);
+
+  const noDb = await request('/api/checkout/recovery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: 'https://elevation-web-v2.test' },
+    body: JSON.stringify(payload)
+  });
+  assert.equal(noDb.status, 503);
+  assert.deepEqual(await noDb.json(), { error: 'CHECKOUT_RECOVERY_STORAGE_NOT_CONFIGURED' });
+});
+
+test('checkout client uses recovery and server order APIs, persists non-payment profile data, and retains card-data guards', async () => {
   const res = await request('/assets/checkout.js');
   assert.equal(res.status, 200);
   const script = await res.text();
   assert.match(script, /elevation-cart-v1/);
   assert.match(script, /elevation-checkout-profile-v1/);
+  assert.match(script, /elevation-checkout-recovery-id-v1/);
   assert.match(script, /localStorage\.setItem\(CHECKOUT_KEY/);
   assert.match(script, /restoreProfile/);
   assert.match(script, /productId/);
   assert.match(script, /quantity/);
   assert.match(script, /\/api\/checkout\/resolve/);
+  assert.match(script, /\/api\/checkout\/recovery/);
+  assert.match(script, /CHECKOUT_STARTED/);
+  assert.match(script, /PAYMENT_START_FAILED/);
+  assert.match(script, /PAYMENT_COMPLETED/);
   assert.match(script, /\/api\/order\/create/);
   assert.match(script, /\/api\/order\/paypal\//);
   assert.match(script, /elevation-checkout-idempotency-v1/);
