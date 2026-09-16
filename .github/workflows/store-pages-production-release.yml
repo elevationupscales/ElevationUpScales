@@ -1,0 +1,149 @@
+name: Store Pages Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact current main SHA containing the approved store fix
+        required: true
+        type: string
+      confirmation:
+        description: Type DEPLOY STORE to authorize this production Pages release
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-store-pages-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_NAME: elevationupscales
+  LIVE_ORIGIN: https://elevationupscales.com
+  LOCKED_HOME_BLOB: 9957fd1f8c9a3892193466dffbdb75e871db80a2
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate explicit release request
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$CONFIRMATION" = "DEPLOY STORE"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+
+      - name: Require exact current main
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+
+      - name: HARD GATE — homepage source must be byte-identical to locked homepage
+        run: |
+          set -euo pipefail
+          ACTUAL="$(git hash-object site/index.html)"
+          echo "Homepage blob: $ACTUAL"
+          test "$ACTUAL" = "$LOCKED_HOME_BLOB"
+
+      - name: Snapshot currently-live homepage bytes
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 2 "$LIVE_ORIGIN/" -o /tmp/home-before.html
+          sha256sum /tmp/home-before.html | tee /tmp/home-before.sha
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/home-before.html
+
+      - name: Validate only the commerce release surface
+        run: |
+          set -euo pipefail
+          node --check site/store-checkout.js
+          node --check site/store-checkout-server.js
+          node --check site/_worker.js
+          node --check site/sok-availability-runtime.js
+          test -f site/checkout/index.html
+          test -f site/store.html
+          grep -q '/store-checkout.js' site/checkout/index.html
+          grep -q '"/checkout"' site/_routes.json
+          grep -q '"/api/\*"' site/_routes.json
+          git diff --check
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned Cloudflare deployment tool
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Deploy the approved site tree to the existing Pages project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --prefix apps/web-v2 --no-install wrangler pages deploy site \
+            --project-name "$PROJECT_NAME" \
+            --branch main \
+            --commit-hash "$EXPECTED_SHA" \
+            2>&1 | tee /tmp/pages-deploy.txt
+
+      - name: HARD GATE — live homepage must remain byte-identical after deployment
+        run: |
+          set -euo pipefail
+          BEFORE="$(cut -d' ' -f1 /tmp/home-before.sha)"
+          AFTER=""
+          for attempt in 1 2 3 4 5 6; do
+            curl -fsSL --retry 2 "$LIVE_ORIGIN/" -o /tmp/home-after.html
+            AFTER="$(sha256sum /tmp/home-after.html | cut -d' ' -f1)"
+            [ "$AFTER" = "$BEFORE" ] && break
+            sleep 5
+          done
+          echo "Homepage before: $BEFORE"
+          echo "Homepage after:  $AFTER"
+          test "$AFTER" = "$BEFORE"
+
+      - name: Prove live Pages checkout backend for SOK SK12V100PC
+        run: |
+          set -euo pipefail
+          CONFIG_STATUS="$(curl -sS -o /tmp/config.json -w '%{http_code}' "$LIVE_ORIGIN/api/store-checkout/config")"
+          test "$CONFIG_STATUS" = "200"
+          jq -e '.configured == true and .checkoutEnabled == true and .liveCheckoutApproved == true and .environment == "live"' /tmp/config.json >/dev/null
+          QUOTE_STATUS="$(curl -sS -o /tmp/quote.json -w '%{http_code}' -X POST "$LIVE_ORIGIN/api/store-checkout/quote" \
+            -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Origin: https://elevationupscales.com' \
+            --data '{"source":"lithium","id":"sok-sk12v100pc","name":"SOK SK12V100PC 12.8V 100Ah 1280Wh LiFePO4 Battery","quantity":1,"variantId":"","couponCode":"","availabilityTimingAcknowledged":false,"shipping":{"fullName":"Store Release Proof","address1":"100 Congress Ave","address2":"","city":"Austin","state":"TX","postalCode":"78701","countryCode":"US"}}')"
+          cat /tmp/quote.json
+          test "$QUOTE_STATUS" = "200"
+          jq -e '.id == "sok-sk12v100pc" and .unitPriceCents == 31900 and .availability.paymentEligible == true' /tmp/quote.json >/dev/null
+
+      - name: Release summary
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          {
+            echo '### STORE PAGES PRODUCTION RELEASE'
+            echo "Project: $PROJECT_NAME"
+            echo "Git SHA: $EXPECTED_SHA"
+            echo "Homepage source blob: $LOCKED_HOME_BLOB"
+            echo 'Homepage bytes before/after: IDENTICAL'
+            echo 'SOK SK12V100PC live quote: PASS'
+            echo 'PayPal live config: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"
