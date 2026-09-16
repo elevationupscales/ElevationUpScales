@@ -1,0 +1,31 @@
+name: Diagnose Homepage Bytes
+
+on:
+  push:
+    branches:
+      - diagnostic/homepage-byte-diff-20260916
+    paths:
+      - '.github/workflows/diagnose-homepage-bytes.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Compare locked source to live homepage
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://elevationupscales.com/ -o /tmp/live1.html
+          sleep 2
+          curl -fsSL --retry 3 https://elevationupscales.com/ -o /tmp/live2.html
+          echo '--- hashes ---'
+          sha256sum site/index.html /tmp/live1.html /tmp/live2.html
+          echo '--- source vs live1 cmp ---'
+          if cmp -s site/index.html /tmp/live1.html; then echo SOURCE_EQUALS_LIVE1; else echo SOURCE_DIFFERS_LIVE1; fi
+          echo '--- live1 vs live2 cmp ---'
+          if cmp -s /tmp/live1.html /tmp/live2.html; then echo LIVE_STABLE; else echo LIVE_CHANGES_BETWEEN_REQUESTS; fi
+          echo '--- first source/live diff ---'
+          diff -u site/index.html /tmp/live1.html | head -n 120 || true
