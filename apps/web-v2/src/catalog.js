@@ -42,6 +42,14 @@ export const VENDORS = Object.freeze([
     unresolvedFacts: Object.freeze([])
   },
   {
+    id: 'sungoldpower',
+    name: 'SunGoldPower',
+    sourcePath: 'operations/vendor-project-sources/SUNGOLDPOWER_PROJECT_SOURCE.md',
+    sourceState: 'APPROVED_DISTRIBUTOR_WEBSITE_LISTING_AUTHORIZED',
+    catalogState: 'INITIAL_CATALOG_INGESTION_FULFILLMENT_HOLD',
+    unresolvedFacts: Object.freeze(['directDropshipProcedure', 'shippingProcedure', 'warrantyRma', 'approvedMedia'])
+  },
+  {
     id: 'kingboss',
     name: 'Kingboss',
     sourcePath: 'operations/vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md',
@@ -110,6 +118,32 @@ function sokProduct({ id, sku, title, summary, media, price, stockState = 'BACKO
     shopifyBaseline: SHOPIFY_BASELINE,
     shopifyProductId,
     shopifyHandle
+  });
+}
+
+function sunGoldProduct({ id, sku, title, summary, map, upc, productUrl, certifications = UNVERIFIED }) {
+  return finalize({
+    id,
+    vendorId: 'sungoldpower',
+    vendorName: 'SunGoldPower',
+    sku,
+    supplierSku: sku,
+    title,
+    specs: Object.freeze({ summary }),
+    media: UNVERIFIED,
+    sellPrice: Object.freeze({ currency: 'USD', amount: map }),
+    priceFloor: Object.freeze({ policy: 'SUNGOLDPOWER_MAP_2026_09_15', amount: map }),
+    stockState: 'IN_STOCK_VERIFIED',
+    backorderState: 'NOT_REQUIRED_IN_STOCK',
+    shippingDisposition: UNVERIFIED,
+    warrantyReturnsOwnership: UNVERIFIED,
+    fulfillmentSource: UNVERIFIED,
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE',
+    sourcePath: 'operations/vendor-project-sources/SUNGOLDPOWER_PROJECT_SOURCE.md',
+    sourceSnapshot: 'SUNGOLDPOWER_SILVER_DEALER_PRICE_LIST_2026_09_15',
+    upc,
+    productUrl,
+    certifications
   });
 }
 
@@ -252,6 +286,84 @@ export const CATALOG_PRODUCTS = Object.freeze([
     shopifyProductId: 'gid://shopify/Product/16001185743217',
     shopifyHandle: 'vevor-camper-levelers-2-pack-up-to-4-in',
     sourceFreshnessNote: 'VEVOR sellability and public reference price require revalidation before supplier purchase.'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-lfp12-100a',
+    sku: 'LFP12-100A',
+    title: 'SunGoldPower 12V 100Ah LiFePO4 Battery with Bluetooth & Self-Heating',
+    summary: '12V 100Ah LiFePO4 deep-cycle battery with Bluetooth, self-heating and IP65 enclosure.',
+    map: 295,
+    upc: '768472473332',
+    productUrl: 'https://sungoldpower.com/products/12v-100ah-lifepo4-deep-cycle-lithium-battery-bluetooth-self-heating'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sg48100p',
+    sku: 'SG48100P',
+    title: 'SunGoldPower 51.2V 100Ah Server Rack LiFePO4 Battery',
+    summary: '51.2V 100Ah server-rack LiFePO4 battery for residential/off-grid energy storage.',
+    map: 1090,
+    upc: '747783651523',
+    productUrl: 'https://sungoldpower.com/products/48v-100ah-server-rack-lifepo4-lithium-battery-sg48100p',
+    certifications: 'UL1973 / UL9540A'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sph8048p',
+    sku: 'SPH8048P',
+    title: 'SunGoldPower 8KW 48V Split Phase Solar Inverter',
+    summary: '8KW 48V split-phase solar inverter with 120V/240V AC input and output.',
+    map: 1450,
+    upc: '768484209318',
+    productUrl: 'https://sungoldpower.com/products/8kw-off-grid-solar-inverter-ul1741',
+    certifications: 'UL 1741 by ETL for Off Grid Solar System'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sph10048p',
+    sku: 'SPH10048P',
+    title: 'SunGoldPower 10KW 48V Split Phase Solar Inverter',
+    summary: '10KW 48V split-phase solar inverter with 120V/240V AC input and output.',
+    map: 1580,
+    upc: '747783675352',
+    productUrl: 'https://sungoldpower.com/products/10kw-48v-split-phase-solar-inverter',
+    certifications: 'UL 1741 by ETL for Off Grid Solar System'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sgs-12k18max',
+    sku: 'SGS-12K18MAX',
+    title: 'SunGoldPower 12KW 48V All-in-One Hybrid Solar Inverter',
+    summary: '12KW 48V all-in-one hybrid inverter for 120V/240V whole-home backup applications.',
+    map: 2990,
+    upc: '791986423951',
+    productUrl: 'https://sungoldpower.com/collections/48v-inverter-charger/products/12kw-48v-all-in-one-hybrid-inverter',
+    certifications: 'UL1741 / IEEE1547.1-2020 / CEC / Rule 21 / HECO'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sg560wbgx2',
+    sku: 'SG560WBGx2',
+    title: 'SunGoldPower 560W Bifacial N-Type Solar Panels — 2 Pack',
+    summary: 'Two 560W bifacial N-Type monocrystalline solar panels.',
+    map: 980,
+    upc: '747783675420',
+    productUrl: 'https://sungoldpower.com/collections/all/products/560watt-bifacial-solar-panel'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sgh-11n2e',
+    sku: 'SGH-11N2E',
+    title: 'SunGoldPower 11.4KW Hybrid Solar Kit with 20.48kWh Lithium & 16 Solar Panels',
+    summary: '11.4KW 48V split-phase hybrid solar kit with 20.48kWh lithium storage and 16 × 450W solar panels.',
+    map: 11950,
+    upc: '747783675673',
+    productUrl: 'https://sungoldpower.com/collections/complete-hybrid-solar-kits/products/hybrid-solar-kit-11-4kw-48v-split-phase-20-48kwh-lithium-battery-16-x-440-watt-solar-panel-sgh-11n2e',
+    certifications: 'Inverter UL 1741 / CSA C22.2 / UL1699B / UL1741SB / IEEE1547:2018 / HECO SRD 2.0 / CEC; batteries UL1973 / UL9540A / CE / UN38.3; panels UL61730 / CE / TUV'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sgr-10k25s',
+    sku: 'SGR-10K25S',
+    title: 'SunGoldPower 10KW Off-Grid Solar Kit with 25.6kWh Lithium & 12 Solar Panels',
+    summary: '10KW 48V off-grid solar kit with 25.6kWh lithium storage and 12 × 550W solar panels.',
+    map: 10350,
+    upc: '747783675383',
+    productUrl: 'https://sungoldpower.com/collections/off-grid-solar-kit/products/off-grid-solar-kit-12-x-550-watts-solar-panels-25-6kwh-lithium-battery-10kw-solar-inverter-48vdc-120v-240v-sgr-10k25s',
+    certifications: 'Inverter UL 1741 by ETL; batteries UL1973 / UL9540A / CE / UN38.3; panels UL61730 / CE / TUV'
   }),
   finalize({
     id: 'kingboss-d01027hh7bv',

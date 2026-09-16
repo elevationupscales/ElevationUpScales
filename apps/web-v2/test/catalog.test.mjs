@@ -13,8 +13,8 @@ import {
 import { renderCatalogPage } from '../src/catalog-pages.js';
 import { getPublicRoute } from '../src/routes.js';
 
-test('initial vendor pilot is 9 SOK plus one record per remaining launch vendor', () => {
-  assert.equal(CATALOG_PRODUCTS.length, 12);
+test('universal catalog includes SOK, Renogy, VEVOR, SunGoldPower and held Kingboss cohorts', () => {
+  assert.equal(CATALOG_PRODUCTS.length, 20);
   assert.deepEqual(getProductsByVendor('sok').map(({ sku }) => sku), [
     'SK12V100PC',
     'SK12V100H',
@@ -29,16 +29,37 @@ test('initial vendor pilot is 9 SOK plus one record per remaining launch vendor'
   assert.deepEqual(getVendor('sok').unresolvedFacts, []);
   assert.deepEqual(getProductsByVendor('renogy').map(({ sku }) => sku), ['RNG-INVT-3000-12V-P2-G3-US']);
   assert.deepEqual(getProductsByVendor('vevor').map(({ sku }) => sku), ['XXKLJT124INCLJF0QV0']);
+  assert.deepEqual(getProductsByVendor('sungoldpower').map(({ sku }) => sku), [
+    'LFP12-100A',
+    'SG48100P',
+    'SPH8048P',
+    'SPH10048P',
+    'SGS-12K18MAX',
+    'SG560WBGx2',
+    'SGH-11N2E',
+    'SGR-10K25S'
+  ]);
   assert.deepEqual(getProductsByVendor('kingboss').map(({ sku }) => sku), ['D01027HH7BV']);
   assert.equal(getProductById('kingboss-d01027hh7bv').supplierSku, UNVERIFIED);
 });
 
-test('launch-ready pilot records are orderable while Kingboss remains fail-closed', () => {
+test('existing launch-ready products remain orderable while SunGoldPower and Kingboss stay transaction-held', () => {
   const orderable = CATALOG_PRODUCTS.filter(({ orderable }) => orderable);
   assert.equal(orderable.length, 11);
   assert.equal(getProductsByVendor('sok').every(({ orderable }) => orderable), true);
   assert.equal(getProductById('renogy-rng-invt-3000-12v-p2-g3-us').orderable, true);
   assert.equal(getProductById('vevor-xxkljt124incljf0qv0').orderable, true);
+
+  for (const product of getProductsByVendor('sungoldpower')) {
+    assert.equal(product.orderable, false, product.sku);
+    assert.equal(product.channelAuthorization, 'ELEVATION_DIRECT_WEBSITE');
+    assert.equal(product.stockState, 'IN_STOCK_VERIFIED');
+    assert.equal(product.sellPrice.amount, product.priceFloor.amount);
+    assert.equal(product.priceFloor.policy, 'SUNGOLDPOWER_MAP_2026_09_15');
+    assert.ok(product.missingFacts.includes('media'));
+    assert.ok(product.missingFacts.includes('shippingDisposition'));
+    assert.ok(product.missingFacts.includes('fulfillmentSource'));
+  }
 
   const kingboss = getProductById('kingboss-d01027hh7bv');
   assert.equal(kingboss.orderable, false);
@@ -46,6 +67,21 @@ test('launch-ready pilot records are orderable while Kingboss remains fail-close
   assert.ok(kingboss.missingFacts.includes('media'));
   assert.ok(kingboss.missingFacts.includes('channelAuthorization'));
   for (const field of kingboss.missingFacts) assert.ok(REQUIRED_ORDERABILITY_FIELDS.includes(field));
+});
+
+test('SunGoldPower initial MAP pricing is encoded without supplier cost exposure', () => {
+  assert.equal(getProductById('sungoldpower-lfp12-100a').sellPrice.amount, 295);
+  assert.equal(getProductById('sungoldpower-sg48100p').sellPrice.amount, 1090);
+  assert.equal(getProductById('sungoldpower-sph8048p').sellPrice.amount, 1450);
+  assert.equal(getProductById('sungoldpower-sph10048p').sellPrice.amount, 1580);
+  assert.equal(getProductById('sungoldpower-sgs-12k18max').sellPrice.amount, 2990);
+  assert.equal(getProductById('sungoldpower-sg560wbgx2').sellPrice.amount, 980);
+  assert.equal(getProductById('sungoldpower-sgh-11n2e').sellPrice.amount, 11950);
+  assert.equal(getProductById('sungoldpower-sgr-10k25s').sellPrice.amount, 10350);
+  for (const product of getProductsByVendor('sungoldpower')) {
+    assert.equal(Object.hasOwn(product, 'dealerCost'), false);
+    assert.equal(Object.hasOwn(product, 'supplierCost'), false);
+  }
 });
 
 test('orderability is derived and recursive UNVERIFIED values fail closed', () => {
@@ -62,7 +98,7 @@ test('orderability is derived and recursive UNVERIFIED values fail closed', () =
   assert.deepEqual(missingRequiredFacts(missingFloor), ['priceFloor']);
 });
 
-test('store and vendor views derive from the bounded initial pilot catalog', () => {
+test('store and vendor views derive from the expanded universal catalog', () => {
   const storeRoute = getPublicRoute('/store');
   const storeHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store'));
   assert.match(storeHtml, /Power Your RV/);
@@ -70,9 +106,20 @@ test('store and vendor views derive from the bounded initial pilot catalog', () 
   assert.match(storeHtml, /SK12V100PC/);
   assert.match(storeHtml, /RNG-INVT-3000-12V-P2-G3-US/);
   assert.match(storeHtml, /XXKLJT124INCLJF0QV0/);
+  assert.match(storeHtml, /LFP12-100A/);
+  assert.match(storeHtml, /SUNGOLDPOWER/);
   assert.match(storeHtml, /D01027HH7BV/);
   assert.match(storeHtml, /Buy Now/);
   assert.match(storeHtml, /Hawaii Shipping Available/);
+
+  const sungoldRoute = getPublicRoute('/shop/sungoldpower');
+  assert.equal(sungoldRoute.implemented, true);
+  const sungoldHtml = renderCatalogPage(sungoldRoute, new URL('https://test.example/shop/sungoldpower'));
+  assert.match(sungoldHtml, /SunGoldPower/);
+  assert.match(sungoldHtml, /LFP12-100A/);
+  assert.match(sungoldHtml, /SGH-11N2E/);
+  assert.match(sungoldHtml, /\$295\.00/);
+  assert.doesNotMatch(sungoldHtml, /data-buy-now="sungoldpower-/);
 
   const vevorHtml = renderCatalogPage(getPublicRoute('/shop/vevor'), new URL('https://test.example/shop/vevor'));
   assert.match(vevorHtml, /Camper Levelers/);
@@ -94,10 +141,11 @@ test('department links actually filter the universal store', () => {
   const batteryHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store?department=lithium-batteries'));
   const batteryCatalog = batteryHtml.split('<section class="full-catalog"')[1] || '';
   assert.match(batteryCatalog, /SK12V100PC/);
+  assert.match(batteryCatalog, /LFP12-100A/);
   assert.doesNotMatch(batteryCatalog, /Camper Levelers/);
 });
 
-test('orderable product details expose retail actions while held Kingboss stays disabled', () => {
+test('orderable product details expose retail actions while held products stay disabled', () => {
   const vevorRoute = getPublicRoute('/product/vevor-xxkljt124incljf0qv0');
   assert.equal(vevorRoute.implemented, true);
   const vevorPage = renderCatalogPage(vevorRoute, new URL('https://test.example/product/vevor-xxkljt124incljf0qv0'));
@@ -109,6 +157,13 @@ test('orderable product details expose retail actions while held Kingboss stays 
   assert.match(vevorPage, /Hawaii Shipping Available/);
   assert.match(vevorPage, /Product Details/);
   assert.doesNotMatch(vevorPage, /MAP \/ floor|Supplier sellability|Authorized channel|Fulfillment/);
+
+  const sungoldRoute = getPublicRoute('/product/sungoldpower-lfp12-100a');
+  const sungoldPage = renderCatalogPage(sungoldRoute, new URL('https://test.example/product/sungoldpower-lfp12-100a'));
+  assert.match(sungoldPage, /LFP12-100A/);
+  assert.match(sungoldPage, /\$295\.00/);
+  assert.match(sungoldPage, /Currently unavailable online/);
+  assert.doesNotMatch(sungoldPage, /data-add-to-cart|data-buy-now/);
 
   const heldRoute = getPublicRoute('/product/kingboss-d01027hh7bv');
   const heldPage = renderCatalogPage(heldRoute, new URL('https://test.example/product/kingboss-d01027hh7bv'));
