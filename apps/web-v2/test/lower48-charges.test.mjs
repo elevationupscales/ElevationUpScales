@@ -15,6 +15,15 @@ const delaware = {
   countryCode: 'US'
 };
 
+const texas = {
+  fullName: 'Checkout Test',
+  address1: '100 Congress Ave',
+  city: 'Austin',
+  state: 'TX',
+  postalCode: '78701',
+  countryCode: 'US'
+};
+
 const colorado = {
   fullName: 'Checkout Test',
   address1: '123 Main St',
@@ -24,12 +33,12 @@ const colorado = {
   countryCode: 'US'
 };
 
-test('SOK Lower-48 resolver produces exact shipping and zero general sales tax in Delaware', () => {
+test('SOK Lower-48 resolver produces exact shipping and zero tax outside configured nexus', () => {
   const resolver = createLower48ChargeResolver({});
   const draft = resolveOrderHandoff(
     [{ productId: 'sok-sk12v100pc', quantity: 1 }],
     customer,
-    delaware,
+    texas,
     { chargeResolver: resolver }
   );
 
@@ -41,7 +50,7 @@ test('SOK Lower-48 resolver produces exact shipping and zero general sales tax i
   assert.deepEqual(draft.totals.amountDue, { currency: 'USD', amount: 346.99 });
 });
 
-test('Lower-48 resolver fails closed when a taxable destination has no configured tax rate', () => {
+test('Colorado physical-nexus destination fails closed without authoritative destination tax rate', () => {
   const resolver = createLower48ChargeResolver({});
   const draft = resolveOrderHandoff(
     [{ productId: 'sok-sk12v100pc', quantity: 1 }],
@@ -54,8 +63,21 @@ test('Lower-48 resolver fails closed when a taxable destination has no configure
   assert.ok(draft.holds.includes('TAX_AMOUNT_UNVERIFIED'));
 });
 
-test('configured destination tax basis points produce deterministic server totals', () => {
-  const resolver = createLower48ChargeResolver({ STORE_SALES_TAX_BPS_JSON: JSON.stringify({ '80903': 825 }) });
+test('an explicitly added nexus state also fails closed until a destination rate exists', () => {
+  const resolver = createLower48ChargeResolver({ STORE_TAX_NEXUS_STATES: 'CO,TX' });
+  const draft = resolveOrderHandoff(
+    [{ productId: 'sok-sk12v100pc', quantity: 1 }],
+    customer,
+    texas,
+    { chargeResolver: resolver }
+  );
+
+  assert.equal(draft.paymentReady, false);
+  assert.ok(draft.holds.includes('TAX_AMOUNT_UNVERIFIED'));
+});
+
+test('configured nexus destination tax basis points produce deterministic server totals', () => {
+  const resolver = createLower48ChargeResolver({ STORE_SALES_TAX_BPS_JSON: JSON.stringify({ 'CO:80903': 825 }) });
   const draft = resolveOrderHandoff(
     [{ productId: 'sok-sk12v100pc', quantity: 1 }],
     customer,
