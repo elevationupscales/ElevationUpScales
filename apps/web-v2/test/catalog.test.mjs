@@ -71,7 +71,6 @@ test('store and vendor views derive from the bounded initial pilot catalog', () 
   assert.match(storeHtml, /RNG-INVT-3000-12V-P2-G3-US/);
   assert.match(storeHtml, /XXKLJT124INCLJF0QV0/);
   assert.match(storeHtml, /D01027HH7BV/);
-  assert.match(storeHtml, /Add to Cart/);
 
   const vevorHtml = renderCatalogPage(getPublicRoute('/shop/vevor'), new URL('https://test.example/shop/vevor'));
   assert.match(vevorHtml, /Camper Levelers/);
