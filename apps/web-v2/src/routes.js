@@ -12,6 +12,7 @@ export const PUBLIC_ROUTES = new Map([
   ['/shop/sok', route('/shop/sok', 'SOK | Elevation UpScales', 'Explore SOK power products through Elevation UpScales.', { implemented: true, page: 'vendor', vendor: 'sok' })],
   ['/shop/renogy', route('/shop/renogy', 'Renogy | Elevation UpScales', 'Explore Renogy power products through Elevation UpScales.', { implemented: true, page: 'vendor', vendor: 'renogy' })],
   ['/shop/vevor', route('/shop/vevor', 'VEVOR | Elevation UpScales', 'Explore VEVOR products through Elevation UpScales.', { implemented: true, page: 'vendor', vendor: 'vevor' })],
+  ['/shop/sungoldpower', route('/shop/sungoldpower', 'SunGoldPower | Elevation UpScales', 'Explore SunGoldPower solar, inverter, battery and complete-system products through Elevation UpScales.', { implemented: true, page: 'vendor', vendor: 'sungoldpower' })],
   ['/shop/kingboss', route('/shop/kingboss', 'Kingboss | Elevation UpScales', 'Explore Kingboss power products through Elevation UpScales.', { implemented: true, page: 'vendor', vendor: 'kingboss' })],
   ['/what-we-do', route('/what-we-do', 'What We Do | Elevation UpScales', 'Explore Elevation UpScales services, power solutions and logistics capabilities.')],
   ['/home-services', route('/home-services', 'Home Services | Elevation UpScales', 'Home repair, restoration and improvement services from Elevation UpScales.')],
@@ -38,6 +39,7 @@ export const PRIMARY_NAV = [
   { label: 'Shop', children: [
     { label: 'Shop Lithium', href: '/store?department=lithium-batteries', description: 'Batteries and power storage' },
     { label: 'Shop SOK', href: '/shop/sok', description: 'Battery systems and accessories' },
+    { label: 'Shop SunGoldPower', href: '/shop/sungoldpower', description: 'Solar, inverters, batteries and complete systems' },
     { label: 'RV & Outdoor', href: '/store?department=rv-outdoor', description: 'Travel, camping and RV gear' },
     { label: 'Elevation Gear', href: '/store', description: 'Current Elevation catalog' }
   ]},
@@ -60,6 +62,7 @@ export const PRIMARY_NAV = [
 export const FOOTER_NAV = [
   { label: 'Lithium Batteries', href: '/store?department=lithium-batteries' },
   { label: 'SOK Battery Systems', href: '/shop/sok' },
+  { label: 'SunGoldPower', href: '/shop/sungoldpower' },
   { label: 'RV & Outdoor', href: '/store?department=rv-outdoor' },
   { label: 'Freight & Logistics', href: '/shipping-logistics-services' },
   { label: 'Marketplace', href: '/marketplace' },
