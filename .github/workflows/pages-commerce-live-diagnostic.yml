@@ -1,0 +1,43 @@
+name: Pages Commerce Live Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/pages-commerce-live-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Snapshot live homepage without mutation
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://elevationupscales.com/ -o /tmp/home.html
+          sha256sum /tmp/home.html
+          grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/home.html
+      - name: Check Pages checkout config
+        run: |
+          set -euo pipefail
+          STATUS="$(curl -sS -o /tmp/config.json -w '%{http_code}' https://elevationupscales.com/api/store-checkout/config)"
+          echo "CONFIG_HTTP=$STATUS"
+          cat /tmp/config.json
+          test "$STATUS" = "200"
+          jq -e '.configured == true' /tmp/config.json >/dev/null
+          jq -e '.clientId | type == "string" and length > 0' /tmp/config.json >/dev/null
+      - name: Check SOK SK12V100PC quote
+        run: |
+          set -euo pipefail
+          STATUS="$(curl -sS -o /tmp/quote.json -w '%{http_code}' -X POST https://elevationupscales.com/api/store-checkout/quote \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -H 'Origin: https://elevationupscales.com' \
+            --data '{"source":"lithium","id":"sok-sk12v100pc","name":"SOK SK12V100PC 12.8V 100Ah 1280Wh LiFePO4 Battery","quantity":1,"variantId":"","couponCode":"","availabilityTimingAcknowledged":false,"shipping":{"fullName":"Checkout Diagnostic","address1":"100 Congress Ave","address2":"","city":"Austin","state":"TX","postalCode":"78701","countryCode":"US"}}')"
+          echo "QUOTE_HTTP=$STATUS"
+          cat /tmp/quote.json
+          test "$STATUS" = "200"
+          jq -e '.productName | type == "string" and length > 0' /tmp/quote.json >/dev/null
+          jq -e '.totalCents | type == "number" and . > 0' /tmp/quote.json >/dev/null
