@@ -66,11 +66,13 @@ test('store and vendor views derive from the bounded initial pilot catalog', () 
   const storeRoute = getPublicRoute('/store');
   const storeHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store'));
   assert.match(storeHtml, /Power Your RV/);
-  assert.match(storeHtml, /Featured Products/);
+  assert.match(storeHtml, /Ready to Shop/);
   assert.match(storeHtml, /SK12V100PC/);
   assert.match(storeHtml, /RNG-INVT-3000-12V-P2-G3-US/);
   assert.match(storeHtml, /XXKLJT124INCLJF0QV0/);
   assert.match(storeHtml, /D01027HH7BV/);
+  assert.match(storeHtml, /Buy Now/);
+  assert.match(storeHtml, /Hawaii Shipping Available/);
 
   const vevorHtml = renderCatalogPage(getPublicRoute('/shop/vevor'), new URL('https://test.example/shop/vevor'));
   assert.match(vevorHtml, /Camper Levelers/);
@@ -79,21 +81,35 @@ test('store and vendor views derive from the bounded initial pilot catalog', () 
   const sokHtml = renderCatalogPage(getPublicRoute('/shop/sok'), new URL('https://test.example/shop/sok'));
   assert.match(sokHtml, /SK12V100PC/);
   assert.match(sokHtml, /SK48V100N/);
-  assert.doesNotMatch(sokHtml, /No SOK checkout is enabled/);
+  assert.doesNotMatch(sokHtml, /source snapshot|No SOK checkout is enabled/i);
 });
 
-test('orderable product details expose cart action while held Kingboss stays disabled', () => {
+test('department links actually filter the universal store', () => {
+  const storeRoute = getPublicRoute('/store');
+  const rvHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store?department=rv-outdoor'));
+  assert.match(rvHtml, /Camper Levelers/);
+  assert.doesNotMatch(rvHtml, /SK48V100N/);
+
+  const batteryHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store?department=lithium-batteries'));
+  assert.match(batteryHtml, /SK12V100PC/);
+  assert.doesNotMatch(batteryHtml, /Camper Levelers/);
+});
+
+test('orderable product details expose retail actions while held Kingboss stays disabled', () => {
   const vevorRoute = getPublicRoute('/product/vevor-xxkljt124incljf0qv0');
   assert.equal(vevorRoute.implemented, true);
   const vevorPage = renderCatalogPage(vevorRoute, new URL('https://test.example/product/vevor-xxkljt124incljf0qv0'));
   assert.match(vevorPage, /XXKLJT124INCLJF0QV0/);
   assert.match(vevorPage, /\$39\.90/);
-  assert.match(vevorPage, /Orderable through Elevation direct commerce/);
+  assert.match(vevorPage, /Available to order/);
+  assert.match(vevorPage, /Buy Now/);
   assert.match(vevorPage, /Add to Cart/);
+  assert.match(vevorPage, /Hawaii Shipping Available/);
+  assert.match(vevorPage, /Product Details/);
+  assert.doesNotMatch(vevorPage, /MAP \/ floor|Supplier sellability|Authorized channel|Fulfillment/);
 
   const heldRoute = getPublicRoute('/product/kingboss-d01027hh7bv');
   const heldPage = renderCatalogPage(heldRoute, new URL('https://test.example/product/kingboss-d01027hh7bv'));
-  assert.match(heldPage, /Verification hold — checkout disabled/);
-  assert.match(heldPage, /approved product media/);
-  assert.doesNotMatch(heldPage, /data-add-to-cart/);
+  assert.match(heldPage, /Currently unavailable online/);
+  assert.doesNotMatch(heldPage, /data-add-to-cart|data-buy-now/);
 });
