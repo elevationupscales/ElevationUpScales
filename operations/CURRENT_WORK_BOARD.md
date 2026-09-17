@@ -145,6 +145,28 @@ Do not claim click-rate improvement without before/after evidence. Do not optimi
 
 ---
 
+# SHOPIFY CONVERSION BASELINE — 2026-09-17
+
+- Fresh Shopify analytics baseline after storefront/navigation and channel repairs:
+  - **168 sessions** in the last 30 days; **167** occurred in the last 7 days.
+  - **15 sessions with cart additions**.
+  - **18 sessions reached checkout**.
+  - **0 sessions completed checkout**.
+  - **0 non-test Shopify orders** at the same checkpoint.
+- Traffic source split:
+  - Direct: **107 sessions / 13 cart additions / 17 checkouts / 0 purchases**.
+  - Search: **41 sessions / 0 cart additions / 0 checkouts / 0 purchases**.
+  - Social: **17 sessions / 1 cart addition / 1 checkout / 0 purchases**; current social referral traffic is Facebook.
+  - Unknown: **3 sessions**.
+- Device split: **154 desktop / 13 mobile / 1 other**. Because management/QA activity is desktop-heavy, raw storewide conversion is materially contaminated by internal/testing sessions; do not treat 0.0% aggregate conversion as a clean prospect-only rate.
+- Current conversion interpretation:
+  - **Search traffic is not progressing into cart at all** and is the clearest external acquisition/merchandising weakness in the current sample.
+  - Social has produced at least one cart + checkout from 17 sessions, but sample size is still too small for a broad redesign conclusion.
+  - Direct checkout activity is heavily mixed with internal QA and cannot be used as proof of a customer checkout defect without a clean external reproduction.
+- COM / Recon action: maintain this as the baseline. Optimize qualified external clicks and search landing/product relevance first; only reopen checkout repair when a clean external customer-path test or real customer evidence proves a defect.
+
+---
+
 # CURRENT VERIFIED SHOPIFY / ORDER CHECKPOINT
 
 - Fresh non-test Shopify order check on 2026-09-17: **0 real orders present**.
