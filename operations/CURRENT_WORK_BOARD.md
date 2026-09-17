@@ -88,6 +88,20 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 
 ---
 
+# SHOPIFY SALES-CHANNEL CHECKPOINT — 2026-09-17
+
+- Shopify Shop-channel incident was verified, not ignored.
+- Store state before repair: **67 ACTIVE products; 37 Shop-approved; 30 Shop needs-action; 0 Shop-published reported by channel search**.
+- The 37 Shop-approved products were added to the Shop publication with zero publication errors.
+- The 30 needs-action products were audited. All 30 had valid price + featured image and all 30 were missing Shopify Standard Product Taxonomy categories.
+- Standardized categories were assigned to all 30 affected products with zero product-update errors.
+- The repaired 30 were also added to the Shop publication with zero publication errors.
+- Final approval-state check: **37 approved / 0 needs-action**. Per-resource verification confirms Shop publication membership is live; channel aggregate counters may lag Shopify's publication objects during reprocessing.
+- Facebook & Instagram channel audit: **36 ACTIVE products are currently published**, with **0 approval backlog and 0 needs-action backlog** at the COM 3 checkpoint.
+- Do not reopen broad Shop repair unless a fresh Shop eligibility or publication error appears. Continue verifying customer-facing purchaseability as channel sync settles.
+
+---
+
 # CURRENT VERIFIED SHOPIFY / ORDER CHECKPOINT
 
 - Fresh non-test Shopify order check on 2026-09-17: **0 real orders present**.
