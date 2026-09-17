@@ -76,7 +76,7 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 | **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
 | **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — LARGEST UNFINISHED BUILD** | Establish one revenue-ready SKU truth model: vendor SKU, Elevation SKU, cost, MAP/floor, shipping, channel fees, expected contribution, stock, authorization, warranty/returns, source and verification state. Start with the verified SOK battery set and reuse the pattern. |
 | **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORIZED / MAP CONTROLLED / REVENUE PRIORITY** | Convert verified exact-SKU SOK products into profitable sellable eBay listings; respect MAP, shipping and full eBay fee economics; hold only SKU-specific blockers. |
-| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / ONE LIVE SKU / NEXT FIVE STAGED** | Preserve the verified 10W live product. Resolve the five staged Renogy SKU gates individually; do not bulk-publish or infer exact-SKU/channel authorization. Real paid orders supersede catalog work. |
+| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / NEXT BATCH STAGED** | Preserve the verified 10W product and newly published 400W suitcase. Resolve remaining Renogy SKU gates individually; do not bulk-publish or infer exact-SKU/channel authorization. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. Real paid orders supersede catalog work. |
 | **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
 | **P1** | SunGoldPower catalog | Vendor / Commerce Operations | **READY FOR NEXT VERIFIED BATCH** | Feed only verified profitable SKUs into commerce surfaces after pricing/source truth is complete. |
 | **HOLD** | Kingboss | Kingboss Project | **ISOLATED HOLD** | Keep Kingboss out of the critical path; do not let its storefront/catalog uncertainty block other vendors or the main store. |
@@ -90,12 +90,15 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 
 # CURRENT VERIFIED SHOPIFY / RENOGY CHECKPOINT
 
-The current COM2 receipt records:
+Current verified state:
 
 - Renogy 10W Solar Battery Trickle Charger Maintainer `RSP10TC-G1-US`: ACTIVE at $39.99, available for sale, customer path through checkout/payment-method selection PASS with no real charge/order;
-- no non-test paid order was present at the final check;
-- the next five Renogy products remain DRAFT / DENY / qty 0 and are held only at named exact-SKU/orderability/media/price/warranty/channel gates;
-- zero additional Renogy SKUs were activated in that run.
+- Renogy 400W compact suitcase portable solar panel `RSP400LSC-G1-US`: ACTIVE at $495.99 and published to the Online Store on 2026-09-17; Shopify generated a live storefront URL after publication;
+- the 400W suitcase exposed a launch-control defect: product status had been ACTIVE while Online Store publication was still absent, producing a broken customer link;
+- launch control is now: **ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED = LIVE**. ACTIVE alone is not sufficient;
+- no non-test paid order was present at the last verified order check;
+- remaining Renogy drafts/holds continue to be resolved SKU-by-SKU at exact-SKU/orderability/media/price/warranty/channel gates;
+- no bulk publication is authorized.
 
 Do not reopen the payment stack absent a fresh defect.
 
