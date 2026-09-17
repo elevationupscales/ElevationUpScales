@@ -1,3 +1,5 @@
+import { getProductById } from './catalog.js';
+
 export const CANONICAL_ORIGIN = 'https://elevationupscales.com';
 
 const route = (path, title, description, options = {}) => ({ path, title, description, implemented: false, ...options });
@@ -128,7 +130,7 @@ export function getSitemapRoutes() { return [...PUBLIC_ROUTES.values()].filter((
 export function resolveCompatibilityRedirect(url) {
   if (url.pathname === '/product') {
     const productId = String(url.searchParams.get('id') || '').trim().toLowerCase();
-    if (/^[a-z0-9][a-z0-9-]*$/.test(productId)) return { location: `/product/${productId}`, status: 302 };
+    if (/^[a-z0-9][a-z0-9-]*$/.test(productId) && getProductById(productId)) return { location: `/product/${productId}`, status: 302 };
   }
   const exact = EXACT_REDIRECTS.get(url.pathname);
   if (exact) return exact;
