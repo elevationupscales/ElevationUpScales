@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       confirmation:
-        description: Type DEPLOY STORE to authorize this production Pages release
+        description: Type DEPLOY STORE to authorize this production Pages release (case-insensitive)
         required: true
         type: string
 
@@ -37,7 +37,8 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$CONFIRMATION" = "DEPLOY STORE"
+          CONFIRMATION_NORMALIZED="$(printf '%s' "$CONFIRMATION" | tr '[:lower:]' '[:upper:]' | xargs)"
+          test "$CONFIRMATION_NORMALIZED" = "DEPLOY STORE"
 
       - uses: actions/checkout@v6
         with:
