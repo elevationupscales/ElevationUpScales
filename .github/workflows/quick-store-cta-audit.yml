@@ -1,0 +1,65 @@
+name: Quick Store CTA Audit
+
+on:
+  push:
+    branches:
+      - diagnostic/store-full-audit-20260916
+    paths:
+      - '.github/workflows/quick-store-cta-audit.yml'
+
+permissions:
+  contents: read
+
+env:
+  ORIGIN: https://elevationupscales.com
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Classify every live store CTA
+        run: |
+          cat > /tmp/audit.mjs <<'EOF'
+          const ORIGIN=process.env.ORIGIN;
+          const clean=v=>String(v??'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+          const ident=p=>[p.brand,p.manufacturer,p.supplier,p.vendor,p.title,p.name,p.sku].map(v=>clean(v).toLowerCase()).join(' ');
+          async function read(path){const r=await fetch(ORIGIN+path,{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error(`${path} ${r.status}`);return r.json();}
+          const [lithium,rv,sok]=await Promise.all([
+            read('/api/store/catalog?section=lithium-batteries'),
+            read('/api/store-catalog?section=rv-outdoor'),
+            read('/api/sok/catalog')
+          ]);
+          const map=new Map();
+          for(const rows of [lithium.products||[],rv.products||[],sok.products||[]]) for(const p of rows){const k=clean(p.id||p.sku||`${p.brand||p.supplier||''}-${p.title||p.name||''}`).toLowerCase();if(k)map.set(k,map.has(k)?{...map.get(k),...p}:p)}
+          const products=[...map.values()];
+          function sale(p){
+            const publish=clean(p.publishStatus||p.publish_status).toLowerCase(),mode=clean(p.availabilityMode||p.availabilityStatus||p.status||'available').toLowerCase(),source=clean(p.sourceState||p.source_state||p.reviewState||'').toLowerCase(),shipping=clean(p.shippingStatus||p.shipping_status||'').toLowerCase(),supplier=ident(p),raw=p.supplierStock??p.inventoryQty??p.inventory_qty??p.quantityOnHand,has=raw!==null&&raw!==undefined&&String(raw)!=='',stock=has?Number(raw):null,price=Number(p.priceCents||p.price_cents||0),eligible=p.paymentEligible!==false;
+            if(publish&&publish!=='published')return{code:'hold',label:'Confirm Availability',buy:false,reason:'NOT_PUBLISHED'};
+            if(/stale|source missing|unknown|hold|review/.test(source))return{code:'hold',label:'Confirm Availability',buy:false,reason:`SOURCE:${source}`};
+            if(/unavailable|out of stock|zero stock/.test(mode)||(has&&Number.isFinite(stock)&&stock<=0))return{code:'out',label:'Out of Stock',buy:false,reason:`STOCK_OR_MODE:${mode}:${stock}`};
+            if(/prepurchase|preorder|backorder/.test(mode))return{code:'hold',label:p.commerceLabel||'Confirm Availability',buy:eligible&&price>0,reason:`PREORDER_MODE:${mode}:eligible=${eligible}:price=${price}`};
+            if(!price&&!p.sokProduct)return{code:'hold',label:'Confirm Availability',buy:false,reason:'NO_PRICE'};
+            if(/doba/.test(supplier)){if(!has||!Number.isFinite(stock))return{code:'hold',label:'Confirm Availability',buy:false,reason:'DOBA_STOCK_UNKNOWN'};if(shipping&&shipping!=='verified')return{code:'hold',label:shipping==='quote_required'?'Shipping Quote Required':'Confirm Availability',buy:false,reason:`DOBA_SHIPPING:${shipping}`};return{code:'buy',label:'Available',buy:price>0,reason:'READY'};}
+            if(p.sokProduct){if(!eligible)return{code:'hold',label:p.commerceLabel||'See Purchase Options',buy:false,reason:`SOK_PAYMENT_INELIGIBLE:${clean(p.publicPurchaseMode||p.purchaseMode)}`};return{code:'buy',label:p.commerceLabel||'Available',buy:price>0,reason:`SOK_ELIGIBLE_PRICE:${price}`};}
+            if(shipping==='quote_required')return{code:'hold',label:'Shipping Quote Required',buy:false,reason:'SHIPPING_QUOTE'};
+            return{code:'buy',label:'Available',buy:price>0,reason:'READY'};
+          }
+          function action(p,s){if(s.buy)return /prepurchase|preorder|backorder/i.test(String(p.availabilityMode||''))?'Purchase Options':'Buy Now';if(p.sokProduct)return 'See Purchase Options';return s.code==='out'?'View Product':'Confirm Availability';}
+          const rows=products.map(p=>{const s=sale(p);return{sku:clean(p.sku||p.supplierSku),id:clean(p.id),title:clean(p.title||p.name),supplier:clean(p.supplier||p.vendor||p.brand),price:Number(p.priceCents||p.price_cents||0),availability:clean(p.availabilityMode||p.availabilityStatus||p.status),purchaseMode:clean(p.publicPurchaseMode||p.purchaseMode),shipping:clean(p.shippingStatus||p.shipping_status),stock:p.supplierStock??p.inventoryQty??p.inventory_qty??p.quantityOnHand??null,sok:Boolean(p.sokProduct),cta:action(p,s),saleLabel:s.label,buy:s.buy,reason:s.reason};});
+          const counts={}; for(const r of rows) counts[r.cta]=(counts[r.cta]||0)+1;
+          console.log('TOTAL',rows.length);console.log('CTA_COUNTS',JSON.stringify(counts));
+          console.log('BUYABLE_COUNT',rows.filter(r=>r.buy).length);
+          console.log('BLOCKED_COUNT',rows.filter(r=>!r.buy).length);
+          console.log('DOBA_STOCK_UNKNOWN_COUNT',rows.filter(r=>r.reason==='DOBA_STOCK_UNKNOWN').length);
+          console.log('SOK_COUNT',rows.filter(r=>r.sok).length);
+          console.log('SOK_BUYABLE_COUNT',rows.filter(r=>r.sok&&r.buy).length);
+          console.log('SOK_ZERO_PRICE_COUNT',rows.filter(r=>r.sok&&r.price<=0).length);
+          console.log('=== SOK BATTERY / POWER STATES ===');
+          for(const r of rows.filter(r=>r.sok)) console.log(JSON.stringify(r));
+          console.log('=== BLOCKERS BY REASON ===');
+          const reasonCounts={}; for(const r of rows.filter(r=>!r.buy)) reasonCounts[r.reason]=(reasonCounts[r.reason]||0)+1; console.log(JSON.stringify(reasonCounts));
+          EOF
+          node /tmp/audit.mjs
