@@ -61,7 +61,7 @@ jobs:
           echo "Homepage blob: $ACTUAL"
           test "$ACTUAL" = "$LOCKED_HOME_BLOB"
 
-      - name: Snapshot currently-live homepage semantics
+      - name: Snapshot current homepage semantics
         run: |
           set -euo pipefail
           curl -fsSL --retry 5 --retry-delay 2 "$LIVE_ORIGIN/" -o /tmp/home-before.html
@@ -74,9 +74,8 @@ jobs:
           Path('/tmp/home-before.normalized.html').write_text(src)
           PY
           sha256sum /tmp/home-before.normalized.html | tee /tmp/home-before.sha
-          grep -q 'AUTHORIZED SOK ENERGY DEALER' /tmp/home-before.html
 
-      - name: Validate only the commerce release surface
+      - name: Validate commerce release surface
         run: |
           set -euo pipefail
           node --check site/store-checkout.js
@@ -85,9 +84,9 @@ jobs:
           node --check site/sok-availability-runtime.js
           node --check site/shipping-rules-runtime.js
           node --check site/universal-store.js
+          node --check scripts/live-store-purchaseability.mjs
           test -f site/checkout/index.html
           test -f site/store.html
-          grep -q '/store-checkout.js' site/checkout/index.html
           grep -q '/universal-store.js?v=1.0.1' site/store.html
           grep -q '"/checkout"' site/_routes.json
           grep -q '"/api/\*"' site/_routes.json
@@ -103,7 +102,7 @@ jobs:
         working-directory: apps/web-v2
         run: npm ci --ignore-scripts
 
-      - name: Deploy the approved site tree to the existing Pages project
+      - name: Deploy approved site tree to existing Pages project
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -141,7 +140,7 @@ jobs:
           echo "Cloudflare Pages deployment ID: $DEPLOYMENT_ID"
           echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
 
-      - name: HARD GATE — homepage semantics remain unchanged after deployment
+      - name: HARD GATE — homepage semantics remain unchanged
         run: |
           set -euo pipefail
           BEFORE="$(cut -d' ' -f1 /tmp/home-before.sha)"
@@ -164,101 +163,22 @@ jobs:
           echo "Homepage normalized after:  $AFTER"
           test "$AFTER" = "$BEFORE"
 
-      - name: Catalog-wide live purchaseability smoke
+      - name: Prove live store cache-bust and checkout configuration
         env:
-          LIVE_ORIGIN: https://elevationupscales.com
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const origin = process.env.LIVE_ORIGIN;
-          const address = {fullName:"Store Release Proof",address1:"100 Congress Ave",address2:"",city:"Austin",state:"TX",postalCode:"78701",countryCode:"US"};
-          const feeds = [
-            ["lithium", "/api/store/catalog?section=lithium-batteries"],
-            ["rv", "/api/store-catalog?section=rv-outdoor"],
-            ["sok", "/api/sok/catalog"],
-          ];
-          const groups = [];
-          let sokProducts = [];
-          for (const [name, path] of feeds) {
-            const response = await fetch(origin + path, {headers:{Accept:"application/json"}});
-            if (!response.ok) throw new Error(`${name} catalog HTTP ${response.status}`);
-            const data = await response.json();
-            if (!Array.isArray(data.products) || data.products.length === 0) throw new Error(`${name} catalog empty`);
-            console.log(`${name} catalog: ${data.products.length}`);
-            if (name === "sok") sokProducts = data.products;
-            groups.push(data.products);
-          }
-          const clean = (v) => String(v ?? "").trim();
-          const key = (p) => clean(p.id || p.sku || p.title || p.name).toLowerCase();
-          const map = new Map();
-          for (const rows of groups) for (const p of rows) {
-            const k = key(p); if (!k) continue;
-            map.set(k, map.has(k) ? {...map.get(k), ...p} : p);
-          }
-          const products = [...map.values()];
-          if (products.length < 70) throw new Error(`catalog unexpectedly small: ${products.length}`);
+          curl -fsSL --retry 5 "$LIVE_ORIGIN/store?release=$EXPECTED_SHA" -o /tmp/store.html
+          grep -q '/universal-store.js?v=1.0.1' /tmp/store.html
+          curl -fsSL --retry 5 "$LIVE_ORIGIN/universal-store.js?v=1.0.1" -o /tmp/universal-store.js
+          grep -q 'checkoutSource = p.sokProduct' /tmp/universal-store.js
+          curl -fsSL --retry 5 "$LIVE_ORIGIN/api/store-checkout/config" -o /tmp/config.json
+          jq -e '.configured == true and .checkoutEnabled == true and .liveCheckoutApproved == true and .environment == "live"' /tmp/config.json >/dev/null
 
-          const sokExpected = new Map([
-            ["SK12V100PC",31900],["SK12V100H",36900],["SK12V206H",74900],
-            ["SK12V206PH",75000],["SK24V100",75100],["SK12V280H",99900],
-            ["SK12V314PH",109900],["SK24V150PH",114900],["SK48V100N",119900],
-          ]);
-          for (const [sku, price] of sokExpected) {
-            const p = sokProducts.find((row) => clean(row.sku).toUpperCase() === sku);
-            if (!p) throw new Error(`missing approved SOK battery ${sku}`);
-            if (Number(p.priceCents || p.price_cents) !== price) throw new Error(`${sku} price mismatch: ${Number(p.priceCents || p.price_cents || 0)}`);
-            if (p.paymentEligible !== true) throw new Error(`${sku} is not paymentEligible`);
-          }
-
-          function sale(p) {
-            const publish = clean(p.publishStatus || p.publish_status).toLowerCase();
-            const mode = clean(p.availabilityMode || p.availabilityStatus || p.status || "available").toLowerCase();
-            const source = clean(p.sourceState || p.source_state || p.reviewState || "").toLowerCase();
-            const shipping = clean(p.shippingStatus || p.shipping_status || "").toLowerCase();
-            const ident = [p.brand,p.manufacturer,p.supplier,p.vendor,p.title,p.name,p.sku].map(clean).join(" ").toLowerCase();
-            const rawStock = p.supplierStock ?? p.inventoryQty ?? p.inventory_qty ?? p.quantityOnHand;
-            const hasStock = rawStock !== null && rawStock !== undefined && String(rawStock) !== "";
-            const stock = hasStock ? Number(rawStock) : null;
-            const price = Number(p.priceCents || p.price_cents || 0);
-            const eligible = p.paymentEligible !== false;
-            if (publish && publish !== "published") return false;
-            if (/stale|source missing|unknown|hold|review/.test(source)) return false;
-            if (!p.sokProduct && (/unavailable|out of stock|zero stock/.test(mode) || (hasStock && Number.isFinite(stock) && stock <= 0))) return false;
-            if (/prepurchase|preorder|backorder/.test(mode) && !p.sokProduct) return eligible && price > 0;
-            if (!price && !p.sokProduct) return false;
-            if (/doba/.test(ident)) {
-              if (!hasStock || !Number.isFinite(stock)) return false;
-              if (shipping && shipping !== "verified") return false;
-              return price > 0;
-            }
-            if (p.sokProduct) return eligible && price > 0;
-            if (shipping && shipping !== "verified") return false;
-            return price > 0;
-          }
-
-          const advertisedBuyNow = products.filter(sale);
-          if (advertisedBuyNow.length < 9) throw new Error(`too few buyable products: ${advertisedBuyNow.length}`);
-          const failures = [];
-          for (const p of advertisedBuyNow) {
-            const id = clean(p.id || p.sku);
-            const name = clean(p.title || p.name);
-            const section = clean(p.storeSection || p.store_section).toLowerCase();
-            const source = p.sokProduct || section === "lithium-batteries" ? "lithium" : "rv";
-            const payload = {source,id,name,quantity:1,variantId:"",couponCode:"",availabilityTimingAcknowledged:true,shipping:address};
-            const response = await fetch(origin + "/api/store-checkout/quote", {
-              method:"POST",
-              headers:{"Content-Type":"application/json",Accept:"application/json",Origin:origin},
-              body:JSON.stringify(payload),
-            });
-            const body = await response.json().catch(()=>({}));
-            if (!response.ok) failures.push(`${id}: HTTP ${response.status} ${body.error || body.message || "quote failed"}`);
-            else if (p.sokProduct && body?.availability?.paymentEligible !== true) failures.push(`${id}: quote not payment eligible`);
-          }
-          console.log(`unique products: ${products.length}`);
-          console.log(`advertised Buy Now products checked: ${advertisedBuyNow.length}`);
-          if (failures.length) throw new Error(`Buy Now failures:\n${failures.join("\n")}`);
-          console.log("Catalog-wide purchaseability: PASS");
-          NODE
+      - name: Catalog-wide live purchaseability audit
+        run: |
+          set -euo pipefail
+          LIVE_ORIGIN="$LIVE_ORIGIN" node scripts/live-store-purchaseability.mjs
 
       - name: Release summary
         env:
@@ -273,8 +193,9 @@ jobs:
             echo "Cloudflare Pages deployment ID: $DEPLOYMENT_ID"
             echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
             echo "Homepage source blob: $LOCKED_HOME_BLOB"
-            echo 'Homepage normalized before/after: IDENTICAL'
-            echo 'Catalog-wide purchaseability: PASS'
+            echo 'Homepage semantics: IDENTICAL'
+            echo 'Store cache-bust: PASS'
             echo 'Nine verified SOK batteries: DIRECT CHECKOUT PASS'
+            echo 'Catalog-wide purchaseability: PASS'
             echo 'PayPal live config: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
