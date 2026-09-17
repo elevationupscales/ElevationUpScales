@@ -13,6 +13,8 @@ import { catalogStyles } from './catalog-styles.js';
 import { homeFidelityStyles } from './home-fidelity-styles.js';
 import { homepageCloseoutStyles } from './homepage-closeout-styles.js';
 import { sokProductMerchandisingStyles } from './sok-product-merchandising-styles.js';
+import { sokSimpleStoreStyles } from './sok-simple-store-styles.js';
+import { getSokProduct, renderSokProduct, renderSokStore } from './sok-simple-store.js';
 import { navStyles } from './nav-styles.js';
 import { CANONICAL_ORIGIN, canonicalUrl, getPublicRoute, getSitemapRoutes, resolveCompatibilityRedirect } from './routes.js';
 import { renderCatalogPage } from './catalog-pages.js';
@@ -169,6 +171,10 @@ export default {
       return response(`${styles}\n${navStyles}\n${catalogStyles}\n${cartStyles}\n${checkoutStyles}\n${homeFidelityStyles}\n${sokProductMerchandisingStyles}\n${homepageCloseoutStyles}`, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
 
+    if (url.pathname === '/assets/sok-store.css') {
+      return response(sokSimpleStoreStyles, { headers: { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+    }
+
     if (url.pathname === '/assets/app.js') {
       return response(clientScript, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
     }
@@ -185,6 +191,15 @@ export default {
       const requestedLines = parseCartItems(url.searchParams.get('items'));
       if (requestedLines === null) return json({ error: 'INVALID_CART_PAYLOAD' }, 400);
       return json(resolveCartLines(requestedLines));
+    }
+
+    if (url.pathname === '/shop/sok') return html(renderSokStore());
+
+    const simpleSokProductMatch = url.pathname.match(/^\/sok\/([a-z0-9-]+)\/?$/i);
+    if (simpleSokProductMatch) {
+      const product = getSokProduct(simpleSokProductMatch[1]);
+      if (product) return html(renderSokProduct(product));
+      return html(renderNotFound(), 404);
     }
 
     if (url.pathname === '/cart') return html(renderCartPage());
