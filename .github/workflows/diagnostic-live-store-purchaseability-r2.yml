@@ -1,0 +1,126 @@
+name: Diagnostic Live Store Purchaseability R2
+
+on:
+  push:
+    branches:
+      - diagnostic/live-store-purchaseability-20260916-r2
+    paths:
+      - .github/workflows/diagnostic-live-store-purchaseability-r2.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Audit every advertised Buy Now against live checkout
+        env:
+          LIVE_ORIGIN: https://elevationupscales.com
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const origin = process.env.LIVE_ORIGIN;
+          const address = {fullName:"Store Diagnostic",address1:"100 Congress Ave",address2:"",city:"Austin",state:"TX",postalCode:"78701",countryCode:"US"};
+          const feeds = [
+            ["lithium", "/api/store/catalog?section=lithium-batteries"],
+            ["rv", "/api/store-catalog?section=rv-outdoor"],
+            ["sok", "/api/sok/catalog"],
+          ];
+          const groups = [];
+          let sokProducts = [];
+          for (const [name, path] of feeds) {
+            const response = await fetch(origin + path, {headers:{Accept:"application/json", "Cache-Control":"no-cache"}});
+            if (!response.ok) throw new Error(`${name} catalog HTTP ${response.status}`);
+            const data = await response.json();
+            if (!Array.isArray(data.products) || data.products.length === 0) throw new Error(`${name} catalog empty`);
+            console.log(`${name} catalog: ${data.products.length}`);
+            if (name === "sok") sokProducts = data.products;
+            groups.push(data.products);
+          }
+
+          const clean = (v) => String(v ?? "").trim();
+          const expected = new Map([
+            ["SK12V100PC",31900],["SK12V100H",36900],["SK12V206H",74900],
+            ["SK12V206PH",75000],["SK24V100",75100],["SK12V280H",99900],
+            ["SK12V314PH",109900],["SK24V150PH",114900],["SK48V100N",119900],
+          ]);
+          const failures = [];
+          for (const [sku, price] of expected) {
+            const p = sokProducts.find((row) => clean(row.sku).toUpperCase() === sku);
+            if (!p) { failures.push(`SOK ${sku}: missing from canonical SOK feed`); continue; }
+            const actual = Number(p.priceCents || p.price_cents || 0);
+            if (actual !== price) failures.push(`SOK ${sku}: price ${actual}, expected ${price}`);
+            if (p.paymentEligible !== true) failures.push(`SOK ${sku}: paymentEligible=${String(p.paymentEligible)}`);
+            if (clean(p.commerceCta).toLowerCase() !== "buy now") failures.push(`SOK ${sku}: CTA=${clean(p.commerceCta)}`);
+
+            const quote = await fetch(origin + "/api/store-checkout/quote", {
+              method:"POST",
+              headers:{"Content-Type":"application/json",Accept:"application/json",Origin:origin},
+              body:JSON.stringify({source:"lithium",id:p.id,name:p.title,quantity:1,variantId:"",couponCode:"",availabilityTimingAcknowledged:true,shipping:address}),
+            });
+            const body = await quote.json().catch(()=>({}));
+            if (!quote.ok) failures.push(`SOK ${sku}: quote HTTP ${quote.status} ${body.error || body.message || "failed"}`);
+            else if (body?.availability?.paymentEligible !== true) failures.push(`SOK ${sku}: quote paymentEligible=false`);
+          }
+
+          const key = (p) => clean(p.id || p.sku || p.title || p.name).toLowerCase();
+          const map = new Map();
+          for (const rows of groups) for (const p of rows) {
+            const k = key(p); if (!k) continue;
+            map.set(k, map.has(k) ? {...map.get(k), ...p} : p);
+          }
+          const products = [...map.values()];
+          console.log(`unique merged products: ${products.length}`);
+          if (products.length < 70) failures.push(`catalog unexpectedly small: ${products.length}`);
+
+          function sale(p) {
+            const publish = clean(p.publishStatus || p.publish_status).toLowerCase();
+            const mode = clean(p.availabilityMode || p.availabilityStatus || p.status || "available").toLowerCase();
+            const sourceState = clean(p.sourceState || p.source_state || p.reviewState || "").toLowerCase();
+            const shipping = clean(p.shippingStatus || p.shipping_status || "").toLowerCase();
+            const ident = [p.brand,p.manufacturer,p.supplier,p.vendor,p.title,p.name,p.sku].map(clean).join(" ").toLowerCase();
+            const rawStock = p.supplierStock ?? p.inventoryQty ?? p.inventory_qty ?? p.quantityOnHand;
+            const hasStock = rawStock !== null && rawStock !== undefined && String(rawStock) !== "";
+            const stock = hasStock ? Number(rawStock) : null;
+            const price = Number(p.priceCents || p.price_cents || 0);
+            const eligible = p.paymentEligible !== false;
+            if (publish && publish !== "published") return false;
+            if (/stale|source missing|unknown|hold|review/.test(sourceState)) return false;
+            if (!p.sokProduct && (/unavailable|out of stock|zero stock/.test(mode) || (hasStock && Number.isFinite(stock) && stock <= 0))) return false;
+            if (/prepurchase|preorder|backorder/.test(mode) && !p.sokProduct) return eligible && price > 0;
+            if (!price && !p.sokProduct) return false;
+            if (/doba/.test(ident)) {
+              if (!hasStock || !Number.isFinite(stock)) return false;
+              if (shipping && shipping !== "verified") return false;
+              return price > 0;
+            }
+            if (p.sokProduct) return eligible && price > 0;
+            if (shipping && shipping !== "verified") return false;
+            return price > 0;
+          }
+
+          const advertised = products.filter(sale);
+          console.log(`advertised Buy Now candidates: ${advertised.length}`);
+          for (const p of advertised) {
+            if (p.sokProduct) continue; // canonical SOK feed was tested above to avoid legacy duplicate records.
+            const id = clean(p.id || p.sku);
+            const name = clean(p.title || p.name);
+            const section = clean(p.storeSection || p.store_section).toLowerCase();
+            const source = section === "lithium-batteries" ? "lithium" : "rv";
+            const response = await fetch(origin + "/api/store-checkout/quote", {
+              method:"POST",
+              headers:{"Content-Type":"application/json",Accept:"application/json",Origin:origin},
+              body:JSON.stringify({source,id,name,quantity:1,variantId:"",couponCode:"",availabilityTimingAcknowledged:true,shipping:address}),
+            });
+            const body = await response.json().catch(()=>({}));
+            if (!response.ok) failures.push(`${id}: HTTP ${response.status} ${body.error || body.message || "quote failed"}`);
+          }
+
+          if (failures.length) {
+            console.error("LIVE PURCHASEABILITY FAILURES:");
+            for (const failure of failures) console.error(`- ${failure}`);
+            process.exit(1);
+          }
+          console.log("LIVE CATALOG-WIDE PURCHASEABILITY: PASS");
+          NODE
