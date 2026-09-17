@@ -5,6 +5,7 @@ const JSON_HEADERS = Object.freeze({"Cache-Control":"no-store","Content-Type":"a
 const RULE_IDS = Object.freeze({LOWER48:"lower48-lithium",HI:"hawaii-lithium",HI_DELIVERY:"hawaii-address-delivery",AK:"alaska-lithium"});
 const CERTAINTY_STATES = new Set(["VERIFIED / ACTIVE","PROVISIONAL","REVIEW REQUIRED","UNAVAILABLE"]);
 const CALCULATIONS = new Set(["flat","per_item","per_battery"]);
+const LOWER48_APPROVED_RATE_CENTS = 2799;
 
 const clean=(v,max=500)=>String(v??"").trim().slice(0,max);
 const bool=(v)=>v===true||["1","true","yes","on"].includes(clean(v,12).toLowerCase());
@@ -25,7 +26,7 @@ function sameOrigin(request){const origin=clean(request.headers.get("Origin"),50
 function view(row){if(!row)return null;return{id:row.id,region:row.region,enabled:Boolean(row.enabled),method:row.method,calculation:row.calculation,rateCents:Number(row.rate_cents||0),quoteRequired:Boolean(row.quote_required),pickupOnly:Boolean(row.pickup_only),residentialAllowed:Boolean(row.residential_allowed),minQuantity:Number(row.min_quantity||1),maxQuantity:row.max_quantity===null?null:Number(row.max_quantity),preferredConsolidationQuantity:row.preferred_consolidation_quantity===null?null:Number(row.preferred_consolidation_quantity),customerLabel:row.customer_label,timingMessage:row.timing_message,effectiveStart:row.effective_start,effectiveEnd:row.effective_end,internalNotes:row.internal_notes,certaintyState:CERTAINTY_STATES.has(clean(row.certainty_state,40).toUpperCase())?clean(row.certainty_state,40).toUpperCase():(Number(row.enabled)?(Number(row.quote_required)?"REVIEW REQUIRED":"VERIFIED / ACTIVE"):"UNAVAILABLE"),version:Number(row.version||1),updatedAt:row.updated_at,updatedBy:row.updated_by};}
 
 async function ensureRules(env){const db=await ensureCommerceSchema(env);const stamp=now();const seeds=[
-  [RULE_IDS.LOWER48,"LOWER48",1,"Standard Shipping","per_battery",2799,0,0,1,1,null,null,"Lower 48 Lithium Shipping","Shipping timing varies by product and supplier fulfillment.","","","Approved 4.5 rule: $27.99 per actual lithium battery","VERIFIED / ACTIVE",stamp,"system"],
+  [RULE_IDS.LOWER48,"LOWER48",1,"Standard Shipping","per_battery",LOWER48_APPROVED_RATE_CENTS,0,0,1,1,null,null,"Lower 48 Lithium Shipping","Shipping timing varies by product and supplier fulfillment.","","","Approved 4.5 rule: $27.99 per actual lithium battery","VERIFIED / ACTIVE",stamp,"system"],
   [RULE_IDS.HI,"HI",1,"Consolidated Freight","per_battery",9900,0,1,0,1,null,3,"Hawaii Freight — Honolulu Pickup","Honolulu warehouse / freight-terminal pickup. Shipment timing is estimated and not guaranteed.","","","Approved 4.5 rule: $99 per actual battery to Honolulu pickup; preferred consolidation 3 compatible batteries","VERIFIED / ACTIVE",stamp,"system"],
   [RULE_IDS.HI_DELIVERY,"HI_DELIVERY",1,"Address Delivery Quote","flat",0,1,0,1,1,null,null,"Additional Delivery Quote Required","Delivery beyond the Honolulu pickup location is a separate quoted service.","","","No standardized Hawaii final-mile delivery price is approved","REVIEW REQUIRED",stamp,"system"],
   [RULE_IDS.AK,"AK",1,"Review Required","per_battery",0,1,0,0,1,null,null,"Freight Review Required","Alaska lithium shipping requires a verified quote and route review.","","","No standardized Alaska lithium price is approved","REVIEW REQUIRED",stamp,"system"]
@@ -36,7 +37,29 @@ async function ensureRules(env){const db=await ensureCommerceSchema(env);const s
 
 async function currentRule(env,state){const db=await ensureRules(env);const region=ruleRegion(state);const row=await db.prepare("SELECT * FROM eus_shipping_rules WHERE region=? LIMIT 1").bind(region).first();return{db,row,region};}
 
-export async function resolveShippingRule(env,{destinationState="",quantity=1,batteryUnitsPerItem=1}={}){const qty=Math.max(1,int(quantity,1)),units=Math.max(1,int(batteryUnitsPerItem,1));const{row,region}=await currentRule(env,destinationState);if(!row)return{ok:false,region,status:"unavailable",label:"Shipping Unavailable",shippingCents:0};const rule=view(row);if(!activeNow(row))return{ok:false,region,status:"unavailable",label:"Currently Unavailable",shippingCents:0,rule};if(rule.quoteRequired)return{ok:true,region,status:"review_required",label:rule.customerLabel||"Freight Review Required",shippingCents:0,rule};let amount=rule.rateCents;if(rule.calculation==="per_item")amount*=qty;else if(rule.calculation==="per_battery")amount*=qty*units;return{ok:true,region,status:"shipping_available",label:rule.customerLabel||"Shipping Available",shippingCents:amount,rateCents:rule.rateCents,rule};}
+// Lower-48 shipping is an approved deterministic retail rule, not a purchase-approval gate.
+// If the mutable admin row is absent/disabled/stale, checkout still uses the approved baseline.
+// Hawaii and Alaska retain their special-route review behavior.
+export async function resolveShippingRule(env,{destinationState="",quantity=1,batteryUnitsPerItem=1}={}){
+  const qty=Math.max(1,int(quantity,1)),units=Math.max(1,int(batteryUnitsPerItem,1)),region=ruleRegion(destinationState);
+  let row=null;
+  try{({row}=await currentRule(env,destinationState));}catch(error){if(region!=="LOWER48")throw error;}
+  if(region==="LOWER48"){
+    const configured=row?view(row):null;
+    const rate=Number.isInteger(Number(configured?.rateCents))&&Number(configured.rateCents)>=0?Number(configured.rateCents):LOWER48_APPROVED_RATE_CENTS;
+    const calculation=configured?.calculation||"per_battery";
+    let amount=rate;
+    if(calculation==="per_item")amount*=qty;else if(calculation==="per_battery")amount*=qty*units;
+    const rule=configured||{id:RULE_IDS.LOWER48,region:"LOWER48",enabled:true,method:"Standard Shipping",calculation:"per_battery",rateCents:LOWER48_APPROVED_RATE_CENTS,quoteRequired:false,pickupOnly:false,residentialAllowed:true,preferredConsolidationQuantity:null,customerLabel:"Lower 48 Lithium Shipping",timingMessage:"Shipping timing varies by product and supplier fulfillment."};
+    return{ok:true,region,status:"shipping_available",label:rule.customerLabel||"Lower 48 Lithium Shipping",shippingCents:amount,rateCents:rate,rule};
+  }
+  if(!row)return{ok:false,region,status:"unavailable",label:"Shipping Unavailable",shippingCents:0};
+  const rule=view(row);
+  if(!activeNow(row))return{ok:false,region,status:"unavailable",label:"Currently Unavailable",shippingCents:0,rule};
+  if(rule.quoteRequired)return{ok:true,region,status:"review_required",label:rule.customerLabel||"Freight Review Required",shippingCents:0,rule};
+  let amount=rule.rateCents;if(rule.calculation==="per_item")amount*=qty;else if(rule.calculation==="per_battery")amount*=qty*units;
+  return{ok:true,region,status:"shipping_available",label:rule.customerLabel||"Shipping Available",shippingCents:amount,rateCents:rule.rateCents,rule};
+}
 
 function publicRule(rule){return{id:rule.id,region:rule.region,enabled:rule.enabled,method:rule.method,calculation:rule.calculation,rateCents:rule.rateCents,quoteRequired:rule.quoteRequired,pickupOnly:rule.pickupOnly,residentialAllowed:rule.residentialAllowed,preferredConsolidationQuantity:rule.preferredConsolidationQuantity,customerLabel:rule.customerLabel,timingMessage:rule.timingMessage,effectiveStart:rule.effectiveStart,effectiveEnd:rule.effectiveEnd};}
 
