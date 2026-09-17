@@ -1,0 +1,209 @@
+name: Full Live Store Audit
+
+on:
+  push:
+    branches:
+      - diagnostic/store-full-audit-20260916
+    paths:
+      - '.github/workflows/full-live-store-audit.yml'
+
+permissions:
+  contents: read
+
+env:
+  LIVE_ORIGIN: https://elevationupscales.com
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install browser
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Audit full live catalog, CTAs, checkout and navigation
+        run: |
+          cat > full-store-audit.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+
+          const ORIGIN = process.env.LIVE_ORIGIN || 'https://elevationupscales.com';
+          const clean = (v) => String(v ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          const ident = (p) => [p.brand,p.manufacturer,p.supplier,p.vendor,p.title,p.name,p.sku].map(v=>clean(v).toLowerCase()).join(' ');
+          const endpointSpecs = [
+            ['/api/store/catalog?section=lithium-batteries','lithium'],
+            ['/api/store-catalog?section=rv-outdoor','rv'],
+            ['/api/sok/catalog','sok'],
+          ];
+
+          async function readJson(path) {
+            const r = await fetch(`${ORIGIN}${path}`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+            const text = await r.text();
+            let data = {};
+            try { data = JSON.parse(text); } catch {}
+            return { path, status: r.status, ok: r.ok, data, text: text.slice(0,1000) };
+          }
+
+          const feeds = [];
+          for (const [path, source] of endpointSpecs) {
+            const result = await readJson(path);
+            console.log(`FEED ${path} HTTP=${result.status} PRODUCTS=${Array.isArray(result.data?.products)?result.data.products.length:0}`);
+            feeds.push({ ...result, source });
+          }
+
+          const map = new Map();
+          for (const feed of feeds) {
+            for (const raw of (Array.isArray(feed.data?.products) ? feed.data.products : [])) {
+              const p = { ...raw, __feed: feed.source };
+              const key = clean(p.id || p.sku || `${p.brand||p.supplier||''}-${p.title||p.name||''}`).toLowerCase();
+              if (!key) continue;
+              map.set(key, map.has(key) ? { ...map.get(key), ...p, __feed: `${map.get(key).__feed},${feed.source}` } : p);
+            }
+          }
+          const products = [...map.values()];
+
+          function sale(p) {
+            const publish=clean(p.publishStatus||p.publish_status).toLowerCase();
+            const mode=clean(p.availabilityMode||p.availabilityStatus||p.status||'available').toLowerCase();
+            const source=clean(p.sourceState||p.source_state||p.reviewState||'').toLowerCase();
+            const shipping=clean(p.shippingStatus||p.shipping_status||'').toLowerCase();
+            const supplier=ident(p);
+            const raw=p.supplierStock??p.inventoryQty??p.inventory_qty??p.quantityOnHand;
+            const has=raw!==null&&raw!==undefined&&String(raw)!=='';
+            const stock=has?Number(raw):null;
+            const price=Number(p.priceCents||p.price_cents||0);
+            const eligible=p.paymentEligible!==false;
+            if(publish&&publish!=='published') return {cta:'HIDDEN',reason:'NOT_PUBLISHED',buy:false};
+            if(/stale|source missing|unknown|hold|review/.test(source)) return {cta:'Confirm Availability',reason:`SOURCE_STATE:${source}`,buy:false};
+            if(/unavailable|out of stock|zero stock/.test(mode)||(has&&Number.isFinite(stock)&&stock<=0)) return {cta:'Out of Stock',reason:`AVAILABILITY:${mode||stock}`,buy:false};
+            if(/prepurchase|preorder|backorder/.test(mode)) return {cta:eligible&&price>0?'Purchase Options':'Confirm Availability',reason:`AVAILABILITY:${mode};paymentEligible=${eligible}`,buy:eligible&&price>0};
+            if(!price&&!p.sokProduct) return {cta:'Confirm Availability',reason:'PRICE_UNAVAILABLE',buy:false};
+            if(/doba/.test(supplier)) {
+              if(!has||!Number.isFinite(stock)) return {cta:'Confirm Availability',reason:'DOBA_STOCK_UNKNOWN',buy:false};
+              if(shipping&&shipping!=='verified') return {cta:shipping==='quote_required'?'Shipping Quote Required':'Confirm Availability',reason:`SHIPPING:${shipping}`,buy:false};
+              return {cta:'Buy Now',reason:'READY',buy:price>0};
+            }
+            if(p.sokProduct) {
+              if(!eligible) return {cta:'See Purchase Options',reason:`SOK_PAYMENT_ELIGIBLE_FALSE;mode=${mode};purchaseMode=${clean(p.publicPurchaseMode||p.purchaseMode)}`,buy:false};
+              return {cta:'Buy Now',reason:'READY',buy:price>0};
+            }
+            if(shipping==='quote_required') return {cta:'Shipping Quote Required',reason:'SHIPPING_QUOTE_REQUIRED',buy:false};
+            return {cta:'Buy Now',reason:'READY',buy:price>0};
+          }
+
+          const rows = products.map(p => {
+            const s = sale(p);
+            return {
+              id: clean(p.id), sku: clean(p.sku||p.supplierSku), title: clean(p.title||p.name), feed:p.__feed,
+              brand: clean(p.brand||p.manufacturer||p.supplier), priceCents:Number(p.priceCents||p.price_cents||0),
+              publish:clean(p.publishStatus||p.publish_status), availability:clean(p.availabilityMode||p.availabilityStatus||p.status),
+              purchaseMode:clean(p.publicPurchaseMode||p.purchaseMode), paymentEligible:p.paymentEligible,
+              shippingStatus:clean(p.shippingStatus||p.shipping_status), stock:p.supplierStock??p.inventoryQty??p.inventory_qty??p.quantityOnHand??null,
+              sok:Boolean(p.sokProduct), cta:s.cta, buy:s.buy, reason:s.reason, storeSection:clean(p.storeSection||p.store_section)
+            };
+          });
+
+          console.log('\n=== PRODUCT PURCHASE-STATE AUDIT ===');
+          for (const r of rows) console.log(JSON.stringify(r));
+          const counts = rows.reduce((a,r)=>(a[r.cta]=(a[r.cta]||0)+1,a),{});
+          console.log('CTA_COUNTS', JSON.stringify(counts));
+          console.log('TOTAL_PRODUCTS', rows.length);
+
+          console.log('\n=== QUOTE AUDIT FOR EVERY BUYABLE PRODUCT ===');
+          for (const r of rows.filter(r=>r.buy && r.cta==='Buy Now')) {
+            const source = r.sok || r.storeSection === 'lithium-batteries' ? 'lithium' : 'rv';
+            const body = {
+              source, id:r.id||r.sku, name:r.title, quantity:1, variantId:'', couponCode:'',
+              shipping:{fullName:'Elevation Audit',address1:'100 Congress Ave',address2:'',city:'Austin',state:'TX',postalCode:'78701',countryCode:'US'}
+            };
+            const response = await fetch(`${ORIGIN}/api/store-checkout/quote`, {method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',Origin:ORIGIN},body:JSON.stringify(body)});
+            const payload = await response.json().catch(()=>({}));
+            console.log(JSON.stringify({sku:r.sku,id:r.id,quoteHttp:response.status,quoteOk:response.ok,error:payload.error||'',totalCents:payload.totalCents??null,shippingCents:payload.shippingCents??null}));
+          }
+
+          const browser = await chromium.launch({headless:true});
+          const desktop = await browser.newPage({viewport:{width:1440,height:1000}});
+          const desktopErrors=[];
+          desktop.on('console',m=>{if(m.type()==='error')desktopErrors.push(m.text())});
+          desktop.on('pageerror',e=>desktopErrors.push(`PAGEERROR ${e.message}`));
+          await desktop.goto(`${ORIGIN}/store`,{waitUntil:'domcontentloaded',timeout:30000});
+          await desktop.waitForFunction(()=>!document.querySelector('[data-universal-status]')?.textContent?.includes('Loading'),null,{timeout:20000}).catch(()=>{});
+          const cards = await desktop.locator('.universal-product').evaluateAll(els=>els.map(el=>({
+            text:(el.innerText||'').replace(/\s+/g,' ').trim(),
+            title:(el.querySelector('h3')?.textContent||'').trim(),
+            state:(el.querySelector('.universal-product__state')?.textContent||'').trim(),
+            actions:[...el.querySelectorAll('.universal-product__actions a')].map(a=>({label:(a.textContent||'').trim(),href:a.getAttribute('href')||''}))
+          })));
+          console.log('\n=== RENDERED STORE CARDS ===');
+          console.log('CARD_COUNT', cards.length);
+          for (const c of cards) console.log(JSON.stringify(c));
+          console.log('DESKTOP_CONSOLE_ERRORS',JSON.stringify(desktopErrors));
+
+          console.log('\n=== SKU VISIBILITY AUDIT ===');
+          for (const r of rows) {
+            if (!r.sku) continue;
+            const card = cards.find(c => (c.title||'').toLowerCase() === (r.title||'').toLowerCase() || c.text.toLowerCase().includes((r.title||'').toLowerCase().slice(0,40)));
+            if (!card) { console.log(JSON.stringify({sku:r.sku,visible:false,reason:'NO_MATCHING_RENDERED_CARD'})); continue; }
+            console.log(JSON.stringify({sku:r.sku,visible:card.text.toLowerCase().includes(r.sku.toLowerCase()),title:card.title,state:card.state}));
+          }
+
+          console.log('\n=== BUY NOW BROWSER CHECKOUT AUDIT ===');
+          for (const card of cards) {
+            const buy = card.actions.find(a=>a.label==='Buy Now');
+            if (!buy) continue;
+            const p = await browser.newPage({viewport:{width:1280,height:900}});
+            const errs=[]; p.on('console',m=>{if(m.type()==='error')errs.push(m.text())}); p.on('pageerror',e=>errs.push(`PAGEERROR ${e.message}`));
+            const resp=await p.goto(new URL(buy.href,ORIGIN).href,{waitUntil:'domcontentloaded',timeout:30000});
+            await p.waitForTimeout(5000);
+            const product=(await p.locator('#checkout-product').textContent().catch(()=>''))?.trim();
+            const status=(await p.locator('#checkout-status').textContent().catch(()=>''))?.trim();
+            const paypal=await p.locator('#checkout-paypal').isVisible().catch(()=>false);
+            console.log(JSON.stringify({title:card.title,href:buy.href,http:resp?.status(),product,status,paypalVisible:paypal,errors:errs}));
+            await p.close();
+          }
+
+          console.log('\n=== MOBILE NAVIGATION AUDIT ===');
+          const mobile = await browser.newPage({viewport:{width:390,height:844}});
+          const navErrors=[]; mobile.on('console',m=>{if(m.type()==='error')navErrors.push(m.text())}); mobile.on('pageerror',e=>navErrors.push(`PAGEERROR ${e.message}`));
+          await mobile.goto(`${ORIGIN}/store`,{waitUntil:'domcontentloaded',timeout:30000});
+          const toggle=mobile.locator('.eus-menu-toggle');
+          const before=await toggle.getAttribute('aria-expanded');
+          await toggle.click();
+          const after=await toggle.getAttribute('aria-expanded');
+          const navOpen=await mobile.locator('.eus-nav').evaluate(el=>el.classList.contains('is-open'));
+          const menuLabels=await mobile.locator('.eus-nav summary').allTextContents();
+          const directLinks=await mobile.locator('.eus-nav a').evaluateAll(as=>as.map(a=>({text:(a.textContent||'').replace(/\s+/g,' ').trim(),href:a.getAttribute('href')})));
+          console.log(JSON.stringify({before,after,navOpen,menuLabels,directLinks,errors:navErrors}));
+          await browser.close();
+
+          const problems = rows.filter(r=>['See Purchase Options','Confirm Availability','Out of Stock','Shipping Quote Required'].includes(r.cta));
+          const skuInvisible = rows.filter(r=>r.sku && !cards.some(c=>c.text.toLowerCase().includes(r.sku.toLowerCase())));
+          const summary = [
+            '# Full Live Store Audit',
+            '',
+            `- Live origin: ${ORIGIN}`,
+            `- API products discovered: ${rows.length}`,
+            `- Rendered store cards: ${cards.length}`,
+            `- Buy Now products: ${rows.filter(r=>r.cta==='Buy Now').length}`,
+            `- Purchase-gated products: ${problems.length}`,
+            `- Products whose SKU is not visible on a rendered card: ${skuInvisible.length}`,
+            '',
+            '## CTA counts',
+            '```json', JSON.stringify(counts,null,2), '```',
+            '',
+            '## Purchase-gated products',
+            ...problems.map(r=>`- ${r.sku||r.id||r.title}: **${r.cta}** — ${r.reason}`),
+            '',
+            '## SKU visibility misses',
+            ...skuInvisible.map(r=>`- ${r.sku}: ${r.title}`),
+          ].join('\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary+'\n');
+          EOF
+          node full-store-audit.mjs
+          rm -f full-store-audit.mjs
