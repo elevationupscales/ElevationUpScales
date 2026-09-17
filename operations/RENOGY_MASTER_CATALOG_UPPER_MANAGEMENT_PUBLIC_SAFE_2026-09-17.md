@@ -85,7 +85,19 @@ Wave 1 is therefore **fully triaged**. Do not force another Wave-1 activation un
 
 For every exact lithium SKU, management must capture chemistry, nominal voltage, Ah/Wh, weights/dimensions, SDS/MSDS, UN38.3/test-summary evidence, supported transport classification, packaging state, carrier/route restrictions, Lower-48 eligibility, AK/HI routing, Partner Portal orderability, warranty source, shipping treatment, and verification date.
 
-Never inherit hazmat attributes from a similar Renogy battery.
+For **kits and bundles**, lithium/hazmat classification is **component/BOM-based**. A flat catalog-level lithium flag is not sufficient authority to mark a kit non-regulated. If the exact kit BOM is unavailable or any included battery/regulated component is unresolved, the kit remains shipping/activation HOLD until component-level transport truth is verified.
+
+Never inherit hazmat attributes from a similar Renogy battery, kit, or prior-generation SKU.
+
+## NEXT REVENUE RECON — 2026-09-17
+
+- **RNG-KIT-STCS100DC-VOY20-G1-US** — strongest next candidate. Shopify record is already DRAFT at $229.99 with approved-looking product media and dealer-orderable/source-prep tags. Public web confirms the exact SKU exists in current commerce, but Renogy-direct exact Partner Portal acceptance still requires current dealer-side verification before activation. Do not call it live until current supplier acceptance/orderability clears and purchaseability smoke passes.
+- **RKIT1500DB-D60G60DT6-GLI42HF3-US** — HIGH-DOLLAR PROSPECT / HOLD. Shopify DRAFT at $13,509.53, no featured media, current exact public Renogy page not found in public recon, and current exact BOM/orderability/freight/media remain unresolved.
+- **RKIT750DB-D50DT3-GLI4HF3-US** — HIGH-DOLLAR PROSPECT / HOLD. Shopify DRAFT at $7,391.73, no featured media, current exact public Renogy page not found in public recon, and current exact BOM/orderability/freight/media remain unresolved.
+- Wave 1 holds remain closed; do not reopen Voyager or the 100W bifacial absent materially changed commercial evidence.
+- Do not bulk-stage the remainder of the 204-row source catalog. Pull only revenue-justified SKUs through the exact activation gate.
+
+---
 
 ## CONTROL PHRASE
 
