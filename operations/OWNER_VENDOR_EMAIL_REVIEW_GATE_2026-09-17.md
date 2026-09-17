@@ -1,4 +1,4 @@
-# Owner Vendor Email Review Gate
+# Lead / Vendor Outbound Review Gate
 
 **Status: ACTIVE / CONTROLLING**  
 **Effective: 2026-09-17**  
@@ -6,46 +6,56 @@
 
 ## Rule
 
-**DO NOT SEND VENDOR / SUPPLIER OUTREACH, FOLLOW-UP, APPLICATION-RELATED, PARTNERSHIP, WHOLESALE, DEALER, DROPSHIP, OR COMMERCIAL EMAILS WITHOUT OWNER REVIEW AND EXPLICIT OWNER APPROVAL TO SEND.**
+**DO NOT SEND LEADS OR ANY LEAD-RELATED OUTBOUND COMMUNICATION WITHOUT MANAGEMENT REVIEW.**
 
-This applies to:
+This applies to every supplier, vendor, dealer, wholesale, dropship, logistics, referral, sourcing, commercial, customer-development, or other prospecting lead.
 
-- new vendor introductions;
-- supplier/dealer/wholesale partnership emails;
+The prior owner-review requirement remains in force for actual vendor/supplier sends unless Casey explicitly changes that approval authority. Management review is mandatory before a lead can become send-eligible; a draft, research result, or prior general outreach instruction is not send approval.
+
+## Covered outbound actions
+
+This gate applies to:
+
+- new lead introductions;
+- vendor/supplier outreach;
+- dealer / wholesale / reseller partnership emails;
 - dropship outreach;
-- follow-ups to existing vendor threads;
+- follow-ups to existing lead or vendor threads;
 - application or onboarding correspondence;
+- dealer/reseller application submissions that create or advance a commercial relationship;
 - compliance-packet sends;
 - commercial qualification questions;
-- Hawaii/Alaska supplier or logistics outreach;
-- any other outbound supplier/vendor email that could create or advance a commercial relationship.
+- Hawaii / Alaska supplier, referral, fulfillment, or logistics outreach;
+- contact-form submissions;
+- replies that materially advance a prospective commercial relationship;
+- any other outbound lead action that could create, advance, commit, or represent Elevation in a commercial relationship.
 
-## Allowed without send authority
+## Allowed before management review
 
 Workers may continue to:
 
 - research and qualify leads;
-- run dedupe checks;
+- run hard dedupe checks;
 - identify verified contacts and application routes;
 - prepare tailored drafts;
+- prepare application answers without submitting them;
 - attach supporting documents to drafts when appropriate;
-- summarize the proposed message and commercial objective for Casey;
-- update the supplier lead map and GitHub operations records.
+- summarize the proposed message, relationship, and commercial objective for management;
+- update the supplier lead map and GitHub operations records;
+- mark items as `DRAFT ONLY / MANAGEMENT REVIEW`.
 
-## Required send gate
+## Required workflow
 
-The workflow is:
+**RESEARCH → QUALIFY → DEDUPE → DRAFT → MANAGEMENT REVIEW → REQUIRED SEND APPROVAL → SEND**
 
-**RESEARCH → QUALIFY → DEDUPE → DRAFT → OWNER REVIEW → EXPLICIT OWNER APPROVAL → SEND**
+No prior general instruction, prior send authority, routine workflow, or phrase such as “reach out,” “contact,” “follow up,” “continue leads,” or “run leads” overrides this gate.
 
-No prior general instruction, prior send authority, prior workflow, or routine-manager authority overrides this gate.
-
-If Casey asks to “reach out,” “contact,” “follow up,” or similar language without explicitly approving the exact outbound message after review, prepare the draft for owner review rather than sending it.
+Until a message has passed management review and the applicable send-approval gate, it stays unsent.
 
 ## Olight correction
 
-An Olight authorized-dealer / wholesale introduction was sent before this owner-review gate was issued. That message cannot be recalled. No additional Olight email, follow-up, application correspondence, or commercial reply may be sent without Casey reviewing and explicitly approving the message first.
+An Olight authorized-dealer / wholesale introduction was sent before this gate was reinforced. That message cannot be recalled. No additional Olight email, follow-up, application correspondence, commercial reply, or submission may be sent without management review and the applicable explicit send approval.
 
 ## Management source
 
-This file is an active owner directive under GitHub `/operations/` and controls vendor/supplier email sending until Casey explicitly changes it.
+This file is an active owner directive under GitHub `/operations/` and controls all lead-related outbound sending until Casey explicitly changes it.
