@@ -74,9 +74,9 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 |---|---|---|---|---|
 | **P0** | Web / commerce stabilization | Web V2 Development | **ACTIVE — BOUNDED DEFECT REPAIR** | Work only proven customer/revenue-path defects. No broad redesign. Build/test on branch and stop at READY TO DEPLOY. |
 | **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
-| **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — LARGEST UNFINISHED BUILD** | Establish one revenue-ready SKU truth model: vendor SKU, Elevation SKU, cost, MAP/floor, shipping, channel fees, expected contribution, stock, authorization, warranty/returns, source and verification state. Start with the verified SOK battery set and reuse the pattern. |
-| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORIZED / MAP CONTROLLED / REVENUE PRIORITY** | Convert verified exact-SKU SOK products into profitable sellable eBay listings; respect MAP, shipping and full eBay fee economics; hold only SKU-specific blockers. |
-| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / NEXT BATCH STAGED** | Preserve the verified 10W product and newly published 400W suitcase. Resolve remaining Renogy SKU gates individually; do not bulk-publish or infer exact-SKU/channel authorization. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. Real paid orders supersede catalog work. |
+| **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — LARGEST UNFINISHED BUILD** | Establish one revenue-ready SKU truth model: vendor SKU, Elevation SKU, protected cost source, MAP/floor, shipping, channel fees, expected contribution state, stock, authorization, warranty/returns, source and verification state. Start with the verified SOK battery set and reuse the pattern. Keep protected dealer costs/raw inventory out of public Git. |
+| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORITY RECONCILIATION REQUIRED / MAP CONTROLLED** | Do not publish through conflicting authority records. Reconcile current documentary marketplace authorization first; direct-site SOK work continues independently. |
+| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Do not force a third launch. Recheck held SKUs only when current retail pricing, supplier availability/orderability, economics, or approved media changes. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
 | **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
 | **P1** | SunGoldPower catalog | Vendor / Commerce Operations | **READY FOR NEXT VERIFIED BATCH** | Feed only verified profitable SKUs into commerce surfaces after pricing/source truth is complete. |
 | **HOLD** | Kingboss | Kingboss Project | **ISOLATED HOLD** | Keep Kingboss out of the critical path; do not let its storefront/catalog uncertainty block other vendors or the main store. |
@@ -97,10 +97,26 @@ Current verified state:
 - the 400W suitcase exposed a launch-control defect: product status had been ACTIVE while Online Store publication was still absent, producing a broken customer link;
 - launch control is now: **ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED = LIVE**. ACTIVE alone is not sufficient;
 - no non-test paid order was present at the last verified order check;
-- remaining Renogy drafts/holds continue to be resolved SKU-by-SKU at exact-SKU/orderability/media/price/warranty/channel gates;
-- no bulk publication is authorized.
+- `RBC2125DS-21W-G3-US` 50A IP67 DC-DC MPPT: **HOLD — economics + current supplier availability**;
+- `RSP100DCT-G1-US` 100W N-Type bifacial: **HOLD — current public promo price + thin economics/backorder state**;
+- `RKIT200RV-A30D1-G2-US` 200W RV kit: **HOLD — current supplier availability + approved media**;
+- `RNG-KIT-PREMIUM400D-RVR40-G4-US` 400W Premium Kit G4: **HOLD — current supplier availability + approved media**;
+- `RCC60REGO-G2-US` REGO 60A MPPT: **HOLD — current public price + availability + approved media**;
+- `RBC2115DS-21W-G1-US` REGO 30A bidirectional: **HOLD — approved media + current dealer-side exact-SKU orderability confirmation**;
+- no bulk publication is authorized and no third Renogy launch should be forced through a commercial hold.
 
 Do not reopen the payment stack absent a fresh defect.
+
+---
+
+# SOK CONTROL CHECKPOINT
+
+- The current supplier baseline is the 2026-09-09 SOK package; a fresh weekly stock/availability update has been requested from Kam and is pending.
+- Current Shopify SOK MAP reconciliation passed for the active nine-product set; no public-price repair was required at the last check.
+- Shopify quantity zero is not treated as supplier out-of-stock proof for dropship products; current supplier availability controls fulfillment truth.
+- Protected dealer costs, raw supplier inventory quantities, private correspondence and protected freight economics remain outside public Git.
+- Direct Elevation commerce may continue using verified SOK terms while current stock is refreshed.
+- eBay publication is separately gated until the conflict between the canonical board and the dedicated marketplace-authority record is reconciled. Do not infer marketplace authorization from direct-site authorization.
 
 ---
 
@@ -158,9 +174,9 @@ When Casey says **NEXT**: move to the next unblocked priority without restarting
 This is an attention order, **not a worker time schedule**:
 
 1. keep Development on the bounded Web / Commerce Stabilization packet;
-2. advance SOK / master catalog economics into reusable revenue-ready SKU truth;
-3. advance SOK eBay revenue listings;
-4. advance Shopify / Renogy only as explicit SKU gates clear;
+2. advance SOK / master catalog economics into reusable revenue-ready SKU truth while respecting protected-data controls;
+3. reconcile SOK eBay authority before marketplace publication;
+4. advance Shopify / Renogy only when explicit commercial SKU gates clear;
 5. review Development/QA receipts whenever they become ready;
 6. approve or hold production deployment as a distinct owner decision.
 
