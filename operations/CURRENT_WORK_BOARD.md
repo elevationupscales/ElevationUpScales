@@ -96,6 +96,19 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 
 ---
 
+# SHOPIFY STOREFRONT MERCHANDISING CHECKPOINT — 2026-09-17
+
+- Shopify storefront navigation repair executed after customer-path review showed the home page visually overrepresented SOK and hid the broader catalog.
+- The legacy manual `frontpage` collection had only one product and that product was DRAFT with no image; it has been converted into **Featured Power & Off-Grid** and now contains a curated live mix across Renogy, SOK, and VEVOR.
+- New customer-facing smart collections created and published: **Solar & Charging**, **Batteries & Monitoring**, and **RV & Mobile Power**.
+- Main navigation updated from **Home / Catalog / Contact** to **Home / Shop / Brands / Catalog / Contact**.
+- **Shop** now exposes Solar & Charging, Batteries & Monitoring, RV & Mobile Power, Off-Grid & Lithium, and Outdoor & Camping.
+- **Brands** now exposes Renogy, SOK Battery, and VEVOR Direct. SunGoldPower remains excluded from live navigation until its product activation gates clear.
+- Collection imagery added so the new categories render as intentional visual destinations instead of text-only links.
+- No product pricing, supplier truth, or activation status was altered as part of this merchandising repair.
+
+---
+
 # CURRENT VERIFIED SHOPIFY / RENOGY CHECKPOINT
 
 Current verified state:
