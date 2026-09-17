@@ -88,6 +88,7 @@ jobs:
           test -f site/checkout/index.html
           test -f site/store.html
           grep -q '/store-checkout.js' site/checkout/index.html
+          grep -q '/universal-store.js?v=1.0.1' site/store.html
           grep -q '"/checkout"' site/_routes.json
           grep -q '"/api/\*"' site/_routes.json
           git diff --check
@@ -177,12 +178,14 @@ jobs:
             ["sok", "/api/sok/catalog"],
           ];
           const groups = [];
+          let sokProducts = [];
           for (const [name, path] of feeds) {
             const response = await fetch(origin + path, {headers:{Accept:"application/json"}});
             if (!response.ok) throw new Error(`${name} catalog HTTP ${response.status}`);
             const data = await response.json();
             if (!Array.isArray(data.products) || data.products.length === 0) throw new Error(`${name} catalog empty`);
             console.log(`${name} catalog: ${data.products.length}`);
+            if (name === "sok") sokProducts = data.products;
             groups.push(data.products);
           }
           const clean = (v) => String(v ?? "").trim();
@@ -201,9 +204,9 @@ jobs:
             ["SK12V314PH",109900],["SK24V150PH",114900],["SK48V100N",119900],
           ]);
           for (const [sku, price] of sokExpected) {
-            const p = products.find((row) => clean(row.sku).toUpperCase() === sku);
+            const p = sokProducts.find((row) => clean(row.sku).toUpperCase() === sku);
             if (!p) throw new Error(`missing approved SOK battery ${sku}`);
-            if (Number(p.priceCents || p.price_cents) !== price) throw new Error(`${sku} price mismatch`);
+            if (Number(p.priceCents || p.price_cents) !== price) throw new Error(`${sku} price mismatch: ${Number(p.priceCents || p.price_cents || 0)}`);
             if (p.paymentEligible !== true) throw new Error(`${sku} is not paymentEligible`);
           }
 
