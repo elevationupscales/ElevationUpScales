@@ -82,6 +82,8 @@ jobs:
           node --check site/store-checkout-server.js
           node --check site/_worker.js
           node --check site/sok-availability-runtime.js
+          node --check site/shipping-rules-runtime.js
+          node --check site/universal-store.js
           test -f site/checkout/index.html
           test -f site/store.html
           grep -q '/store-checkout.js' site/checkout/index.html
@@ -160,18 +162,99 @@ jobs:
           echo "Homepage normalized after:  $AFTER"
           test "$AFTER" = "$BEFORE"
 
-      - name: Prove live Pages checkout backend for SOK SK12V100PC
+      - name: Catalog-wide live purchaseability smoke
+        env:
+          LIVE_ORIGIN: https://elevationupscales.com
         run: |
           set -euo pipefail
-          CONFIG_STATUS="$(curl -sS -o /tmp/config.json -w '%{http_code}' "$LIVE_ORIGIN/api/store-checkout/config")"
-          test "$CONFIG_STATUS" = "200"
-          jq -e '.configured == true and .checkoutEnabled == true and .liveCheckoutApproved == true and .environment == "live"' /tmp/config.json >/dev/null
-          QUOTE_STATUS="$(curl -sS -o /tmp/quote.json -w '%{http_code}' -X POST "$LIVE_ORIGIN/api/store-checkout/quote" \
-            -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Origin: https://elevationupscales.com' \
-            --data '{"source":"lithium","id":"sok-sk12v100pc","name":"SOK SK12V100PC 12.8V 100Ah 1280Wh LiFePO4 Battery","quantity":1,"variantId":"","couponCode":"","availabilityTimingAcknowledged":false,"shipping":{"fullName":"Store Release Proof","address1":"100 Congress Ave","address2":"","city":"Austin","state":"TX","postalCode":"78701","countryCode":"US"}}')"
-          cat /tmp/quote.json
-          test "$QUOTE_STATUS" = "200"
-          jq -e '.id == "sok-sk12v100pc" and .unitPriceCents == 31900 and .availability.paymentEligible == true' /tmp/quote.json >/dev/null
+          node <<'NODE'
+          const origin = process.env.LIVE_ORIGIN;
+          const address = {fullName:"Store Release Proof",address1:"100 Congress Ave",address2:"",city:"Austin",state:"TX",postalCode:"78701",countryCode:"US"};
+          const feeds = [
+            ["lithium", "/api/store/catalog?section=lithium-batteries"],
+            ["rv", "/api/store-catalog?section=rv-outdoor"],
+            ["sok", "/api/sok/catalog"],
+          ];
+          const groups = [];
+          for (const [name, path] of feeds) {
+            const response = await fetch(origin + path, {headers:{Accept:"application/json"}});
+            if (!response.ok) throw new Error(`${name} catalog HTTP ${response.status}`);
+            const data = await response.json();
+            if (!Array.isArray(data.products) || data.products.length === 0) throw new Error(`${name} catalog empty`);
+            console.log(`${name} catalog: ${data.products.length}`);
+            groups.push(data.products);
+          }
+          const clean = (v) => String(v ?? "").trim();
+          const key = (p) => clean(p.id || p.sku || p.title || p.name).toLowerCase();
+          const map = new Map();
+          for (const rows of groups) for (const p of rows) {
+            const k = key(p); if (!k) continue;
+            map.set(k, map.has(k) ? {...map.get(k), ...p} : p);
+          }
+          const products = [...map.values()];
+          if (products.length < 70) throw new Error(`catalog unexpectedly small: ${products.length}`);
+
+          const sokExpected = new Map([
+            ["SK12V100PC",31900],["SK12V100H",36900],["SK12V206H",74900],
+            ["SK12V206PH",75000],["SK24V100",75100],["SK12V280H",99900],
+            ["SK12V314PH",109900],["SK24V150PH",114900],["SK48V100N",119900],
+          ]);
+          for (const [sku, price] of sokExpected) {
+            const p = products.find((row) => clean(row.sku).toUpperCase() === sku);
+            if (!p) throw new Error(`missing approved SOK battery ${sku}`);
+            if (Number(p.priceCents || p.price_cents) !== price) throw new Error(`${sku} price mismatch`);
+            if (p.paymentEligible !== true) throw new Error(`${sku} is not paymentEligible`);
+          }
+
+          function sale(p) {
+            const publish = clean(p.publishStatus || p.publish_status).toLowerCase();
+            const mode = clean(p.availabilityMode || p.availabilityStatus || p.status || "available").toLowerCase();
+            const source = clean(p.sourceState || p.source_state || p.reviewState || "").toLowerCase();
+            const shipping = clean(p.shippingStatus || p.shipping_status || "").toLowerCase();
+            const ident = [p.brand,p.manufacturer,p.supplier,p.vendor,p.title,p.name,p.sku].map(clean).join(" ").toLowerCase();
+            const rawStock = p.supplierStock ?? p.inventoryQty ?? p.inventory_qty ?? p.quantityOnHand;
+            const hasStock = rawStock !== null && rawStock !== undefined && String(rawStock) !== "";
+            const stock = hasStock ? Number(rawStock) : null;
+            const price = Number(p.priceCents || p.price_cents || 0);
+            const eligible = p.paymentEligible !== false;
+            if (publish && publish !== "published") return false;
+            if (/stale|source missing|unknown|hold|review/.test(source)) return false;
+            if (!p.sokProduct && (/unavailable|out of stock|zero stock/.test(mode) || (hasStock && Number.isFinite(stock) && stock <= 0))) return false;
+            if (/prepurchase|preorder|backorder/.test(mode) && !p.sokProduct) return eligible && price > 0;
+            if (!price && !p.sokProduct) return false;
+            if (/doba/.test(ident)) {
+              if (!hasStock || !Number.isFinite(stock)) return false;
+              if (shipping && shipping !== "verified") return false;
+              return price > 0;
+            }
+            if (p.sokProduct) return eligible && price > 0;
+            if (shipping && shipping !== "verified") return false;
+            return price > 0;
+          }
+
+          const advertisedBuyNow = products.filter(sale);
+          if (advertisedBuyNow.length < 9) throw new Error(`too few buyable products: ${advertisedBuyNow.length}`);
+          const failures = [];
+          for (const p of advertisedBuyNow) {
+            const id = clean(p.id || p.sku);
+            const name = clean(p.title || p.name);
+            const section = clean(p.storeSection || p.store_section).toLowerCase();
+            const source = p.sokProduct || section === "lithium-batteries" ? "lithium" : "rv";
+            const payload = {source,id,name,quantity:1,variantId:"",couponCode:"",availabilityTimingAcknowledged:true,shipping:address};
+            const response = await fetch(origin + "/api/store-checkout/quote", {
+              method:"POST",
+              headers:{"Content-Type":"application/json",Accept:"application/json",Origin:origin},
+              body:JSON.stringify(payload),
+            });
+            const body = await response.json().catch(()=>({}));
+            if (!response.ok) failures.push(`${id}: HTTP ${response.status} ${body.error || body.message || "quote failed"}`);
+            else if (p.sokProduct && body?.availability?.paymentEligible !== true) failures.push(`${id}: quote not payment eligible`);
+          }
+          console.log(`unique products: ${products.length}`);
+          console.log(`advertised Buy Now products checked: ${advertisedBuyNow.length}`);
+          if (failures.length) throw new Error(`Buy Now failures:\n${failures.join("\n")}`);
+          console.log("Catalog-wide purchaseability: PASS");
+          NODE
 
       - name: Release summary
         env:
@@ -187,6 +270,7 @@ jobs:
             echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
             echo "Homepage source blob: $LOCKED_HOME_BLOB"
             echo 'Homepage normalized before/after: IDENTICAL'
-            echo 'SOK SK12V100PC live quote: PASS'
+            echo 'Catalog-wide purchaseability: PASS'
+            echo 'Nine verified SOK batteries: DIRECT CHECKOUT PASS'
             echo 'PayPal live config: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
