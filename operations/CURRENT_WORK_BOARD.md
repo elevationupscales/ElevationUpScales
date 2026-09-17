@@ -129,6 +129,33 @@ Conversion funnel to measure:
 
 Do not claim click-rate improvement without before/after evidence. Do not optimize vanity traffic at the expense of purchaseability or margin.
 
+
+---
+
+# OS RECON MARKET-EXPANSION EXECUTION CHECK — 2026-09-17
+
+Live Shopify verification after the canonical expansion control:
+
+- **Renogy — Hawaii & Alaska Eligible** collection exists and contains 5 ACTIVE Renogy products.
+- **Renogy — Canada Supply** collection exists and contains 5 ACTIVE Renogy products.
+- Both expansion collections currently have **no collection image**.
+- Neither expansion collection is currently linked in the default **Main menu**. Main navigation exposes Shop categories and Brands → Renogy, but does not expose the new Hawaii/Alaska or Canada paths.
+- This is the current first proven click-through defect: the destinations exist, but storefront navigation does not provide a direct discovery path.
+- The AK/HI set correctly excludes the 400W Renogy suitcase.
+- Live variant verification:
+  - `RSP10TC-G1-US`: ACTIVE / availableForSale PASS / inventory policy CONTINUE / qty 0.
+  - `RNG-CTRL-ADV30-LI-US`: ACTIVE / availableForSale PASS / inventory policy DENY / qty 0.
+  - `RBM500-G3-US`: ACTIVE / availableForSale PASS / inventory policy DENY / qty 0.
+  - `RSHST-B02P300-G1-US`: ACTIVE / availableForSale PASS / inventory policy DENY / qty 0.
+  - `RNG-INVT-3000-12V-P2-G3-US`: ACTIVE / availableForSale PASS / inventory policy CONTINUE / qty 0.
+- Because three promoted Wave-1 products remain DENY at quantity zero, **do not change inventory policy merely to improve click rate**. Shopify Store Operations must reconcile exact supplier orderability before changing those controls.
+- The conversion baseline shows **41 search sessions with 0 cart additions**, making search/landing relevance and product discovery the clearest current external conversion weakness.
+- Route:
+  - **Commerce/Storefront:** surface the two market collections in a clear customer-facing navigation/merchandising path and add intentional collection imagery/copy; no broad redesign.
+  - **Shopify Store Operations under Peter:** verify destination checkout/rates and reconcile the three DENY-at-zero Wave-1 SKUs before claiming them fully purchase-ready.
+  - **OS RECON:** re-verify navigation, collection contents, purchaseability and funnel movement after receipts land.
+- Do not create another market-expansion plan. This is execution against the existing canonical control.
+
 ---
 
 # SHOPIFY SALES-CHANNEL CHECKPOINT — 2026-09-17
