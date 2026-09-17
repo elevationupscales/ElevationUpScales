@@ -1,0 +1,78 @@
+# RENOGY MASTER CATALOG — UPPER MANAGEMENT PUBLIC-SAFE RECONCILIATION
+
+**Effective:** 2026-09-17  
+**Owner:** Casey Young  
+**Source package:** `RENOGY_MASTER_CATALOG_UPPER_MANAGEMENT_2026-09-17.zip`  
+**Source row count:** 204  
+**Control type:** Public-safe management reconciliation only
+
+## SOURCE HIERARCHY
+
+The Renogy upper-management package contains:
+- the recovered Renogy Sales Support source workbook;
+- a normalized 204-row management catalog;
+- a CSV mirror;
+- profitability/pricing controls;
+- warranty/backorder/shipping controls;
+- lithium/hazmat controls;
+- Shopify merchandising-wave and high-dollar prospect priorities.
+
+Protected dealer costs and raw private source data remain outside public Git.
+
+## CONTROLLING ACTIVATION GATE
+
+**EXACT CURRENT SKU → CURRENT RETAIL/MSRP → PROFIT → PARTNER PORTAL ORDERABILITY → APPROVED MEDIA → WARRANTY → SHIPPING → DIRECT-SITE AUTHORIZATION → SHOPIFY RECORD MATCH → ACTIVATE → LIVE SMOKE**
+
+The source-workbook MSRP is historical/source data and is not automatically the current storefront price.
+
+## PROFIT / PRICING CONTROL
+
+- Recheck current public Renogy retail/MSRP for each exact SKU before activation.
+- Do not infer a blanket pricing allowance.
+- Positive contribution is required after applicable variable costs.
+- Protected dealer economics remain internal.
+
+## SHIPPING / WARRANTY / BACKORDER CONTROL
+
+- Warranty must be verified by exact SKU/product source.
+- Public backorder state does not prove Partner Portal dealer orderability.
+- Lower-48 standard shipping has supplier support as free under ordinary Renogy terms, subject to order-specific exceptions.
+- Hawaii shipping is supported with additional item/destination-dependent cost.
+- Lithium/Hazmat routing requires exact-SKU transport verification.
+
+## MERCHANDISING PRIORITIES — NOT AUTO-PUBLISH AUTHORITY
+
+### Conversion Wave 1
+- RBM500-G3-US — 500A Battery Monitor
+- RSP100DCT-G1-US — 100W N-Type Bifacial Panel
+- RCC20VOYP-G1-US — Voyager 20A Waterproof Controller
+- RSHST-B02P300-G1-US — Battery Shunt 300
+- RSP10TC-G1-US — 10W Solar Battery Trickle Charger Maintainer
+
+### High-Dollar Showcase
+- RKIT400DAP2-US — 400W complete AGM solution
+- RKIT400DLP2-US — 400W complete lithium solution
+- RKIT800PM-R60D4-LIBT13-PCL3-US — 800W premium lithium + inverter prospect
+- RKIT750DB-D50DT3-GLI4HF3-US — 750W charger-system prospect
+- RKIT1500DB-D60G60DT6-GLI42HF3-US — 1500W REGO system prospect
+
+These are merchandising/prospect priorities only. Each exact SKU remains subject to the full activation gate.
+
+## CURRENT-STATE RECONCILIATION
+
+- RSP10TC-G1-US remains a verified live Shopify product under current launch controls.
+- RBM500-G3-US and RSHST-B02P300-G1-US are active Renogy products and remain subject to current orderability/route truth.
+- RSP100DCT-G1-US remains **HOLD** under newer current commercial truth due current public pricing/economics/backorder conditions. Its appearance in Conversion Wave 1 does not override that hold.
+- RCC20VOYP-G1-US is a valid catalog Wave-1 candidate from the upper-management package but is not automatically activated by this file.
+- High-dollar showcase SKUs remain prospect/merchandising candidates until exact current SKU gates pass.
+- Current live Shopify / Renogy control files and the canonical workboard supersede any older activation implication when fresher evidence proves a hold or changed state.
+
+## LITHIUM / HAZMAT CONTROL
+
+For every exact lithium SKU, management must capture chemistry, nominal voltage, Ah/Wh, weights/dimensions, SDS/MSDS, UN38.3/test-summary evidence, supported transport classification, packaging state, carrier/route restrictions, Lower-48 eligibility, AK/HI routing, Partner Portal orderability, warranty source, shipping treatment, and verification date.
+
+Never inherit hazmat attributes from a similar Renogy battery.
+
+## CONTROL PHRASE
+
+**USE THE 204-ROW CATALOG AS SOURCE TRUTH. USE CURRENT COMMERCIAL VERIFICATION AS ACTIVATION TRUTH. NEVER EXPOSE PROTECTED DEALER ECONOMICS.**
