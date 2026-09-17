@@ -46,7 +46,7 @@ Major website build/edit work is substantially complete. The company is now conv
 
 Current priority order:
 
-**P0 WEB / COMMERCE STABILIZATION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 SOK EBAY REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P1 SUNGOLDPOWER → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
+**P0 WEB / COMMERCE STABILIZATION → P0 MARKET EXPANSION CONVERSION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 SOK EBAY REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P1 SUNGOLDPOWER → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
 
 Vendor acquisition is no longer the main mission. New vendor prospecting is opportunistic only unless Casey specifically elevates a target.
 
@@ -74,9 +74,10 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 |---|---|---|---|---|
 | **P0** | Web / commerce stabilization | Web V2 Development | **ACTIVE — BOUNDED DEFECT REPAIR** | Work only proven customer/revenue-path defects. No broad redesign. Build/test on branch and stop at READY TO DEPLOY. |
 | **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
+| **P0** | Renogy Hawaii / Alaska / Canada expansion + click conversion | Shopify Store Operations under Peter; Commerce/Storefront; Shipping & Logistics; OS RECON | **ACTIVE — OWNER DIRECTED / ORGANIZED EXPANSION** | Use `RENOGY_HI_AK_CANADA_MARKET_OPENING_2026-09-17.md` as canonical lane control. Open verified eligible SKUs, install/verify protected shipping treatment, expose one clear customer shopping path, measure product clicks → add-to-cart → checkout → paid order, and tune shipping from real fulfillment. No duplicate rules. |
 | **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — SOK MODEL ESTABLISHED** | Reuse the public-safe SOK truth pattern vendor by vendor: exact SKU, protected cost source, MAP/floor, shipping, channel fees, contribution state, stock, authorization, warranty/returns, source and verification state. Keep protected dealer costs/raw inventory out of public Git. |
 | **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORITY RECONCILIATION REQUIRED / MAP CONTROLLED** | Do not publish through conflicting authority records. Existing supplier correspondence does not yet establish eBay-specific authorization. Direct-site SOK work continues independently. |
-| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Do not force a third launch. Recheck held SKUs only when current retail pricing, supplier availability/orderability, economics, or approved media changes. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
+| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / EXPANSION ACTIVE / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Expansion does not override SKU commercial holds. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
 | **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
 | **P1** | SunGoldPower catalog | Vendor / Commerce Operations | **BATCH 1 STAGED — 5 DRAFTS / EXTERNAL ACTIVATION GATES** | Five in-stock inverter SKUs are staged at supplier MAP. Hold publication until approved exact-SKU media, dropship/order-submission procedure and Lower-48 shipping economics are verified. Do not send duplicate vendor outreach; the operating-detail request is already pending. |
 | **HOLD** | Kingboss | Kingboss Project | **ISOLATED HOLD** | Keep Kingboss out of the critical path; do not let its storefront/catalog uncertainty block other vendors or the main store. |
@@ -85,6 +86,48 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 | **P2** | External communications control | Company Operations | **CONTAINED / MONITORED** | No unapproved external vendor send. Inbound does not create outbound authority. |
 | **P2** | Owner direct phone/SMS verification | Communications Recovery | **OPEN VERIFICATION** | Verify inbound call, SMS and voicemail when routed; does not block commerce. |
 | **P2** | Optional visual/media polish | Web specialist lane | **ONLY AFTER PROVEN REVENUE DEFECTS** | One proven section/media group at a time. No redesign campaign. |
+
+---
+
+# MARKET EXPANSION + CLICK-CONVERSION CHECKPOINT — 2026-09-17
+
+Canonical control: `RENOGY_HI_AK_CANADA_MARKET_OPENING_2026-09-17.md`.
+
+Owner direction:
+- Hawaii Renogy path: **OPENING / ACTIVE**
+- Alaska Renogy path: **OPENING / ACTIVE**
+- Canada Renogy path: **OFFICIALLY ACTIVE PATH**
+- objective: **increase qualified product click-through and convert clicks into paid orders**
+- do not wait for perfect shipping history where a conservative bounded estimate is safe
+- learn from actual orders and adjust future rate classes
+
+Worker boundaries:
+- **Shopify Store Operations under Peter:** destination eligibility, shipping rates, publication, checkout, purchaseability
+- **Commerce/Storefront:** click-through merchandising only; one clear eligible-products path; no broad redesign
+- **Shipping & Logistics:** actual cost, freight/DG exceptions, estimate tuning
+- **OS RECON:** verify boundaries, route logic, promoted-SKU purchaseability, funnel evidence
+- **COM2/COM3/support workers:** supporting evidence/fixes only; no competing market rule set
+
+Canonical initial estimates:
+- Hawaii small eligible Renogy parcel: **$24.99**
+- Hawaii large inverter/heavy power electronics: **$89.99**
+- Alaska small eligible Renogy parcel: **$34.99**
+- Canada small eligible Renogy parcel: **$39.99**
+- no generic Hawaii free-shipping threshold during learning
+- no generic Hawaii $15 Express until verified
+
+Hard exclusions remain:
+- AK/HI batteries: no blanket auto-open
+- AK/HI solar panels over 320W: blocked from automatic air route
+- Canada Yukon/Nunavut/NWT: blocked under current route
+- regulated/DG or unknown freight: quote/review
+- expansion does not clear unrelated SKU price/orderability/media holds
+
+Conversion funnel to measure:
+
+**IMPRESSIONS → PRODUCT/COLLECTION CLICK → PRODUCT DETAIL → ADD TO CART → CHECKOUT → PAID ORDER**
+
+Do not claim click-rate improvement without before/after evidence. Do not optimize vanity traffic at the expense of purchaseability or margin.
 
 ---
 
@@ -223,12 +266,14 @@ When Casey says **NEXT**: move to the next unblocked priority without restarting
 This is an attention order, **not a worker time schedule**:
 
 1. keep Development on the bounded Web / Commerce Stabilization packet;
-2. keep master catalog truth current without exposing protected supplier economics;
-3. reconcile SOK eBay authority before marketplace publication;
-4. advance Shopify / Renogy only when explicit commercial SKU gates clear;
-5. hold SunGoldPower Batch 1 at the documented external operating-detail gates while continuing unrelated revenue work;
-6. review Development/QA receipts whenever they become ready;
-7. approve or hold production deployment as a distinct owner decision.
+2. open and verify the Renogy Hawaii / Alaska / Canada parcel-class market path;
+3. surface eligible products clearly and measure product click → add-to-cart → checkout;
+4. keep master catalog truth current without exposing protected supplier economics;
+5. reconcile SOK eBay authority before marketplace publication;
+6. advance Shopify / Renogy only when explicit commercial SKU gates clear;
+7. hold SunGoldPower Batch 1 at the documented external operating-detail gates while continuing unrelated revenue work;
+8. review Development/QA receipts whenever they become ready;
+9. approve or hold production deployment as a distinct owner decision.
 
 ---
 
@@ -242,4 +287,4 @@ They are not live authority when they conflict with this board or newer owner di
 
 # CONTROL PHRASE
 
-**CONVERT VERIFIED PRODUCTS INTO PROFITABLE ORDERS. DEVELOPMENT BUILDS. RECON VERIFIES. MANAGEMENT ROUTES. CASEY APPROVES PRODUCTION DEPLOYMENT.**
+**CONVERT VERIFIED PRODUCTS INTO PROFITABLE ORDERS. OPEN CLEAN MARKETS. MEASURE THE CLICK. PROTECT THE MARGIN. DEVELOPMENT BUILDS. RECON VERIFIES. MANAGEMENT ROUTES. CASEY APPROVES PRODUCTION DEPLOYMENT.**
