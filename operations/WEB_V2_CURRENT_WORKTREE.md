@@ -3,188 +3,177 @@
 **Owner:** Casey Young  
 **Company:** Elevation UpScales, Inc.  
 **System:** Elevation OS 1.1  
-**Status:** **CURRENT-MAIN RELEASE ACTIVE**  
-**Controlling release directive:** `OWNER_DIRECTIVE_WEB_V2_DIRECT_RELEASE_CONTROL_2026-09-16.md`  
+**Status:** **COMMERCE STABILIZATION / DEVELOPMENT ACTIVE**  
+**Canonical state:** `CURRENT_WORK_BOARD.md`  
 **Historical recovery workflow:** `WEB_V2_DEV_OS_RECOVERY_WORKFLOW_2026-09-14.md` — **REFERENCE / EXCEPTION ONLY**
 
 ---
 
 # 1. CURRENT CONTROL
 
-Web V2 no longer operates through mandatory historical recovery → owner QA → forward-port replay.
+Major website build/edit work is substantially complete.
 
-The owner-approved visual work and later commerce/runtime work have already advanced into current `main`.
+Web V2 is no longer operating as a broad redesign/rebuild program and management/recon chats are no longer the default coding/deployment lane.
 
-Therefore the controlling path is:
+The controlling execution path is:
 
-**CURRENT MAIN → RELEASE-CRITICAL QA → FIX ONLY PROVEN BLOCKER → IMMUTABLE CANDIDATE → SMOKE → PROMOTE SAME VERSION → LIVE VERIFY → DONE.**
+**PROVEN DEFECT → MPM ROUTES BOUNDED PACKET → DEVELOPMENT BRANCH → BUILD → TEST → QA/RECON VERIFY → READY TO DEPLOY → CASEY APPROVAL → RELEASE ENGINEER DEPLOY → LIVE SMOKE → RECORD BASELINE.**
 
-Historical states such as `e0db198...` and `a2c0de22...` remain useful rollback/reference evidence only. They are not the default execution path.
+Development is state/gate driven. It is not run on a clock or deadline block unless Casey explicitly sets one.
 
 ---
 
-# 2. CURRENT-MAIN RULE
+# 2. OWNER DEPLOYMENT GATE
 
-Before Web V2 release work, resolve `main` once.
+**NO PRODUCTION DEPLOYMENT WITHOUT CASEY'S EXPLICIT APPROVAL.**
 
-If current `main` contains the approved work, do not:
+Development may create branches, fixes, tests, previews/candidates and release receipts under already-approved scope.
+
+Production promotion/deployment must stop at:
+
+**READY TO DEPLOY — OWNER APPROVAL REQUIRED.**
+
+This owner instruction supersedes older language allowing normal promotion/deployment without a fresh Casey gate.
+
+The temporary manager/recon direct-deploy pattern used during major website grunt work is closed. MPM/COM/Recon may directly code/deploy only when Casey explicitly authorizes that exception for the specific task.
+
+---
+
+# 3. CURRENT DEVELOPMENT SCOPE
+
+Work only **proven customer/revenue-path defects** and bounded commerce stabilization.
+
+Current allowed classes include:
+
+1. store readability/contrast or broken branding asset behavior;
+2. product card → product detail → CTA consistency;
+3. SKU/model visibility and customer-readable product identity;
+4. catalog category/classification defects that materially hurt shopping;
+5. listing/card presentation defects after functional revenue-path defects;
+6. exact checkout/cart defects proven by QA.
+
+Do not broaden into:
+
+- homepage redesign;
+- broad visual redesign;
+- new architecture;
+- new vendor integrations unrelated to a proven blocker;
+- speculative shipping/tax/payment changes;
+- unrelated Shopify/eBay work;
+- management dashboards/analytics unless specifically routed;
+- mass catalog polish before duplicate/source truth is resolved.
+
+Kingboss remains isolated and must not block the main store or other vendor lanes.
+
+---
+
+# 4. CURRENT-MAIN RULE
+
+Before technical work, resolve current `main` once.
+
+Create/recover one bounded development branch from current truth unless an existing active branch already owns the exact packet.
+
+Do not:
 
 - rebuild an old recovery branch;
-- replay Phase A;
-- replay Phase B;
-- forward-port work that is already present;
-- recreate old screenshot approval gates;
-- route Casey through another owner review merely because a prior worktree required one.
+- replay Phase A / Phase B by default;
+- forward-port work already present on current main;
+- restart broad visual QA because history exists;
+- create a second execution lane for the same defect.
 
-If a dated deployment instruction names an older SHA as current, that instruction is automatically **STALE / REFERENCE ONLY** unless it states a permanent invariant.
-
----
-
-# 3. RELEASE-CRITICAL TEST SCOPE
-
-Required proof is bounded to the customer revenue path:
-
-1. homepage renders;
-2. store renders;
-3. representative product detail renders;
-4. Add to Cart works;
-5. cart persistence/totals work;
-6. checkout accepts required contact/delivery data;
-7. PayPal handoff opens correctly without an unintended test charge;
-8. server-side price/orderability controls remain enforced;
-9. candidate reports exact Git SHA and Cloudflare Version ID;
-10. production smoke passes after promotion.
-
-Previously approved visual work is not re-litigated on every release.
-
-A material new visual regression introduced by the current candidate is a blocker; old visual history by itself is not.
+Historical SHAs remain rollback/reference evidence only.
 
 ---
 
-# 4. RELEASE LOOP
+# 5. QA / RELEASE-READINESS SCOPE
 
-**RESOLVE CURRENT MAIN**  
-↓  
-**RUN REQUIRED RELEASE-CRITICAL TESTS**  
-↓  
-**IF FAIL: FIX ONLY THE EXACT PROVEN BLOCKER AND RETEST**  
-↓  
-**CREATE ONE IMMUTABLE CLOUDFLARE CANDIDATE**  
-↓  
-**VERIFY GIT SHA + CLOUDFLARE VERSION ID + `/__version`**  
-↓  
-**SMOKE HOME / STORE / PRODUCT / CART / CHECKOUT / PAYPAL**  
-↓  
-**PROMOTE THE SAME TESTED VERSION ID**  
-↓  
-**LIVE VERIFY**  
-↓  
-**RECORD PRODUCTION BASELINE**  
-↓  
-**DONE**
+For any branch that affects the customer revenue path, prove only what the change can affect plus the critical surrounding path:
 
-No extra management phase is inserted without a proven release-critical defect.
+1. homepage remains unchanged unless Casey explicitly authorized a homepage change;
+2. store renders and navigation remains stable;
+3. affected product cards show correct identity / CTA;
+4. affected product detail routes render correctly;
+5. cart/checkout behavior remains correct where touched;
+6. server-side price/orderability protections remain enforced;
+7. PayPal/payment handoff remains intact when the packet touches checkout or product orderability;
+8. no unrelated vendor/catalog area regresses.
+
+Do not re-litigate previously approved design decisions on every packet.
 
 ---
 
-# 5. EXECUTION OWNERSHIP
+# 6. EXECUTION OWNERSHIP
 
-One release = one execution owner.
+One packet = one execution owner.
 
-Management routes and verifies; it does not create duplicate execution lanes.
+- Web V2 Development executes code changes;
+- Recon / QA inspects and verifies exact defects/results;
+- MPM / Company Oversight owns priority, routing and state;
+- specialist workers own only their named defect class;
+- Release Engineer owns production deployment after Casey approval.
 
-For an active release:
-
-- Web V2 Development / Release Engineer executes the release path;
-- Company/OS management tracks state and removes blockers;
-- specialist workers are used only for a specific proven defect;
-- no second manager re-runs broad recon before release can continue.
-
----
-
-# 6. OWNER GATES
-
-A fresh Casey approval gate is required only for:
-
-- a new material customer-facing design decision;
-- new pricing/business policy;
-- material payment-behavior change;
-- a release-critical tradeoff requiring owner judgment;
-- an explicit owner request to review.
-
-No new owner gate is required for normal candidate creation, smoke testing, same-version promotion, or deployment of work Casey already approved.
+Management must not become the routine coder simply because it can access Git.
 
 ---
 
-# 7. PRESERVE DURING RELEASE
+# 7. DEVELOPMENT RECEIPT
 
-Do not broaden release scope into:
+When the packet is complete, Development returns:
 
-- redesign;
-- catalog architecture changes unrelated to a blocker;
-- optional media cleanup;
-- new vendor integrations;
-- new analytics/dashboard work;
-- management documentation projects;
-- unrelated Shopify/eBay work;
-- unrelated Hawaii/freight work.
+- branch name;
+- exact SHA;
+- defects fixed;
+- files changed;
+- tests / QA evidence;
+- known holds or non-blocking issues;
+- `READY TO DEPLOY: YES/NO`.
 
-The release path must remain shorter than the feature-development path.
+If `NO`, identify the exact blocker and keep unrelated work moving.
+
+If `YES`, stop. Do not deploy until Casey explicitly approves.
 
 ---
 
-# 8. HISTORICAL VISUAL CONTROLS
+# 8. RELEASE LOOP AFTER OWNER APPROVAL
 
-The owner-approved visual direction remains protected.
+Only after Casey says to deploy the ready candidate:
 
-Historical references may be consulted when diagnosing a current regression, including:
+**VERIFY EXACT APPROVED SHA/CANDIDATE → DEPLOY/PROMOTE EXACT TESTED BUILD → LIVE SMOKE CUSTOMER PATH → RECORD DEPLOYMENT RECEIPT → CLOSE.**
 
-- `e0db19829ec3c36b4caaa503f5b9f7bcde38d868` — owner-reviewed QA history;
-- `a2c0de22b7c18320603b196f0b3f6401fe4e7b40` — underlying historical visual implementation;
-- QA run `34799915010` / `web-v2-final-visual-qa` — historical visual evidence.
+Do not silently add features or rebuild between approval and promotion.
 
-These are not mandatory deployment starting points.
+If production smoke exposes a real regression:
 
-A rejected historical candidate remains rejected and must not be promoted merely to shorten release work.
+**EXACT FAILURE → HOLD/ROLL BACK AS APPROPRIATE → ROUTE SMALLEST SAFE FIX → RETEST → RETURN TO OWNER GATE.**
 
 ---
 
 # 9. FAILURE RULE
 
-If current-main QA exposes a real regression:
+If branch QA exposes a real regression:
 
-**EXACT FAILURE → SMALLEST SAFE FIX → RETEST → CONTINUE RELEASE.**
-
-Only reactivate historical recovery when comparison to a prior state is actually necessary to repair that exact regression.
+**IDENTIFY EXACT FAILURE → FIX SMALLEST SAFE DELTA → RETEST → CONTINUE PACKET.**
 
 Do not convert one failed test into a project-wide recovery loop.
 
----
-
-# 10. RELEASE RECEIPT
-
-A clean release receipt contains only:
-
-- Git SHA;
-- Cloudflare Version ID / deployment ID;
-- release-critical QA result;
-- production smoke result;
-- narrowly held non-blocking defects, if any.
-
-No long-form recovery narrative is required.
+Do not make one broken SKU, image, vendor, optional feature or admin surface block unrelated clean revenue work.
 
 ---
 
-# 11. RUN MEANING
+# 10. RUN MEANING
 
-When Casey says **RUN** for Web V2 deployment:
+When Casey says **MPM RUN**:
 
-**RESOLVE CURRENT MAIN → TEST RELEASE PATH → FIX ONLY PROVEN BLOCKER → BUILD IMMUTABLE CANDIDATE → SMOKE → PROMOTE SAME VERSION → LIVE VERIFY → REPORT RECEIPT.**
+MPM resolves current state, routes the highest-priority unblocked packet, verifies receipts and continues until a real owner/external gate.
 
-Do not route backward into Phase A / Phase B unless current-main testing proves a recovery need.
+When Casey explicitly says **DEPLOY** for a ready Web V2 candidate:
+
+Release Engineer verifies the exact approved candidate, deploys/promotes that exact tested build, performs live smoke, and records the receipt.
+
+`RUN` by itself is not standing authorization for a production deployment when the current worktree is at READY TO DEPLOY.
 
 ---
 
 # CONTROL PHRASE
 
-**CURRENT MAIN IS THE RELEASE SOURCE. TEST THE REVENUE PATH. FIX ONLY PROVEN BLOCKERS. PROMOTE THE SAME TESTED VERSION. HISTORICAL RECOVERY IS EXCEPTION-ONLY.**
+**DEVELOPMENT BUILDS. RECON VERIFIES. MANAGEMENT ROUTES. CASEY APPROVES PRODUCTION. FIX PROVEN REVENUE DEFECTS WITHOUT REOPENING THE WEBSITE PROJECT.**
