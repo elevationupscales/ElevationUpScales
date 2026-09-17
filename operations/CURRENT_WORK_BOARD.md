@@ -1,11 +1,11 @@
 # ELEVATION UPSCALES — CURRENT WORK BOARD
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-09-16  
+**Effective:** 2026-09-17  
 **Owner:** Casey Young  
 **State Owner:** **Operating System Project Manager — Company Oversight ROLE**  
-**Release Control:** `OWNER_DIRECTIVE_WEB_V2_DIRECT_RELEASE_CONTROL_2026-09-16.md`  
-**Web V2 Worktree:** `WEB_V2_CURRENT_WORKTREE.md`
+**Web / Commerce Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
+**Active Execution Workflow:** `MPM_ACTIVE_EXECUTION_WORKFLOW_2026-09-17.md`
 
 ---
 
@@ -13,61 +13,58 @@
 
 **ONE CURRENT STATE PER WORK ITEM. ONE EXECUTION OWNER. NO DUPLICATE RECON. NO DUPLICATE DEV ROUTING.**
 
-Numbered MPM chat instances are continuity/session labels only. They do not become independent authority layers.
+Numbered MPM/COM/Recon chat instances are continuity/session labels only. They do not become independent authority layers.
 
 Casey's newest explicit direction controls. Git current `main` is technical state truth.
 
-A new MPM instance must adopt this board; it must not create a competing global worktree merely because the chat changed.
+Before routing technical work, resolve current `main` once. Do not relaunch broad recon merely because a chat changed.
 
 ---
 
-# ANTI-STALE RULE
+# OWNER RELEASE CONTROL — CURRENT
 
-Before routing technical work, resolve current `main` once.
+**NO PRODUCTION DEPLOYMENT WITHOUT CASEY'S EXPLICIT APPROVAL.**
 
-Any dated instruction that names an older SHA as the current deployment source becomes **STALE / REFERENCE ONLY** after `main` advances, unless it defines a permanent invariant.
+This supersedes any older instruction that allowed routine promotion/deployment without a fresh owner gate.
 
-Do not launch recon just to rediscover that a dated deployment file is stale.
+Development may branch, build, test, create previews/candidates, and return a release receipt without another owner decision when the scope is already approved.
 
-For Web V2 release conflicts:
+Production promotion/deployment stops at:
 
-**CURRENT MAIN + `OWNER_DIRECTIVE_WEB_V2_DIRECT_RELEASE_CONTROL_2026-09-16.md` WINS.**
+**READY TO DEPLOY → CASEY APPROVAL REQUIRED.**
+
+MPM, COM, and Recon are not the normal production coding/deployment lane. The temporary manager/recon direct-deploy pattern used to push through major website grunt work is closed. A manager/recon worker may directly execute code/deployment only when Casey explicitly directs that exception for the specific task.
 
 ---
 
 # CURRENT COMPANY POSTURE
 
-**Aggregate:** OPERATIONAL / REVENUE LAUNCH FOCUS.
+**Aggregate:** GREEN / ACTIVE with contained yellow areas.  
+**Operating focus:** **REVENUE CONVERSION / COMMERCE STABILIZATION.**
 
-Current priority:
+Major website build/edit work is substantially complete. The company is now converting authorized vendor relationships into **verified, profitable, purchasable products and actual orders**.
 
-**P0 WEB V2 DIRECT RELEASE → P1 SOK EBAY CATALOG ACTIVATION → P1 CATALOG / PRICING NORMALIZATION → P1 SHOPIFY + VENDOR REVENUE WORK → P1 CUSTOMER/COMMUNICATION VERIFICATION → P2 OPTIONAL CLEANUP.**
+Current priority order:
 
-One non-release-critical lane does not block another clean revenue lane.
+**P0 WEB / COMMERCE STABILIZATION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 SOK EBAY REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
+
+Vendor acquisition is no longer the main mission. New vendor prospecting is opportunistic only unless Casey specifically elevates a target.
+
+One blocked vendor/SKU does not block another clean revenue lane.
 
 ---
 
-# P0 — WEB V2 DIRECT RELEASE
+# DEVELOPMENT OPERATING MODE
 
-**State:** ACTIVE / SHORTEST SAFE PATH REQUIRED.
+Major redesign is closed unless Casey explicitly reopens it.
 
-Historical mandatory Phase A → Phase B recovery is closed as the default deployment route.
+Normal development loop:
 
-Current release loop:
+**ISSUE OBSERVED → RECON/QA PROVES IT → MPM ROUTES BOUNDED PACKET → DEVELOPMENT BRANCHES → DEVELOPMENT FIXES → QA/RECON VERIFIES → READY TO DEPLOY → CASEY APPROVES → RELEASE ENGINEER DEPLOYS → LIVE SMOKE → BASELINE RECORDED.**
 
-**CURRENT MAIN → RELEASE-CRITICAL QA → FIX ONLY PROVEN BLOCKER → ONE IMMUTABLE CLOUDFLARE CANDIDATE → VERIFY SHA/VERSION → SMOKE HOME/STORE/PRODUCT/CART/CHECKOUT/PAYPAL → PROMOTE SAME VERSION → LIVE VERIFY → RECORD BASELINE → DONE.**
+Development is **state/gate driven, not time scheduled**. A work packet stays active until it passes, hits a real blocker, or requires an owner decision.
 
-Do not add:
-
-- historical branch replay;
-- recovery reconstruction;
-- duplicate screenshot approval;
-- broad catalog/media cleanup;
-- new architecture;
-- another manager gate;
-- unrelated vendor work.
-
-A fresh Casey gate is required only for a new material decision, not for normal release execution of already-approved work.
+Managers manage state and priorities. Workers execute code and commerce operations.
 
 ---
 
@@ -75,79 +72,100 @@ A fresh Casey gate is required only for a new material decision, not for normal 
 
 | Priority | Work Item | Execution Owner | State | Next Action |
 |---|---|---|---|---|
-| **P0** | Web V2 production release | Web V2 Development / Release Engineer | **ACTIVE — DIRECT RELEASE PATH** | Resolve current `main`, run bounded release QA, fix only proven blocker, create/test/promote same immutable version, live verify. |
-| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORIZED / MAP CONTROLLED / 9-SKU BASE READY** | Build and publish exact-SKU listings under verified SOK eBay authorization; respect MAP and full eBay fee economics; hold only SKU-specific blockers. |
-| **P1** | Master vendor inventory / pricing truth | Company Operations + Vendor Projects | **ACTIVE** | Build one Elevation inventory master source with vendor SKU, Elevation SKU, cost, MAP/floor, stock, shipping, channel authorization, warranty/returns, alternate source and verification state. |
-| **P1** | SunGoldPower catalog | Vendor/Commerce Operations | **READY FOR NEXT MAJOR BATCH** | Normalize approved price/catalog data and feed verified SKUs into commerce surfaces. |
-| **P1** | Renogy economics | Renogy Project + Commerce | **PRICING DATA GAP** | Complete dealer-cost/pricing truth before broad catalog scaling; preserve verified live products. |
-| **P1** | VEVOR source optimization | VEVOR Project + Commerce | **ACTIVE / SOURCE-COST REVIEW** | Continue exact-SKU Doba-vs-VEVOR source comparison; cheapest verified in-stock authorized source wins internally. |
-| **P1** | Kingboss | Kingboss Project | **HOLD KINGBOSS ONLY** | Do not let Kingboss uncertainty block store or other vendors. |
-| **P1** | Shopify revenue path | Shopify Store Operations under Peter | **PAYMENT GREEN / OPERATIONS ACTIVE** | Continue product trust, exact shipping truth, profitability and purchaseability verification without reopening payment setup absent a fresh defect. |
-| **P1** | External communications control | Company Operations | **CONTAINED / MONITORED** | No unapproved external vendor send; inbound does not create outbound authority; report suspected rogue sends to Casey. |
-| **P1** | Owner direct phone/SMS verification | Communications Recovery | **OPEN VERIFICATION** | Verify direct inbound call, SMS and voicemail; does not block Web V2 release. |
-| **P2** | Optional visual/media polish | Web V2 specialist lane | **POST-RELEASE ONLY** | One proven section/media group at a time after production baseline is live. |
+| **P0** | Web / commerce stabilization | Web V2 Development | **ACTIVE — BOUNDED DEFECT REPAIR** | Work only proven customer/revenue-path defects. No broad redesign. Build/test on branch and stop at READY TO DEPLOY. |
+| **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
+| **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — LARGEST UNFINISHED BUILD** | Establish one revenue-ready SKU truth model: vendor SKU, Elevation SKU, cost, MAP/floor, shipping, channel fees, expected contribution, stock, authorization, warranty/returns, source and verification state. Start with the verified SOK battery set and reuse the pattern. |
+| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORIZED / MAP CONTROLLED / REVENUE PRIORITY** | Convert verified exact-SKU SOK products into profitable sellable eBay listings; respect MAP, shipping and full eBay fee economics; hold only SKU-specific blockers. |
+| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / ONE LIVE SKU / NEXT FIVE STAGED** | Preserve the verified 10W live product. Resolve the five staged Renogy SKU gates individually; do not bulk-publish or infer exact-SKU/channel authorization. Real paid orders supersede catalog work. |
+| **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
+| **P1** | SunGoldPower catalog | Vendor / Commerce Operations | **READY FOR NEXT VERIFIED BATCH** | Feed only verified profitable SKUs into commerce surfaces after pricing/source truth is complete. |
+| **HOLD** | Kingboss | Kingboss Project | **ISOLATED HOLD** | Keep Kingboss out of the critical path; do not let its storefront/catalog uncertainty block other vendors or the main store. |
+| **P2** | VEVOR | VEVOR Project | **DEPRIORITIZED** | No broad VEVOR optimization push. Work only a proven source-cost/revenue case explicitly routed by management. |
+| **P2** | New vendor acquisition | Vendor Operations | **PAUSED / OPPORTUNISTIC** | Process valuable inbound or Casey-directed prospects; do not run acquisition as the primary company mission. |
+| **P2** | External communications control | Company Operations | **CONTAINED / MONITORED** | No unapproved external vendor send. Inbound does not create outbound authority. |
+| **P2** | Owner direct phone/SMS verification | Communications Recovery | **OPEN VERIFICATION** | Verify inbound call, SMS and voicemail when routed; does not block commerce. |
+| **P2** | Optional visual/media polish | Web specialist lane | **ONLY AFTER PROVEN REVENUE DEFECTS** | One proven section/media group at a time. No redesign campaign. |
 
 ---
 
-# WEB V2 RELEASE INVARIANTS
+# CURRENT VERIFIED SHOPIFY / RENOGY CHECKPOINT
 
-Permanent safeguards retained:
+The current COM2 receipt records:
 
-- one approved Git SHA maps to one immutable Cloudflare version;
-- smoke the exact version intended for production;
-- promote that same tested version;
-- `/__version` or equivalent version proof must match;
-- do not rebuild between acceptance and promotion;
-- do not promote a historically rejected candidate;
-- do not expose unverified price/orderability/supplier truth;
-- payment/customer data protections remain intact.
+- Renogy 10W Solar Battery Trickle Charger Maintainer `RSP10TC-G1-US`: ACTIVE at $39.99, available for sale, customer path through checkout/payment-method selection PASS with no real charge/order;
+- no non-test paid order was present at the final check;
+- the next five Renogy products remain DRAFT / DENY / qty 0 and are held only at named exact-SKU/orderability/media/price/warranty/channel gates;
+- zero additional Renogy SKUs were activated in that run.
 
-These safeguards do **not** require historical recovery replay.
+Do not reopen the payment stack absent a fresh defect.
 
 ---
 
-# RELEASE FAILURE BEHAVIOR
+# RELEASE / FAILURE BEHAVIOR
 
-If current-main release QA fails:
+For a proven development defect:
 
-**IDENTIFY EXACT FAILURE → FIX SMALLEST SAFE DELTA → RETEST → CONTINUE.**
+**IDENTIFY EXACT FAILURE → FIX SMALLEST SAFE DELTA → RETEST → RETURN RECEIPT.**
 
 Do not restart the whole site project.
 
-Do not make one broken SKU, image, vendor, optional feature, admin surface, or unrelated integration block the entire store unless it actually breaks the release-critical customer path.
+Do not let one broken SKU, image, vendor, optional feature, admin surface, or unrelated integration block the entire commerce program unless it actually breaks the customer revenue path.
+
+A development receipt should contain:
+
+- branch / exact SHA;
+- defects fixed;
+- files changed;
+- tests passed;
+- known holds;
+- `READY TO DEPLOY: YES/NO`.
+
+If `YES`, stop and request Casey's deployment approval.
 
 ---
 
 # MANAGEMENT DISCIPLINE
 
-Managers manage state; workers execute work.
-
 A manager may:
 
 - resolve current state once;
 - choose the highest-priority unblocked lane;
-- route one owner;
-- verify the result;
-- escalate a proven blocker.
+- route one execution owner;
+- verify receipts/results;
+- escalate a proven blocker;
+- keep unrelated revenue lanes moving.
 
 A manager may not:
 
-- create a second workboard;
+- create a competing global workboard;
 - duplicate another worker's recon;
-- require Casey to re-approve an already-approved state without a new decision;
+- become the default coding/deployment worker;
 - reopen closed recovery history as normal workflow;
-- create documentation work that delays a clean release;
+- create documentation work that delays execution;
 - hold unrelated revenue work because another lane is waiting on an outside party.
 
-When Casey says **RUN**: execute the highest-priority unblocked action and continue until a real gate is reached.
+When Casey says **MPM RUN** or **RUN** to MPM: execute the highest-priority unblocked management action, route/verify execution, continue until a real owner gate or external blocker is reached.
 
 When Casey says **NEXT**: move to the next unblocked priority without restarting recon.
 
 ---
 
+# OWNER GRIND ORDER
+
+This is an attention order, **not a worker time schedule**:
+
+1. keep Development on the bounded Web / Commerce Stabilization packet;
+2. advance SOK / master catalog economics into reusable revenue-ready SKU truth;
+3. advance SOK eBay revenue listings;
+4. advance Shopify / Renogy only as explicit SKU gates clear;
+5. review Development/QA receipts whenever they become ready;
+6. approve or hold production deployment as a distinct owner decision.
+
+---
+
 # HISTORICAL REFERENCES
 
-Prior recovery artifacts, MPM takeover prompts, dated workboards, historical SHAs, and old release candidates remain evidence only.
+Prior recovery artifacts, dated workboards, old release candidates and previous manager direct-deploy exceptions remain evidence only.
 
 They are not live authority when they conflict with this board or newer owner direction.
 
@@ -155,4 +173,4 @@ They are not live authority when they conflict with this board or newer owner di
 
 # CONTROL PHRASE
 
-**GET CURRENT MAIN LIVE SAFELY. VERIFY THE REVENUE PATH. FIX ONLY REAL BLOCKERS. DO NOT TURN MANAGEMENT OR RELEASE CONTROL INTO ANOTHER PROJECT.**
+**CONVERT VERIFIED PRODUCTS INTO PROFITABLE ORDERS. DEVELOPMENT BUILDS. RECON VERIFIES. MANAGEMENT ROUTES. CASEY APPROVES PRODUCTION DEPLOYMENT.**
