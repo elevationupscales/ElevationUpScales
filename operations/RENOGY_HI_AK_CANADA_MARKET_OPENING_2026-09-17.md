@@ -1,12 +1,29 @@
 # ELEVATION UPSCALES — RENOGY HAWAII / ALASKA / CANADA MARKET OPENING
 
-**Status:** OWNER-DIRECTED / ACTIVE REVENUE EXPANSION
+**Status:** OWNER-DIRECTED / ACTIVE REVENUE + CONVERSION EXPANSION
 **Effective:** 2026-09-17
 **Owner:** Casey Young
-**Lane:** Shopify / Renogy Revenue
-**Recon role:** OS RECON verification and control alignment
+**Canonical lane owner:** Shopify Store Operations under Peter
+**Supporting lanes:** Shipping & Logistics; Commerce/Storefront; OS RECON
+**Recon role:** control alignment, verification, metric discipline
 
-## OWNER DIRECTION
+---
+
+# CONTROL
+
+This file is the canonical operating control for the Renogy Hawaii / Alaska / Canada opening.
+
+Older or parallel assists, including COM2_RENOGY_HAWAII_OPENING_ASSIST_2026-09-17.md, are supporting evidence only and may not create a competing expansion plan.
+
+Authority order for this lane:
+
+**CASEY OWNER DIRECTION → CURRENT_WORK_BOARD → THIS FILE → LANE RECEIPTS / ASSISTS**
+
+One worker owns each action. No duplicate shipping models, no duplicate storefront campaigns, no duplicate recon.
+
+---
+
+# OWNER DIRECTION
 
 Elevation UpScales is opening the Renogy sales path for:
 
@@ -14,148 +31,192 @@ Elevation UpScales is opening the Renogy sales path for:
 - Alaska;
 - Canada.
 
-Revenue/conversion is the priority. Where exact supplier freight is not yet available but the product is clearly parcel-class and non-hazardous, Elevation may use a conservative estimated shipping amount as an initial operating value, reconcile against the actual supplier/carrier charge after real orders, and adjust the model from observed landed cost.
+Immediate business goal:
 
-This does not authorize invented freight, blanket hazardous-material shipping, or loss-making fulfillment.
+**INCREASE QUALIFIED PRODUCT CLICKS → ADD TO CART → CHECKOUT → PAID ORDERS.**
 
-## CURRENT EXTERNAL SHIPPING TRUTH
+Do not wait for a perfect freight model before selling clean parcel-class products. Use conservative management estimates where the route/product class is bounded, honor the checkout amount on accepted orders, record actual fulfillment cost, and tune future rates.
 
-Current Renogy public shipping rules support Alaska/Hawaii air shipment with product restrictions. Batteries and solar panels over 320W are excluded from that AK/HI air path. Solar panels over 250W may require LTL and may not qualify for free shipping. Remote AK/HI destinations can incur additional charges.
+This does not authorize invented freight, blanket hazardous-material shipping, loss-making fulfillment, or forced activation of commercially held SKUs.
 
-Renogy also supports international shipping in selected cases. Its U.S. shipping guidance says selected Canada delivery is supported with possible additional shipping charges and customs duties/clearance borne by the customer. Renogy Canada currently excludes Yukon, Nunavut, and Northwest Territories from delivery.
+---
 
-Therefore the expansion must be SKU-classified rather than enabled as one blanket rule.
+# CURRENT ROUTE TRUTH
 
-## INITIAL ROUTE CLASSIFICATION
+Current Renogy public shipping rules support Alaska/Hawaii air shipment with restrictions. Batteries and solar panels over 320W are excluded from that AK/HI air path. Solar panels over 250W may require LTL and may not qualify for ordinary free-shipping treatment. Remote AK/HI destinations can incur additional charges.
 
-### GREEN — FAST PILOT / ESTIMATED SHIPPING ALLOWED
+Selected Canada fulfillment is supportable but shipping/customs can vary. Yukon, Nunavut, and Northwest Territories remain excluded from the current Renogy Canada path.
 
-Eligible non-hazardous parcel products with verified dimensions/weight and no known supplier destination prohibition.
+The expansion is SKU-classified, not blanket-enabled.
 
-Initial examples:
-- Renogy 10W Solar Battery Trickle Charger Maintainer — product weight approx. 14.23 oz; small parcel profile.
-- Similar controllers, chargers, monitors, accessories and electronics once exact SKU/orderability and package profile are verified.
+---
 
-Initial conservative customer shipping estimates:
-- Alaska/Hawaii small parcel: **$34.99 estimated shipping**
-- Canada small parcel: **$39.99 estimated shipping**
+# CANONICAL STARTER SHIPPING ESTIMATES
 
-These are operating estimates, not supplier quotes. They are deliberately above ordinary light-parcel postage floors to absorb packaging/remote/dropship variance while real order data is collected.
+Latest owner-approved operating estimates control over earlier draft values.
 
-If actual fulfillment is lower, retain normal approved margin policy or refund/credit only if the selling terms require it.
-If actual fulfillment is materially higher than the collected estimate, obtain customer approval before any additional charge or cancel/refund cleanly. Do not silently charge more.
+## Hawaii
 
-### YELLOW — QUOTE / RECONFIRMATION PATH
+- Small accessories / monitors / controllers: **$24.99 estimated standard shipping**
+- Small solar maintainer: **$24.99 estimated standard shipping**
+- Large inverter / heavy power electronics: **$89.99 estimated standard shipping**
+- No generic free-shipping threshold during the learning period
+- Do not offer generic $15 Express until verified
 
-- Larger non-hazardous electronics;
-- kits that may split into multiple packages;
-- solar panels up to 320W where destination and carrier route are not yet exact;
-- products where supplier fulfillment location materially changes freight;
-- Canada orders where customs/duties or local-vs-cross-border fulfillment path is unresolved.
+## Alaska
 
-Use a shipping estimate only when current product package facts support it. Otherwise route to shipping review before fulfillment.
+- Small eligible parcel: **$34.99 estimated standard shipping**
+- Larger electronics: **quote / class-specific review until a bounded rate exists**
+- Batteries and solar panels over 320W: **do not auto-open**
 
-### RED — DO NOT AUTO-OPEN
+## Canada
+
+- Small eligible parcel: **$39.99 estimated shipping**
+- Larger / multi-package / regulated products: **quote or reconfirmation**
+- Customer-facing customs/duty treatment must be disclosed when applicable
+- Yukon / Nunavut / Northwest Territories: **blocked under current route**
+
+These are management estimates, not representations of Renogy's exact surcharge.
+
+Learning loop:
+
+**COLLECTED SHIPPING → ACTUAL SUPPLIER/CARRIER COST → VARIANCE → NEXT-RATE ADJUSTMENT**
+
+If an accepted order has materially higher actual shipping, do not silently charge the customer more. Route the anomaly for management review before supplier release.
+
+---
+
+# SKU ROUTING
+
+## GREEN — FAST PILOT
+
+Eligible non-hazardous parcel products with exact identity, live/orderable state, usable package profile, and no known destination prohibition.
+
+Priority wave:
+
+1. RSP10TC-G1-US — 10W Solar Battery Trickle Charger Maintainer
+2. RNG-CTRL-ADV30-LI-US — Adventurer Li 30A controller, only when live orderability clears
+3. RBM500-G3-US — 500A Battery Monitor, only when live orderability clears
+4. RSHST-B02P300-G1-US — Battery Shunt 300, only when live orderability clears
+
+## YELLOW — REVIEW / QUOTE
+
+- larger non-hazardous electronics;
+- multi-package kits;
+- solar panels up to 320W where destination/carrier economics are not bounded;
+- large inverter RNG-INVT-3000-12V-P2-G3-US outside the approved Hawaii $89.99 class;
+- Canada orders with unresolved cross-border/customs path;
+- any SKU whose supplier fulfillment location materially changes freight.
+
+## RED — DO NOT AUTO-OPEN
 
 For Alaska/Hawaii:
 - batteries;
 - solar panels over 320W;
-- items requiring an unverified DG route;
-- freight/LTL products without verified route economics.
+- unverified DG routes;
+- freight/LTL products without verified economics.
 
 For Canada:
 - Yukon;
 - Nunavut;
 - Northwest Territories;
-- batteries or regulated goods without a verified Canada fulfillment/DG path;
-- any SKU whose Canadian channel/orderability is not established.
+- batteries/regulated goods without verified Canada route;
+- SKUs lacking Canadian channel/orderability truth.
 
-## CONVERSION RULE
+The live RSP400LSC-G1-US 400W suitcase remains blocked from AK/HI automatic air treatment because it exceeds 320W.
 
-Customer-facing presentation should communicate:
+---
 
-**Hawaii, Alaska & Canada shipping now available on eligible Renogy products.**
+# CONVERSION / CLICK-RATE CONTROL
 
-Do not display a blanket claim that every Renogy product ships to every destination.
+The expansion is not complete just because shipping zones exist.
 
-For eligible products, show the shipping price early enough that the customer does not discover an unexpected surcharge only at the final payment step.
+Primary funnel:
 
-For quote/reconfirmation products, use a direct, sales-forward message such as:
-**Shipping available — final freight confirmed for your destination before fulfillment.**
+**TRAFFIC / IMPRESSIONS → COLLECTION OR PRODUCT CLICK → PRODUCT DETAIL → ADD TO CART → CHECKOUT → PAID ORDER**
 
-Avoid operations-heavy language.
+Workers must optimize the next weak step in this funnel, not perform broad visual redesign.
 
-## PILOT SKU
+## Immediate click-through actions
 
-The live Renogy 10W Solar Battery Trickle Charger Maintainer is the cleanest first geographic-expansion pilot because:
-- it is already live on Shopify;
-- current product weight is about 14.23 oz;
-- it is not a battery;
-- it is far below the Renogy AK/HI >320W panel exclusion;
-- parcel economics can be bounded conservatively.
+**Commerce / Storefront worker**
+- create or surface a clear **Hawaii, Alaska & Canada Eligible Renogy** shopping path using only verified eligible products;
+- keep geographic availability visible near relevant collection/product entry points;
+- use product-first sales language, not internal operations language;
+- put the strongest currently purchasable Renogy products first;
+- ensure every promoted card has a working product URL, image, price and CTA;
+- do not promote blocked SKUs into the expansion collection;
+- do not redesign unrelated store sections.
 
-The live 400W Renogy suitcase must **not** be treated as an AK/HI air pilot under current Renogy public shipping rules because it exceeds 320W.
-
-## CANADA OPENING CONTROL
-
-Canada is officially an active market path, but initial fulfillment must distinguish:
-
-1. supplier/local Canadian fulfillment when verified;
-2. U.S.-to-Canada cross-border fulfillment when supported;
-3. customer customs/duties obligations;
-4. excluded territories;
-5. regulated/battery routing.
-
-Do not infer that U.S. dealer pricing, stock, warranty handling or fulfillment terms automatically equal Canadian dealer terms.
-
-## ECONOMICS LOOP
-
-For each first-wave order capture privately:
-
-**SKU → DESTINATION → CUSTOMER SHIPPING COLLECTED → ACTUAL SUPPLIER/CARRIER SHIPPING → DUTY/BROKERAGE IF APPLICABLE → CHANNEL/PAYMENT FEES → NET CONTRIBUTION → ESTIMATE ERROR**
-
-After each real order, adjust the estimate table from actuals.
-
-Target behavior:
-
-**ESTIMATE → SELL → FULFILL → RECONCILE ACTUAL → ADJUST → REPEAT**
-
-Do not wait for a perfect freight model before selling clean parcel-class SKUs.
-
-## EXECUTION ROUTE
-
-**Shopify Store Operations under Peter**
-- implement eligible destination/shipping rules;
-- start with the existing 10W Renogy pilot;
-- preserve exact-SKU orderability and pricing gates;
-- do not activate blocked SKUs merely because a geography opened;
-- live-verify checkout by destination before calling the route open.
+**Shopify Store Operations**
+- own destination eligibility, checkout rates, publication and purchaseability;
+- smoke-test Hawaii, Alaska and eligible Canada destinations;
+- preserve inventory/orderability controls;
+- one SKU failure does not stop other clean SKUs.
 
 **Shipping & Logistics**
-- validate actual fulfillment cost from first orders;
-- refine bands;
-- own freight/DG exceptions.
+- own actual-cost reconciliation;
+- refine shipping classes from real orders;
+- own DG/freight exceptions.
 
 **OS RECON**
-- verify destination logic, SKU eligibility and post-order estimate accuracy;
-- identify any route that starts producing negative contribution or fulfillment failures.
+- verify worker boundaries;
+- compare promoted products against actual purchaseability;
+- verify rate/route logic;
+- maintain the funnel scoreboard;
+- return exact defects, not broad redesign instructions.
 
-## HARD GUARDS
+---
 
-- No blanket AK/HI battery shipping.
-- No AK/HI auto-route for solar panels above 320W.
-- No unverified DG assumption.
-- No Canada delivery to Yukon/Nunavut/NWT under the current Renogy route.
-- No silent customer charge increase after checkout.
-- No invented supplier inventory.
-- No forced activation of commercially held Renogy SKUs.
-- No vendor email is authorized by this directive.
-- Existing production-deployment owner gate remains unchanged for website-code deployments.
+# SCOREBOARD
 
-## IMMEDIATE NEXT ACTION
+Track separately for Hawaii, Alaska, Canada when data becomes available:
 
-1. Configure/verify the 10W Renogy product as the first AK/HI/Canada pilot.
-2. Test Hawaii, Alaska and eligible Canada checkout behavior without completing a real charge.
-3. Classify the next Renogy products into GREEN / YELLOW / RED destination eligibility.
-4. Add customer-facing geographic availability messaging only after checkout behavior is verified.
-5. Reconcile shipping estimates from the first real orders and adjust the bands.
+- storefront/collection impressions;
+- product-card clicks;
+- product-detail sessions;
+- add-to-cart events;
+- checkout starts;
+- paid orders;
+- product click-through rate = product clicks / relevant impressions;
+- add-to-cart rate = add-to-cart / product-detail sessions;
+- checkout-start rate = checkout starts / add-to-cart;
+- purchase conversion = paid orders / product-detail sessions;
+- collected shipping vs actual shipping variance.
+
+Do not claim improvement without before/after evidence.
+
+Until sufficient market-specific traffic exists, optimize against customer-path defects and clarity rather than overreacting to tiny samples.
+
+---
+
+# WORKER CONTROL / NO-DRIFT RULES
+
+1. **Shopify Store Operations under Peter owns market activation.**
+2. **Commerce/Storefront owns click-through merchandising only after eligibility is verified.**
+3. **Shipping & Logistics owns fulfillment economics and exceptions.**
+4. **OS RECON verifies; it does not become the default Shopify executor.**
+5. COM2/COM3/support workers may return evidence or bounded fixes but may not create competing market rules.
+6. No worker may change shipping estimates independently; rate changes require owner/management control or reconciled actual-order evidence.
+7. No vendor email is authorized by this directive.
+8. No production website-code deployment without Casey's explicit approval.
+9. No broad redesign campaign under the label of conversion optimization.
+10. Every promoted expansion SKU must be **VISIBLE + CLICKABLE + PURCHASEABLE + ROUTE-ELIGIBLE**.
+
+---
+
+# CURRENT EXECUTION ORDER
+
+1. Install/verify Hawaii-specific Renogy rate protection, replacing unsafe generic Lower-48 treatment for eligible products.
+2. Verify Alaska small-parcel path.
+3. Verify eligible Canada checkout path and excluded territories.
+4. Smoke-test the 10W maintainer in all three markets without a real charge.
+5. Clear additional Wave-1 products only if current orderability permits.
+6. Surface one customer-facing expansion collection/path built only from verified products.
+7. Measure product clicks → add-to-cart → checkout; fix the first proven drop-off.
+8. Record actual shipping from every first-wave order and tune the rate classes.
+9. Real paid orders supersede catalog polishing.
+
+# CONTROL PHRASE
+
+**OPEN CLEAN MARKETS. PROMOTE ONLY WHAT CAN SELL. MEASURE THE CLICK. PROTECT THE MARGIN. LEARN FROM EVERY ORDER.**
