@@ -87,6 +87,32 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 | **P2** | Owner direct phone/SMS verification | Communications Recovery | **OPEN VERIFICATION** | Verify inbound call, SMS and voicemail when routed; does not block commerce. |
 | **P2** | Optional visual/media polish | Web specialist lane | **ONLY AFTER PROVEN REVENUE DEFECTS** | One proven section/media group at a time. No redesign campaign. |
 
+
+---
+
+# WEB V2 SHOPIFY-ALIGNED LISTINGS — OWNER BUILD APPROVAL — 2026-09-17
+
+Casey approved the bounded Shopify-aligned purchasable-listings packet for elevationupscales.com.
+
+Execution branch:
+- `work/web-v2-shopify-purchasable-listings-2026-09-17`
+- base: `6ffe0eed331556652230fc0ec086f4bed9270459`
+
+Scope:
+- mirror Shopify's proven product-card/detail merchandising structure;
+- expose only verified live products;
+- preserve one commerce truth;
+- route purchase CTAs into the existing verified checkout/payment path;
+- add Renogy / Hawaii-Alaska / Canada customer discovery paths;
+- no broad homepage redesign;
+- no held-SKU activation;
+- no duplicate payment engine.
+
+Control:
+**BUILD / TEST / PREVIEW AUTHORIZED. PRODUCTION DEPLOYMENT IS NOT YET AUTHORIZED.**
+
+Development must return an exact candidate SHA and `READY TO DEPLOY: YES/NO`. Production remains behind the separate Casey approval gate.
+
 ---
 
 # MARKET EXPANSION + CLICK-CONVERSION CHECKPOINT — 2026-09-17
