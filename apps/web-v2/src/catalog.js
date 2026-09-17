@@ -1,3 +1,5 @@
+import { SOK_SUPPORT_CATALOG } from './sok-support-catalog.js';
+
 export const UNVERIFIED = 'UNVERIFIED';
 
 export const REQUIRED_ORDERABILITY_FIELDS = Object.freeze([
@@ -121,6 +123,31 @@ function sokProduct({ id, sku, title, summary, media, price, stockState = 'BACKO
   });
 }
 
+function sokSupportProduct({ id, sku, title, summary, merchandisingDepartment }) {
+  return finalize({
+    id,
+    vendorId: 'sok',
+    vendorName: 'SOK Energy',
+    sku,
+    supplierSku: sku,
+    title,
+    specs: Object.freeze({ summary }),
+    media: UNVERIFIED,
+    sellPrice: UNVERIFIED,
+    priceFloor: UNVERIFIED,
+    stockState: UNVERIFIED,
+    backorderState: UNVERIFIED,
+    shippingDisposition: 'QUOTE_REQUIRED',
+    warrantyReturnsOwnership: 'ELEVATION_COORDINATES_SOK_AUTHORIZES',
+    fulfillmentSource: UNVERIFIED,
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE',
+    merchandisingDepartment,
+    sourcePath: 'operations/vendor-project-sources/SOK_PROJECT_SOURCE.md',
+    sourceSnapshot: 'LIVE_SOK_CATALOG_AUDIT_2026_09_17',
+    sourceNote: 'Identity and public purchase-option presence verified in the live SOK catalog; commercial/orderability facts remain held.'
+  });
+}
+
 function sunGoldProduct({ id, sku, title, summary, map, upc, productUrl, certifications = UNVERIFIED }) {
   return finalize({
     id,
@@ -240,6 +267,7 @@ export const CATALOG_PRODUCTS = Object.freeze([
     shopifyProductId: 'gid://shopify/Product/15995497972081',
     shopifyHandle: 'sok-sk48v100n-51-2v-100ah-5-12kwh-lifepo4-rack-battery'
   }),
+  ...SOK_SUPPORT_CATALOG.map(sokSupportProduct),
   finalize({
     id: 'renogy-rng-invt-3000-12v-p2-g3-us',
     vendorId: 'renogy',
@@ -406,7 +434,7 @@ export function searchCatalog(query = '') {
   const needle = String(query).trim().toLowerCase();
   if (!needle) return CATALOG_PRODUCTS;
   return CATALOG_PRODUCTS.filter((product) =>
-    [product.vendorName, product.vendorId, product.sku, product.supplierSku, product.title]
+    [product.vendorName, product.vendorId, product.sku, product.supplierSku, product.title, product.merchandisingDepartment]
       .filter(Boolean)
       .some((value) => String(value).toLowerCase().includes(needle))
   );
