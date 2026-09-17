@@ -1,0 +1,60 @@
+name: Quick Live Store API Audit
+
+on:
+  push:
+    branches:
+      - diagnostic/store-full-audit-20260916
+    paths:
+      - '.github/workflows/quick-live-store-api-audit.yml'
+
+permissions:
+  contents: read
+
+env:
+  ORIGIN: https://elevationupscales.com
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inventory every live product and purchase state
+        run: |
+          set -euo pipefail
+          curl -fsS "$ORIGIN/api/store/catalog?section=lithium-batteries" -o /tmp/lithium.json
+          curl -fsS "$ORIGIN/api/store-catalog?section=rv-outdoor" -o /tmp/rv.json
+          curl -fsS "$ORIGIN/api/sok/catalog" -o /tmp/sok.json
+          echo "LITHIUM_COUNT=$(jq '.products|length' /tmp/lithium.json)"
+          echo "RV_COUNT=$(jq '.products|length' /tmp/rv.json)"
+          echo "SOK_COUNT=$(jq '.products|length' /tmp/sok.json)"
+          jq -s '
+            [.[0].products[], .[1].products[], .[2].products[]]
+            | group_by((.id // .sku // .title // .name // "")|ascii_downcase)
+            | map(reduce .[] as $x ({}; . * $x))
+            | map({
+                id:(.id//""),
+                sku:(.sku//.supplierSku//""),
+                title:(.title//.name//""),
+                brand:(.brand//.manufacturer//.supplier//""),
+                priceCents:(.priceCents//.price_cents//0),
+                publish:(.publishStatus//.publish_status//""),
+                availability:(.availabilityMode//.availabilityStatus//.status//""),
+                publicPurchaseMode:(.publicPurchaseMode//.purchaseMode//""),
+                paymentEligible:(.paymentEligible//null),
+                directCheckoutReady:(.directCheckoutReady//null),
+                shippingStatus:(.shippingStatus//.shipping_status//""),
+                stock:(.supplierStock//.inventoryQty//.inventory_qty//.quantityOnHand//null),
+                sokProduct:(.sokProduct//false),
+                commerceLabel:(.commerceLabel//""),
+                commerceCta:(.commerceCta//"")
+              })
+          ' /tmp/lithium.json /tmp/rv.json /tmp/sok.json | tee /tmp/products.json
+          echo '=== SOK LIVE STATES ==='
+          jq -c '.[] | select(.sokProduct==true or (.brand|ascii_downcase|contains("sok")) or (.sku|startswith("SK")))' /tmp/products.json
+          echo '=== ALL NON-DIRECT / NON-BUY STATES ==='
+          jq -c '.[] | select((.paymentEligible==false) or (.publicPurchaseMode!="" and .publicPurchaseMode!="DIRECT_CHECKOUT") or (.availability|ascii_downcase|test("unavailable|backorder|prepurchase|preorder")) or (.shippingStatus!="" and .shippingStatus!="verified"))' /tmp/products.json
+          echo '=== COUNTS ==='
+          echo "TOTAL_UNIQUE=$(jq length /tmp/products.json)"
+          echo "PAYMENT_ELIGIBLE_TRUE=$(jq '[.[]|select(.paymentEligible==true)]|length' /tmp/products.json)"
+          echo "PAYMENT_ELIGIBLE_FALSE=$(jq '[.[]|select(.paymentEligible==false)]|length' /tmp/products.json)"
+          echo "DIRECT_CHECKOUT=$(jq '[.[]|select(.publicPurchaseMode=="DIRECT_CHECKOUT")]|length' /tmp/products.json)"
+          echo "PURCHASE_OPTIONS=$(jq '[.[]|select(.publicPurchaseMode=="PURCHASE_OPTIONS")]|length' /tmp/products.json)"
