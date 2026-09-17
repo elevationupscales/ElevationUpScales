@@ -1,0 +1,265 @@
+name: Build Postrelease Home Store Repair
+
+on:
+  push:
+    branches:
+      - work/postrelease-home-store-repair-20260917
+    paths:
+      - .github/workflows/build-postrelease-home-store-repair.yml
+
+permissions:
+  contents: write
+
+env:
+  PROJECT_NAME: elevationupscales
+  PREVIEW_BRANCH: postrelease-home-store-repair
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/postrelease-home-store-repair-20260917
+          fetch-depth: 0
+
+      - name: Apply bounded owner-approved repairs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected 1 match in {path}, got {count}")
+              p.write_text(text.replace(old, new, 1))
+
+          # 1) Restore the owner-approved homepage hero copy only. No homepage layout redesign.
+          replace_once(
+              'site/index.html',
+              '<h1 id="reference-flagship-title">Lithium Power<br><span>for RV, Solar &amp; Backup</span></h1>',
+              '<h1 id="reference-flagship-title">Power Beyond<br><span>the Grid.</span></h1>',
+              'homepage headline'
+          )
+          replace_once(
+              'site/index.html',
+              '<p class="reference-storefront-hero__lead">Shop SOK lithium batteries and power systems for RV, solar, backup and off-grid use.</p>',
+              '<p class="reference-storefront-hero__lead">Elevation UpScales, Inc. is a lithium battery and energy retailer expanding a qualified vendor network for commercial freight and dropshipping. We aim to make dependable power products easier to buy and move, including streamlined fulfillment to Hawaii, Alaska, and select international markets where supplier, carrier, and compliance requirements support it.</p>',
+              'homepage lead'
+          )
+          replace_once(
+              'site/index.html',
+              '<a class="button retail-primary reference-storefront-hero__primary" href="/lithium-batteries" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Explore Power Solutions <span aria-hidden="true">→</span></a>',
+              '<a class="button retail-primary reference-storefront-hero__primary" href="/store" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Shop Power &amp; Energy <span aria-hidden="true">→</span></a>',
+              'homepage primary CTA'
+          )
+
+          # Force the custom domain and pages.dev clients onto the same current presentation assets.
+          index = Path('site/index.html')
+          text = index.read_text()
+          versions = {
+              '/site-shell.js?v=5.2.0': '/site-shell.js?v=5.2.1',
+              '/home-commerce.js?v=5.2.0': '/home-commerce.js?v=5.2.1',
+              '/home-commerce.css?v=5.2.0': '/home-commerce.css?v=5.2.1',
+              '/retail-first.css?v=5.1.0': '/retail-first.css?v=5.4.1',
+              '/home-hero-slides.css?v=1.2.3': '/home-hero-slides.css?v=1.2.4',
+              '/home-hero-slides.js?v=1.2.0': '/home-hero-slides.js?v=1.2.1',
+              '/home-hero-slides.json?v=1.2.0': '/home-hero-slides.json?v=1.2.1',
+              '/homepage-owner-annotations.css?v=1.0.1': '/homepage-owner-annotations.css?v=1.0.2',
+          }
+          for old, new in versions.items():
+              if old not in text:
+                  raise SystemExit(f'missing homepage cache token: {old}')
+              text = text.replace(old, new)
+          index.write_text(text)
+
+          # 2) Make the static Store header the first and only visual header render.
+          shell = Path('site/site-shell.js')
+          text = shell.read_text()
+          old = '      : "/assets/brand/storefront-wordmark.webp";'
+          new = '      : "/assets/brand/storefront-wordmark.webp?v=20260917-1";'
+          if text.count(old) != 1:
+              raise SystemExit('storefront wordmark source pattern changed')
+          text = text.replace(old, new, 1)
+          text = text.replace('style.href = "/retail-first.css?v=5.4.0";', 'style.href = "/retail-first.css?v=5.4.1";', 1)
+          old = '    if (!header || !inner) return;\n    inner.innerHTML = `'
+          new = '''    if (!header || !inner) return;
+    const preserveExistingStoreHeader = path === "/store" && inner.querySelector("[data-global-search]") && inner.querySelector(".eus-menu--shop");
+    if (!preserveExistingStoreHeader) inner.innerHTML = `'''
+          if text.count(old) != 1:
+              raise SystemExit('retail header rewrite anchor changed')
+          text = text.replace(old, new, 1)
+          old = '''      <a class="button button-primary reference-global-cta" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="header">Start a Project</a>`;
+
+    const search = inner.querySelector("[data-global-search]");'''
+          new = '''      <a class="button button-primary reference-global-cta" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="header">Start a Project</a>`;
+
+    if (preserveExistingStoreHeader) {
+      const existingBrand = inner.querySelector(".eus-brand img");
+      if (existingBrand) {
+        existingBrand.src = retailBrandSrc;
+        existingBrand.width = retailBrandWidth;
+        existingBrand.height = retailBrandHeight;
+      }
+    }
+    const search = inner.querySelector("[data-global-search]");'''
+          if text.count(old) != 1:
+              raise SystemExit('retail header post-template anchor changed')
+          shell.write_text(text.replace(old, new, 1))
+
+          # 3) Store contrast correction for the intentionally light cards/sections.
+          css = Path('site/universal-store.css')
+          text = css.read_text()
+          marker = '/* postrelease-light-surface-contrast-v1 */'
+          if marker not in text:
+              text += '''\n/* postrelease-light-surface-contrast-v1 */
+          .universal-store .universal-trust span{color:#526a75!important}
+          .universal-store .universal-trust strong{color:#10202a!important}
+          .universal-store .universal-section h2{color:#10202a!important}
+          .universal-store .universal-department strong,.universal-store .brand-store-card strong{color:#10202a!important}
+          .universal-store .brand-store-card p,.universal-store .universal-product__description{color:#526a75!important}
+          .universal-store .universal-product h3,.universal-store .universal-product__price{color:#10202a!important}
+          .universal-store .universal-status,.universal-store .universal-note{color:#58717e!important}
+          '''
+          css.write_text(text)
+
+          # 4) Cache-bust the Store wordmark and corrected styles/shell.
+          store = Path('site/store.html')
+          text = store.read_text()
+          text = text.replace('/assets/brand/storefront-wordmark.webp', '/assets/brand/storefront-wordmark.webp?v=20260917-1')
+          text = text.replace('/universal-store.css?v=1.0.0', '/universal-store.css?v=1.0.1')
+          text = text.replace('/retail-first.css?v=5.4.0', '/retail-first.css?v=5.4.1')
+          text = text.replace('/site-shell.js?v=5.2.0', '/site-shell.js?v=5.2.1')
+          store.write_text(text)
+
+          retail = Path('site/retail-first.css')
+          text = retail.read_text().replace("content:url('/assets/brand/storefront-wordmark.webp')", "content:url('/assets/brand/storefront-wordmark.webp?v=20260917-1')")
+          retail.write_text(text)
+
+          # 5) Product details: show SKU/model and resolve SOK-only accessory records.
+          product_html = Path('site/product.html')
+          text = product_html.read_text()
+          text = text.replace('<h1 data-product-title>Product details</h1><p class="product-price"', '<h1 data-product-title>Product details</h1><p class="product-sku" data-product-sku></p><p class="product-price"', 1)
+          text = text.replace('/site-shell.js?v=5.2.0', '/site-shell.js?v=5.2.1')
+          text = text.replace('/product-detail.css?v=4.4.1', '/product-detail.css?v=4.4.2')
+          text = text.replace('/product-detail.js?v=4.4.2', '/product-detail.js?v=4.4.3')
+          product_html.write_text(text)
+
+          product_css = Path('site/product-detail.css')
+          text = product_css.read_text()
+          if '.product-sku{' not in text:
+              text += '\n.product-sku{margin:-.35rem 0 .7rem;color:#8fdced!important;font-size:.86rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}\n'
+          product_css.write_text(text)
+
+          detail = Path('site/product-detail.js')
+          text = detail.read_text()
+          old = '  const priceEl = document.querySelector("[data-product-price]");'
+          new = '  const priceEl = document.querySelector("[data-product-price]");\n  const skuEl = document.querySelector("[data-product-sku]");'
+          if text.count(old) != 1:
+              raise SystemExit('product sku node anchor changed')
+          text = text.replace(old, new, 1)
+          old = '  function sectionFor(product) { return clean(product?.storeSection, 60).toLowerCase() === "lithium-batteries" ? "lithium" : "rv"; }'
+          new = '  function sectionFor(product) { if (product?.sokProduct === true) return "lithium"; return clean(product?.storeSection, 60).toLowerCase() === "lithium-batteries" ? "lithium" : "rv"; }'
+          if text.count(old) != 1:
+              raise SystemExit('product sectionFor anchor changed')
+          text = text.replace(old, new, 1)
+          old = '    if (!(Number(product.priceCents) > 0)) return false;'
+          new = '    if (!(Number(product.priceCents) > 0) && !(product.sokProduct === true && purchaseUrl(product))) return false;'
+          if text.count(old) != 1:
+              raise SystemExit('product price live gate anchor changed')
+          text = text.replace(old, new, 1)
+          old = '    categoryEl.textContent = displayCategory(product); titleEl.textContent = title; priceEl.textContent = money.format(Number(product.priceCents) / 100);'
+          new = '''    categoryEl.textContent = displayCategory(product); titleEl.textContent = title;
+    const sku = clean(product?.sku || product?.supplierSku || product?.id, 160);
+    if (skuEl) { skuEl.textContent = sku ? `SKU ${sku}` : ""; skuEl.hidden = !sku; }
+    const directPrice = Number(product.priceCents) > 0;
+    priceEl.textContent = directPrice ? money.format(Number(product.priceCents) / 100) : "Purchase options";'''
+          if text.count(old) != 1:
+              raise SystemExit('product render title/price anchor changed')
+          text = text.replace(old, new, 1)
+          old = '      buyNow.hidden = false; buyNow.href = purchase; buyNow.setAttribute("aria-label", `Buy ${title}`);'
+          new = '''      const directPayment = Number(product.priceCents) > 0 && product.paymentEligible !== false && clean(product.publicPurchaseMode, 40).toUpperCase() !== "PURCHASE_OPTIONS";
+      buyNow.textContent = directPayment ? "Buy Now" : (clean(product.commerceCta, 80) || "See Purchase Options");
+      buyNow.hidden = false; buyNow.href = purchase; buyNow.setAttribute("aria-label", `${buyNow.textContent}: ${title}`);'''
+          if text.count(old) != 1:
+              raise SystemExit('product buy action anchor changed')
+          text = text.replace(old, new, 1)
+          old = '      const price = document.createElement("strong"); price.textContent = money.format(Number(product.priceCents) / 100);'
+          new = '      const price = document.createElement("strong"); price.textContent = Number(product.priceCents) > 0 ? money.format(Number(product.priceCents) / 100) : "Purchase options";'
+          if text.count(old) != 1:
+              raise SystemExit('related product price anchor changed')
+          text = text.replace(old, new, 1)
+          old = '    const url = section === "lithium" ? "/api/store/catalog?section=lithium-batteries" : "/api/store-catalog?section=rv-outdoor";'
+          new = '    const url = section === "sok" ? "/api/sok/catalog" : section === "lithium" ? "/api/store/catalog?section=lithium-batteries" : "/api/store-catalog?section=rv-outdoor";'
+          if text.count(old) != 1:
+              raise SystemExit('product fetchSection anchor changed')
+          text = text.replace(old, new, 1)
+          old = '      const order = hintedStore === "lithium" ? ["lithium", "rv"] : hintedStore === "rv" ? ["rv", "lithium"] : ["lithium", "rv"];'
+          new = '      const order = /^sok-/i.test(requestedId) ? ["sok", "lithium", "rv"] : hintedStore === "lithium" ? ["lithium", "sok", "rv"] : hintedStore === "rv" ? ["rv", "lithium", "sok"] : ["lithium", "sok", "rv"];'
+          if text.count(old) != 1:
+              raise SystemExit('product lookup order anchor changed')
+          detail.write_text(text.replace(old, new, 1))
+
+          # Also ensure dynamically-added retail CSS uses the fresh version.
+          # site-shell already changed above; keep the static Store preload fresh too.
+          PY
+
+      - name: Validate repair source
+        run: |
+          set -euo pipefail
+          node --check site/site-shell.js
+          node --check site/product-detail.js
+          node --check site/universal-store.js
+          grep -q 'Power Beyond<br><span>the Grid.</span>' site/index.html
+          grep -q 'Shop Power &amp; Energy' site/index.html
+          ! grep -q 'Lithium Power<br><span>for RV, Solar &amp; Backup</span>' site/index.html
+          grep -q 'data-product-sku' site/product.html
+          grep -q '/api/sok/catalog' site/product-detail.js
+          grep -q 'preserveExistingStoreHeader' site/site-shell.js
+          grep -q 'postrelease-light-surface-contrast-v1' site/universal-store.css
+          grep -q 'storefront-wordmark.webp?v=20260917-1' site/store.html
+          git diff --check
+          echo "New homepage blob: $(git hash-object site/index.html)"
+
+      - name: Commit repair branch
+        id: commit
+        run: |
+          set -euo pipefail
+          git config user.name elevationupscales
+          git config user.email caseymyoung@gmail.com
+          git add site/index.html site/store.html site/site-shell.js site/universal-store.css site/retail-first.css site/product.html site/product-detail.css site/product-detail.js
+          git commit -m 'Repair post-release homepage and storefront consistency'
+          git push origin HEAD:work/postrelease-home-store-repair-20260917
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned Cloudflare deployment tool
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Deploy repair to Pages preview only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          REPAIR_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler pages deploy site \
+            --project-name "$PROJECT_NAME" \
+            --branch "$PREVIEW_BRANCH" \
+            --commit-hash "$REPAIR_SHA" \
+            2>&1 | tee /tmp/repair-preview.txt
+
+      - name: Receipt
+        env:
+          REPAIR_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          echo "Repair branch SHA: $REPAIR_SHA"
+          grep -Eo 'https://[a-z0-9]+\.elevationupscales\.pages\.dev' /tmp/repair-preview.txt | tail -1 || true
