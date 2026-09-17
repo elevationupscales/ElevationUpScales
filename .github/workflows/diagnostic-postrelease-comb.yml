@@ -22,13 +22,13 @@ jobs:
           mkdir -p /tmp/audit
           for host in elevationupscales.com elevationupscales.pages.dev; do
             echo "===== $host HOME HEADERS ====="
-            curl -fsSIL "https://$host/?audit=${GITHUB_SHA}" | sed -n '1,30p'
+            curl -sSIL "https://$host/?audit=${GITHUB_SHA}" | sed -n '1,30p' || true
             curl -fsSL "https://$host/?audit=${GITHUB_SHA}" -o "/tmp/audit/${host}.home.html"
             curl -fsSL "https://$host/store?audit=${GITHUB_SHA}" -o "/tmp/audit/${host}.store.html"
             echo "HOME headline/copy markers:"
             grep -Eo 'Power Beyond|Lithium Power|Shop SOK lithium|Shop Power &amp; Energy|Explore Power Solutions' "/tmp/audit/${host}.home.html" | sort -u || true
             echo "STORE wordmark refs:"
-            grep -Eo '/assets/brand/[^"'"' ]+\.webp[^"'"' ]*' "/tmp/audit/${host}.store.html" | head -10 || true
+            grep -Eo "/assets/brand/[^\" ]+\.webp[^\" ]*" "/tmp/audit/${host}.store.html" | head -10 || true
           done
           echo '===== RAW HTML HASHES ====='
           sha256sum /tmp/audit/*.html
