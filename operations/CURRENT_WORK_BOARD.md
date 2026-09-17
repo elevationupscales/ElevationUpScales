@@ -156,6 +156,38 @@ Live Shopify verification after the canonical expansion control:
   - **OS RECON:** re-verify navigation, collection contents, purchaseability and funnel movement after receipts land.
 - Do not create another market-expansion plan. This is execution against the existing canonical control.
 
+
+---
+
+# OS RECON FOLLOW-UP — MARKET DISCOVERY STILL OPEN — 2026-09-17
+
+Current Git advanced through Renogy Wave-1 reconciliation and BOM/hazmat hardening, but the storefront discovery defect remains open.
+
+Verified live Shopify state:
+- **Renogy — Hawaii & Alaska Eligible** collection still exists with 5 products.
+- **Renogy — Canada Supply** collection still exists with 5 products.
+- Both collections still have **no collection image**.
+- Default **Main menu** still does **not** link either expansion collection.
+- Main navigation remains Home / Shop / Brands / Catalog / Contact, with Shop category links and Brands → Renogy/SOK/VEVOR only.
+
+Therefore the current conversion priority remains:
+**SURFACE THE EXPANSION PATH → DRIVE QUALIFIED PRODUCT CLICKS → MEASURE CART / CHECKOUT MOVEMENT.**
+
+Catalog-side progress since the previous recon:
+- Renogy Wave 1 has been fully triaged against current commercial truth.
+- `RSP10TC-G1-US` remains LIVE / verified.
+- `RBM500-G3-US` and `RSHST-B02P300-G1-US` remain ACTIVE under current route/orderability controls.
+- `RSP100DCT-G1-US` and `RCC20VOYP-G1-US` remain HOLD; do not force activation.
+- Renogy kit/bundle hazmat control is now BOM/component-based; unresolved included battery/regulated component keeps the kit on HOLD.
+- Do not reopen Wave-1 product activation merely because the storefront discovery defect is still open.
+
+Execution ownership remains:
+- **Commerce/Storefront:** add a clear customer-facing path to the Hawaii/Alaska and Canada Renogy collections and add intentional collection imagery/copy; no broad redesign.
+- **Shopify Store Operations under Peter:** continue route/rate/purchaseability verification; do not change inventory/orderability controls merely for click rate.
+- **OS RECON:** re-verify after storefront receipt lands and compare the conversion funnel against the existing baseline.
+
+Status: **YELLOW — DISCOVERY/CTR DEFECT OPEN; PRODUCT TRUTH CONTROL IMPROVING.**
+
 ---
 
 # SHOPIFY SALES-CHANNEL CHECKPOINT — 2026-09-17
