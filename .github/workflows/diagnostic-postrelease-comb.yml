@@ -1,0 +1,118 @@
+name: Diagnostic Postrelease Comb
+
+on:
+  push:
+    branches:
+      - diagnostic/postrelease-comb-20260917
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Compare canonical and Pages frontend state
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/audit
+          for host in elevationupscales.com elevationupscales.pages.dev; do
+            echo "===== $host HOME HEADERS ====="
+            curl -fsSIL "https://$host/?audit=${GITHUB_SHA}" | sed -n '1,30p'
+            curl -fsSL "https://$host/?audit=${GITHUB_SHA}" -o "/tmp/audit/${host}.home.html"
+            curl -fsSL "https://$host/store?audit=${GITHUB_SHA}" -o "/tmp/audit/${host}.store.html"
+            echo "HOME headline/copy markers:"
+            grep -Eo 'Power Beyond|Lithium Power|Shop SOK lithium|Shop Power &amp; Energy|Explore Power Solutions' "/tmp/audit/${host}.home.html" | sort -u || true
+            echo "STORE wordmark refs:"
+            grep -Eo '/assets/brand/[^"'"' ]+\.webp[^"'"' ]*' "/tmp/audit/${host}.store.html" | head -10 || true
+          done
+          echo '===== RAW HTML HASHES ====='
+          sha256sum /tmp/audit/*.html
+          echo '===== IMPORTANT ASSET COMPARISON ====='
+          assets=(
+            '/assets/brand/storefront-wordmark.webp'
+            '/retail-first.css?v=5.4.0'
+            '/universal-store.css?v=1.0.0'
+            '/site-shell.js?v=5.2.0'
+            '/universal-store.js?v=1.0.1'
+            '/home-commerce.js?v=5.2.0'
+            '/homepage-owner-annotations.css?v=1.0.1'
+          )
+          for asset in "${assets[@]}"; do
+            safe="$(printf '%s' "$asset" | tr '/?=&' '____')"
+            echo "--- $asset"
+            for host in elevationupscales.com elevationupscales.pages.dev; do
+              code="$(curl -sS -L -o "/tmp/audit/${host}.${safe}" -w '%{http_code}' "https://$host$asset")"
+              bytes="$(wc -c < "/tmp/audit/${host}.${safe}")"
+              hash="$(sha256sum "/tmp/audit/${host}.${safe}" | cut -d' ' -f1)"
+              echo "$host status=$code bytes=$bytes sha256=$hash"
+            done
+          done
+
+      - name: Audit every live product detail route
+        env:
+          ORIGIN: https://elevationupscales.com
+        run: |
+          cat > /tmp/product-detail-audit.mjs <<'JS'
+          const origin = process.env.ORIGIN;
+          async function products(path) {
+            const r = await fetch(origin + path, { headers: {accept:'application/json'}, cache:'no-store' });
+            if (!r.ok) throw new Error(`${path} ${r.status}`);
+            const body = await r.json();
+            if (!Array.isArray(body.products)) throw new Error(`${path} missing products`);
+            return body.products;
+          }
+          const groups = await Promise.all([
+            products('/api/store/catalog?section=lithium-batteries'),
+            products('/api/store-catalog?section=rv-outdoor'),
+            products('/api/sok/catalog'),
+          ]);
+          const map = new Map();
+          for (const group of groups) for (const p of group) {
+            const key = String(p.id || p.sku || '').trim().toLowerCase();
+            if (!key) continue;
+            map.set(key, map.has(key) ? {...map.get(key), ...p} : p);
+          }
+          const rows = [...map.values()];
+          const failures = [];
+          const unavailable = [];
+          const skuMissing = [];
+          let checked = 0;
+          for (const p of rows) {
+            const id = String(p.id || p.sku || '').trim();
+            if (!id) continue;
+            const url = `${origin}/product?id=${encodeURIComponent(id)}&store=universal&audit=1`;
+            const r = await fetch(url, {cache:'no-store'});
+            const html = await r.text();
+            checked++;
+            if (!r.ok) failures.push({id,status:r.status});
+            if (/This product is not currently available to purchase/i.test(html)) unavailable.push(id);
+            const sku = String(p.sku || p.supplierSku || '').trim();
+            if (sku && !html.toLowerCase().includes(sku.toLowerCase())) skuMissing.push({id,sku});
+          }
+          console.log(`unique products=${rows.length}`);
+          console.log(`detail pages checked=${checked}`);
+          console.log(`http failures=${failures.length}`);
+          console.log(`unavailable detail pages=${unavailable.length}`);
+          console.log(`detail pages missing SKU text=${skuMissing.length}`);
+          if (failures.length) console.log('HTTP_FAILURES', JSON.stringify(failures));
+          if (unavailable.length) console.log('UNAVAILABLE_DETAILS', JSON.stringify(unavailable));
+          if (skuMissing.length) console.log('SKU_MISSING', JSON.stringify(skuMissing));
+          JS
+          node /tmp/product-detail-audit.mjs
+
+      - name: Source-level navigation and contrast checks
+        run: |
+          set -euo pipefail
+          echo '===== HEADER REWRITE ====='
+          grep -n 'inner.innerHTML' site/site-shell.js || true
+          echo '===== POWER BEYOND SOURCE ====='
+          grep -Rni 'Power Beyond' apps/web-v2/src site | head -20 || true
+          echo '===== CURRENT PAGES HERO ====='
+          grep -n 'reference-flagship-title' site/index.html || true
+          echo '===== UNIVERSAL STORE COLOR RULES ====='
+          grep -o 'universal-product h3[^}]*}\|universal-department strong[^}]*}\|universal-trust span[^}]*}' site/universal-store.css || true
