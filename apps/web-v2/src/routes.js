@@ -126,6 +126,10 @@ export function getPublicRoute(pathname) {
 export function getSitemapRoutes() { return [...PUBLIC_ROUTES.values()].filter(({ implemented, indexable = true }) => implemented && indexable); }
 
 export function resolveCompatibilityRedirect(url) {
+  if (url.pathname === '/product') {
+    const productId = String(url.searchParams.get('id') || '').trim().toLowerCase();
+    if (/^[a-z0-9][a-z0-9-]*$/.test(productId)) return { location: `/product/${productId}`, status: 302 };
+  }
   const exact = EXACT_REDIRECTS.get(url.pathname);
   if (exact) return exact;
   const projectType = PROJECT_REDIRECTS.get(url.pathname);
