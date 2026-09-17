@@ -67,6 +67,20 @@ These are merchandising/prospect priorities only. Each exact SKU remains subject
 - High-dollar showcase SKUs remain prospect/merchandising candidates until exact current SKU gates pass.
 - Current live Shopify / Renogy control files and the canonical workboard supersede any older activation implication when fresher evidence proves a hold or changed state.
 
+## WAVE 1 RECONCILIATION RECEIPT — 2026-09-17
+
+Current commercial state after exact-SKU reconciliation:
+
+- **RSP10TC-G1-US** — LIVE / verified current Shopify revenue product.
+- **RBM500-G3-US** — ACTIVE / current live Renogy product; preserve current orderability and route controls.
+- **RSHST-B02P300-G1-US** — ACTIVE / current live Renogy product; preserve current orderability and route controls.
+- **RSP100DCT-G1-US** — HOLD; newer current retail/economics/backorder evidence overrides Wave-1 merchandising priority.
+- **RCC20VOYP-G1-US** — HOLD; Shopify record remains DRAFT at $54.99 with no approved media, Renogy public model family is currently backordered/unavailable, and Partner Portal exact-SKU orderability remains required before activation.
+
+Wave 1 is therefore **fully triaged**. Do not force another Wave-1 activation until a hold condition materially changes.
+
+---
+
 ## LITHIUM / HAZMAT CONTROL
 
 For every exact lithium SKU, management must capture chemistry, nominal voltage, Ah/Wh, weights/dimensions, SDS/MSDS, UN38.3/test-summary evidence, supported transport classification, packaging state, carrier/route restrictions, Lower-48 eligibility, AK/HI routing, Partner Portal orderability, warranty source, shipping treatment, and verification date.
