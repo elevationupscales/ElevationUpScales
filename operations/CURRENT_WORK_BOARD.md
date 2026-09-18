@@ -166,9 +166,9 @@ Live Shopify verification after the canonical expansion control:
 
 - **Renogy — Hawaii & Alaska Eligible** collection exists and contains 5 ACTIVE Renogy products.
 - **Renogy — Canada Supply** collection exists and contains 5 ACTIVE Renogy products.
-- Both expansion collections currently have **no collection image**.
-- Neither expansion collection is currently linked in the default **Main menu**. Main navigation exposes Shop categories and Brands → Renogy, but does not expose the new Hawaii/Alaska or Canada paths.
-- This is the current first proven click-through defect: the destinations exist, but storefront navigation does not provide a direct discovery path.
+- Both expansion collections now have intentional customer-facing collection imagery and updated retail copy.
+- The default **Main menu → Shop** now directly exposes **Renogy — Hawaii & Alaska** and **Renogy — Canada Supply**.
+- The prior destination-discovery defect is **FIXED** in live Shopify; measure external source → collection/product → cart movement before another navigation redesign.
 - The AK/HI set correctly excludes the 400W Renogy suitcase.
 - Live variant verification:
   - `RSP10TC-G1-US`: ACTIVE / availableForSale PASS / inventory policy CONTINUE / qty 0.
@@ -192,14 +192,16 @@ Live Shopify verification after the canonical expansion control:
 Current Git advanced through Renogy Wave-1 reconciliation and BOM/hazmat hardening, but the storefront discovery defect remains open.
 
 Verified live Shopify state:
-- **Renogy — Hawaii & Alaska Eligible** collection still exists with 5 products.
-- **Renogy — Canada Supply** collection still exists with 5 products.
-- Both collections still have **no collection image**.
-- Default **Main menu** still does **not** link either expansion collection.
-- Main navigation remains Home / Shop / Brands / Catalog / Contact, with Shop category links and Brands → Renogy/SOK/VEVOR only.
+- **Renogy — Hawaii & Alaska Eligible** now contains 9 ACTIVE products.
+- **Renogy — Canada Supply** now contains 9 ACTIVE products.
+- Both collections have customer-facing imagery and updated retail copy.
+- Default **Main menu → Shop** links both destination collections directly.
+- Six primary Renogy entry-product PDPs have been rewritten for customer value/trust and route clarity.
+- `RSP100DCT-G1-US` has been corrected to the canonical **$99.99** price.
+- `RNG-KIT-STCS100DC-VOY20-G1-US` now has populated SEO; `RBM500-G3-US` SEO no longer embeds dated stock language.
 
-Therefore the current conversion priority remains:
-**SURFACE THE EXPANSION PATH → DRIVE QUALIFIED PRODUCT CLICKS → MEASURE CART / CHECKOUT MOVEMENT.**
+Therefore the current conversion priority is now:
+**MEASURE EXTERNAL SOURCE → PRODUCT/COLLECTION → CART MOVEMENT → FIX ONLY THE NEXT PROVEN DROP-OFF.**
 
 Catalog-side progress since the previous recon:
 - Renogy Wave 1 has been fully triaged against current commercial truth.
