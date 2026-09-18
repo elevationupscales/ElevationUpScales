@@ -296,14 +296,16 @@ Executed live in Shopify:
 - all six changed products remained ACTIVE + published + availableForSale after mutation;
 - final Shopify order check remained **0 orders**.
 
-New trust gate found:
-- Shopify `shop.primaryDomain.url` currently resolves to **`https://elevationupscalesinc.myshopify.com`**;
-- this is a likely external trust/conversion penalty and should be corrected by the Shopify/Storefront lane using a branded Elevation customer domain or the branded `elevationupscales.com` Web V2 purchase path;
-- do not create a second payment stack; preserve verified Shopify checkout;
-- PR #236 has been explicitly routed to verify that the branded Elevation storefront is the customer-facing origin and that Shopify handoff is intentional rather than a surprise unbranded-domain jump.
+Branded-domain trust gate — CLOSED:
+- Shopify `shop.primaryDomain.url` now resolves to **`https://shop.elevationupscales.com`** with SSL enabled;
+- public Shopify home, Renogy AK/HI collection and Renogy Canada collection resolve on the branded domain;
+- PR #236 branch customer destinations were corrected from the old `myshopify.com` host to `shop.elevationupscales.com`;
+- stale PR copy for the Renogy 3000W inverter AK/HI rate was corrected from **$89.99** to the verified live **$119.95** rate;
+- Shopify delivery-profile API verification confirms small parcel AK/HI **$34.95**, small parcel Canada **$29.95**, inverter AK/HI **$119.95**, inverter Canada **$79.95**;
+- preserve the existing Shopify checkout/payment stack; do not create a second payment system.
 
 Status:
-**PDP VALUE/TRUST = FIXED; SEO DEFECTS = FIXED; COLLECTION TRUST/DISCOVERY = FIXED; PRICE MISMATCH ON 100W BIFACIAL = CURRENTLY CLEARED; BRANDED SHOPIFY DOMAIN = OPEN HIGH-PRIORITY TRUST GATE; PAYMENT STACK = DO NOT REOPEN WITHOUT NEW EVIDENCE.**
+**PDP VALUE/TRUST = FIXED; SEO DEFECTS = FIXED; COLLECTION TRUST/DISCOVERY = FIXED; 100W BIFACIAL PRICE = $99.99 VERIFIED; BRANDED SHOPIFY DOMAIN = FIXED; REMOTE-MARKET SHIPPING CONFIG = VERIFIED; PAYMENT STACK = DO NOT REOPEN WITHOUT NEW EVIDENCE; WEB V2 PR #236 = RECONCILE CURRENT MAIN + PREVIEW/SMOKE BEFORE OWNER DEPLOY GATE.**
 
 ---
 # CURRENT VERIFIED SHOPIFY / ORDER CHECKPOINT
