@@ -171,7 +171,7 @@
     const title = compactTitle(p);
     const detail = `/product?id=${encodeURIComponent(id || sku)}&store=universal`;
     const section = text(p.storeSection || p.store_section).toLowerCase();
-    const checkoutSource = p.sokProduct || section === "lithium-batteries" ? "lithium" : "rv";
+    const checkoutSource=p.sokProduct||section==="lithium-batteries"?"lithium":"rv";
     if (s.buy) return { href: `/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id || sku)}&name=${encodeURIComponent(title)}`, label: "Buy Now", detail };
     if (p.sokProduct) return { href: `/sok-order.html?sku=${encodeURIComponent(sku)}&intent=purchase_options`, label: "See Purchase Options", detail };
     return { href: detail, label: s.code === "out" ? "View Product" : "Confirm Availability", detail };
