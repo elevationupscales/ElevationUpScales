@@ -280,6 +280,32 @@ This delta records only state verified during the current management RUN. It doe
 Status after routing: **P0 Web V2 = DEVELOPMENT CORRECTION/PREVIEW PENDING; Renogy remote-market = ACTIVE WITH ONE EXACT DESTINATION-MEMBERSHIP CORRECTION; SOK stock refresh = EXTERNAL PENDING; SOK eBay = AUTHORITY HOLD; production deploy = OWNER GATE.**
 
 ---
+
+# ASAP SALES-GATE REMEDIATION — 2026-09-17
+
+Owner direction: **fix identified sales gates ASAP**.
+
+Executed live in Shopify:
+- six promoted Renogy PDPs now lead with customer-facing Elevation value: exact-SKU support, destination-aware shipping, system-fit help and supplier recheck before fulfillment;
+- backorder/pre-purchase language clarified on the 100W bifacial panel and 100W portable suitcase;
+- 500A monitor dated-stock SEO/PDP wording replaced with durable orderability/support language;
+- missing SEO added to the 100W portable suitcase;
+- main Renogy, Renogy AK/HI and Renogy Canada collections now have intentional imagery plus customer-facing route/value copy;
+- existing Shopify main navigation already exposes the AK/HI and Canada Renogy collections, so no duplicate navigation mutation was made;
+- `RSP100DCT-G1-US` is now **$99.99** live, matching Renogy's current public price at the verification checkpoint;
+- all six changed products remained ACTIVE + published + availableForSale after mutation;
+- final Shopify order check remained **0 orders**.
+
+New trust gate found:
+- Shopify `shop.primaryDomain.url` currently resolves to **`https://elevationupscalesinc.myshopify.com`**;
+- this is a likely external trust/conversion penalty and should be corrected by the Shopify/Storefront lane using a branded Elevation customer domain or the branded `elevationupscales.com` Web V2 purchase path;
+- do not create a second payment stack; preserve verified Shopify checkout;
+- PR #236 has been explicitly routed to verify that the branded Elevation storefront is the customer-facing origin and that Shopify handoff is intentional rather than a surprise unbranded-domain jump.
+
+Status:
+**PDP VALUE/TRUST = FIXED; SEO DEFECTS = FIXED; COLLECTION TRUST/DISCOVERY = FIXED; PRICE MISMATCH ON 100W BIFACIAL = CURRENTLY CLEARED; BRANDED SHOPIFY DOMAIN = OPEN HIGH-PRIORITY TRUST GATE; PAYMENT STACK = DO NOT REOPEN WITHOUT NEW EVIDENCE.**
+
+---
 # CURRENT VERIFIED SHOPIFY / ORDER CHECKPOINT
 
 - Fresh non-test Shopify order check on 2026-09-17: **0 real orders present**.
