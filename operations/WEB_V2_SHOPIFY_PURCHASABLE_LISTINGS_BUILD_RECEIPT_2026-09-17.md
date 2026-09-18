@@ -62,3 +62,26 @@ An immutable preview/live browser smoke has not yet been produced from this cand
 **READY TO DEPLOY: NO — PREVIEW/SMOKE REQUIRED**
 
 Production remains behind Casey's separate deployment approval gate.
+
+
+## BRANDED SHOP DOMAIN REMEDIATION — 2026-09-17
+
+Live Shopify domain verification:
+- primary storefront: `https://shop.elevationupscales.com`;
+- SSL enabled;
+- public Renogy, Alaska/Hawaii and Canada collection paths resolve on the branded domain.
+
+Branch correction:
+- replaced all 19 hard-coded `https://elevationupscalesinc.myshopify.com` customer destinations in `site/store.html` with `https://shop.elevationupscales.com`;
+- corrected stale 3000W inverter Alaska/Hawaii shipping copy from **$89.99** to the verified live **$119.95** launch rate;
+- correction commit: `945f3a4ba0d093296c0c9c715ca4b4ecfd1e8ff1`.
+
+Shopify delivery-profile verification:
+- Renogy small parcel: AK/HI **$34.95**, Canada **$29.95**;
+- Renogy medium parcel / inverter: AK/HI **$119.95**, Canada **$79.95**;
+- Lower-48 rates remain separately configured;
+- AK/HI and supported Canada province zones are active.
+
+Interactive payment-screen re-smoke was not re-run in this receipt because the connected metered browser wallet lacked funds. Existing payment-stack verification is not reopened absent new evidence of failure.
+
+**READY TO DEPLOY: NO — CURRENT MAIN RECONCILIATION + IMMUTABLE PREVIEW/SMOKE STILL REQUIRED.**
