@@ -58,7 +58,7 @@ PASS:
 No automatic GitHub CI/workflow run was attached to the branch head at verification time.
 An immutable preview/live browser smoke has not yet been produced from this candidate.
 
-**READY TO PREVIEW: YES**
+**READY TO PREVIEW: YES — PR QA RE-RUN AFTER CANONICAL TEST ALIGNMENT**
 **READY TO DEPLOY: NO — PREVIEW/SMOKE REQUIRED**
 
 Production remains behind Casey's separate deployment approval gate.
