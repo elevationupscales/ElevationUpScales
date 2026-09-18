@@ -76,7 +76,7 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 | **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
 | **P0** | Renogy Hawaii / Alaska / Canada expansion + click conversion | Shopify Store Operations under Peter; Commerce/Storefront; Shipping & Logistics; OS RECON | **ACTIVE — OWNER DIRECTED / ORGANIZED EXPANSION** | Use `RENOGY_HI_AK_CANADA_MARKET_OPENING_2026-09-17.md` as canonical lane control. Open verified eligible SKUs, install/verify protected shipping treatment, expose one clear customer shopping path, measure product clicks → add-to-cart → checkout → paid order, and tune shipping from real fulfillment. No duplicate rules. |
 | **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — SOK MODEL ESTABLISHED** | Reuse the public-safe SOK truth pattern vendor by vendor: exact SKU, protected cost source, MAP/floor, shipping, channel fees, contribution state, stock, authorization, warranty/returns, source and verification state. Keep protected dealer costs/raw inventory out of public Git. |
-| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **AUTHORITY RECONCILIATION REQUIRED / MAP CONTROLLED** | Do not publish through conflicting authority records. Existing supplier correspondence does not yet establish eBay-specific authorization. Direct-site SOK work continues independently. |
+| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **OWNER-AUTHORIZED CURRENT WAVE / MAP CONTROLLED** | Execute only the supplied `00_CURRENT_UPLOADS` wave, verify each upload receipt, preserve MAP and shipping-policy controls, and do not use `90_SUPERSEDED_DRAFTS`. The `10_PRESALE_HOLD` lane remains held until separately cleared. |
 | **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / EXPANSION ACTIVE / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Expansion does not override SKU commercial holds. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
 | **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
 | **P1** | SunGoldPower catalog | Vendor / Commerce Operations | **BATCH 1 STAGED — 5 DRAFTS / EXTERNAL ACTIVATION GATES** | Five in-stock inverter SKUs are staged at supplier MAP. Hold publication until approved exact-SKU media, dropship/order-submission procedure and Lower-48 shipping economics are verified. Do not send duplicate vendor outreach; the operating-detail request is already pending. |
@@ -274,10 +274,10 @@ This delta records only state verified during the current management RUN. It doe
 - Both Renogy remote-market collections currently contain **9 ACTIVE products**. Keep the current route intact unless a fresh exact-SKU shipping/orderability defect appears.
 - The 400W Renogy suitcase remains excluded from the AK/HI automatic-air collection, consistent with the >320W exclusion.
 - SOK weekly stock refresh: Casey's request to Kam was sent at **10:57 AM MDT on 2026-09-17**; no newer stock reply was found during this RUN. This remains an external wait and does not block verified direct SOK commerce.
-- SOK eBay authority: no fresh supplier correspondence was found that proves eBay-specific authorization. **HOLD remains in force for SOK eBay publication**; do not infer marketplace authority from direct-site authorization.
+- SOK eBay authority: **Casey explicitly owner-authorized the supplied current-upload SOK eBay wave on 2026-09-17.** This supersedes the prior internal marketplace-authority hold for those exact files. The packet contains one confirmed successful listing receipt for `SK24V150PH-L48-4-SEP26` (eBay Item ID `168697218516`). Remaining current-upload files are authorized but must be verified after upload. `10_PRESALE_HOLD` remains separate.
 - No vendor email was sent by this MPM RUN.
 
-Status after routing: **P0 Web V2 = DEVELOPMENT CORRECTION/PREVIEW PENDING; Renogy remote-market = ACTIVE WITH ONE EXACT DESTINATION-MEMBERSHIP CORRECTION; SOK stock refresh = EXTERNAL PENDING; SOK eBay = AUTHORITY HOLD; production deploy = OWNER GATE.**
+Status after routing: **P0 Web V2 = DEVELOPMENT CORRECTION/PREVIEW PENDING; Renogy remote-market = ACTIVE; SOK stock refresh = EXTERNAL PENDING; SOK eBay CURRENT WAVE = OWNER AUTHORIZED / VERIFY EACH UPLOAD; SOK PRESALE = HOLD; production deploy = OWNER GATE.**
 
 ---
 
@@ -348,6 +348,38 @@ Current verified state:
 
 ---
 
+# SOK SHOPIFY PACKAGE WAVE — PHASE 1 LIVE / PHASE 2 PLANNED — 2026-09-17
+
+Canonical receipt/plan: `SOK_SHOPIFY_PACKAGE_WAVE_PHASE2_PLAN_2026-09-17.md`.
+
+Owner direction executed:
+- equivalent Shopify package listings were built from the owner-authorized SOK eBay package wave without duplicating existing singles or the existing 30.72kWh rack package;
+- **12 new SOK package products are ACTIVE + Online Store published + availableForSale**;
+- Lower-48 package wave: SK12V206H 2/3-pack, SK12V280H 2/3/4-pack, SK24V150PH 2/3/4-pack;
+- Hawaii package wave: SK12V100PC 3/6/9/12-pack;
+- owner-authorized eBay customer prices were preserved for Shopify Phase 1; channel-specific repricing is deferred until fee/margin analysis.
+
+Shipping:
+- Lower-48 packages reuse `gid://shopify/DeliveryProfile/140130550129` with **Freight Included — Lower 48 / $0.00**;
+- Hawaii packages use `gid://shopify/DeliveryProfile/140132122993` with **Hawaii only / Hawaii Lithium Freight — Included / $0.00**;
+- Hawaii package price contains the working freight allowance; final carrier/DG/terminal handoff remains a fulfillment check;
+- SOK collection copy was updated so Hawaii package availability is no longer contradicted by legacy exclusion language.
+
+Public smoke:
+- Lower-48 SK12V206H 2-pack: PASS on `shop.elevationupscales.com`;
+- Hawaii SK12V100PC 3-pack: PASS on `shop.elevationupscales.com`.
+
+Phase 2 plan:
+- SK12V314PH 2/3-pack presale after fresh supplier timing/orderability check;
+- activate existing 20.48kWh and 51.2kWh rack-system drafts after cabinet/freight/orderability gates;
+- recon heavier Hawaii battery families before expanding freight packages;
+- evaluate Shopify-direct pricing advantage only after fee + MAP + contribution analysis;
+- add package-specific merchandising and measure package PDP → cart → checkout → paid order.
+
+Status: **PHASE 1 LIVE / PHASE 2 PLANNED / PRESALE HOLD ISOLATED.**
+
+---
+
 # SOK CONTROL CHECKPOINT
 
 - Public-safe SKU truth is recorded in `SOK_MASTER_CATALOG_TRUTH_2026-09-17.md`.
@@ -356,7 +388,7 @@ Current verified state:
 - Shopify quantity zero is not treated as supplier out-of-stock proof for dropship products; current supplier availability controls fulfillment truth.
 - Protected dealer costs, raw supplier inventory quantities, private correspondence and protected freight economics remain outside public Git.
 - Direct Elevation commerce may continue using verified SOK terms while current stock is refreshed.
-- Existing supplier correspondence does not currently prove eBay-specific authorization. Do not infer marketplace authorization from direct-site authorization.
+- Casey's explicit owner authorization clears the internal eBay authority hold for the exact supplied current-upload wave. Preserve `10_PRESALE_HOLD` as a separate gate and verify every eBay upload result before calling it live.
 
 ---
 
@@ -433,7 +465,7 @@ This is an attention order, **not a worker time schedule**:
 2. open and verify the Renogy Hawaii / Alaska / Canada parcel-class market path;
 3. surface eligible products clearly and measure product click → add-to-cart → checkout;
 4. keep master catalog truth current without exposing protected supplier economics;
-5. reconcile SOK eBay authority before marketplace publication;
+5. execute and verify the owner-authorized SOK eBay current-upload wave; keep the presale hold isolated;
 6. advance Shopify / Renogy only when explicit commercial SKU gates clear;
 7. hold SunGoldPower Batch 1 at the documented external operating-detail gates while continuing unrelated revenue work;
 8. review Development/QA receipts whenever they become ready;
