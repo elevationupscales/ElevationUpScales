@@ -134,13 +134,15 @@ Worker boundaries:
 - **OS RECON:** verify boundaries, route logic, promoted-SKU purchaseability, funnel evidence
 - **COM2/COM3/support workers:** supporting evidence/fixes only; no competing market rule set
 
-Canonical initial estimates:
-- Hawaii small eligible Renogy parcel: **$24.99**
-- Hawaii large inverter/heavy power electronics: **$89.99**
-- Alaska small eligible Renogy parcel: **$34.99**
-- Canada small eligible Renogy parcel: **$39.99**
-- no generic Hawaii free-shipping threshold during learning
-- no generic Hawaii $15 Express until verified
+Initial planning estimates have been superseded by the live Shopify execution receipt and checkout-rate proof:
+- Renogy small-parcel remote profile: **AK/HI $34.95**;
+- Renogy small-parcel Canada profile: **$29.95** in the current launch provinces;
+- Renogy 3000W inverter remote profile: **AK/HI $119.95**;
+- Renogy 3000W inverter Canada profile: **$79.95**;
+- Canada launch provinces: AB, BC, MB, NB, NL, NS, ON, PE, QC, SK;
+- Canada YT / NU / NT remain excluded;
+- no generic Hawaii free-shipping threshold during learning;
+- rates remain conservative launch estimates and must be tuned from real paid-order freight data.
 
 Hard exclusions remain:
 - AK/HI batteries: no blanket auto-open
@@ -305,13 +307,14 @@ Current verified state:
 - Renogy 400W compact suitcase portable solar panel `RSP400LSC-G1-US`: ACTIVE at $495.99 and published to the Online Store on 2026-09-17; Shopify generated a live storefront URL after publication;
 - the 400W suitcase exposed a launch-control defect: product status had been ACTIVE while Online Store publication was still absent, producing a broken customer link;
 - launch control is now: **ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED = LIVE**. ACTIVE alone is not sufficient;
-- `RBC2125DS-21W-G3-US` 50A IP67 DC-DC MPPT: **HOLD — economics + current supplier availability**;
-- `RSP100DCT-G1-US` 100W N-Type bifacial: **HOLD — current public promo price + thin economics/backorder state**;
+- `RBC2125DS-21W-G3-US` 50A IP67 DC-DC MPPT: **ACTIVE / PUBLISHED / AVAILABLE FOR SALE / CONTINUE**; exact SKU, approved media and supplier orderability are verified;
+- `RSP100DCT-G1-US` 100W N-Type bifacial: **ACTIVE / PUBLISHED / AVAILABLE FOR SALE / CONTINUE** at $109.99 under the verified public backorder/pre-purchase path;
+- `RNG-KIT-STCS100DC-VOY20-G1-US` 100W portable suitcase + Voyager 20A: **ACTIVE / PUBLISHED / AVAILABLE FOR SALE / CONTINUE** at $229.99 under the verified public backorder/pre-purchase path;
+- `RBC2115DS-21W-G1-US` REGO 30A bidirectional: **ACTIVE / PUBLISHED / AVAILABLE FOR SALE / CONTINUE** at $327.99 with approved exact-SKU media and supplier catalog state;
 - `RKIT200RV-A30D1-G2-US` 200W RV kit: **HOLD — current supplier availability + approved media**;
 - `RNG-KIT-PREMIUM400D-RVR40-G4-US` 400W Premium Kit G4: **HOLD — current supplier availability + approved media**;
 - `RCC60REGO-G2-US` REGO 60A MPPT: **HOLD — current public price + availability + approved media**;
-- `RBC2115DS-21W-G1-US` REGO 30A bidirectional: **HOLD — approved media + current dealer-side exact-SKU orderability confirmation**;
-- no bulk publication is authorized and no third Renogy launch should be forced through a commercial hold.
+- no bulk publication is authorized; advance only exact SKUs whose commerce gates are actually clean.
 
 ---
 
