@@ -261,7 +261,13 @@ This delta records only state verified during the current management RUN. It doe
 - Web V2 PR **#236** is open at head `3aaa7335e21ab88bcdb1d57d2bcd1a54a123676f`. Its latest Pull Request QA fails inside the pre-existing SOK commercialization gate, not inside the Renogy diff. The branch also must reconcile current `main` ancestry before the preview workflow can pass. Exact correction and preview routing were posted to PR #236; **production remains not authorized**.
 - Live Shopify order check: **0 orders present**. A real paid order still supersedes optimization work if one appears.
 - **Renogy — Hawaii & Alaska Eligible** now contains **9 ACTIVE products**; **Renogy — Canada Supply** also contains **9 ACTIVE products**.
-- Exact route mismatch found: `RNG-INVT-3000-12V-P2-G3-US` is currently tagged `AK-HI Eligible`, placing the 3000W inverter in the blanket AK/HI smart collection even though the canonical market-opening control keeps that inverter **YELLOW / class-specific review**. Shopify Store Operations is routed to correct only destination merchandising/eligibility, preserve the clean Lower-48 product path, and reverify Canada treatment. Do not blanket-deactivate the product.
+- Renogy remote-market reconciliation corrected: `RNG-INVT-3000-12V-P2-G3-US` is intentionally AK/HI + Canada enabled under the later Shopify execution receipt. Checkout-rate proof is recorded at **$119.95 AK/HI** and **$79.95 Canada**; live Shopify confirms ACTIVE + published + availableForSale + inventory policy CONTINUE. The prior MPM instruction to remove it from the remote-market route is withdrawn.
+- Newly advanced Renogy products were live-audited and are customer-saleable:
+  - `RSP100DCT-G1-US` — ACTIVE / published / availableForSale / CONTINUE / public backorder verified;
+  - `RNG-KIT-STCS100DC-VOY20-G1-US` — ACTIVE / published / availableForSale / CONTINUE / public backorder verified;
+  - `RBC2125DS-21W-G3-US` — ACTIVE / published / availableForSale / CONTINUE / supplier orderability verified;
+  - `RBC2115DS-21W-G1-US` — ACTIVE / published / availableForSale / CONTINUE / approved media + supplier catalog state.
+- Both Renogy remote-market collections currently contain **9 ACTIVE products**. Keep the current route intact unless a fresh exact-SKU shipping/orderability defect appears.
 - The 400W Renogy suitcase remains excluded from the AK/HI automatic-air collection, consistent with the >320W exclusion.
 - SOK weekly stock refresh: Casey's request to Kam was sent at **10:57 AM MDT on 2026-09-17**; no newer stock reply was found during this RUN. This remains an external wait and does not block verified direct SOK commerce.
 - SOK eBay authority: no fresh supplier correspondence was found that proves eBay-specific authorization. **HOLD remains in force for SOK eBay publication**; do not infer marketplace authority from direct-site authorization.
