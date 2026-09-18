@@ -252,6 +252,24 @@ Status: **YELLOW — DISCOVERY/CTR DEFECT OPEN; PRODUCT TRUTH CONTROL IMPROVING.
 
 ---
 
+
+# MPM RUN LIVE DELTA — 2026-09-17
+
+This delta records only state verified during the current management RUN. It does not create a new authority layer.
+
+- Git `main` was re-resolved at the start of this RUN to `4dbdb14fcd42da4ec6d1acd4d557740391acb14e`; that commit records Casey's Shopify-aligned Web V2 build approval.
+- Web V2 PR **#236** is open at head `3aaa7335e21ab88bcdb1d57d2bcd1a54a123676f`. Its latest Pull Request QA fails inside the pre-existing SOK commercialization gate, not inside the Renogy diff. The branch also must reconcile current `main` ancestry before the preview workflow can pass. Exact correction and preview routing were posted to PR #236; **production remains not authorized**.
+- Live Shopify order check: **0 orders present**. A real paid order still supersedes optimization work if one appears.
+- **Renogy — Hawaii & Alaska Eligible** now contains **9 ACTIVE products**; **Renogy — Canada Supply** also contains **9 ACTIVE products**.
+- Exact route mismatch found: `RNG-INVT-3000-12V-P2-G3-US` is currently tagged `AK-HI Eligible`, placing the 3000W inverter in the blanket AK/HI smart collection even though the canonical market-opening control keeps that inverter **YELLOW / class-specific review**. Shopify Store Operations is routed to correct only destination merchandising/eligibility, preserve the clean Lower-48 product path, and reverify Canada treatment. Do not blanket-deactivate the product.
+- The 400W Renogy suitcase remains excluded from the AK/HI automatic-air collection, consistent with the >320W exclusion.
+- SOK weekly stock refresh: Casey's request to Kam was sent at **10:57 AM MDT on 2026-09-17**; no newer stock reply was found during this RUN. This remains an external wait and does not block verified direct SOK commerce.
+- SOK eBay authority: no fresh supplier correspondence was found that proves eBay-specific authorization. **HOLD remains in force for SOK eBay publication**; do not infer marketplace authority from direct-site authorization.
+- No vendor email was sent by this MPM RUN.
+
+Status after routing: **P0 Web V2 = DEVELOPMENT CORRECTION/PREVIEW PENDING; Renogy remote-market = ACTIVE WITH ONE EXACT DESTINATION-MEMBERSHIP CORRECTION; SOK stock refresh = EXTERNAL PENDING; SOK eBay = AUTHORITY HOLD; production deploy = OWNER GATE.**
+
+---
 # CURRENT VERIFIED SHOPIFY / ORDER CHECKPOINT
 
 - Fresh non-test Shopify order check on 2026-09-17: **0 real orders present**.
