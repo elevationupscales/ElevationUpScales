@@ -7,7 +7,7 @@ const homeCommerce = fs.readFileSync(new URL("../site/home-commerce.js", import.
 
 test("protected homepage top stays authored in index.html and is not rewritten by commerce runtime", () => {
   assert.match(index, /class="reference-storefront-hero__lead">Shop SOK lithium batteries and power systems for RV, solar, backup and off-grid use\.<\/p>/);
-  assert.match(index, /class="button retail-primary reference-storefront-hero__primary"[^>]*>Explore Power Solutions/);
+  assert.match(index, /class="button retail-primary reference-storefront-hero__primary"[^>]*href="\\/start-a-project"[^>]*>Start a Project/);
 
   assert.doesNotMatch(homeCommerce, /reference-storefront-hero__lead/);
   assert.doesNotMatch(homeCommerce, /reference-storefront-hero__primary/);
