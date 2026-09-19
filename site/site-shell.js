@@ -394,8 +394,8 @@
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Power <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-          <a href="/lithium-batteries"><span><strong>Lithium Batteries</strong><small>12V, 24V and 48V power</small></span></a>
-          <a href="/sok-batteries"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy Dealer</small></span></a>
+          <a href="https://shop.elevationupscales.com/collections/all"><span><strong>Lithium Batteries</strong><small>Shop current battery and power products</small></span></a>
+          <a href="https://shop.elevationupscales.com/collections/sok-battery"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy products</small></span></a>
           <a href="/solar-project"><span><strong>Solar & Off-Grid</strong><small>Build around real power needs</small></span></a>
           <a href="/hawaii-lithium-batteries"><span><strong>Hawaii Power</strong><small>Availability and freight review</small></span></a>
         </div></details>
