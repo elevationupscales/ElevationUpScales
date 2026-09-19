@@ -6,14 +6,15 @@
 **Project Specialist:** VEVOR Reconciliation & Price-Control Specialist  
 **Human Ecommerce Oversight:** Peter Torres  
 **Status:** ACTIVE — STAGE 1 PROVING / PUBLIC CHECKOUT VERIFIED / FIRST PROFITABLE ORDER OPEN  
-**Last reconciled:** 2026-09-11  
+**Last reconciled:** 2026-09-12  
 **Project Source:** `vendor-project-sources/VEVOR_PROJECT_SOURCE.md`  
 **Controlling SOP:** `VEVOR_VENDOR_MASTER_SOP.md`  
 **B-Tier Preparation Receipt:** `VEVOR_B_TIER_PREPARATION_2026-09-10.md`  
 **B-Tier Live Qualification Receipt:** `VEVOR_B_TIER_LIVE_QUALIFICATION_2026-09-10.md`  
 **Fulfillment Receipt:** `VEVOR_FULFILLMENT_QUALIFICATION_2026-09-10.md`  
 **Profitability Control:** `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md`  
-**First-Sale Shortlist:** `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md`
+**First-Sale Shortlist:** `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md`  
+**First-Sale Fresh Check:** `VEVOR_FIRST_SALE_FRESH_CHECK_2026-09-12.md`
 
 ## Project outcome
 
@@ -41,15 +42,18 @@ Current operating objective:
 - Generic supplier fulfillment follow-up is answered/closed. Do not resend it.
 - Current Shopify order sweep on 2026-09-11 returned **0 orders**, so first-real-order proof remains open.
 - Current first-sale execution is governed by `DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md`: a product is not a promotion target until current economics support positive expected order contribution.
-- `VEVOR_FIRST_SALE_PROMOTION_SHORTLIST_2026-09-11.md` is the current bounded promotion-candidate queue. It does not authorize discounts, paid ads, inventory buys or promotion before the profit gate passes.
+- The 10-item first-sale shortlist received a fresh exact-SKU public VEVOR check on 2026-09-12. **Three SKUs are currently orderable; seven are currently out of stock.**
+- Current orderable candidates are `XXKLJT124INCLJF0QV0`, `AXLSTCQJDSYKAZ99C001V0`, and `D25FT14IN20AHOGLOV1`. Their public VEVOR selling prices matched their feed MAP references at the fresh check and each page exposed Buy Now / Add to Cart.
+- The seven unavailable candidates are sellability holds and return to the back of the source-refresh queue. Do not spend promotion-economics capacity on them during the current source window.
+- A focused supplier request for exact current PRO net unit price and normal continental-U.S. dropship shipping treatment for the three orderable SKUs has been sent. Protected cost values remain outside public Git.
 
 ## Current worktree
 
-**LAST VERIFIED:** public Shopify checkout is open; A-tier is established; B-tier 17/17 is live-qualified, ACTIVE and media-complete; fulfillment baseline is answered; zero current Shopify orders.  
-**CURRENT ACTIVE TASK:** convert the preliminary VEVOR first-sale shortlist into `PROMOTE`, `HOLD — ECONOMICS UNKNOWN`, or `HOLD — NEGATIVE CONTRIBUTION` using fresh exact-SKU source/sellability/price-MAP checks plus protected current order economics.  
-**CURRENT EXTERNAL TRIGGER:** first real paid VEVOR order.  
-**DO NOT REBUILD:** PRO registration, supplier-feed intake, A-tier launch, VEVOR Direct collection, B-tier queue preparation, B-tier live qualification, B-tier product/media creation, direct-vs-Doba source separation, storefront-password removal, or generic fulfillment inquiry.  
-**NEXT EXECUTABLE:** fresh-check highest-value shortlist SKUs; calculate expected order contribution using protected economics outside public Git; route clean `PROMOTE` items into free/owned traffic and existing Shopify merchandising.  
+**LAST VERIFIED:** public Shopify checkout is open; A-tier is established; B-tier 17/17 is live-qualified, ACTIVE and media-complete; fulfillment baseline is answered; the 10-SKU first-sale fresh check is complete; 3 exact SKUs are orderable and 7 are currently out of stock.  
+**CURRENT ACTIVE TASK:** obtain/reconcile exact protected PRO economics for the three orderable SKUs and assign `PROMOTE`, `HOLD — ECONOMICS UNKNOWN`, or `HOLD — NEGATIVE CONTRIBUTION`.  
+**CURRENT EXTERNAL TRIGGERS:** supplier economics reply for the three viable SKUs; first real paid VEVOR order.  
+**DO NOT REBUILD / REPEAT THIS SOURCE WINDOW:** PRO registration, supplier-feed intake, A-tier launch, VEVOR Direct collection, B-tier queue preparation, B-tier live qualification, B-tier product/media creation, direct-vs-Doba source separation, storefront-password removal, generic fulfillment inquiry, or the completed 10-SKU fresh public sellability/price pass.  
+**NEXT EXECUTABLE:** reconcile exact current PRO unit cost + supplier shipping for the three viable SKUs; calculate expected order contribution using protected economics outside public Git; route clean `PROMOTE` items into free/owned traffic and existing Shopify merchandising.  
 **FIRST REAL ORDER TRIGGER:** reverify exact SKU + live sellability + current VEVOR selling price/feed MAP + supplier-order path → place supplier order → capture supplier acceptance/tracking/customer completion → record actual contribution and exceptions.
 
 ## Unified project team
@@ -97,7 +101,7 @@ Resolve current `main`; read `MASTER_SOP_V1_0.md`, `MASTER_OS_GLOSSARY_V1_0.md`,
 
 Identify the last verified VEVOR action and next executable VEVOR action before doing new work.
 
-Do not restart completed onboarding, catalog, media, password or fulfillment-research work.
+Do not restart completed onboarding, catalog, media, password, fulfillment-research or current-window shortlist-freshness work.
 
 ### 2 — SOURCE / SKU CONTROL
 
@@ -137,6 +141,8 @@ Use customer-safe states:
 
 Before active promotion and before supplier purchase, reverify current sellability. Do not invent preorder/backorder authorization.
 
+For the current first-sale source window, the 10-SKU fresh check is already complete: **3 orderable / 7 unavailable**. Do not re-run all 10 until a later refresh trigger exists.
+
 ### 5 — PROFITABILITY GATE / FIRST-SALE SHORTLIST
 
 The current startup objective is the first **profitable** Elevation direct-site order.
@@ -154,7 +160,15 @@ Disposition each candidate as:
 - `HOLD — NEGATIVE CONTRIBUTION` — expected contribution is $0 or below;
 - `OWNER REVIEW — STRATEGIC EXCEPTION` — deliberate loss leader/subsidy or other strategic exception.
 
-Use the current first-sale shortlist as the initial bounded queue. Re-rank by purchase friction + expected dollar contribution + contribution rate + brand fit + fulfillment reliability + support/return risk.
+Current bounded economics queue is the three orderable SKUs only:
+
+- `XXKLJT124INCLJF0QV0` — Camper Levelers
+- `AXLSTCQJDSYKAZ99C001V0` — A-Frame Trailer Jack
+- `D25FT14IN20AHOGLOV1` — 25-ft Electric Drain Auger
+
+All three remain `HOLD — ECONOMICS UNKNOWN` until exact current PRO unit cost, normal supplier shipping treatment and applicable order variable costs are known enough to calculate positive contribution.
+
+The seven out-of-stock shortlist SKUs are not current economics candidates; re-enter them only after a later sellability refresh clears the exact SKU.
 
 ### 6 — CATALOG / SHOPIFY CONTROL
 
@@ -277,14 +291,14 @@ If one SKU/order fails, reopen only that affected control unless evidence proves
 If one VEVOR sub-item waits, continue another safe VEVOR sub-item such as:
 
 - source cleanup;
-- price/sellability refresh for a different shortlist SKU;
-- protected economics review for another candidate;
+- protected economics processing for any viable candidate whose current cost evidence arrives;
 - product/media normalization where not already complete;
 - direct-vs-Doba reconciliation when new SKUs appear;
 - first-order receipt preparation;
-- supplier/account evidence processing if new information arrives.
+- supplier/account evidence processing if new information arrives;
+- a later sellability refresh only when a real refresh trigger exists.
 
-Do not recreate completed B-tier preparation/live qualification, password work or generic fulfillment inquiry.
+Do not recreate completed B-tier preparation/live qualification, password work, generic fulfillment inquiry or the current-window 10-SKU fresh check.
 
 Do not leave the VEVOR project to take unrelated company work without routing.
 
@@ -333,7 +347,7 @@ VEVOR reaches repeatable CONTROLLED operating state when:
 
 Current RUN pickup:
 
-**ZERO ORDER CONFIRMED → PRESERVE 17/17 LIVE-QUALIFIED ACTIVE B-TIER → DO NOT RECREATE CLOSED PASSWORD/FULFILLMENT TASKS → FRESH-CHECK FIRST-SALE SHORTLIST → APPLY POSITIVE-CONTRIBUTION GATE → ROUTE TOP CLEAN PROMOTE ITEMS → WAIT FOR FIRST REAL ORDER WHILE CONTINUING OTHER SAFE VEVOR WORK**
+**PRESERVE LIVE CATALOG → DO NOT RECREATE CLOSED PASSWORD/FULFILLMENT/FRESH-CHECK TASKS → 3 ORDERABLE SKUS WAIT ON EXACT PRO ECONOMICS → 7 UNAVAILABLE SKUS STAY AT BACK OF REFRESH QUEUE → WHEN ECONOMICS ARRIVE, CALCULATE CONTRIBUTION + DISPOSITION PROMOTE/HOLD → ROUTE CLEAN PROMOTE ITEMS → FIRST REAL ORDER → REVERIFY + FULFILL + RECORD ACTUALS**
 
 ## Return
 

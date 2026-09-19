@@ -14,12 +14,13 @@ assert.ok(shopStart >= 0 && shopEnd > shopStart, "shared SHOP_LINKS block must e
 const shopBlock = shell.slice(shopStart, shopEnd);
 
 for (const route of [
-  "/store",
-  "/rv-store",
-  "/lithium-batteries",
-  "/sok-batteries",
+  "https://shop.elevationupscales.com/collections/all",
+  "https://shop.elevationupscales.com/collections/complete-power-systems",
+  "https://shop.elevationupscales.com/collections/sok-battery",
+  "https://shop.elevationupscales.com/collections/renogy",
+  "https://shop.elevationupscales.com/collections/sungoldpower",
 ]) {
-  assert.ok(shopBlock.includes(`\"${route}\"`), `shared Shop menu missing ${route}`);
+  assert.ok(shopBlock.includes(`"${route}"`), `shared Shop menu missing ${route}`);
 }
 
 assert.equal(shopBlock.includes('"/marketplace"'), false, "retired Marketplace must not be owned by the active Shop menu");
@@ -31,20 +32,20 @@ assert.ok(shell.includes('<summary class="eus-nav-trigger">Projects'), "shared s
 assert.ok(shell.includes('<summary class="eus-nav-trigger">Services'), "shared shell must expose the grouped Services menu");
 assert.ok(shell.includes('<summary class="eus-nav-trigger">Company'), "shared shell must expose the grouped Company menu");
 
-// Retail-first homepage contract: shopping and logistics lead; Marketplace is retired.
+// Main-site contract: Shopify owns product shopping; projects, planning and logistics stay on ElevationUpScales.com.
 for (const route of [
-  "/lithium-batteries",
-  "/sok-batteries",
-  "/rv-store",
+  "https://shop.elevationupscales.com/collections/all",
+  "https://shop.elevationupscales.com/collections/complete-power-systems",
+  "https://shop.elevationupscales.com/collections/sok-battery",
   "/solar-project",
   "/hawaii-lithium-batteries",
 ]) {
-  assert.ok(home.includes(`href=\"${route}\"`) || home.includes(`href=\"${route}?`), `retail homepage missing ${route}`);
+  assert.ok(home.includes(`href="${route}"`) || home.includes(`href="${route}?`), `homepage missing ${route}`);
 }
 assert.ok(home.includes('href="#logistics"') || home.includes('href="/shipping-logistics-services"'), "homepage must expose Freight & Logistics from primary retail navigation");
 assert.ok(home.includes("retail-shop-menu") || /reference-nav-menu[^>]*><summary[^>]*>Shop/.test(home), "homepage must use the retail-first Shop menu");
 assert.ok(home.includes("retail-more-menu") || home.includes("reference-nav-menu--company"), "homepage must retain a quieter company/menu layer for non-shopping destinations");
-assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain available as a secondary support path");
+assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain the main-site project path");
 
 // Service-page source retains semantic ownership while the shared runtime supplies one public shell.
 assert.ok(solarServices.includes("eus-menu--services"), "full service navigation must retain Services ownership");
@@ -62,7 +63,7 @@ const redirects = fs.readFileSync("site/_redirects", "utf8");
 assert.ok(redirects.includes("/solar-services.html /solar-services 301"), "canonical Solar Services redirect must remain intact");
 assert.ok(redirects.includes("/marketplace /store 301"), "retired Marketplace must redirect to the active Store");
 assert.ok(redirects.includes("/make-a-listing /store 301"), "retired seller intake must redirect to the active Store");
-assert.ok(redirects.includes("/report-an-issue /store 301"), "retired Marketplace issue report must redirect to the active Store");
+assert.ok(redirects.includes("/report-an-issue /other-ways-we-can-help 301"), "retired Marketplace issue report must redirect to the active help/contact surface");
 assert.ok(redirects.includes("/list-an-rv /rv-store 301"), "retired RV seller intake must redirect to the RV Store");
 
 // Release C: retired public routes stay out of discovery while server redirects remain authoritative.

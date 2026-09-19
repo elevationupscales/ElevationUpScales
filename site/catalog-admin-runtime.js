@@ -2,7 +2,7 @@ import { getPromotionConfig, pricingForProduct } from "./promotion-runtime.js";
 const DEFAULT_ADMIN_EMAIL = "elevationupscales@gmail.com";
 const PUBLISH_STATES = new Set(["draft", "published", "paused", "archived", "hold"]);
 const SHIPPING_STATES = new Set(["unverified", "verified", "quote_required", "hold"]);
-const SOURCES = new Set(["doba", "ebay", "tiktok", "fourthwall", "sok", "kingboss", "printful", "spreadconnect", "self-stock", "other"]);
+const SOURCES = new Set(["doba", "ebay", "tiktok", "fourthwall", "sok", "kingboss", "renogy", "printful", "spreadconnect", "self-stock", "other"]);
 const FULFILLMENT = new Set(["tracked", "supplier_managed", "dropship", "pod"]);
 const STORE_SECTIONS = new Set(["rv-outdoor", "lithium-batteries", "apparel", "other"]);
 const JSON_HEADERS = Object.freeze({"Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer"});
@@ -128,8 +128,8 @@ function baseStatus(publishStatus) { return publishStatus === "published" ? "act
 function normalizeSource(value) { const source = clean(value, 30).toLowerCase(); return SOURCES.has(source) ? source : "other"; }
 function baseSupplier(source, value) {
   const supplied = clean(value, 30).toLowerCase();
-  if (["doba","fourthwall","sok","kingboss","printful","spreadconnect","self-stock","other"].includes(supplied)) return supplied;
-  if (["doba","fourthwall","sok","kingboss","printful","spreadconnect","self-stock"].includes(source)) return source;
+  if (["doba","fourthwall","sok","kingboss","renogy","printful","spreadconnect","self-stock","other"].includes(supplied)) return supplied;
+  if (["doba","fourthwall","sok","kingboss","renogy","printful","spreadconnect","self-stock"].includes(source)) return source;
   return "other";
 }
 function normalizeRecord(raw = {}, sourceHint = "other") {

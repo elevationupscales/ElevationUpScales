@@ -1,0 +1,140 @@
+name: Web V2 Live Domain Cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/web-v2-live-cutover.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-v2-live-domain-cutover
+  cancel-in-progress: false
+
+env:
+  WORKER_NAME: elevation-web-v2
+  VERSION_ID: fc2e5d28-0fcb-4763-8cf1-d17f69301368
+  LIVE_ORIGIN: https://elevationupscales.com
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    environment: web-v2-release
+    steps:
+      - name: Validate cutover credentials
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$VERSION_ID"
+
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned release toolchain
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Verify target Worker version exists
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions view "$VERSION_ID" \
+            --config apps/web-v2/wrangler.jsonc --json > /tmp/web-v2-version.json
+          jq -e --arg id "$VERSION_ID" '(.id // .version_id // .uuid) == $id' /tmp/web-v2-version.json >/dev/null || \
+            grep -q "$VERSION_ID" /tmp/web-v2-version.json
+
+      - name: Ensure exact target version is deployed at 100 percent
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler versions deploy \
+            "$VERSION_ID@100" \
+            --config apps/web-v2/wrangler.jsonc \
+            --message "live-domain-cutover version_id=$VERSION_ID" \
+            --yes
+
+      - name: Attach probe-only production route first
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler triggers deploy \
+            --config apps/web-v2/wrangler.jsonc \
+            --routes "elevationupscales.com/__version*"
+
+      - name: Prove Worker reaches the real production zone
+        run: |
+          set -euo pipefail
+          ACTUAL=""
+          for attempt in 1 2 3 4 5 6; do
+            ACTUAL="$(curl -fsSL "$LIVE_ORIGIN/__version" | jq -r '.id // empty' || true)"
+            [ "$ACTUAL" = "$VERSION_ID" ] && break
+            sleep 3
+          done
+          echo "live version probe: $ACTUAL"
+          test "$ACTUAL" = "$VERSION_ID"
+
+      - name: Cut full production domain to Web V2
+        run: |
+          set -euo pipefail
+          npx --prefix apps/web-v2 --no-install wrangler triggers deploy \
+            --config apps/web-v2/wrangler.jsonc \
+            --routes "elevationupscales.com/*"
+
+      - name: Verify live store and checkout on real domain
+        run: |
+          set -euo pipefail
+          ACTUAL=""
+          for attempt in 1 2 3 4 5 6; do
+            ACTUAL="$(curl -fsSL "$LIVE_ORIGIN/__version" | jq -r '.id // empty' || true)"
+            [ "$ACTUAL" = "$VERSION_ID" ] && break
+            sleep 3
+          done
+          test "$ACTUAL" = "$VERSION_ID"
+          curl -fsSL --retry 2 -o /tmp/home.html "$LIVE_ORIGIN/"
+          curl -fsSL --retry 2 -o /tmp/store.html "$LIVE_ORIGIN/store"
+          curl -fsSL --retry 2 -o /tmp/checkout.html "$LIVE_ORIGIN/checkout"
+          curl -fsSL --retry 2 -o /tmp/sok.html "$LIVE_ORIGIN/shop/sok"
+          grep -q '<h1>Checkout</h1>' /tmp/checkout.html
+          grep -q 'SOK' /tmp/sok.html
+
+      - name: Verify live SOK checkout resolver
+        run: |
+          set -euo pipefail
+          HTTP="$(curl -sS -o /tmp/resolve.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            --data '{"items":[{"productId":"sok-sk12v100pc","quantity":1}],"destination":{"country":"US","state":"TX","postalCode":"78701"}}' \
+            "$LIVE_ORIGIN/api/checkout/resolve")"
+          cat /tmp/resolve.json
+          test "$HTTP" = "200"
+          jq -e '.checkoutReady == true' /tmp/resolve.json >/dev/null
+          jq -e '.lines[0].sku == "SK12V100PC"' /tmp/resolve.json >/dev/null
+          jq -e '.lines[0].unitPrice.amount == 319' /tmp/resolve.json >/dev/null
+
+      - name: Live cutover receipt
+        run: |
+          {
+            echo '### Web V2 LIVE CUTOVER PASS'
+            echo "Production origin: $LIVE_ORIGIN"
+            echo "Cloudflare Version ID: $VERSION_ID"
+            echo 'Production route: elevationupscales.com/*'
+            echo 'Store: PASS'
+            echo 'Checkout page: PASS'
+            echo 'SOK checkout resolver: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Restore Legacy customer routing if cutover verification fails
+        if: failure()
+        run: |
+          set +e
+          echo 'Cutover verification failed. Restoring customer traffic to Legacy; retaining only a harmless Worker version probe route.'
+          npx --prefix apps/web-v2 --no-install wrangler triggers deploy \
+            --config apps/web-v2/wrangler.jsonc \
+            --routes "elevationupscales.com/__version*"

@@ -1,0 +1,68 @@
+name: Live Checkout Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/live-checkout-proof.yml'
+
+permissions:
+  contents: read
+
+env:
+  LIVE_ORIGIN: https://elevationupscales.com
+  EXPECTED_VERSION_ID: fc2e5d28-0fcb-4763-8cf1-d17f69301368
+
+jobs:
+  prove-live-checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prove live Worker version
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 2 "$LIVE_ORIGIN/__version" -o /tmp/version.json
+          cat /tmp/version.json
+          ACTUAL="$(jq -r '.id // empty' /tmp/version.json)"
+          test "$ACTUAL" = "$EXPECTED_VERSION_ID"
+
+      - name: Prove live checkout is Web V2
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 2 "$LIVE_ORIGIN/checkout" -o /tmp/checkout.html
+          grep -q '<h1>Checkout</h1>' /tmp/checkout.html
+          grep -q '/assets/checkout.js' /tmp/checkout.html
+          grep -q 'Contact & delivery' /tmp/checkout.html
+          if grep -q 'Loading checkout' /tmp/checkout.html; then
+            echo 'Legacy checkout marker still present' >&2
+            exit 1
+          fi
+
+      - name: Prove live SOK checkout resolver
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -X POST "$LIVE_ORIGIN/api/checkout/resolve" \
+            -H 'Content-Type: application/json' \
+            --data '{"items":[{"productId":"sok-sk12v100pc","quantity":1}],"destination":{"country":"US","state":"TX","postalCode":"78701"}}' \
+            -o /tmp/resolve.json
+          cat /tmp/resolve.json
+          jq -e '.checkoutReady == true' /tmp/resolve.json >/dev/null
+          jq -e '.lines[0].sku == "SK12V100PC"' /tmp/resolve.json >/dev/null
+
+      - name: Prove live PayPal order creation without capture
+        run: |
+          set -euo pipefail
+          IDEMPOTENCY="live-proof-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          jq -n \
+            --arg key "$IDEMPOTENCY" \
+            '{items:[{productId:"sok-sk12v100pc",quantity:1}],customer:{email:"checkout-proof@elevationupscales.com",phone:"2088134998"},shipping:{fullName:"Elevation Checkout Proof",address1:"100 Congress Ave",address2:"",city:"Austin",state:"TX",postalCode:"78701",countryCode:"US"},idempotencyKey:$key}' \
+            > /tmp/order-request.json
+          STATUS="$(curl -sS --retry 2 -o /tmp/order.json -w '%{http_code}' -X POST "$LIVE_ORIGIN/api/order/create" \
+            -H 'Content-Type: application/json' \
+            -H 'Origin: https://elevationupscales.com' \
+            --data-binary @/tmp/order-request.json)"
+          echo "HTTP $STATUS"
+          cat /tmp/order.json
+          test "$STATUS" = "201"
+          jq -e '.providerOrderId | type == "string" and length > 0' /tmp/order.json >/dev/null
+          jq -e '.approveUrl | type == "string" and contains("paypal.com")' /tmp/order.json >/dev/null
+          echo 'LIVE_CHECKOUT_PROOF_PASS_NO_CAPTURE'

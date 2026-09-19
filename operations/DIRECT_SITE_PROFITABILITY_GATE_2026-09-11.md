@@ -1,9 +1,10 @@
 # Elevation UpScales — Direct-Site Profitability Gate
 
 **Status:** ACTIVE / OWNER-DIRECTED REVENUE CONTROL  
-**Effective:** 2026-09-11  
+**Effective:** 2026-09-11; owner paid-acquisition override reconciled 2026-09-12  
 **Owner:** Casey Young  
-**Applies To:** Elevation direct-site / Shopify / PayPal product promotion, pricing, first-sale acceleration, vendor catalog activation and order economics
+**Applies To:** Elevation direct-site / Shopify / PayPal product promotion, pricing, first-sale acceleration, vendor catalog activation and order economics  
+**Owner Paid-Acquisition Control:** `OWNER_DIRECTIVE_NO_PAID_ADS_UNTIL_CAPITAL_RECOVERY_2026-09-12.md`
 
 ## Owner rule
 
@@ -14,6 +15,19 @@ Elevation is not pursuing sales for sales-volume alone.
 A product is not a preferred promotion candidate merely because it is inexpensive, likely to convert, currently published, or capable of reaching checkout.
 
 The current startup objective is the **first profitable Elevation direct-site order**, followed by repeatable profitable orders.
+
+## Paid-acquisition override
+
+**PAID ACQUISITION IS CURRENTLY BLOCKED COMPANY-WIDE.**
+
+No product-level margin, conversion estimate or campaign model may authorize paid social, boosted posts, PPC, sponsored marketplace traffic, paid retargeting or other prepaid media while the owner capital-recovery rule is active.
+
+The gate reopens only after BOTH are true:
+
+1. the verified capital-recovery hole is closed; and
+2. Casey explicitly reopens paid acquisition.
+
+Until then, use organic / owned / SEO / direct / free marketplace traffic and performance-based affiliate activity only where the resulting order remains positive-contribution and no prohibited upfront media spend is created.
 
 ## Profitability gate
 
@@ -34,7 +48,7 @@ Use this working calculation:
 
 Sales tax collected for remittance is not treated as product revenue or profit.
 
-If paid advertising is used for a campaign, attributable customer-acquisition spend must also be considered when judging whether the campaign is actually profitable. The current first-sale plan should prefer free/owned traffic unless paid acquisition is separately approved and economics are known.
+Paid-ad cost is not part of current execution because paid acquisition is owner-blocked. If Casey later reopens paid acquisition after capital recovery, attributable acquisition spend must then be included in the campaign contribution model before any paid scale decision.
 
 ## Default decision states
 
@@ -49,14 +63,18 @@ Use only when:
 - fulfillment path is executable;
 - checkout path is working.
 
+During the owner capital-recovery restriction, `PROMOTE` means **organic / owned / otherwise no-prohibited-upfront-spend promotion only**. It does not authorize paid advertising.
+
 ### `HOLD — ECONOMICS UNKNOWN`
 Use when a material current cost is unknown, including supplier cost, freight, transaction treatment or another order-specific variable cost that could make the sale unprofitable.
+
+An ACTIVE storefront listing may still carry this promotion state when checkout preservation is intentionally allowed by a newer owning-lane control. In that case, do not assign concentrated traffic until economics clear; protect any real customer order and perform the required live source/economics check before supplier purchase.
 
 ### `HOLD — NEGATIVE CONTRIBUTION`
 Use when current expected order contribution is $0 or below.
 
 ### `OWNER REVIEW — STRATEGIC EXCEPTION`
-A deliberate loss leader, customer-acquisition subsidy, bundle subsidy, launch promotion or other below-normal-margin strategy requires Casey's explicit approval. Automation and vendor workers may not create or normalize loss-making sales on their own.
+A deliberate loss leader, customer-acquisition subsidy, bundle subsidy, launch promotion or other below-normal-margin strategy requires Casey's explicit approval. This state does **not** override the separate no-paid-ads owner rule unless Casey also explicitly reopens paid acquisition after capital recovery.
 
 ## Ranking rule
 
@@ -107,7 +125,7 @@ Vendor-specific MAP, channel, shipping, warranty and fulfillment rules remain co
 
 The startup revenue sequence is now:
 
-**WORKING BUY PATH → EXACT SKU / SOURCE → LIVE SELLABILITY → CURRENT PRICE / MAP → CURRENT COSTS → POSITIVE CONTRIBUTION → PROMOTE → CUSTOMER ORDER → REVERIFY → FULFILL → RECORD ACTUAL PROFITABILITY → SCALE WINNERS.**
+**WORKING BUY PATH → EXACT SKU / SOURCE → LIVE SELLABILITY → CURRENT PRICE / MAP → CURRENT COSTS → POSITIVE CONTRIBUTION → ORGANIC/OWNED PROMOTION → CUSTOMER ORDER → REVERIFY → FULFILL → RECORD ACTUAL PROFITABILITY → SCALE WINNERS WITHIN OWNER CASH CONTROLS.**
 
 The close condition is not merely “an order exists.”
 
@@ -115,4 +133,4 @@ The commercial goal is a verified direct-site order that demonstrates an executa
 
 ## Control phrase
 
-**DON'T CHASE REVENUE THAT LOSES MONEY → VERIFY CONTRIBUTION → PROMOTE PROFITABLE PRODUCTS → RECORD ACTUALS → SCALE WHAT WORKS.**
+**DON'T CHASE REVENUE THAT LOSES MONEY → VERIFY CONTRIBUTION → ORGANIC/OWNED PROMOTE PROFITABLE PRODUCTS → NO PAID ADS UNTIL OWNER REOPENS AFTER RECOVERY → RECORD ACTUALS → SCALE WHAT WORKS.**

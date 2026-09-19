@@ -31,9 +31,5 @@
     "/sok-full-line-runtime.js",
     "/sok-full-line-data.js"
   ],
-  "exclude": [
-    "/api/store-catalog",
-    "/api/store/catalog",
-    "/api/store/featured"
-  ]
+  "exclude": []
 }

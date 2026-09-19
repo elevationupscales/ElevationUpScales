@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web V2 Homepage Fidelity QA</title></head>
+<body><pre id="status">Rendering exact Web V2 source…</pre>
+<script>
+(async()=>{
+  const base='https://raw.githubusercontent.com/elevationupscales/ElevationUpScales/a3ba36a38d32b7ae015621c854cd0db29539beaa/apps/web-v2/src/';
+  const files=['routes.js','styles.js','nav-styles.js','home-fidelity-styles.js','shell.js'];
+  const parts=[];
+  for(const file of files){
+    const response=await fetch(base+file,{cache:'no-store'});
+    if(!response.ok) throw new Error(file+': '+response.status);
+    parts.push(await response.text());
+  }
+  let code=parts.join('\n').replace(/^import .*;\s*$/gm,'').replace(/\bexport\s+/g,'');
+  code = '(()=>{'+code+'\nwindow.__qa={renderPublicPage,styles,navStyles,homeFidelityStyles};})()';
+  (0,eval)(code);
+  const routeInfo={path:'/',page:'home',title:'Elevation UpScales | Off-Grid Power • Supply • Logistics',description:'Elevation UpScales provides off-grid power, supply and logistics support for RV, solar, backup power, commercial systems and harder-to-serve markets.'};
+  let html=window.__qa.renderPublicPage(routeInfo);
+  html=html.replace('<link rel="stylesheet" href="/assets/app.css">','<style>'+window.__qa.styles+'\n'+window.__qa.navStyles+'\n'+window.__qa.homeFidelityStyles+'</style>');
+  html=html.replace('<script defer src="/assets/app.js"><' + '/script>','');
+  document.open();document.write(html);document.close();
+})().catch(error=>{document.body.innerHTML='<pre style="white-space:pre-wrap;color:#f66;background:#111;padding:20px">'+String(error.stack||error)+'</pre>'});
+</script>
+</body>
+</html>

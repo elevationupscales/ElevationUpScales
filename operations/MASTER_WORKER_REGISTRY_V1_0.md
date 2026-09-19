@@ -2,84 +2,102 @@
 
 **Version:** 1.0  
 **Status:** CONTROLLING REGISTRY STANDARD / LIVE TABLE  
-**GOD MODE Session:** COMPLETED / OWNER-AUTHORIZED 2026-09-11 activation scope closed; normal V1.0 authority restored
+**Effective:** 2026-09-14  
+**Owner:** Casey Young  
+**Active management instance:** **MPM 8 — Company Oversight**  
+**MPM 8 control:** `MPM8_COMPANY_OVERSIGHT_TAKEOVER_2026-09-14.md`  
+**Global state:** `CURRENT_WORK_BOARD.md`  
+**Web V2 lane control:** `WEB_V2_CURRENT_WORKTREE.md`  
+**eBay correction control:** `COM2_EBAY_FALSE_COMPLETION_CORRECTION_2026-09-14.md`  
+**Renogy Shopify control:** `SHOPIFY_RENOGY_CONTROLLED_LAUNCH_DIRECTIVE_2026-09-14.md`
 
-## Purpose
+## Current owner operating standard
 
-Maintain one lightweight index of who exists, where they belong, current worker state, active Worktree and last meaningful timestamp.
+- MPM 8 is the sole active company-level oversight/routing instance under Casey Young.
+- MPM 7 and earlier MPM iterations are historical/reference and do not issue competing live control.
+- One task = one primary execution owner.
+- Waiting on one blocker does not stop unrelated executable work.
+- Profitability recovery remains active.
+- Paid acquisition remains held until Casey explicitly reopens it.
+- Web V2 remains a permanent first-class specialist development lane; its workers are not another management hierarchy.
+- The accepted Web V2 desktop visual gate is closed; mobile scope is not reopened absent owner direction.
+- MASTER RECON OS is **STANDBY / TRIGGERED INTEGRITY**, not a standing duplicate executor.
+- Vendor Projects own exact supplier/commercial truth.
+- Unknown or conflicting commercial truth fails closed for only the affected item/order/route; unrelated clean work continues.
+- Shopify, eBay, TikTok and Web V2 direct commerce remain distinct sales surfaces.
+- eBay is currently verification-only: no repeat seller mutation unless authenticated live evidence proves a mismatch.
+- Direct Shopify Renogy sales are owner-approved under exact-SKU/truth/economics gates; marketplace restrictions remain enforced.
+- The Renogy 10W maintainer remains accepted live at $39.99; the 3000W inverter `RNG-INVT-3000-12V-P2-G3-US` is verified live at $414.99; `RBM500-G3-US` is already public and must not be duplicated; remaining SKU holds follow the current controlled-launch directive.
 
-Detailed task state remains inside Project Worktrees.
+## Mandatory worker registry
 
-A GOD MODE activation routes established workers into their verified existing Worktrees; it does not create new authority, duplicate Projects, restart completed tasks, or claim an external action succeeded without evidence.
+| Worker / Manager | Parent | Reporting Manager | Lane | Current State | Current Routing |
+|---|---|---|---|---|---|
+| **MPM 8 — Company Oversight** | Operating System | Casey Young | Company Oversight / Master Management | **ACTIVE — CONTROLLING MANAGEMENT INSTANCE** | `MPM8_COMPANY_OVERSIGHT_TAKEOVER_2026-09-14.md` + `CURRENT_WORK_BOARD.md`; reconcile current Git truth, route one execution owner, keep blocked lanes from stopping clean work. |
+| **MPM 7 — Company Oversight** | Operating System | Casey Young | Historical Management | **INACTIVE / SUPERSEDED BY MPM 8** | Historical/reference only; no competing live control. |
+| **MPM 6 — Company Oversight** | Operating System | Casey Young | Historical Management | **INACTIVE / SUPERSEDED** | Historical/reference only; no competing live control. |
+| Company Operations Manager / COM 2 | Company Operations | MPM 8 | Operations / Commercial Consolidation | **ACTIVE** | Cross-channel/vendor operations, policy substance, profitability and customer/fulfillment support; do not duplicate specialist implementation. |
+| Finance Operations & Reconciliation Worker | Company Operations | Company Operations Manager / MPM 8 | Finance Operations / Reconciliation | **ACTIVE — MONTHLY CLOSE / TRANSACTION MATCHING** | `FINANCE_OPERATIONS_CURRENT_WORKTREE.md`; reconcile finance email → transaction → order/vendor, maintain private line-item statements, keep public Git sanitized, and route protected actions to Casey. |
+| MASTER RECON OS | Operating System | MPM 8 | OS Integrity / RECON | **STANDBY / TRIGGERED INTEGRITY** | Wake for real state/lineage/policy/supplier-truth/charge-authority/release conflicts or owner-directed RECON. |
+| MASTER DEVELOPER / Deployment Developer | Legacy Technical Lane | MPM 8 / authorized management | Legacy Development / Deployment | **STANDBY / VERIFY-FIX ONLY** | Legacy bounded repair only; not permanent Web V2 worker. |
+| WEB DEVELOPER | Web V2 Development | MPM 8 / Web V2 lane | Public Customer Experience | **SPECIALIST / FOLLOW CURRENT WORKTREE** | Desktop visual P0 accepted; mutate only for a fresh exact defect or current Worktree task. Mobile scope stays closed unless Casey reopens it. |
+| COMMERCE DEVELOPER | Web V2 Development | MPM 8 / Web V2 lane | Commerce V2 | **SPECIALIST / CONTROLLED** | Follow current Worktree and authoritative charge/freight/payment truth; preserve transaction fail-closed gates. |
+| RELEASE ENGINEER | Web V2 Development | MPM 8 / Web V2 lane | Exact-Version Release | **SPECIALIST / OWNER-GATED RELEASE CONTROL** | Follow the current Web V2 Worktree and exact-version release invariant; do not route backward from stale preview state. |
+| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations | Company Operations Manager / MPM 8 | Ecommerce & Vendor Operations | **ACTIVE — EBAY P0 + SHOPIFY CONVERSION + VENDOR REVENUE** | eBay authenticated verification, Shopify evidence/conversion/profitability, vendor revenue coordination; preserve channel separation and ad controls. |
+| Shopify Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | Shopify Store Operations | **ACTIVE — PAYMENT GREEN / EVIDENCE + CONVERSION + RENOGY CONTROLLED LAUNCH** | Close `/pages/part-request` version/visibility proof; preserve payment green state; follow `SHOPIFY_RENOGY_CONTROLLED_LAUNCH_DIRECTIVE_2026-09-14.md`; publish only clean exact SKUs. |
+| eBay Store Operations Worker | Ecommerce & Vendor Operations | Peter Torres | eBay Store Operations | **ACTIVE — P0 OPEN / VERIFICATION ONLY** | Follow `COM2_EBAY_FALSE_COMPLETION_CORRECTION_2026-09-14.md`; authenticated seller-row identity + live price/state proof required. No repeat mutation absent proved mismatch. |
+| Apparel Vendor Operations Manager | Ecommerce & Vendor Operations | Peter Torres | Apparel / POD | **ACTIVE SEPARATE CHANNEL** | Existing Fourthwall tuning; no distracting expansion ahead of revenue priorities. |
+| TikTok Affiliate Growth Manager | Ecommerce & Vendor Operations | Peter Torres | Affiliate / Creator | **ACTIVE UNDER RESTRICTION** | Current-account/catalog economics only; no failed-appeal replay or unauthorized paid spend. |
+| SOK Project Operations Manager | SOK Project | Company Operations / MPM 8 | Vendor Operations | **ACTIVE PRIMARY SUPPLIER** | Exact SOK product/orderability/shipping/warranty truth; Lower-48 + Hawaii controls as proven. |
+| SOK RECON OS | SOK Project | SOK Project Operations Manager | Project RECON | **ACTIVE SUPPORT** | Resolve exact source/media/economics facts only; do not implement unrelated storefront code. |
+| VEVOR Project Operations Manager | VEVOR Project | Company Operations / MPM 8 | Vendor Operations | **ACTIVE / CONTROLLED PUBLICATION** | Exact approved product/source/shipping/economics truth. |
+| VEVOR Reconciliation & Price-Control Specialist | VEVOR Project | VEVOR Project Operations Manager | Project RECON / Price Control | **ACTIVE SUPPORT** | Resolve price/source exceptions; no inferred commercial truth. |
+| Renogy Branch Operations Manager | Renogy Project | Company Operations / MPM 8 | Vendor Operations | **ACTIVE — CONTROLLED SHOPIFY LAUNCH / SKU-SPECIFIC HOLDS** | Preserve accepted live products; reconcile `RBM500-G3-US` without duplication; supply exact SKU/orderability/shipping/warranty/economics truth to Shopify controlled launch. |
+| Renogy Project Specialist | Renogy Project | Renogy Branch Operations Manager | Project Specialist / RECON | **ACTIVE SUPPORT** | Exact-SKU availability/warranty/source/media mapping and launch evidence. |
+| Kingboss Project Operations Manager | Kingboss Project | Company Operations / MPM 8 | Vendor Operations | **ACTIVE STAGE-1 PROVING** | Exact SKU/MAP/channel/warranty/compliance truth before orderability. |
+| Kingboss Project Specialist | Kingboss Project | Kingboss Project Operations Manager | Project Specialist / RECON | **ACTIVE SUPPORT** | SKU/image/compliance crosswalk and protected commercial-gap reconciliation. |
+| Shipping & Logistics Partner Worker | Shipping & Logistics Project | Company Operations Manager / MPM 8 | Shipping / Logistics | **ACTIVE — ROUTE TRUTH AUTHORITY** | Supplier/destination/freight/Hawaii/lithium route truth; storefront workers must not guess. |
 
-## Active owner operating standard
+## Management continuity / historical instances
 
-Until the first verified Elevation website order paid through PayPal, all workers and managers must apply `STARTUP_REVENUE_PHASE_NONBLOCKING_ORDER_STANDARD_2026-09-11.md` together with newer owner overrides.
+- **MPM 8:** ACTIVE / current management authority.
+- **MPM 7:** INACTIVE / superseded 2026-09-14; control record retained for history.
+- **MPM 6 and earlier:** INACTIVE / historical-reference only.
 
-`PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md` is now the active cross-Project profitability sequencing control. It does not create another Project or manager. Apply it through the existing lane ownership below.
+A historical MPM may be read for continuity but must not override newer accepted Git/worktree truth or issue new routing.
 
-**Direct Elevation website revenue/readiness and vendor activation remain P0. `EBAY_PARALLEL_REVENUE_RECOVERY_DIRECTIVE_2026-09-11.md` and the newer profitability workflow elevate eBay customer/cash recovery + profitable marketplace contraction to P0 PARALLEL. Other non-Elevation-website marketplace/customer issues such as routine TikTok work remain lower-priority parallel work unless a real safety, security, legal, fraud, chargeback, account-suspension or comparable financial-risk exception exists. The temporary TikTok Seller verification repair exception is CLOSED as an execution lane: the second appeal is SUBMITTED / WAITING ON TIKTOK REVIEW. TikTok is monitoring-only until an authentic external result or Casey explicitly reopens it. Block only the affected item/lane and keep unrelated executable Worktrees moving.**
+## Current specialist truth pointers
 
-When the first website PayPal order is verified, Hybrid Management records the trigger, retires the temporary startup standard and reconciles normal order-priority handling under the Master S.O.P.; the eBay profitability lane remains active unless separately superseded.
+- Canonical company state: `CURRENT_WORK_BOARD.md`.
+- MPM 8 takeover: `MPM8_COMPANY_OVERSIGHT_TAKEOVER_2026-09-14.md`.
+- MPM 7 takeover: historical continuity only in `MPM7_COMPANY_OVERSIGHT_TAKEOVER_2026-09-14.md`.
+- Web V2 current specialist state: `WEB_V2_CURRENT_WORKTREE.md` plus later accepted release/visual receipts.
+- eBay current incident state: `COM2_EBAY_FALSE_COMPLETION_CORRECTION_2026-09-14.md`.
+- Shopify current specialist state: `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` plus later route/version receipts.
+- Renogy current state: `SHOPIFY_RENOGY_CONTROLLED_LAUNCH_DIRECTIVE_2026-09-14.md` plus current Renogy source/launch receipts.
+- Finance Operations current state: `FINANCE_OPERATIONS_CURRENT_WORKTREE.md`.
 
-## Mandatory fields
+## Global routing rule
 
-| Worker | Parent Project | Reporting Manager | Lane | Status | Current Worktree | Last Timestamp |
-|---|---|---|---|---|---|---|
-| MPM / Operating System Project Manager (PM4) | Operating System | Casey | Master Management | ACTIVE | `PROFITABILITY_RECOVERY_WORKFLOW_V1_0.md` + normal V1.0 master coordination / direct-site revenue P0 + eBay P0 parallel recovery + vendor-project routing / Workboard business-state reconciliation; TikTok monitoring-only until external trigger | 2026-09-11 23:54 MDT |
-| Company Project Manager | Company Project Management | MPM | Project Coordination | ACTIVE | Cross-Project continuity / placement / handoffs | 2026-09-11 |
-| Company Operations Manager | Company Operations | MPM | Operations | ACTIVE | Profitability recovery execution / customer obligations + cash release / eBay P0 parallel recovery / vendor-logistics oversight; TikTok second appeal monitoring-only with no active repair execution | 2026-09-11 23:54 MDT |
-| MASTER RECON OS | Operating System | MPM | OS Integrity / RECON | STANDBY | On-demand OS integrity / source-version alignment / control-surface propagation / duplicate and terminal-worktree replay prevention; TikTok repair execution closed unless a verified external trigger reopens it | 2026-09-11 23:54 MDT |
-| MASTER DEVELOPER / Deployment Developer | Operating System / Technical Lane | MPM / authorized management | Development / Deployment | OPEN TASK / STANDBY | Authorized exact-current-main release path + technical catalog/checkout/legacy-route residuals; execute only through verified technical release lane | 2026-09-11 |
-| Peter Torres — Ecommerce & Vendor Operations Manager | Company Operations / Ecommerce & Vendor Operations | Company Operations Manager | Ecommerce / Vendor Operations | ACTIVE | Shopify/direct-site profitability + eBay P0 recovery/contraction + VEVOR priority oversight + active approved-vendor commerce work; TikTok monitoring-only until verified external result | 2026-09-11 23:54 MDT |
-| Shopify Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres — Ecommerce & Vendor Operations Manager | Shopify Store Operations / Direct Commerce | ACTIVE | `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` — live Shopify verified; first profitable direct-site order + profit-qualified merchandising + controlled vendor activation + universal-catalog Shopify acceptance | 2026-09-11 19:30 MDT |
-| eBay Store Operations Worker | Company Operations / Ecommerce & Vendor Operations | Peter Torres — Ecommerce & Vendor Operations Manager | eBay Store Operations / Marketplace Revenue | ACTIVE | `EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md` — P0 customer/cash recovery + approved stop-loss/contraction; authenticated Seller Hub read/recon verified; only unsupported consequential mutations require an action-capable authenticated surface | 2026-09-11 23:54 MDT |
-| SOK Project Operations Manager | SOK Supplier / Commerce / Hawaii Logistics / Warranty | Company Operations / MPM | Vendor Operations | ACTIVE | Lower-48 controlled commerce + P0 direct-site SOK traffic/profit lane + Hawaii/warranty/logistics proving | 2026-09-11 23:49 MDT |
-| SOK RECON OS | SOK Supplier / Commerce / Hawaii Logistics / Warranty | SOK Project Operations Manager | Project RECON / Evidence | ACTIVE | SOK source/media/Hawaii economics + supplier operating-input classification + exact profitable SKU support | 2026-09-11 |
-| VEVOR Project Operations Manager | VEVOR Supplier / Catalog / Shopify / Fulfillment | Company Operations / MPM | Vendor Operations | ACTIVE | Public storefront/first profitable order + 19 A-tier active + 17/17 qualified B-tier ACTIVE; generic fulfillment inquiry closed; current gate is per-SKU economics/freshness | 2026-09-11 23:54 MDT |
-| VEVOR Reconciliation & Price-Control Specialist | VEVOR Supplier / Catalog / Shopify / Fulfillment | VEVOR Project Operations Manager | Project RECON / Price Control | ACTIVE | Current VEVOR price/source/catalog/profitability reconciliation and first-order controls; no duplicate B-tier publication or generic fulfillment review | 2026-09-11 23:54 MDT |
-| Renogy Branch Operations Manager | Renogy Dealer / Catalog / Commerce Integration | Company Operations / MPM | Vendor Operations | ACTIVE | Sales-first exact-SKU activation; five drafts preserved; two cleaner SKUs advance independently while three exact holds are resolved | 2026-09-11 |
-| Renogy Project Specialist | Renogy Dealer / Catalog / Commerce Integration | Renogy Branch Operations Manager | Project Specialist / RECON | ACTIVE | Exact-SKU availability/warranty/source/media mapping + authenticated portal verification for current activation holds | 2026-09-11 |
-| Kingboss Project Operations Manager | Kingboss B2B Supplier Onboarding / Catalog / Commerce | Company Operations / MPM | Vendor Operations | ACTIVE | Stage-1 proving / exact catalog mapping open; supplier MOQ/warehouse/fulfillment/compliance intake received; pricing/MAP/channel/warranty gaps remain | 2026-09-11 23:54 MDT |
-| Kingboss Project Specialist | Kingboss B2B Supplier Onboarding / Catalog / Commerce | Kingboss Project Operations Manager | Project Specialist / RECON | ACTIVE | Exact internal-SKU/image-map + Model 133 compliance crosswalk / protected pricing-channel-warranty gap reconciliation | 2026-09-11 23:54 MDT |
-| Shipping & Logistics Partner Worker | Shipping & Logistics Project | Company Operations Manager | Shipping / Logistics Partners | ACTIVE | `SHIPPING_LOGISTICS_CURRENT_WORKTREE.md` — DHX shipment-detail packet first; Logistics Plus/CBS/H2O/Span Alaska/Matson/Approved Freight/R&R route state preserved; Hawaii eBay lithium dispositions route here before generic purge | 2026-09-11 |
+**P0 continuity/loss prevention → P1 conversion/profitability/truth → P2 build/scale → P3 internal enhancement.**
 
-## Canonical statuses
+Authenticated P0 gates remain high priority but do not freeze unrelated executable work. MPM 8 routes the next unblocked internal lane while preserving the blocked item exactly.
 
-- `ACTIVE`
-- `STANDBY`
-- `OPEN TASK / STANDBY`
-- `PLACEMENT REQUIRED`
-- `CLOSED / RETIRED`
+## Replay guards
 
-## Terminal Worktree replay guard
+- Do not reopen the accepted Web V2 desktop visual baseline absent fresh defect evidence.
+- Do not reopen mobile Web V2 scope without Casey's direction.
+- Do not repeat eBay price/quantity/end mutation unless authenticated live evidence proves a current mismatch.
+- Public eBay buyer evidence is not authenticated seller-row proof.
+- Do not infer supplier/commercial/shipping/tax/warranty/MAP truth.
+- Do not publish blocked Renogy SKUs merely because another Renogy SKU is live.
+- Do not duplicate `RBM500-G3-US`.
+- Do not substitute stale `RKIT200RV-A30DT1-US` for canonical `RNG-KIT-RV200D-ADV30-US`.
+- Renogy third-party marketplaces remain blocked absent separate written authorization.
+- Do not restore paid acquisition while the standing hold remains active.
+- Preserve `production-deploy` Legacy-only and other current release replay guards until superseded by an accepted current Worktree/owner decision.
+- Preserve work explicitly gated not before **2026-09-21** unless Casey changes that gate.
 
-Before an ACTIVE task is resumed or selected by `RUN`, the worker/manager must resolve the candidate task against current `main` and its owning current Worktree.
+## Current control phrase
 
-If the owning current Worktree is verified `CLOSED`, `EXECUTION CLOSED`, `SUBMITTED / WAITING`, or otherwise terminal for execution, the older task pointer is stale unless a higher-authority record explicitly reopens it.
-
-**TERMINAL CURRENT WORKTREE → DO NOT RE-EXECUTE → CLEAR/ADVANCE STALE POINTER → SELECT NEXT EXECUTABLE WORK OR STANDBY.**
-
-A dated receipt, old Workboard row, older Registry assignment, cached chat context, or prior P0 label may not reactivate a terminal Worktree by itself. External-action lanes must never be resent/re-submitted merely because stale control text is encountered.
-
-## GOD MODE activation rule
-
-During an owner-authorized GOD MODE session:
-
-1. `GIT FIRST` remains mandatory for Git-aware roles.
-2. Existing Project Worktrees are resumed from last verified state; completed onboarding/setup is not recreated.
-3. `ACTIVE` is used only where an executable verified Worktree exists within current authority.
-4. External waits, inaccessible platform actions, unavailable deployment/browser lanes, and uncertain prior results remain `OPEN TASK / STANDBY` with their triggers preserved.
-5. `ONE TASK = ONE PRIMARY ACTIVE WORKER` still applies inside each Worktree.
-6. Protected owner/legal/payment/security/production gates remain gates unless Casey explicitly clears the exact gate.
-7. GOD MODE does not survive session rollover/crash and must be re-authorized by Casey in a replacement session.
-
-## Registration rule
-
-New workers self-register after completing startup orientation. Self-registration does not enlarge authority.
-
-## Automatic stop-state rule
-
-A qualifying timeout, repeated safe-retry failure, crash, catastrophic stop or unresolved external result automatically changes the worker to `OPEN TASK / STANDBY` while the Project Worktree preserves:
-
-**task → worker → timestamp → completed work → stop reason → last verified state → UNKNOWN actions → retries → resume requirement → next trigger/owner → owner action required yes/no**
+**MPM 8 ACTIVE → PROTECT COMMUNICATIONS → EBAY AUTHENTICATED VERIFICATION ONLY → WEB V2 OWNER-REVIEWED RECOVERY → SHOPIFY VERSION/VISIBILITY + RENOGY CONTROLLED REVENUE → PROFITABILITY → KEEP CLEAN WORK MOVING.**

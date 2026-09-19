@@ -1,0 +1,201 @@
+name: Store Pages Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact current main SHA containing the approved store release
+        required: true
+        type: string
+      confirmation:
+        description: Type DEPLOY STORE to authorize this production Pages release (case-insensitive)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: elevation-store-pages-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_NAME: elevationupscales
+  LIVE_ORIGIN: https://elevationupscales.com
+  LOCKED_HOME_BLOB: 9957fd1f8c9a3892193466dffbdb75e871db80a2
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate explicit release request
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          CONFIRMATION_NORMALIZED="$(printf '%s' "$CONFIRMATION" | tr '[:lower:]' '[:upper:]' | xargs)"
+          test "$CONFIRMATION_NORMALIZED" = "DEPLOY STORE"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+
+      - name: Require exact current main
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/main:refs/remotes/origin/main --no-tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+
+      - name: HARD GATE — homepage source remains exactly locked
+        run: |
+          set -euo pipefail
+          ACTUAL="$(git hash-object site/index.html)"
+          echo "Homepage blob: $ACTUAL"
+          test "$ACTUAL" = "$LOCKED_HOME_BLOB"
+
+      - name: Snapshot current homepage semantics
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 2 "$LIVE_ORIGIN/" -o /tmp/home-before.html
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          src = Path('/tmp/home-before.html').read_text()
+          src = re.sub(r'(/cdn-cgi/l/email-protection#)[0-9a-fA-F]+', r'\1CFEMAIL', src)
+          src = re.sub(r'(data-cfemail=")[0-9a-fA-F]+(")', r'\1CFEMAIL\2', src)
+          Path('/tmp/home-before.normalized.html').write_text(src)
+          PY
+          sha256sum /tmp/home-before.normalized.html | tee /tmp/home-before.sha
+
+      - name: Validate commerce release surface
+        run: |
+          set -euo pipefail
+          node --check site/store-checkout.js
+          node --check site/store-checkout-server.js
+          node --check site/_worker.js
+          node --check site/sok-availability-runtime.js
+          node --check site/shipping-rules-runtime.js
+          node --check site/universal-store.js
+          node --check scripts/live-store-purchaseability.mjs
+          test -f site/checkout/index.html
+          test -f site/store.html
+          grep -q '/universal-store.js?v=1.0.1' site/store.html
+          grep -q '"/checkout"' site/_routes.json
+          grep -q '"/api/\*"' site/_routes.json
+          git diff --check
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-v2/package-lock.json
+
+      - name: Install pinned Cloudflare deployment tool
+        working-directory: apps/web-v2
+        run: npm ci --ignore-scripts
+
+      - name: Deploy approved site tree to existing Pages project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --prefix apps/web-v2 --no-install wrangler pages deploy site \
+            --project-name "$PROJECT_NAME" \
+            --branch main \
+            --commit-hash "$EXPECTED_SHA" \
+            2>&1 | tee /tmp/pages-deploy.txt
+
+      - name: Capture Cloudflare Pages deployment receipt
+        id: pages_receipt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          curl -fsS \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments" \
+            -o /tmp/pages-deployments.json
+          jq -e '.success == true' /tmp/pages-deployments.json >/dev/null
+          DEPLOYMENT="$(jq -c --arg sha "$EXPECTED_SHA" '[.result[] | select(.deployment_trigger.metadata.commit_hash == $sha)] | sort_by(.created_on) | reverse | .[0]' /tmp/pages-deployments.json)"
+          test "$DEPLOYMENT" != "null"
+          DEPLOYMENT_ID="$(jq -r '.id' <<<"$DEPLOYMENT")"
+          DEPLOYMENT_URL="$(jq -r '.url' <<<"$DEPLOYMENT")"
+          echo "deployment_id=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
+          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
+          echo "Cloudflare Pages deployment ID: $DEPLOYMENT_ID"
+          echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
+
+      - name: HARD GATE — homepage semantics remain unchanged
+        run: |
+          set -euo pipefail
+          BEFORE="$(cut -d' ' -f1 /tmp/home-before.sha)"
+          AFTER=""
+          for attempt in 1 2 3 4 5 6; do
+            curl -fsSL --retry 2 "$LIVE_ORIGIN/" -o /tmp/home-after.html
+            python3 - <<'PY'
+          import re
+          from pathlib import Path
+          src = Path('/tmp/home-after.html').read_text()
+          src = re.sub(r'(/cdn-cgi/l/email-protection#)[0-9a-fA-F]+', r'\1CFEMAIL', src)
+          src = re.sub(r'(data-cfemail=")[0-9a-fA-F]+(")', r'\1CFEMAIL\2', src)
+          Path('/tmp/home-after.normalized.html').write_text(src)
+          PY
+            AFTER="$(sha256sum /tmp/home-after.normalized.html | cut -d' ' -f1)"
+            [ "$AFTER" = "$BEFORE" ] && break
+            sleep 5
+          done
+          echo "Homepage normalized before: $BEFORE"
+          echo "Homepage normalized after:  $AFTER"
+          test "$AFTER" = "$BEFORE"
+
+      - name: Prove live store cache-bust and checkout configuration
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 "$LIVE_ORIGIN/store?release=$EXPECTED_SHA" -o /tmp/store.html
+          grep -q '/universal-store.js?v=1.0.1' /tmp/store.html
+          curl -fsSL --retry 5 "$LIVE_ORIGIN/universal-store.js?v=1.0.1" -o /tmp/universal-store.js
+          grep -q 'checkoutSource = p.sokProduct' /tmp/universal-store.js
+          curl -fsSL --retry 5 "$LIVE_ORIGIN/api/store-checkout/config" -o /tmp/config.json
+          jq -e '.configured == true and .checkoutEnabled == true and .liveCheckoutApproved == true and .environment == "live"' /tmp/config.json >/dev/null
+
+      - name: Catalog-wide live purchaseability audit
+        run: |
+          set -euo pipefail
+          LIVE_ORIGIN="$LIVE_ORIGIN" node scripts/live-store-purchaseability.mjs
+
+      - name: Release summary
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          DEPLOYMENT_ID: ${{ steps.pages_receipt.outputs.deployment_id }}
+          DEPLOYMENT_URL: ${{ steps.pages_receipt.outputs.deployment_url }}
+        run: |
+          {
+            echo '### STORE PAGES PRODUCTION RELEASE'
+            echo "Project: $PROJECT_NAME"
+            echo "Git SHA: $EXPECTED_SHA"
+            echo "Cloudflare Pages deployment ID: $DEPLOYMENT_ID"
+            echo "Cloudflare Pages deployment URL: $DEPLOYMENT_URL"
+            echo "Homepage source blob: $LOCKED_HOME_BLOB"
+            echo 'Homepage semantics: IDENTICAL'
+            echo 'Store cache-bust: PASS'
+            echo 'Nine verified SOK batteries: DIRECT CHECKOUT PASS'
+            echo 'Catalog-wide purchaseability: PASS'
+            echo 'PayPal live config: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"

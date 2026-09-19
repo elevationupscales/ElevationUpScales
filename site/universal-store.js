@@ -1,60 +1,229 @@
 (() => {
   "use strict";
-  const root=document.querySelector("[data-universal-store]"); if(!root)return;
-  const grid=root.querySelector("[data-universal-grid]"),status=root.querySelector("[data-universal-status]"),search=root.querySelector("[data-universal-search]"),sort=root.querySelector("[data-universal-sort]"),chips=[...root.querySelectorAll("[data-universal-department]")];
-  const brandFilter=String(document.body.dataset.storeBrand||"").trim().toLowerCase();
-  const params=new URLSearchParams(location.search),state={products:[],query:"",department:params.get("department")||"all",sort:"featured",quarantined:0};
-  const money=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
-  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const text=v=>String(v??"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
-  const ident=p=>[p.brand,p.manufacturer,p.supplier,p.vendor,p.title,p.name,p.sku].map(v=>text(v).toLowerCase()).join(" ");
-  const TRUSTED_MEDIA_HOSTS=["elevationupscales.com","cdn.shopify.com","image.doba.com","img.vevorstatic.com","image.vevor.com","vevor.com","renogy.com","sokbattery.com","fourthwall.com","fwcdn.pl"];
-  const BLOCKED_MEDIA_HOSTS=["walmartimages.com","walmart.com","lowes.com","alicdn.com","alibaba.com","utedusjer.no"];
-  const hostMatches=(host,suffix)=>host===suffix||host.endsWith(`.${suffix}`);
-  function mediaUrl(p){return text(p.primaryImage||p.image||(Array.isArray(p.images)&&p.images[0])||"");}
-  function trustedMedia(raw){
-    const value=text(raw); if(!value)return false;
-    if(value.startsWith("/"))return true;
-    try{
-      const url=new URL(value,location.origin),host=url.hostname.toLowerCase();
-      if(BLOCKED_MEDIA_HOSTS.some(x=>hostMatches(host,x)))return false;
-      if(host===location.hostname.toLowerCase())return true;
-      return TRUSTED_MEDIA_HOSTS.some(x=>hostMatches(host,x));
-    }catch{return false;}
+
+  const root = document.querySelector("[data-universal-store]");
+  if (!root) return;
+
+  const grid = root.querySelector("[data-universal-grid]");
+  const status = root.querySelector("[data-universal-status]");
+  const search = root.querySelector("[data-universal-search]");
+  const sort = root.querySelector("[data-universal-sort]");
+  const chips = [...root.querySelectorAll("[data-universal-department]")];
+  const brandFilter = String(document.body.dataset.storeBrand || "").trim().toLowerCase();
+  const params = new URLSearchParams(location.search);
+  const state = { products: [], query: "", department: params.get("department") || "all", sort: "featured" };
+  const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const text = (v) => String(v ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const ident = (p) => [p.brand, p.manufacturer, p.supplier, p.vendor, p.title, p.name, p.sku].map((v) => text(v).toLowerCase()).join(" ");
+
+  const TRUSTED_MEDIA_HOSTS = ["elevationupscales.com", "cdn.shopify.com", "image.doba.com", "img.vevorstatic.com", "image.vevor.com", "vevor.com", "renogy.com", "sokbattery.com", "fourthwall.com", "fwcdn.pl"];
+  const BLOCKED_MEDIA_HOSTS = ["walmartimages.com", "walmart.com", "lowes.com", "alicdn.com", "alibaba.com", "utedusjer.no"];
+  const hostMatches = (host, suffix) => host === suffix || host.endsWith(`.${suffix}`);
+
+  function mediaUrl(p) {
+    return text(p.primaryImage || p.image || (Array.isArray(p.images) && p.images[0]) || "");
   }
-  function brand(p){const all=ident(p),image=mediaUrl(p).toLowerCase();if(all.includes("kingboss"))return"Kingboss";if(all.includes("renogy")||image.includes("renogy"))return"Renogy";if(all.includes("vevor")||image.includes("vevor"))return"VEVOR";if(p.sokProduct||all.includes("sok battery")||/\bsok\b/.test(all))return"SOK";return text(p.brand||p.manufacturer||p.supplier||"Supplier");}
-  function compactTitle(p){let value=text(p.title||p.name||"Power product");if(/^vevor\b/i.test(value))value=`VEVOR ${value.replace(/\bVEVOR\b/gi,"").replace(/^\s*[-:|,]+\s*/,"").trim()}`;value=value.replace(/\s+/g," ").trim();if(value.length>112)value=`${value.slice(0,109).replace(/\s+\S*$/,"").trim()}…`;return value;}
-  function department(p){const raw=`${ident(p)} ${text(p.category).toLowerCase()} ${text(p.storeSection).toLowerCase()}`;if(/monitor|display|meter|controller|bms|shunt/.test(raw))return"monitoring-controls";if(/cable|connector|terminal|adapter|bracket|mount|wire|fuse/.test(raw))return"cables-accessories";if(/charger|charging|solar|panel|mppt|inverter|converter/.test(raw))return"solar-charging";if(/rv|camper|marine|van|travel|trailer|outdoor|camp/.test(raw)&&!/battery/.test(raw))return"rv-outdoor";if(/backup|ups|rack|server|storage/.test(raw))return"backup-power";if(/battery|lifepo4|lithium/.test(raw))return"lithium-batteries";return"outdoor-offgrid";}
-  function sale(p){const publish=text(p.publishStatus||p.publish_status).toLowerCase(),mode=text(p.availabilityMode||p.availabilityStatus||p.status||"available").toLowerCase(),source=text(p.sourceState||p.source_state||p.reviewState||"").toLowerCase(),shipping=text(p.shippingStatus||p.shipping_status||"").toLowerCase(),supplier=ident(p),raw=p.supplierStock??p.inventoryQty??p.inventory_qty??p.quantityOnHand,has=raw!==null&&raw!==undefined&&String(raw)!=="",stock=has?Number(raw):null,price=Number(p.priceCents||p.price_cents||0),eligible=p.paymentEligible!==false;
-    if(publish&&publish!=="published")return{code:"hold",label:"Confirm Availability",buy:false};
-    if(/stale|source missing|unknown|hold|review/.test(source))return{code:"hold",label:"Confirm Availability",buy:false};
-    if(/unavailable|out of stock|zero stock/.test(mode)||(has&&Number.isFinite(stock)&&stock<=0))return{code:"out",label:"Out of Stock",buy:false};
-    if(/prepurchase|preorder|backorder/.test(mode))return{code:"hold",label:p.commerceLabel||"Confirm Availability",buy:eligible&&price>0};
-    if(!price&&!p.sokProduct)return{code:"hold",label:"Confirm Availability",buy:false};
-    if(/doba/.test(supplier)){if(!has||!Number.isFinite(stock))return{code:"hold",label:"Confirm Availability",buy:false};if(shipping&&shipping!=="verified")return{code:"hold",label:shipping==="quote_required"?"Shipping Quote Required":"Confirm Availability",buy:false};return{code:"buy",label:"Supplier Stock Available",buy:price>0};}
-    if(p.sokProduct){if(!eligible)return{code:"hold",label:p.commerceLabel||"See Purchase Options",buy:false};return{code:"buy",label:p.commerceLabel||"Available",buy:price>0};}
-    if(shipping==="quote_required")return{code:"hold",label:"Shipping Quote Required",buy:false};
-    return{code:"buy",label:"Available",buy:price>0};
+
+  function trustedMedia(raw) {
+    const value = text(raw);
+    if (!value) return false;
+    if (value.startsWith("/")) return true;
+    try {
+      const url = new URL(value, location.origin);
+      const host = url.hostname.toLowerCase();
+      if (BLOCKED_MEDIA_HOSTS.some((x) => hostMatches(host, x))) return false;
+      if (host === location.hostname.toLowerCase()) return true;
+      return TRUSTED_MEDIA_HOSTS.some((x) => hostMatches(host, x));
+    } catch (_) {
+      return false;
+    }
   }
-  function publicProduct(p){
-    if(!p||!text(p.id||p.sku||p.title||p.name))return false;
-    const pub=text(p.publishStatus||p.publish_status).toLowerCase();
-    if(pub&&pub!=="published")return false;
-    if(!trustedMedia(mediaUrl(p)))return false;
-    if(!text(p.title||p.name))return false;
-    const price=Number(p.priceCents||p.price_cents||0);
-    if(price<=0&&!p.sokProduct)return false;
-    if(/\b(test|demo|sample|staging)\b/i.test(`${text(p.title)} ${text(p.name)} ${text(p.sku)}`))return false;
-    return !brandFilter||ident(p).includes(brandFilter);
+
+  function safeMedia(p) {
+    const raw = mediaUrl(p);
+    return trustedMedia(raw) ? raw : "/assets/logo.webp";
   }
-  const key=p=>text(p.id||p.sku||`${brand(p)}-${p.title||p.name}`).toLowerCase();
-  function merge(groups){const map=new Map();for(const rows of groups)for(const p of(Array.isArray(rows)?rows:[])){const k=key(p);if(!k)continue;map.set(k,map.has(k)?{...map.get(k),...p}:p);}const all=[...map.values()];const clean=all.filter(publicProduct);state.quarantined=all.length-clean.length;return clean;}
-  async function read(url){const r=await fetch(url,{headers:{Accept:"application/json"},cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(url);return d;}
-  async function load(){const r=await Promise.allSettled([read("/api/store/catalog?section=lithium-batteries"),read("/api/store-catalog?section=rv-outdoor"),read("/api/sok/catalog")]);const products=merge(r.map(x=>x.status==="fulfilled"?x.value.products:[]));if(!products.length)throw new Error("empty");return products;}
-  function action(p,s){const id=text(p.id||""),sku=text(p.sku||p.supplierSku||""),title=compactTitle(p),fallbackDetail=`/product?id=${encodeURIComponent(id||sku)}&store=universal`,providedDetail=text(p.detailUrl||""),detail=p.sokProduct&&providedDetail.startsWith("/sok/")?providedDetail:fallbackDetail,section=text(p.storeSection||p.store_section).toLowerCase(),checkoutSource=p.sokProduct||section==="lithium-batteries"?"lithium":"rv",purchase=text(p.purchaseUrl||"");if(s.buy){const href=p.sokProduct&&purchase?purchase:`/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id||sku)}&name=${encodeURIComponent(title)}`,label=p.sokProduct?text(p.commerceCta||"Buy Now"):(/prepurchase|preorder|backorder/i.test(String(p.availabilityMode||""))?"Purchase Options":"Buy Now");return{href,label,detail};}if(p.sokProduct)return{href:purchase||`/sok-order.html?sku=${encodeURIComponent(sku)}&intent=purchase_options`,label:text(p.commerceCta||"See Purchase Options"),detail};return{href:detail,label:s.code==="out"?"View Product":"Confirm Availability",detail};}
-  function card(p){const s=sale(p),a=action(p,s),title=compactTitle(p),supplier=brand(p),image=mediaUrl(p),desc=text(p.description).slice(0,180),price=Number(p.priceCents||p.price_cents||0),stock=p.supplierStock??p.inventoryQty??p.inventory_qty,inventory=p.sokProduct?"Availability is confirmed as part of your order.":(stock===null||stock===undefined?"Availability is confirmed before fulfillment.":"Supplier-managed inventory; final availability is confirmed at order time.");return`<article class="universal-product"><a class="universal-product__image" href="${esc(a.detail)}"><img src="${esc(image)}" alt="${esc(title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a><div class="universal-product__body"><div class="universal-product__meta">${esc(supplier)} · ${esc(department(p).replaceAll("-"," "))}</div><h3>${esc(title)}</h3>${desc?`<p class="universal-product__description">${esc(desc)}</p>`:""}<span class="universal-product__state is-${esc(s.code)}">${esc(s.label)}</span><p class="universal-product__description">${esc(inventory)}</p><div class="universal-product__footer"><strong class="universal-product__price">${price>0?money.format(price/100):"Purchase options"}</strong><div class="universal-product__actions"><a class="button button-outline" href="${esc(a.detail)}">Details</a><a class="button button-primary" href="${esc(a.href)}">${esc(a.label)}</a></div></div></div></article>`;}
-  function rows(){let out=state.products.filter(p=>state.department==="all"||department(p)===state.department),q=state.query.trim().toLowerCase();if(q)out=out.filter(p=>`${ident(p)} ${text(p.category).toLowerCase()}`.includes(q));if(state.sort==="price-low")out.sort((a,b)=>Number(a.priceCents||0)-Number(b.priceCents||0));else if(state.sort==="price-high")out.sort((a,b)=>Number(b.priceCents||0)-Number(a.priceCents||0));else if(state.sort==="name")out.sort((a,b)=>compactTitle(a).localeCompare(compactTitle(b)));else out.sort((a,b)=>Number(Boolean(b.sokProduct))-Number(Boolean(a.sokProduct))||compactTitle(a).localeCompare(compactTitle(b)));return out;}
-  function render(){const out=rows();grid.innerHTML=out.length?out.map(card).join(""):`<div class="universal-empty"><strong>No current products match this view.</strong><p>Try another department or clear the search. Listings with uncertain source, media, supplier or fulfillment presentation stay out of customer discovery until verified.</p></div>`;status.textContent=`${out.length} product${out.length===1?"":"s"} ready to browse${state.quarantined?` · ${state.quarantined} trust-review listing${state.quarantined===1?"":"s"} withheld`:""}`;chips.forEach(c=>c.classList.toggle("is-active",c.dataset.universalDepartment===state.department));}
-  chips.forEach(c=>c.addEventListener("click",()=>{state.department=c.dataset.universalDepartment||"all";params.set("department",state.department);history.replaceState(null,"",`${location.pathname}?${params.toString()}`);render();}));search?.addEventListener("input",()=>{state.query=search.value||"";render();});sort?.addEventListener("change",()=>{state.sort=sort.value||"featured";render();});
-  status.textContent="Loading current supplier-backed catalog…";load().then(p=>{state.products=p;render();}).catch(()=>{status.textContent="Catalog temporarily unavailable.";grid.innerHTML='<div class="universal-empty"><strong>Current catalog could not be loaded safely.</strong><p>No order is being offered from unverified fallback data. Try again shortly or contact Elevation for product availability.</p></div>';});
+
+  function brand(p) {
+    const all = ident(p);
+    const image = mediaUrl(p).toLowerCase();
+    if (all.includes("kingboss")) return "Kingboss";
+    if (all.includes("renogy") || image.includes("renogy")) return "Renogy";
+    if (all.includes("vevor") || image.includes("vevor")) return "VEVOR";
+    if (p.sokProduct || all.includes("sok battery") || /\bsok\b/.test(all)) return "SOK";
+    return text(p.brand || p.manufacturer || p.supplier || "Supplier");
+  }
+
+  function compactTitle(p) {
+    let value = text(p.title || p.name || "Power product");
+    if (/^vevor\b/i.test(value)) value = `VEVOR ${value.replace(/\bVEVOR\b/gi, "").replace(/^\s*[-:|,]+\s*/, "").trim()}`;
+    value = value.replace(/\s+/g, " ").trim();
+    if (value.length > 112) value = `${value.slice(0, 109).replace(/\s+\S*$/, "").trim()}…`;
+    return value;
+  }
+
+  function department(p) {
+    const raw = `${ident(p)} ${text(p.category).toLowerCase()} ${text(p.storeSection).toLowerCase()}`;
+    if (/monitor|display|meter|controller|bms|shunt/.test(raw)) return "monitoring-controls";
+    if (/cable|connector|terminal|adapter|bracket|mount|wire|fuse/.test(raw)) return "cables-accessories";
+    if (/charger|charging|solar|panel|mppt|inverter|converter/.test(raw)) return "solar-charging";
+    if (/rv|camper|marine|van|travel|trailer|outdoor|camp/.test(raw) && !/battery/.test(raw)) return "rv-outdoor";
+    if (/backup|ups|rack|server|storage/.test(raw)) return "backup-power";
+    if (/battery|lifepo4|lithium/.test(raw)) return "lithium-batteries";
+    return "outdoor-offgrid";
+  }
+
+  function sale(p) {
+    const publish = text(p.publishStatus || p.publish_status).toLowerCase();
+    const mode = text(p.availabilityMode || p.availabilityStatus || p.status || "available").toLowerCase();
+    const source = text(p.sourceState || p.source_state || p.reviewState || "").toLowerCase();
+    const shipping = text(p.shippingStatus || p.shipping_status || "").toLowerCase();
+    const supplier = ident(p);
+    const rawStock = p.supplierStock ?? p.inventoryQty ?? p.inventory_qty ?? p.quantityOnHand;
+    const hasStockValue = rawStock !== null && rawStock !== undefined && String(rawStock) !== "";
+    const stock = hasStockValue ? Number(rawStock) : null;
+    const price = Number(p.priceCents || p.price_cents || 0);
+    const eligible = p.paymentEligible !== false;
+
+    if (publish && publish !== "published") return { code: "hold", label: "Confirm Availability", buy: false };
+    if (/stale|source missing|unknown|hold|review/.test(source)) return { code: "hold", label: "Confirm Availability", buy: false };
+
+    // SOK verified batteries can remain orderable when supplier inventory is awaiting refresh;
+    // owner policy supports pre-purchase/backorder instead of silently disabling checkout.
+    if (!p.sokProduct && (/unavailable|out of stock|zero stock/.test(mode) || (hasStockValue && Number.isFinite(stock) && stock <= 0))) {
+      return { code: "out", label: "Out of Stock", buy: false };
+    }
+
+    if (/prepurchase|preorder|backorder/.test(mode) && !p.sokProduct) {
+      return { code: "hold", label: p.commerceLabel || "Confirm Availability", buy: eligible && price > 0 };
+    }
+
+    if (!price && !p.sokProduct) return { code: "hold", label: "Confirm Availability", buy: false };
+
+    if (/doba/.test(supplier)) {
+      if (!hasStockValue || !Number.isFinite(stock)) return { code: "hold", label: "Confirm Availability", buy: false };
+      if (shipping && shipping !== "verified") return { code: "hold", label: shipping === "quote_required" ? "Shipping Quote Required" : "Confirm Availability", buy: false };
+      return { code: "buy", label: "Available", buy: price > 0 };
+    }
+
+    if (p.sokProduct) {
+      if (!eligible || price <= 0) return { code: "hold", label: p.commerceLabel || "See Purchase Options", buy: false };
+      return { code: "buy", label: p.commerceLabel || "Available to Order", buy: true };
+    }
+
+    // Never advertise Buy Now when the catalog itself says shipping is unresolved.
+    if (shipping && shipping !== "verified") {
+      return { code: "hold", label: shipping === "quote_required" ? "Shipping Quote Required" : "Confirm Availability", buy: false };
+    }
+
+    return { code: "buy", label: "Available", buy: price > 0 };
+  }
+
+  function publicProduct(p) {
+    if (!p || !text(p.id || p.sku || p.title || p.name)) return false;
+    const pub = text(p.publishStatus || p.publish_status).toLowerCase();
+    if (pub && pub !== "published") return false;
+    if (!text(p.title || p.name)) return false;
+    const price = Number(p.priceCents || p.price_cents || 0);
+    if (price <= 0 && !p.sokProduct) return false;
+    if (/\b(test|demo|sample|staging)\b/i.test(`${text(p.title)} ${text(p.name)} ${text(p.sku)}`)) return false;
+    return !brandFilter || ident(p).includes(brandFilter);
+  }
+
+  const key = (p) => text(p.id || p.sku || `${brand(p)}-${p.title || p.name}`).toLowerCase();
+
+  function merge(groups) {
+    const map = new Map();
+    for (const rows of groups) {
+      for (const p of (Array.isArray(rows) ? rows : [])) {
+        const k = key(p);
+        if (!k) continue;
+        map.set(k, map.has(k) ? { ...map.get(k), ...p } : p);
+      }
+    }
+    return [...map.values()].filter(publicProduct);
+  }
+
+  async function read(url) {
+    const response = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !Array.isArray(data.products)) throw new Error(`${url} failed`);
+    return data;
+  }
+
+  async function load() {
+    // A partial catalog is a broken store, not a successful load. Fail visibly if any feed fails.
+    const feeds = await Promise.all([
+      read("/api/store/catalog?section=lithium-batteries"),
+      read("/api/store-catalog?section=rv-outdoor"),
+      read("/api/sok/catalog"),
+    ]);
+    const products = merge(feeds.map((feed) => feed.products));
+    if (!products.length) throw new Error("empty catalog");
+    return products;
+  }
+
+  function action(p, s) {
+    const id = text(p.id || "");
+    const sku = text(p.sku || p.supplierSku || "");
+    const title = compactTitle(p);
+    const detail = `/product?id=${encodeURIComponent(id || sku)}&store=universal`;
+    const section = text(p.storeSection || p.store_section).toLowerCase();
+    const checkoutSource = p.sokProduct || section === "lithium-batteries" ? "lithium" : "rv";
+    if (s.buy) return { href: `/checkout/?source=${checkoutSource}&id=${encodeURIComponent(id || sku)}&name=${encodeURIComponent(title)}`, label: "Buy Now", detail };
+    if (p.sokProduct) return { href: `/sok-order.html?sku=${encodeURIComponent(sku)}&intent=purchase_options`, label: "See Purchase Options", detail };
+    return { href: detail, label: s.code === "out" ? "View Product" : "Confirm Availability", detail };
+  }
+
+  function card(p) {
+    const s = sale(p);
+    const a = action(p, s);
+    const title = compactTitle(p);
+    const supplier = brand(p);
+    const image = safeMedia(p);
+    const desc = text(p.description).slice(0, 180);
+    const price = Number(p.priceCents || p.price_cents || 0);
+    const sku = text(p.sku || p.supplierSku || p.supplier_sku || p.id || "");
+    const stock = p.supplierStock ?? p.inventoryQty ?? p.inventory_qty;
+    const inventory = stock === null || stock === undefined ? "Check current availability before purchase." : "Ships from supplier inventory.";
+    const meta = [supplier, department(p).replaceAll("-", " "), sku ? `SKU ${sku}` : ""].filter(Boolean).join(" · ");
+
+    return `<article class="universal-product"><a class="universal-product__image" href="${esc(a.detail)}"><img src="${esc(image)}" alt="${esc(title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a><div class="universal-product__body"><div class="universal-product__meta">${esc(meta)}</div><h3>${esc(title)}</h3>${desc ? `<p class="universal-product__description">${esc(desc)}</p>` : ""}<span class="universal-product__state is-${esc(s.code)}">${esc(s.label)}</span><p class="universal-product__description">${esc(inventory)}</p><div class="universal-product__footer"><strong class="universal-product__price">${price > 0 ? money.format(price / 100) : "Purchase options"}</strong><div class="universal-product__actions"><a class="button button-outline" href="${esc(a.detail)}">Details</a><a class="button button-primary" href="${esc(a.href)}">${esc(a.label)}</a></div></div></div></article>`;
+  }
+
+  function rows() {
+    let out = state.products.filter((p) => state.department === "all" || department(p) === state.department);
+    const q = state.query.trim().toLowerCase();
+    if (q) out = out.filter((p) => `${ident(p)} ${text(p.category).toLowerCase()}`.includes(q));
+    if (state.sort === "price-low") out.sort((a, b) => Number(a.priceCents || 0) - Number(b.priceCents || 0));
+    else if (state.sort === "price-high") out.sort((a, b) => Number(b.priceCents || 0) - Number(a.priceCents || 0));
+    else if (state.sort === "name") out.sort((a, b) => compactTitle(a).localeCompare(compactTitle(b)));
+    else out.sort((a, b) => Number(Boolean(b.sokProduct)) - Number(Boolean(a.sokProduct)) || compactTitle(a).localeCompare(compactTitle(b)));
+    return out;
+  }
+
+  function render() {
+    const out = rows();
+    grid.innerHTML = out.length ? out.map(card).join("") : `<div class="universal-empty"><strong>No products match this view.</strong><p>Try another department or clear the search.</p></div>`;
+    status.textContent = `${out.length} product${out.length === 1 ? "" : "s"}`;
+    chips.forEach((c) => c.classList.toggle("is-active", c.dataset.universalDepartment === state.department));
+  }
+
+  chips.forEach((c) => c.addEventListener("click", () => {
+    state.department = c.dataset.universalDepartment || "all";
+    params.set("department", state.department);
+    history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+    render();
+  }));
+  search?.addEventListener("input", () => { state.query = search.value || ""; render(); });
+  sort?.addEventListener("change", () => { state.sort = sort.value || "featured"; render(); });
+
+  status.textContent = "Loading products…";
+  load().then((products) => { state.products = products; render(); }).catch((error) => {
+    console.error("Store catalog load failed", error);
+    status.textContent = "Products are temporarily unavailable.";
+    grid.innerHTML = '<div class="universal-empty"><strong>We could not load the complete current catalog.</strong><p>Please try again shortly or contact Elevation for product availability.</p></div>';
+  });
 })();

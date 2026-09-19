@@ -1,0 +1,413 @@
+export const UNVERIFIED = 'UNVERIFIED';
+
+export const REQUIRED_ORDERABILITY_FIELDS = Object.freeze([
+  'vendorId',
+  'sku',
+  'title',
+  'specs',
+  'media',
+  'sellPrice',
+  'priceFloor',
+  'stockState',
+  'backorderState',
+  'shippingDisposition',
+  'warrantyReturnsOwnership',
+  'fulfillmentSource',
+  'channelAuthorization'
+]);
+
+export const VENDORS = Object.freeze([
+  {
+    id: 'sok',
+    name: 'SOK Energy',
+    sourcePath: 'operations/vendor-project-sources/SOK_PROJECT_SOURCE.md',
+    sourceState: 'ACTIVE_PRIMARY_AUTHORIZED_SUPPLIER',
+    catalogState: 'FULL_INITIAL_LAUNCH',
+    unresolvedFacts: Object.freeze([])
+  },
+  {
+    id: 'renogy',
+    name: 'Renogy',
+    sourcePath: 'operations/vendor-project-sources/RENOGY_PROJECT_SOURCE.md',
+    sourceState: 'APPROVED_DEALER_PARTNER',
+    catalogState: 'ONE_SKU_INITIAL_LAUNCH',
+    unresolvedFacts: Object.freeze([])
+  },
+  {
+    id: 'vevor',
+    name: 'VEVOR',
+    sourcePath: 'operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md',
+    sourceState: 'ACTIVE_DIRECT_RELATIONSHIP',
+    catalogState: 'ONE_SKU_INITIAL_LAUNCH',
+    unresolvedFacts: Object.freeze([])
+  },
+  {
+    id: 'sungoldpower',
+    name: 'SunGoldPower',
+    sourcePath: 'operations/vendor-project-sources/SUNGOLDPOWER_PROJECT_SOURCE.md',
+    sourceState: 'APPROVED_DISTRIBUTOR_WEBSITE_LISTING_AUTHORIZED',
+    catalogState: 'INITIAL_CATALOG_INGESTION_FULFILLMENT_HOLD',
+    unresolvedFacts: Object.freeze(['directDropshipProcedure', 'shippingProcedure', 'warrantyRma', 'approvedMedia'])
+  },
+  {
+    id: 'kingboss',
+    name: 'Kingboss',
+    sourcePath: 'operations/vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md',
+    sourceState: 'B2B_WHOLESALE_APPROVED',
+    catalogState: 'ONE_SKU_VERIFICATION_HOLD',
+    unresolvedFacts: Object.freeze(['exactManufacturerModel', 'commercialActivationFacts'])
+  }
+]);
+
+function hasUnverified(value) {
+  if (value === UNVERIFIED || value === null || value === undefined) return true;
+  if (Array.isArray(value)) return value.length === 0 || value.some(hasUnverified);
+  if (typeof value === 'object') return Object.values(value).some(hasUnverified);
+  if (typeof value === 'string') return value.trim() === '';
+  return false;
+}
+
+export function missingRequiredFacts(product) {
+  return REQUIRED_ORDERABILITY_FIELDS.filter((field) => hasUnverified(product?.[field]));
+}
+
+const ORDERABLE_STOCK_STATES = new Set([
+  'IN_STOCK_VERIFIED',
+  'PREORDER_AUTHORIZED',
+  'BACKORDER_AUTHORIZED'
+]);
+
+export function evaluateOrderability(product) {
+  if (!product || missingRequiredFacts(product).length) return false;
+  if (product.channelAuthorization !== 'ELEVATION_DIRECT_WEBSITE') return false;
+  return ORDERABLE_STOCK_STATES.has(product.stockState);
+}
+
+function finalize(product) {
+  const missingFacts = Object.freeze(missingRequiredFacts(product));
+  return Object.freeze({
+    ...product,
+    missingFacts,
+    orderable: evaluateOrderability(product)
+  });
+}
+
+const SOURCE_SNAPSHOT = '2ee4c8ba2b41eec940f0280e523e827c1efea8d4';
+const SHOPIFY_BASELINE = 'SHOPIFY_LIVE_2026-09-15';
+
+function sokProduct({ id, sku, title, summary, media, price, stockState = 'BACKORDER_AUTHORIZED', backorderState = 'BACKORDER_AUTHORIZED', shopifyProductId, shopifyHandle }) {
+  return finalize({
+    id,
+    vendorId: 'sok',
+    vendorName: 'SOK Energy',
+    sku,
+    supplierSku: sku,
+    title,
+    specs: Object.freeze({ summary }),
+    media,
+    sellPrice: Object.freeze({ currency: 'USD', amount: price }),
+    priceFloor: Object.freeze({ policy: 'SOK_MAP_VERIFIED_2026_09_09', amount: price }),
+    stockState,
+    backorderState,
+    shippingDisposition: 'LOWER_48_SUPPLIER_SHIPPING_VERIFIED',
+    warrantyReturnsOwnership: 'ELEVATION_COORDINATES_SOK_AUTHORIZES',
+    fulfillmentSource: 'SOK_DIRECT_DROPSHIP',
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE',
+    sourcePath: 'operations/vendor-project-sources/SOK_PROJECT_SOURCE.md',
+    sourceSnapshot: SOURCE_SNAPSHOT,
+    shopifyBaseline: SHOPIFY_BASELINE,
+    shopifyProductId,
+    shopifyHandle
+  });
+}
+
+function sunGoldProduct({ id, sku, title, summary, map, upc, productUrl, certifications = UNVERIFIED }) {
+  return finalize({
+    id,
+    vendorId: 'sungoldpower',
+    vendorName: 'SunGoldPower',
+    sku,
+    supplierSku: sku,
+    title,
+    specs: Object.freeze({ summary }),
+    media: UNVERIFIED,
+    sellPrice: Object.freeze({ currency: 'USD', amount: map }),
+    priceFloor: Object.freeze({ policy: 'SUNGOLDPOWER_MAP_2026_09_15', amount: map }),
+    stockState: 'IN_STOCK_VERIFIED',
+    backorderState: 'NOT_REQUIRED_IN_STOCK',
+    shippingDisposition: UNVERIFIED,
+    warrantyReturnsOwnership: UNVERIFIED,
+    fulfillmentSource: UNVERIFIED,
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE',
+    sourcePath: 'operations/vendor-project-sources/SUNGOLDPOWER_PROJECT_SOURCE.md',
+    sourceSnapshot: 'SUNGOLDPOWER_SILVER_DEALER_PRICE_LIST_2026_09_15',
+    upc,
+    productUrl,
+    certifications
+  });
+}
+
+export const CATALOG_PRODUCTS = Object.freeze([
+  sokProduct({
+    id: 'sok-sk12v100pc',
+    sku: 'SK12V100PC',
+    title: 'Premium 12V 100Ah Bluetooth LiFePO4 Battery — SK12V100PC',
+    summary: '12V 100Ah LiFePO4 battery, transparent Group 24 case, Bluetooth monitoring.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v100pc-main.png?v=1788791577',
+    price: 319,
+    shopifyProductId: 'gid://shopify/Product/15995497906545',
+    shopifyHandle: 'sok-sk12v100pc-12v-100ah-lifepo4-battery-group-24'
+  }),
+  sokProduct({
+    id: 'sok-sk12v100h',
+    sku: 'SK12V100H',
+    title: 'Premium 12V 100Ah Heated LiFePO4 Battery — SK12V100H',
+    summary: '12V 100Ah LiFePO4 battery, metal enclosure, Bluetooth monitoring and heater pad.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v100h-official_df4e4635-3946-44d1-aefd-fec9d609580b.jpg?v=1788889904',
+    price: 369,
+    shopifyProductId: 'gid://shopify/Product/15997524935025',
+    shopifyHandle: 'sok-sk12v100h-12v-100ah-heated-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk12v206h',
+    sku: 'SK12V206H',
+    title: 'Premium 12V 206Ah Heated LiFePO4 Battery — SK12V206H',
+    summary: '12V 206Ah LiFePO4 battery, metal enclosure, Bluetooth monitoring and heater pad.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v206h-official_c401f431-a8c1-4cd1-96e9-435d596df14f.jpg?v=1788889910',
+    price: 749,
+    shopifyProductId: 'gid://shopify/Product/15997525164401',
+    shopifyHandle: 'sok-sk12v206h-12v-206ah-heated-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk12v206ph',
+    sku: 'SK12V206PH',
+    title: 'Premium Marine Grade 12V 206Ah Heated LiFePO4 Battery — SK12V206PH',
+    summary: '12V 206Ah LiFePO4 battery, sealed plastic enclosure, Bluetooth monitoring and heater pad.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v206ph-official_890bb4cd-8888-40f2-9d1a-7d76aa2d73f3.jpg?v=1788889917',
+    price: 750,
+    shopifyProductId: 'gid://shopify/Product/15997525197169',
+    shopifyHandle: 'sok-sk12v206ph-12v-206ah-heated-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk24v100',
+    sku: 'SK24V100',
+    title: 'Premium 24V 100Ah LiFePO4 Battery — SK24V100',
+    summary: '24V 100Ah LiFePO4 battery, metal enclosure with Bluetooth monitoring.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk24v100-official_ada9d795-175f-4f60-b6e7-720be9a4f84a.jpg?v=1788889926',
+    price: 751,
+    shopifyProductId: 'gid://shopify/Product/15997525262705',
+    shopifyHandle: 'sok-sk24v100-24v-100ah-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk12v280h',
+    sku: 'SK12V280H',
+    title: 'Premium 12V 280Ah Heated LiFePO4 Battery — SK12V280H',
+    summary: '12V 280Ah LiFePO4 battery, aluminum enclosure, Bluetooth monitoring and heater pad.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v280h-official_7e442177-cf94-4baf-ab3c-4052649963f6.png?v=1788889935',
+    price: 999,
+    shopifyProductId: 'gid://shopify/Product/15997525393777',
+    shopifyHandle: 'sok-sk12v280h-12v-280ah-heated-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk12v314ph',
+    sku: 'SK12V314PH',
+    title: 'Premium 12V 314Ah Heated LiFePO4 Battery with Victron CAN — SK12V314PH',
+    summary: '12V 314Ah LiFePO4 battery, plastic enclosure, Bluetooth, heating pad and Victron communication.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v314ph-official_2f1f0524-9d34-4b16-b024-d9e8c7a60de1.png?v=1788889945',
+    price: 1099,
+    stockState: 'PREORDER_AUTHORIZED',
+    backorderState: 'PREORDER_AUTHORIZED',
+    shopifyProductId: 'gid://shopify/Product/15997525492081',
+    shopifyHandle: 'sok-sk12v314ph-12v-314ah-heated-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk24v150ph',
+    sku: 'SK24V150PH',
+    title: 'Premium 24V 150Ah Heated LiFePO4 Battery with Victron CAN — SK24V150PH',
+    summary: '24V 150Ah LiFePO4 battery, plastic enclosure, Bluetooth, heating pads and Victron communication.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk24v150ph-official_9557cb8c-e11e-4339-aeb0-7851cadc3c8e.png?v=1788889952',
+    price: 1149,
+    shopifyProductId: 'gid://shopify/Product/15997525623153',
+    shopifyHandle: 'sok-sk24v150ph-24v-150ah-heated-lifepo4-battery'
+  }),
+  sokProduct({
+    id: 'sok-sk48v100n',
+    sku: 'SK48V100N',
+    title: 'Premium 51.2V 100Ah 5.12kWh Rack LiFePO4 Battery — SK48V100N',
+    summary: '48V-class 100Ah 3U rack LiFePO4 battery with Bluetooth OTA, heater pad and app-selectable protocol.',
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk48v100n-main.jpg?v=1788791588',
+    price: 1199,
+    shopifyProductId: 'gid://shopify/Product/15995497972081',
+    shopifyHandle: 'sok-sk48v100n-51-2v-100ah-5-12kwh-lifepo4-rack-battery'
+  }),
+  finalize({
+    id: 'renogy-rng-invt-3000-12v-p2-g3-us',
+    vendorId: 'renogy',
+    vendorName: 'Renogy',
+    sku: 'RNG-INVT-3000-12V-P2-G3-US',
+    supplierSku: 'RNG-INVT-3000-12V-P2-G3-US',
+    publicAliasSku: 'RNG-INVT-3000-12V-P2-US',
+    title: 'Renogy 3000W 12V Pure Sine Wave Inverter',
+    specs: Object.freeze({ summary: '3000W 12V pure sine wave inverter with 6000W peak surge and remote control.' }),
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/RNG-260901-M9-_1-44.jpg?v=1789369602',
+    sellPrice: Object.freeze({ currency: 'USD', amount: 414.99 }),
+    priceFloor: Object.freeze({ policy: 'CURRENT_RENOGY_PUBLIC_PRICE_REFERENCE', amount: 414.99 }),
+    stockState: 'BACKORDER_AUTHORIZED',
+    backorderState: 'BACKORDER_AUTHORIZED',
+    shippingDisposition: 'LOWER_48_SUPPLIER_SHIPPING_VERIFIED',
+    warrantyReturnsOwnership: 'ELEVATION_COORDINATES_RENOGY_SUPPORT',
+    fulfillmentSource: 'RENOGY_DIRECT_DROPSHIP',
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE',
+    sourcePath: 'operations/vendor-project-sources/RENOGY_PROJECT_SOURCE.md',
+    sourceSnapshot: SOURCE_SNAPSHOT,
+    shopifyBaseline: SHOPIFY_BASELINE,
+    shopifyProductId: 'gid://shopify/Product/16002364408177',
+    shopifyHandle: 'renogy-rng-invt-3000-12v-p2-g3-us'
+  }),
+  finalize({
+    id: 'vevor-xxkljt124incljf0qv0',
+    vendorId: 'vevor',
+    vendorName: 'VEVOR',
+    sku: 'XXKLJT124INCLJF0QV0',
+    title: 'VEVOR Camper Levelers — 2-Pack, Up to 4 in',
+    specs: Object.freeze({ summary: 'Two curved RV leveling blocks, up to 4 in leveling height, rated up to 8,818.5 lb.' }),
+    media: 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/vevor-xxkljt124incljf0qv0.jpg?v=1789106224',
+    sellPrice: Object.freeze({ currency: 'USD', amount: 39.90 }),
+    priceFloor: Object.freeze({ policy: 'ELEVATION_TEST_PRICE_ABOVE_CURRENT_VEVOR_REFERENCE', amount: 39.90 }),
+    stockState: 'IN_STOCK_VERIFIED',
+    backorderState: 'NOT_REQUIRED_IN_STOCK',
+    shippingDisposition: 'LOWER_48_SUPPLIER_SHIPPING_VERIFIED',
+    warrantyReturnsOwnership: 'ELEVATION_FIRST_VEVOR_SUPPORT_ROUTE',
+    fulfillmentSource: 'VEVOR_DIRECT_DROPSHIP',
+    channelAuthorization: 'ELEVATION_DIRECT_WEBSITE',
+    sourcePath: 'operations/vendor-project-sources/VEVOR_PROJECT_SOURCE.md',
+    sourceSnapshot: SOURCE_SNAPSHOT,
+    shopifyBaseline: SHOPIFY_BASELINE,
+    shopifyProductId: 'gid://shopify/Product/16001185743217',
+    shopifyHandle: 'vevor-camper-levelers-2-pack-up-to-4-in',
+    sourceFreshnessNote: 'VEVOR sellability and public reference price require revalidation before supplier purchase.'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-lfp12-100a',
+    sku: 'LFP12-100A',
+    title: 'SunGoldPower 12V 100Ah LiFePO4 Battery with Bluetooth & Self-Heating',
+    summary: '12V 100Ah LiFePO4 deep-cycle battery with Bluetooth, self-heating and IP65 enclosure.',
+    map: 295,
+    upc: '768472473332',
+    productUrl: 'https://sungoldpower.com/products/12v-100ah-lifepo4-deep-cycle-lithium-battery-bluetooth-self-heating'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sg48100p',
+    sku: 'SG48100P',
+    title: 'SunGoldPower 51.2V 100Ah Server Rack LiFePO4 Battery',
+    summary: '51.2V 100Ah server-rack LiFePO4 battery for residential/off-grid energy storage.',
+    map: 1090,
+    upc: '747783651523',
+    productUrl: 'https://sungoldpower.com/products/48v-100ah-server-rack-lifepo4-lithium-battery-sg48100p',
+    certifications: 'UL1973 / UL9540A'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sph8048p',
+    sku: 'SPH8048P',
+    title: 'SunGoldPower 8KW 48V Split Phase Solar Inverter',
+    summary: '8KW 48V split-phase solar inverter with 120V/240V AC input and output.',
+    map: 1450,
+    upc: '768484209318',
+    productUrl: 'https://sungoldpower.com/products/8kw-off-grid-solar-inverter-ul1741',
+    certifications: 'UL 1741 by ETL for Off Grid Solar System'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sph10048p',
+    sku: 'SPH10048P',
+    title: 'SunGoldPower 10KW 48V Split Phase Solar Inverter',
+    summary: '10KW 48V split-phase solar inverter with 120V/240V AC input and output.',
+    map: 1580,
+    upc: '747783675352',
+    productUrl: 'https://sungoldpower.com/products/10kw-48v-split-phase-solar-inverter',
+    certifications: 'UL 1741 by ETL for Off Grid Solar System'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sgs-12k18max',
+    sku: 'SGS-12K18MAX',
+    title: 'SunGoldPower 12KW 48V All-in-One Hybrid Solar Inverter',
+    summary: '12KW 48V all-in-one hybrid inverter for 120V/240V whole-home backup applications.',
+    map: 2990,
+    upc: '791986423951',
+    productUrl: 'https://sungoldpower.com/collections/48v-inverter-charger/products/12kw-48v-all-in-one-hybrid-inverter',
+    certifications: 'UL1741 / IEEE1547.1-2020 / CEC / Rule 21 / HECO'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sg560wbgx2',
+    sku: 'SG560WBGx2',
+    title: 'SunGoldPower 560W Bifacial N-Type Solar Panels — 2 Pack',
+    summary: 'Two 560W bifacial N-Type monocrystalline solar panels.',
+    map: 980,
+    upc: '747783675420',
+    productUrl: 'https://sungoldpower.com/collections/all/products/560watt-bifacial-solar-panel'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sgh-11n2e',
+    sku: 'SGH-11N2E',
+    title: 'SunGoldPower 11.4KW Hybrid Solar Kit with 20.48kWh Lithium & 16 Solar Panels',
+    summary: '11.4KW 48V split-phase hybrid solar kit with 20.48kWh lithium storage and 16 × 450W solar panels.',
+    map: 11950,
+    upc: '747783675673',
+    productUrl: 'https://sungoldpower.com/collections/complete-hybrid-solar-kits/products/hybrid-solar-kit-11-4kw-48v-split-phase-20-48kwh-lithium-battery-16-x-440-watt-solar-panel-sgh-11n2e',
+    certifications: 'Inverter UL 1741 / CSA C22.2 / UL1699B / UL1741SB / IEEE1547:2018 / HECO SRD 2.0 / CEC; batteries UL1973 / UL9540A / CE / UN38.3; panels UL61730 / CE / TUV'
+  }),
+  sunGoldProduct({
+    id: 'sungoldpower-sgr-10k25s',
+    sku: 'SGR-10K25S',
+    title: 'SunGoldPower 10KW Off-Grid Solar Kit with 25.6kWh Lithium & 12 Solar Panels',
+    summary: '10KW 48V off-grid solar kit with 25.6kWh lithium storage and 12 × 550W solar panels.',
+    map: 10350,
+    upc: '747783675383',
+    productUrl: 'https://sungoldpower.com/collections/off-grid-solar-kit/products/off-grid-solar-kit-12-x-550-watts-solar-panels-25-6kwh-lithium-battery-10kw-solar-inverter-48vdc-120v-240v-sgr-10k25s',
+    certifications: 'Inverter UL 1741 by ETL; batteries UL1973 / UL9540A / CE / UN38.3; panels UL61730 / CE / TUV'
+  }),
+  finalize({
+    id: 'kingboss-d01027hh7bv',
+    vendorId: 'kingboss',
+    vendorName: 'Kingboss',
+    sku: 'D01027HH7BV',
+    supplierSku: UNVERIFIED,
+    title: 'Kingboss 12V 100Ah LiFePO4 Battery — Verification Pilot',
+    specs: Object.freeze({ summary: '12V 100Ah LiFePO4 battery; exact manufacturer model mapping remains under verification.' }),
+    media: UNVERIFIED,
+    sellPrice: UNVERIFIED,
+    priceFloor: UNVERIFIED,
+    stockState: UNVERIFIED,
+    backorderState: UNVERIFIED,
+    shippingDisposition: UNVERIFIED,
+    warrantyReturnsOwnership: UNVERIFIED,
+    fulfillmentSource: UNVERIFIED,
+    channelAuthorization: UNVERIFIED,
+    sourcePath: 'operations/vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md',
+    sourceSnapshot: SOURCE_SNAPSHOT,
+    sourceNote: 'Doba SKU attribution to Kingboss is supported; exact manufacturer SKU/model is not yet locked.'
+  })
+]);
+
+export function getVendor(vendorId) {
+  return VENDORS.find(({ id }) => id === String(vendorId || '').toLowerCase()) || null;
+}
+
+export function getProductsByVendor(vendorId) {
+  const normalized = String(vendorId || '').toLowerCase();
+  return CATALOG_PRODUCTS.filter(({ vendorId: productVendor }) => productVendor === normalized);
+}
+
+export function getProductById(productId) {
+  const normalized = String(productId || '').toLowerCase();
+  return CATALOG_PRODUCTS.find(({ id }) => id === normalized) || null;
+}
+
+export function searchCatalog(query = '') {
+  const needle = String(query).trim().toLowerCase();
+  if (!needle) return CATALOG_PRODUCTS;
+  return CATALOG_PRODUCTS.filter((product) =>
+    [product.vendorName, product.vendorId, product.sku, product.supplierSku, product.title]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(needle))
+  );
+}

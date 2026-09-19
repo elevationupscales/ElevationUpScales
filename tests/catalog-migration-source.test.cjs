@@ -32,7 +32,9 @@ test('migration parser preserves mixed-provider identity and hierarchy', () => {
 
 test('catalog runtime accepts normalized strategic and POD vendor sources', () => {
   const runtime = read('site/catalog-admin-runtime.js');
-  assert.match(runtime, /"sok", "kingboss", "printful", "spreadconnect", "self-stock"/);
+  for (const provider of ['sok','kingboss','renogy','printful','spreadconnect','self-stock']) {
+    assert.match(runtime, new RegExp(`"${provider}"`), `catalog runtime should accept ${provider}`);
+  }
   assert.match(runtime, /\["fourthwall","printful","spreadconnect"\]\.includes\(sourceType\) \? "pod"/);
   assert.match(runtime, /sourceType === "sok" \? "lithium-batteries"/);
 });

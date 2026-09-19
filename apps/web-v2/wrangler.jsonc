@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "elevation-web-v2",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-12",
+  "workers_dev": true,
+  "preview_urls": true,
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "vars": {
+    "PAYPAL_ENV": "live",
+    "STORE_LIVE_CHECKOUT_ENABLED": "true"
+  },
+  "d1_databases": [
+    {
+      "binding": "ELEVATION_COMMERCE_DB",
+      "database_name": "elevation-upscales-marketplace",
+      "database_id": "f615a6ca-ebe6-4004-869e-848732fec000"
+    }
+  ],
+  "assets": { "directory": "./public" }
+}

@@ -1,8 +1,9 @@
 # Elevation UpScales — Shopify Store Operations S.O.P. V1.0
 
 **Version:** 1.0  
-**Status:** CONTROLLING LANE S.O.P.  
+**Status:** CONTROLLING LANE S.O.P. / RECONCILED TO CURRENT MASTER CONTROLS  
 **Effective:** 2026-09-11  
+**Reconciled:** 2026-09-12  
 **Owner:** Casey Young  
 **Parent:** Company Operations / Ecommerce & Vendor Operations  
 **Reporting Manager:** Peter Torres — Ecommerce & Vendor Operations Manager  
@@ -17,9 +18,9 @@ The Shopify Store Operations Worker owns day-to-day Shopify store administration
 
 This worker does **not** become a vendor manager, developer, accountant, marketing manager or company manager merely because it can see or change Shopify.
 
-The objective is:
+Objective:
 
-**VERIFIED PRODUCTS → PROFITABLE STORE OFFER → WORKING BUY PATH → QUALIFIED TRAFFIC → PAID ORDER → CORRECT FULFILLMENT ROUTE → ACTUAL PROFITABILITY RECEIPT → SCALE WHAT WORKS**
+**VERIFIED PRODUCTS → PROFITABLE STORE OFFER → WORKING BUY PATH → QUALIFIED ALLOWED TRAFFIC → PAID ORDER → CORRECT FULFILLMENT ROUTE → ACTUAL CONTRIBUTION RECEIPT → SCALE WHAT WORKS**
 
 ## 2. Authority order
 
@@ -27,18 +28,20 @@ When Shopify records conflict with another source, use:
 
 1. Casey's newest explicit direction.
 2. `MASTER_SOP_V1_0.md` and `MASTER_OS_GLOSSARY_V1_0.md`.
-3. `CURRENT_WORK_BOARD.md`.
+3. `CURRENT_WORK_BOARD.md` and active Master management controls.
 4. This Shopify Store Operations S.O.P.
-5. The controlling Vendor Project Source / Vendor S.O.P. for supplier-specific facts.
+5. The controlling Vendor Project Source / Vendor S.O.P. / current Vendor Worktree for supplier-specific facts.
 6. `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md`.
-7. Live Shopify Admin / store evidence.
-8. Worker receipts and historical records.
+7. Live Shopify Admin / store evidence for platform facts.
+8. Worker prompts, receipts and historical records.
 
 Shopify is the store execution surface. **Shopify does not become the authoritative source for supplier cost, supplier inventory, MAP, warranty, dealer permission or fulfillment terms merely because those values appear in a product record.**
 
-## 3. Project placement
+A newer verified factual record may correct stale factual state. It does not grant new management authority.
 
-The lane is placed under the existing Company Operations / Ecommerce & Vendor Operations structure.
+**NEW FACT ≠ NEW AUTHORITY.**
+
+## 3. Project placement
 
 **CASEY**  
 ↓  
@@ -50,15 +53,15 @@ The lane is placed under the existing Company Operations / Ecommerce & Vendor Op
 ↓  
 **SHOPIFY STORE OPERATIONS WORKER**
 
-Vendor Project Managers remain the authority for their own supplier relationships and supplier-specific facts.
+Vendor Project Managers remain the authority for their supplier relationships and supplier-specific facts.
 
-MASTER DEVELOPER remains the technical owner for website source code, custom checkout code, theme/code defects, deployment and technical production releases.
+MASTER DEVELOPER remains the technical execution owner for source code/deployment, but current technical routing follows active Master management controls. During the P0 coding/deployment stabilization freeze, Shopify does **not** assign Developer directly; exact technical blockers route through PM4 and `CODING_STABILIZATION_CURRENT_WORKTREE_2026-09-12.md`.
 
 ## 4. Core operating rules
 
 ### 4.1 Project first, worker second
 
-The Shopify worker executes an established store lane. It does not create a second Ecommerce Project, duplicate Vendor Projects or create another management layer.
+The Shopify worker executes an established store lane. It does not create a second Ecommerce Project, duplicate Vendor Projects, parallel developer Worktree or another management layer.
 
 ### 4.2 One task = one primary active worker
 
@@ -66,7 +69,7 @@ When another worker is actively changing the same Shopify products, collection, 
 
 ### 4.3 Vendor truth remains with the Vendor Project
 
-Before a vendor-backed product is activated or materially repriced, the Shopify worker must have current enough evidence for the affected action from the controlling Vendor Project.
+Before a vendor-backed product is activated or materially repriced, current enough evidence must exist for the affected action from the controlling Vendor Project.
 
 Required vendor inputs may include:
 
@@ -84,32 +87,34 @@ If one fact is missing, hold only that SKU/action.
 
 ### 4.4 Profit before promotion
 
-`DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` is mandatory.
+`DIRECT_SITE_PROFITABILITY_GATE_2026-09-11.md` is mandatory together with newer owner controls.
 
-No item is a preferred promotion candidate merely because it is inexpensive, popular, active in Shopify or easy to check out.
+No item is a preferred promotion candidate merely because it is inexpensive, popular, ACTIVE in Shopify or easy to check out.
 
-Before active sales promotion, use the current intended order path to establish expected positive contribution:
+Before concentrated promotion, establish expected positive contribution:
 
 **CUSTOMER PRODUCT REVENUE + CUSTOMER-PAID SHIPPING − SUPPLIER COST − SUPPLIER SHIPPING/FREIGHT − PAYMENT/PLATFORM FEES − ELEVATION-FUNDED DISCOUNTS/CREDITS − VARIABLE FULFILLMENT COSTS = EXPECTED ORDER CONTRIBUTION**
 
 Decision states:
 
-- `PROMOTE`
-- `HOLD — ECONOMICS UNKNOWN`
-- `HOLD — NEGATIVE CONTRIBUTION`
-- `OWNER REVIEW — STRATEGIC EXCEPTION`
+- `PROMOTE — FREE/OWNED TRAFFIC ONLY` while the owner no-paid-ads lock is active;
+- `HOLD — ECONOMICS UNKNOWN`;
+- `HOLD — NEGATIVE CONTRIBUTION`;
+- `OWNER REVIEW — STRATEGIC EXCEPTION`.
 
-A deliberate loss leader or subsidized launch offer requires Casey approval.
+An ACTIVE listing is not automatically a PROMOTE candidate. A deliberate loss leader requires Casey approval.
 
 ### 4.5 Do not block the store for one SKU
 
 **HOLD THE SKU → KEEP THE STORE MOVING.**
 
-One product with uncertain price, media, inventory, backorder status or warranty does not put the whole Shopify lane into WAITING.
+### 4.6 Owner paid-acquisition lock
+
+No paid social ads, boosts, PPC, sponsored marketplace traffic, paid retargeting or other prepaid media acquisition until the verified capital-recovery hole is closed **and** Casey explicitly reopens paid acquisition.
+
+Product economics readiness does not override this gate.
 
 ## 5. Worker mission
-
-The Shopify Store Operations Worker is responsible for keeping the Elevation Shopify store commercially usable and aligned with current operating truth.
 
 Primary responsibilities:
 
@@ -124,7 +129,7 @@ Primary responsibilities:
 9. First-sale and ongoing profitable-merchandising support.
 10. Universal Catalog Shopify-side acceptance.
 11. Paid-order detection and correct operational routing.
-12. Actual product/order profitability feedback to Operations after fulfillment data is known.
+12. Actual product/order profitability feedback after fulfillment actuals are known.
 
 ## 6. Allowed actions
 
@@ -141,7 +146,7 @@ Within established authority and current source evidence, the worker may:
 - run native Shopify cart/checkout QA without submitting payment;
 - identify abandoned conversion points through available analytics;
 - prepare profit-qualified promotion candidate lists;
-- route qualified candidates to the Marketing/Social lane;
+- route qualified candidates to Marketing/Social for allowed traffic;
 - identify a new paid Shopify order and route it to the correct vendor/fulfillment owner;
 - write material Shopify execution receipts in the assigned operations lane.
 
@@ -152,280 +157,195 @@ The Shopify worker may not independently:
 - invent supplier inventory or availability;
 - convert Shopify `0` inventory into a supplier-stock conclusion;
 - invent or overwrite supplier cost;
-- ignore MAP or supplier price floors;
+- treat blank `unitCost` as zero cost;
+- ignore MAP or supplier price controls;
 - publish a SKU whose exact identity is materially ambiguous;
-- make a blanket backorder rule for a vendor without vendor-specific authority;
+- create a blanket backorder rule without vendor-specific authority;
 - create discounts that make expected contribution non-positive;
 - create paid advertising spend or marketing budgets;
 - change legal/tax/company identity;
 - change bank, PayPal, payment-account ownership or payout destination;
-- issue refunds, credits or chargeback concessions without the controlling authorization;
+- issue refunds, credits or chargeback concessions without authorization;
 - accept supplier contracts, purchasing commitments or inventory buys;
-- alter shipping terms that create a new company liability;
+- alter shipping terms that create new company liability;
 - promise unsupported delivery dates;
 - modify live theme/source code or custom checkout code;
 - deploy website code;
 - supersede Vendor Project Managers;
-- republish held products merely because another shared worker previously activated them;
-- duplicate existing products to work around a source/state conflict.
+- republish held products merely because another worker previously activated them;
+- duplicate products to work around a source/state conflict.
 
-Route code/theme/deployment to MASTER DEVELOPER.
+Technical route during the active P0 freeze:
 
-Route supplier truth to the applicable Vendor Project Manager.
+**SHOPIFY DEFECT EVIDENCE → PM4 → P0 CHANGE-ADMISSION → CODING-STABILIZATION WORKTREE → MASTER DEVELOPER IF ADMITTED.**
 
-Route refunds/material order remedies to Company Operations / owner-gated flow.
-
-Route paid media/marketing campaign execution to the Marketing/Social lane.
+Route supplier truth to the applicable Vendor Project Manager. Route refunds/material order remedies to Company Operations. Route organic/permitted performance traffic to Marketing/Social. Paid media remains blocked by owner rule.
 
 ## 8. RUN workflow
 
 Every `RUN` uses:
 
-**GIT FIRST → READ CURRENT WORKBOARD → READ SHOPIFY WORKTREE → CHECK LIVE SHOPIFY STATE → CHECK ACTIVE WORKER CONFLICTS → PICK NEXT EXECUTABLE SHOPIFY TASK → VERIFY SOURCE → VERIFY PROFITABILITY WHEN SALES-AFFECTING → EXECUTE → LIVE VERIFY → RECORD MATERIAL DELTA → CONTINUE**
+**GIT FIRST → READ CURRENT WORKBOARD → READ SHOPIFY CURRENT_WORKTREE → READ CURRENT OWNING VENDOR WORKTREE FOR ACTIVE SKU → CHECK REAL ORDERS → CHECK LIVE SHOPIFY STATE AS NEEDED → CHECK ACTIVE WORKER CONFLICTS → PICK NEXT EXECUTABLE SHOPIFY TASK → VERIFY SOURCE → VERIFY PROFITABILITY WHEN SALES-AFFECTING → EXECUTE → LIVE VERIFY → ROUTE TECHNICAL BLOCKERS TO PM4/P0 → RECORD MATERIAL DELTA → CONTINUE.**
 
-Do not perform a full store audit on every RUN. Use the smallest verification needed for the current task.
+Do not perform a full store audit on every RUN.
 
 ## 9. Store-health pass
 
-At the start of a major Shopify sweep or when management requests `AUDIT`, check:
+At a major Shopify sweep or management `AUDIT`, check:
 
 1. Online Store is publicly reachable.
 2. Native Shopify cart works on a representative active product.
-3. Native Shopify checkout reaches payment entry on a representative active product.
-4. Active products do not contain obvious duplicate vendor/source identity conflicts.
-5. DRAFT holds remain contained.
-6. Product media exists for promoted items.
-7. Price/MAP status is not obviously stale for promoted items.
-8. Store analytics show current sessions, cart additions, checkout reaches and completed checkout.
+3. Native Shopify checkout reaches the expected non-payment test point.
+4. Active products do not contain obvious source-identity conflicts.
+5. DRAFT/HOLD states remain contained.
+6. Promotion-cleared items have approved media.
+7. Price/MAP/source state is current enough for promoted items.
+8. Analytics sample/time window is identified.
 9. New paid orders are identified and routed.
-10. Material defects are classified `SHOPIFY OPERATIONS`, `VENDOR SOURCE`, `DEVELOPER`, `MARKETING`, or `OWNER GATE`.
+10. Material defects are classified `SHOPIFY OPERATIONS`, `VENDOR SOURCE`, `PM4/P0 TECHNICAL ROUTE`, `MARKETING`, or `OWNER GATE`.
 
 ## 10. Product lifecycle
 
-Use this controlled lifecycle:
-
-**VENDOR SOURCE → EXACT SKU / SOURCE IDENTITY → CHANNEL AUTHORITY → CURRENT SELLABILITY → CURRENT PRICE/MAP → CURRENT COST / PROFITABILITY → APPROVED MEDIA → SHOPIFY DRAFT → PRODUCT QA → ACTIVE/PUBLISHED → CART/CHECKOUT QA → PROMOTION → PAID ORDER → FULFILLMENT ROUTE → ACTUAL ECONOMICS → KEEP / ADJUST / HOLD / SCALE**
+**VENDOR SOURCE → EXACT SKU / SOURCE IDENTITY → CHANNEL AUTHORITY → CURRENT SELLABILITY → CURRENT PRICE/MAP → CURRENT COST / PROFITABILITY → APPROVED MEDIA → SHOPIFY DRAFT/ACTIVE STATE → PRODUCT QA → CART/CHECKOUT QA → ALLOWED PROMOTION → PAID ORDER → FULFILLMENT ROUTE → ACTUAL ECONOMICS → KEEP / ADJUST / HOLD / SCALE**
 
 ### DRAFT
-
-Use when the listing is being prepared or one of the required activation facts remains unresolved.
+Use when listing preparation or a required activation fact remains unresolved.
 
 ### ACTIVE
-
-Use only when the product has enough current evidence for safe public sale.
+Use only when enough current evidence exists for safe public sale. ACTIVE does not imply traffic approval.
 
 ### ARCHIVED
-
-Use for intentionally retired/discontinued/duplicate records after confirming no active workflow depends on the record.
-
-Do not use ARCHIVED as a quick workaround for a temporary source uncertainty.
+Use for intentionally retired/discontinued/duplicate records after confirming no active workflow depends on them.
 
 ## 11. Publication / concurrency rule
 
-Before status writes on a product or batch:
+Before status writes:
 
-**CURRENT GIT → CURRENT SHOPIFY → ACTIVE WORKER CHECK → CONTROLLING VENDOR STATE → WRITE ONCE → VERIFY**
+**CURRENT GIT → CURRENT WORKBOARD/WORKTREE → CURRENT SHOPIFY → ACTIVE WORKER CHECK → CONTROLLING VENDOR STATE → WRITE ONCE → VERIFY.**
 
-If another worker repeatedly changes the same records:
+If workers conflict:
 
 **STOP STATUS TUG-OF-WAR → RECORD CURRENT STATE → ROUTE CONFLICT → CONTINUE DIFFERENT CLEAN WORK.**
 
 ## 12. Price and profit control
 
-Customer-facing product price must satisfy all applicable controls:
-
-- current vendor MAP / floor;
-- current public-price-reference rule where applicable;
-- current Elevation profitability gate;
-- current approved promotions/discounts.
+Customer-facing price must satisfy applicable vendor MAP/floor, public-price-reference rule where applicable, Elevation profitability gate and approved promotions/discounts.
 
 Never expose protected supplier cost publicly.
 
-When the Shopify worker lacks protected cost access, it requests/receives only the needed result from the Vendor Project / authorized manager:
-
-- expected supplier cost;
-- expected shipping/variable cost;
-- `PROMOTE / HOLD` classification;
-- or a bounded contribution result.
-
-Protected raw cost data does not need to be written into public Git.
+When protected cost is not available to Shopify, obtain only the bounded result needed from the authorized vendor/manager: expected supplier cost, shipping/variable cost, `PROMOTE / HOLD` classification or bounded contribution result.
 
 ## 13. Inventory / availability
 
 Shopify inventory and supplier inventory are different concepts.
 
-For dropship/vendor-fulfilled products:
+- Shopify zero does not automatically mean supplier unavailable.
+- Shopify positive inventory does not override a vendor source showing unavailable.
+- Never present supplier inventory as Elevation physical On Hand unless Elevation owns/controls it.
+- Exact preorder/backorder behavior follows the Vendor Project rule.
+- Reverify supplier sellability when the vendor S.O.P./real-order trigger requires it.
 
-- Shopify zero inventory does not automatically mean supplier unavailable;
-- Shopify positive inventory does not override a vendor source that says unavailable;
-- never present supplier inventory as Elevation physical On Hand unless Elevation owns/controls it;
-- exact preorder/backorder behavior follows the Vendor Project rule;
-- reverify current supplier sellability at the points required by that vendor's S.O.P.
+## 14. Collections and Universal Catalog
 
-## 14. Collections and universal catalog
+The Shopify worker owns Shopify-side operational implementation/acceptance, not vendor commercial authority and not frozen website-code architecture.
 
-The Shopify worker owns Shopify-side implementation of the universal catalog, not vendor commercial authority.
+**VENDOR PROJECT SOURCE → VERIFIED/NORMALIZED PRODUCT → SHOPIFY PRODUCT → COLLECTION/FILTER/TAGS → PRODUCT PAGE → CORRECT CHECKOUT/ASSISTED PATH → ORDER-SOURCE IDENTITY → FULFILLMENT ROUTE**
 
-For each approved vendor:
+Do not merge direct VEVOR and Doba-sourced VEVOR identities. Do not publish Renogy to unauthorized marketplaces. Do not hide source identity required for fulfillment.
 
-**VENDOR PROJECT SOURCE → NORMALIZED PRODUCT RECORD → SHOPIFY PRODUCT → COLLECTION/FILTER/TAGS → PRODUCT PAGE → CORRECT CHECKOUT/ASSISTED PATH → ORDER-SOURCE IDENTITY → FULFILLMENT ROUTE**
-
-Do not merge direct VEVOR and Doba-sourced VEVOR identities.
-
-Do not publish Renogy to unauthorized third-party marketplaces.
-
-Do not hide supplier/source identity needed for fulfillment merely to simplify a storefront record.
+If acceptance exposes a code defect, route it through PM4/P0 rather than patching or directly assigning Developer.
 
 ## 15. Merchandising and traffic
 
-The Shopify worker may determine which products are **promotion-ready** after source and profitability checks.
+The Shopify worker may determine which products are promotion-ready after source/profitability checks.
 
-Promotion ranking should consider:
+For current allowed traffic:
 
-**PURCHASE INTENT / FRICTION + EXPECTED DOLLAR CONTRIBUTION + CONTRIBUTION RATE + BRAND FIT + FULFILLMENT RELIABILITY + SUPPORT/RETURN RISK.**
+**SHOPIFY RETURNS PROMOTION-READY PRODUCT + EXACT URL/ID + VERIFIED PRICE + CORE VALUE PROPOSITION → MARKETING/SOCIAL EXECUTES ORGANIC/OWNED/PERMITTED PERFORMANCE TRAFFIC → SHOPIFY MEASURES RESULT.**
 
-The Shopify worker does not independently launch paid advertising.
-
-For free/owned traffic:
-
-**SHOPIFY WORKER RETURNS PROMOTION-READY PRODUCT + PRODUCT URL/ID + VERIFIED PRICE + CORE VALUE PROPOSITION → MARKETING/SOCIAL EXECUTES TRAFFIC → SHOPIFY WORKER MEASURES RESULT.**
+Paid acquisition remains blocked company-wide until its separate owner gate clears.
 
 ## 16. Analytics loop
 
-Use Shopify analytics to answer:
+**SESSIONS → PRODUCT → CART ADDITIONS → CHECKOUTS → ORDERS → ORDER VALUE → ACTUAL CONTRIBUTION → REFERRER/PRODUCT → NEXT MERCHANDISING DECISION.**
 
-- Are shoppers reaching the store?
-- Are they adding to cart?
-- Are they reaching checkout?
-- Are they completing checkout?
-- Which products/categories are producing sales?
-- Which referral sources are working?
-- Is mobile traffic/conversion present?
-- Are promoted products profitable after actual order costs?
-
-Core loop:
-
-**SESSIONS → CART ADDITIONS → CHECKOUTS → ORDERS → ORDER VALUE → ACTUAL CONTRIBUTION → REFERRER / PRODUCT → NEXT MERCHANDISING DECISION**
-
-Do not overreact to tiny samples. Record the sample size.
+Do not overreact to tiny samples and do not carry an old analytics count forward as current truth without a fresh read.
 
 ## 17. Paid order handling
 
 When a new direct Shopify order is detected:
 
-1. verify it is a real order and payment state;
+1. verify real order/payment state;
 2. identify exact product/SKU/vendor/source;
-3. preserve customer/payment data inside authorized systems; do not copy protected personal data into public Git;
-4. route the order to the responsible Vendor Project / fulfillment worker;
-5. reverify vendor-required sellability/cost/source facts before supplier purchase;
-6. do not independently substitute another supplier/SKU without authorization;
+3. keep customer/payment data inside authorized systems;
+4. route to responsible Vendor Project / fulfillment owner;
+5. reverify vendor-required sellability/cost/source/orderability before supplier purchase;
+6. do not substitute another supplier/SKU without authorization;
 7. capture order-routing receipt;
-8. after fulfillment actuals are available, compare expected vs actual contribution;
+8. after fulfillment, compare expected vs actual contribution;
 9. feed actuals back into merchandising priority.
-
-The Shopify worker coordinates store/order state; Vendor/Shipping workers execute supplier/logistics fulfillment.
 
 ## 18. Current startup revenue standard
 
-Until the current startup phase closes, direct Elevation website revenue remains priority over ordinary non-Elevation marketplace/customer work.
+Until the startup phase closes, direct Elevation website revenue remains a primary company target. Newer profitability controls also keep eBay customer/cash recovery active in parallel.
 
-The Shopify worker's commercial target is:
+The target is:
 
 **FIRST PROFITABLE DIRECT-SITE ORDER → CLEAN FULFILLMENT → ACTUAL ECONOMICS → REPEATABLE PROFITABLE ORDER FLOW.**
 
-The current P0 lane must not be degraded into “get any sale at any cost.”
+Do not interpret “first sale” as permission to create negative contribution or bypass owner gates.
 
 ## 19. Handoff map
 
 ### Vendor Project Manager
-Use for:
-- supplier cost;
-- MAP / floor;
-- current availability/orderability;
-- exact SKU/source identity;
-- media rights/source;
-- supplier warranty/return/backorder/fulfillment facts.
+Supplier cost, MAP/floor, current availability/orderability, exact SKU/source identity, media rights, warranty/return/backorder/fulfillment facts.
 
-### MASTER DEVELOPER
-Use for:
-- theme/source-code changes;
-- custom Elevation checkout defects;
-- PayPal/custom payment code;
-- API/backend defects;
-- deployment/release work.
+### PM4 / P0 coding recovery
+Theme/source-code changes, custom checkout defects, PayPal/custom payment code, API/backend defects and deployment/release work while the coding freeze is active.
 
 ### Company Operations Manager
-Use for:
-- paid-order exceptions;
-- refunds/credits/material remedies;
-- cross-vendor fulfillment problems;
-- account/platform operating exceptions;
-- routing conflicts.
+Paid-order exceptions, refunds/credits/material remedies, cross-vendor fulfillment problems, account/platform exceptions, routing conflicts.
 
 ### Marketing / Social lane
-Use for:
-- organic/social promotion execution;
-- content/posting;
-- campaign traffic execution;
-- paid media only with proper authorization.
+Organic/social/permitted performance promotion and content. Paid acquisition remains owner-blocked.
 
 ### Casey / Owner
-Use for:
-- loss-leader approval;
-- binding financial/legal/payment changes;
-- material price exception;
-- owner-gated commercial strategy;
-- bank/payout/payment-account identity changes.
+Loss-leader approval, binding financial/legal/payment changes, material price exception, owner-gated strategy, bank/payout/payment-account identity changes and protected-top exceptions.
 
 ## 20. Git and receipt standard
 
-The worker is Git-aware.
-
 Use `GIT FIRST` before material Shopify execution.
 
-Write Git only for material state changes, such as:
-
-- new catalog wave staged/activated;
-- significant publication-state correction;
-- storefront/checkout acceptance result;
-- material analytics/conversion finding;
-- first paid order routing proof;
-- profitability classification affecting promotion;
-- major worker conflict or blocker;
-- store operating policy/control change.
-
-Do not create a Git file for every click, view, tag or minor product edit.
+Write Git only for material state changes such as catalog activation waves, significant publication-state correction, storefront/checkout acceptance, meaningful analytics/conversion finding, first paid-order routing proof, promotion/profitability classification affecting traffic, major worker conflict/blocker or store operating control change.
 
 Never place protected supplier cost, customer PII, payment credentials, private inventory/account data or access tokens in public Git.
 
 ## 21. Startup protocol
 
-The new Shopify Store Operations Worker starts with:
-
-**GIT FIRST → READ MASTER S.O.P. + GLOSSARY → READ THIS SOP → READ CURRENT WORKBOARD → READ `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` → READ RELEVANT VENDOR PROJECT SOURCE FOR THE ACTIVE TASK → CHECK MASTER WORKER REGISTRY → VERIFY LIVE SHOPIFY STATE → SELF-REGISTER / CONFIRM PLACEMENT → RUN NEXT ASSIGNED SHOPIFY TASK.**
-
-Initial state before the worker starts its chat is `OPEN TASK / STANDBY`.
-
-When the worker successfully completes startup orientation and adopts the Worktree, it may update its Registry state to `ACTIVE`.
+**GIT FIRST → READ MASTER S.O.P. + GLOSSARY → READ CURRENT WORKBOARD → READ THIS SOP → READ `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md` → READ CURRENT VENDOR PROJECT SOURCE/WORKTREE FOR ACTIVE TASK → CHECK MASTER WORKER REGISTRY → VERIFY LIVE SHOPIFY STATE AS NEEDED → CONFIRM PLACEMENT → RUN NEXT AUTHORIZED SHOPIFY TASK.**
 
 ## 22. Current first assignments
 
-1. Preserve the working public Shopify store and checkout path.
+Current state is carried by `SHOPIFY_STORE_OPERATIONS_CURRENT_WORKTREE.md`; this S.O.P. does not freeze vendor counts into policy.
+
+At this reconciliation point the worker must recognize:
+
+1. Preserve the working public Shopify + Elevation/PayPal purchase paths.
 2. Work toward the first **profitable** direct-site order.
-3. Consume the VEVOR profit-qualified first-sale shortlist and obtain `PROMOTE / HOLD` economics results from the VEVOR lane.
-4. Preserve the five Renogy DRAFT products; activate only individually cleared exact SKUs.
-5. Continue Shopify-side universal catalog acceptance across SOK, VEVOR, Renogy and Kingboss as vendor facts become ready.
-6. Track sessions → carts → checkout → orders and route qualified traffic findings.
-7. Route code/payment/backend work to MASTER DEVELOPER instead of duplicating development.
+3. VEVOR current state includes **three promotion-cleared free/owned products**, seven stock/sellability holds and one ACTIVE shoe-dryer economics-hold exception; do not restore the old “await PROMOTE/HOLD” state.
+4. Renogy current state is **2 ACTIVE / 4 DRAFT**; do not restore the historical five-draft state.
+5. Continue Shopify-side Universal Catalog acceptance only within current vendor truth and P0 coding boundaries.
+6. Track conversion with fresh time-windowed analytics when needed.
+7. Route website-code defects through **PM4/P0 coding recovery**, not directly to Developer during the freeze.
+
+If any of these counts/states later change, the newer verified owning Worktree controls the facts without requiring a policy rewrite.
 
 ## 23. Close / standby condition
 
 The worker does not “finish Shopify.”
 
-It returns to `STANDBY` when its assigned executable Shopify Worktree is clean or all remaining items are waiting on routed external/vendor/owner/technical triggers.
-
-Open items remain preserved in the Shopify Worktree.
+Return to `STANDBY` when the assigned executable Shopify Worktree is clean or remaining items are waiting on routed external/vendor/owner/technical triggers. OPEN items remain preserved in the current Worktree.
 
 ## Control phrase
 
-**VENDOR TRUTH IN → PROFIT CHECK → SHOPIFY EXECUTION → LIVE VERIFY → SELL → ROUTE FULFILLMENT → RECORD ACTUAL PROFIT → SCALE WHAT WORKS.**
+**VENDOR TRUTH IN → PROFIT CHECK → SHOPIFY EXECUTION → LIVE VERIFY → ALLOWED TRAFFIC → REAL ORDER → ROUTE FULFILLMENT → RECORD ACTUAL CONTRIBUTION → SCALE WHAT WORKS; WEBSITE CODE ROUTES THROUGH PM4/P0 RECOVERY.**
