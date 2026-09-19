@@ -13,13 +13,15 @@ assert set(['SK12V100PC','SK48V100N']) <= set(rows)
 assert rows['SK12V100PC']['priceCents'] >= 31900
 assert rows['SK48V100N']['priceCents'] >= 119900
 assert rows['SK12V100PC']['availabilityMode'] == 'available'
-assert rows['SK48V100N']['availabilityMode'] == 'prepurchase'
+assert rows['SK48V100N']['availabilityMode'] == 'available'
 for sku,p in rows.items():
     promo=p.get('promotion',{})
     assert promo.get('eligible') is False
     assert promo.get('couponEligible') is False
-    if sku in ('SK12V100PC','SK48V100N'):
+    if p.get('mapVerified') is True:
+        assert isinstance(p.get('priceCents'), int) and p.get('priceCents') > 0
         assert promo.get('pricingMode') == 'sok-map'
+        assert p.get('publicPurchaseMode') == 'DIRECT_CHECKOUT'
     else:
         assert p.get('priceCents') is None
         assert promo.get('pricingMode') == 'purchase-options'
@@ -27,7 +29,7 @@ raw=json.dumps(d).lower()
 for token in ['suppliercost','supplierinventory','sourcewarehouse','dropshipcost','landedcost','margincents','primary_carrier','carrier_state','economics_state']:
     assert token not in raw, token
 PY2
-for asset in /assets/brands/sok/sk12v100pc/hero.png /assets/brands/sok/sk12v100pc/spec-sheet.pdf /assets/brands/sok/sk48v100n/hero.jpg /assets/brands/sok/sk48v100n/spec-sheet.pdf /assets/brands/sok/sk48v100n/system-cabinet.png /sok-product-merch.js /sok-solar-builder.js; do code=$(curl -sS -L --retry 8 --retry-all-errors -o /dev/null -w '%{http_code}' "${base}${asset}"); [[ "$code" == 200 ]] || { echo "FAIL asset $asset = $code"; exit 1; }; done
+for asset in /assets/brands/sok/sk12v100pc/hero.png /assets/brands/sok/sk12v100pc/spec-sheet.pdf /assets/brands/sok/sk48v100n/official-clean.png /assets/brands/sok/sk48v100n/spec-sheet.pdf /assets/brands/sok/sk48v100n/system-cabinet.png /sok-product-merch.js /sok-solar-builder.js; do code=$(curl -sS -L --retry 8 --retry-all-errors -o /dev/null -w '%{http_code}' "${base}${asset}"); [[ "$code" == 200 ]] || { echo "FAIL asset $asset = $code"; exit 1; }; done
 for protected in /sok-availability-runtime.js /sok-operations-runtime.js /commerce-pricing-runtime.js /catalog-admin-runtime.js /doba-csv-sync-runtime.js; do code=$(curl -sS -o /dev/null -w '%{http_code}' "${base}${protected}" || true); [[ "$code" == 404 ]] || { echo "FAIL protected $protected = $code"; exit 1; }; done
 code=$(curl -sS -o /dev/null -w '%{http_code}' "${base}/api/admin/sok-availability" || true); [[ "$code" == 401 ]] || { echo "FAIL SOK admin auth = $code"; exit 1; }
 curl -sS -L "${base}/solar-project" -o /tmp/sok-solar-project; grep -q 'sok-solar-builder.js' /tmp/sok-solar-project

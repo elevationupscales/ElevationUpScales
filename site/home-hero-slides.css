@@ -146,6 +146,20 @@
   font-size:.82rem!important;
 }
 
+/* Partnership announcement banner */
+.home-partnership-banner{
+  width:100%;
+  background:#01080d;
+  border-bottom:1px solid rgba(5,199,242,.22);
+  overflow:hidden;
+}
+.home-partnership-banner img{
+  display:block;
+  width:min(100%,2172px);
+  height:auto;
+  margin:0 auto;
+}
+
 /* Flagship first fold */
 .reference-storefront-hero{
   position:relative;

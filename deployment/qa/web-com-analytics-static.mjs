@@ -69,8 +69,9 @@ assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static rede
 
 const home = fs.readFileSync("site/index.html", "utf8");
 assert.ok(home.includes("AUTHORIZED SOK ENERGY DEALER"));
-assert.ok(home.includes("Lithium Power"));
-assert.ok(home.includes("for RV, Solar &amp; Backup"));
+assert.ok(home.includes("Power Systems, Projects"));
+assert.ok(home.includes("&amp; Logistics Support"));
+assert.ok(home.includes("shop.elevationupscales.com"), "homepage must expose the branded Shopify storefront");
 assert.equal(home.includes("Supply Logistics &amp; Ocean Freight"), false, "superseded freight mission returned to homepage flagship");
 assert.ok(home.includes("Battery Freight for Hawaii &amp; Alaska."));
 assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");

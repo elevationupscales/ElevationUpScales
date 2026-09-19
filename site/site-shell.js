@@ -18,10 +18,11 @@
   });
 
   const SHOP_LINKS = Object.freeze([
-    ["/lithium-batteries", "Lithium Batteries", "12V, 24V and 48V LiFePO4 for RV, solar and off-grid power"],
-    ["/sok-batteries", "SOK Battery Systems", "Authorized SOK Energy Dealer · batteries, chargers and accessories"],
-    ["/rv-store", "RV & Outdoor", "RV essentials, camping, travel and practical outdoor equipment"],
-    ["/store", "Elevation Gear", "Apparel, hats and current Elevation releases"],
+    ["https://shop.elevationupscales.com/collections/all", "Shop All Products", "Open the Elevation Shopify store"],
+    ["https://shop.elevationupscales.com/collections/complete-power-systems", "Complete Power Systems", "Battery and system-scale packages"],
+    ["https://shop.elevationupscales.com/collections/sok-battery", "SOK Battery", "Authorized SOK Energy products"],
+    ["https://shop.elevationupscales.com/collections/renogy", "Renogy", "Solar, charging and off-grid power"],
+    ["https://shop.elevationupscales.com/collections/sungoldpower", "SunGoldPower", "Inverters and power systems"],
   ]);
 
   function randomId() {
@@ -393,8 +394,8 @@
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Power <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-          <a href="/lithium-batteries"><span><strong>Lithium Batteries</strong><small>12V, 24V and 48V power</small></span></a>
-          <a href="/sok-batteries"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy Dealer</small></span></a>
+          <a href="https://shop.elevationupscales.com/collections/all"><span><strong>Lithium Batteries</strong><small>Shop current battery and power products</small></span></a>
+          <a href="https://shop.elevationupscales.com/collections/sok-battery"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy products</small></span></a>
           <a href="/solar-project"><span><strong>Solar & Off-Grid</strong><small>Build around real power needs</small></span></a>
           <a href="/hawaii-lithium-batteries"><span><strong>Hawaii Power</strong><small>Availability and freight review</small></span></a>
         </div></details>
@@ -423,8 +424,12 @@
       const query = String(new FormData(search).get("q") || "").trim();
       if (!query) return;
       const lower = query.toLowerCase();
-      const destination = /sok|battery|lithium|12v|24v|48v|lifepo4/.test(lower) ? "/lithium-batteries" : /marketplace|used|rv for sale|vehicle/.test(lower) ? "/marketplace" : "/rv-store";
-      location.assign(`${destination}?q=${encodeURIComponent(query)}`);
+      const destination = /service|repair|project/.test(lower)
+        ? `/start-a-project?q=${encodeURIComponent(query)}`
+        : /hawaii|alaska|freight|logistic|shipping/.test(lower)
+          ? `/shipping-logistics-services?q=${encodeURIComponent(query)}`
+          : `https://shop.elevationupscales.com/search?q=${encodeURIComponent(query)}`;
+      location.assign(destination);
     });
   }
 
@@ -432,7 +437,7 @@
     if (document.body.classList.contains("retail-home")) return;
     const footer = document.querySelector(".site-footer");
     if (!footer) return;
-    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Off-Grid Power • Supply • Logistics<br>Elevation Catalog and independent Marketplace</p></div></div><div class="footer-contact"><a href="/lithium-batteries">Lithium Batteries</a><a href="/sok-batteries">SOK Battery Systems</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/marketplace">Marketplace</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
+    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Off-Grid Power • Supply • Logistics<br>Projects, logistics and online shopping</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/collections/all">Shop Online</a><a href="https://shop.elevationupscales.com/collections/complete-power-systems">Complete Power Systems</a><a href="https://shop.elevationupscales.com/collections/sok-battery">SOK Battery</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
     const year = footer.querySelector("#year");
     if (year) year.textContent = String(new Date().getFullYear());
   }

@@ -5,15 +5,11 @@
     const shopMenu = [...document.querySelectorAll(".reference-nav-menu")].find((menu) => menu.querySelector("summary")?.textContent.trim().startsWith("Shop"));
     const dropdown = shopMenu?.querySelector(".eus-dropdown");
     if (dropdown) dropdown.innerHTML = `
-      <a href="/store"><span><strong>Universal Store</strong><small>Lithium, charging, RV, backup and off-grid products</small></span></a>
-      <a href="/sok-batteries"><span><strong>Shop SOK</strong><small>Authorized SOK Energy Dealer storefront</small></span></a>
-      <a href="/kingboss-batteries"><span><strong>Shop Kingboss</strong><small>Kingboss battery storefront in the Elevation catalog</small></span></a>
-      <a href="/store?department=rv-outdoor"><span><strong>RV &amp; Mobile Power</strong><small>RV, travel and mobile-power products</small></span></a>`;
-
-    document.querySelectorAll('a[href="/lithium-batteries"]').forEach((link) => {
-      if (!link.closest("[data-home-sok]")) link.href = "/store?department=lithium-batteries";
-    });
-    document.querySelectorAll('a[href="/rv-store"]').forEach((link) => { link.href = "/store?department=rv-outdoor"; });
+      <a href="https://shop.elevationupscales.com/collections/all"><span><strong>Shop All Products</strong><small>Open the Elevation Shopify store</small></span></a>
+      <a href="https://shop.elevationupscales.com/collections/complete-power-systems"><span><strong>Complete Power Systems</strong><small>Battery and system-scale packages</small></span></a>
+      <a href="https://shop.elevationupscales.com/collections/sok-battery"><span><strong>SOK Battery</strong><small>Authorized SOK Energy products</small></span></a>
+      <a href="https://shop.elevationupscales.com/collections/renogy"><span><strong>Renogy</strong><small>Solar, charging and off-grid power</small></span></a>
+      <a href="https://shop.elevationupscales.com/collections/sungoldpower"><span><strong>SunGoldPower</strong><small>Inverters and power systems</small></span></a>`;
   }
 
   installCommerceNavigation();

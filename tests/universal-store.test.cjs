@@ -47,6 +47,6 @@ test('email integration remains present in the same release tree', () => {
 test('universal store routes direct checkout into supported checkout source lanes', () => {
   const runtime = read('site/universal-store.js');
   assert.doesNotMatch(runtime, /\/checkout\/\?source=universal/);
-  assert.match(runtime, /checkoutSource=p\.sokProduct\|\|section==="lithium-batteries"\?"lithium":"rv"/);
+  assert.match(runtime, /checkoutSource\s*=\s*p\.sokProduct\s*\|\|\s*section\s*===\s*"lithium-batteries"\s*\?\s*"lithium"\s*:\s*"rv"/);
   assert.match(runtime, /\/checkout\/\?source=\$\{checkoutSource\}/);
 });
