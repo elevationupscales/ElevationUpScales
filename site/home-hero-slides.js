@@ -14,6 +14,7 @@
     if (utility) {
       utility.innerHTML = `
         <span class="reference-utility__signal">Off-Grid Power • Supply • Logistics</span>
+        <a class="reference-utility__signal" href="https://shop.elevationupscales.com/collections/all" data-eus-event="shopify_store_open" data-eus-value="utility">Shop Online →</a>
         <a class="reference-utility__signal reference-utility__signal--hawaii" href="/shipping-logistics-services">Hawaii &amp; Alaska Logistics Review</a>
         <span class="reference-utility__signal reference-utility__signal--applications">RV • Solar • Backup • Commercial</span>
         <span class="reference-utility__contact"><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a></span>`;
@@ -28,11 +29,11 @@
     const nav = document.querySelector("#eus-nav");
     if (nav) {
       nav.innerHTML = `
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Power <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/lithium-batteries"><span><strong>Lithium Batteries</strong><small>12V, 24V and 48V power</small></span></a><a href="/sok-batteries"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy Dealer</small></span></a><a href="/solar-project"><span><strong>Solar &amp; Off-Grid</strong><small>Build around real power needs</small></span></a><a href="/hawaii-lithium-batteries"><span><strong>Hawaii Power</strong><small>SOK purchase options and freight review</small></span></a><a href="/shipping-logistics-services#alaska"><span><strong>Alaska Logistics</strong><small>Product and destination shipping review</small></span></a></div></details>
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/lithium-batteries"><span><strong>Shop Lithium</strong><small>Batteries and power storage</small></span></a><a href="/sok-batteries"><span><strong>Shop SOK</strong><small>Batteries, chargers and accessories</small></span></a><a href="/rv-store"><span><strong>RV &amp; Outdoor</strong><small>Travel, camping and RV gear</small></span></a><a href="/store"><span><strong>Elevation Gear</strong><small>Current Elevation releases</small></span></a></div></details>
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="https://shop.elevationupscales.com/collections/all"><span><strong>Shop All Products</strong><small>Open the Elevation Shopify store</small></span></a><a href="https://shop.elevationupscales.com/collections/complete-power-systems"><span><strong>Complete Power Systems</strong><small>Battery and system-scale packages</small></span></a><a href="https://shop.elevationupscales.com/collections/sok-battery"><span><strong>SOK Battery</strong><small>Authorized SOK Energy products</small></span></a><a href="https://shop.elevationupscales.com/collections/renogy"><span><strong>Renogy</strong><small>Solar, charging and off-grid power</small></span></a><a href="https://shop.elevationupscales.com/collections/sungoldpower"><span><strong>SunGoldPower</strong><small>Inverters and power systems</small></span></a></div></details>
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Projects <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or project support</small></span></a><a href="/solar-project"><span><strong>Solar System Builder</strong><small>Plan your power system</small></span></a></div></details>
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Services <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/shipping-logistics-services"><span><strong>Freight &amp; Logistics</strong><small>Hawaii, Alaska and destination support</small></span></a><a href="/what-we-do#home-rv-services"><span><strong>Home &amp; RV Services</strong><small>Repair, restoration and upgrades</small></span></a><a href="/solar-services"><span><strong>Power &amp; Solar Services</strong><small>Planning and troubleshooting</small></span></a></div></details>
-        <details class="eus-menu reference-nav-menu reference-nav-menu--company"><summary class="eus-nav-trigger">Company <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics and projects</small></span></a><a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth</small></span></a><a href="/marketplace"><span><strong>Marketplace</strong><small>Local listings and community inventory</small></span></a></div></details>`;
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Logistics <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/shipping-logistics-services"><span><strong>Freight &amp; Logistics</strong><small>Hawaii, Alaska and destination support</small></span></a><a href="/hawaii-lithium-batteries"><span><strong>Hawaii Power</strong><small>Lithium and freight review</small></span></a><a href="/shipping-logistics-services#alaska"><span><strong>Alaska Logistics</strong><small>Product and destination shipping review</small></span></a></div></details>
+        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Services <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/what-we-do#home-rv-services"><span><strong>Home &amp; RV Services</strong><small>Repair, restoration and upgrades</small></span></a><a href="/solar-services"><span><strong>Power &amp; Solar Services</strong><small>Planning and troubleshooting</small></span></a></div></details>
+        <details class="eus-menu reference-nav-menu reference-nav-menu--company"><summary class="eus-nav-trigger">Company <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"><a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics and projects</small></span></a><a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth</small></span></a></div></details>`;
     }
 
     const headerInner = document.querySelector(".eus-header__inner");
@@ -59,15 +60,10 @@
       search.dataset.bound = "true";
       const routeFor = (query) => {
         const q = query.toLowerCase();
-        if (/sok|rack|48v|battery system/.test(q)) return "/sok-batteries";
-        if (/hawaii/.test(q)) return "/hawaii-lithium-batteries";
-        if (/alaska|freight|logistic|shipping|ocean/.test(q)) return "/shipping-logistics-services";
-        if (/lithium|lifepo4|12v|24v|battery/.test(q)) return "/lithium-batteries";
-        if (/solar|off.grid|inverter|backup|power/.test(q)) return "/solar-project";
-        if (/rv|camp|outdoor|travel/.test(q)) return "/rv-store";
         if (/service|repair|restore|project/.test(q)) return "/start-a-project";
-        if (/commercial|multi|quantity/.test(q)) return "/sok-batteries";
-        return "/rv-store";
+        if (/hawaii|alaska|freight|logistic|shipping|ocean/.test(q)) return "/shipping-logistics-services";
+        if (/builder|plan|size|sizing/.test(q) && /solar|battery|power|system/.test(q)) return "/solar-project";
+        return `https://shop.elevationupscales.com/search?q=${encodeURIComponent(query)}`;
       };
 
       search.addEventListener("submit", (event) => {
@@ -98,15 +94,15 @@
           <h1 id="reference-flagship-title">Lithium Power Solutions<br><span>Supply Logistics &amp; Ocean Freight</span></h1>
           <p class="reference-storefront-hero__lead"><strong>Battery supply and hard-to-serve freight are a core Elevation focus.</strong> SOK systems, Hawaii and Alaska destination review, and practical power support for RV, solar, backup and commercial use.</p>
           <div class="reference-storefront-hero__actions">
-            <a class="button retail-primary reference-storefront-hero__primary" href="/lithium-batteries" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Explore Power Solutions <span aria-hidden="true">→</span></a>
+            <a class="button retail-primary reference-storefront-hero__primary" href="https://shop.elevationupscales.com/collections/all" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Explore Power Solutions <span aria-hidden="true">→</span></a>
             <a class="button retail-secondary" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="flagship">Start a Project</a>
           </div>
           <nav class="reference-usecases" aria-label="Power solution shortcuts">
-            <a href="/lithium-batteries"><span>Lithium Batteries</span></a>
-            <a href="/sok-batteries"><span>SOK Battery Systems</span></a>
+            <a href="https://shop.elevationupscales.com/collections/all"><span>Lithium Batteries</span></a>
+            <a href="https://shop.elevationupscales.com/collections/sok-battery"><span>SOK Battery Systems</span></a>
             <a href="/shipping-logistics-services"><span>Hawaii &amp; Alaska Logistics</span></a>
             <a href="/solar-project"><span>Solar &amp; Off-Grid</span></a>
-            <a href="/sok-batteries"><span>Commercial Supply</span></a>
+            <a href="https://shop.elevationupscales.com/collections/sok-battery"><span>Commercial Supply</span></a>
           </nav>
         </div>
 
@@ -145,15 +141,15 @@
     section.setAttribute("aria-labelledby", "reference-solutions-title");
     section.innerHTML = `
       <div class="container">
-        <div class="reference-solutions__head"><h2 id="reference-solutions-title">Shop by <span>Solution</span></h2><div class="reference-solutions__rail"><span>Real Power for Real Life</span><i></i><a href="/rv-store">View All Products →</a></div></div>
+        <div class="reference-solutions__head"><h2 id="reference-solutions-title">Choose Your <span>Path</span></h2><div class="reference-solutions__rail"><span>Real Power for Real Life</span><i></i><a href="https://shop.elevationupscales.com/collections/all">Shop Online →</a></div></div>
         <div class="reference-solutions__grid">
-          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v100pc/home-hero.webp');--solution-size:contain;--solution-position:center 28%;--solution-color:#eef3f4"><div><h3>Lithium Batteries</h3><p>12V lithium energy for RV and mobile systems.</p><a href="/lithium-batteries">Shop Batteries →</a></div></article>
-          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>SOK Battery Systems</h3><p>12V, 24V &amp; 48V systems.</p><a href="/sok-batteries">Shop SOK →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v100pc/home-hero.webp');--solution-size:contain;--solution-position:center 28%;--solution-color:#eef3f4"><div><h3>Lithium Batteries</h3><p>12V lithium energy for RV and mobile systems.</p><a href="https://shop.elevationupscales.com/collections/all">Shop Batteries →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>SOK Battery Systems</h3><p>12V, 24V &amp; 48V systems.</p><a href="https://shop.elevationupscales.com/collections/sok-battery">Shop SOK →</a></div></article>
           <article class="reference-solution-card" style="--solution-image:url('/assets/solar/solar-hero-desktop.webp')"><div><h3>Solar &amp; Off-Grid</h3><p>Build your energy independence.</p><a href="/solar-project">Shop Solar →</a></div></article>
           <article class="reference-solution-card" style="--solution-image:url('/assets/hero/hawaii-ocean-freight-v1.webp');--solution-position:center"><div><h3>Hawaii Power &amp; Logistics</h3><p>Battery freight matched to product and destination.</p><a href="/hawaii-lithium-batteries">Learn More →</a></div></article>
-          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v206h/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#edf1f2"><div><h3>RV &amp; Outdoor</h3><p>Current batteries and gear for the journey.</p><a href="/rv-store">Shop RV &amp; Outdoor →</a></div></article>
-          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>Backup Power</h3><p>Keep what matters running.</p><a href="/sok-batteries">Shop Backup Power →</a></div></article>
-          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk48v100n/home-crop.webp');--solution-size:contain;--solution-position:center 20%;--solution-color:#eef2f3"><div><h3>Commercial Power</h3><p>Scalable power solutions.</p><a href="/sok-batteries">Shop Commercial →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v206h/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#edf1f2"><div><h3>RV &amp; Outdoor</h3><p>Current batteries and gear for the journey.</p><a href="https://shop.elevationupscales.com/collections/all">Shop RV &amp; Outdoor →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>Backup Power</h3><p>Keep what matters running.</p><a href="https://shop.elevationupscales.com/collections/sok-battery">Shop Backup Power →</a></div></article>
+          <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk48v100n/home-crop.webp');--solution-size:contain;--solution-position:center 20%;--solution-color:#eef2f3"><div><h3>Commercial Power</h3><p>Scalable power solutions.</p><a href="https://shop.elevationupscales.com/collections/sok-battery">Shop Commercial →</a></div></article>
         </div>
       </div>`;
 
@@ -289,7 +285,7 @@
       installCarousel(await response.json());
     } catch (error) {
       root.dataset.slideshowReady = "false";
-      root.innerHTML = `<div class="home-hero-slides__fallback"><a href="/lithium-batteries"><img src="/assets/brand/storefront-wordmark.webp" alt="Elevation UpScales, Inc."><span>Explore Power Solutions →</span></a></div>`;
+      root.innerHTML = `<div class="home-hero-slides__fallback"><a href="https://shop.elevationupscales.com/collections/all"><img src="/assets/brand/storefront-wordmark.webp" alt="Elevation UpScales, Inc."><span>Explore Power Solutions →</span></a></div>`;
       console.warn("Homepage slideshow fallback", error);
     }
   }
