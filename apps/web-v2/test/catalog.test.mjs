@@ -8,24 +8,42 @@ import {
   getProductById,
   getProductsByVendor,
   getVendor,
-  missingRequiredFacts
+  missingRequiredFacts,
+  searchCatalog
 } from '../src/catalog.js';
 import { renderCatalogPage } from '../src/catalog-pages.js';
+import { catalogStyles } from '../src/catalog-styles.js';
 import { getPublicRoute } from '../src/routes.js';
 
-test('universal catalog includes SOK, Renogy, VEVOR, SunGoldPower and held Kingboss cohorts', () => {
-  assert.equal(CATALOG_PRODUCTS.length, 20);
-  assert.deepEqual(getProductsByVendor('sok').map(({ sku }) => sku), [
-    'SK12V100PC',
-    'SK12V100H',
-    'SK12V206H',
-    'SK12V206PH',
-    'SK24V100',
-    'SK12V280H',
-    'SK12V314PH',
-    'SK24V150PH',
-    'SK48V100N'
-  ]);
+const SOK_ACTIVE_SKUS = [
+  'SK12V100PC',
+  'SK12V100H',
+  'SK12V206H',
+  'SK12V206PH',
+  'SK24V100',
+  'SK12V280H',
+  'SK12V314PH',
+  'SK24V150PH',
+  'SK48V100N'
+];
+
+const SOK_SUPPORT_SKUS = [
+  'SK12V40A',
+  'SK12V20A',
+  'SK24V10A',
+  'SK48V18A',
+  'SKTC30',
+  'SK4S100',
+  'SK48V100NBR',
+  'SK-L250-8',
+  'SK12V314PHBTI',
+  'SK12V314PHBTB',
+  'SOK-48V-CABINET'
+];
+
+test('universal catalog includes active SOK, verified SOK support identities, Renogy, VEVOR, SunGoldPower and held Kingboss cohorts', () => {
+  assert.equal(CATALOG_PRODUCTS.length, 31);
+  assert.deepEqual(getProductsByVendor('sok').map(({ sku }) => sku), [...SOK_ACTIVE_SKUS, ...SOK_SUPPORT_SKUS]);
   assert.deepEqual(getVendor('sok').unresolvedFacts, []);
   assert.deepEqual(getProductsByVendor('renogy').map(({ sku }) => sku), ['RNG-INVT-3000-12V-P2-G3-US']);
   assert.deepEqual(getProductsByVendor('vevor').map(({ sku }) => sku), ['XXKLJT124INCLJF0QV0']);
@@ -43,10 +61,21 @@ test('universal catalog includes SOK, Renogy, VEVOR, SunGoldPower and held Kingb
   assert.equal(getProductById('kingboss-d01027hh7bv').supplierSku, UNVERIFIED);
 });
 
-test('existing launch-ready products remain orderable while SunGoldPower and Kingboss stay transaction-held', () => {
+test('existing launch-ready products remain orderable while support identities, SunGoldPower and Kingboss stay transaction-held', () => {
   const orderable = CATALOG_PRODUCTS.filter(({ orderable }) => orderable);
   assert.equal(orderable.length, 11);
-  assert.equal(getProductsByVendor('sok').every(({ orderable }) => orderable), true);
+
+  const sokProducts = getProductsByVendor('sok');
+  assert.equal(sokProducts.filter(({ orderable: ready }) => ready).length, 9);
+  assert.deepEqual(sokProducts.filter(({ orderable: ready }) => !ready).map(({ sku }) => sku), SOK_SUPPORT_SKUS);
+  for (const sku of SOK_SUPPORT_SKUS) {
+    const product = sokProducts.find((candidate) => candidate.sku === sku);
+    assert.equal(product.orderable, false, sku);
+    assert.ok(product.missingFacts.includes('media'), sku);
+    assert.ok(product.missingFacts.includes('sellPrice'), sku);
+    assert.ok(product.missingFacts.includes('fulfillmentSource'), sku);
+  }
+
   assert.equal(getProductById('renogy-rng-invt-3000-12v-p2-g3-us').orderable, true);
   assert.equal(getProductById('vevor-xxkljt124incljf0qv0').orderable, true);
 
@@ -104,6 +133,7 @@ test('store and vendor views derive from the expanded universal catalog', () => 
   assert.match(storeHtml, /Power Your RV/);
   assert.match(storeHtml, /Ready to Shop/);
   assert.match(storeHtml, /SK12V100PC/);
+  assert.match(storeHtml, /SK12V40A/);
   assert.match(storeHtml, /RNG-INVT-3000-12V-P2-G3-US/);
   assert.match(storeHtml, /XXKLJT124INCLJF0QV0/);
   assert.match(storeHtml, /LFP12-100A/);
@@ -128,10 +158,13 @@ test('store and vendor views derive from the expanded universal catalog', () => 
   const sokHtml = renderCatalogPage(getPublicRoute('/shop/sok'), new URL('https://test.example/shop/sok'));
   assert.match(sokHtml, /SK12V100PC/);
   assert.match(sokHtml, /SK48V100N/);
+  assert.match(sokHtml, /SK12V40A/);
+  assert.match(sokHtml, /SKTC30/);
+  assert.match(sokHtml, /SOK-48V-CABINET/);
   assert.doesNotMatch(sokHtml, /source snapshot|No SOK checkout is enabled/i);
 });
 
-test('department links actually filter the universal store', () => {
+test('department and category links filter the universal store to customer-readable groups', () => {
   const storeRoute = getPublicRoute('/store');
   const rvHtml = renderCatalogPage(storeRoute, new URL('https://test.example/store?department=rv-outdoor'));
   const rvCatalog = rvHtml.split('<section class="full-catalog"')[1] || '';
@@ -143,9 +176,18 @@ test('department links actually filter the universal store', () => {
   assert.match(batteryCatalog, /SK12V100PC/);
   assert.match(batteryCatalog, /LFP12-100A/);
   assert.doesNotMatch(batteryCatalog, /Camper Levelers/);
+
+  const accessorySkus = searchCatalog('accessories').map(({ sku }) => sku);
+  assert.ok(accessorySkus.includes('SK12V40A'));
+  assert.ok(accessorySkus.includes('SK48V100NBR'));
+  assert.ok(accessorySkus.includes('SK-L250-8'));
+  assert.equal(accessorySkus.includes('SK12V100PC'), false);
+
+  const commercialSkus = searchCatalog('commercial').map(({ sku }) => sku);
+  assert.deepEqual(commercialSkus, ['SOK-48V-CABINET']);
 });
 
-test('orderable product details expose retail actions while held products stay disabled', () => {
+test('orderable product details expose retail actions while held products and SOK support identities stay disabled', () => {
   const vevorRoute = getPublicRoute('/product/vevor-xxkljt124incljf0qv0');
   assert.equal(vevorRoute.implemented, true);
   const vevorPage = renderCatalogPage(vevorRoute, new URL('https://test.example/product/vevor-xxkljt124incljf0qv0'));
@@ -158,6 +200,13 @@ test('orderable product details expose retail actions while held products stay d
   assert.match(vevorPage, /Product Details/);
   assert.doesNotMatch(vevorPage, /MAP \/ floor|Supplier sellability|Authorized channel|Fulfillment/);
 
+  const accessoryRoute = getPublicRoute('/product/sok-sk12v40a');
+  const accessoryPage = renderCatalogPage(accessoryRoute, new URL('https://test.example/product/sok-sk12v40a'));
+  assert.match(accessoryPage, /SK12V40A/);
+  assert.match(accessoryPage, /Battery Charger for 12V LiFePO4 Batteries/);
+  assert.match(accessoryPage, /Currently unavailable online/);
+  assert.doesNotMatch(accessoryPage, /data-add-to-cart|data-buy-now/);
+
   const sungoldRoute = getPublicRoute('/product/sungoldpower-lfp12-100a');
   const sungoldPage = renderCatalogPage(sungoldRoute, new URL('https://test.example/product/sungoldpower-lfp12-100a'));
   assert.match(sungoldPage, /LFP12-100A/);
@@ -169,4 +218,11 @@ test('orderable product details expose retail actions while held products stay d
   const heldPage = renderCatalogPage(heldRoute, new URL('https://test.example/product/kingboss-d01027hh7bv'));
   assert.match(heldPage, /Currently unavailable online/);
   assert.doesNotMatch(heldPage, /data-add-to-cart|data-buy-now/);
+});
+
+test('catalog contrast rules keep dark cards readable and white detail cards explicit', () => {
+  assert.match(catalogStyles, /\.catalog-card \.sku\{[^}]*color:#c7dbe2/);
+  assert.match(catalogStyles, /\.catalog-card \.vendor\{[^}]*color:#7fe8ff/);
+  assert.match(catalogStyles, /\.catalog-detail-card,\.catalog-facts\{[^}]*color:#0b1b22/);
+  assert.match(catalogStyles, /\.catalog-main>\.catalog-shell>a\{[^}]*color:#7fe8ff/);
 });
