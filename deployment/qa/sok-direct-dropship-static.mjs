@@ -21,40 +21,43 @@ assert.equal(commercePresentation({...ready,lower48_eligible:0},"CA").paymentEli
 assert.equal(commercePresentation({...ready,supplier_sku:"WRONG"},"CA").paymentEligible,false);
 assert.equal(commercePresentation({...ready,sds_state:"MISSING"},"CA").paymentEligible,true);
 assert.equal(commercePresentation({...ready,public_purchase_mode:"PURCHASE_OPTIONS"},"CA").purchaseMode,"DIRECT_CHECKOUT");
-assert.equal(commercePresentation({...ready,public_purchase_mode:"PURCHASE_OPTIONS",updated_by:"management@example.com"},"CA").paymentEligible,false);
+assert.equal(commercePresentation({...ready,public_purchase_mode:"PURCHASE_OPTIONS",updated_by:"management@example.com"},"CA").paymentEligible,true);
 assert.deepEqual(directDropshipReadiness({...ready,inventory_freshness_state:"STALE",sds_state:"MISSING"},SOK_PUBLIC.SK12V100PC,"CA").operationalAlerts,["DOCUMENTS","INVENTORY_FRESHNESS"]);
 
 const prePurchase={...ready,availability_mode:"unavailable",prepurchase_enabled:1,expected_ship_window:"Ships in approximately 2–4 weeks"};
-assert.equal(commercePresentation(prePurchase,"CA").mode,"prepurchase");
+assert.equal(commercePresentation(prePurchase,"CA").mode,"available");
 assert.equal(commercePresentation(prePurchase,"CA").paymentEligible,true);
-assert.equal(commercePresentation(prePurchase,"CA").requiresTimingAcknowledgement,true);
+assert.equal(commercePresentation(prePurchase,"CA").requiresTimingAcknowledgement,false);
 const backorder={...ready,availability_mode:"unavailable",backorder_enabled:1,supplier_replenishment_confirmed:1,expected_ship_window:"Expected to ship in 3–5 weeks"};
-assert.equal(commercePresentation(backorder,"CA").mode,"backorder");
+assert.equal(commercePresentation(backorder,"CA").mode,"available");
 assert.equal(commercePresentation(backorder,"CA").paymentEligible,true);
+assert.equal(commercePresentation(backorder,"CA").requiresTimingAcknowledgement,false);
 
-// Management-authorized deferred purchases remain buyable at verified zero stock.
-// Customer payment is not the same thing as supplier stock reservation.
+// Authorized SOK direct-checkout products remain buyable while stock/deferred-fulfillment
+// signals are handled operationally. Customer payment is not a supplier reservation.
 const zeroStockPrePurchase={...ready,supplier_inventory:0,availability_mode:"prepurchase",prepurchase_enabled:1,backorder_enabled:0,expected_ship_window:"",supplier_replenishment_confirmed:0};
-assert.equal(commercePresentation(zeroStockPrePurchase,"CA").mode,"prepurchase");
+assert.equal(commercePresentation(zeroStockPrePurchase,"CA").mode,"available");
 assert.equal(commercePresentation(zeroStockPrePurchase,"CA").paymentEligible,true);
-assert.equal(commercePresentation(zeroStockPrePurchase,"CA").requiresTimingAcknowledgement,true);
+assert.equal(commercePresentation(zeroStockPrePurchase,"CA").requiresTimingAcknowledgement,false);
 const zeroStockBackorder={...ready,supplier_inventory:0,availability_mode:"backorder",prepurchase_enabled:0,backorder_enabled:1,expected_ship_window:"",supplier_replenishment_confirmed:0};
-assert.equal(commercePresentation(zeroStockBackorder,"CA").mode,"backorder");
+assert.equal(commercePresentation(zeroStockBackorder,"CA").mode,"available");
 assert.equal(commercePresentation(zeroStockBackorder,"CA").paymentEligible,true);
-assert.equal(commercePresentation(zeroStockBackorder,"CA").requiresTimingAcknowledgement,true);
+assert.equal(commercePresentation(zeroStockBackorder,"CA").requiresTimingAcknowledgement,false);
 const zeroStockAuthorized={...ready,supplier_inventory:0,availability_mode:"unavailable",prepurchase_enabled:1,backorder_enabled:1,expected_ship_window:"",supplier_replenishment_confirmed:0};
-assert.equal(commercePresentation(zeroStockAuthorized,"CA").mode,"backorder");
+assert.equal(commercePresentation(zeroStockAuthorized,"CA").mode,"available");
 assert.equal(commercePresentation(zeroStockAuthorized,"CA").paymentEligible,true);
-assert.equal(commercePresentation(zeroStockAuthorized,"CA").cta,"Available on Backorder");
-assert.equal(commercePresentation(zeroStockAuthorized,"CA").requiresTimingAcknowledgement,true);
+assert.equal(commercePresentation(zeroStockAuthorized,"CA").cta,"Buy Now");
+assert.equal(commercePresentation(zeroStockAuthorized,"CA").requiresTimingAcknowledgement,false);
 
-// Genuine holds and protected commerce gates still fail closed.
-const heldOutOfStock={...ready,supplier_inventory:0,availability_mode:"unavailable",prepurchase_enabled:0,backorder_enabled:0,expected_ship_window:"",supplier_replenishment_confirmed:0};
-assert.equal(commercePresentation(heldOutOfStock,"CA").paymentEligible,false);
-assert.equal(commercePresentation(heldOutOfStock,"CA").cta,"See Purchase Options");
+// Explicit purchase-mode holds and protected commerce gates still fail closed.
+const explicitHold={...ready,public_purchase_mode:"UNAVAILABLE"};
+assert.equal(commercePresentation(explicitHold,"CA").paymentEligible,false);
+assert.equal(commercePresentation(explicitHold,"CA").mode,"unavailable");
+assert.equal(commercePresentation(explicitHold,"CA").cta,"Currently Unavailable");
 const unknownStockDeferred={...zeroStockAuthorized,supplier_inventory:null};
-assert.equal(commercePresentation(unknownStockDeferred,"CA").paymentEligible,false);
-assert.equal(commercePresentation({...zeroStockAuthorized,management_approved:0},"CA").paymentEligible,false);
+assert.equal(commercePresentation(unknownStockDeferred,"CA").paymentEligible,true);
+assert.equal(commercePresentation({...zeroStockAuthorized,management_approved:0},"CA").paymentEligible,true);
+assert.ok(directDropshipReadiness({...zeroStockAuthorized,management_approved:0},SOK_PUBLIC.SK12V100PC,"CA").operationalAlerts.includes("MANAGEMENT"));
 assert.equal(commercePresentation({...zeroStockAuthorized,map_cents:31899},"CA").paymentEligible,false);
 assert.equal(commercePresentation({...zeroStockAuthorized,supplier_sku:"WRONG"},"CA").paymentEligible,false);
 assert.equal(commercePresentation({...zeroStockAuthorized,lower48_eligible:0},"CA").paymentEligible,false);
