@@ -90,27 +90,27 @@
       <div class="reference-storefront-hero__scene" aria-hidden="true"></div>
       <div class="container reference-storefront-hero__inner">
         <div class="reference-storefront-hero__copy">
-          <p class="reference-storefront-hero__eyebrow">LITHIUM BATTERY SUPPLY <span aria-hidden="true">|</span> HAWAII &amp; ALASKA SHIPPING LOGISTICS</p>
-          <h1 id="reference-flagship-title">Lithium Power Solutions<br><span>Supply Logistics &amp; Ocean Freight</span></h1>
-          <p class="reference-storefront-hero__lead"><strong>Battery supply and hard-to-serve freight are a core Elevation focus.</strong> SOK systems, Hawaii and Alaska destination review, and practical power support for RV, solar, backup and commercial use.</p>
+          <p class="reference-storefront-hero__eyebrow">OFF-GRID POWER • SUPPLY • LOGISTICS</p>
+          <h1 id="reference-flagship-title">Power Systems, Projects<br><span>&amp; Logistics Support</span></h1>
+          <p class="reference-storefront-hero__lead">Shop authorized power products through the Elevation online store, start a project, or get help planning systems and moving lithium into harder-to-serve destinations.</p>
           <div class="reference-storefront-hero__actions">
-            <a class="button retail-primary reference-storefront-hero__primary" href="https://shop.elevationupscales.com/collections/all" data-eus-event="homepage_product_detail_open" data-eus-value="flagship-power">Explore Power Solutions <span aria-hidden="true">→</span></a>
-            <a class="button retail-secondary" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="flagship">Start a Project</a>
+            <a class="button retail-primary reference-storefront-hero__primary" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="flagship">Start a Project <span aria-hidden="true">→</span></a>
+            <a class="button retail-secondary" href="https://shop.elevationupscales.com/collections/all" data-eus-event="shopify_store_open" data-eus-value="flagship-shop">Shop Online</a>
           </div>
-          <nav class="reference-usecases" aria-label="Power solution shortcuts">
-            <a href="https://shop.elevationupscales.com/collections/all"><span>Lithium Batteries</span></a>
-            <a href="https://shop.elevationupscales.com/collections/sok-battery"><span>SOK Battery Systems</span></a>
-            <a href="/shipping-logistics-services"><span>Hawaii &amp; Alaska Logistics</span></a>
-            <a href="/solar-project"><span>Solar &amp; Off-Grid</span></a>
-            <a href="https://shop.elevationupscales.com/collections/sok-battery"><span>Commercial Supply</span></a>
+          <nav class="reference-usecases" aria-label="Elevation shortcuts">
+            <a href="https://shop.elevationupscales.com/collections/all"><span>Shop Online</span></a>
+            <a href="https://shop.elevationupscales.com/collections/complete-power-systems"><span>Complete Systems</span></a>
+            <a href="/shipping-logistics-services"><span>Freight &amp; Logistics</span></a>
+            <a href="/solar-project"><span>Solar System Builder</span></a>
+            <a href="/start-a-project"><span>Project Support</span></a>
           </nav>
         </div>
 
         <div class="reference-storefront-hero__visual" aria-label="SOK lithium battery systems">
           <img class="reference-sok-brand" src="/assets/brands/sok/sok-wordmark-home-transparent.webp" alt="SOK Battery" width="620" height="190">
           <p class="reference-sok-partnership">Authorized Dealer <span>•</span> Premium SOK Energy Products</p>
-          <a class="reference-product reference-product--12v" href="/sok/sk12v100pc/" aria-label="View SOK SK12V100PC"><img src="/assets/brands/sok/sk12v100pc/home-hero.webp" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900" fetchpriority="high" decoding="async"><span><b>SK12V100PC</b><small>12.8V 100Ah</small></span></a>
-          <a class="reference-product reference-product--48v" href="/sok/sk48v100n/" aria-label="View SOK SK48V100N"><img src="/assets/brands/sok/48v-battery-cabinet/hero.webp" alt="SOK 48V rack storage cabinet" width="500" height="500" decoding="async"><span><b>SK48V100N</b><small>51.2V 100Ah rack platform</small></span></a>
+          <a class="reference-product reference-product--12v" href="https://shop.elevationupscales.com/search?q=SK12V100PC" aria-label="View SOK SK12V100PC"><img src="/assets/brands/sok/sk12v100pc/home-hero.webp" alt="SOK SK12V100PC 12.8V 100Ah LiFePO4 battery" width="900" height="900" fetchpriority="high" decoding="async"><span><b>SK12V100PC</b><small>12.8V 100Ah</small></span></a>
+          <a class="reference-product reference-product--48v" href="https://shop.elevationupscales.com/search?q=SK48V100N" aria-label="View SOK SK48V100N"><img src="/assets/brands/sok/48v-battery-cabinet/hero.webp" alt="SOK 48V rack storage cabinet" width="500" height="500" decoding="async"><span><b>SK48V100N</b><small>51.2V 100Ah rack platform</small></span></a>
           <div class="reference-authorized"><img src="/assets/brand/storefront-wordmark.webp" alt="Elevation UpScales, Inc." width="430" height="150"><span>AUTHORIZED DEALER</span></div>
         </div>
       </div>
@@ -123,7 +123,7 @@
     trust.dataset.referenceTrust = "true";
     trust.setAttribute("aria-label", "Elevation customer support highlights");
     trust.innerHTML = `
-      <div class="reference-trust-strip__item"><div><strong>Authorized Battery Supply</strong><span>SOK systems for RV, solar and storage.</span></div></div>
+      <a class="reference-trust-strip__item" href="https://shop.elevationupscales.com/collections/all"><div><strong>Shop Elevation</strong><span>Secure online shopping at shop.elevationupscales.com.</span></div></a>
       <a class="reference-trust-strip__item" href="/shipping-logistics-services"><div><strong>Hawaii &amp; Alaska</strong><span>Destination review for harder-to-serve markets.</span></div></a>
       <a class="reference-trust-strip__item" href="tel:+12088134998"><div><strong>Support</strong><span>Call Elevation: 208-813-4998</span></div></a>`;
     hero.insertAdjacentElement("afterend", trust);
@@ -145,7 +145,7 @@
         <div class="reference-solutions__grid">
           <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v100pc/home-hero.webp');--solution-size:contain;--solution-position:center 28%;--solution-color:#eef3f4"><div><h3>Lithium Batteries</h3><p>12V lithium energy for RV and mobile systems.</p><a href="https://shop.elevationupscales.com/collections/all">Shop Batteries →</a></div></article>
           <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>SOK Battery Systems</h3><p>12V, 24V &amp; 48V systems.</p><a href="https://shop.elevationupscales.com/collections/sok-battery">Shop SOK →</a></div></article>
-          <article class="reference-solution-card" style="--solution-image:url('/assets/solar/solar-hero-desktop.webp')"><div><h3>Solar &amp; Off-Grid</h3><p>Build your energy independence.</p><a href="/solar-project">Shop Solar →</a></div></article>
+          <article class="reference-solution-card" style="--solution-image:url('/assets/solar/solar-hero-desktop.webp')"><div><h3>Solar &amp; Off-Grid</h3><p>Build your energy independence.</p><a href="/solar-project">Build a System →</a></div></article>
           <article class="reference-solution-card" style="--solution-image:url('/assets/hero/hawaii-ocean-freight-v1.webp');--solution-position:center"><div><h3>Hawaii Power &amp; Logistics</h3><p>Battery freight matched to product and destination.</p><a href="/hawaii-lithium-batteries">Learn More →</a></div></article>
           <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/sk12v206h/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#edf1f2"><div><h3>RV &amp; Outdoor</h3><p>Current batteries and gear for the journey.</p><a href="https://shop.elevationupscales.com/collections/all">Shop RV &amp; Outdoor →</a></div></article>
           <article class="reference-solution-card reference-solution-card--product" style="--solution-image:url('/assets/brands/sok/48v-battery-cabinet/hero.webp');--solution-size:contain;--solution-position:center 24%;--solution-color:#e9edef"><div><h3>Backup Power</h3><p>Keep what matters running.</p><a href="https://shop.elevationupscales.com/collections/sok-battery">Shop Backup Power →</a></div></article>
