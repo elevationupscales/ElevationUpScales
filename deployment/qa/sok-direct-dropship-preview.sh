@@ -33,8 +33,11 @@ if(direct.publicPurchaseMode!=="DIRECT_CHECKOUT"||direct.paymentEligible!==true|
 if(!String(direct.purchaseUrl||"").startsWith("/checkout/?source=lithium&id=sok-sk12v100pc"))throw new Error("SK12V100PC checkout URL mismatch");
 if(!["CURRENT","AGING","STALE","UNCONFIRMED"].includes(direct.inventoryFreshness))throw new Error("inventory freshness missing");
 
-const assisted=by.SK48V100N;
-if(!assisted||assisted.priceCents!==119900||assisted.paymentEligible!==false)throw new Error("SK48V100N assisted path changed unexpectedly");
+const rack=by.SK48V100N;
+if(!rack)throw new Error("SK48V100N missing from public SOK catalog");
+if(rack.priceCents!==119900||rack.mapVerified!==true)throw new Error("SK48V100N MAP mismatch");
+if(rack.publicPurchaseMode!=="DIRECT_CHECKOUT"||rack.paymentEligible!==true||rack.commerceCta!=="Buy Now")throw new Error("SK48V100N direct checkout not active");
+if(!String(rack.purchaseUrl||"").startsWith("/checkout/?source=lithium&id=sok-sk48v100n"))throw new Error("SK48V100N checkout URL mismatch");
 
 const raw=JSON.stringify(catalog);
 for(const token of ["supplierCost","dropShipCost","supplierInventory","sourceWarehouse","inventory_confirmation_source","last_supplier_verified","primary_carrier","carrier_state","economics_state","H2O Logistics","Approved Freight Forwarders"]){
