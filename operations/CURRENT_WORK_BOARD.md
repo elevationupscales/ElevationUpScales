@@ -1,7 +1,7 @@
 # ELEVATION UPSCALES — CURRENT WORK BOARD
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-09-17  
+**Effective:** 2026-09-20  
 **Owner:** Casey Young  
 **State Owner:** **Operating System Project Manager — Company Oversight ROLE**  
 **Web / Commerce Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
@@ -46,7 +46,7 @@ Major website build/edit work is substantially complete. The company is now conv
 
 Current priority order:
 
-**P0 WEB / COMMERCE STABILIZATION → P0 MARKET EXPANSION CONVERSION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 SOK EBAY REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P1 SUNGOLDPOWER → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
+**P0 CORE LINEUP MERCHANDISING + PURCHASEABILITY → P0 WEB / COMMERCE STABILIZATION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 SOK EBAY REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P1 SUNGOLDPOWER → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
 
 Vendor acquisition is no longer the main mission. New vendor prospecting is opportunistic only unless Casey specifically elevates a target.
 
@@ -68,13 +68,41 @@ Managers manage state and priorities. Workers execute code and commerce operatio
 
 ---
 
+# OWNER P0 DIRECTIVE — CORE LINEUP MERCHANDISING + PURCHASEABILITY — 2026-09-20
+
+Casey's current storefront directive is:
+
+**CORE 12 → HOMEPAGE HIERARCHY → THREE BUYING LANES → TRUST PASS → 12-SKU CHECKOUT SMOKE → MARKET**
+
+This supersedes broad catalog-growth and random-product merchandising as the current storefront priority.
+
+Execution rules:
+- preserve the current theme/shell; this is a merchandising and purchaseability pass, not a redesign;
+- use approximately 12 deliberately promoted revenue SKUs as the measured selling set;
+- simplify the visible customer path into **Shop Equipment / Complete Systems / Commercial-Large Projects**;
+- homepage sequence should represent the full business rather than overloading first-time visitors with SOK multipacks or Hawaii freight offers;
+- target sequence: **SOK 100Ah → Renogy portable solar → Elevation bundle → SunGold 8kW complete system → Hawaii capability**;
+- establish a visible entry-price ladder before asking every visitor to make a four-figure decision;
+- every core product must answer authorization/trust, fulfillment, included equipment, normal shipping treatment, and Elevation support;
+- smoke the exact 12 core product paths from merchandising surface through product detail, cart/Buy action and checkout;
+- one failed SKU becomes one bounded repair; do not restart the entire store project;
+- marketing scales only after the core lineup smoke is clean;
+- sourcing, new bundle creation and broad catalog expansion are behind this conversion lane until the core selling structure has measurable evidence.
+
+Primary measurement:
+
+**CORE PRODUCT VIEW → ADD TO CART → CHECKOUT → PAID ORDER**
+
+Do not use total catalog count as a storefront-success metric.
+
 # CURRENT PRIORITIES
 
 | Priority | Work Item | Execution Owner | State | Next Action |
 |---|---|---|---|---|
-| **P0** | Web / commerce stabilization | Web V2 Development | **ACTIVE — BOUNDED DEFECT REPAIR** | Work only proven customer/revenue-path defects. No broad redesign. Build/test on branch and stop at READY TO DEPLOY. |
+| **P0** | Core lineup merchandising + purchaseability | Shopify Store Operations / Commerce-Storefront; Recon-QA verifies | **ACTIVE — OWNER DIRECTED** | Lock the Core 12, rebuild homepage hierarchy without redesign, expose three buying lanes, run trust pass, smoke all 12 purchase paths, then market only after clean evidence. |
+| **P0** | Web / commerce stabilization | Web V2 Development | **ACTIVE — SUPPORTING BOUNDED DEFECT REPAIR** | Repair only exact defects exposed by the Core 12 smoke. No broad redesign. Build/test on branch and stop at READY TO DEPLOY. |
 | **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
-| **P0** | Renogy Hawaii / Alaska / Canada expansion + click conversion | Shopify Store Operations under Peter; Commerce/Storefront; Shipping & Logistics; OS RECON | **ACTIVE — OWNER DIRECTED / ORGANIZED EXPANSION** | Use `RENOGY_HI_AK_CANADA_MARKET_OPENING_2026-09-17.md` as canonical lane control. Open verified eligible SKUs, install/verify protected shipping treatment, expose one clear customer shopping path, measure product clicks → add-to-cart → checkout → paid order, and tune shipping from real fulfillment. No duplicate rules. |
+| **P1** | Renogy Hawaii / Alaska / Canada expansion + click conversion | Shopify Store Operations under Peter; Commerce/Storefront; Shipping & Logistics; OS RECON | **ACTIVE — SUPPORTING / NO LONGER STORE LEAD** | Preserve verified market routes and use them where they support the Core 12. Do not let destination expansion outrank the core conversion pass. |
 | **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — SOK MODEL ESTABLISHED** | Reuse the public-safe SOK truth pattern vendor by vendor: exact SKU, protected cost source, MAP/floor, shipping, channel fees, contribution state, stock, authorization, warranty/returns, source and verification state. Keep protected dealer costs/raw inventory out of public Git. |
 | **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **OWNER-AUTHORIZED CURRENT WAVE / MAP CONTROLLED** | Execute only the supplied `00_CURRENT_UPLOADS` wave, verify each upload receipt, preserve MAP and shipping-policy controls, and do not use `90_SUPERSEDED_DRAFTS`. The `10_PRESALE_HOLD` lane remains held until separately cleared. |
 | **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / EXPANSION ACTIVE / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Expansion does not override SKU commercial holds. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
