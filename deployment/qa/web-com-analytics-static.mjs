@@ -73,7 +73,8 @@ assert.ok(home.includes("Power products and support"), "clean commerce homepage 
 assert.ok(home.includes("SHOP • COMMERCIAL • PROJECTS"), "clean commerce homepage intent framing missing");
 assert.ok(home.includes("shop.elevationupscales.com"), "homepage must expose the branded Shopify storefront");
 assert.equal(home.includes("Supply Logistics &amp; Ocean Freight"), false, "superseded freight mission returned to homepage flagship");
-assert.ok(home.includes("Hawaii &amp; Alaska"), "homepage must retain destination-logistics discovery");
+assert.ok(home.includes('href="/hawaii-lithium-batteries"'), "homepage must retain the direct Hawaii purchase path");
+assert.ok(home.includes('href="/shipping-logistics-services"'), "homepage must retain general destination-logistics discovery");
 assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK12V100PC"'), "homepage SK12V100PC analytics missing");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK48V100N"'), "homepage SK48V100N analytics missing");
