@@ -69,15 +69,16 @@ assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static rede
 
 const home = fs.readFileSync("site/index.html", "utf8");
 assert.ok(home.includes("AUTHORIZED SOK ENERGY DEALER"));
-assert.ok(home.includes("Power Systems, Projects"));
-assert.ok(home.includes("&amp; Logistics Support"));
+assert.ok(home.includes("Power products and support"), "clean commerce homepage headline missing");
+assert.ok(home.includes("SHOP • COMMERCIAL • PROJECTS"), "clean commerce homepage intent framing missing");
 assert.ok(home.includes("shop.elevationupscales.com"), "homepage must expose the branded Shopify storefront");
 assert.equal(home.includes("Supply Logistics &amp; Ocean Freight"), false, "superseded freight mission returned to homepage flagship");
-assert.ok(home.includes("Battery Freight for Hawaii &amp; Alaska."));
+assert.ok(home.includes("Hawaii &amp; Alaska"), "homepage must retain destination-logistics discovery");
 assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK12V100PC"'), "homepage SK12V100PC analytics missing");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK48V100N"'), "homepage SK48V100N analytics missing");
-assert.ok(home.includes('data-eus-value="alaska"'), "homepage Alaska logistics route analytics missing");
+assert.ok(home.includes('data-eus-event="homepage_logistics_route" data-eus-value="hawaii-alaska"'), "homepage Hawaii/Alaska logistics route analytics missing");
+assert.ok(home.includes('data-eus-event="commercial_review_route"'), "homepage commercial route analytics missing");
 assert.equal(home.toLowerCase().includes("start with what you need"), false, "removed owner copy returned to homepage");
 assert.equal(home.includes("for RV Life."), false, "superseded RV-life hero copy returned to homepage");
 
