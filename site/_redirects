@@ -102,3 +102,13 @@
 /outdoor-store /store?department=rv-outdoor 301
 /rv-outdoor-store /store?department=rv-outdoor 301
 /shop/rv /store?department=rv-outdoor 301
+
+# Clean commerce / vendor canonical routes
+/brands /vendors 301
+/brands/ /vendors 301
+/brands.html /vendors 301
+/vendor/Olight /vendor/olight 301
+/vendor/Olight/ /vendor/olight 301
+/vendor/OLIGHT /vendor/olight 301
+/commercial.html /commercial 301
+/vendors.html /vendors 301
