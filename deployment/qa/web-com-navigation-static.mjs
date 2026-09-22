@@ -26,11 +26,13 @@ for (const route of [
 assert.equal(shopBlock.includes('"/marketplace"'), false, "retired Marketplace must not be owned by the active Shop menu");
 assert.equal(shopBlock.includes('"/solar-services"'), false, "Solar services must remain under Services, not be duplicated into shared Shop ownership");
 assert.equal(shopBlock.includes('"/collector"'), false, "Collector Series must not remain in the primary Shop menu");
-assert.ok(shell.includes('<summary class="eus-nav-trigger">Power'), "shared shell must expose the grouped Power menu");
-assert.ok(shell.includes('href="/hawaii-lithium-batteries"'), "Hawaii Power must remain available under Power");
+assert.equal(shell.includes('<summary class="eus-nav-trigger">Power'), false, "retired duplicate Power menu must stay removed from the simplified shell");
+assert.ok(shell.includes('href="/vendors"'), "shared shell must expose the Brands hub");
+assert.ok(shell.includes('href="/commercial"'), "shared shell must expose the Commercial hub");
 assert.ok(shell.includes('<summary class="eus-nav-trigger">Projects'), "shared shell must expose the grouped Projects menu");
 assert.ok(shell.includes('<summary class="eus-nav-trigger">Services'), "shared shell must expose the grouped Services menu");
-assert.ok(shell.includes('<summary class="eus-nav-trigger">Company'), "shared shell must expose the grouped Company menu");
+assert.ok(shell.includes('<summary class="eus-nav-trigger">Company'), "shared shell must retain the quieter Company menu");
+assert.equal(shell.includes('href="/marketplace"'), false, "retired Marketplace must not remain in the shared public shell");
 
 // Main-site contract: Shopify owns product shopping; projects, planning and logistics stay on ElevationUpScales.com.
 for (const route of [
@@ -39,6 +41,9 @@ for (const route of [
   "https://shop.elevationupscales.com/collections/sok-battery",
   "/solar-project",
   "/hawaii-lithium-batteries",
+  "/vendors",
+  "/commercial",
+  "/vendor/olight",
 ]) {
   assert.ok(home.includes(`href="${route}"`) || home.includes(`href="${route}?`), `homepage missing ${route}`);
 }
@@ -46,6 +51,23 @@ assert.ok(home.includes('href="#logistics"') || home.includes('href="/shipping-l
 assert.ok(home.includes("retail-shop-menu") || /reference-nav-menu[^>]*><summary[^>]*>Shop/.test(home), "homepage must use the retail-first Shop menu");
 assert.ok(home.includes("retail-more-menu") || home.includes("reference-nav-menu--company"), "homepage must retain a quieter company/menu layer for non-shopping destinations");
 assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain the main-site project path");
+
+assert.ok(home.includes('href="/vendor/sok-energy"'), "homepage must expose the SOK vendor page");
+assert.ok(home.includes('href="/vendor/renogy"'), "homepage must expose the Renogy vendor page");
+assert.ok(home.includes('href="/vendor/sungoldpower"'), "homepage must expose the SunGoldPower vendor page");
+
+for (const requiredFile of [
+  "site/vendors/index.html",
+  "site/vendor/olight/index.html",
+  "site/vendor/sok-energy/index.html",
+  "site/vendor/renogy/index.html",
+  "site/vendor/sungoldpower/index.html",
+  "site/commercial/index.html",
+  "site/clean-commerce-v1.css",
+]) {
+  assert.equal(fs.existsSync(requiredFile), true, `clean commerce route missing: ${requiredFile}`);
+}
+
 
 // Service-page source retains semantic ownership while the shared runtime supplies one public shell.
 assert.ok(solarServices.includes("eus-menu--services"), "full service navigation must retain Services ownership");
