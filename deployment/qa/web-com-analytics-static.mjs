@@ -77,7 +77,7 @@ assert.ok(home.includes("Hawaii &amp; Alaska"), "homepage must retain destinatio
 assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK12V100PC"'), "homepage SK12V100PC analytics missing");
 assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK48V100N"'), "homepage SK48V100N analytics missing");
-assert.ok(home.includes('data-eus-event="homepage_logistics_route" data-eus-value="hawaii-alaska"'), "homepage Hawaii/Alaska logistics route analytics missing");
+assert.ok(home.includes('data-eus-event="homepage_logistics_route" data-eus-value="hawaii"'), "homepage Hawaii logistics route analytics missing");
 assert.ok(home.includes('data-eus-event="commercial_review_route"'), "homepage commercial route analytics missing");
 assert.equal(home.toLowerCase().includes("start with what you need"), false, "removed owner copy returned to homepage");
 assert.equal(home.includes("for RV Life."), false, "superseded RV-life hero copy returned to homepage");
