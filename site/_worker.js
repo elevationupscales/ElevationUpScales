@@ -30,6 +30,7 @@ const CHECKOUT_CSP = [
 ].join("; ");
 
 function checkoutResponse(response) {if(!response)return response;const headers=new Headers(response.headers);headers.set("Content-Security-Policy",CHECKOUT_CSP);headers.set("Cache-Control","no-store");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
+function previewSeoResponse(request,response){if(!response)return response;let hostname="";try{hostname=new URL(request.url).hostname.toLowerCase();}catch(_){return response;}if(!hostname.endsWith(".pages.dev"))return response;const headers=new Headers(response.headers);headers.set("X-Robots-Tag","noindex, nofollow, noarchive");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
 function checkoutJson(data,status){return Response.json(data,{status,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer"}});}
 async function mergedCatalogPublicApi(request,env,pathname){const response=await handleCatalogPublicApi(request,env,pathname);if(!response?.ok)return response;try{const url=new URL(request.url);if(clean(url.searchParams.get("section"),60).toLowerCase()!=="lithium-batteries")return response;const data=await response.json();const sok=await publicSokCatalogProducts(env);const existing=Array.isArray(data?.products)?data.products:[];const keys=new Set(sok.flatMap(p=>[clean(p.id,140).toLowerCase(),clean(p.sku,140).toLowerCase()]));const products=[...sok,...existing.filter(p=>!keys.has(clean(p?.id,140).toLowerCase())&&!keys.has(clean(p?.sku,140).toLowerCase()))];return Response.json({...data,products,count:products.length},{status:200,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});}catch(_){return response;}}
 function clean(value,max=500){return String(value??"").trim().slice(0,max);}
@@ -103,12 +104,12 @@ export default {
     if(url.pathname==="/api/admin/commerce-intake") return handleCommerceIntakeAdminApi(request,env,url.pathname);
     if(url.pathname==="/api/admin/apparel-providers") return handleApparelProviderAdminApi(request,env,url.pathname);
     if(url.pathname==="/api/sync/run") return handleSyncScheduledApi(request,env,url.pathname);
-    if(url.pathname.startsWith("/sok/")){const page=await handleSokFullLinePage(request,env,url.pathname);if(page)return page;}
+    if(url.pathname.startsWith("/sok/")){const page=await handleSokFullLinePage(request,env,url.pathname);if(page)return previewSeoResponse(request,page);}
     const response=await coreWorker.fetch(request,env,ctx);
-    if(url.pathname==="/checkout"||url.pathname==="/checkout/") return checkoutResponse(response);
-    if(url.pathname==="/lithium-batteries"||url.pathname==="/lithium-batteries/") return enhanceStorefront(request,response,env,"lithium");
-    if(url.pathname==="/hawaii-lithium-batteries"||url.pathname==="/hawaii-lithium-batteries/") return enhanceStorefront(request,response,env,"hawaii");
-    if(url.pathname==="/rv-store"||url.pathname==="/rv-store/") return enhanceStorefront(request,response,env,"rv");
-    return response;
+    if(url.pathname==="/checkout"||url.pathname==="/checkout/") return previewSeoResponse(request,checkoutResponse(response));
+    if(url.pathname==="/lithium-batteries"||url.pathname==="/lithium-batteries/") return previewSeoResponse(request,await enhanceStorefront(request,response,env,"lithium"));
+    if(url.pathname==="/hawaii-lithium-batteries"||url.pathname==="/hawaii-lithium-batteries/") return previewSeoResponse(request,await enhanceStorefront(request,response,env,"hawaii"));
+    if(url.pathname==="/rv-store"||url.pathname==="/rv-store/") return previewSeoResponse(request,await enhanceStorefront(request,response,env,"rv"));
+    return previewSeoResponse(request,response);
   },
 };
