@@ -31,7 +31,7 @@ jobs:
       - name: Download vendor-supplied SOK media archive
         run: |
           mkdir -p /tmp/sok-media
-          gdown --fuzzy "https://drive.google.com/file/d/1_IUGscvqpefBDORUg2eYEnp9DsGBh1-e/view?usp=sharing" -O /tmp/sok-media/SOK_Product_Images.zip
+          gdown "1_IUGscvqpefBDORUg2eYEnp9DsGBh1-e" -O /tmp/sok-media/SOK_Product_Images.zip
           unzip -t /tmp/sok-media/SOK_Product_Images.zip >/dev/null
 
       - name: Extract full approved media library
