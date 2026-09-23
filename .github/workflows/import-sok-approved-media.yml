@@ -41,6 +41,24 @@ jobs:
           mkdir -p "$TARGET"
           unzip -q /tmp/sok-media/SOK_Product_Images.zip -d "$TARGET"
 
+      - name: Install nested-archive extractor
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Expand nested SOK archives
+        run: |
+          TARGET="assets/vendor-media/sok/approved-product-images"
+          while find "$TARGET" -type f \( -iname "*.zip" -o -iname "*.rar" \) -print -quit | grep -q .; do
+            find "$TARGET" -type f \( -iname "*.zip" -o -iname "*.rar" \) -print0 | while IFS= read -r -d '' ARCHIVE; do
+              DEST="${ARCHIVE%.*}"
+              mkdir -p "$DEST"
+              echo "Expanding nested archive: $ARCHIVE"
+              7z x -y -o"$DEST" "$ARCHIVE" >/dev/null
+              rm -f "$ARCHIVE"
+            done
+          done
+
       - name: Verify GitHub file-size compatibility
         run: |
           python - <<'PY'
