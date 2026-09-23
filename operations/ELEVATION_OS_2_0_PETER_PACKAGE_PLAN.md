@@ -26,6 +26,7 @@ It does **not** replace live Git.
 5. Give Peter a durable local Git lane without creating a second Master Work Board.
 6. Preserve owner gates, public-data controls and project ownership.
 7. Make the package small enough to load into a new ChatGPT project/chat without recreating the entire company archive.
+8. Enforce a visible Git-first preflight receipt before any substantive Git-aware work so stale chat context cannot silently drive execution.
 
 ## Proposed package structure
 
@@ -162,6 +163,7 @@ Before delivery, verify:
 7. AI reset prompt rejects stale queues/historical MPM instances.
 8. Manifest hashes validate.
 9. Package can be loaded into a fresh Peter ChatGPT conversation and the worker can correctly explain its scope before execution.
+10. Fresh-chat test confirms the worker resolves live `main` and records a `GIT CHECK` receipt before substantive analysis or execution.
 
 ## Build decision
 
