@@ -14,6 +14,13 @@ assert.ok(worker.includes("return previewSeoResponse(request,page);"), "dynamic 
 const globalHeaderBlock = headers.split(/\n\s*\n/)[0];
 assert.equal(globalHeaderBlock.includes("X-Robots-Tag"), false, "global noindex must never be applied to the production site");
 assert.ok(robots.includes("Sitemap: https://elevationupscales.com/sitemap.xml"), "production sitemap declaration missing");
+assert.ok(sitemap.includes("<loc>https://elevationupscales.com/lithium-batteries</loc>"), "lithium storefront sitemap entry missing");
+assert.ok(sitemap.includes("<loc>https://elevationupscales.com/rv-store</loc>"), "RV storefront sitemap entry missing");
+
+for (const file of ["site/product.html", "site/sok-order.html", "site/checkout/index.html"]) {
+  const html = fs.readFileSync(file, "utf8");
+  assert.ok(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html), `${file}: utility noindex missing`);
+}
 
 const keyPages = [
   ["site/sok-batteries.html", "https://elevationupscales.com/sok-batteries"],
