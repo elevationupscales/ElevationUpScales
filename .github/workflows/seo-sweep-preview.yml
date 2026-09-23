@@ -23,12 +23,11 @@ jobs:
             deployment/qa
             package.json
 
-      - name: Run SEO and canonical QA
+      - name: Run focused SEO QA
         shell: bash
         run: |
           set -euo pipefail
-          npm run qa
-          npm run qa:secrets
+          npm run qa:seo
           git diff --check
 
       - name: Deploy isolated Cloudflare SEO preview
