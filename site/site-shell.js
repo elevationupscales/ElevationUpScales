@@ -393,26 +393,21 @@
       <a class="eus-brand" href="/" aria-label="Elevation UpScales, Inc. home"><img class="reference-header-wordmark" src="${retailBrandSrc}" alt="Elevation UpScales, Inc." width="${retailBrandWidth}" height="${retailBrandHeight}"></a>
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Power <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-          <a href="https://shop.elevationupscales.com/collections/all"><span><strong>Lithium Batteries</strong><small>Shop current battery and power products</small></span></a>
-          <a href="https://shop.elevationupscales.com/collections/sok-battery"><span><strong>SOK Battery Systems</strong><small>Authorized SOK Energy products</small></span></a>
-          <a href="/solar-project"><span><strong>Solar & Off-Grid</strong><small>Build around real power needs</small></span></a>
-          <a href="/hawaii-lithium-batteries"><span><strong>Hawaii Power</strong><small>Availability and freight review</small></span></a>
-        </div></details>
         <details class="eus-menu eus-menu--shop reference-nav-menu"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>
+        <a class="eus-nav-link" href="/vendors">Brands</a>
+        <a class="eus-nav-link" href="/commercial">Commercial</a>
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Projects <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
           <a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or project support</small></span></a>
-          <a href="/solar-project"><span><strong>Solar System Builder</strong><small>Plan your power system</small></span></a>
+          <a href="/solar-project"><span><strong>Solar System Builder</strong><small>Plan battery, solar and inverter needs</small></span></a>
         </div></details>
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Services <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
           <a href="/shipping-logistics-services"><span><strong>Freight & Logistics</strong><small>Hawaii, Alaska and destination support</small></span></a>
-          <a href="/what-we-do#home-rv-services"><span><strong>Home & RV Services</strong><small>Repair, restoration and upgrades</small></span></a>
           <a href="/solar-services"><span><strong>Power & Solar Services</strong><small>Planning and troubleshooting</small></span></a>
+          <a href="/what-we-do#home-rv-services"><span><strong>Home & RV Services</strong><small>Repair, restoration and upgrades</small></span></a>
         </div></details>
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Company <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
+        <details class="eus-menu reference-nav-menu reference-nav-menu--company"><summary class="eus-nav-trigger">Company <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
           <a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics and projects</small></span></a>
           <a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth</small></span></a>
-          <a href="/marketplace"><span><strong>Marketplace</strong><small>Independent local and community listings</small></span></a>
         </div></details>
       </nav>
       ${retailRoute ? '<form class="reference-global-search" data-global-search role="search"><label class="sr-only" for="global-site-search">Search products</label><input id="global-site-search" name="q" type="search" autocomplete="off" placeholder="Search products…"><button type="submit" aria-label="Search">⌕</button></form>' : ""}
@@ -437,7 +432,7 @@
     if (document.body.classList.contains("retail-home")) return;
     const footer = document.querySelector(".site-footer");
     if (!footer) return;
-    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Off-Grid Power • Supply • Logistics<br>Projects, logistics and online shopping</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/collections/all">Shop Online</a><a href="https://shop.elevationupscales.com/collections/complete-power-systems">Complete Power Systems</a><a href="https://shop.elevationupscales.com/collections/sok-battery">SOK Battery</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
+    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Power • Supply • Logistics • Projects</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/collections/all">Shop Online</a><a href="/vendors">Brands</a><a href="/commercial">Commercial Supply</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
     const year = footer.querySelector("#year");
     if (year) year.textContent = String(new Date().getFullYear());
   }
