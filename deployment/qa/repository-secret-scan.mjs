@@ -5,6 +5,13 @@ import { pathToFileURL } from "node:url";
 
 const MAX_TRACKED_FILE_BYTES = 25 * 1024 * 1024;
 
+const APPROVED_OVERSIZED_GIT_BLOBS = new Map([
+  ["assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240703100307.png", "f9949a40bab8b44e74e561d97e404b50e904ae1d"],
+  ["assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240719101900.png", "9f7e852833b43938977deb4670f430fd43f3ad5e"],
+  ["assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240920092400.png", "1fa1124a645d993da3f01051aa92d2884b420f3b"],
+  ["assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240913110831.png", "91851630d814f32434a024933c2cb0bdefcebcf7"],
+]);
+
 const FORBIDDEN_PATH_RULES = [
   { label: "environment file", test: (value) => /(^|\/)\.env(?:\.|$)/i.test(value) },
   { label: "Cloudflare local secret file", test: (value) => /(^|\/)\.dev\.vars(?:\.|$)/i.test(value) },
@@ -66,8 +73,19 @@ export function scanTrackedRepository(root = process.cwd()) {
     }
     if (!stat.isFile()) continue;
     if (stat.size > MAX_TRACKED_FILE_BYTES) {
-      findings.push({ path: normalized, rule: "tracked file exceeds 25 MiB" });
-      continue;
+      const approvedBlob = APPROVED_OVERSIZED_GIT_BLOBS.get(normalized);
+      let currentBlob = "";
+      if (approvedBlob) {
+        try {
+          currentBlob = execFileSync("git", ["hash-object", "--", relative], { cwd: root, encoding: "utf8" }).trim();
+        } catch (_) {
+          currentBlob = "";
+        }
+      }
+      if (!approvedBlob || currentBlob !== approvedBlob) {
+        findings.push({ path: normalized, rule: "tracked file exceeds 25 MiB" });
+        continue;
+      }
     }
 
     const bytes = fs.readFileSync(absolute);
