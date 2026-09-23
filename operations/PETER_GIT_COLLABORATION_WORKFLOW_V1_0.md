@@ -15,7 +15,7 @@ The design rule is:
 
 **ONE REPOSITORY → ONE MASTER S.O.P. → ONE GLOBAL WORK BOARD → PETER READS GLOBAL STATE → PETER WRITES HIS OWN LANE → MATERIAL DELTAS ROUTE UP.**
 
-The parent authority remains `operations/MASTER_SOP_V1_0.md`.
+The parent authority is the accepted OS 1.1 composite control set: `operations/MASTER_SOP_V1_0.md` + `operations/MASTER_SOP_V1_1.md` + accepted OS 1.1 modules. V1.0 remains the non-regression foundation.
 
 ## Authority boundary
 
@@ -31,7 +31,7 @@ Peter's Git lane is a delegated operating surface under Company Operations / cur
 
 Peter-directed Git-aware work starts with:
 
-**GIT FIRST → RESOLVE CURRENT `main` → READ MASTER S.O.P. → READ CURRENT WORK BOARD → READ PETER MANAGER INDEX → READ THE OWNING PROJECT/WORKTREE → VERIFY ASSIGNMENT → EXECUTE.**
+**GIT FIRST → RESOLVE CURRENT `main` → READ MASTER S.O.P. V1.0 + V1.1 CONTROL SET → READ OS 1.1 EXECUTION/HANDOFF CONTROL → READ CURRENT WORK BOARD → READ PETER MANAGER INDEX → READ THE OWNING PROJECT/WORKTREE → VERIFY ASSIGNMENT → EXECUTE.**
 
 ### Hard preflight gate
 
