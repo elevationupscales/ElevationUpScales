@@ -78,6 +78,10 @@ Use one owner for each type of state:
 - [`DROPSHIP_VENDOR_OUTREACH_STANDARD.md`](./DROPSHIP_VENDOR_OUTREACH_STANDARD.md) — dropship first-outreach standard.
 - [`VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md`](./VENDOR_ONBOARDING_AND_CATALOG_MERGE_SOP.md) — proportional post-approval vendor onboarding/catalog merge standard.
 - [`PETER_PROJECT_STARTER_V2_2026-09-10.md`](./PETER_PROJECT_STARTER_V2_2026-09-10.md) — Peter's simplified Ecommerce & Vendor Operations execution control; work order comes from `CURRENT_WORK_BOARD.md`.
+- [`PETER_GIT_COLLABORATION_WORKFLOW_V1_0.md`](./PETER_GIT_COLLABORATION_WORKFLOW_V1_0.md) — delegated same-repository Git collaboration boundary for Peter: read global state, write Peter-owned lane, route material global changes upward.
+- [`peter/PETER_MANAGER_INDEX.md`](./peter/PETER_MANAGER_INDEX.md) — Peter's durable Git-first orientation/index; not a second global Work Board.
+- [`peter/PETER_CURRENT_WORKTREE.md`](./peter/PETER_CURRENT_WORKTREE.md) — Peter Git collaboration onboarding/current bounded work state.
+- [`peter/PETER_HANDOFF_LOG.md`](./peter/PETER_HANDOFF_LOG.md) — public-safe material-result handoff surface back to Company Operations / current MPM.
 - [`shopify-manager/SHOPIFY_MANAGER.md`](./shopify-manager/SHOPIFY_MANAGER.md) — Shopify / Shopify POS / Doba / SOK ecommerce worker lane under Company Operations.
 
 ## Dedicated vendor Project Sources
