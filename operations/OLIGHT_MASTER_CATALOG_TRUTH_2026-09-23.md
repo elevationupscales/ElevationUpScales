@@ -19,8 +19,8 @@ Shopify inventory quantities are not treated as supplier physical inventory.
 Live Shopify verification on 2026-09-23 found:
 
 - **13 total Olight product records**
-- **8 ACTIVE**
-- **5 DRAFT**
+- **9 ACTIVE**
+- **4 DRAFT**
 
 | Product | Shopify SKU / variant identity | Public price | Shopify state | Supplier/source state | Current disposition |
 |---|---|---:|---|---|---|
@@ -92,7 +92,7 @@ Rules:
 ## Next revenue sequence
 
 1. Protect and measure the 8 ACTIVE products, including the newly separated Oclip 2 Ultra Premium.
-2. Move **Sphere** through exact media + purchaseability verification.
+2. **Sphere is live / verified** with official Olight media and Online Store purchaseability confirmed.
 3. Move **Odin S M-LOK** through exact media + purchaseability verification.
 4. Move **PL X GL** through exact media + purchaseability verification.
 5. Move **OSIGHT SE** through exact media + purchaseability verification.
