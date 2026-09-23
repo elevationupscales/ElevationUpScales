@@ -46,7 +46,7 @@ Historical `OLIGHT_PARTNERSHIP_RECON_2026-09-17.md` is useful relationship histo
 
 ## Current launch assortment
 
-Current Shopify verification on 2026-09-23 found **12 Olight product records: 7 ACTIVE and 5 DRAFT**.
+Current Shopify verification on 2026-09-23 found **13 Olight product records: 8 ACTIVE and 5 DRAFT**. The Oclip family is now separated correctly: Oclip 2 Pro Black/Orange standard remains its own $49.99 listing, and Oclip 2 Ultra Premium is a separate $94.99 live listing with the Mobile Charging Dock.
 
 The exact operational truth is maintained in:
 
@@ -78,7 +78,7 @@ Customer-facing product, collection and brochure material should be product-led 
 
 ## Current next work
 
-1. Preserve the 7 currently ACTIVE Olight products and verify conversion/purchaseability rather than recreating them.
+1. Preserve the 8 currently ACTIVE Olight products and verify conversion/purchaseability rather than recreating them.
 2. Advance clean DRAFT products only when exact source, current availability, media and publication readiness pass.
 3. Keep the exact Black Baton 4 draft held because the current dealer source marks that exact SKU unavailable; do not silently substitute another color.
 4. Use Olight's launch-feedback opportunity for video/promotion planning only after economics and promotional/MAP compatibility are verified.
