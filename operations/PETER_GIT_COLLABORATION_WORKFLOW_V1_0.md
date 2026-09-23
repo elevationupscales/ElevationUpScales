@@ -33,6 +33,20 @@ Peter-directed Git-aware work starts with:
 
 **GIT FIRST → RESOLVE CURRENT `main` → READ MASTER S.O.P. → READ CURRENT WORK BOARD → READ PETER MANAGER INDEX → READ THE OWNING PROJECT/WORKTREE → VERIFY ASSIGNMENT → EXECUTE.**
 
+### Hard preflight gate
+
+No substantive analysis, recommendation, drafting, mutation, publication, send, upload, deployment, or project-state claim may occur before the Git-first check is complete for Git-aware work.
+
+The worker must record a compact startup receipt before proceeding:
+
+**GIT CHECK → current `main` SHA → control files read → owning Project/Worktree resolved → assignment confirmed.**
+
+If the worker cannot resolve current Git:
+
+**STOP ONLY THE GIT-DEPENDENT WORK → REPORT GIT CHECK FAILED → DO NOT SUBSTITUTE MEMORY OR OLD CHAT STATE.**
+
+A stale chat summary, old handoff, historical MPM number, remembered product state, or prior local note is never a substitute for the Git-first check.
+
 Do not use old chat prompts, historical MPM numbers, old handoffs or stale local notes as current authority when current Git is available and consistent.
 
 ## Read scope
