@@ -4,7 +4,7 @@
 **Audience:** Peter Torres + Peter-directed AI workers  
 **Package name:** `ELEVATION_OS_2.0_PETER.zip`  
 **Plan date:** 2026-09-23  
-**Status:** BUILD IN PROGRESS — STARTUP README + PETER CHATGPT PROJECT PROMPT COMPLETE  
+**Status:** BUILD IN PROGRESS — STARTUP CORE COMPLETE / ZIP ASSEMBLY PENDING  
 **Live source of truth:** `elevationupscales/ElevationUpScales`
 
 ## Purpose
@@ -177,6 +177,16 @@ Completed source files:
 - `operations/elevation-os-2.0/PETER_CHATGPT_PROJECT_START_PROMPT.md` — controlling prompt for the new Peter ChatGPT Project.
 
 These files are Git-backed source material for the future startup ZIP. The ZIP should contain copies of these files, but live Git remains authoritative after startup.
+
+Additional startup-core files completed:
+
+- `operations/elevation-os-2.0/00_START_HERE.md`
+- `operations/elevation-os-2.0/01_OS_2_0_OVERVIEW.md`
+- `operations/elevation-os-2.0/PETER_AI_WORKER_RESET_PROMPT.md`
+- `operations/elevation-os-2.0/CUSTOMER_FACING_COLLATERAL_WORKER_PROFILE.md`
+- `operations/elevation-os-2.0/GIT_FIRST_STARTUP_CHECKLIST.md`
+
+Next unblocked build step: assemble the one-time startup ZIP from exact current-main source files, add the snapshot warning + source manifest, hash it, and verify contents.
 
 ## Build decision
 
