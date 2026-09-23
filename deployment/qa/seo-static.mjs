@@ -9,7 +9,8 @@ assert.ok(worker.includes('hostname.endsWith(".pages.dev")'), "Pages preview hos
 assert.ok(worker.includes('headers.set("X-Robots-Tag","noindex, nofollow, noarchive")'), "Pages preview noindex header missing");
 assert.ok(worker.includes("return previewSeoResponse(request,response);"), "final static response must pass through preview SEO guard");
 assert.ok(worker.includes("return previewSeoResponse(request,page);"), "dynamic SOK page must pass through preview SEO guard");
-assert.equal(headers.includes("X-Robots-Tag: noindex, nofollow, noarchive\n\n/"), false, "global noindex must never be applied to the production site");
+const globalHeaderBlock = headers.split(/\n\s*\n/)[0];
+assert.equal(globalHeaderBlock.includes("X-Robots-Tag"), false, "global noindex must never be applied to the production site");
 assert.ok(robots.includes("Sitemap: https://elevationupscales.com/sitemap.xml"), "production sitemap declaration missing");
 
 console.log("SEO static checks passed");
