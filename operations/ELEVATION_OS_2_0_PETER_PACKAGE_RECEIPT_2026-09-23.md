@@ -2,7 +2,7 @@
 
 **Owner:** Casey Young  
 **Package:** `ELEVATION_OS_2.0_PETER.zip`  
-**State:** BUILT / VERIFIED / DELIVERED PENDING EMAIL RECEIPT  
+**State:** BUILT / VERIFIED / DELIVERED  
 **Repository:** `elevationupscales/ElevationUpScales`
 
 ## Build
@@ -38,4 +38,9 @@ A one-time GitHub Actions packaging workflow was added to create the exact repos
 
 ## Delivery
 
-Email delivery receipt should be appended after send verification.
+Sent to Peter Torres at `petertorres805@icloud.com`.
+
+- Gmail message ID: `1a0ceeadf5577cef`
+- Gmail thread ID: `1a0cee2664454f58`
+- Attachment: `ELEVATION_OS_2.0_PETER.zip`
+- Send result: VERIFIED / SENT
