@@ -27,13 +27,14 @@ Authority rule:
 Every Peter-directed Git-aware chat or worker should begin:
 
 1. resolve current `main`;
-2. read `../MASTER_SOP_V1_0.md`;
-3. read `../CURRENT_WORK_BOARD.md`;
-4. read this file;
-5. read `PETER_CURRENT_WORKTREE.md`;
-6. read the current owning vendor/channel Project Source or Worktree;
-7. verify the exact assignment;
-8. execute only the assigned scope.
+2. read `../MASTER_SOP_V1_0.md` and `../MASTER_SOP_V1_1.md`;
+3. read `../OS_1_1_EXECUTION_HANDOFF_SOP.md`;
+4. read `../CURRENT_WORK_BOARD.md`;
+5. read this file;
+6. read `PETER_CURRENT_WORKTREE.md`;
+7. read the current owning vendor/channel Project Source or Worktree;
+8. verify the exact assignment;
+9. execute only the assigned scope.
 
 Historical MPM numbers, old chat handoffs and old queues are reference only unless current Git explicitly says otherwise.
 
