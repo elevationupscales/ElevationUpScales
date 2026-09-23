@@ -154,11 +154,28 @@ No management essay is required.
 
 ## Git / management systems
 
-Peter is not responsible for keeping management Git current.
+Peter now has a delegated Git collaboration lane in the same Elevation repository.
 
-Company Operations / OS management owns SOPs, work-board reconciliation, Git records, project handoffs, and cross-project routing.
+Parent control:
 
-If Peter needs Git for a task, he should read only the specific current record needed. If Git access is unavailable, that alone does not create a Peter troubleshooting project; report it and let Operations handle access.
+- `operations/PETER_GIT_COLLABORATION_WORKFLOW_V1_0.md`
+- `operations/peter/PETER_MANAGER_INDEX.md`
+- `operations/peter/PETER_CURRENT_WORKTREE.md`
+- `operations/peter/PETER_HANDOFF_LOG.md`
+
+Peter and Peter-directed AI workers may read current public-safe OS/project state needed for assigned work.
+
+Normal Peter-lane writes belong under `operations/peter/` unless the current assignment explicitly grants a bounded project/vendor file update.
+
+Peter does **not** independently own global Work Board reconciliation, Master S.O.P. policy, cross-project routing, release authority, or another Project's controlling Worktree.
+
+The operating rule is:
+
+**READ GLOBAL → WRITE LOCAL → ROUTE MATERIAL CHANGE UP.**
+
+Company Operations / current MPM continues to own global work-board reconciliation and cross-project routing.
+
+If Peter's verified result materially changes global company state, record `MASTER UPDATE REQUIRED` in `operations/peter/PETER_HANDOFF_LOG.md` and route it upward.
 
 Protected data does not belong in public Git.
 
