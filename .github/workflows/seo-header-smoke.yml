@@ -1,0 +1,53 @@
+name: SEO Header Smoke
+
+on:
+  push:
+    paths:
+      - ".github/workflows/seo-header-smoke.yml"
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            site
+            deployment/qa
+            package.json
+
+      - name: Focused SEO QA
+        run: npm run qa:seo
+
+      - name: Deploy SEO preview
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=seo-header-smoke
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check pages.dev noindex and key routes
+        env:
+          BASE: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE%/}"
+          for route in / /sok-batteries /hawaii-lithium-batteries /vendors /vendor/olight /commercial; do
+            code="$(curl -sS -L -o /dev/null -w '%{http_code}' "$base$route")"
+            test "$code" = "200"
+            header="$(curl -sSI "$base$route" | tr -d '\r' | grep -i '^x-robots-tag:' || true)"
+            echo "$route => $code | $header"
+            echo "$header" | grep -qi 'noindex'
+          done
+          echo "SEO_HEADER_SMOKE=PASS"
+          echo "SEO_PREVIEW_URL=$base"
