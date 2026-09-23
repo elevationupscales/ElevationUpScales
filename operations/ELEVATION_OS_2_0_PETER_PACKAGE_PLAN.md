@@ -4,7 +4,7 @@
 **Audience:** Peter Torres + Peter-directed AI workers  
 **Package name:** `ELEVATION_OS_2.0_PETER.zip`  
 **Plan date:** 2026-09-23  
-**Status:** PLANNED / NOT YET BUILT  
+**Status:** BUILD IN PROGRESS — STARTUP README + PETER CHATGPT PROJECT PROMPT COMPLETE  
 **Live source of truth:** `elevationupscales/ElevationUpScales`
 
 ## Purpose
@@ -168,6 +168,15 @@ Before delivery, verify:
 8. Manifest hashes validate.
 9. Package can be loaded into a fresh Peter ChatGPT conversation and the worker can correctly explain its scope before execution.
 10. Fresh-chat test confirms the worker resolves live `main` and records a `GIT CHECK` receipt before substantive analysis or execution.
+
+## Build progress — 2026-09-23
+
+Completed source files:
+
+- `operations/elevation-os-2.0/README.md` — one-time Peter startup README;
+- `operations/elevation-os-2.0/PETER_CHATGPT_PROJECT_START_PROMPT.md` — controlling prompt for the new Peter ChatGPT Project.
+
+These files are Git-backed source material for the future startup ZIP. The ZIP should contain copies of these files, but live Git remains authoritative after startup.
 
 ## Build decision
 
