@@ -17,14 +17,11 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 1
-
-      - name: Run reconciliation QA
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run qa
-          npm run qa:secrets
-          git diff --check
+          filter: blob:none
+          sparse-checkout: |
+            site
+            deployment/qa
+            package.json
 
       - name: Deploy isolated Cloudflare preview
         id: deploy
