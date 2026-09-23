@@ -1,0 +1,102 @@
+name: Build SK24V100 Pack Covers
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build-sk24v100-pack-covers.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Install Pillow
+        run: python -m pip install pillow
+
+      - name: Build quantity-specific pack covers
+        shell: bash
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw, ImageFont
+          from pathlib import Path
+
+          src = Path("assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100, SK12V314PH, SK24V150PH, SK24V100, SK48V100N/111/24V100.jpg")
+          outdir = Path("assets/vendor-media/sok/derived/sk24v100-packs")
+          outdir.mkdir(parents=True, exist_ok=True)
+
+          base = Image.open(src).convert("RGB")
+
+          def font(size, bold=False):
+              candidates = [
+                  "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                  "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+              ]
+              for p in candidates:
+                  try: return ImageFont.truetype(p, size)
+                  except: pass
+              return ImageFont.load_default()
+
+          layouts = {
+              3: (3,1),
+              6: (3,2),
+              9: (3,3),
+              12:(4,3),
+          }
+
+          for qty,(cols,rows) in layouts.items():
+              W=H=1600
+              canvas=Image.new("RGB",(W,H),"white")
+              draw=ImageDraw.Draw(canvas)
+
+              top=135
+              bottom=115
+              side=70
+              gap=24
+              grid_w=W-2*side
+              grid_h=H-top-bottom
+              cell_w=(grid_w-gap*(cols-1))//cols
+              cell_h=(grid_h-gap*(rows-1))//rows
+
+              pad=max(8,int(min(cell_w,cell_h)*0.03))
+              fitted=ImageOps.contain(base,(cell_w-2*pad,cell_h-2*pad),Image.Resampling.LANCZOS)
+
+              for r in range(rows):
+                  for c in range(cols):
+                      x=side+c*(cell_w+gap)
+                      y=top+r*(cell_h+gap)
+                      px=x+(cell_w-fitted.width)//2
+                      py=y+(cell_h-fitted.height)//2
+                      canvas.paste(fitted,(px,py))
+
+              # restrained quantity identity only
+              title=f"{qty} BATTERY PACK"
+              model="SOK SK24V100 • 24V 100Ah"
+              f1=font(56,True)
+              f2=font(30,False)
+              tb=draw.textbbox((0,0),title,font=f1)
+              mb=draw.textbbox((0,0),model,font=f2)
+              draw.text(((W-(tb[2]-tb[0]))/2,28),title,fill=(18,42,52),font=f1)
+              draw.text(((W-(mb[2]-mb[0]))/2,92),model,fill=(72,91,98),font=f2)
+
+              fn=outdir/f"sok-sk24v100-{qty}-pack-hero.jpg"
+              canvas.save(fn,quality=94,optimize=True,progressive=True)
+              print(fn)
+
+          PY
+
+      - name: Commit derivatives
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Elevation UpScales Media Builder"
+          git config user.email "elevationupscales@gmail.com"
+          git add assets/vendor-media/sok/derived/sk24v100-packs
+          git commit -m "assets: add SK24V100 quantity pack heroes"
+          git push origin HEAD:"$GITHUB_REF_NAME"
