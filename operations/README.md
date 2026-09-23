@@ -53,6 +53,9 @@ Use one owner for each type of state:
 
 ## Current controlling SOP / control library
 
+- [`MASTER_SOP_V1_0.md`](./MASTER_SOP_V1_0.md) — non-regression foundation for the Elevation Operating System.
+- [`MASTER_SOP_V1_1.md`](./MASTER_SOP_V1_1.md) — accepted additive integration control; read with V1.0 for current master policy.
+- [`OS_1_1_EXECUTION_HANDOFF_SOP.md`](./OS_1_1_EXECUTION_HANDOFF_SOP.md) — accepted Git-first startup, RUN, handoff and recovery control.
 - [`CURRENT_WORK_BOARD.md`](./CURRENT_WORK_BOARD.md) — canonical global work board and dedicated-vendor Project Source index.
 - [`MANAGEMENT_OPERATING_SOP.md`](./MANAGEMENT_OPERATING_SOP.md) — universal management execution standard, commercial strategy, proportional controls, reuse-first development, public-data protection, and common metrics.
 - [`OWNER_PROJECT_WORKFLOW_DIRECTIVE_2026-09-10.md`](./OWNER_PROJECT_WORKFLOW_DIRECTIVE_2026-09-10.md) — owner direction requiring project manager/specialist pairs, tailored workflows, direct manager execution, worktree continuity, material documentation, vendor Project Sources and progressive gate maturity.
