@@ -16,6 +16,11 @@ jobs:
         with:
           fetch-depth: 0
           lfs: false
+          filter: blob:none
+          sparse-checkout: |
+            assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100, SK12V314PH, SK24V150PH, SK24V100, SK48V100N/111
+            assets/vendor-media/sok/derived/sk24v100-packs
+          sparse-checkout-cone-mode: false
 
       - name: Install Pillow
         run: python -m pip install pillow
