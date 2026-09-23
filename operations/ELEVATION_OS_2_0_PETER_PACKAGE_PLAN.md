@@ -19,7 +19,7 @@ It does **not** replace live Git.
 
 ## Primary objectives
 
-1. Give Peter the original controlling Master S.O.P. without rewriting it.
+1. Give Peter the original Master S.O.P. V1.0 intact and the accepted OS 1.1 additive control set that currently governs execution.
 2. Explain the current OS architecture in plain language.
 3. Reset Peter's AI worker away from old operations-heavy/stale prompt behavior.
 4. Teach the worker to resolve live Git before acting.
@@ -34,8 +34,11 @@ It does **not** replace live Git.
 ELEVATION_OS_2.0_PETER/
 ├── 00_START_HERE.md
 ├── 01_OS_2_0_OVERVIEW.md
-├── 02_ORIGINAL_MASTER_SOP/
-│   └── MASTER_SOP_V1_0.md
+├── 02_MASTER_CONTROL/
+│   ├── MASTER_SOP_V1_0.md
+│   ├── MASTER_SOP_V1_1.md
+│   ├── OS_1_1_INTEGRATION_SPEC.md
+│   └── OS_1_1_EXECUTION_HANDOFF_SOP.md
 ├── 03_CORE_CONTROL/
 │   ├── MASTER_OS_GLOSSARY_V1_0.md
 │   ├── README_OPERATIONS.md
@@ -93,15 +96,16 @@ Explain:
 - protected owner gates;
 - customer-facing work must not leak internal control language.
 
-## Original Master S.O.P.
+## Master control set
 
-Include the repository copy of:
+Include the exact repository copies of:
 
-`operations/MASTER_SOP_V1_0.md`
+- `operations/MASTER_SOP_V1_0.md`
+- `operations/MASTER_SOP_V1_1.md`
+- `operations/OS_1_1_INTEGRATION_SPEC.md`
+- `operations/OS_1_1_EXECUTION_HANDOFF_SOP.md`
 
-Do not rewrite or summarize it in place.
-
-The overview may explain it, but the original must be supplied intact.
+Do not rewrite them in place. V1.0 is the non-regression foundation; V1.1 is the accepted integration/execution layer. The overview may explain the relationship, but the source controls must be supplied intact.
 
 ## Current Work Board snapshot
 
