@@ -1,0 +1,57 @@
+name: Restore SOK Originals from Main
+
+on:
+  push:
+    paths:
+      - ".github/workflows/restore-sok-originals.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Restore exact manufacturer originals from main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          files=(
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240703100307.png"
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240719101900.png"
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240920092400.png"
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240913110831.png"
+          )
+
+          rm -f .gitattributes
+
+          for f in "${files[@]}"; do
+            git checkout origin/main -- "$f"
+          done
+
+          git add -A .gitattributes "${files[@]}"
+          git config user.name "Elevation UpScales Reconciliation"
+          git config user.email "elevationupscales@gmail.com"
+          git commit -m "fix: restore SOK manufacturer originals from main"
+          git push origin HEAD:"$GITHUB_REF_NAME"
+
+      - name: Verify byte identity against main
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240703100307.png"
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240719101900.png"
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240920092400.png"
+            "assets/vendor-media/sok/approved-product-images/SOK Product Images/SK12V100PC,SK12V206PH, SK12V280H/SK12V206PH/素材PNG/微信图片_20240913110831.png"
+          )
+          for f in "${files[@]}"; do
+            test "$(git hash-object "$f")" = "$(git rev-parse "origin/main:$f")"
+          done
+          test ! -e .gitattributes
