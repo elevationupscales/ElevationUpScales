@@ -2,7 +2,7 @@
 
 **Owner:** Casey Young  
 **Mode:** GIT FIRST → LIVE SEARCH CHECK → SHOPIFY SEO RECON → BOUNDED TECHNICAL FIX  
-**State:** ACTIVE / PARTIAL COMPLETE
+**State:** SHOPIFY SEO COMPLETE / TECHNICAL SEO CANDIDATE QA PASS / READY TO DEPLOY
 
 ## Git check
 
@@ -41,6 +41,10 @@ Candidate behavior:
 - include dynamic SOK HTML pages in that preview-domain guard;
 - add dedicated SEO static QA;
 - do not alter checkout, pricing, orders, shipping, catalog truth or production deployment state.
+
+PR #240 canonical QA run #262 completed **PASS** at candidate SHA `f9f0c6a9bfe85a81a23f4a31a23a6e0a30a4bd2a`.
+
+**READY TO DEPLOY: YES — CASEY APPROVAL REQUIRED.**
 
 Production is not authorized by this receipt.
 
