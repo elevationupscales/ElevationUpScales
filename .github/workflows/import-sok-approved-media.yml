@@ -1,0 +1,113 @@
+name: Import SOK Approved Product Media
+
+on:
+  push:
+    paths:
+      - ".github/workflows/import-sok-approved-media.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-sok-media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install downloader
+        run: python -m pip install --upgrade gdown
+
+      - name: Download vendor-supplied SOK media archive
+        run: |
+          mkdir -p /tmp/sok-media
+          gdown --fuzzy "https://drive.google.com/file/d/1_IUGscvqpefBDORUg2eYEnp9DsGBh1-e/view?usp=sharing" -O /tmp/sok-media/SOK_Product_Images.zip
+          unzip -t /tmp/sok-media/SOK_Product_Images.zip >/dev/null
+
+      - name: Extract full approved media library
+        run: |
+          TARGET="assets/vendor-media/sok/approved-product-images"
+          rm -rf "$TARGET"
+          mkdir -p "$TARGET"
+          unzip -q /tmp/sok-media/SOK_Product_Images.zip -d "$TARGET"
+
+      - name: Verify GitHub file-size compatibility
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path("assets/vendor-media/sok/approved-product-images")
+          too_large = []
+          for p in root.rglob("*"):
+              if p.is_file() and p.stat().st_size >= 100 * 1024 * 1024:
+                  too_large.append((p.stat().st_size, p))
+          if too_large:
+              print("Files at or above GitHub's 100 MiB per-file limit:")
+              for size, p in sorted(too_large, reverse=True):
+                  print(f"{size} bytes\t{p}")
+              raise SystemExit(1)
+          print("All extracted files are below the 100 MiB per-file GitHub limit.")
+          PY
+
+      - name: Build media manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import csv, hashlib, datetime
+
+          root = Path("assets/vendor-media/sok/approved-product-images")
+          out = Path("assets/vendor-media/sok/MANIFEST.csv")
+          rows = []
+          total_bytes = 0
+
+          for p in sorted(x for x in root.rglob("*") if x.is_file()):
+              data = p.read_bytes()
+              size = len(data)
+              total_bytes += size
+              rows.append({
+                  "path": p.as_posix(),
+                  "bytes": size,
+                  "sha256": hashlib.sha256(data).hexdigest(),
+                  "extension": p.suffix.lower(),
+              })
+
+          with out.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=["path", "bytes", "sha256", "extension"])
+              w.writeheader()
+              w.writerows(rows)
+
+          summary = Path("assets/vendor-media/sok/IMPORT_SUMMARY.md")
+          summary.write_text(
+              "# SOK Approved Media Import Summary\n\n"
+              f"- Imported files: **{len(rows)}**\n"
+              f"- Total extracted size: **{total_bytes:,} bytes**\n"
+              f"- Source archive: `SOK Product Images.zip`\n"
+              f"- Vendor source: SOK Energy / Kam\n"
+              f"- Imported UTC: {datetime.datetime.now(datetime.timezone.utc).isoformat()}\n\n"
+              "See `MANIFEST.csv` for per-file SHA-256 hashes.\n",
+              encoding="utf-8"
+          )
+
+          print(f"Imported {len(rows)} files totaling {total_bytes:,} bytes")
+          PY
+
+      - name: Commit imported media
+        run: |
+          git config user.name "Elevation UpScales Media Import"
+          git config user.email "elevationupscales@gmail.com"
+          git add assets/vendor-media/sok
+          if git diff --cached --quiet; then
+            echo "No SOK media changes to commit."
+            exit 0
+          fi
+          git commit -m "assets: import full SOK approved product media library"
+          git push origin HEAD:main
