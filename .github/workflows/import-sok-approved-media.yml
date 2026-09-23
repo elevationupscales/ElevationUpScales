@@ -49,6 +49,8 @@ jobs:
       - name: Expand nested SOK archives
         run: |
           TARGET="assets/vendor-media/sok/approved-product-images"
+          find "$TARGET" -type d -name "__MACOSX" -prune -exec rm -rf {} +
+          find "$TARGET" -type f -name ".DS_Store" -delete
           while find "$TARGET" -type f \( -iname "*.zip" -o -iname "*.rar" \) -print -quit | grep -q .; do
             find "$TARGET" -type f \( -iname "*.zip" -o -iname "*.rar" \) -print0 | while IFS= read -r -d '' ARCHIVE; do
               DEST="${ARCHIVE%.*}"
