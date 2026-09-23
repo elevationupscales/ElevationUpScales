@@ -1,4 +1,5 @@
 name: SEO Header Smoke
+# rerun after route coverage fix
 
 on:
   push:
