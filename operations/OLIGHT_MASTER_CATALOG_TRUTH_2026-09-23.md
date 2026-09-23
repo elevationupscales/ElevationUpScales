@@ -18,13 +18,14 @@ Shopify inventory quantities are not treated as supplier physical inventory.
 
 Live Shopify verification on 2026-09-23 found:
 
-- **12 total Olight product records**
-- **7 ACTIVE**
+- **13 total Olight product records**
+- **8 ACTIVE**
 - **5 DRAFT**
 
 | Product | Shopify SKU / variant identity | Public price | Shopify state | Supplier/source state | Current disposition |
 |---|---|---:|---|---|---|
-| Oclip 2 Pro | Elevation variants: `OCLIP2PRO-BLK-STD`, `OCLIP2PRO-ORG-STD` | $49.99 | **ACTIVE** | Exact Oclip 2 Pro Black/Orange family verified in current Olight hot-selling source | **KEEP LIVE** — source family + colors verified; Shopify variant SKU is Elevation-side identity |
+| Oclip 2 Pro | Elevation variants: `OCLIP2PRO-BLK-STD`, `OCLIP2PRO-ORG-STD` | $49.99 | **ACTIVE** | Direct dealer hot-selling source verifies Oclip 2 Pro Black/Orange standard. Olight's current public retail site also offers additional Pro/Premium configurations, but those are not treated as Elevation dealer-sale authority without direct dealer commercial verification. | **KEEP LIVE — BLACK + ORANGE STANDARD ONLY**; unsupported Tidal Blue/Premium variants and media were removed from this listing. |
+| Oclip 2 Ultra Premium | Elevation variants: `OCLIP2ULTRAPREM-BLK`, `OCLIP2ULTRAPREM-OLG`, `OCLIP2ULTRAPREM-AOR` | $94.99 | **ACTIVE** | Direct Olight hot-selling source verifies Ultra Premium, 580 lumens, 130 m beam, 1,000mAh Mobile Charging Dock and Black/Olive Green/Amber Orange family. Current official Olight product page confirms the Premium product and manufacturer media. | **LIVE / VERIFIED** — official media, SEO, Online Store publication, supplier-managed availability and Olight Standard Shipping profile verified. |
 | ArkPro Ultra Class 3R | `ARKPROULTRAOBKCW`, `ARKPROULTRA3RCWOLG` | $129.99 | **ACTIVE** | Exact current supplier identities verified | **KEEP LIVE** |
 | Warrior Ultra | `WARRIORULTRAOLG`, `WARRIORULTRANB`, `WARRIORULTRASG` | $139.99 | **ACTIVE** | Exact three source variants verified | **KEEP LIVE** |
 | Warrior X 4 | `WARRIORX4MTBK` | $129.99 | **ACTIVE** | Matte Black exact source variant verified; adjacent FDE/Camo/Glacial variants are not current substitutes | **KEEP LIVE / DO NOT AUTO-ADD ADJACENT COLORS** |
@@ -90,7 +91,7 @@ Rules:
 
 ## Next revenue sequence
 
-1. Protect and measure the 7 ACTIVE products.
+1. Protect and measure the 8 ACTIVE products, including the newly separated Oclip 2 Ultra Premium.
 2. Move **Sphere** through exact media + purchaseability verification.
 3. Move **Odin S M-LOK** through exact media + purchaseability verification.
 4. Move **PL X GL** through exact media + purchaseability verification.
