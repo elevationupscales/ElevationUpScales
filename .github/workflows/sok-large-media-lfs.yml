@@ -1,0 +1,52 @@
+name: Normalize Oversized SOK Media to Git LFS
+
+on:
+  push:
+    paths:
+      - ".github/workflows/sok-large-media-lfs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Convert oversized approved SOK media to LFS pointers
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          root="assets/vendor-media/sok/approved-product-images"
+          mapfile -d '' files < <(find "$root" -type f -size +25M -print0)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No oversized SOK media files require LFS."
+            exit 0
+          fi
+
+          for file in "${files[@]}"; do
+            echo "Moving exact original to Git LFS: $file"
+            git lfs track "$file"
+            git rm --cached -- "$file"
+            git add -- "$file"
+          done
+
+          git add .gitattributes
+          git config user.name "Elevation UpScales Media Hygiene"
+          git config user.email "elevationupscales@gmail.com"
+          git commit -m "assets: preserve oversized SOK originals with Git LFS"
+          git push origin HEAD:"$GITHUB_REF_NAME"
+
+      - name: Verify oversized working-tree files are LFS managed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs ls-files
+          test -z "$(git ls-files -z 'assets/vendor-media/sok/approved-product-images/**' | xargs -0 -r -I{} sh -c 'test "$(stat -c%s "{}")" -le 26214400 || { git check-attr filter -- "{}" | grep -q "filter: lfs"; }' || true)"
