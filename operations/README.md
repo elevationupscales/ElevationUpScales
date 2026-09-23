@@ -95,6 +95,7 @@ Current dedicated vendor Project Sources are linked from `CURRENT_WORK_BOARD.md`
 - [`RENOGY_PROJECT_SOURCE.md`](./vendor-project-sources/RENOGY_PROJECT_SOURCE.md)
 - [`SOK_PROJECT_SOURCE.md`](./vendor-project-sources/SOK_PROJECT_SOURCE.md)
 - [`KINGBOSS_PROJECT_SOURCE.md`](./vendor-project-sources/KINGBOSS_PROJECT_SOURCE.md)
+- [`OLIGHT_PROJECT_SOURCE.md`](./vendor-project-sources/OLIGHT_PROJECT_SOURCE.md)
 
 Future suppliers do not need a dedicated source file while still only prospects. Once a dedicated vendor project/manager exists, a Project Source becomes mandatory.
 
