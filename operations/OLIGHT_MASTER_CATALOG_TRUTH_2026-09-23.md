@@ -4,7 +4,7 @@
 **Owner:** Casey Young  
 **Execution owner:** Company Operations + Ecommerce & Vendor Operations  
 **Supplier source:** `vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`  
-**Live verification:** Shopify + current Olight dealer sources, 2026-09-23
+**Live verification:** Shopify 2026-09-24 + current retained Olight dealer sources
 
 ## Purpose
 
@@ -16,11 +16,11 @@ Shopify inventory quantities are not treated as supplier physical inventory.
 
 ## Current Shopify Olight set
 
-Live Shopify verification on 2026-09-23 found:
+Live Shopify verification on 2026-09-24 found:
 
 - **13 total Olight product records**
-- **9 ACTIVE**
-- **4 DRAFT**
+- **10 ACTIVE**
+- **3 DRAFT**
 
 | Product | Shopify SKU / variant identity | Public price | Shopify state | Supplier/source state | Current disposition |
 |---|---|---:|---|---|---|
@@ -32,11 +32,11 @@ Live Shopify verification on 2026-09-23 found:
 | Javelot Turbo 2 | `JAVELOTTURBO2BK`, `JAVELOTTURBO2KITBK`, `JAVELOTTURBO2KITDC` | $209.99–$264.99 | **ACTIVE** | Exact current source variants verified | **KEEP LIVE** |
 | Marauder 3 | Shopify color variants Black / Midnight Blue / Orange | $369.99 | **ACTIVE** | Current Olight hot-selling source verifies the Marauder 3 color family | **KEEP LIVE** — Shopify variant SKUs are Elevation-side identities |
 | OSIGHT R | Shopify SKU `OSIGHTR`; dealer product identity verified separately | $279.99 | **ACTIVE** | Exact product/spec/price verified in current hot-selling source | **KEEP LIVE** |
-| Sphere | `SPHERE` | $19.99 | **DRAFT** | Exact current supplier product verified | **ADVANCE AFTER MEDIA + PURCHASEABILITY PASS** |
+| Sphere | `SPHERE` | $19.99 | **ACTIVE** | Exact current supplier product verified | **LIVE / VERIFIED — preserve current product** |
 | Odin S | `ODINSMMTBK` | $149.99 | **DRAFT** | Exact Matte Black M-LOK source variant verified; same-name Pic variant in dealer source is unavailable and must not be confused with M-LOK | **ADVANCE M-LOK ONLY AFTER MEDIA + PURCHASEABILITY PASS** |
 | PL X GL | supplier item `0.0002.0234` | $149.99 | **DRAFT** | Exact hot-selling source identity verified | **ADVANCE AFTER MEDIA + PURCHASEABILITY PASS** |
 | OSIGHT SE | `OSIGHTSE` | $199.99 | **DRAFT** | Exact source product verified | **ADVANCE AFTER MEDIA + PURCHASEABILITY PASS** |
-| Baton 4 Black | `BATON4BK` | $54.99 | **DRAFT** | Current dealer source marks exact Black SKU unavailable; other colors are separate exact variants | **HOLD EXACT BLACK SKU** — do not silently replace with OD Green or another color |
+| Baton 4 Black | `BATON4BK` | $54.99 | **ACTIVE** | Last retained dealer-source snapshot marked exact Black SKU unavailable; live Shopify is now ACTIVE as of 2026-09-24. Source-state mismatch remains open for management reconciliation. | **PRESERVE LIVE / DO NOT RECREATE OR REPRICE** — do not silently substitute another color; reconcile current supplier availability before relying on the dated snapshot for fulfillment. |
 
 ## Price / economics control
 
@@ -91,13 +91,17 @@ Rules:
 
 ## Next revenue sequence
 
-1. Protect and measure the 8 ACTIVE products, including the newly separated Oclip 2 Ultra Premium.
-2. **Sphere is live / verified** with official Olight media and Online Store purchaseability confirmed.
-3. Move **Odin S M-LOK** through exact media + purchaseability verification.
-4. Move **PL X GL** through exact media + purchaseability verification.
-5. Move **OSIGHT SE** through exact media + purchaseability verification.
-6. Keep **Baton 4 Black** held unless the exact source state changes or Casey explicitly chooses a different exact color/SKU.
-7. Qualify any launch promotion against current price controls and protected contribution economics before creation.
+1. Preserve and measure the **10 ACTIVE** Olight products; do not recreate them during this launch-closeout pass.
+2. Peter Torres is assigned the three remaining Shopify drafts as a bounded media/listing-production queue:
+   - **Odin S M-LOK** — `ODINSMMTBK`
+   - **PL X GL** — `0.0002.0234`
+   - **OSIGHT SE** — `OSIGHTSE`
+3. Peter uses only Olight-authorized exact-product media/materials already supplied to Elevation and leaves each product **DRAFT** after media/copy completion.
+4. Peter may complete media, ordering, alt text, and source-grounded customer copy; he may not change price, SKU, vendor, shipping profile, inventory policy, publication/channel state, or product status under this assignment.
+5. Management reviews each completed draft through exact source, price/MAP, shipping/fulfillment, publication and storefront-purchaseability gates before activation.
+6. Baton 4 Black is live in Shopify but has a dated supplier-availability mismatch; preserve the live listing and reconcile the source state before treating the old snapshot as current fulfillment truth.
+7. After the three-draft queue is complete, issue a separate Wave 2 listing assignment from the current dealer catalog rather than bulk-building without review.
+8. Qualify any launch promotion against current price controls and protected contribution economics before creation.
 
 ## Control statement
 
