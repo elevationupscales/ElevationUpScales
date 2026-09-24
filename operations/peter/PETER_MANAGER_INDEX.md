@@ -3,8 +3,8 @@
 **Owner:** Casey Young  
 **Human Manager:** Peter Torres — Ecommerce & Vendor Operations  
 **Parent:** Company Operations / current MPM  
-**Effective:** 2026-09-23  
-**Status:** ACTIVE / PETER-LANE INDEX  
+**Effective:** 2026-09-24  
+**Status:** ACTIVE / PETER-LANE INDEX / ACCESS VERIFIED  
 **Repository:** `elevationupscales/ElevationUpScales`
 
 ## This file is not the Master Work Board
@@ -101,11 +101,34 @@ Do not silently rewrite global company priority from this index.
 
 ## Current access state
 
-- GitHub collaboration invitation: **ISSUED / ACCEPTANCE NOT YET VERIFIED**
-- Peter Manager Index: **READY**
-- Peter Current Worktree: **READY**
-- Peter Handoff Log: **READY**
+- GitHub collaboration invitation: **ACCEPTED / AUTHENTICATED WRITE VERIFIED**
+- Peter GitHub identity: **`cheekypete840`**
+- Peter Manager Index: **ACTIVE / ACCESS RECONCILED**
+- Peter Current Worktree: **ACTIVE / SOK EBAY CURRENT UPLOAD WAVE**
+- Peter Handoff Log: **ACCESS VERIFIED / ONBOARDING CLOSED / ASSIGNMENT ACTIVATED**
 - Parent workflow: `../PETER_GIT_COLLABORATION_WORKFLOW_V1_0.md`
+
+The authenticated access gate is closed. Do not route Peter back through Git onboarding unless a new access failure is actually verified.
+
+## Current bounded assignment pointer
+
+**Assignment:** SOK eBay current upload wave.
+
+Controlling sources:
+
+- `../CURRENT_WORK_BOARD.md`
+- `../EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md`
+- `../vendor-project-sources/SOK_PROJECT_SOURCE.md`
+- `PETER_CURRENT_WORKTREE.md`
+
+Scope controls:
+
+- execute only the supplied `00_CURRENT_UPLOADS` wave;
+- preserve SOK MAP and shipping-policy controls;
+- verify each upload/listing result before calling it complete;
+- do not use `90_SUPERSEDED_DRAFTS`;
+- keep `10_PRESALE_HOLD` held until separately cleared;
+- do not turn this assignment into broad catalog reprioritization or unrelated eBay cleanup.
 
 ## Control phrase
 
