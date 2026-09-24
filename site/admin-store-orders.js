@@ -5,7 +5,7 @@
   const money=(cents)=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(cents||0)/100);
   const text=(value)=>String(value??"").trim();
   const statusLabel=(value)=>({pending:"Pending",paid:"Paid",fulfillment_pending:"Prepare Supplier Order",supplier_ordered:"PO Submitted",supplier_released:"Supplier Paid / Released",shipped:"Shipped",completed:"Completed",hold_issue:"Hold / Issue",refund_needed:"Refund Needed",refunded:"Refunded",cancelled:"Cancelled"})[value]||value||"Pending";
-  const sourceLabel=(value)=>({apparel:"Website · Apparel",rv:"Website · RV & Outdoor",lithium:"Website · Lithium",shopify:"Shopify",ebay:"eBay",tiktok:"TikTok Shop",fourthwall:"Fourthwall"})[value]||value||"Store";
+  const sourceLabel=(value)=>({apparel:"Website · Apparel",rv:"Website · RV & Outdoor",lithium:"Website · Lithium",custom:"Website · Custom Order",shopify:"Shopify",ebay:"eBay",tiktok:"TikTok Shop",fourthwall:"Fourthwall"})[value]||value||"Store";
   const supplierLabel=(order)=>text(order?.supplier?.supplierName||order?.supplier?.supplier||order?.supplier?.provider||order?.supplier?.source||((order?.supplier?.itemNo||order?.supplier?.skuId)?"Doba":""))||"—";
   const supplierSku=(order)=>text(order?.supplier?.supplierSku||order?.supplier?.skuId||order?.elevationSku);
   const inventoryFreshness=(order)=>text(order?.supplier?.availability?.inventoryFreshness||"UNCONFIRMED").toUpperCase();

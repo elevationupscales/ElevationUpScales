@@ -11,6 +11,7 @@ const DEFAULT_CURRENCY = "USD";
 const APPAREL_MARKUP = 1.20;
 const APPAREL_SHIPPING_CENTS = 700;
 const MAX_QTY = 10;
+const MAX_CUSTOM_PAYMENT_CENTS = 5_000_000;
 
 const JSON_HEADERS = Object.freeze({
   "Cache-Control": "no-store",
@@ -463,8 +464,50 @@ async function quoteRv(raw, env) {
     doba:{itemNo:clean(entry.itemNo,120),skuId:clean(entry.skuId,120),spuNo:clean(entry.spuNo,120)}
   };
 }
+function quoteCustom(raw) {
+  const approvedReference = clean(raw?.id || raw?.approvedReference, 80).toUpperCase();
+  const description = clean(raw?.name || raw?.description, 240);
+  const amountCents = dollarsToCents(raw?.amount);
+  if (!/^[A-Z0-9][A-Z0-9 .#/_-]{2,79}$/i.test(approvedReference)) {
+    return { ok:false,status:400,error:"Enter the approved Elevation order or quote reference" };
+  }
+  if (description.length < 3) {
+    return { ok:false,status:400,error:"Enter the product or order description from your approved quote" };
+  }
+  if (raw?.approvalAcknowledged !== true) {
+    return { ok:false,status:409,error:"Confirm that the amount and reference match an approved Elevation order or quote" };
+  }
+  if (!Number.isInteger(amountCents) || amountCents < 100 || amountCents > MAX_CUSTOM_PAYMENT_CENTS) {
+    return { ok:false,status:400,error:"Enter an approved payment amount from $1.00 to $50,000.00" };
+  }
+  return {
+    ok:true,
+    source:"custom",
+    id:`custom:${approvedReference}`,
+    productName:description,
+    quantity:1,
+    unitPriceCents:amountCents,
+    listMerchandiseCents:amountCents,
+    discountCents:0,
+    merchandiseCents:amountCents,
+    shippingCents:0,
+    totalCents:amountCents,
+    couponCode:"",
+    couponPercent:0,
+    promotion:{ pricingMode:"custom_approved", couponEligible:false },
+    shippingRule:null,
+    variantId:"",
+    variantName:`Approved reference ${approvedReference}`,
+    variants:[],
+    physical:true,
+    custom:{ approvedReference, customerEnteredAmount:true },
+    doba:{},
+  };
+}
+
 async function quoteStoreItem(raw, env) {
   const source = clean(raw?.source, 20).toLowerCase();
+  if (source === "custom") return quoteCustom(raw);
   if (source === "apparel") return quoteApparel(raw, env);
   if (source === "rv" || source === "lithium") return quoteRv(raw, env);
   return { ok: false, status: 400, error: "Invalid store source" };
@@ -554,7 +597,7 @@ async function createStoreOrder(request, env) {
 
   const raw = await request.json().catch(() => ({}));
   const source = clean(raw?.source, 20).toLowerCase();
-  if (!["apparel", "rv", "lithium"].includes(source)) return json({ error: "Invalid store source" }, 400);
+  if (!["apparel", "rv", "lithium", "custom"].includes(source)) return json({ error: "Invalid store source" }, 400);
   if (!validQuantity(raw?.quantity)) return json({ error: "Quantity must be from 1 to 10" }, 400);
   const customer = normalizeCustomer(raw?.customer);
   if (!validEmail(customer.email)) return json({ error: "A valid customer email is required" }, 400);
@@ -624,7 +667,7 @@ async function createStoreOrder(request, env) {
       quote.totalCents,
       JSON.stringify(customer),
       JSON.stringify(address),
-      JSON.stringify({...quote.doba,shippingRule:quote.shippingRule||{},hawaii:quote.hawaii||null,availability:quote.availability||null,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
+      JSON.stringify({...quote.doba,...(quote.custom?{custom:quote.custom}:{}),shippingRule:quote.shippingRule||{},hawaii:quote.hawaii||null,availability:quote.availability||null,promotion:{pricingMode:quote.promotion?.pricingMode||"existing",markupPercent:quote.promotion?.markupPercent??null,couponCode:quote.couponCode||"",couponPercent:quote.couponPercent||0,discountCents:quote.discountCents||0,listMerchandiseCents:quote.listMerchandiseCents??quote.merchandiseCents,battery:quote.battery||{}}}),
       clean(body.id, 80),
       "",
       "created",
@@ -715,7 +758,7 @@ export async function handleStoreCheckoutApi(request, env, pathname) {
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { Allow: "POST" });
       const raw = await request.json().catch(() => ({}));
     const source = clean(raw?.source, 20).toLowerCase();
-    if (!["apparel", "rv", "lithium"].includes(source)) return json({ error: "Invalid store source" }, 400);
+    if (!["apparel", "rv", "lithium", "custom"].includes(source)) return json({ error: "Invalid store source" }, 400);
     if (!validQuantity(raw?.quantity)) return json({ error: "Quantity must be from 1 to 10" }, 400);
     const quote = await quoteStoreItem(raw, env);
     return json(quote, quote.ok ? 200 : (quote.status || 400));

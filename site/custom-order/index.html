@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#061014">
+<title>Custom Orders & Battery Shipping | Elevation UpScales</title>
+<meta name="description" content="Pay an approved Elevation UpScales custom order or start a battery shipment request for Hawaii, Alaska, Lower-48 and destination-sensitive lithium orders.">
+<link rel="canonical" href="https://elevationupscales.com/custom-order">
+<link rel="icon" href="/assets/favicon.png" type="image/png">
+<link rel="stylesheet" href="/styles.css?v=3.11.23">
+<link rel="stylesheet" href="/site-shell.css?v=5.2.0">
+<link rel="stylesheet" href="/clean-commerce-v1.css?v=1.0.0">
+<link rel="stylesheet" href="/custom-order.css?v=1.0.0">
+<script defer src="/site-shell.js?v=5.2.0"></script>
+<script defer src="/custom-order.js?v=1.0.0"></script>
+</head>
+<body class="clean-commerce-page custom-order-page">
+<header class="eus-header"><div class="container eus-header__inner"><a class="eus-brand" href="/" aria-label="Elevation UpScales home"><img src="/assets/logo-mark.webp" width="128" height="80" alt="Elevation UpScales"></a></div></header>
+<main>
+<section class="cc-hero custom-order-hero"><div class="cc-container cc-hero__grid"><div><p class="cc-eyebrow">CUSTOM ORDERS</p><h1>Pay a prepared order or start a battery shipment.</h1><p>Use this lane when a normal cart is not the right fit. If Elevation already gave you a quote or order reference, you can pay it securely here. If you are still working out the battery, quantity or destination, start the shipment request first.</p><div class="cc-actions"><a class="cc-button cc-button--primary" href="#pay">Pay an Approved Order</a><a class="cc-button cc-button--secondary" href="#battery-request">Start Battery Shipment</a><a class="cc-button cc-button--secondary" href="https://shop.elevationupscales.com/collections/all">Shop Online</a></div></div><div class="cc-hero-card cc-card"><img src="/assets/hero/hawaii-ocean-freight-v1.webp" alt="Battery freight and destination logistics"><div class="cc-card__body"><p class="cc-eyebrow">ONE ELEVATION LANE</p><h2>Product + destination + payment.</h2><p>Elevation coordinates the supplier and shipping path behind the order. Customers do not need to become freight or dangerous-goods experts.</p></div></div></div></section>
+<section class="cc-section" id="pay"><div class="cc-container"><div class="cc-section__head"><div><p class="cc-eyebrow">READY TO PAY</p><h2>Pay an approved custom order.</h2></div><p>Only use this section after Elevation UpScales, Inc. has provided an order or quote reference and an approved amount.</p></div><div class="custom-order-panel">
+<form id="custom-pay-form" class="custom-order-form" novalidate><div class="custom-order-grid">
+<label>Order / quote reference<input id="custom-pay-reference" maxlength="80" autocomplete="off" placeholder="Example: EUS-QUOTE-1234" required></label>
+<label>Approved amount to pay<input id="custom-pay-amount" inputmode="decimal" autocomplete="off" placeholder="0.00" required></label>
+<label class="custom-order-span">Product / order description<input id="custom-pay-description" maxlength="240" placeholder="Battery model, pack quantity, system or prepared order" required></label>
+<label>Full name<input id="custom-pay-name" maxlength="120" autocomplete="name" required></label><label>Email<input id="custom-pay-email" type="email" maxlength="180" autocomplete="email" required></label><label>Phone<input id="custom-pay-phone" maxlength="60" autocomplete="tel"></label>
+<label class="custom-order-span">Shipping address<input id="custom-pay-address1" maxlength="180" autocomplete="address-line1" required></label><label class="custom-order-span">Address line 2<input id="custom-pay-address2" maxlength="180" autocomplete="address-line2"></label>
+<label>City<input id="custom-pay-city" maxlength="120" autocomplete="address-level2" required></label><label>State<input id="custom-pay-state" maxlength="2" autocomplete="address-level1" placeholder="HI" required></label><label>ZIP code<input id="custom-pay-postal" maxlength="10" autocomplete="postal-code" required></label>
+</div><label class="custom-order-check"><input id="custom-pay-ack" type="checkbox" required><span>I confirm this reference and amount match an approved Elevation UpScales, Inc. order or quote. I understand this payment applies to that prepared order and does not create new pricing or override product, shipping, safety or carrier requirements.</span></label><p class="custom-order-note">For specialized battery freight, the order remains subject to the shipping terms provided with your quote or order. If the payment details do not match the prepared order, fulfillment pauses until the difference is reconciled.</p></form>
+<div id="custom-pay-status" class="custom-order-status" aria-live="polite">Loading secure payment…</div><div id="custom-paypal" class="custom-paypal" hidden></div><div id="custom-pay-success" class="custom-order-success" hidden><p class="cc-eyebrow">PAYMENT RECEIVED</p><h3>We have your custom-order payment.</h3><p id="custom-pay-success-reference"></p><p>Elevation will verify the prepared order and move it into fulfillment.</p></div>
+</div></div></section>
+<section class="cc-section cc-section--alt" id="battery-request"><div class="cc-container"><div class="cc-section__head"><div><p class="cc-eyebrow">BATTERY SHIPMENT</p><h2>Start the order before the freight is solved.</h2></div><p>Tell us the battery, quantity and destination. Elevation will review the supplier and shipping path and contact you with the next purchase step.</p></div><div class="custom-order-panel">
+<form id="battery-request-form" class="custom-order-form" novalidate><input id="battery-website" class="custom-order-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="custom-order-grid">
+<label>Name<input id="battery-name" maxlength="120" autocomplete="name" required></label><label>Email<input id="battery-email" type="email" maxlength="180" autocomplete="email"></label><label>Phone<input id="battery-phone" maxlength="60" autocomplete="tel"></label><label>Preferred contact<select id="battery-contact"><option>Email</option><option>Text message</option><option>Phone call</option></select></label>
+<label class="custom-order-span">Battery / product<input id="battery-product" maxlength="240" placeholder="Example: Kingboss 12V 100Ah LiFePO4" required></label><label>Quantity<input id="battery-quantity" type="number" min="1" max="100" value="1" required></label><label>Destination state<input id="battery-state" maxlength="2" autocomplete="address-level1" placeholder="HI" required></label><label>Destination ZIP<input id="battery-zip" maxlength="10" autocomplete="postal-code" required></label>
+<label class="custom-order-span">Timing / delivery notes<input id="battery-timing" maxlength="500" placeholder="When you need it, terminal pickup vs delivery, commercial/residential, or other useful details"></label><label class="custom-order-span">Anything else?<textarea id="battery-note" maxlength="1200" rows="4" placeholder="System use, island, pack size, preferred model or other order details"></textarea></label>
+</div><label class="custom-order-check"><input id="battery-consent" type="checkbox" required><span>I authorize Elevation UpScales, Inc. to contact me about this battery shipment request.</span></label><button id="battery-submit" class="cc-button cc-button--primary" type="submit">Start Battery Shipment Request</button><p id="battery-status" class="custom-order-status" aria-live="polite"></p></form>
+<div id="battery-success" class="custom-order-success" hidden><p class="cc-eyebrow">REQUEST RECEIVED</p><h3>Elevation has the shipment request.</h3><p id="battery-success-reference"></p><p>We will review the product, quantity and destination and contact you with the next order step.</p></div>
+</div></div></section>
+</main><footer class="site-footer"><div class="container"><p>Elevation UpScales, Inc. · <a href="https://shop.elevationupscales.com/collections/all">Shop Online</a> · <a href="/custom-order">Custom Order</a> · <a href="/shipping-logistics-services">Freight &amp; Logistics</a> · <a href="tel:+12088134998">208-813-4998</a></p></div></footer></body></html>
