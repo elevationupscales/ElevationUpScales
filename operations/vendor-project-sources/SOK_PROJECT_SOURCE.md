@@ -53,11 +53,12 @@ Do not expose EIN, tax-license numbers, bank/card details, private addresses, si
 
 ## Current warranty/logistics development state
 
-- Consolidated SOK Hawaii warranty operating-input request has already been **SENT**.
-- Current external state is **WAITING ON SOK RESPONSE**; do not duplicate or fragment the request.
-- When SOK replies, classify inputs as **EXACT / ESTIMATE / UNKNOWN**.
-- Combine supplier inputs with verified Hawaii storage/freight economics before forming owner-reviewed permanent commercial terms.
-- Logistics Plus pricing/operating terms are independently waiting after planning inputs were supplied.
+- Consolidated SOK Hawaii warranty operating-input request was **SENT AND ANSWERED**; Kam returned the requested planning inputs on 2026-09-11. Do not duplicate or fragment the completed request.
+- Current warranty-development state is **SUPPLIER INPUTS RECEIVED / ECONOMICS + RESPONSIBILITY RECONCILIATION ACTIVE**.
+- Public-safe conclusions from the response: Hawaii volume is still small; SOK did not recommend initial spare-parts stocking; normal replenishment should ride with a later Elevation order when practical, with urgent parts capable of separate shipment; SOK proposed recognizing Hawaii warehouse-to-customer shipping cost for authorized warranty support; failed batteries may be resolved without physical return when route economics make return impractical; warranty intake should capture serial number, Bluetooth/BMS screenshots and a detailed failure description.
+- Treat supplier estimates as planning inputs, not guaranteed demand, SLA, reimbursement, or permanent commercial terms.
+- Combine these supplier inputs with verified Hawaii storage/freight economics before forming owner-reviewed permanent commercial terms.
+- Logistics Plus returned its warehousing/fulfillment rate card on 2026-09-22. The protected rates now belong in the private economics model; public Git records only the operational state and resulting decisions.
 - H2O/Pasha confirmed that H2O is the Pasha-facing account/coordination party for this lane. Additional-model pricing requires exact manufacturer-packed dimensions, weights and configurations.
 - SOK already supplied those broader shipment profiles in a legacy spreadsheet. Current connected tooling can locate the source but cannot directly extract that legacy attachment format. Treat only that extraction step as blocked; do not estimate the profiles and do not ask SOK to repeat already-supplied data.
 - The starter Hawaii landed-cost comparison has now been modeled privately from verified supplier and existing freight evidence. Public Git retains only the operational conclusion: the one-unit low-voltage proof is a qualification case rather than a proven scalable-margin lane, consolidation materially improves that lane, and the current high-voltage starter profile shows stronger preliminary freight-carrying economics. Exact costs/rates remain protected and all quoted economics still require current quote validation, excluded-cost reconciliation and first-shipment actuals before scale.
@@ -110,12 +111,13 @@ Parallel SOK work remains:
 
 1. Continue independent verified SOK catalog/media/commerce work; use the official media source already supplied and do not duplicate the supplier request.
 2. Recover the exact additional-model shipment profiles from the existing SOK legacy workbook through a supported extraction path, then send only the verified profile data to H2O/Pasha for backup-route pricing.
-3. Process Logistics Plus terms when returned and add protected costs to the private economics model.
-4. Process SOK warranty response when returned; do not resend.
-5. Prove first real Shopify/SOK paid-order → OS ingestion → supplier fulfillment chain when a real order occurs.
-6. Reconcile first Hawaii proof actuals against the protected starter landed-cost model before treating a route as production-proven.
-7. Build owner-review Hawaii warranty economics only after verified supplier/provider inputs exist.
-8. Prepare the Puerto Rico PR-02 supplier qualification package for `SK12V100PC` and `SK48V100N`; external send remains behind Casey approval.
+3. Reconcile the received Logistics Plus rate card into the protected Hawaii storage/fulfillment economics model.
+4. Reconcile the received SOK warranty inputs with provider economics; contact SOK again only for a material unresolved fact. Do not resend the completed consolidated request.
+5. Execute the first official Hawaii SOK order as the current fulfillment proof while preserving customer-payment, carrier/DG and supplier-release gates.
+6. Prove first real Shopify/SOK paid-order → OS ingestion → supplier fulfillment chain when a qualifying Shopify order occurs; do not confuse the Hawaii proof order with that separate Shopify bridge proof.
+7. Reconcile first Hawaii proof actuals against the protected starter landed-cost model before treating a route as production-proven.
+8. Build the owner-review Hawaii warranty economics from the now-received supplier/provider inputs, keeping binding compensation/commitments behind Casey approval.
+9. Prepare the Puerto Rico PR-02 supplier qualification package for `SK12V100PC` and `SK48V100N`; external send remains behind Casey approval.
 
 ## Close condition for active repeatable vendor onboarding
 
