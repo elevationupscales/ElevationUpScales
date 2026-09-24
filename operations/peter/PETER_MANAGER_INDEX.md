@@ -104,31 +104,43 @@ Do not silently rewrite global company priority from this index.
 - GitHub collaboration invitation: **ACCEPTED / AUTHENTICATED WRITE VERIFIED**
 - Peter GitHub identity: **`cheekypete840`**
 - Peter Manager Index: **ACTIVE / ACCESS RECONCILED**
-- Peter Current Worktree: **ACTIVE / SOK EBAY CURRENT UPLOAD WAVE**
-- Peter Handoff Log: **ACCESS VERIFIED / ONBOARDING CLOSED / ASSIGNMENT ACTIVATED**
+- Peter Current Worktree: **ACTIVE / OLIGHT SHOPIFY DRAFT PRODUCTION**
+- Peter Handoff Log: **ACCESS VERIFIED / ONBOARDING CLOSED / OLIGHT ASSIGNMENT ACTIVATED**
 - Parent workflow: `../PETER_GIT_COLLABORATION_WORKFLOW_V1_0.md`
 
 The authenticated access gate is closed. Do not route Peter back through Git onboarding unless a new access failure is actually verified.
 
 ## Current bounded assignment pointer
 
-**Assignment:** SOK eBay current upload wave.
+**Assignment:** Olight Shopify draft-production closeout.
+
+**Owner authorization:** Casey Young — 2026-09-24.
 
 Controlling sources:
 
 - `../CURRENT_WORK_BOARD.md`
-- `../EBAY_STORE_OPERATIONS_CURRENT_WORKTREE.md`
-- `../vendor-project-sources/SOK_PROJECT_SOURCE.md`
+- `../vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`
+- `../OLIGHT_MASTER_CATALOG_TRUTH_2026-09-23.md`
 - `PETER_CURRENT_WORKTREE.md`
+
+Peter's direct queue:
+
+1. **Odin S M-LOK** — `ODINSMMTBK`
+2. **PL X GL** — `0.0002.0234`
+3. **OSIGHT SE** — `OSIGHTSE`
 
 Scope controls:
 
-- execute only the supplied `00_CURRENT_UPLOADS` wave;
-- preserve SOK MAP and shipping-policy controls;
-- verify each upload/listing result before calling it complete;
-- do not use `90_SUPERSEDED_DRAFTS`;
-- keep `10_PRESALE_HOLD` held until separately cleared;
-- do not turn this assignment into broad catalog reprioritization or unrelated eBay cleanup.
+- use Olight-authorized exact-product media/materials;
+- work on the existing Shopify DRAFT records rather than recreating them;
+- build the media gallery, hero selection, alt text, and source-grounded customer copy;
+- remove `Dealer Media Pending` only when the corresponding media pass is complete;
+- leave products **DRAFT** for management review;
+- no price, SKU, vendor, shipping profile, inventory policy, channel/publication or product-status changes;
+- no bulk Wave 2 product creation without a separate assignment;
+- record completion/blockers in `PETER_HANDOFF_LOG.md`.
+
+The SOK eBay current wave remains a valid company/eBay-lane work item on the canonical Work Board, but it is **not Peter's current direct Worktree assignment** while this owner-directed Olight launch-closeout queue is active.
 
 ## Control phrase
 
