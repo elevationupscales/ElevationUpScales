@@ -22,8 +22,8 @@ Operate SOK as Elevation's primary authorized battery supplier with repeatable c
 - SOK supports Elevation taking an active warranty role for Elevation customers, with SOK retaining warranty authorization.
 - Supplier replenishment of approved warranty-used replacement stock into later Elevation orders is supported in principle; consignment is not verified.
 - Product media/specification material has been received through existing sources.
-- The consolidated Hawaii warranty operating-input request has already been sent and is waiting on SOK. Do not duplicate it.
-- Logistics Plus pricing/operating terms are separately waiting after Elevation supplied conservative planning inputs.
+- The consolidated Hawaii warranty operating-input request was sent and **answered by SOK on 2026-09-11**. Do not duplicate it; reconcile the received planning inputs.
+- Logistics Plus returned its warehousing/fulfillment rate card on **2026-09-22**. Protected rates belong in the private economics model.
 - H2O/Pasha backup-route pricing needs exact verified SOK packed shipment profiles for additional models; do not estimate missing cargo data.
 
 ## Unified project team
@@ -94,11 +94,11 @@ Do not create a false blocker from unrelated internal management status.
 
 ### 4 — HAWAII FREIGHT / STORAGE DEVELOPMENT
 
-Advance verified provider work independently of the outstanding SOK warranty reply.
+Advance verified provider work using the received SOK warranty planning inputs; there is no longer an outstanding consolidated SOK warranty reply.
 
 #### Logistics Plus
 
-When pricing returns, extract protected internal operating costs for:
+The rate card has returned. Extract and reconcile protected internal operating costs for:
 
 - receiving / DG handling;
 - pallet-position storage;
@@ -139,10 +139,10 @@ Replenishment is verified in principle. Consignment is not verified and must not
 
 ### 7 — OPERATING INPUT RECONCILIATION
 
-When SOK replies to the existing consolidated request:
+SOK answered the existing consolidated request on 2026-09-11. Continue from received evidence:
 
-1. read the full existing thread;
-2. extract each requested operating input;
+1. preserve the completed response as the supplier evidence point;
+2. extract/classify each requested operating input;
 3. classify as EXACT / ESTIMATE / UNKNOWN;
 4. combine usable SOK inputs with verified warehouse/freight/storage inputs;
 5. model true incremental and dedicated costs;
