@@ -514,3 +514,70 @@ They are not live authority when they conflict with this board or newer owner di
 # CONTROL PHRASE
 
 **CONVERT VERIFIED PRODUCTS INTO PROFITABLE ORDERS. OPEN CLEAN MARKETS. MEASURE THE CLICK. PROTECT THE MARGIN. DEVELOPMENT BUILDS. RECON VERIFIES. MANAGEMENT ROUTES. CASEY APPROVES PRODUCTION DEPLOYMENT.**
+
+
+---
+
+# SOP RECON CORRECTION CHECKPOINT — 2026-09-24
+
+This checkpoint reconciles durable state against current Git, live supplier/provider evidence, live mailbox send state and read-only public-route smoke. Where an older section conflicts with this checkpoint, this newer state controls.
+
+## P0 — FIRST OFFICIAL HAWAII SOK ORDER
+
+**State:** ACTIVE FULFILLMENT PROOF.
+
+A real Hawaii SOK customer order now supersedes speculative SOK catalog-prep work for fulfillment attention.
+
+Control sequence:
+
+**ORDER / CUSTOMER FUNDS → EXACT SKU + DOCUMENTS → CARRIER/DG READINESS → SOK PO/PAYMENT → SUPPLIER RELEASE → FREIGHT TENDER → TRANSIT → DESTINATION RECEIPT → CUSTOMER CLOSEOUT → ACTUALS**
+
+Do not collapse payment capture, carrier acceptance and supplier release into one gate. Keep Hawaii fulfillment ahead of Puerto Rico research.
+
+## SOK WARRANTY / STORAGE STATE
+
+- Consolidated SOK Hawaii warranty operating-input request: **ANSWERED 2026-09-11 / RECONCILIATION ACTIVE**.
+- Logistics Plus Hawaii warehousing/fulfillment rate card: **RECEIVED 2026-09-22 / PROTECTED ECONOMICS RECONCILIATION ACTIVE**.
+- Do not resend the completed SOK request.
+- Contact SOK again only for a material unresolved fact that prevents an executable warranty/economics model.
+
+## CUSTOM ORDER RELEASE STATE
+
+The Custom Order work from PR #243 is **MERGED TO MAIN / NOT VERIFIED LIVE IN PRODUCTION**.
+
+Read-only production smoke on 2026-09-24 returned **404** for `/custom-order`.
+
+Control:
+
+**MERGED ≠ DEPLOYED.**
+
+Do not represent Custom Order as production-live until Casey explicitly approves a production release and a post-release live smoke passes.
+
+## EXTERNAL COMMUNICATION RECEIPT STATE
+
+Live mailbox state on 2026-09-24 confirms these consequential messages are **SENT**:
+
+- SOK first official Hawaii order notification;
+- Approved Freight Forwarders quote #152762 booking-stage message;
+- Olight/Kiki launch update.
+
+This checkpoint records send state only; it does not infer approval provenance from mailbox evidence.
+
+Puerto Rico supplier/carrier qualification remains **DRAFT / UNSENT / OWNER GATE**.
+
+For consequential external messages, use:
+
+**DRAFT → CASEY APPROVED / CASEY SENT → SENT RECEIPT → RESULT / WAITING**
+
+## OPEN-PR CONTROL
+
+The 2026-09-24 SOP recon found the open PR estate materially diverged from current `main`.
+
+- #242 remains the only current owner-review/rebase/retest candidate.
+- #238, #231, #228, #213, #187 and #70 are supersession/forward-port candidates and must not be merged directly from their stale branches.
+- Preserve evidence before closing or deleting any historical branch.
+- Historical green CI on a diverged branch is not current-main release evidence.
+
+## SYSTEM CONTROL
+
+**CURRENT MAIN + CURRENT WORK BOARD + LIVE EXTERNAL EVIDENCE → ONE STATE. MERGED IS NOT DEPLOYED. SENT IS NOT DRAFT. RECEIVED IS NOT WAITING.**
