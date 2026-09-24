@@ -5,6 +5,38 @@
 **Initial SKUs:** SOK SK12V100PC; SOK SK48V100N  
 **Quantity cases:** 1 unit and 3 units, each SKU quoted separately
 
+## Current official contact paths — verified 2026-09-25
+
+### Crowley LCL
+
+Official LCL quote page:
+https://www.crowley.com/logistics/quote/lcl/
+
+Current mainland LCL receiving contacts published by Crowley:
+
+- Miami: `miaprlcl@crowley.com`
+- Jacksonville: `jaxprlcl@crowley.com`
+- Northeast/Pennsylvania: `northeastprlcl@crowley.com`
+- Customer line: `1-800-276-9539`
+
+Current Crowley LCL page publishes a Guaynabo receiving warehouse at Carretera 165 KM 2.4, Edificio 13, Guaynabo, Puerto Rico.
+
+### TOTE Maritime Puerto Rico
+
+Official rate-request contact page:
+https://www.totemaritime.com/puerto-rico/tote-puerto-rico-contact-us/
+
+- Rate requests: `TeamQuotes@totemaritime.com`
+- Customer service / rates: `1-877-775-7447`
+- Puerto Rico terminal/service destination: San Juan
+
+Official quote form:
+https://www.totemaritime.com/request-a-quote/
+
+TOTE's public quote form explicitly asks whether cargo is hazardous and requests the UN number when applicable. This confirms a review path, not acceptance of either SOK SKU.
+
+Do not send a rate request until exact supplier shipment data is complete.
+
 ## Request purpose
 
 Obtain a complete executable mainland-origin-to-Puerto-Rico freight path for each exact battery configuration.
