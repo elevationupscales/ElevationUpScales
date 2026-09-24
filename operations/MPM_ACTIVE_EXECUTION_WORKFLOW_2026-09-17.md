@@ -32,6 +32,29 @@ Casey's attention may move between lanes as useful, while each execution owner c
 
 ---
 
+
+---
+
+# CURRENT EXECUTION OVERLAY — 2026-09-24
+
+The queue descriptions below remain reusable execution patterns, but **all queue state snapshots are subordinate to the current `CURRENT_WORK_BOARD.md` on every RUN**. Do not route work from a dated queue snapshot without first reconciling the Work Board.
+
+Current overlay:
+
+1. **P0 real-order fulfillment:** first official Hawaii SOK order is an active fulfillment proof and supersedes speculative SOK catalog preparation when fulfillment action is executable.
+2. **P0 web/commerce:** bounded defect repair only; production remains behind Casey's explicit release approval.
+3. **Custom Order:** PR #243 is merged to main but `/custom-order` returned 404 in the 2026-09-24 production smoke. State is **MERGED / NOT DEPLOYED** until owner-approved release + live smoke.
+4. **Olight:** preserve the current live set; Peter's bounded draft-production queue and current Olight project source control. Do not fall back to pre-launch Olight state.
+5. **SOK warranty:** consolidated supplier planning response was received 2026-09-11. State is **INPUTS RECEIVED / ECONOMICS + RESPONSIBILITY RECONCILIATION ACTIVE**, not waiting on SOK.
+6. **Logistics Plus:** Hawaii warehousing/fulfillment rate card was received 2026-09-22. Use protected rates in the private economics model.
+7. **Puerto Rico:** PR-01 / PR-02 remains research/qualification only; no supplier/carrier send, booking, purchase, registration or public launch without the applicable owner gate. Hawaii fulfillment remains ahead of PR research.
+8. **External communications:** consequential messages must reconcile actual mailbox state. A sent message must not remain labeled DRAFT.
+9. **Open PRs:** do not merge a stale/diverged PR because an old QA run was green. Reconcile current main first.
+
+RUN precedence:
+
+**CASEY'S NEWEST DIRECTION → CURRENT WORK BOARD → CURRENT MAIN → PROJECT SOURCE → THIS EXECUTION OVERLAY → HISTORICAL QUEUE SNAPSHOT.**
+
 # ACTIVE EXECUTION QUEUES
 
 ## QUEUE A — P0 WEB / COMMERCE STABILIZATION
