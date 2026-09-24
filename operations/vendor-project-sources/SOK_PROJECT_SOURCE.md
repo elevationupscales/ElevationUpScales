@@ -87,6 +87,23 @@ Keep:
 
 Do not use Hawaii development, an unanswered warranty-program email, internal project status, optional enrichment, or a generic zero-stock flag to block an otherwise verified Lower-48/backorder commerce path.
 
+## Puerto Rico qualification lane
+
+Casey has opened a separate **PR-01 / PR-02 Puerto Rico research and qualification lane**. Initial exact-SKU comparison is `SK12V100PC` versus `SK48V100N`, modeled at one and three units with San Juan/Guaynabo terminal pickup as the first destination hypothesis.
+
+Controls:
+
+- Puerto Rico does not inherit Hawaii freight, tax, warranty or carrier assumptions;
+- fresh Puerto Rico supplier authority, current orderability, exact packed data and warranty treatment are required before quoting;
+- carrier acceptance and landed economics must be qualified independently;
+- no Puerto Rico supplier/carrier outreach, booking, purchase, registration or public launch is authorized by the research lane alone;
+- Hawaii's first shipment remains the current SOK fulfillment priority.
+
+Canonical controls:
+
+- `../PUERTO_RICO_MARKET_ENTRY_PR01_2026-09-24.md`
+- `../PUERTO_RICO_PR02_QUALIFICATION_WORKTREE_2026-09-25.md`
+
 ## Next action
 
 Parallel SOK work remains:
@@ -98,6 +115,7 @@ Parallel SOK work remains:
 5. Prove first real Shopify/SOK paid-order → OS ingestion → supplier fulfillment chain when a real order occurs.
 6. Reconcile first Hawaii proof actuals against the protected starter landed-cost model before treating a route as production-proven.
 7. Build owner-review Hawaii warranty economics only after verified supplier/provider inputs exist.
+8. Prepare the Puerto Rico PR-02 supplier qualification package for `SK12V100PC` and `SK48V100N`; external send remains behind Casey approval.
 
 ## Close condition for active repeatable vendor onboarding
 
