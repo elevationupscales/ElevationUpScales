@@ -33,3 +33,19 @@ This is not a second Master Work Board.
 - Routed to: Company Operations / current MPM.
 
 **GIT ACCESS VERIFIED — 2026-09-23T17:19:43-07:00 — current main resolved — Peter lane write verified.**
+
+
+---
+
+## 2026-09-24 — Peter control-state reconciliation / next assignment activated
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Peter Git access is authenticated and write-verified; the completed onboarding gate has been closed in Peter's control files.
+- Evidence/source: `PETER_HANDOFF_LOG.md` access receipt dated 2026-09-23; current `operations/CURRENT_WORK_BOARD.md`; current Peter Manager Index and Current Worktree recon.
+- Affected Project: Ecommerce & Vendor Operations / Peter lane; eBay Store Operations / SOK.
+- Prior state: Peter Manager Index still said acceptance was not verified and Peter Current Worktree still pointed to onboarding / no activated Git-based assignment.
+- New state: Peter lane is access-reconciled and ACTIVE on the bounded SOK eBay `00_CURRENT_UPLOADS` wave.
+- Assignment controls: preserve MAP and shipping policy; verify each upload receipt; do not use `90_SUPERSEDED_DRAFTS`; keep `10_PRESALE_HOLD` held until separately cleared.
+- Recommended global update: None. The canonical Current Work Board already carries the SOK eBay current-wave assignment.
+- Routed to: Peter Torres / Ecommerce & Vendor Operations; Company Operations / current MPM.
