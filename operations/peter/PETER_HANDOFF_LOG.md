@@ -49,3 +49,21 @@ This is not a second Master Work Board.
 - Assignment controls: preserve MAP and shipping policy; verify each upload receipt; do not use `90_SUPERSEDED_DRAFTS`; keep `10_PRESALE_HOLD` held until separately cleared.
 - Recommended global update: None. The canonical Current Work Board already carries the SOK eBay current-wave assignment.
 - Routed to: Peter Torres / Ecommerce & Vendor Operations; Company Operations / current MPM.
+
+
+---
+
+## 2026-09-24 — Owner-directed Olight Shopify draft-production assignment
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Casey authorized Peter to use his own Shopify user account and the Olight-authorized media package to help finish the Olight listing build.
+- Evidence/source: owner direction; live Shopify verification showing 13 Olight records / 10 ACTIVE / 3 DRAFT; current Olight Project Source.
+- Affected Project: Olight Authorized Dealer / Catalog / Commerce Integration; Ecommerce & Vendor Operations / Peter lane.
+- Prior Peter direct assignment: SOK eBay current-upload wave.
+- New Peter direct assignment: Olight Shopify draft-production closeout.
+- Exact queue: Odin S M-LOK `ODINSMMTBK` → PL X GL `0.0002.0234` → OSIGHT SE `OSIGHTSE`.
+- Authorized work: exact-product official media, hero/gallery order, alt text, source-grounded copy verification/improvement, save as DRAFT.
+- Protected controls: no price, SKU, vendor, shipping profile, inventory policy, publication/channel or ACTIVE-status changes.
+- SOK eBay note: current wave remains valid on the company/eBay lane but is not Peter's current direct Worktree while the Olight closeout is active.
+- Routed to: Peter Torres / Ecommerce & Vendor Operations; Company Operations / current MPM.
