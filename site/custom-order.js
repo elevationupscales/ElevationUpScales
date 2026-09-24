@@ -180,7 +180,7 @@
       return;
     }
     const product = text("battery-product");
-    const qty = Math.max(1, Number.parseInt(text("battery-quantity") || "1", 10) || 1);
+    const qty = Math.min(100, Math.max(1, Number.parseInt(text("battery-quantity") || "1", 10) || 1));
     const state = text("battery-state").toUpperCase();
     const zip = text("battery-zip");
     if (!text("battery-name") || !product || !/^[A-Z]{2}$/.test(state) || !/^\d{5}(?:-\d{4})?$/.test(zip)) {
