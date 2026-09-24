@@ -101,10 +101,12 @@ Do not silently rewrite global company priority from this index.
 
 ## Current access state
 
-- GitHub collaboration invitation: **ISSUED / ACCEPTANCE NOT YET VERIFIED**
+- GitHub collaboration: **VERIFIED / AUTHENTICATED READ + PETER-LANE WRITE**
+- Connected GitHub identity: **`cheekypete840`**
 - Peter Manager Index: **READY**
-- Peter Current Worktree: **READY**
+- Peter Current Worktree: **COMPLETE / STANDBY**
 - Peter Handoff Log: **READY**
+- Access-verification commit: **`87654af94e3922a129fcdab1a68c7e032c5a11bf`**
 - Parent workflow: `../PETER_GIT_COLLABORATION_WORKFLOW_V1_0.md`
 
 ## Control phrase
