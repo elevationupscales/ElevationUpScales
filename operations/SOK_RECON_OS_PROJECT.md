@@ -67,8 +67,8 @@ SOK RECON OS maintains detailed project state, reconciles evidence, develops the
 - Lower-48 warranty execution and Hawaii warranty development are separate lanes.
 - Product-image media has been received and belongs in the existing catalog/media lane.
 - Hawaii downstream resale and proof-shipment work remain controlled by their applicable SOK/logistics records.
-- The consolidated SOK Hawaii warranty operating-input request has been **SENT** in the existing supplier thread.
-- The current external state for that request is **WAITING ON SOK RESPONSE**. Do not recreate the email, create a duplicate draft, or send repeated small clarification loops while the response is pending.
+- The consolidated SOK Hawaii warranty operating-input request was **SENT AND ANSWERED** in the existing supplier thread.
+- Kam returned the requested planning inputs on **2026-09-11**. Current state is **INPUTS RECEIVED / ECONOMICS + RESPONSIBILITY RECONCILIATION ACTIVE**. Do not recreate the email, create a duplicate draft, or resend the completed request.
 
 ## Current warranty-development control
 
@@ -78,9 +78,9 @@ The controlling supplier-specific negotiation record is:
 
 Current sequence:
 
-**CAPACITY ESTABLISHED → OPERATING INPUT REQUEST SENT → WAIT FOR SOK → EXTRACT EXACT / ESTIMATE / UNKNOWN → COMBINE WITH VERIFIED HAWAII STORAGE / FREIGHT INPUTS → MODEL TRUE COST / VALUE → FORM OWNER-REVIEWED COMMERCIAL STRUCTURE**
+**CAPACITY ESTABLISHED → OPERATING INPUT REQUEST SENT → SOK RESPONSE RECEIVED → EXTRACT EXACT / ESTIMATE / UNKNOWN → COMBINE WITH VERIFIED HAWAII STORAGE / FREIGHT INPUTS → MODEL TRUE COST / VALUE → FORM OWNER-REVIEWED COMMERCIAL STRUCTURE**
 
-The supplier-request step is complete. While waiting, hold permanent commercial economics internal and advance only work that does not require another SOK reply.
+The supplier-request and supplier-response steps are complete. Hold permanent commercial economics internal; use the received planning inputs and contact SOK again only if a material unresolved fact prevents an executable model.
 
 Do not commit Elevation to reserve-stock purchases, warehouse minimums/long-term agreements, guaranteed warranty volume/SLA, standing absorption of Hawaii warranty freight, service-fee/retainer terms, exclusivity, or permanent compensation structure without verified inputs and owner approval where applicable.
 
@@ -92,7 +92,7 @@ Use actual protected provider quotes and shipment economics internally. The publ
 
 Determine when local warranty stock, receiving, storage, release, replenishment, and failed-unit control become more economical and customer-friendly than one-off replacement shipments.
 
-A parallel Logistics Plus follow-up has also been sent for additional detail around investment, long-term-agreement/minimum options, and scalable Hawaii warehouse support while Elevation completes the SOK projections. Keep supplier- and provider-specific private economics isolated.
+Logistics Plus returned its warehousing and fulfillment rate card on **2026-09-22**. Use those protected provider costs in the private SOK economics model while keeping supplier- and provider-specific private economics isolated.
 
 ## Logistics Plus pricing-input development — 2026-09-10
 
@@ -159,10 +159,10 @@ SOK Project Operations requested direction among the current proof-shipment, sto
 
 ### What remains waiting / held
 
-- SOK warranty operating-input response — WAITING EXTERNAL;
-- Logistics Plus warehouse/fulfillment pricing and terms — WAITING EXTERNAL;
+- SOK warranty operating-input response — **RECEIVED / RECONCILIATION ACTIVE**;
+- Logistics Plus warehouse/fulfillment pricing and terms — **RATE CARD RECEIVED / ECONOMICS RECONCILIATION ACTIVE**;
 - H2O additional-SKU pricing — HELD only on exact profile extraction;
-- first material Hawaii booking/release — OWNER GATE / not yet requested;
+- first official Hawaii SOK order — **ACTIVE FULFILLMENT PROOF**; carrier/DG readiness, customer-funds availability and supplier-release controls remain shipment-specific gates;
 - full large-package media ingestion — TOOLING/TRANSFER LIMITATION; use bounded preserved assets rather than block commerce.
 
 ### Casey decision now
@@ -175,7 +175,7 @@ No purchase, shipment booking, warehouse commitment, liability assumption, perma
 
 **CONTINUE THE VERIFIED LOWER-48 / CATALOG WORKTREE:** take the next highest-value SOK product/media/catalog item that already has exact identity and approved source evidence, complete its bounded readiness work, and route only the implementation action required. Do not restart qualification and do not wait on Hawaii to continue normal commerce.
 
-When Logistics Plus pricing or SOK warranty inputs arrive, reconcile them immediately and re-rank the Hawaii proof decision. If the legacy workbook becomes extractable first, complete the seven-model profile extraction and hand only verified rows to Company Operations/H2O.
+Reconcile the received Logistics Plus pricing and SOK warranty inputs now; the first official Hawaii SOK order is already the active proof lane and outranks speculative catalog preparation. If the legacy workbook becomes extractable first, complete the seven-model profile extraction and hand only verified rows to Company Operations/H2O.
 
 ## SOK planning inputs requested
 
@@ -189,10 +189,10 @@ The sent consolidated request sought the operating inputs needed to size the fir
 - failed-unit disposition requirements;
 - evidence and reconciliation records needed for the program.
 
-When SOK replies:
+SOK replied on 2026-09-11. Current reconciliation sequence:
 
-1. read the full existing thread;
-2. extract each requested input;
+1. preserve the completed supplier response as evidence;
+2. classify each received input;
 3. classify each input as **EXACT / ESTIMATE / UNKNOWN**;
 4. combine usable SOK inputs with verified warehouse/freight/storage inputs;
 5. model true incremental and dedicated costs;
