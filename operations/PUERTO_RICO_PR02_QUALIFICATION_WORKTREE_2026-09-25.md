@@ -134,6 +134,28 @@ Only after Gates 1–5 are evidence-complete:
 - build inquiry/checkout treatment;
 - run customer-path QA.
 
+## Current execution receipt — 2026-09-25
+
+Completed internally:
+
+- PR-01 baseline committed to Git;
+- PR-02 qualification worktree committed;
+- SOK supplier qualification request prepared in Git and Gmail as **DRAFT / NOT SENT**;
+- carrier qualification specification prepared;
+- current official Crowley and TOTE quote/contact paths verified and added to the carrier specification;
+- PR-01-A initial market comparison captured with two Puerto Rico retail references and exact-SKU mainland references.
+
+Current external gates:
+
+- Casey approval before SOK qualification email send;
+- exact supplier data before carrier quote requests;
+- carrier written acceptance/quotes;
+- qualified Puerto Rico tax/registration determination.
+
+Current research file:
+
+- `PUERTO_RICO_PR01A_MARKET_COMPARISON_2026-09-25.md`
+
 ## Completion evidence
 
 PR-02 closes when management has:
