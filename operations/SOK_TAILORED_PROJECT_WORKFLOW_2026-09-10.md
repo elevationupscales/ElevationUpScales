@@ -215,7 +215,7 @@ While SOK waits externally, continue safe SOK-only work such as:
 - protected cost-model structure;
 - public-safe project-state cleanup.
 
-Waiting on SOK does not authorize jumping to another project.
+A SOK sub-item waiting on an external dependency does not authorize jumping to another project.
 
 ## Real gates
 
