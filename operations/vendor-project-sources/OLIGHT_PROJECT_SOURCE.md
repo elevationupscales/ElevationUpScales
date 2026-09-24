@@ -1,7 +1,7 @@
 # Elevation UpScales — Olight Project Source
 
 **Status:** ACTIVE / PUBLIC-SAFE PROJECT SOURCE  
-**Effective:** 2026-09-23  
+**Effective:** 2026-09-24  
 **Project:** Olight Authorized Dealer / Catalog / Commerce Integration  
 **Owner:** Casey Young  
 **Execution ownership:** Company Operations + Ecommerce & Vendor Operations  
@@ -46,7 +46,11 @@ Historical `OLIGHT_PARTNERSHIP_RECON_2026-09-17.md` is useful relationship histo
 
 ## Current launch assortment
 
-Current Shopify verification on 2026-09-23 now finds **13 Olight product records: 9 ACTIVE and 4 DRAFT** after Sphere completed its media and purchaseability pass. The Oclip family is now separated correctly: Oclip 2 Pro Black/Orange standard remains its own $49.99 listing, and Oclip 2 Ultra Premium is a separate $94.99 live listing with the Mobile Charging Dock.
+Current Shopify verification on 2026-09-24 finds **13 Olight product records: 10 ACTIVE and 3 DRAFT**. The remaining DRAFT queue is **Odin S M-LOK**, **PL X GL**, and **OSIGHT SE**. Sphere and Baton 4 are currently ACTIVE in Shopify.
+
+The Oclip family remains separated correctly: Oclip 2 Pro Black/Orange standard is its own $49.99 listing, and Oclip 2 Ultra Premium is a separate $94.99 live listing with the Mobile Charging Dock.
+
+**Baton 4 source-state note:** Shopify currently shows Baton 4 Black ACTIVE, while the last dealer-source snapshot recorded the exact Black SKU as unavailable. Preserve the live product without recreating or repricing it, but treat the supplier-source mismatch as a management reconciliation item before relying on that dated availability snapshot for fulfillment.
 
 The exact operational truth is maintained in:
 
@@ -78,11 +82,23 @@ Customer-facing product, collection and brochure material should be product-led 
 
 ## Current next work
 
-1. Preserve the 9 currently ACTIVE Olight products and verify conversion/purchaseability rather than recreating them.
-2. Sphere is now live / verified; advance Odin S M-LOK next, then PL X GL and OSIGHT SE, only when exact source, current availability, media and publication readiness pass.
-3. Keep the exact Black Baton 4 draft held because the current dealer source marks that exact SKU unavailable; do not silently substitute another color.
-4. Use Olight's launch-feedback opportunity for video/promotion planning only after economics and promotional/MAP compatibility are verified.
-5. Capture first real Olight paid-order fulfillment as the next maturity proof.
+1. Preserve the **10 currently ACTIVE** Olight products; do not recreate them during the draft-production pass.
+2. Peter Torres is authorized for a bounded Shopify listing-production assignment on the three existing DRAFT products, in this order:
+   - **Odin S M-LOK** — Shopify SKU `ODINSMMTBK`
+   - **PL X GL** — supplier/product identity `0.0002.0234`
+   - **OSIGHT SE** — Shopify SKU `OSIGHTSE`
+3. Peter may use the Olight-authorized media package already downloaded to his local working environment to:
+   - match exact product media to the exact existing Shopify draft;
+   - upload/select official hero and supporting product/lifestyle media;
+   - improve media order and alt text;
+   - verify customer-facing description/spec copy against the supplied Olight materials;
+   - remove the `Dealer Media Pending` tag only after that product's media pass is actually complete.
+4. Peter must leave all three products **DRAFT** for management review. This assignment does **not** authorize price, SKU, vendor, shipping profile, inventory-policy, publication/channel, or product-status changes.
+5. Management final gate for each draft remains:
+   **EXACT PRODUCT/SKU → CURRENT OLIGHT SOURCE → PRICE/MAP → MEDIA → SHIPPING/FULFILLMENT → PUBLICATION → STOREFRONT PURCHASEABILITY.**
+6. After the three-draft launch queue is completed and reviewed, management may issue a separate Wave 2 assignment from the current dealer catalog. Do not bulk-create unreviewed Olight products.
+7. Preserve Baton 4 live state while management reconciles the dated supplier-availability mismatch; do not silently substitute colors or duplicate the listing.
+8. Capture the first real Olight paid-order fulfillment as the next maturity proof.
 
 ## Control statement
 
