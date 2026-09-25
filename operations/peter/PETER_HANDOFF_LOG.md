@@ -324,3 +324,48 @@ This is not a second Master Work Board.
 - Voice control: Casey-authored introduction must not be posted under Peter's identity. If later authorized for Peter, introduction must identify Peter and retain transparent Elevation commercial disclosure.
 - Next: internal tracking only until Casey explicitly approves posting; before any later approved post, reopen each thread, verify need is still active, verify subreddit/vendor rules or moderator permission where needed, then post only the approved public reply.
 - Routed to: Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Hawaii Reddit public-inquiry qualification batch / 7 prospects
+
+**State:** BLOCKED
+
+- Verified change: Casey authorized qualification/follow-up preparation for seven public Reddit battery/power-station inquiries. No Reddit outreach was performed by the assistant.
+- Scope/permission control:
+  - public inquiry/buying signal does not equal private-marketing opt-in;
+  - initial interaction stays in the original public thread;
+  - move private only if the user invites or explicitly accepts;
+  - no homeowner contact scraping or addition to marketing lists;
+  - no repeated bumping/chasing of older comments;
+  - disclose Peter + Elevation UpScales affiliation in any later approved public reply.
+- Source-access blocker: this ChatGPT environment currently has no live Reddit/web access and no connected Reddit posting tool. Therefore current thread status, current replies, community/vendor rules, and whether a reply is presently permitted could not be independently verified. No source was falsely marked open or reply-allowed.
+- Current internal stages pending source recheck:
+  1. Ecoflow battery or similar — **Needs Recheck / Fresh** — fridge-capable portable power station; confirm island, fridge model, desired runtime.
+  2. Fridge battery backup — **Needs Recheck** — confirm whether Battery Bill's already solved the need; then general area, runtime, pickup/delivery preference.
+  3. SirMontego — **Needs Recheck / Explicit sourcing request** — target about 2kWh portable, ~$700 budget; confirm still shopping, carry-weight ceiling, and whether budget includes freight.
+  4. Head-Refrigerator812 — **Needs Recheck / Explicit sourcing request** — asked for Oahu Anker SOLIX S2000 source; confirm still seeking and exact-model vs alternative flexibility; do not imply Anker authorization.
+  5. No-Performance-8911 — **Needs Recheck / Buying signal** — prior C2000 + expansion-battery purchase attempt/pickup restriction; confirm unresolved and whether financing is essential; no financing promise.
+  6. erocko — **Needs Recheck / Buying signal** — wants second power station for rotating fridge/charging use; confirm still interested and whether exact Jackery 1500 v2 is required.
+  7. JenSlice — **Needs Recheck / Buying signal** — prior borrowed power station / stock difficulty; confirm still seeking and establish model, budget and timing.
+- Product-source recon: retained Git search found no current Elevation source/authorization records for EcoFlow, Anker SOLIX or Jackery power-station SKUs at this checkpoint. Treat these as unqualified brands/models until supplier authorization and exact SKU availability are established.
+- Quote blockers common to all seven:
+  - exact product/SKU not yet qualified for most inquiries;
+  - supplier authorization/availability unresolved;
+  - appliance running/startup fit unresolved;
+  - destination-specific lithium freight acceptance unresolved;
+  - packed shipment profile/charges unresolved;
+  - total landed price unresolved;
+  - support/returns/warranty path unresolved;
+  - no runtime, stock, delivery-date or financing promise authorized.
+- Internal Peter-voice draft direction:
+  - fresh/explicit requests should first confirm the need is still active and gather island/general area, appliance model, runtime, budget, desired date, portability and exact-model flexibility;
+  - do not offer a bare SOK battery as a direct substitute for a plug-in power station.
+- Actions actually taken:
+  - deduped the seven against retained Git inquiry records; no prior retained record found for these public handles/threads beyond the two previously staged drafts;
+  - checked retained Git for EcoFlow/Anker/Jackery source records; none found;
+  - staged all seven as Needs Recheck rather than falsely advancing to Awaiting Response;
+  - no post, DM, email, call or quote was sent.
+- Next required action outside this environment: reopen each Reddit source, verify the need remains active, read current replies, verify subreddit commercial/vendor rules or moderator permission, then post only the relevant Peter-identified public response where permitted.
+- Routed to: Casey Young / Company Operations / current MPM.
