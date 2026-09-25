@@ -13,6 +13,7 @@
 <link href="/admin-supplier-leads.css?v=1.0.0" rel="stylesheet">
 <link href="/admin-followups.css?v=3.11.9a" rel="stylesheet">
 <link href="/admin-opportunities.css?v=3.11.7" rel="stylesheet">
+<link href="/admin-property-opportunities.css?v=1.0.0" rel="stylesheet">
 <link href="/admin-control-center-v342.css?v=3.5.0" rel="stylesheet">
 <link href="/admin-workspace.css?v=3.11.21-leads-nav" rel="stylesheet">
 <link href="/admin-market-pulse.css?v=3.11.20-visuals" rel="stylesheet">
@@ -25,6 +26,7 @@
 <script defer src="/admin-supplier-leads.js?v=1.0.0"></script>
 <script defer src="/admin-followups.js?v=3.11.9b"></script>
 <script defer src="/admin-opportunities.js?v=3.11.16-solar-stage"></script>
+<script defer src="/admin-property-opportunities.js?v=1.0.0"></script>
 <script defer src="/admin-listings.js?v=3.11.19-login-state"></script>
 <script defer src="/admin-store-orders-link.js?v=3.11.42"></script>
 <script defer src="/admin-workspace.js?v=3.11.21-leads-nav"></script>
@@ -95,6 +97,57 @@
 <article class="is-primary"><span>Listing Interests</span><strong id="signal-listing-interests">—</strong><small>Unique sessions that activated Show Contact</small></article>
 </div><div class="admin-contact-action-sources"><span>Top Contact Action pages</span><div id="signal-contact-sources">Waiting for tracked actions…</div></div></section>
 </div></section>
+<section class="property-opportunities-workspace" id="property-opportunities-workspace">
+<div class="property-opportunity-head">
+  <div><p class="eyebrow">Property Intelligence</p><h2>Property Opportunities</h2><p>Manual/test pilot records scored from lawful source evidence. Review every opportunity before outreach. Qualified customer responses convert into the existing Leads pipeline.</p></div>
+  <button class="button button-outline" id="property-opportunity-refresh" type="button">Refresh</button>
+</div>
+<div class="property-opportunity-kpis" aria-label="Property Intelligence funnel">
+  <article><span>Discovered</span><strong id="property-kpi-discovered">—</strong></article>
+  <article><span>Qualified</span><strong id="property-kpi-qualified">—</strong></article>
+  <article><span>Visited</span><strong id="property-kpi-visited">—</strong></article>
+  <article><span>Engaged</span><strong id="property-kpi-engaged">—</strong></article>
+  <article><span>Leads</span><strong id="property-kpi-leads">—</strong></article>
+  <article><span>Projects Won</span><strong id="property-kpi-projects">—</strong></article>
+</div>
+<details class="property-opportunity-create">
+  <summary>+ Add Manual / Synthetic Test Property</summary>
+  <form id="property-opportunity-form" class="property-opportunity-form">
+    <label class="wide">Property Address<input name="propertyAddress" maxlength="240" required placeholder="123 Example Rd"></label>
+    <label>City<input name="city" maxlength="120" required placeholder="Colorado Springs"></label>
+    <label>State<input name="state" maxlength="2" required value="CO"></label>
+    <label>ZIP<input name="postalCode" inputmode="numeric" maxlength="10" required></label>
+    <label>Property Type<select name="propertyType"><option value="single_family">Single Family</option><option value="multi_family">Multi Family</option><option value="commercial">Commercial</option><option value="agricultural">Agricultural</option><option value="mixed_use">Mixed Use</option><option value="other">Other</option></select></label>
+    <label>Source Type<select name="sourceType"><option value="synthetic_test">Synthetic Test</option><option value="manual">Manual Review</option><option value="public_record">Public Record</option><option value="licensed">Licensed Source</option><option value="partner_authorized">Partner Authorized</option></select></label>
+    <label>Source Record ID<input name="sourceRecordId" maxlength="180"></label>
+    <label>Source Date<input name="sourceDate" type="date"></label>
+    <label class="wide">Source URL (HTTPS)<input name="sourceUrl" type="url" maxlength="500" placeholder="https://…"></label>
+    <label class="wide">Source Summary<input name="sourceSummary" maxlength="1200" placeholder="Factual source note; no owner PII or protected attributes"></label>
+    <label>Latitude (optional)<input name="latitude" inputmode="decimal"></label>
+    <label>Longitude (optional)<input name="longitude" inputmode="decimal"></label>
+    <label>Estimated Roof Area ft²<input name="estimatedRoofArea" type="number" min="0" step="1"></label>
+    <label>Estimated Ground Area ft²<input name="estimatedGroundArea" type="number" min="0" step="1"></label>
+    <label>Solar Exposure<select name="solarExposure"><option value="unknown">Unknown</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+    <label>Roof Orientation<select name="roofOrientation"><option value="unknown">Unknown</option><option value="south">South</option><option value="east_west">East / West</option><option value="flat">Flat</option><option value="north">North</option></select></label>
+    <label>Shade<select name="shadeLevel"><option value="unknown">Unknown</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
+    <label>Existing Solar<select name="existingSolarDetected"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></label>
+    <label>Rural / Off-Grid Signal<select name="ruralOrOffgridSignal"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></label>
+    <label>Backup Power Applicability<select name="backupPowerApplicability"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></label>
+    <label>Campaign<input name="campaign" maxlength="120" value="property-intelligence-pilot"></label>
+    <label class="full">Internal Notes<textarea name="notes" maxlength="5000" placeholder="Human review notes. Do not add sensitive targeting data."></textarea></label>
+    <button class="button button-primary" type="submit">Score + Create Opportunity</button>
+    <p class="property-opportunity-note full">This form stores no owner identity and does not send mail, email, SMS, ads, or automated outreach.</p>
+  </form>
+</details>
+<div class="property-opportunity-tools">
+  <input id="property-opportunity-search" type="search" placeholder="Search property, city, ID, type or rep">
+  <select id="property-opportunity-filter"><option value="all">All Qualification States</option><option value="qualified">Qualified</option><option value="review">Review</option><option value="watch">Watch</option><option value="archived">Archived</option></select>
+</div>
+<p id="property-opportunity-status" class="admin-inline-status" aria-live="polite">Waiting for authenticated Property Intelligence data…</p>
+<div class="admin-table-scroll"><table class="property-opportunity-table"><thead><tr><th>Property</th><th>Opportunity</th><th>Score</th><th>Service Region</th><th>Qualification / Next</th><th>Engagement</th><th>Lead</th><th>Open</th></tr></thead><tbody id="property-opportunity-table-body"><tr><td colspan="8" class="property-opportunity-empty">Sign in to load Property Opportunities.</td></tr></tbody></table></div>
+<p id="property-opportunity-table-summary" class="admin-table-summary"></p>
+<section id="property-opportunity-detail" class="property-opportunity-detail" hidden></section>
+</section>
 <section class="admin-opportunity-workspace" id="opportunity-workspace"><div class="admin-section-head"><div><p class="eyebrow">Leads & Work With Us</p><h2>Leads / Opportunities</h2><p class="admin-muted">Lead and Work With Us records stay operationally separate from Solar Leads and Marketplace. Open a saved Lead to download its manual Portal handoff package.</p></div><div class="admin-table-tools"><label>Family<select id="opp-family-filter"><option value="all">All</option><option value="projects">Leads</option><option value="work">Work With Us</option></select></label><label>Project Type<select id="opp-project-filter"><option value="all">All</option><option value="home">Home</option><option value="rv">RV</option><option value="solar">Solar</option></select></label><label>Market<select id="opp-market-filter"><option value="all">All Markets</option><option value="southern_colorado">Colorado Springs / Peyton</option><option value="treasure_valley">Boise / Treasure Valley</option><option value="denver_metro">Denver Metro</option><option value="outside_standard_area">Outside Service Area</option><option value="manual_review">Location Needs Verification</option></select></label><label>Assigned Rep<select id="opp-rep-filter"><option value="all">All Representatives</option><option value="__unassigned__">Unassigned</option></select></label><label>Portal<select id="opp-portal-filter"><option value="all">All Portal States</option><option value="handoff_ready">Qualified / Won — NOT IN PORTAL</option><option value="not_in_portal">NOT IN PORTAL</option><option value="in_portal">IN PORTAL</option></select></label><label>Work With Us<select id="opp-wwu-filter"><option value="all">All</option><option value="affiliate">Affiliate</option><option value="marketing">Marketing</option><option value="technician">Technician</option><option value="investment">Growth / Investment</option></select></label><label class="admin-search">Search<input id="opp-search" type="search" placeholder="Name, reference, city, email"></label></div></div><section class="opp-market-quick" id="opp-market-quick" aria-label="Lead market quick filters" hidden><div class="opp-market-quick__primary" role="group" aria-label="Primary lead markets"><button type="button" data-market-quick="treasure_valley"><span>Boise / Treasure Valley</span><strong id="opp-quick-count-treasure">—</strong></button><button type="button" data-market-quick="southern_colorado"><span>Colorado Springs / Peyton</span><strong id="opp-quick-count-southern">—</strong></button><button type="button" data-market-quick="other" aria-expanded="false" aria-controls="opp-market-quick-other"><span>Other Service Areas</span><strong id="opp-quick-count-other">—</strong></button></div><div class="opp-market-quick__secondary" id="opp-market-quick-other" hidden><button type="button" data-market-quick="denver_metro">Denver Metro</button><button type="button" data-market-quick="outside_standard_area">Outside Service Area</button><button type="button" data-market-quick="manual_review">Location Needs Verification</button></div></section><div class="opportunity-counts"><article><span>Customer Leads</span><strong id="opp-count-projects">—</strong></article><article><span>Outside Area Review</span><strong id="opp-count-outside">—</strong></article><article><span>Work With Us</span><strong id="opp-count-work">—</strong></article></div><p id="opp-error" class="lead-center-error" hidden></p><div class="admin-table-scroll"><table class="opportunity-table"><thead><tr><th>Customer</th><th>Family</th><th>Market</th><th>Rep</th><th class="opp-next-heading">Next Action</th><th>Status</th><th>Portal</th><th>Open</th></tr></thead><tbody id="opp-table-body"><tr><td colspan="8" class="admin-empty-cell">Loading leads / opportunities…</td></tr></tbody></table></div><p class="admin-table-summary" id="opp-table-summary"></p></section>
 <section class="admin-supplier-leads" id="supplier-leads-workspace">
 <div class="admin-section-head"><div><p class="eyebrow">Commercial Relationships</p><h2>Supplier Leads</h2><p class="admin-muted">Supplier, vendor and logistics opportunities. This queue is separate from customer and Solar leads; no outreach is sent automatically.</p></div><div class="supplier-lead-actions"><button class="button button-primary" id="supplier-lead-add" type="button">+ Add Supplier</button><button class="button button-outline" id="supplier-lead-refresh" type="button">Refresh</button></div></div>
