@@ -113,3 +113,34 @@ This is not a second Master Work Board.
 - Media state: 0 product images. No wrong OSIGHT R media was reused.
 - Next: attach/upload exact official OSIGHT SE media from the authorized package, arrange gallery and alt text, then return for management review.
 - Routed to: Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Olight OSIGHT SE media closeout
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Existing Shopify DRAFT `OSIGHTSE` now has a complete exact-product customer gallery built from official Olight OSIGHT SE red-dot materials.
+- Evidence/source: authorized Olight `White Pics/RD` package, official OSIGHT SE unboxing image, and selected official OSIGHT SE scenario/lifestyle images supplied by Peter; Shopify readback after media update.
+- Affected Project: Olight Authorized Dealer / Catalog / Commerce Integration.
+- Media completed: clean hero, rear angle, battery-tray detail, both side profiles, reticle view, package contents, installation/use lifestyle, mounted detail lifestyle, and wet-weather lifestyle.
+- Variant control: green-dot `GN` and `GN 6MOA` assets were explicitly excluded from the red-dot `OSIGHTSE` draft.
+- Protected controls preserved: SKU `OSIGHTSE`, price $199.99, vendor Olight, inventory state and DRAFT status remain unchanged.
+- New state: OSIGHT SE media/copy pass is review-ready and remains DRAFT for Management commercial/publish review.
+- Routed to: Company Operations / current MPM.
+
+---
+
+## 2026-09-25 — Olight PL X GL dealer-sheet copy verification
+
+**State:** BLOCKED
+
+- Verified change: Existing Shopify DRAFT supplier item `0.0002.0234` copy was re-verified and strengthened against Olight's exact official dealer sales sheet.
+- Evidence/source: official Olight `PL X GL 一页纸卖点.pdf` dealer sales sheet supplied by Peter; Shopify readback after copy update.
+- Verified customer-facing facts added/clarified: 1,200-lumen floodlight, up to 260 m spotlight distance, 16,900 candela, Class 3R green laser below 5 mW, USB-C direct charging, up to 9 hours laser-only runtime, adjustable anti-loosening rail clamp, anodized aircraft-grade aluminum housing, IPX7, 1.5 m drop test and 10,000-round durability test.
+- Protected controls preserved: SKU/item `0.0002.0234`, price $149.99, vendor Olight and DRAFT status remain unchanged.
+- Exact blocker: PL X GL still has only one exact official feature graphic attached; exact hero/supporting product and lifestyle media remain outstanding.
+- Media state: `Dealer Media Pending` remains correctly in place.
+- Next: attach exact PL X GL White Pics / Scenarios / Launch Page assets, arrange gallery and alt text, then clear `Dealer Media Pending` only after verification.
+- Routed to: Company Operations / current MPM.
