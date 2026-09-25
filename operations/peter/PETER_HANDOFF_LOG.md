@@ -178,3 +178,34 @@ This is not a second Master Work Board.
 - Protected controls preserved: supplier item/SKU identity `0.0002.0234`, price $149.99, vendor Olight, inventory state and DRAFT status remain unchanged.
 - New state: PL X GL media/copy pass is review-ready and remains DRAFT for Management commercial/publish review.
 - Routed to: Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Olight Odin S M-LOK media closeout
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Existing Shopify DRAFT `ODINSMMTBK` now has a complete exact-product customer gallery built from official Olight Odin S M-LOK Matte Black materials.
+- Evidence/source: official Olight Odin S `白底图 / M-LOK版 / 黑色` package, matching `M版-哑黑` unboxing image, official Odin S Launch Pages, and selected official Odin S scenario images supplied by Peter; Shopify readback after media update.
+- Gallery completed: clean M-LOK Matte Black hero, remote-switch configuration, alternate product angles, tail-switch detail, emitter/front detail, M-LOK mounted outdoor close-up, long-range night-beam lifestyle image, 1,500-lumen / 250 m official feature graphic, dual-power official feature graphic, and matching M-version Matte Black package contents.
+- Variant control: Picatinny-version and Desert/Tan assets were explicitly excluded from the assigned `ODINSMMTBK` draft.
+- Hero state: clean Odin S M-LOK Matte Black product image is the Shopify featured image.
+- Tag state: `Dealer Media Pending` removed only after the exact-product media pass was complete.
+- Protected controls preserved: SKU `ODINSMMTBK`, price $149.99, vendor Olight, inventory state and DRAFT status remain unchanged.
+- New state: Odin S media/copy pass is review-ready and remains DRAFT for Management commercial/publish review.
+- Routed to: Company Operations / current MPM.
+
+---
+
+## 2026-09-25 — Olight three-draft launch-closeout queue complete
+
+**State:** MASTER UPDATE REQUIRED
+
+- Verified change: Peter's assigned three-product Olight Shopify draft-production queue is locally complete.
+- Completed drafts: Odin S M-LOK `ODINSMMTBK`; PL X GL `0.0002.0234`; OSIGHT SE `OSIGHTSE`.
+- Verification state: all three remain Shopify DRAFTs with exact official media/copy passes completed; no duplicate products were created.
+- Protected controls preserved: no price, SKU, vendor, inventory-policy, shipping-profile, sales-channel publication or ACTIVE-status changes were made.
+- Management next gate: exact product/SKU → current Olight source → price/MAP → media → shipping/fulfillment → publication → storefront purchaseability.
+- Recommended global update: mark Peter Olight draft-production closeout complete and move the three products to Management final commercial/publish review.
+- Routed to: Company Operations / current MPM.
