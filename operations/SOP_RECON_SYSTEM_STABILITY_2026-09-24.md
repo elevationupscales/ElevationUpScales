@@ -226,3 +226,27 @@ Do not treat a historical green workflow on a diverged branch as current-main re
 ## Control statement
 
 **CURRENT MAIN + CURRENT WORK BOARD + LIVE EXTERNAL EVIDENCE → ONE STATE. MERGED IS NOT DEPLOYED. SENT IS NOT DRAFT. RECEIVED IS NOT WAITING. HISTORICAL GREEN IS NOT CURRENT GREEN.**
+
+
+---
+
+## Correction run receipt — 2026-09-24
+
+Casey authorized execution with **RUN** after the recon report.
+
+Completed:
+
+- reconciled SOK Project Source from WAITING to supplier-inputs received / economics reconciliation active;
+- reconciled SOK project record and tailored workflow to the 2026-09-11 supplier response;
+- recorded Logistics Plus rate card as received 2026-09-22 without exposing protected rates;
+- updated the canonical Work Board with the first official Hawaii SOK order as the active fulfillment proof;
+- recorded Custom Order as **MERGED / NOT DEPLOYED**;
+- refreshed the MPM workflow with a current-state overlay and hard Work Board precedence;
+- reconciled consequential mailbox send state at a public-safe level;
+- closed stale/superseded PRs #238, #231, #228, #213, #187 and #70 without deleting their branches/evidence;
+- retained PR #242 as the sole open owner-review candidate, with explicit current-main rebase/retest requirement;
+- reran read-only public smoke: homepage PASS, Start a Project PASS, Hawaii lithium PASS, Shopify storefront PASS, Custom Order remains 404 / not production-live.
+
+No production deployment, supplier/carrier send, purchase, booking, payment, or branch deletion was performed by this correction run.
+
+**Post-correction state: GREEN/YELLOW — core control state reconciled; remaining yellow is intentional release/owner-gate work rather than uncontrolled SOP drift.**
