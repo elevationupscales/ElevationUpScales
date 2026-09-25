@@ -144,6 +144,7 @@
         <label>Qualification<select id="property-edit-qualification">${["qualified","review","watch","archived"].map((v) => `<option value="${v}" ${item.qualificationStatus===v?"selected":""}>${friendly(v)}</option>`).join("")}</select></label>
         <label>Outreach record<select id="property-edit-outreach">${["not_sent","approved","sent","paused"].map((v) => `<option value="${v}" ${item.outreachStatus===v?"selected":""}>${friendly(v)}</option>`).join("")}</select></label>
         <label>Outreach Type<input id="property-edit-outreach-type" value="${esc(item.outreachType)}" placeholder="mail / manual email / other"></label>
+        <label><span>Opt Out</span><input id="property-edit-opt-out" type="checkbox" ${item.outreachOptOut?"checked":""}> Block outreach for this property record</label>
         <label>Notes<textarea id="property-edit-notes">${esc(item.notes)}</textarea></label>
         <button type="button" class="button button-primary" id="property-save">Save Management State</button>
         <p class="property-opportunity-note">Changing outreach status records a human action only. This screen sends nothing.</p>
@@ -166,6 +167,7 @@
           qualificationStatus:$("property-edit-qualification")?.value || item.qualificationStatus,
           outreachStatus:$("property-edit-outreach")?.value || item.outreachStatus,
           outreachType:$("property-edit-outreach-type")?.value || "",
+          outreachOptOut:Boolean($("property-edit-opt-out")?.checked),
           notes:$("property-edit-notes")?.value || "",
         }),
       });
