@@ -1,8 +1,18 @@
 # Puerto Rico PR-02 — SOK Supplier Qualification Request — DRAFT ONLY
 
-**Status:** READY FOR OWNER REVIEW / NOT SENT  
+**Status:** HOLD — LANE DISCOVERY FIRST / NOT SEND-ELIGIBLE  
 **Candidate SKUs:** SK12V100PC + SK48V100N  
-**Purpose:** Puerto Rico market qualification only
+**Purpose:** Later-phase Puerto Rico product qualification only; not current execution
+
+## Current control
+
+Do not send this draft during the lane-discovery phase.
+
+Current sequence is:
+
+**APPROVED FORWARDERS LANE MAP → WILL-CALL / TERMINAL OPTIONS → FINAL-MILE CAPABILITY → RESPONSIBILITY MAP → OWNER DECISION → SOK QUALIFICATION.**
+
+This draft is retained only so prior work is not lost. It becomes review-eligible only after Casey explicitly advances Puerto Rico from logistics-lane R&D into product qualification.
 
 ## Draft message
 
@@ -45,4 +55,4 @@ Elevation UpScales, Inc.
 
 ## Send gate
 
-**CASEY APPROVAL REQUIRED BEFORE EXTERNAL SEND.**
+**HOLD. CASEY MUST FIRST ADVANCE THE PHASE, THEN REVIEW THE FINAL MESSAGE, THEN EXPLICITLY APPROVE SEND.**
