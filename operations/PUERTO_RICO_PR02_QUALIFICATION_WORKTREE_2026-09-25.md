@@ -156,6 +156,34 @@ Current research file:
 
 - `PUERTO_RICO_PR01A_MARKET_COMPARISON_2026-09-25.md`
 
+
+## Phase 1 research checkpoint — 2026-09-25
+
+Phase 1 is now actively executed and preserved in:
+
+- `PUERTO_RICO_PHASE1_RESEARCH_2026-09-25.md`
+
+New evidence:
+
+- EIA reports 171,372 distributed battery systems and 2,864 MWh of distributed battery capacity in Puerto Rico at year-end 2025, supporting a real established storage market rather than an event-only demand hypothesis.
+- Current SOK no-MOQ source establishes the protected baseline for both candidates; exact carton profiles are available for SK12V100PC and SK48V100N.
+- SOK's current public state shows SK12V100PC In Stock and SK48V100N Pre-order, creating a fresh exact-orderability reconciliation gate for the 48V candidate despite the supplier's September 20 strong-inventory guidance.
+- Puerto Rico 48V competition is active: current EnergizaPR and JFC Solar 5.12kWh EG4 offers remain visible, and additional Puerto Rico-specific battery programs exist.
+- TOTE's public Puerto Rico HAZMAT framework and quote path are verified, but exact UN3480 acceptance and small-shipment/consolidation eligibility remain unverified.
+- Hacienda confirms maritime taxable imports require IVU handling before release, including inventory/resale imports; exact Elevation merchant/importer responsibility remains a qualified-advice gate.
+- Census/Trade.gov confirm U.S.→Puerto Rico EEI rules. At current MAP, a 3-unit SK48V100N case crosses the general $2,500-per-Schedule-B filing threshold; final classification/value treatment still requires verification.
+
+Phase 1 working order:
+
+**SK48V100N = PRIMARY COMMERCIAL/INSTALLER RESEARCH CANDIDATE**  
+**SK12V100PC = SECONDARY LIGHTER-FREIGHT / CONSUMER RESEARCH CANDIDATE**
+
+This is a research prioritization, not launch authority.
+
+Next internal research:
+
+**SCHEDULE B / EEI WORKSHEET → CROWLEY PATH → 12V COMPETITION → LANDED-COST SHELL → EXACT CARRIER PACKETS.**
+
 ## Completion evidence
 
 PR-02 closes when management has:
