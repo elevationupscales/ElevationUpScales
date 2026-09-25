@@ -1,6 +1,6 @@
-# Elevation UpScales — Puerto Rico Market Entry — PR-02 Qualification Worktree
+# Elevation UpScales — Puerto Rico Market Entry — PR-02 Lane Establishment Worktree
 
-**Status:** ACTIVE / INTERNAL QUALIFICATION / EXTERNAL OUTREACH NOT YET AUTHORIZED  
+**Status:** ACTIVE / LOGISTICS-LANE R&D / EXTERNAL OUTREACH REQUIRES OWNER REVIEW  
 **Effective:** 2026-09-25  
 **Parent:** `PUERTO_RICO_MARKET_ENTRY_PR01_2026-09-24.md`  
 **Owner:** Casey Young  
@@ -9,130 +9,69 @@
 
 ## Objective
 
-Turn PR-01 into an executable go/no-go decision for the first Puerto Rico battery offer.
+Establish the Puerto Rico logistics lane before product qualification, freight quoting, landed-cost modeling or public offer development.
 
-Initial comparison:
+Current owner sequence:
 
-1. **SOK SK12V100PC**
-2. **SOK SK48V100N**
+**MAP THE LANE → DEFINE WILL-CALL / TERMINAL OPTIONS → DEFINE FINAL-MILE CAPABILITY → MAP OPERATIONAL / TAX / FILING RESPONSIBILITIES → THEN QUALIFY SOK → THEN PRICE → THEN LIST / SELL.**
 
-Initial quantity cases: **1 unit and 3 units**.
+This phase is not a shipment quote exercise. It is an R&D phase focused on how Approved Forwarders' existing Puerto Rico network actually works and what repeatable customer fulfillment options can be built around it.
 
-Initial destination structure: **San Juan / Guaynabo terminal pickup first; separately priced delivery option.**
+SOK remains the intended anchor product relationship for the later product phase, but exact SKU qualification is deliberately held until the lane architecture is understood.
 
-## Gate 1 — Supplier qualification
+## Phase A — Lane architecture
 
-Required evidence per SKU:
+Establish with Approved Forwarders / Corky:
 
-- Puerto Rico resale/channel permission;
-- current dealer price and MAP;
-- current orderability/stock state and hold/allocation options;
-- ship-from ZIP;
-- exact packed dimensions and gross weight;
-- pallet profile when applicable;
-- matching SDS/MSDS and UN38.3 summary;
-- ability to tender to selected mainland carrier/consolidator;
-- named responsible shipper/warehouse contact;
-- Puerto Rico warranty eligibility;
-- diagnosis path;
-- replacement routing and freight responsibility;
-- failed/damaged battery disposition;
-- any established Puerto Rico distributor/service relationship available to support Elevation.
+- Puerto Rico destination terminals, partner facilities and will-call pickup points currently available;
+- which locations are customer-accessible for will-call;
+- normal mainland-to-Puerto-Rico handoff flow;
+- destination receiving/release process;
+- whether Approved has personnel or operating partners in Puerto Rico supporting the lane;
+- whether residential and commercial final-mile delivery is available beyond the terminal;
+- what customer/address information is required for final-mile service;
+- common delivery constraints such as appointment, liftgate, residential, limited-access or geographic service boundaries;
+- which steps are handled by Approved versus Elevation versus the customer;
+- whether Approved can support AES/EEI filing or related documentation workflow when applicable;
+- what account, paperwork or operating setup Elevation should have in place before introducing specific lithium products.
 
-No Hawaii-specific term transfers automatically.
+**Do not request shipment-specific rates in this phase unless Casey later authorizes it.**
 
-## Gate 2 — Carrier qualification
+## Phase B — Regulatory / operating responsibility map
 
-Compare at least:
+Research and resolve, without public launch:
 
-- Crowley LCL path;
-- TOTE / qualified consolidator path.
+- Puerto Rico merchant / SURI requirements for the intended transaction structure;
+- IVU collection and import-release responsibility;
+- importer / consignee roles;
+- AES/EEI responsibility and filing-agent options;
+- any licensing or registration requirements material to Elevation's intended sales model;
+- customer pickup/release obligations.
 
-Require written confirmation for each exact SKU/configuration covering:
+Use qualified Puerto Rico advice where required for final determinations.
 
-- acceptance and consolidation eligibility;
-- origin receiving location;
-- origin pickup option;
-- packaging/document requirements;
-- responsible shipper/offeror;
-- receiving cutoff and departure frequency;
-- planning transit range;
-- mainland transport;
-- ocean freight;
-- regulated-cargo charges;
-- origin/destination charges;
-- documentation / EEI fees;
-- fuel/security/accessorials;
-- Guaynabo/San Juan terminal release;
-- separately priced delivery option;
-- SURI/release assistance, if any;
-- free time/storage;
-- residential/liftgate restrictions;
-- carrier liability/cargo coverage;
-- claim deadlines;
-- quote expiration;
-- delayed/rejected cargo handling.
+## Phase C — SOK lane qualification
 
-A quote request is not a booking and does not authorize charges.
+Only after Phase A is sufficiently mapped:
 
-## Gate 3 — Tax / release responsibility
+- select the simplest SOK SKU(s) for pilot use;
+- confirm Puerto Rico resale/channel authority;
+- confirm exact orderability, warranty territory and support path;
+- collect exact packed profiles and current compliance documents;
+- confirm SOK can tender into the established mainland handoff;
+- qualify exact lithium acceptance against the already-understood lane.
 
-Resolve in writing:
+## Phase D — Pricing / first offer
 
-- merchant-registration requirement for the planned transaction;
-- direct-sale versus marketplace collection responsibility;
-- applicable IVU treatment;
-- exact-product exemption eligibility;
-- import-declaration responsibility;
-- destination-release responsibility;
-- freight tax treatment;
-- customer obligations;
-- whether the planned activity creates a separate corporate-registration requirement.
+Only after the lane and exact SOK movement are qualified:
 
-Use qualified Puerto Rico advice for the final operating determination.
-
-## Gate 4 — EEI / filing
-
-Resolve classification, transaction value, filing requirement, USPPI, filing agent, ITN/exemption treatment, filing cutoff and carrier handoff requirements.
-
-## Gate 5 — Landed economics
-
-For each SKU × quantity × carrier path calculate:
-
-**SALES REVENUE EXCLUDING TAXES COLLECTED  
-− SUPPLIER COST  
-− MAINLAND TRANSPORT  
-− PACKAGING / HANDLING  
-− OCEAN / REGULATED-CARGO CHARGES  
-− DESTINATION / DELIVERY  
-− SELLING / PAYMENT FEES  
-− OTHER VERIFIED ORDER COSTS  
-= CONTRIBUTION**
-
-Separately calculate:
-
-**CASH REQUIRED BEFORE FUNDS CLEAR  
-= SUPPLIER + CARRIER + PREPARATION PAYMENTS DUE  
-− CLEARED CUSTOMER FUNDS**
-
-Do not blend tax collection/remittance into contribution.
-
-Do not assume three-unit economics are a linear multiple of one-unit economics.
-
-## Gate 6 — Offer readiness
-
-Only after Gates 1–5 are evidence-complete:
-
-- choose the first exact SKU/configuration;
-- set a defensible customer price;
-- define terminal pickup versus delivery;
-- state availability truth;
-- state when transit timing begins;
-- define release/customer obligations;
-- define warranty contact;
-- prepare English and Spanish copy;
-- build inquiry/checkout treatment;
-- run customer-path QA.
+- request or model shipment pricing;
+- establish terminal/will-call baseline;
+- separately establish optional final-mile pricing;
+- calculate landed economics and cash exposure;
+- prepare compliant customer-facing listings;
+- prove one movement;
+- scale from actuals.
 
 ## Current execution receipt — 2026-09-25
 
@@ -147,10 +86,12 @@ Completed internally:
 
 Current external gates:
 
-- Casey approval before SOK qualification email send;
-- exact supplier data before carrier quote requests;
-- carrier written acceptance/quotes;
-- qualified Puerto Rico tax/registration determination.
+- Casey approval before any external email or request;
+- lane-architecture discussion with Corky / Approved first;
+- no SOK Puerto Rico qualification send yet;
+- no carrier quote request yet;
+- no booking, purchase order, registration or public launch;
+- qualified Puerto Rico tax/registration determination before launch.
 
 Current research file:
 
@@ -182,20 +123,18 @@ This is a research prioritization, not launch authority.
 
 Next internal research:
 
-**SCHEDULE B / EEI WORKSHEET → CROWLEY PATH → 12V COMPETITION → LANDED-COST SHELL → EXACT CARRIER PACKETS.**
+**APPROVED PUERTO RICO NETWORK MAP → WILL-CALL / TERMINAL OPTIONS → FINAL-MILE CAPABILITY → RESPONSIBILITY MAP → THEN SOK QUALIFICATION.**
 
 ## Completion evidence
 
 PR-02 closes when management has:
 
-- fresh supplier qualification for both candidate SKUs;
-- exact shipment data sheets;
-- at least one executable written carrier path and one meaningful comparison;
-- written tax/release responsibility map;
-- EEI responsibility procedure;
-- landed-cost/cash-exposure comparison;
-- first-offer recommendation based on evidence;
-- owner decision to launch, hold or revise.
+- a documented Puerto Rico logistics lane and destination handoff flow;
+- known will-call / terminal options;
+- known final-mile capability and required customer information;
+- written responsibility map for tax/import/release and EEI handling;
+- clear division of responsibilities between Approved, Elevation and customer;
+- owner approval to advance into exact SOK qualification and later pricing.
 
 ## External-action boundary
 
@@ -205,4 +144,4 @@ It does **not** authorize supplier/carrier email sends, carrier booking, supplie
 
 ## Control statement
 
-**QUALIFY FIRST → PRICE FROM ACTUALS → DISCLOSE RESPONSIBILITY → TAKE ORDER → PROVE ONE MOVEMENT → SCALE FROM EVIDENCE.**
+**ESTABLISH THE LANE → MAP RESPONSIBILITIES → QUALIFY SOK → PRICE FROM ACTUALS → TAKE ORDER → PROVE ONE MOVEMENT → SCALE FROM EVIDENCE.**
