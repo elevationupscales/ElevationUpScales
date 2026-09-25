@@ -611,3 +611,24 @@ Payment-processing reconciliation:
 - exact fee rates and margin calculations remain outside public Git;
 - do not retroactively add a processor surcharge to a paid customer order without Casey's explicit approval and channel/legal validation.
 
+---
+
+# APPROVED FORWARDERS STRUCTURED-PRICING OPPORTUNITY — 2026-09-24
+
+Inbound from Approved Forwarders management materially advances the Hawaii logistics lane.
+
+**State:** **STRATEGIC PRICING DISCUSSION OFFERED / OWNER GATE.**
+
+Approved Forwarders reviewed Elevation's repeated Hawaii lithium quote activity and proposed discussing a more permanent, consistent pricing structure rather than continuing only with one-off quotes. A solutions lead was added to the conversation and a Teams call was requested to discuss Elevation's broader Hawaii shipping requirements.
+
+Operational significance:
+- this may support a repeatable island / will-call rate architecture instead of quote-by-quote checkout assumptions;
+- it directly aligns with Elevation's goal of building dependable Hawaii battery purchasing and terminal pickup options;
+- no permanent rates, commercial commitments, exclusivity, booking authority, or public customer pricing are agreed yet;
+- existing real-order fulfillment remains active and should not wait on this strategic discussion where current shipment execution is already supported.
+
+Next action:
+**CASEY OWNER DECISION → DRAFT RESPONSE / CALL SCOPE → TEAMS DISCUSSION → PROTECTED RATE/TERM RECEIPT → ECONOMICS + ROUTE RECONCILIATION → OWNER APPROVAL BEFORE CUSTOMER-FACING STANDARDIZATION.**
+
+Do not commit private carrier pricing, named customer information, private contacts beyond what is necessary for public-safe project state, or negotiated commercial terms to public Git.
+
