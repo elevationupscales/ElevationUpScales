@@ -161,3 +161,20 @@ This is not a second Master Work Board.
 - Tag state: `Dealer Media Pending` remains in place.
 - Next: add exact PL X GL White Pics and at least one useful scenario/lifestyle image, set the clean product image as hero, then clear `Dealer Media Pending` only after full verification.
 - Routed to: Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Olight PL X GL media closeout
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Existing Shopify DRAFT supplier item `0.0002.0234` now has a complete exact-product customer gallery built from official Olight PL X GL materials.
+- Evidence/source: official Olight White Pics JPG package, exact duplicate higher-resolution PNG package, Launch Pages package, Dealer Sales Sheet, and selected official U.S. Outdoor Range scenarios supplied by Peter; Shopify readback after media update.
+- Gallery completed: clean product hero, laser-on product view, multiple product angles, emitter/front detail, USB-C charging detail, size-in-hand reference, two selected outdoor lifestyle/use images, official launch/feature graphics and specifications.
+- Hero state: clean product image is now the Shopify featured image.
+- Duplicate control: PNG package was verified as the same clean product set at higher resolution; duplicate images were not added to the product gallery.
+- Tag state: `Dealer Media Pending` removed only after the exact-product media pass was complete.
+- Protected controls preserved: supplier item/SKU identity `0.0002.0234`, price $149.99, vendor Olight, inventory state and DRAFT status remain unchanged.
+- New state: PL X GL media/copy pass is review-ready and remains DRAFT for Management commercial/publish review.
+- Routed to: Company Operations / current MPM.
