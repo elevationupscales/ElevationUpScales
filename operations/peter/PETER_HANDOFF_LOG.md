@@ -232,3 +232,28 @@ This is not a second Master Work Board.
 - No price, freight promise, inventory claim, compatibility promise, emergency-delivery claim, email send, form submission, spend or public publishing occurred.
 - Next: Casey/Management reviews dedupe and approves exact copy/creative before any outreach; if approved, re-check recipient identity/contact freshness immediately before send and expand toward 50 only after the first controlled batch is ready.
 - Routed to: Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Hawaii residential backup-power route campaign / Phase 1 prep
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Casey defined the first residential Hawaii backup-power campaign as a route-based USPS EDDM program using carrier routes, physical postcards, ZIP/campaign-specific QR links and opt-in landing-page traffic rather than private homeowner lists.
+- Phase 1 target ZIPs:
+  - `96743` Waimea / Kamuela — campaign `HI-R1-96743`
+  - `96719` Hawi / North Kohala — campaign `HI-R1-96719`
+  - `96727` Honokaa / Hamakua — campaign `HI-R1-96727`
+  - `96761` Lahaina / Napili / Olowalu — campaign `HI-R1-96761`
+- Later staged ZIPs recorded by Casey:
+  - R2: `96778`, `96749`, `96720`, `96738`, `96740`, `96704`
+  - R3: `96753`, `96708`
+- Intended flow: EDDM postcard → ZIP/carrier-route QR → Hawaii Backup Power landing page → resident opt-in → Elevation lead → SOK battery/system fit → freight/landed quote → order.
+- Proposed campaign URL pattern: `elevationupscales.com/hawaii-backup-power?campaign=HI-R1-96743`.
+- Residential message direction supplied by Casey: Hawaii backup power / expandable SOK lithium storage / home backup / existing solar storage / off-grid power / 12V, 24V and 48V options / Hawaii freight planning / system sizing support.
+- Authorized prep only: pull carrier-route counts, calculate postage + print cost, choose 1–3 test routes, assign unique QR campaign IDs, then prepare physical postcard for owner approval.
+- Hard gate: postcard concepts and creative remain UNAPPROVED. No print order, EDDM purchase, public campaign launch, postcard send or other outreach is authorized until Casey approves final copy/creative.
+- Privacy control: residential lane is route-based and opt-in; no private homeowner email/name scraping.
+- Current priority note: Hawaii first-order fulfillment remains operational priority; this campaign work is preparation only and must not interfere with current fulfillment.
+- Routed to: Casey Young / Company Operations / current MPM.
