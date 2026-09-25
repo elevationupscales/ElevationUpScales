@@ -30,20 +30,67 @@
 
   function renderSummary() {
     const map = [
-      ["property-kpi-discovered","discovered"],["property-kpi-qualified","qualified"],["property-kpi-visited","visited"],
-      ["property-kpi-engaged","engaged"],["property-kpi-leads","leads"],["property-kpi-projects","projects"]
+      ["property-kpi-discovered","discovered"],["property-kpi-qualified","qualified"],["property-kpi-concepts","conceptsGenerated"],
+      ["property-kpi-outreach","outreachSent"],["property-kpi-visited","visited"],["property-kpi-engaged","engaged"],
+      ["property-kpi-leads","leads"],["property-kpi-estimates","estimates"],["property-kpi-projects","projects"]
     ];
     map.forEach(([id,key]) => { if ($(id)) $(id).textContent = Number(summary[key]) || 0; });
+    if ($("property-kpi-pipeline")) $("property-kpi-pipeline").textContent = Number.isFinite(Number(summary.pipelineValue)) && summary.pipelineValue !== null ? `${Number(summary.pipelineValue).toLocaleString()}` : "—";
   }
 
   function filtered() {
     const query = ($("property-opportunity-search")?.value || "").trim().toLowerCase();
-    const statusValue = $("property-opportunity-filter")?.value || "all";
+    const qualification = $("property-opportunity-filter")?.value || "all";
+    const region = $("property-opportunity-region")?.value || "all";
+    const type = $("property-opportunity-type")?.value || "all";
+    const outreach = $("property-opportunity-outreach")?.value || "all";
+    const engagement = $("property-opportunity-engagement")?.value || "all";
+    const conversion = $("property-opportunity-conversion")?.value || "all";
+    const rep = ($("property-opportunity-rep")?.value || "").trim().toLowerCase();
+    const minSolar = Number($("property-opportunity-min-solar")?.value || 0);
+    const minLithium = Number($("property-opportunity-min-lithium")?.value || 0);
+    const minCombined = Number($("property-opportunity-min-combined")?.value || 0);
+    const dateFrom = $("property-opportunity-date")?.value || "";
     return opportunities.filter((item) => {
-      if (statusValue !== "all" && item.qualificationStatus !== statusValue) return false;
+      if (qualification !== "all" && item.qualificationStatus !== qualification) return false;
+      if (region !== "all" && item.serviceRegion !== region) return false;
+      if (type !== "all" && item.opportunityType !== type) return false;
+      if (outreach !== "all" && item.outreachStatus !== outreach) return false;
+      if (engagement === "visited" && !(Number(item.pageVisitCount) > 0)) return false;
+      if (engagement === "unvisited" && Number(item.pageVisitCount) > 0) return false;
+      if (engagement === "qr" && !(Number(item.qrScanCount) > 0)) return false;
+      if (engagement === "start" && !(Number(item.startProjectOpened) > 0)) return false;
+      if (conversion === "unlinked" && item.convertedLeadId) return false;
+      if (conversion === "linked" && !item.convertedLeadId) return false;
+      if (conversion === "submitted" && !item.leadSubmitted) return false;
+      if (rep && !String(item.assignedRep || "").toLowerCase().includes(rep)) return false;
+      if (Number(item.solarOpportunityScore) < minSolar || Number(item.lithiumOpportunityScore) < minLithium || Number(item.combinedOpportunityScore) < minCombined) return false;
+      if (dateFrom && String(item.createdAt || "").slice(0,10) < dateFrom) return false;
       if (!query) return true;
       return [item.opportunityId,item.propertyAddress,item.city,item.state,item.postalCode,item.opportunityType,item.serviceRegion,item.assignedRep]
         .join(" ").toLowerCase().includes(query);
+    });
+  }
+
+  function renderMap() {
+    const group = $("property-opportunity-map-points");
+    const label = $("property-opportunity-map-summary");
+    if (!group || !label) return;
+    const points = opportunities.filter((item) => {
+      const lat = Number(item.latitude), lon = Number(item.longitude);
+      return Number.isFinite(lat) && Number.isFinite(lon) && lat >= 37 && lat <= 41 && lon >= -109.1 && lon <= -102;
+    });
+    group.innerHTML = points.map((item) => {
+      const x = 38 + ((Number(item.longitude) + 109.1) / 7.1) * 644;
+      const y = 28 + ((41 - Number(item.latitude)) / 4) * 246;
+      const cls = Number(item.startProjectOpened) > 0 ? "is-engaged" : item.qualificationStatus === "qualified" ? "is-qualified" : "";
+      return `<circle tabindex="0" role="button" aria-label="${esc(item.propertyAddress)}" data-map-id="${esc(item.opportunityId)}" class="${cls}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6"><title>${esc(item.propertyAddress)} · ${esc(item.opportunityType)} · ${esc(item.combinedOpportunityScore)}</title></circle>`;
+    }).join("");
+    label.textContent = points.length ? `${points.length} Colorado opportunities plotted from explicit stored coordinates. Green = qualified; amber = Start Project opened.` : "No Colorado coordinate records are available yet. The pilot does not auto-geocode addresses.";
+    group.querySelectorAll("[data-map-id]").forEach((point) => {
+      const open = () => { selected = point.dataset.mapId || ""; renderDetail(); $("property-opportunity-detail")?.scrollIntoView({ behavior:"smooth", block:"nearest" }); };
+      point.addEventListener("click", open);
+      point.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } });
     });
   }
 
@@ -56,7 +103,7 @@
       <td><strong>${esc(item.opportunityType)}</strong><small>${esc(item.scoreConfidence)} confidence</small></td>
       <td><span class="property-score">${esc(item.combinedOpportunityScore)}</span><small>S ${esc(item.solarOpportunityScore)} · L ${esc(item.lithiumOpportunityScore)}</small></td>
       <td><strong>${esc(friendly(item.serviceRegion))}</strong><small>${esc(friendly(item.serviceabilityStatus))}</small></td>
-      <td><span class="property-status">${esc(friendly(item.qualificationStatus))}</span><small>${esc(item.nextAction || "Review")}</small></td>
+      <td><span class="property-status">${esc(friendly(item.qualificationStatus))}</span><small>${esc(item.nextAction || "Review")}</small><small>Outreach: ${esc(friendly(item.outreachStatus))} · Rep: ${esc(item.assignedRep || "Unassigned")}</small></td>
       <td><strong>${Number(item.pageVisitCount)||0} visits</strong><small>${Number(item.qrScanCount)||0} QR · ${Number(item.startProjectOpened)||0} Start Project</small></td>
       <td>${item.convertedLeadId ? `<strong>${esc(item.convertedLeadId)}</strong><small>${item.leadSubmitted ? "Submitted" : "Contact captured"}</small>` : "<span>—</span>"}</td>
       <td><button type="button" data-property-open>Open</button></td>
@@ -133,7 +180,7 @@
       const data = await api();
       opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
       summary = data.summary || {};
-      renderSummary(); renderTable(); renderDetail();
+      renderSummary(); renderTable(); renderMap(); renderDetail();
       status("Property Intelligence pilot ready · manual/test inputs only · outbound automation off");
     } catch (error) {
       if (/unauthorized|session/i.test(error.message)) return;
@@ -141,8 +188,8 @@
     }
   }
 
-  $("property-opportunity-search")?.addEventListener("input", renderTable);
-  $("property-opportunity-filter")?.addEventListener("change", renderTable);
+  ["property-opportunity-search","property-opportunity-rep","property-opportunity-min-solar","property-opportunity-min-lithium","property-opportunity-min-combined","property-opportunity-date"].forEach((id) => $(id)?.addEventListener("input", renderTable));
+  ["property-opportunity-filter","property-opportunity-region","property-opportunity-type","property-opportunity-outreach","property-opportunity-engagement","property-opportunity-conversion"].forEach((id) => $(id)?.addEventListener("change", renderTable));
   $("property-opportunity-refresh")?.addEventListener("click", load);
   $("property-opportunity-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
