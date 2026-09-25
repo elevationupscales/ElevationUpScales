@@ -49,7 +49,7 @@ function normalizePropertyOpportunityInput(raw = {}) {
     city: String(raw.city || "").trim().slice(0, 120),
     state: String(raw.state || "").trim().toUpperCase().slice(0, 2),
     postalCode: String(raw.postalCode || raw.zip || "").trim().slice(0, 10),
-    latitude: nonNegative(Math.abs(Number(raw.latitude))) === null ? null : Number(raw.latitude),
+    latitude: finite(raw.latitude),
     longitude: finite(raw.longitude),
     sourceType,
     sourceRecordId: String(raw.sourceRecordId || "").trim().slice(0, 180),
