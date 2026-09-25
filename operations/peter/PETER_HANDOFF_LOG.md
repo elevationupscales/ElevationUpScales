@@ -257,3 +257,40 @@ This is not a second Master Work Board.
 - Privacy control: residential lane is route-based and opt-in; no private homeowner email/name scraping.
 - Current priority note: Hawaii first-order fulfillment remains operational priority; this campaign work is preparation only and must not interfere with current fulfillment.
 - Routed to: Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Hawaii residential-reach + owner/operator call-list dedupe
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Reviewed Casey's new Hawaii residential-reach email lane and owner/operator cold-call lane against current Peter handoff state, retained Hawaii lead research, and the connected Elevation Gmail. No calls or emails were sent.
+- Authority/boundary: both lanes remain prospecting/review only. Residential creative remains UNAPPROVED. No residential email send, cold call, print order, homeowner-list request, public campaign launch or spend was executed.
+- Residential-reach exact-address Gmail dedupe: no matching existing messages were found for the supplied public addresses for Associa Hawaii, Maui Lani Community Association, Wailea Community Association, Hawaii Loa Ridge Owners Association, Mehana at Kapolei Community Association, Ho'opili Community Association, Big Island Property Monitoring, Hawaii Hale Watch, Island Home Watch & Refresh, With Aloha Property Services, or Pacifica Realty Management at this checkpoint.
+- Residential-lane overlap from Casey's prior Wave 1:
+  - Big Island Property Monitoring / `bigislandpmc@gmail.com` — already present in Casey's earlier B-tier property/resilience list; treat as the same staged prospect, not a new lead.
+  - With Aloha Property Services — already present in Casey's earlier B-tier list under `kerrie@withalohapropertyservices.com`; the new `Rentals@WithAlohaPropertyServices.com` address is an additional public route for the same business, not a separate lead.
+- Owner/operator call-list repeats from Casey's earlier Hawaii backup-power Wave 1:
+  - Hawaii Solar Outfitters
+  - SolarMan Consulting, LLC
+  - DKN Electrical LLC
+  - Hawaii Off Grid
+  - Big Island Property Monitoring, LLC
+  - With Aloha Property Services
+  These should inherit the existing prospect record/campaign lane rather than be counted again as net-new prospects.
+- Owner/operator names not found in the retained Hawaii lead files checked at this checkpoint:
+  - ProVision Solar / Marco Mangelsdorf
+  - Salt Water Real Estate / Jessica Gauthier
+  - Solar Saint
+  These remain candidate new records pending normal contact/identity verification.
+- Prior research overlap/control: `Hawaii Off Grid` remains distinct from retained lead `Off Grid Solar Hawaii` unless business identity is affirmatively proven; do not merge on similar name alone.
+- Gmail business-name search across the nine supplied owner/operator call targets returned no matching existing message threads at this checkpoint.
+- Lane separation preserved:
+  - installer/dealer/operator calls = SOK supply/project-support positioning;
+  - residential/property-management contacts = opt-in homeowner resource/referral positioning;
+  - no private homeowner names/emails requested or collected.
+- Call opener supplied by Casey is recorded as campaign direction only; it is not treated as send/call authorization.
+- Exact blocker/owner gate: Casey approval of outreach/copy/creative remains required before residential email outreach; any cold-call launch should likewise be explicitly cleared as external outreach under the current Hawaii lead-control rule.
+- Next: consolidate duplicate records into one send-readiness/call-readiness sheet, preserve alternate public contacts on the same account, verify new call-list identities/contact freshness, and await Casey's exact outreach approval.
+- Routed to: Casey Young / Company Operations / current MPM.
