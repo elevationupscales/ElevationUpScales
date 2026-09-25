@@ -49,7 +49,7 @@ Do not expose EIN, tax-license numbers, bank/card details, private addresses, si
 | Hawaii freight/storage | **PROVING / MULTI-PROVIDER DEVELOPMENT** | Logistics Plus waiting on terms; H2O/Pasha backup pricing needs exact SOK packed profiles; current extraction blocker is the supplier's legacy workbook format, not missing supplier cooperation. Other provider evidence remains separate/protected. |
 | Tax/resale treatment | **COMPANY DOCUMENTATION AVAILABLE / SUPPLIER-SPECIFIC TREATMENT PROTECTED** | Use current supplier/account evidence; do not infer tax treatment from another vendor. |
 | Returns/RMA | **PARTIAL / WARRANTY-SPECIFIC PROCESS CONTROLS APPLY** | Exact SOK warranty authorization/evidence/disposition rules govern. |
-| First paid order → OS proof | **VERIFYING** | Shopify/SOK paid-order bridge is merged; full live purchase-to-OS proof remains when a real order occurs. |
+| First paid order → OS proof | **VERIFYING** | Hawaii proof-order payment is received; this does not by itself complete the separate Shopify/SOK paid-order bridge proof. |
 
 ## Current warranty/logistics development state
 
@@ -113,7 +113,7 @@ Parallel SOK work remains:
 2. Recover the exact additional-model shipment profiles from the existing SOK legacy workbook through a supported extraction path, then send only the verified profile data to H2O/Pasha for backup-route pricing.
 3. Reconcile the received Logistics Plus rate card into the protected Hawaii storage/fulfillment economics model.
 4. Reconcile the received SOK warranty inputs with provider economics; contact SOK again only for a material unresolved fact. Do not resend the completed consolidated request.
-5. Execute the first official Hawaii SOK order as the current fulfillment proof while preserving customer-payment, carrier/DG and supplier-release gates.
+5. Execute the first official Hawaii SOK order as the current fulfillment proof. Customer payment is received; next preserve exact-SKU/document, carrier/DG, SOK PO/payment and supplier-release gates.
 6. Prove first real Shopify/SOK paid-order → OS ingestion → supplier fulfillment chain when a qualifying Shopify order occurs; do not confuse the Hawaii proof order with that separate Shopify bridge proof.
 7. Reconcile first Hawaii proof actuals against the protected starter landed-cost model before treating a route as production-proven.
 8. Build the owner-review Hawaii warranty economics from the now-received supplier/provider inputs, keeping binding compensation/commitments behind Casey approval.
