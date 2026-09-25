@@ -209,3 +209,26 @@ This is not a second Master Work Board.
 - Management next gate: exact product/SKU → current Olight source → price/MAP → media → shipping/fulfillment → publication → storefront purchaseability.
 - Recommended global update: mark Peter Olight draft-production closeout complete and move the three products to Management final commercial/publish review.
 - Routed to: Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Hawaii backup-power Wave 1 lead prep / dedupe
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Reviewed Casey's 20-contact Hawaii backup-power Wave 1 for existing Elevation lead overlap and existing exact-address Gmail correspondence. No outreach was sent.
+- Authority/boundary: Casey's Wave 1 note authorizes review, de-duplication and campaign preparation only. Postcard/creative concepts remain UNAPPROVED; customer outreach remains HOLD until Casey approves exact copy/creative.
+- Existing researched-lead overlap:
+  - Hawaii PV Partners — already present in `LITHIUM_BUYER_NETWORK_HAWAII_WAVE1_2026-09-10.md`; prior positioning = commercial PV service/project-supply support.
+  - Sunspear Energy — already present in the same Wave 1 buyer-network file; prior positioning = complementary commercial/off-grid/non-standard supply, not generic residential-battery replacement.
+  - Independent Energy Hawaii — already present in both the Hawaii buyer-network Wave 1 and `HAWAII_ONLY_LEADS_RECON_2026-09-17.md`; prior positioning = supplemental lithium/off-grid/remote-power supply and service/referral support.
+- Identity caution: `Hawaii Off Grid` in Casey's batch must not be automatically merged with the existing `Off Grid Solar Hawaii` lead; names are similar but exact business identity has not been proven.
+- Gmail dedupe: exact-address search across all 20 public addresses returned no matching existing messages in the connected Elevation mailbox at this checkpoint.
+- Campaign structure preserved:
+  - A-tier = supply/dealer/project-support positioning.
+  - B-tier = backup-power/property-resilience positioning.
+  - installers/solar/storage remain separate from property-management outreach.
+- No price, freight promise, inventory claim, compatibility promise, emergency-delivery claim, email send, form submission, spend or public publishing occurred.
+- Next: Casey/Management reviews dedupe and approves exact copy/creative before any outreach; if approved, re-check recipient identity/contact freshness immediately before send and expand toward 50 only after the first controlled batch is ready.
+- Routed to: Casey Young / Company Operations / current MPM.
