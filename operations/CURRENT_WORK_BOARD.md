@@ -604,3 +604,10 @@ Immediate next action:
 
 Customer identity, payment amount, private carrier rates and other protected commercial/customer information remain outside public Git.
 
+Payment-processing reconciliation:
+- the first Hawaii proof order exposed a processor-cost omission in the quoted economics;
+- treat the processor deduction as a protected order-cost variance and include it in first-order actuals;
+- future controlled quotes/payment links must recover expected processing/channel cost before the customer total is issued;
+- exact fee rates and margin calculations remain outside public Git;
+- do not retroactively add a processor surcharge to a paid customer order without Casey's explicit approval and channel/legal validation.
+
