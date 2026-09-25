@@ -1,9 +1,9 @@
-# Puerto Rico PR-02 — Carrier Qualification Request Specification — DRAFT ONLY
+# Puerto Rico PR-02 — Logistics Lane Discovery Specification — DRAFT ONLY
 
-**Status:** READY FOR CARRIER-SPECIFIC COMPLETION / NOT SENT  
-**Initial candidates:** Crowley LCL; TOTE / qualified consolidator  
-**Initial SKUs:** SOK SK12V100PC; SOK SK48V100N  
-**Quantity cases:** 1 unit and 3 units, each SKU quoted separately
+**Status:** HOLD FOR LANE-DISCOVERY USE / NOT SENT  
+**Primary relationship:** Approved Forwarders / Corky advisory lane  
+**Current scope:** network, terminal, will-call, handoff and final-mile architecture  
+**Shipment-specific quotes:** OUT OF SCOPE UNTIL OWNER ADVANCES PHASE
 
 ## Current official contact paths — verified 2026-09-25
 
@@ -37,15 +37,25 @@ TOTE's public quote form explicitly asks whether cargo is hazardous and requests
 
 Do not send a rate request until exact supplier shipment data is complete.
 
-## Request purpose
+## Current purpose
 
-Obtain a complete executable mainland-origin-to-Puerto-Rico freight path for each exact battery configuration.
+Understand the Puerto Rico logistics network before requesting shipment pricing or exact lithium acceptance.
 
-Do not request a booking.
+This phase should answer:
 
-Do not combine different SKU assumptions into one ambiguous rate.
+- what Puerto Rico terminal / will-call points are available;
+- which are customer-accessible;
+- how freight moves from mainland handoff to destination release;
+- whether Approved has employees, agents or established operating partners in Puerto Rico;
+- what final-mile residential/commercial delivery options exist;
+- what information is required to support final-mile service;
+- what account / documentation setup Elevation needs before introducing exact SOK products;
+- what Approved can handle regarding AES/EEI or related filing workflow;
+- what responsibilities remain with Elevation and the customer.
 
-## Shipment data required before send
+Do not send hazmat packets, exact SKU qualification requests or shipment quote requests during this lane-discovery phase unless Casey explicitly advances the scope.
+
+## Later-phase shipment data — NOT CURRENTLY REQUIRED
 
 For each exact SKU insert:
 
@@ -68,7 +78,7 @@ For each exact SKU insert:
 - packaging / terminal-protection description;
 - available manufacturer/warehouse packaging evidence if required.
 
-## Carrier questions
+## Later-phase carrier qualification questions
 
 Request written confirmation of:
 
@@ -98,7 +108,7 @@ Request written confirmation of:
 24. handling if shipment review rejects or delays cargo after arrival at the receiving facility;
 25. EEI/ITN information required by the carrier and filing cutoff.
 
-## Quote format
+## Later-phase quote format
 
 Require a dated written quote showing:
 
@@ -116,6 +126,6 @@ Require a dated written quote showing:
 
 ## External-action boundary
 
-**CASEY APPROVAL REQUIRED BEFORE ANY QUOTE REQUEST IS SENT.**
+**CASEY APPROVAL REQUIRED BEFORE ANY EXTERNAL MESSAGE IS SENT.**
 
-A quote request does not authorize booking, tender, payment or movement.
+Current phase is lane discovery, not quoting. No quote request, booking, tender, payment or movement is authorized.
