@@ -24,6 +24,7 @@
   const command = topChildren.find((el) => el.classList.contains("admin-command-actions"));
   const ownerSignals = topChildren.find((el) => el.classList.contains("admin-owner-signals"));
   const opportunity = $("opportunity-workspace");
+  const propertyOpportunities = $("property-opportunities-workspace");
   const supplierLeads = $("supplier-leads-workspace");
   const solarLeads = topChildren.find((el) => el.classList.contains("admin-leads-workspace"));
   const solarInsights = topChildren.find((el) => el.classList.contains("admin-lead-insights"));
@@ -51,10 +52,10 @@
   const description = $("eus-admin-view-description");
   const nav = null;
 
-  const allSections = [statusStrip, priority, command, summary, ownerSignals, opportunity, supplierLeads, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
+  const allSections = [statusStrip, priority, command, summary, ownerSignals, propertyOpportunities, opportunity, supplierLeads, solarLeads, solarInsights, marketplace, followup, system, lower].filter(Boolean);
   allSections.forEach((el) => content.appendChild(el));
   const viewSections = {
-    projects: [opportunity],
+    projects: [propertyOpportunities, opportunity],
     suppliers: [supplierLeads],
     solar: [solarLeads, solarInsights],
     work: [opportunity],
@@ -62,7 +63,7 @@
   };
 
   const viewDescriptions = {
-    projects: "Customer requests for Home, RV, lithium and general projects. Solar Builder activity stays in its own lane.",
+    projects: "Customer Leads plus the upstream Property Intelligence opportunity queue. Qualified Property Opportunities convert into this same Lead pipeline.",
     suppliers: "Supplier and dropshipping relationships only. This is separate from customer and Solar leads.",
     solar: "Solar Builder activity, intent and follow-up. Do not mix these records with lithium battery leads.",
     work: "Affiliate, Marketing, Technician and Growth opportunities remain separate from customer Leads.",
