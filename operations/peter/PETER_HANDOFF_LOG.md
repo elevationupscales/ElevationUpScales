@@ -67,3 +67,49 @@ This is not a second Master Work Board.
 - Protected controls: no price, SKU, vendor, shipping profile, inventory policy, publication/channel or ACTIVE-status changes.
 - SOK eBay note: current wave remains valid on the company/eBay lane but is not Peter's current direct Worktree while the Olight closeout is active.
 - Routed to: Peter Torres / Ecommerce & Vendor Operations; Company Operations / current MPM.
+
+
+---
+
+## 2026-09-24 — Olight Odin S M-LOK draft pass
+
+**State:** BLOCKED
+
+- Verified change: Existing Shopify DRAFT `ODINSMMTBK` was opened and its customer-facing description was cleaned up using only the already-recorded product facts. Product remained DRAFT.
+- Evidence/source: current Peter Olight Worktree; Olight Project Source; Olight Master Catalog Truth; Shopify readback after edit.
+- Affected Project: Olight Authorized Dealer / Catalog / Commerce Integration.
+- Protected controls preserved: price $149.99, SKU `ODINSMMTBK`, vendor Olight, DRAFT status, and existing zero-image state were not altered outside authorized copy work.
+- Exact blocker: no Odin S exact-product media is attached to the draft or discoverable in Shopify Files; the Olight package referenced by the Worktree is not exposed through the current ChatGPT Project/Drive file surfaces. No substitute or adjacent Olight asset was used.
+- Media state: 0 product images; `Dealer Media Pending` remains in place.
+- Next: attach/upload exact official Odin S M-LOK media from the authorized package, order gallery, add alt text, then clear `Dealer Media Pending` only after verification.
+- Routed to: Company Operations / current MPM.
+
+---
+
+## 2026-09-24 — Olight PL X GL draft pass
+
+**State:** BLOCKED
+
+- Verified change: Existing Shopify DRAFT supplier item `0.0002.0234` was opened; customer-facing description was polished; the existing official PL X GL feature graphic was preserved with its useful alt text. Product remained DRAFT.
+- Evidence/source: current Peter Olight Worktree; Olight Project Source; Olight Master Catalog Truth; Shopify product/files readback.
+- Affected Project: Olight Authorized Dealer / Catalog / Commerce Integration.
+- Protected controls preserved: price $149.99, SKU/item identity `0.0002.0234`, vendor Olight, DRAFT status and commercial controls were not changed.
+- Exact blocker: Shopify contains only one exact PL X GL feature graphic and no recoverable exact hero/supporting media set. The local authorized Olight package is not exposed through the current ChatGPT Project/Drive file surfaces.
+- Media state: 1 official feature graphic with alt text; gallery is not complete; `Dealer Media Pending` remains in place.
+- Next: attach/upload the official PL X GL hero plus supporting product/lifestyle media from the authorized package, arrange the gallery, verify alt text, then clear `Dealer Media Pending`.
+- Routed to: Company Operations / current MPM.
+
+---
+
+## 2026-09-24 — Olight OSIGHT SE draft pass
+
+**State:** BLOCKED
+
+- Verified change: Existing Shopify DRAFT `OSIGHTSE` was opened and its customer-facing description/formatting was cleaned up using only the already-recorded product facts. Product remained DRAFT.
+- Evidence/source: current Peter Olight Worktree; Olight Project Source; Olight Master Catalog Truth; Shopify product/files readback.
+- Affected Project: Olight Authorized Dealer / Catalog / Commerce Integration.
+- Protected controls preserved: price $199.99, SKU `OSIGHTSE`, vendor Olight, DRAFT status and commercial controls were not changed.
+- Exact blocker: no OSIGHT SE exact-product media is attached to the draft or discoverable in Shopify Files. Shopify's discoverable OSIGHT media is for OSIGHT R and was correctly rejected as a non-matching product source. The local authorized Olight package is not exposed through the current ChatGPT Project/Drive file surfaces.
+- Media state: 0 product images. No wrong OSIGHT R media was reused.
+- Next: attach/upload exact official OSIGHT SE media from the authorized package, arrange gallery and alt text, then return for management review.
+- Routed to: Company Operations / current MPM.
