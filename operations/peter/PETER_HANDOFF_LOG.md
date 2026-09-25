@@ -144,3 +144,20 @@ This is not a second Master Work Board.
 - Media state: `Dealer Media Pending` remains correctly in place.
 - Next: attach exact PL X GL White Pics / Scenarios / Launch Page assets, arrange gallery and alt text, then clear `Dealer Media Pending` only after verification.
 - Routed to: Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Olight PL X GL Launch Pages media pass
+
+**State:** BLOCKED
+
+- Verified change: Existing Shopify DRAFT supplier item `0.0002.0234` received five additional exact official Olight Launch Pages graphics with useful alt text.
+- Evidence/source: official Olight `PL X GL 精品页 (Launch Pages)` package supplied by Peter; Shopify readback after media update.
+- Media added: launch/brand hero graphic, product overview, 3-in-1 flood/spot/green-laser feature graphic, USB-C charging feature graphic, and official specifications/performance summary.
+- Current media state: 6 exact official graphics total including the previously attached PL X GL feature graphic.
+- Protected controls preserved: price $149.99, supplier item/SKU identity `0.0002.0234`, vendor Olight, inventory state and DRAFT status remain unchanged.
+- Exact remaining blocker: no clean White Pics product hero/angle set or scenario/lifestyle media has been supplied yet, so the gallery is not treated as complete.
+- Tag state: `Dealer Media Pending` remains in place.
+- Next: add exact PL X GL White Pics and at least one useful scenario/lifestyle image, set the clean product image as hero, then clear `Dealer Media Pending` only after full verification.
+- Routed to: Company Operations / current MPM.
