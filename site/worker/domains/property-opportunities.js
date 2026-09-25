@@ -101,6 +101,7 @@ async function ensurePropertyOpportunitySchema(db) {
         outreach_status TEXT NOT NULL DEFAULT 'not_sent',
         outreach_type TEXT NOT NULL DEFAULT '',
         outreach_sent_at TEXT NOT NULL DEFAULT '',
+        outreach_opt_out INTEGER NOT NULL DEFAULT 0,
         first_visit_at TEXT NOT NULL DEFAULT '',
         last_visit_at TEXT NOT NULL DEFAULT '',
         page_visit_count INTEGER NOT NULL DEFAULT 0,
@@ -183,6 +184,7 @@ function propertyOpportunityRecord(row, origin = "") {
     outreachStatus: row?.outreach_status || "",
     outreachType: row?.outreach_type || "",
     outreachSentAt: row?.outreach_sent_at || "",
+    outreachOptOut: Boolean(row?.outreach_opt_out),
     firstVisitAt: row?.first_visit_at || "",
     lastVisitAt: row?.last_visit_at || "",
     pageVisitCount: Number(row?.page_visit_count) || 0,
@@ -317,10 +319,10 @@ async function handleAdminPropertyOpportunities(request, env) {
       estimated_solar_kw_low,estimated_solar_kw_high,estimated_storage_kwh_low,estimated_storage_kwh_high,
       service_region,serviceability_status,qualification_status,qualification_reason,
       score_reason_codes_json,source_evidence_json,score_confidence,concept_status,concept_image_url,concept_generated_at,
-      personalized_page_slug,qr_code_id,campaign,outreach_status,outreach_type,outreach_sent_at,
+      personalized_page_slug,qr_code_id,campaign,outreach_status,outreach_type,outreach_sent_at,outreach_opt_out,
       first_visit_at,last_visit_at,page_visit_count,qr_scan_count,start_project_opened,lead_submitted,converted_lead_id,
       assigned_rep,next_action,notes
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
       .bind(
         opportunityId,now,now,input.propertyAddress,input.city,state,postalCode,latitude,longitude,
         input.sourceType,input.sourceRecordId,input.sourceDate,input.propertyType,input.estimatedRoofArea,input.estimatedGroundArea,
@@ -332,7 +334,7 @@ async function handleAdminPropertyOpportunities(request, env) {
         score.estimatedSolarKwLow,score.estimatedSolarKwHigh,score.estimatedStorageKwhLow,score.estimatedStorageKwhHigh,
         service.serviceArea,score.serviceabilityStatus,score.qualificationStatus,score.qualificationReason,
         JSON.stringify(score.reasons),JSON.stringify(evidence),score.scoreConfidence,"text_concept_ready","",now,
-        slug,qrCodeId,input.campaign,"not_sent","","",
+        slug,qrCodeId,input.campaign,"not_sent","","",0,
         "","",0,0,0,0,"",
         "","Review Property Opportunity",input.notes
       ).run();
@@ -354,8 +356,10 @@ async function handleAdminPropertyOpportunities(request, env) {
 
     const qualificationStatus = cleanString(body.qualificationStatus, 40).toLowerCase() || current.qualification_status;
     const outreachStatus = cleanString(body.outreachStatus, 40).toLowerCase() || current.outreach_status;
+    const outreachOptOut = body.outreachOptOut === undefined ? Boolean(current.outreach_opt_out) : Boolean(body.outreachOptOut);
     if (!PROPERTY_QUALIFICATION_STATUSES.has(qualificationStatus)) return jsonResponse({ error: "Invalid qualification status" }, 400);
     if (!PROPERTY_OUTREACH_STATUSES.has(outreachStatus)) return jsonResponse({ error: "Invalid outreach status" }, 400);
+    if (outreachOptOut && (outreachStatus === "approved" || outreachStatus === "sent")) return jsonResponse({ error: "Outreach is blocked because this record is opted out" }, 409);
     const assignedRep = cleanString(body.assignedRep, 120);
     const nextAction = cleanString(body.nextAction, 180) || current.next_action;
     const notes = cleanString(body.notes, 5000);
@@ -363,9 +367,9 @@ async function handleAdminPropertyOpportunities(request, env) {
     const now = new Date().toISOString();
     const outreachSentAt = outreachStatus === "sent" ? (current.outreach_sent_at || now) : current.outreach_sent_at;
     await env.LEADS_DB.prepare(`UPDATE property_opportunities
-      SET qualification_status=?,outreach_status=?,outreach_type=?,outreach_sent_at=?,assigned_rep=?,next_action=?,notes=?,updated_at=?
+      SET qualification_status=?,outreach_status=?,outreach_type=?,outreach_sent_at=?,outreach_opt_out=?,assigned_rep=?,next_action=?,notes=?,updated_at=?
       WHERE opportunity_id=?`)
-      .bind(qualificationStatus,outreachStatus,outreachType,outreachSentAt,assignedRep,nextAction,notes,now,opportunityId).run();
+      .bind(qualificationStatus,outreachStatus,outreachType,outreachSentAt,outreachOptOut?1:0,assignedRep,nextAction,notes,now,opportunityId).run();
     const row = await env.LEADS_DB.prepare("SELECT * FROM property_opportunities WHERE opportunity_id=? LIMIT 1").bind(opportunityId).first();
     return jsonResponse({ ok: true, updated: true, outreachSentBySystem: false, opportunity: propertyOpportunityRecord(row, origin) }, 200);
   }
@@ -406,8 +410,9 @@ async function linkPropertyOpportunityLead(env, opportunityId, reference, submit
   await env.LEADS_DB.prepare(`UPDATE property_opportunities SET
     converted_lead_id=CASE WHEN converted_lead_id='' THEN ? ELSE converted_lead_id END,
     lead_submitted=CASE WHEN ?=1 THEN 1 ELSE lead_submitted END,
+    next_action=?,
     updated_at=?
-    WHERE opportunity_id=?`).bind(reference,submitted ? 1 : 0,now,opportunityId).run();
+    WHERE opportunity_id=?`).bind(reference,submitted ? 1 : 0,submitted?"Lead Submitted — Work Lead":"Lead Contact Captured — Work Lead",now,opportunityId).run();
 }
 
 function publicReasonList(row) {
@@ -467,7 +472,7 @@ async function handlePropertyOpportunityPublic(request, env, slug) {
     const now = new Date().toISOString();
     await env.LEADS_DB.prepare(`UPDATE property_opportunities SET
       first_visit_at=CASE WHEN first_visit_at='' THEN ? ELSE first_visit_at END,
-      last_visit_at=?,page_visit_count=page_visit_count+1,updated_at=?
+      last_visit_at=?,page_visit_count=page_visit_count+1,next_action=CASE WHEN next_action='Review Property Opportunity' THEN 'Review Page Engagement' ELSE next_action END,updated_at=?
       WHERE opportunity_id=?`).bind(now,now,now,row.opportunity_id).run();
   }
   return new Response(request.method === "HEAD" ? null : propertyOpportunityHtml(row), {
@@ -492,7 +497,7 @@ async function handlePropertyOpportunityQr(request, env, qrCodeId) {
   if (!row) return new Response("Not Found", { status: 404 });
   if (request.method === "GET") {
     const now = new Date().toISOString();
-    await env.LEADS_DB.prepare("UPDATE property_opportunities SET qr_scan_count=qr_scan_count+1,updated_at=? WHERE opportunity_id=?").bind(now,row.opportunity_id).run();
+    await env.LEADS_DB.prepare("UPDATE property_opportunities SET qr_scan_count=qr_scan_count+1,next_action=CASE WHEN next_action IN ('Review Property Opportunity','Review Page Engagement') THEN 'Review QR Engagement' ELSE next_action END,updated_at=? WHERE opportunity_id=?").bind(now,row.opportunity_id).run();
   }
   return new Response(null, { status: 302, headers: { Location: `/project-opportunity/${encodeURIComponent(row.personalized_page_slug)}?via=qr`, "Cache-Control": "no-store" } });
 }
@@ -504,7 +509,7 @@ async function handlePropertyOpportunityStart(request, env, slug) {
   if (!row) return new Response("Not Found", { status: 404 });
   if (request.method === "GET") {
     const now = new Date().toISOString();
-    await env.LEADS_DB.prepare("UPDATE property_opportunities SET start_project_opened=start_project_opened+1,updated_at=? WHERE opportunity_id=?").bind(now,row.opportunity_id).run();
+    await env.LEADS_DB.prepare("UPDATE property_opportunities SET start_project_opened=start_project_opened+1,next_action='Follow Up on Start Project Activity',updated_at=? WHERE opportunity_id=?").bind(now,row.opportunity_id).run();
   }
   const params = new URLSearchParams({
     source: "property-intelligence",
