@@ -399,3 +399,30 @@ Actual carrier / partner charges must be revalidated when stale, shipment facts 
 **ALL LANES:** protect private carrier rates, partner identities, supplier costs, and internal margin mechanics.
 
 The purpose of the model is to make the Hawaii / Alaska logistics capability sustainable without pricing Elevation out of the market or giving away the operational network that creates the value.
+
+---
+
+## 14. Payment-processing cost recovery — owner hard control 2026-09-24
+
+Payment-processing cost is a real order cost and must be recovered in pricing. Elevation does not intentionally absorb routine card, wallet, PayPal, marketplace, financing, or checkout-processing costs as an unpriced expense.
+
+For every quote, invoice, payment link, marketplace listing, and direct checkout where Elevation controls the customer price, the protected internal economics must include:
+
+**PRODUCT / SUPPLIER COST**
+**+ FREIGHT / DG / ACCESSORIAL COST**
+**+ TAX TREATMENT**
+**+ PAYMENT / CHANNEL PROCESSING COST**
+**+ REQUIRED ELEVATION CONTRIBUTION**
+**= CUSTOMER PRICE**
+
+When the processor charges a percentage plus a fixed fee, calculate the customer price from the required net amount using a gross-up method rather than simply adding the fee percentage to the target amount.
+
+Exact processor rates, channel fees, internal contribution targets, and resulting margin calculations remain protected commercial data and must not be committed to public Git.
+
+Default customer-facing behavior is to quote an all-in commercially approved price that already covers expected processing overhead. Do not add an after-the-fact processor surcharge to a paid order, or publish a separate payment-method surcharge, unless Casey explicitly approves it and the specific channel/payment method permits it.
+
+For proof orders and unusual transactions, reconcile:
+**GROSS CUSTOMER PAYMENT → ACTUAL PROCESSOR / CHANNEL DEDUCTION → NET RECEIPT → ACTUAL PRODUCT + FREIGHT + TAX + ACCESSORIAL COSTS → ACTUAL CONTRIBUTION.**
+
+A processor-fee miss is a pricing variance to correct in the next quote/listing, not a reason to obscure or ignore the real order economics.
+
