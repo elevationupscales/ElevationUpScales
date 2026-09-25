@@ -581,3 +581,26 @@ The 2026-09-24 SOP recon found the open PR estate materially diverged from curre
 ## SYSTEM CONTROL
 
 **CURRENT MAIN + CURRENT WORK BOARD + LIVE EXTERNAL EVIDENCE → ONE STATE. MERGED IS NOT DEPLOYED. SENT IS NOT DRAFT. RECEIVED IS NOT WAITING.**
+
+---
+
+# HAWAII SOK ORDER PAYMENT CHECKPOINT — 2026-09-24
+
+Casey confirmed customer payment has been received for the first official Hawaii SOK order.
+
+**State:** **PAYMENT RECEIVED / FULFILLMENT EXECUTION ACTIVE.**
+
+The customer-funds gate is now cleared. Do not collapse the remaining gates.
+
+Current sequence:
+
+**PAYMENT RECEIVED → EXACT SKU + DOCUMENT PACKET → CARRIER/DG READINESS → SOK PO/PAYMENT → SUPPLIER RELEASE → FREIGHT TENDER → TRANSIT → DESTINATION RECEIPT → CUSTOMER CLOSEOUT → ACTUALS**
+
+Immediate next action:
+- verify the exact SOK SKU/package against the order record;
+- assemble/verify the correct SKU-specific compliance documents;
+- confirm carrier/DG readiness and final routing requirements;
+- then advance the SOK purchase/release step under the existing fulfillment controls.
+
+Customer identity, payment amount, private carrier rates and other protected commercial/customer information remain outside public Git.
+
