@@ -154,6 +154,14 @@ function scorePropertyOpportunity(input, service = {}) {
     addReason(reasons,"BACKUP_POWER_APPLICABILITY","Backup-power applicability is a strong storage opportunity signal.","lithium",30);
   }
 
+  const serviceArea = String(service.serviceArea || "manual_review");
+  const supported = new Set(["southern_colorado","denver_metro","treasure_valley"]).has(serviceArea);
+  if (supported) {
+    solar += 5;
+    lithium += 5;
+    addReason(reasons,"SERVICE_REGION_SUPPORTED","The property is in a current Elevation service market.","service",5);
+  }
+
   solar = clamp(solar);
   if (solar >= 65) {
     lithium += 12;
@@ -167,8 +175,6 @@ function scorePropertyOpportunity(input, service = {}) {
   else if (solar >= 60 && lithium >= 55) subtype = "Solar + Storage";
   else if (solar >= lithium + 10) subtype = "Solar";
 
-  const serviceArea = String(service.serviceArea || "manual_review");
-  const supported = new Set(["southern_colorado","denver_metro","treasure_valley"]).has(serviceArea);
   const serviceabilityStatus = supported ? "supported" : serviceArea === "outside_standard_area" ? "outside_standard_area" : "review_required";
   let qualificationStatus = "watch";
   if (combined >= 70 && supported) qualificationStatus = "qualified";
