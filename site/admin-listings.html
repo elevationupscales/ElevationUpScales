@@ -105,11 +105,24 @@
 <div class="property-opportunity-kpis" aria-label="Property Intelligence funnel">
   <article><span>Discovered</span><strong id="property-kpi-discovered">—</strong></article>
   <article><span>Qualified</span><strong id="property-kpi-qualified">—</strong></article>
+  <article><span>Concepts Generated</span><strong id="property-kpi-concepts">—</strong></article>
+  <article><span>Outreach Sent</span><strong id="property-kpi-outreach">—</strong></article>
   <article><span>Visited</span><strong id="property-kpi-visited">—</strong></article>
   <article><span>Engaged</span><strong id="property-kpi-engaged">—</strong></article>
   <article><span>Leads</span><strong id="property-kpi-leads">—</strong></article>
+  <article><span>Estimates</span><strong id="property-kpi-estimates">—</strong></article>
   <article><span>Projects Won</span><strong id="property-kpi-projects">—</strong></article>
+  <article><span>Pipeline Value</span><strong id="property-kpi-pipeline">—</strong></article>
 </div>
+<section class="property-opportunity-map" aria-labelledby="property-opportunity-map-title">
+  <header><div><p class="eyebrow">Pilot Map</p><h3 id="property-opportunity-map-title">Colorado Opportunity Coordinates</h3></div><small>Only records with explicit lawful coordinates are plotted.</small></header>
+  <svg id="property-opportunity-map" viewBox="0 0 720 320" role="img" aria-label="Colorado property opportunity coordinate map">
+    <rect x="38" y="28" width="644" height="246" rx="4"></rect>
+    <text x="50" y="48">COLORADO PILOT · 37–41° N · 109–102° W</text>
+    <g id="property-opportunity-map-points"></g>
+  </svg>
+  <p id="property-opportunity-map-summary">No coordinate records loaded.</p>
+</section>
 <details class="property-opportunity-create">
   <summary>+ Add Manual / Synthetic Test Property</summary>
   <form id="property-opportunity-form" class="property-opportunity-form">
@@ -140,8 +153,18 @@
   </form>
 </details>
 <div class="property-opportunity-tools">
-  <input id="property-opportunity-search" type="search" placeholder="Search property, city, ID, type or rep">
-  <select id="property-opportunity-filter"><option value="all">All Qualification States</option><option value="qualified">Qualified</option><option value="review">Review</option><option value="watch">Watch</option><option value="archived">Archived</option></select>
+  <input id="property-opportunity-search" type="search" placeholder="Property, city, ID or rep">
+  <select id="property-opportunity-filter"><option value="all">All Qualification</option><option value="qualified">Qualified</option><option value="review">Review</option><option value="watch">Watch</option><option value="archived">Archived</option></select>
+  <select id="property-opportunity-region"><option value="all">All Regions</option><option value="southern_colorado">Colorado Springs / Peyton</option><option value="denver_metro">Denver Metro</option><option value="treasure_valley">Treasure Valley</option><option value="outside_standard_area">Outside Service Area</option><option value="manual_review">Manual Review</option></select>
+  <select id="property-opportunity-type"><option value="all">All Opportunity Types</option><option>Solar</option><option>Lithium</option><option>Solar + Storage</option><option>Off-Grid</option></select>
+  <select id="property-opportunity-outreach"><option value="all">All Outreach</option><option value="not_sent">Not Sent</option><option value="approved">Approved</option><option value="sent">Sent</option><option value="paused">Paused</option></select>
+  <select id="property-opportunity-engagement"><option value="all">All Engagement</option><option value="visited">Visited</option><option value="qr">QR Scanned</option><option value="start">Start Project Opened</option><option value="unvisited">Unvisited</option></select>
+  <select id="property-opportunity-conversion"><option value="all">All Conversion</option><option value="unlinked">No Lead</option><option value="linked">Lead Linked</option><option value="submitted">Lead Submitted</option></select>
+  <input id="property-opportunity-rep" type="search" placeholder="Assigned rep">
+  <input id="property-opportunity-min-solar" type="number" min="0" max="100" placeholder="Min solar score">
+  <input id="property-opportunity-min-lithium" type="number" min="0" max="100" placeholder="Min battery score">
+  <input id="property-opportunity-min-combined" type="number" min="0" max="100" placeholder="Min combined score">
+  <label>Date from<input id="property-opportunity-date" type="date"></label>
 </div>
 <p id="property-opportunity-status" class="admin-inline-status" aria-live="polite">Waiting for authenticated Property Intelligence data…</p>
 <div class="admin-table-scroll"><table class="property-opportunity-table"><thead><tr><th>Property</th><th>Opportunity</th><th>Score</th><th>Service Region</th><th>Qualification / Next</th><th>Engagement</th><th>Lead</th><th>Open</th></tr></thead><tbody id="property-opportunity-table-body"><tr><td colspan="8" class="property-opportunity-empty">Sign in to load Property Opportunities.</td></tr></tbody></table></div>
