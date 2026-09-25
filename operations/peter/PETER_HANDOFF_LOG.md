@@ -294,3 +294,33 @@ This is not a second Master Work Board.
 - Exact blocker/owner gate: Casey approval of outreach/copy/creative remains required before residential email outreach; any cold-call launch should likewise be explicitly cleared as external outreach under the current Hawaii lead-control rule.
 - Next: consolidate duplicate records into one send-readiness/call-readiness sheet, preserve alternate public contacts on the same account, verify new call-list identities/contact freshness, and await Casey's exact outreach approval.
 - Routed to: Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-09-25 — Hawaii public Reddit inquiry drafts / permission-controlled follow-up prep
+
+**State:** LOCAL COMPLETE
+
+- Verified change: Reviewed Casey's two proposed public Hawaii battery-inquiry replies and follow-up workflow. No Reddit reply, DM, email, call, quote, or other external contact was sent.
+- Public inquiries:
+  - r/Hawaii — `Ecoflow battery or similar` — proposed reply focuses on exact island, fridge use/runtime need, model fit, and a complete shipping-included comparison without promising availability or timing.
+  - r/BigIsland — `Fridge battery backup` — proposed reply focuses on whether the need remains active, general area, desired fridge runtime, delivery/pickup feasibility, and whether Battery Bill's already solved the need.
+- Git dedupe: no retained repository record was found for either thread slug/title or the supplied Reddit paths at this checkpoint; treat them as newly surfaced public-inquiry records, not established marketing leads.
+- Privacy/permission control:
+  - public inquiry ≠ private-marketing opt-in;
+  - no harvesting residential contact information;
+  - no unsolicited private message;
+  - ask permission before moving from public thread to DM/private quote;
+  - never request a home address in the public thread;
+  - retain only public handle/thread/status in public-safe tracking; any later private contact details belong in an appropriate private system.
+- Technical fit control: a complete plug-in power station must be checked against fridge running/startup requirements; a bare lithium battery is not treated as a direct substitute.
+- Quote gate: before quoting, verify exact product fit, stock/orderability, destination-specific lithium freight acceptance, complete delivered cost, pickup/delivery structure, warranty support and realistic timing. No runtime, availability or delivery promise may be made before verification.
+- Follow-up control: only one agreed follow-up after a requested quote; stop on decline and close rather than repeatedly contacting a nonresponsive inquiry.
+- Exact blocker/owner gate:
+  - current thread activity and subreddit commercial-posting rules have not been independently verified in this environment;
+  - Casey's supplied replies remain DRAFTS ONLY;
+  - Peter/user has explicitly instructed that nothing be sent or posted while awaiting Casey approval.
+- Voice control: Casey-authored introduction must not be posted under Peter's identity. If later authorized for Peter, introduction must identify Peter and retain transparent Elevation commercial disclosure.
+- Next: internal tracking only until Casey explicitly approves posting; before any later approved post, reopen each thread, verify need is still active, verify subreddit/vendor rules or moderator permission where needed, then post only the approved public reply.
+- Routed to: Casey Young / Company Operations / current MPM.
