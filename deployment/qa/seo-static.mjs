@@ -15,8 +15,8 @@ assert.ok(worker.includes("return previewSeoResponse(request,page);"), "dynamic 
 const globalHeaderBlock = headers.split(/\n\s*\n/)[0];
 assert.equal(globalHeaderBlock.includes("X-Robots-Tag"), false, "global noindex must never be applied to production");
 assert.ok(robots.includes("Sitemap: https://elevationupscales.com/sitemap.xml"), "production sitemap declaration missing");
-for (const route of ["/vendors", "/vendor/*", "/commercial", "/custom-order"]) assert.ok(routes.includes(`"${route}"`), `public route ${route} must pass through preview SEO guard`);
-for (const canonical of ["https://elevationupscales.com/lithium-batteries","https://elevationupscales.com/rv-store","https://elevationupscales.com/vendors","https://elevationupscales.com/vendor/olight","https://elevationupscales.com/commercial","https://elevationupscales.com/custom-order"]) {
+for (const route of ["/vendors", "/vendor/*", "/commercial", "/custom-order", "/launch/osight-r"]) assert.ok(routes.includes(`"${route}"`), `public route ${route} must pass through preview SEO guard`);
+for (const canonical of ["https://elevationupscales.com/lithium-batteries","https://elevationupscales.com/rv-store","https://elevationupscales.com/vendors","https://elevationupscales.com/vendor/olight","https://elevationupscales.com/commercial","https://elevationupscales.com/custom-order","https://elevationupscales.com/launch/osight-r"]) {
   assert.ok(sitemap.includes(`<loc>${canonical}</loc>`), `sitemap entry missing: ${canonical}`);
 }
 for (const file of ["site/product.html", "site/sok-order.html", "site/checkout/index.html"]) {
