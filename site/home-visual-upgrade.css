@@ -60,7 +60,7 @@
 .campaign-products .campaign-section-head{margin-bottom:26px}.campaign-products .campaign-section-head>p{max-width:460px}.campaign-category img,.campaign-feature__media img,.campaign-solar__image img,.campaign-commercial__visual img{transition:transform .35s ease}.campaign-category:hover img,.campaign-feature:hover .campaign-feature__media img,.campaign-commercial:hover .campaign-commercial__visual img{transform:scale(1.025)}
 
 /* SEO + conversion layout pass */
-.campaign-shop-lane{position:sticky;top:0;z-index:8;background:rgba(6,16,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
+.campaign-shop-lane{position:sticky;top:var(--eus-header-height,82px);z-index:900;background:rgba(6,16,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
 .campaign-shop-lane__inner{display:flex;align-items:center;gap:10px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
 .campaign-shop-lane__inner::-webkit-scrollbar{display:none}
 .campaign-shop-lane__inner>span{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#79dff3;flex:0 0 auto}
