@@ -58,7 +58,9 @@
     "/product.html",
     "/sok-order.html",
     "/custom-order",
-    "/custom-order/*"
+    "/custom-order/*",
+    "/launch/osight-r",
+    "/launch/osight-r/*"
   ],
   "exclude": []
 }
