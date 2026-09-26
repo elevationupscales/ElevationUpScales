@@ -69,8 +69,9 @@ assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static rede
 
 const home = fs.readFileSync("site/index.html", "utf8");
 assert.ok(home.includes("AUTHORIZED SOK ENERGY DEALER"));
-assert.ok(home.includes("Power. Light. Storage."), "retail campaign homepage headline missing");
-assert.ok(home.includes("SHOP THE EQUIPMENT"), "retail campaign homepage intent framing missing");
+assert.ok(home.includes("Power Beyond Limits"), "owner-approved homepage headline missing");
+assert.equal(home.includes("Power. Light. Storage."), false, "unapproved replacement homepage headline returned");
+assert.equal(home.includes("SHOP THE EQUIPMENT"), false, "removed hero marketing kicker returned");
 assert.ok(home.includes("shop.elevationupscales.com"), "homepage must expose the branded Shopify storefront");
 assert.equal(home.includes("Supply Logistics &amp; Ocean Freight"), false, "superseded freight mission returned to homepage flagship");
 assert.ok(home.includes('href="/hawaii-lithium-batteries"'), "homepage must retain the direct Hawaii purchase path");
