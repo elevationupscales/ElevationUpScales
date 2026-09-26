@@ -20,6 +20,7 @@
 
 /store
   Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, follow
   X-EUS-Store-Build: 3.0.3
 
 /rv-store
@@ -97,6 +98,7 @@
 
 /store.html
   Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, follow
   X-EUS-Store-Build: 3.0.3
 
 /rv-store.html
