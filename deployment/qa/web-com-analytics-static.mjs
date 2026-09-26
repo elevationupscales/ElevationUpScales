@@ -68,7 +68,7 @@ for (const event of ["homepage_logistics_capability_view", "homepage_logistics_r
 assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static redesigned logistics block must record a capability view");
 
 const home = fs.readFileSync("site/index.html", "utf8");
-assert.ok(home.includes("AUTHORIZED SOK ENERGY DEALER"));
+assert.ok(/authorized sok energy dealer/i.test(home), "authorized SOK Energy dealer statement missing");
 assert.ok(home.includes("Power Beyond Limits"), "owner-approved homepage headline missing");
 assert.equal(home.includes("Power. Light. Storage."), false, "unapproved replacement homepage headline returned");
 assert.equal(home.includes("SHOP THE EQUIPMENT"), false, "removed hero marketing kicker returned");
