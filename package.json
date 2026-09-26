@@ -16,8 +16,9 @@
     "qa:command-center": "node deployment/qa/command-center-workflow-static.mjs",
     "qa:analytics": "node deployment/qa/web-com-analytics-static.mjs",
     "qa:navigation": "node deployment/qa/web-com-navigation-static.mjs",
-    "qa": "npm run qa:fast && npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:commerce-logistics && npm run qa:sok-dropship && npm run qa:sok-direct-dropship && npm run qa:supplier-leads && npm run qa:command-center && npm run qa:analytics && npm run qa:navigation",
-    "qa:preview": "bash deployment/qa/clean-baseline-preview.sh"
+    "qa": "npm run qa:fast && npm run rebuild:verify && npm test && npm run check && npm run qa:commerce && npm run qa:commerce-logistics && npm run qa:sok-dropship && npm run qa:sok-direct-dropship && npm run qa:supplier-leads && npm run qa:command-center && npm run qa:analytics && npm run qa:navigation && npm run qa:seo",
+    "qa:preview": "bash deployment/qa/clean-baseline-preview.sh",
+    "qa:seo": "node deployment/qa/seo-static.mjs"
   },
   "dependencies": {
     "wrangler": "^4.129.0"
