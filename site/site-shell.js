@@ -17,14 +17,6 @@
     ),
   });
 
-  const SHOP_LINKS = Object.freeze([
-    ["https://shop.elevationupscales.com/collections/all", "Shop All Products", "Open the Elevation Shopify store"],
-    ["https://shop.elevationupscales.com/collections/complete-power-systems", "Complete Power Systems", "Battery and system-scale packages"],
-    ["https://shop.elevationupscales.com/collections/sok-battery", "SOK Battery", "Authorized SOK Energy products"],
-    ["https://shop.elevationupscales.com/collections/renogy", "Renogy", "Solar, charging and off-grid power"],
-    ["https://shop.elevationupscales.com/collections/sungoldpower", "SunGoldPower", "Inverters and power systems"],
-  ]);
-
   function randomId() {
     if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
     const bytes = new Uint8Array(16);
@@ -432,7 +424,7 @@
     if (document.body.classList.contains("retail-home")) return;
     const footer = document.querySelector(".site-footer");
     if (!footer) return;
-    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Power • Supply • Logistics • Projects</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/collections/all">Shop Online</a><a href="/vendors">Brands</a><a href="/commercial">Commercial Supply</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
+    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Power • Supply • Logistics • Projects</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/">Shop Online</a><a href="/vendors">Brands</a><a href="/commercial">Commercial Supply</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
     const year = footer.querySelector("#year");
     if (year) year.textContent = String(new Date().getFullYear());
   }
@@ -440,6 +432,17 @@
   function installNavigation() {
     const header = document.querySelector(".eus-header");
     if (!header) return;
+
+    const legacyShopMenu = header.querySelector(".eus-menu--shop");
+    if (legacyShopMenu) {
+      const shopLink = document.createElement("a");
+      shopLink.className = "eus-nav-link";
+      shopLink.href = "https://shop.elevationupscales.com/";
+      shopLink.textContent = "Shop";
+      shopLink.dataset.eusEvent = "shopify_store_open";
+      shopLink.dataset.eusValue = "header";
+      legacyShopMenu.replaceWith(shopLink);
+    }
 
     const toggle = header.querySelector(".eus-menu-toggle");
     const nav = header.querySelector(".eus-nav");
