@@ -7,6 +7,7 @@ const robots = fs.readFileSync("site/robots.txt", "utf8");
 const sitemap = fs.readFileSync("site/sitemap.xml", "utf8");
 const routes = fs.readFileSync("site/_routes.json", "utf8");
 const home = fs.readFileSync("site/index.html", "utf8");
+const manifest = fs.readFileSync("site/site.webmanifest", "utf8");
 
 assert.ok(worker.includes('hostname.endsWith(".pages.dev")'), "Pages preview hostname SEO gate missing");
 assert.ok(worker.includes('headers.set("X-Robots-Tag","noindex, nofollow, noarchive")'), "Pages preview noindex header missing");
@@ -31,4 +32,10 @@ assert.ok(home.includes('"@type":"WebPage"'), "homepage WebPage schema missing")
 assert.ok(home.includes('"@type":"ItemList"'), "homepage featured-product ItemList schema missing");
 assert.ok(home.includes('https://shop.elevationupscales.com/collections/olight'), "homepage Olight store route missing");
 assert.ok(home.includes('href="/vendor/olight"'), "homepage Olight dealer authority link missing");
+assert.ok(home.includes('rel="icon" href="/assets/favicon.png" type="image/png" sizes="96x96"'), "explicit 96x96 favicon declaration missing");
+assert.ok(home.includes('rel="apple-touch-icon" href="/assets/apple-touch-icon.png" sizes="180x180"'), "explicit Apple touch icon declaration missing");
+assert.ok(home.includes('rel="manifest" href="/site.webmanifest"'), "web manifest link missing");
+assert.ok(manifest.includes('"src": "/assets/favicon.png"'), "manifest favicon entry missing");
+assert.ok(manifest.includes('"sizes": "96x96"'), "manifest favicon size missing");
+assert.ok(manifest.includes('"src": "/assets/apple-touch-icon.png"'), "manifest Apple icon entry missing");
 console.log("SEO static checks passed");
