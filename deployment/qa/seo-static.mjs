@@ -18,9 +18,17 @@ const globalHeaderBlock = headers.split(/\n\s*\n/)[0];
 assert.equal(globalHeaderBlock.includes("X-Robots-Tag"), false, "global noindex must never be applied to production");
 assert.ok(robots.includes("Sitemap: https://elevationupscales.com/sitemap.xml"), "production sitemap declaration missing");
 for (const route of ["/vendors", "/vendor/*", "/commercial", "/custom-order", "/launch/osight-r"]) assert.ok(routes.includes(`"${route}"`), `public route ${route} must pass through preview SEO guard`);
-for (const canonical of ["https://elevationupscales.com/lithium-batteries","https://elevationupscales.com/rv-store","https://elevationupscales.com/vendors","https://elevationupscales.com/vendor/olight","https://elevationupscales.com/commercial","https://elevationupscales.com/custom-order","https://elevationupscales.com/launch/osight-r"]) {
+for (const canonical of ["https://elevationupscales.com/vendors","https://elevationupscales.com/vendor/olight","https://elevationupscales.com/commercial","https://elevationupscales.com/custom-order","https://elevationupscales.com/launch/osight-r"]) {
   assert.ok(sitemap.includes(`<loc>${canonical}</loc>`), `sitemap entry missing: ${canonical}`);
 }
+for (const retiredRetailCanonical of ["https://elevationupscales.com/store","https://elevationupscales.com/rv-store","https://elevationupscales.com/lithium-batteries"]) {
+  assert.equal(sitemap.includes(`<loc>${retiredRetailCanonical}</loc>`), false, `legacy/redirecting retail URL must stay out of sitemap: ${retiredRetailCanonical}`);
+}
+const legacyStore = fs.readFileSync("site/store.html", "utf8");
+assert.ok(/<meta[^>]+name=["']robots["'][^>]+content=["']noindex,follow["']/i.test(legacyStore), "legacy main-domain store must remain noindex,follow");
+assert.ok(headers.includes("/store\n  Cache-Control: no-cache, no-store, must-revalidate\n  X-Robots-Tag: noindex, follow"), "legacy /store X-Robots-Tag missing");
+assert.ok(fs.readFileSync("site/_redirects","utf8").includes("/favicon.ico /assets/favicon.png 301"), "root favicon fallback redirect missing");
+
 for (const file of ["site/product.html", "site/sok-order.html", "site/checkout/index.html"]) {
   const html = fs.readFileSync(file, "utf8");
   assert.ok(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html), `${file}: utility noindex missing`);
