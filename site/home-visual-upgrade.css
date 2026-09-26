@@ -58,3 +58,30 @@
 
 /* Shopify-media retail pass */
 .campaign-products .campaign-section-head{margin-bottom:26px}.campaign-products .campaign-section-head>p{max-width:460px}.campaign-category img,.campaign-feature__media img,.campaign-solar__image img,.campaign-commercial__visual img{transition:transform .35s ease}.campaign-category:hover img,.campaign-feature:hover .campaign-feature__media img,.campaign-commercial:hover .campaign-commercial__visual img{transform:scale(1.025)}
+
+/* SEO + conversion layout pass */
+.campaign-shop-lane{position:sticky;top:0;z-index:8;background:rgba(6,16,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
+.campaign-shop-lane__inner{display:flex;align-items:center;gap:10px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+.campaign-shop-lane__inner::-webkit-scrollbar{display:none}
+.campaign-shop-lane__inner>span{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#79dff3;flex:0 0 auto}
+.campaign-shop-lane a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border:1px solid rgba(255,255,255,.16);border-radius:999px;color:#fff;text-decoration:none;font-weight:800;white-space:nowrap;background:rgba(255,255,255,.04)}
+.campaign-shop-lane a:hover{background:#fff;color:#071014}
+.campaign-shop-lane__all{margin-left:auto!important;background:#08c5ed!important;color:#001016!important;border-color:#08c5ed!important}
+.campaign-brand-resources{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:22px;padding-top:20px;border-top:1px solid #d9dfe2;font-size:.92rem}
+.campaign-brand-resources>span{font-weight:900;color:#3d4b53}
+.campaign-brand-resources a{color:#0b6478;font-weight:800;text-decoration:none}
+.campaign-brand-resources a:hover{text-decoration:underline}
+.campaign-products{padding-top:64px}
+.campaign-section-head h2{max-width:900px}
+.campaign-product-rail{padding:6px 2px 18px}
+.campaign-category,.campaign-product{outline:none}
+.campaign-category:focus-visible,.campaign-product:focus-visible,.campaign-shop-lane a:focus-visible{box-shadow:0 0 0 4px rgba(13,199,236,.35)}
+@media(min-width:1100px){
+  .campaign-product-rail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}
+  .campaign-product{min-width:0;max-width:none}
+  .campaign-product:nth-child(n+4){margin-top:2px}
+}
+@media(max-width:900px){
+  .campaign-shop-lane{position:relative}
+  .campaign-shop-lane__all{margin-left:0!important}
+}
