@@ -117,3 +117,45 @@ Customer-facing product, collection and brochure material should be product-led 
 ## Control statement
 
 **CURRENT SUPPLIER TRUTH + CURRENT SHOPIFY STATE → ONE OLIGHT CATALOG → PROTECTED ECONOMICS STAY PRIVATE → VERIFY BEFORE PUBLISHING OR PROMISING.**
+
+
+## MPM 25 storefront repair checkpoint — 2026-09-26
+
+**State:** P0 CATALOG / INVENTORY REPAIR EXECUTED; CHECKOUT ROUTE PARTIALLY VERIFIED; DESTINATION + FINAL PAYMENT STAGE STILL VERIFYING.
+
+Completed:
+- all **23 variants across the 13 active Olight products** were changed to **untracked inventory** in Shopify so placeholder/local quantities no longer operate as claimed Elevation physical stock;
+- supplier fulfillment remains the selling model and current Olight supplier availability remains the fulfillment truth;
+- source-proven supplier SKU repairs were completed for:
+  - PL X GL → `PLXGLMB`;
+  - OSIGHT R → `OSIGHTRRD`;
+  - Oclip 2 Pro Matte Black → `OCLIP2PROBK`;
+  - Oclip 2 Pro Orange → `OCLIP2PROOG`;
+  - Marauder 3 Black → `M3BKWPA`;
+  - Marauder 3 Midnight Blue → `M3MBWPA`;
+  - Marauder 3 Orange → `M3OGWPA`;
+- all 13 Olight PDPs now carry public supplier-fulfillment/support wording explaining supplier-stock dependency, tracking after shipment, and Elevation's retailer-support role;
+- corrupt Marauder 3 tags were normalized;
+- Baton 4 received explicit SEO title/description metadata;
+- Tactical & Professional collection SEO was narrowed to tactical/professional product intent and its malformed description spacing was corrected.
+
+Public/customer-path verification:
+- OSIGHT SE, Marauder 3 and Warrior Ultra each generated a Shopify checkout session from direct cart routing after the inventory repair;
+- checkout reached the shipping-address stage, but the remote render returned a temporary refresh/request-ID condition before an address could be entered;
+- therefore **cart-to-checkout routing is PASS**, while **shipping-rate, destination and final payment-stage verification remain VERIFY**, not PASS;
+- Shopify admin reports checkout support enabled and Shop Pay / Apple Pay / Google Pay supported;
+- PayPal's external account review must not be represented as a Shopify checkout failure without direct checkout evidence.
+
+Held / unresolved:
+- Oclip 2 Ultra Premium Olive Green / Onyx Black supplier SKU mapping remains **HOLD — SOURCE CONFLICT**. Do not infer a correction;
+- Shopify theme still renders generic `In stock` for sellable untracked supplier-fulfilled products. The false numerical/low-stock urgency was removed; a theme-level availability-label refinement is separate work and must not reintroduce fake quantities;
+- store-wide shipping-country configuration is broader than proven Olight supplier routes. Do not make global shipping-zone changes that can affect unrelated vendors without a bounded route solution;
+- customer-facing Shopify account identity still requires a separate settings-level reconciliation where editable authority is available.
+
+### Wave 2 gate
+
+Do **not** treat supplier-stock, destination shipping, or final payment-stage verification as closed.
+
+The next listing-production queue remains preserved, but publication/customer-availability claims require the normal management gate:
+
+**EXACT PRODUCT → SOURCE-PROVEN SKU → CURRENT SUPPLIER AVAILABILITY → ROUTE/SHIPPING → PAYMENT/CHECKOUT → PUBLICATION.**
