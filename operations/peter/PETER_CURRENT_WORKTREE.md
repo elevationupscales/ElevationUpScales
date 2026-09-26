@@ -3,47 +3,34 @@
 **Owner:** Casey Young  
 **Human Manager:** Peter Torres  
 **Parent:** Company Operations / current MPM  
-**Status:** ACTIVE / OLIGHT SHOPIFY DRAFT PRODUCTION  
-**Effective:** 2026-09-24
+**Status:** ACTIVE / OLIGHT WAVE 2 LISTING PRODUCTION  
+**Effective:** 2026-09-26
 
 ## Current state
 
 Peter's Git collaboration onboarding is complete and write access is verified.
 
-Casey has explicitly authorized Peter to help finish the current Olight Shopify listing build using Peter's own Shopify user account and the Olight media package already downloaded to Peter's working environment.
-
-Live Shopify verification on 2026-09-24 shows:
+Fresh Shopify verification on 2026-09-26 shows:
 
 - **13 total Olight product records**
-- **10 ACTIVE**
-- **3 DRAFT**
+- **13 ACTIVE**
+- **0 DRAFT**
 
-The remaining DRAFT queue is:
+The prior 10 ACTIVE / 3 DRAFT assignment is superseded.
 
-1. **Olight Odin S — 1,500 Lumen Professional Light**
-   - Shopify SKU: `ODINSMMTBK`
-   - Current state: DRAFT
-   - Current media state at assignment: no product images
-2. **Olight PL X GL — 1,200 Lumen Light + Green Laser**
-   - Supplier/product identity: `0.0002.0234`
-   - Current state: DRAFT
-   - Current media state at assignment: one product image
-3. **Olight OSIGHT SE — 2 MOA Dot + 32 MOA Circle Red Dot Sight**
-   - Shopify SKU: `OSIGHTSE`
-   - Current state: DRAFT
-   - Current media state at assignment: no product images
+**Odin S M-LOK, PL X GL, and OSIGHT SE are already ACTIVE. Do not rebuild them.**
 
 ## Current objective
 
-Finish the media/listing-production work on those three existing Shopify drafts so management receives review-ready products without duplicating listings or changing protected commercial controls.
+Advance the next Olight listing wave from exact Olight supplier source material while keeping supplier-stock verification separate from listing production.
 
-**OLIGHT AUTHORIZED MEDIA → EXACT EXISTING DRAFT → MEDIA/COPY BUILD → LEAVE DRAFT → MANAGEMENT REVIEW.**
+**EXACT OLIGHT SOURCE → BUILD/STAGE LISTING → RECORD BLOCKERS → MANAGEMENT STOCK/MAP/FULFILLMENT GATE → RETAIL READINESS.**
 
 ## Startup requirement
 
 Before work:
 
-**RESOLVE CURRENT MAIN → MASTER S.O.P. → CURRENT WORK BOARD → PETER MANAGER INDEX → OLIGHT PROJECT SOURCE → OLIGHT MASTER CATALOG TRUTH → EXACT SHOPIFY DRAFT.**
+**RESOLVE CURRENT MAIN → MASTER S.O.P. → CURRENT WORK BOARD → PETER MANAGER INDEX → OLIGHT PROJECT SOURCE → EXACT SHOPIFY PRODUCT / MISSING PRODUCT FAMILY.**
 
 Required control sources:
 
@@ -51,66 +38,123 @@ Required control sources:
 - `../vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`
 - `../OLIGHT_MASTER_CATALOG_TRUTH_2026-09-23.md`
 - `PETER_MANAGER_INDEX.md`
+- private Olight September 2026 new-arrivals source supplied by management
+
+## Current bounded queue
+
+### 1. Oclip 2 Pro Premium — BUILD FIRST
+
+Build the missing product family from exact Olight source data.
+
+Expected source-supported color family:
+- Black
+- Orange
+- Tidal Blue
+
+Peter may stage exact:
+- title / description / specs;
+- authorized media;
+- variant structure;
+- SKU / UPC data when supported by source;
+- SEO/customer-facing merchandising.
+
+Do not invent stock or supplier availability.
+
+### 2. Oclip 2 Ultra — BUILD SECOND
+
+Build the missing product family from exact Olight source data.
+
+Expected source-supported color family:
+- Olive Green
+- Onyx Black
+- Amber Orange
+
+Same exact-product and no-invented-stock controls apply.
+
+### 3. ArkPro Ultra — VARIANT EXPANSION
+
+Prepare the missing **Amber Orange** variant on the existing ArkPro Ultra product after validating the exact variant identity against the Olight source.
+
+Do not create a duplicate ArkPro Ultra product.
+
+### 4. Oclip 2 Pro — VARIANT EXPANSION
+
+Prepare the missing **Tidal Blue** variant on the existing Oclip 2 Pro product after validating the exact variant identity against the Olight source.
+
+Do not create a duplicate Oclip 2 Pro product.
+
+### 5. Oclip 2 Ultra Premium — AUDIT ONLY
+
+The current live product remains in place.
+
+There is an apparent supplier-source conflict in the Olive Green / Onyx Black SKU mapping.
+
+Peter must:
+- preserve the existing live product;
+- record the discrepancy;
+- avoid changing the SKU mapping by inference;
+- wait for management/Olight confirmation before any correction.
+
+## Inventory / availability rule
+
+**SHOPIFY INVENTORY ≠ OLIGHT PHYSICAL STOCK.**
+
+Peter may build/stage listings from exact supplier source data without waiting for management to complete stock recon.
+
+Peter may not:
+- represent Shopify inventory as supplier warehouse truth;
+- invent exact availability;
+- promise dropship fulfillment from an old snapshot;
+- silently substitute adjacent colors/SKUs.
+
+Management separately owns:
+- current U.S. warehouse availability;
+- dropship eligibility;
+- MAP/launch timing;
+- fulfillment readiness;
+- final availability/customer promise.
 
 ## Authorized work
 
-For each assigned Olight draft, Peter may:
-
-1. open the existing Shopify DRAFT record;
-2. match the exact product folder/materials from Olight's authorized media package;
-3. upload/select official hero and supporting product/lifestyle media;
-4. arrange the media gallery in a strong customer-facing order;
-5. add useful, accurate image alt text;
-6. verify the title/description/specification copy against Olight's supplied product materials;
-7. improve customer-facing copy only when grounded in the supplied exact-product source;
-8. remove the `Dealer Media Pending` tag only after the product's media pass is actually complete;
-9. save the product as **DRAFT**;
-10. record completion, source concerns, or blockers in `PETER_HANDOFF_LOG.md`.
+Peter may:
+1. work only the queue above;
+2. use Olight-authorized media/spec source material;
+3. build or stage accurate customer-facing listing content;
+4. add exact source-supported variants to the existing products named above;
+5. record conflicts/blockers instead of guessing;
+6. return a listing-production receipt to Company Operations.
 
 ## Hard boundaries
 
-This assignment does **not** authorize Peter to change:
-
-- product price or compare-at price;
-- SKU or exact variant identity;
-- vendor;
-- shipping profile/rates;
-- inventory policy or supplier-stock assumptions;
-- sales-channel publication;
-- product status from DRAFT to ACTIVE;
-- discounts/promotions;
-- unrelated live Olight products;
-- Shopify theme;
-- billing, payouts, staff/users, apps or owner-level settings;
-- protected dealer economics in public Git.
-
-Do not create duplicate listings for Odin S, PL X GL or OSIGHT SE.
-
-Do not bulk-create a second Olight wave under this Worktree. Wave 2 requires a separate management assignment after these three products are reviewed.
-
-## Baton 4 note
-
-Live Shopify currently shows Baton 4 Black ACTIVE, while the retained dealer-source snapshot previously marked that exact Black SKU unavailable.
-
-Peter should **not edit or recreate Baton 4** under this Worktree. Management owns the supplier-source reconciliation.
+This assignment does not authorize Peter to:
+- rebuild existing active Olight products outside the queue;
+- use Shopify inventory as supplier stock proof;
+- invent stock;
+- infer a disputed SKU mapping;
+- expose protected dealer costs/raw supplier inventory in public Git;
+- alter unrelated Shopify products;
+- alter Shopify theme;
+- alter billing, payouts, staff/users, apps or owner-level settings;
+- make unsupported Hawaii/Alaska/special-route shipping promises.
 
 ## Completion condition
 
 This Worktree is complete when:
 
-1. Odin S M-LOK has a complete exact-product media/copy pass and remains DRAFT;
-2. PL X GL has a complete exact-product media/copy pass and remains DRAFT;
-3. OSIGHT SE has a complete exact-product media/copy pass and remains DRAFT;
-4. no protected price/shipping/inventory/publication controls were changed;
-5. no duplicate listing was created;
-6. each result or blocker is recorded in the Peter Handoff Log.
+1. Oclip 2 Pro Premium is staged/built from exact supplier source;
+2. Oclip 2 Ultra is staged/built from exact supplier source;
+3. ArkPro Ultra Amber Orange variant work is staged against the existing product;
+4. Oclip 2 Pro Tidal Blue variant work is staged against the existing product;
+5. Oclip 2 Ultra Premium discrepancy is recorded with no inferred correction;
+6. all source conflicts/blockers are returned to Company Operations;
+7. no duplicate product is created and no unsupported stock promise is made.
 
-Management then performs the final gate:
+Management then performs:
 
-**EXACT PRODUCT/SKU → CURRENT OLIGHT SOURCE → PRICE/MAP → MEDIA → SHIPPING/FULFILLMENT → PUBLICATION → STOREFRONT PURCHASEABILITY.**
+**EXACT PRODUCT/SKU → CURRENT OLIGHT SOURCE → CURRENT AVAILABILITY → PRICE/MAP → MEDIA → SHIPPING/FULFILLMENT → PUBLICATION/PURCHASEABILITY.**
 
 ## Return
 
-**DONE:** all three drafts are review-ready and still DRAFT.  
-**BLOCKED:** record the exact missing product/source/media item; continue the other clean drafts.  
-**NEXT:** return the three-product receipt to Company Operations / current MPM for final review and activation decisions.
+**DONE:** Wave 2 listing-production queue staged with exact-source discipline.  
+**BLOCKED:** record the exact missing source/media/SKU item; continue the other clean queue items.  
+**NEXT:** return the Wave 2 receipt to Company Operations / current MPM for final supplier and retail-readiness gates.
