@@ -43,7 +43,7 @@ for (const route of [
   "/hawaii-lithium-batteries",
   "/vendors",
   "/commercial",
-  "/vendor/olight",
+  "https://shop.elevationupscales.com/collections/olight",
 ]) {
   assert.ok(home.includes(`href="${route}"`) || home.includes(`href="${route}?`), `homepage missing ${route}`);
 }
@@ -52,9 +52,9 @@ assert.ok(home.includes("retail-shop-menu") || /reference-nav-menu[^>]*><summary
 assert.ok(home.includes("retail-more-menu") || home.includes("reference-nav-menu--company"), "homepage must retain a quieter company/menu layer for non-shopping destinations");
 assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain the main-site project path");
 
-assert.ok(home.includes('href="/vendor/sok-energy"'), "homepage must expose the SOK vendor page");
-assert.ok(home.includes('href="/vendor/renogy"'), "homepage must expose the Renogy vendor page");
-assert.ok(home.includes('href="/vendor/sungoldpower"'), "homepage must expose the SunGoldPower vendor page");
+assert.ok(home.includes('href="https://shop.elevationupscales.com/collections/sok-battery"'), "homepage must expose the SOK store collection");
+assert.ok(home.includes('href="https://shop.elevationupscales.com/collections/olight"'), "homepage must expose the Olight store collection");
+assert.ok(home.includes('href="https://shop.elevationupscales.com/collections/complete-power-systems"'), "homepage must expose complete power systems");
 
 for (const requiredFile of [
   "site/vendors/index.html",
