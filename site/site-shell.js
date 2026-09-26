@@ -17,14 +17,6 @@
     ),
   });
 
-  const SHOP_LINKS = Object.freeze([
-    ["https://shop.elevationupscales.com/collections/all", "Shop All Products", "Open the Elevation Shopify store"],
-    ["https://shop.elevationupscales.com/collections/complete-power-systems", "Complete Power Systems", "Battery and system-scale packages"],
-    ["https://shop.elevationupscales.com/collections/sok-battery", "SOK Battery", "Authorized SOK Energy products"],
-    ["https://shop.elevationupscales.com/collections/renogy", "Renogy", "Solar, charging and off-grid power"],
-    ["https://shop.elevationupscales.com/collections/sungoldpower", "SunGoldPower", "Inverters and power systems"],
-  ]);
-
   function randomId() {
     if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
     const bytes = new Uint8Array(16);
@@ -393,7 +385,7 @@
       <a class="eus-brand" href="/" aria-label="Elevation UpScales, Inc. home"><img class="reference-header-wordmark" src="${retailBrandSrc}" alt="Elevation UpScales, Inc." width="${retailBrandWidth}" height="${retailBrandHeight}"></a>
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
-        <details class="eus-menu eus-menu--shop reference-nav-menu"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>
+        <a class="eus-nav-link" href="https://shop.elevationupscales.com/" data-eus-event="shopify_store_open" data-eus-value="header">Shop</a>
         <a class="eus-nav-link" href="/vendors">Brands</a>
         <a class="eus-nav-link" href="/commercial">Commercial</a>
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Projects <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
@@ -432,7 +424,7 @@
     if (document.body.classList.contains("retail-home")) return;
     const footer = document.querySelector(".site-footer");
     if (!footer) return;
-    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Power • Supply • Logistics • Projects</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/collections/all">Shop Online</a><a href="/vendors">Brands</a><a href="/commercial">Commercial Supply</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
+    footer.innerHTML = `<div class="container footer-grid"><div class="footer-brand"><img alt="" src="/assets/logo.webp" width="80" height="80"><div><strong>Elevation UpScales, Inc.</strong><p>Power • Supply • Logistics • Projects</p></div></div><div class="footer-contact"><a href="https://shop.elevationupscales.com/">Shop Online</a><a href="/vendors">Brands</a><a href="/commercial">Commercial Supply</a><a href="/shipping-logistics-services">Hawaii • Alaska • Freight</a><a href="/start-a-project">Start a Project</a><a href="tel:+12088134998">208-813-4998</a><a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><p class="copyright">© <span id="year"></span> Elevation UpScales, Inc. · Colorado Springs, CO.</p></div>`;
     const year = footer.querySelector("#year");
     if (year) year.textContent = String(new Date().getFullYear());
   }
@@ -441,21 +433,15 @@
     const header = document.querySelector(".eus-header");
     if (!header) return;
 
-    const dropdown = header.querySelector(".eus-menu--shop .eus-dropdown");
-    if (dropdown) {
-      dropdown.replaceChildren();
-      for (const [href, title, description] of SHOP_LINKS) {
-        const link = document.createElement("a");
-        link.href = href;
-        const span = document.createElement("span");
-        const strong = document.createElement("strong");
-        const small = document.createElement("small");
-        strong.textContent = title;
-        small.textContent = description;
-        span.append(strong, small);
-        link.append(span);
-        dropdown.append(link);
-      }
+    const legacyShopMenu = header.querySelector(".eus-menu--shop");
+    if (legacyShopMenu) {
+      const shopLink = document.createElement("a");
+      shopLink.className = "eus-nav-link";
+      shopLink.href = "https://shop.elevationupscales.com/";
+      shopLink.textContent = "Shop";
+      shopLink.dataset.eusEvent = "shopify_store_open";
+      shopLink.dataset.eusValue = "header";
+      legacyShopMenu.replaceWith(shopLink);
     }
 
     const toggle = header.querySelector(".eus-menu-toggle");
