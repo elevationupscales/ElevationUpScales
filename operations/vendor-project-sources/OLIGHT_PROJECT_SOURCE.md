@@ -159,3 +159,29 @@ Do **not** treat supplier-stock, destination shipping, or final payment-stage ve
 The next listing-production queue remains preserved, but publication/customer-availability claims require the normal management gate:
 
 **EXACT PRODUCT → SOURCE-PROVEN SKU → CURRENT SUPPLIER AVAILABILITY → ROUTE/SHIPPING → PAYMENT/CHECKOUT → PUBLICATION.**
+
+
+## OLIGHT INVENTORY POLICY — OWNER CONTROL — 2026-09-26
+
+This owner directive supersedes any prior Olight inventory treatment that used lithium/battery stock logic or untracked-inventory logic as the default.
+
+For supplier-fulfilled Olight products, supplier availability is binary:
+
+- **Supplier AVAILABLE → Shopify sellable quantity may be set to 10.**
+- **Supplier UNAVAILABLE → remove or disable customer availability according to the approved sales policy.**
+
+The Shopify quantity `10` is an **operational sellability buffer**. It is not a verified Olight warehouse count and must never be reported internally or publicly as supplier stock.
+
+Do not attempt to mirror Olight supplier unit counts unless Olight provides a verified count feed and management explicitly adopts it.
+
+When Elevation UpScales purchases and physically owns Olight inventory, those owned units move to **real quantity tracking** and Shopify must reflect actual Elevation on-hand stock.
+
+**Supplier stock and Elevation-owned stock are separate states.**
+
+Customer-facing logic should communicate **availability**, not artificial scarcity such as “Only 10 left” or “Low stock,” while the product is supplier fulfilled.
+
+Current implementation target:
+- current supplier-available Olight SKUs: tracked in Shopify with operational quantity **10**;
+- supplier-unavailable Olight SKUs: controlled unavailable state;
+- future Elevation-owned Olight stock: actual physical on-hand quantity;
+- never interpret placeholder `10` as supplier warehouse inventory.
