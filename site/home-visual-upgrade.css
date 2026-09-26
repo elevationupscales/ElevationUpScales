@@ -4,11 +4,11 @@
 .campaign-hero{position:relative;min-height:78vh;display:flex;align-items:end;overflow:hidden;background:#031018;color:#fff}
 .campaign-hero__media,.campaign-hero__veil{position:absolute;inset:0}
 .campaign-hero__media img,.campaign-hero__media video{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.campaign-hero__veil{background:linear-gradient(90deg,rgba(1,10,15,.94) 0%,rgba(1,10,15,.7) 42%,rgba(1,10,15,.14) 78%),linear-gradient(0deg,rgba(1,10,15,.78),transparent 58%)}
-.campaign-hero__content{position:relative;z-index:2;padding:110px 0 82px}
-.campaign-hero h1{max-width:900px;font-size:clamp(4rem,8.5vw,8.2rem);line-height:.88;letter-spacing:-.065em;margin:.15em 0}
-.campaign-hero__lead{max-width:760px;font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.65;color:#d8e3e8}
-.campaign-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:28px}
+.campaign-hero__veil{background:linear-gradient(90deg,rgba(1,8,12,.88) 0%,rgba(1,8,12,.72) 48%,rgba(1,8,12,.42) 100%),linear-gradient(0deg,rgba(1,8,12,.72),rgba(1,8,12,.18) 62%)}
+.campaign-hero__content{position:relative;z-index:2;padding:110px 0 82px;max-width:980px}
+.campaign-hero h1{max-width:900px;font-size:clamp(4rem,8.5vw,8.2rem);line-height:.9;letter-spacing:-.055em;margin:0;text-shadow:0 3px 24px rgba(0,0,0,.7)}
+.campaign-hero__lead{max-width:680px;font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.55;color:#e8eef1;text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.campaign-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px}
 .campaign-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 21px;border:1px solid transparent;border-radius:7px;font-weight:900;text-decoration:none}
 .campaign-btn--primary{background:#08c5ed;color:#001016}
 .campaign-btn--secondary{border-color:rgba(255,255,255,.48);background:rgba(4,12,17,.48);color:#fff}
@@ -16,9 +16,9 @@
 .campaign-text-link{font-weight:800;color:inherit;text-decoration:none}
 .campaign-trust{background:#fff;color:#10171b;border-bottom:1px solid #dfe5e8}
 .campaign-trust__inner{display:grid;grid-template-columns:repeat(4,1fr)}
-.campaign-trust__inner span{padding:24px 26px;border-right:1px solid #e2e6e8}
+.campaign-trust__inner span{padding:20px 26px;border-right:1px solid #e2e6e8;display:flex;align-items:center;justify-content:center;text-align:center}
 .campaign-trust__inner span:last-child{border-right:0}
-.campaign-trust strong,.campaign-trust small{display:block}.campaign-trust strong{font-size:1.03rem}.campaign-trust small{margin-top:5px;color:#65717a}
+.campaign-trust strong,.campaign-trust small{display:block}.campaign-trust strong{font-size:1rem}.campaign-trust small{margin-top:5px;color:#65717a}
 .campaign-feature{display:grid;grid-template-columns:1.1fr .9fr;min-height:620px}
 .campaign-feature__media{min-height:620px;background:#080b0d;overflow:hidden}
 .campaign-feature__media video,.campaign-feature__media>img{width:100%;height:100%;object-fit:cover;display:block}
@@ -43,7 +43,7 @@
 .campaign-category span{position:absolute;z-index:2;left:20px;right:20px;bottom:20px}.campaign-category small,.campaign-category strong{display:block}.campaign-category small{letter-spacing:.12em;font-weight:900;color:#62dffa}.campaign-category strong{font-size:1.55rem;margin-top:5px}
 .campaign-products{padding:78px 0 92px;background:#f4f6f7;color:#10171b;border-bottom:1px solid #dde3e6}
 .campaign-product{flex:0 0 min(390px,84vw);background:#fff;border-radius:16px;overflow:hidden;color:#111;text-decoration:none;scroll-snap-align:start;box-shadow:0 16px 38px rgba(0,0,0,.09);transition:transform .2s ease,box-shadow .2s ease}.campaign-product:hover{transform:translateY(-4px);box-shadow:0 22px 48px rgba(0,0,0,.13)}
-.campaign-product img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#f6f7f7}
+.campaign-product img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#f6f7f7;padding:14px}
 .campaign-product div{padding:20px 20px 24px}.campaign-product small{color:#66737b;font-weight:800;letter-spacing:.08em}.campaign-product strong{display:block;font-size:1.34rem;line-height:1.25;margin:7px 0 16px}.campaign-price{display:block;font-size:1.35rem;font-weight:900;margin-bottom:16px}.campaign-product em{font-style:normal;font-weight:800;color:#087b99}
 .campaign-solar{position:relative;min-height:680px;display:flex;align-items:end;color:#fff;overflow:hidden}
 .campaign-solar__image,.campaign-solar__overlay{position:absolute;inset:0}.campaign-solar__image img{width:100%;height:100%;object-fit:cover}.campaign-solar__overlay{background:linear-gradient(0deg,rgba(0,8,12,.94),rgba(0,8,12,.08) 65%)}
