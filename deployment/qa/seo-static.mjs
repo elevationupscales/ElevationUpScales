@@ -33,8 +33,10 @@ for (const file of ["site/product.html", "site/sok-order.html", "site/checkout/i
   const html = fs.readFileSync(file, "utf8");
   assert.ok(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html), `${file}: utility noindex missing`);
 }
-assert.ok(home.includes("<title>Lithium Batteries, Solar Power & Olight Gear | Elevation UpScales</title>"), "homepage SEO title missing");
+assert.ok(home.includes("<title>Lithium Batteries, Solar & Olight Gear | Elevation UpScales</title>"), "homepage SEO title missing");
 assert.ok(home.includes('name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"'), "homepage robots directive missing");
+assert.ok(home.includes('property="og:image:alt"'), "homepage Open Graph image alt missing");
+assert.ok(home.includes('name="twitter:image:alt"'), "homepage Twitter image alt missing");
 assert.ok(home.includes('"@type":"WebSite"'), "homepage WebSite schema missing");
 assert.ok(home.includes('"@type":"WebPage"'), "homepage WebPage schema missing");
 assert.ok(home.includes('"@type":"ItemList"'), "homepage featured-product ItemList schema missing");
