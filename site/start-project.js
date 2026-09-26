@@ -44,6 +44,8 @@
     solarBuilderAcknowledged: false,
     journeyId: "",
     source: params.get("source") || "start-a-project",
+    propertyOpportunitySlug: /^op-[a-f0-9]{32}$/.test((params.get("propertyOpportunity") || "").toLowerCase()) ? (params.get("propertyOpportunity") || "").toLowerCase() : "",
+    campaign: (params.get("campaign") || "").slice(0, 120),
     reference: "",
     contactRequested: false,
   };
@@ -65,6 +67,8 @@
     journeyReference: state.journeyId,
     projectType: state.projectType,
     serviceArea: state.serviceArea,
+    propertyOpportunity: state.propertyOpportunitySlug,
+    campaign: state.campaign,
   });
 
   let intakeTracked = false;
@@ -409,6 +413,9 @@
           consent: true,
           journeyId: state.journeyId,
           reference: state.reference,
+          propertyOpportunitySlug: state.propertyOpportunitySlug,
+          campaign: state.campaign,
+          source: state.propertyOpportunitySlug ? "property-intelligence" : state.source,
           sessionId: window.EUSIntent?.sessionId?.() || "",
           category: "Small Repairs & Handyman",
           summary: handymanSummaryText(),
@@ -534,7 +541,9 @@
       email: $("sap-email").value.trim(),
       preferredContact: $("sap-preferred").value,
       consent: $("sap-consent").checked,
-      source: state.source,
+      source: state.propertyOpportunitySlug ? "property-intelligence" : state.source,
+      propertyOpportunitySlug: state.propertyOpportunitySlug,
+      campaign: state.campaign,
       journeyId: state.journeyId,
       reference: state.reference,
       sessionId: window.EUSIntent?.sessionId?.() || "",

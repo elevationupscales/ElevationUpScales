@@ -35,6 +35,10 @@ import {
   PROJECT_HANDYMAN_PHOTOS_PATH,
   WORK_WITH_US_SUBMIT_PATH,
   ADMIN_OPPORTUNITIES_PATH,
+  ADMIN_PROPERTY_OPPORTUNITIES_PATH,
+  PROPERTY_OPPORTUNITY_PREFIX,
+  PROPERTY_OPPORTUNITY_QR_PREFIX,
+  PROPERTY_OPPORTUNITY_START_PREFIX,
   ADMIN_MARKET_ANALYTICS_PATH,
   ADMIN_SOLAR_QA_TOKEN_PATH,
   ADMIN_INVENTORY_PATH,
@@ -51,6 +55,7 @@ import { handleAdminEmailOperations, handleOrderConfirmation } from "./worker/do
 import { handleAdminEmailRoleQa } from "./worker/domains/email-role-qa.js";
 import { handleAdminInventory, handlePublicInventory } from "./worker/domains/inventory.js";
 import { handleAdminLeads, handleAdminOpportunities, handleProjectCapture, handleProjectClassify, handleProjectContactRequest, handleProjectFollowUpRequest, handleProjectHandymanPhotos, handleProjectSubmit } from "./worker/domains/leads.js";
+import { handleAdminPropertyOpportunities, handlePropertyOpportunityPublic, handlePropertyOpportunityQr, handlePropertyOpportunityStart } from "./worker/domains/property-opportunities.js";
 import { handleAdminSupplierLeads } from "./worker/domains/supplier-leads.js";
 import { handleWorkWithUsSubmit } from "./worker/domains/opportunities.js";
 import { handleAdminSolarQaToken, handleSolarNotification, handleSolarQaValidate } from "./worker/domains/solar.js";
@@ -83,6 +88,9 @@ export default {
     if (url.pathname === PROJECT_HANDYMAN_PHOTOS_PATH) return handleProjectHandymanPhotos(request, env);
     if (url.pathname === PROJECT_SUBMIT_PATH) return handleProjectSubmit(request, withEmailRole(env, "sales"), ctx);
     if (url.pathname === WORK_WITH_US_SUBMIT_PATH) return handleWorkWithUsSubmit(request, withEmailRole(env, "owner"), ctx);
+    if (url.pathname.startsWith(PROPERTY_OPPORTUNITY_QR_PREFIX)) return handlePropertyOpportunityQr(request, env, url.pathname.slice(PROPERTY_OPPORTUNITY_QR_PREFIX.length));
+    if (url.pathname.startsWith(PROPERTY_OPPORTUNITY_START_PREFIX)) return handlePropertyOpportunityStart(request, env, url.pathname.slice(PROPERTY_OPPORTUNITY_START_PREFIX.length));
+    if (url.pathname.startsWith(PROPERTY_OPPORTUNITY_PREFIX)) return handlePropertyOpportunityPublic(request, env, url.pathname.slice(PROPERTY_OPPORTUNITY_PREFIX.length));
     if (url.pathname === MARKETPLACE_PUBLIC_PATH) return retiredJson(request, { ok: true, listings: [], count: 0 }, 200);
     if (url.pathname === MARKETPLACE_SUBMIT_PATH) return retiredJson(request, { ok: false, error: "Marketplace submissions are retired. Use the Elevation Store." }, 410);
     if (url.pathname.startsWith(MARKETPLACE_IMAGE_PREFIX)) return retiredJson(request, { ok: false, error: "Marketplace images are retired." }, 410);
@@ -96,6 +104,7 @@ export default {
     if (url.pathname === ADMIN_OPERATIONS_PATH) return handleAdminOperations(request, env);
     if (url.pathname === ADMIN_MARKET_ANALYTICS_PATH) return handleAdminMarketAnalytics(request, env);
     if (url.pathname === ADMIN_OPPORTUNITIES_PATH) return handleAdminOpportunities(request, env);
+    if (url.pathname === ADMIN_PROPERTY_OPPORTUNITIES_PATH) return handleAdminPropertyOpportunities(request, env);
     if (url.pathname === ADMIN_SOLAR_QA_TOKEN_PATH) return handleAdminSolarQaToken(request, env);
     if (url.pathname === ADMIN_GMAIL_PROVIDER_QA_PATH) return handleAdminGmailProviderQa(request, env);
     if (url.pathname === ADMIN_EMAIL_ROLE_QA_PATH) return handleAdminEmailRoleQa(request, env);
