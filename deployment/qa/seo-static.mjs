@@ -16,6 +16,7 @@ assert.ok(worker.includes("return previewSeoResponse(request,page);"), "dynamic 
 
 const globalHeaderBlock = headers.split(/\n\s*\n/)[0];
 assert.equal(globalHeaderBlock.includes("X-Robots-Tag"), false, "global noindex must never be applied to production");
+assert.ok(globalHeaderBlock.includes("media-src 'self' https://cdn.shopify.com https://shop.elevationupscales.com"), "CSP must allow Shopify-hosted campaign video");
 assert.ok(robots.includes("Sitemap: https://elevationupscales.com/sitemap.xml"), "production sitemap declaration missing");
 for (const route of ["/vendors", "/vendor/*", "/commercial", "/custom-order", "/launch/osight-r"]) assert.ok(routes.includes(`"${route}"`), `public route ${route} must pass through preview SEO guard`);
 for (const canonical of ["https://elevationupscales.com/vendors","https://elevationupscales.com/vendor/olight","https://elevationupscales.com/commercial","https://elevationupscales.com/custom-order","https://elevationupscales.com/launch/osight-r"]) {
