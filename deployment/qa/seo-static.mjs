@@ -40,9 +40,9 @@ assert.ok(home.includes('property="og:image:alt"'), "homepage Open Graph image a
 assert.ok(home.includes('name="twitter:image:alt"'), "homepage Twitter image alt missing");
 assert.ok(home.includes('"@type":"WebSite"'), "homepage WebSite schema missing");
 assert.ok(home.includes('"@type":"WebPage"'), "homepage WebPage schema missing");
-assert.ok(home.includes('"@type":"ItemList"'), "homepage featured-product ItemList schema missing");
+assert.equal(home.includes('"@type":"ItemList"'), false, "navigation-first homepage should not publish stale featured-product ItemList schema");
 assert.ok(home.includes('https://shop.elevationupscales.com/collections/olight'), "homepage Olight store route missing");
-assert.ok(home.includes('href="/vendor/olight"'), "homepage Olight dealer authority link missing");
+assert.ok(home.includes('href="/commercial"'), "homepage commercial route missing");
 assert.ok(home.includes('rel="icon" href="/assets/favicon.png" type="image/png" sizes="96x96"'), "explicit 96x96 favicon declaration missing");
 assert.ok(home.includes('rel="apple-touch-icon" href="/assets/apple-touch-icon.png" sizes="180x180"'), "explicit Apple touch icon declaration missing");
 assert.ok(home.includes('rel="manifest" href="/site.webmanifest"'), "web manifest link missing");
