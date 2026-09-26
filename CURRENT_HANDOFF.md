@@ -1,52 +1,106 @@
 # Elevation UpScales — Current Worker Handoff
 
-Updated: 2026-09-09
-
+Updated: 2026-09-26
+Control mode: MPM 25 MASTER S.O.P. RELOCK
 Repository: `elevationupscales/ElevationUpScales`
 
-Verified base `main`: `bd270a08dfc5309787baa322f8037a0863230e70`
+## Read first
 
-Active branch: `work/email-role-routing-0909`
+1. `MASTER-SOP.md`
+2. `AGENTS.md`
+3. `CODING-WORKFLOW.md`
+4. task-specific files explicitly required by the owner
 
-Purpose: centralize business role email routing, preserve authenticated Gmail delivery, add safe customer acknowledgements where useful, route existing public email surfaces by intent, and prepare protected production lane QA.
+Do not use older handoff content, old PR descriptions, or dated baselines as current authority.
 
-## Durable gate log
+## Control baseline
 
-- **Gate 1 — PASS / SAVED** `b93f56a95566c76567b54466f40dd1d2d4b6c743` — central five-role resolver; project/Solar→Sales; Work With Us→Owner.
-- **Gate 2 — PASS / SAVED** `31165ad5704bbf65d56ddb9deca575da7a7233e7` — record-first Solar/Work With Us acknowledgements; protected role QA.
-- **Gate 3 — PASS / SAVED** `0d28fcd727c7c755aed4670038aa73d71dab0417` — public email surfaces by customer intent without redesign/clutter.
-- **Gate 4 — PASS / SAVED** `c9aa46f7c8f7453cb17381997fd3d171401d86b7` — final smoke/live-role workflow and handoff.
-- **QA repair — PASS / SAVED** `79c6c04372c747dcbd55843734768bbe933b5f6a` — preserved the Gmail-provider invariant that `system.js` never parses caller JSON by isolating role-QA request parsing in its own protected domain module.
+Accepted `main` at relock:
 
-## Final pre-merge QA
+`f8b55f928f28b8f3087980576158bab286dc022d`
 
-Pull Request: **#63**
+That SHA contains the merged PR #247 navigation-only patch:
+`Direct Shop navigation to Shopify storefront`.
 
-Pull Request QA run: `34312029282`
+Always re-resolve `main` before beginning new work. The SHA above records the MPM 25 relock checkpoint; it is not permission to roll back newer owner-approved work.
 
-- focused email-role tests: PASS
-- Gmail provider regression: PASS
-- canonical `npm run qa`: PASS
-- `git diff --check`: PASS
-- repository credential/secret scan: PASS
+## Platform boundary
 
-## Protected boundaries
+### Git website
+`elevationupscales.com`
 
-No schema, binding, secret, authentication/session, checkout, PayPal, SOK ordering, pricing, freight-calculation, supplier ownership, or Portal behavior is intentionally changed.
+Source/deployment:
+GitHub → Cloudflare Pages
 
-The repository remains public. No OAuth values, refresh tokens, client secrets, customer PII, supplier pricing, carrier rates, or private commercial information belong in this handoff.
+### Shopify storefront
+`shop.elevationupscales.com`
+`store.elevationupscales.com`
 
-## Execution note
+Source/deployment:
+Shopify
 
-The current runtime could not create a local checkout because outbound DNS to GitHub was unavailable. Durable state is saved on the named GitHub branch in meaningful commits; GitHub CI is the execution environment for canonical tests.
+Workers must not cross these systems by assumption.
 
-## Exact next action
+## Current owner state
 
-1. Re-resolve `main`; merge PR #63 only if lineage remains clean and the final PR head is green.
-2. Deploy exact merged `main` through the normal `production-deploy` workflow.
-3. Trigger `qa/gmail-provider-live-20260908` at that exact production SHA.
-4. Verify the controlled Gmail provider message plus owner/sales/orders/logistics/support synthetic lane messages in Gmail Sent.
-5. Verify Inbox copies for each role alias to prove Cloudflare inbound routing where configured.
-6. Require post-send exact-deployment and canonical-domain smoke PASS.
+The immediate website direction preceding this relock was navigation-only:
+- make the Shopify storefront easy to reach;
+- obsolete Git-site "Shop All Products" behavior must not be restored;
+- destination is the Shopify storefront;
+- no collection rebuild;
+- no wording edits;
+- no marketing additions.
 
-HANDOFF STATUS: **PRE-MERGE QA PASS — READY FOR DEPLOYMENT WORKFLOW**
+PR #247 is merged and represents that completed Git patch.
+
+## HOLD — preserved, not authorized
+
+These pre-existing open PRs are not active work until the owner explicitly reauthorizes them:
+
+- PR #242 — SEO preview-domain indexing
+- PR #244 — Property Opportunity Engine Phase 1
+- PR #245 — SEO preview refresh
+
+Do not merge, deploy, stack on, or treat these PRs as current requirements.
+
+## Worker operating rule
+
+One task. One branch. One owner-approved objective.
+
+Before editing:
+- resolve current `main`;
+- restate the exact objective;
+- identify which platform owns it;
+- create a focused branch from current `main`.
+
+Before merge:
+- inspect changed files;
+- confirm no scope expansion;
+- run required QA;
+- compare against current `main`.
+
+Before deployment:
+- require explicit deployment authority;
+- use exact-SHA preview;
+- production must use the same SHA;
+- verify canonical production after release.
+
+## Stop rule
+
+If owner says STOP / HOLD / FREEZE / NO MORE EDITS:
+- stop mutations;
+- preserve branch;
+- do not merge;
+- do not deploy;
+- report state only.
+
+## Current handoff status
+
+**MPM 25 CONTROL RELOCK IN PROGRESS**
+
+Scope of the relock branch:
+- add `MASTER-SOP.md`;
+- point `AGENTS.md` to master control;
+- replace this stale handoff with current MPM 25 state.
+
+No website content, routing, Shopify content, product data, pricing, checkout logic, or deployment is authorized by this control update.
