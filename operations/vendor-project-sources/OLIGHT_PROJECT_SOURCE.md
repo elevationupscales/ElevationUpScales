@@ -46,13 +46,27 @@ Historical `OLIGHT_PARTNERSHIP_RECON_2026-09-17.md` is useful relationship histo
 
 ## Current launch assortment
 
-Current Shopify verification on 2026-09-24 finds **13 Olight product records: 10 ACTIVE and 3 DRAFT**. The remaining DRAFT queue is **Odin S M-LOK**, **PL X GL**, and **OSIGHT SE**. Sphere and Baton 4 are currently ACTIVE in Shopify.
+Current Shopify verification on 2026-09-26 finds **13 Olight product records and all 13 are ACTIVE**.
 
-The Oclip family remains separated correctly: Oclip 2 Pro Black/Orange standard is its own $49.99 listing, and Oclip 2 Ultra Premium is a separate $94.99 live listing with the Mobile Charging Dock.
+The prior **10 ACTIVE / 3 DRAFT** state is superseded. **Odin S M-LOK, PL X GL, and OSIGHT SE are already ACTIVE and must not be rebuilt as draft-production work.**
 
-**Baton 4 source-state note:** Shopify currently shows Baton 4 Black ACTIVE, while the last dealer-source snapshot recorded the exact Black SKU as unavailable. Preserve the live product without recreating or repricing it, but treat the supplier-source mismatch as a management reconciliation item before relying on that dated availability snapshot for fulfillment.
+Current operating interpretation:
+- live Shopify product status does not prove current supplier warehouse stock;
+- Shopify inventory values are not Olight physical-stock truth;
+- listing production and supplier-stock verification are separate gates;
+- current Olight direct correspondence and source files remain the exact-product basis for SKU/spec/media work;
+- availability promises require current supplier confirmation.
 
-The exact operational truth is maintained in:
+The next bounded listing-production wave is:
+1. **Oclip 2 Pro Premium** — build the missing full product family from exact Olight source data.
+2. **Oclip 2 Ultra** — build the missing full product family from exact Olight source data.
+3. **ArkPro Ultra** — prepare the missing Amber Orange variant on the existing product; do not duplicate the product.
+4. **Oclip 2 Pro** — prepare the missing Tidal Blue variant on the existing product; do not duplicate the product.
+5. **Oclip 2 Ultra Premium** — audit only until the exact Olive Green / Onyx Black SKU mapping is confirmed by Olight. Do not “correct” the live mapping by inference.
+
+Current source file for this wave exists in the private supplier layer as the Olight September 2026 new-arrivals workbook. Protected dealer economics and raw supplier availability remain outside public Git.
+
+The exact operational truth remains linked through:
 
 `../OLIGHT_MASTER_CATALOG_TRUTH_2026-09-23.md`
 
@@ -82,22 +96,22 @@ Customer-facing product, collection and brochure material should be product-led 
 
 ## Current next work
 
-1. Preserve the **10 currently ACTIVE** Olight products; do not recreate them during the draft-production pass.
-2. Peter Torres is authorized for a bounded Shopify listing-production assignment on the three existing DRAFT products, in this order:
-   - **Odin S M-LOK** — Shopify SKU `ODINSMMTBK`
-   - **PL X GL** — supplier/product identity `0.0002.0234`
-   - **OSIGHT SE** — Shopify SKU `OSIGHTSE`
-3. Peter may use the Olight-authorized media package already downloaded to his local working environment to:
-   - match exact product media to the exact existing Shopify draft;
-   - upload/select official hero and supporting product/lifestyle media;
-   - improve media order and alt text;
-   - verify customer-facing description/spec copy against the supplied Olight materials;
-   - remove the `Dealer Media Pending` tag only after that product's media pass is actually complete.
-4. Peter must leave all three products **DRAFT** for management review. This assignment does **not** authorize price, SKU, vendor, shipping profile, inventory-policy, publication/channel, or product-status changes.
-5. Management final gate for each draft remains:
-   **EXACT PRODUCT/SKU → CURRENT OLIGHT SOURCE → PRICE/MAP → MEDIA → SHIPPING/FULFILLMENT → PUBLICATION → STOREFRONT PURCHASEABILITY.**
-6. After the three-draft launch queue is completed and reviewed, management may issue a separate Wave 2 assignment from the current dealer catalog. Do not bulk-create unreviewed Olight products.
-7. Preserve Baton 4 live state while management reconciles the dated supplier-availability mismatch; do not silently substitute colors or duplicate the listing.
+1. Preserve the **13 currently ACTIVE** Olight products. Do not recreate Odin S M-LOK, PL X GL, OSIGHT SE, or any other existing active product.
+2. Peter Torres is authorized for the next bounded Shopify listing-production assignment in this order:
+   - **Oclip 2 Pro Premium** — create/build the missing exact product family from supplied Olight source data.
+   - **Oclip 2 Ultra** — create/build the missing exact product family from supplied Olight source data.
+   - **ArkPro Ultra Amber Orange** — stage the exact missing variant on the existing ArkPro Ultra product after source validation.
+   - **Oclip 2 Pro Tidal Blue** — stage the exact missing variant on the existing Oclip 2 Pro product after source validation.
+3. Peter may use Olight-authorized product materials already supplied to:
+   - match exact product/variant identity;
+   - build customer-facing descriptions/specification copy grounded in the exact source;
+   - upload/select authorized hero and supporting media;
+   - stage accurate variant, UPC/SKU and SEO data where supported by the supplier source;
+   - record any source conflict instead of guessing.
+4. Supplier availability is a separate management gate. Peter must not use Shopify inventory quantity as proof of Olight warehouse stock and must not invent stock.
+5. Management owns current U.S. availability, dropship eligibility, MAP/launch timing and fulfillment confirmation with Olight before making new availability promises.
+6. **Oclip 2 Ultra Premium is audit-only** until Olight confirms the apparent Olive Green / Onyx Black SKU mapping conflict in the supplier source. Preserve current live state; do not infer a correction.
+7. After this Wave 2 listing-production queue is staged, management performs final retail-readiness / purchaseability review and determines the next Olight family.
 8. Capture the first real Olight paid-order fulfillment as the next maturity proof.
 
 ## Control statement
