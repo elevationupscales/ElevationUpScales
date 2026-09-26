@@ -393,7 +393,7 @@
       <a class="eus-brand" href="/" aria-label="Elevation UpScales, Inc. home"><img class="reference-header-wordmark" src="${retailBrandSrc}" alt="Elevation UpScales, Inc." width="${retailBrandWidth}" height="${retailBrandHeight}"></a>
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
-        <details class="eus-menu eus-menu--shop reference-nav-menu"><summary class="eus-nav-trigger">Shop <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown"></div></details>
+        <a class="eus-nav-link" href="https://shop.elevationupscales.com/" data-eus-event="shopify_store_open" data-eus-value="header">Shop</a>
         <a class="eus-nav-link" href="/vendors">Brands</a>
         <a class="eus-nav-link" href="/commercial">Commercial</a>
         <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Projects <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
@@ -440,23 +440,6 @@
   function installNavigation() {
     const header = document.querySelector(".eus-header");
     if (!header) return;
-
-    const dropdown = header.querySelector(".eus-menu--shop .eus-dropdown");
-    if (dropdown) {
-      dropdown.replaceChildren();
-      for (const [href, title, description] of SHOP_LINKS) {
-        const link = document.createElement("a");
-        link.href = href;
-        const span = document.createElement("span");
-        const strong = document.createElement("strong");
-        const small = document.createElement("small");
-        strong.textContent = title;
-        small.textContent = description;
-        span.append(strong, small);
-        link.append(span);
-        dropdown.append(link);
-      }
-    }
 
     const toggle = header.querySelector(".eus-menu-toggle");
     const nav = header.querySelector(".eus-nav");
