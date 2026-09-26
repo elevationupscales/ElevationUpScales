@@ -21,6 +21,7 @@
     ["https://shop.elevationupscales.com/collections/all", "Shop All Products", "Open the Elevation Shopify store"],
     ["https://shop.elevationupscales.com/collections/complete-power-systems", "Complete Power Systems", "Battery and system-scale packages"],
     ["https://shop.elevationupscales.com/collections/sok-battery", "SOK Battery", "Authorized SOK Energy products"],
+    ["https://shop.elevationupscales.com/collections/olight", "Olight", "Professional lighting and optics"],
     ["https://shop.elevationupscales.com/collections/renogy", "Renogy", "Solar, charging and off-grid power"],
     ["https://shop.elevationupscales.com/collections/sungoldpower", "SunGoldPower", "Inverters and power systems"],
   ]);
