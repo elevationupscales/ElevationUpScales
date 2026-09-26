@@ -28,7 +28,39 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"Elevation UpScales","legalName":"Elevation UpScales, Inc.","url":"https://elevationupscales.com/","logo":"https://elevationupscales.com/assets/logo.webp","image":"https://elevationupscales.com/assets/elevation-lithium-social-card.webp","telephone":"+1-208-813-4998","email":"casey@elevationupscales.com","description":"Off-grid power, commercial supply, project support and destination-aware logistics with online shopping through the Elevation store."}
 </script>
-</head>
+<style>
+/* 2026-09-25 homepage visual upgrade */
+.home-stage{display:grid;grid-template-columns:1.35fr .65fr;grid-template-rows:235px 235px;gap:14px}
+.home-stage__primary,.home-stage__tile{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:18px;background:#071018;color:#fff;text-decoration:none;box-shadow:0 24px 55px rgba(0,0,0,.28)}
+.home-stage__primary{grid-row:1/3}
+.home-stage__primary img,.home-stage__tile img,.home-stage__tile video{width:100%;height:100%;object-fit:cover;display:block}
+.home-stage__shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,10,16,.94),rgba(0,10,16,.08) 64%)}
+.home-stage__copy{position:absolute;z-index:2;left:24px;right:24px;bottom:22px}
+.home-stage__copy small{display:block;color:#61ddfa;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.home-stage__copy strong{display:block;font-size:clamp(1.35rem,2.3vw,2rem);line-height:1.05;margin:.28rem 0}
+.home-stage__copy span{display:block;color:#d4e0e6;line-height:1.45}
+.home-live{padding:64px 0;background:linear-gradient(180deg,#061014 0,#09141a 100%);color:#f5fbfd}
+.home-live__head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:26px}
+.home-live__head h2{font-size:clamp(2.2rem,4.5vw,4rem);margin:.08em 0;letter-spacing:-.035em}
+.home-live__head p{max-width:570px;color:#a9bac4;line-height:1.6}
+.home-live__grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:16px}
+.home-live__card{position:relative;min-height:360px;overflow:hidden;border:1px solid rgba(79,199,231,.18);border-radius:16px;background:#0c171d;color:#fff;text-decoration:none}
+.home-live__card video,.home-live__card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.home-live__card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,7,10,.95),rgba(0,7,10,.02) 66%)}
+.home-live__body{position:absolute;z-index:2;left:20px;right:20px;bottom:20px}
+.home-live__body small{color:#59d7f5;font-weight:900;letter-spacing:.12em}
+.home-live__body strong{display:block;font-size:1.5rem;margin:.28rem 0}
+.home-live__body span{display:block;color:#ced8de;line-height:1.45}
+.home-brand-video{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:center}
+.home-brand-video__media{position:relative;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,.12);min-height:390px;background:#020507}
+.home-brand-video__media video{width:100%;height:100%;min-height:390px;object-fit:cover;display:block}
+.home-brand-video__media:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(1,8,12,.52),transparent 48%)}
+.home-brand-video__copy{padding:22px 8px}
+.home-brand-video__copy h2{font-size:clamp(2.1rem,4vw,3.6rem);margin:.12em 0}
+.home-brand-video__copy p{color:#aebcc4;line-height:1.65}
+@media(max-width:900px){.home-stage{grid-template-columns:1fr;grid-template-rows:420px 220px 220px}.home-stage__primary{grid-row:auto}.home-live__grid{grid-template-columns:1fr 1fr}.home-live__card:first-child{grid-column:1/-1}.home-brand-video{grid-template-columns:1fr}.home-live__head{display:block}}
+@media(max-width:620px){.home-stage{grid-template-rows:360px 210px 210px}.home-live__grid{grid-template-columns:1fr}.home-live__card:first-child{grid-column:auto}.home-live__card{min-height:320px}}
+</style></head>
 <body class="retail-home reference-storefront-home clean-commerce-page">
 <a class="skip-link" href="#main">Skip to main content</a>
 <div class="retail-utility" aria-label="Store information"><div class="container retail-utility__inner">
@@ -61,13 +93,18 @@
 <div class="reference-storefront-hero__actions"><a class="button retail-primary reference-storefront-hero__primary" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="flagship">Start a Project <span aria-hidden="true">→</span></a><a class="button retail-secondary" href="https://shop.elevationupscales.com/collections/all" data-eus-event="shopify_store_open" data-eus-value="flagship-shop">Shop Online</a><a class="button retail-secondary" href="/commercial">Commercial Supply</a></div>
 <nav class="reference-usecases" aria-label="Elevation shortcuts"><a href="https://shop.elevationupscales.com/collections/all"><span>Shop Products</span></a><a href="/vendors"><span>Shop by Brand</span></a><a href="/commercial"><span>Commercial</span></a><a href="/shipping-logistics-services"><span>Freight &amp; Logistics</span></a><a href="/solar-project"><span>Solar Builder</span></a></nav>
 </div>
-<div class="reference-storefront-hero__visual" aria-label="Elevation UpScales products and brand partners">
-<div class="cc-hero-mosaic">
-<a class="cc-hero-media cc-hero-media--primary" href="/vendor/olight"><img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/elevation-olight-partnership-announcement_ddc0a38d-b79b-498a-be1b-55f9463ae16f.png?v=1789786968" alt="Elevation UpScales and Olight authorized dealer partnership"></a>
-<a class="cc-hero-media" href="/vendor/sok-energy"><img src="/assets/brands/sok/sk12v100pc/home-hero.webp" alt="SOK 12V 100Ah lithium battery"></a>
-<a class="cc-hero-media" href="/solar-project"><img src="/assets/solar/builder-v2/rv-solar-install-field-desktop.webp" alt="Solar installation on an RV roof"></a>
-<div class="cc-hero-store-badge"><span>SHOP ONLINE</span><strong>Current products and secure checkout</strong><a href="https://shop.elevationupscales.com/collections/all">Open Elevation Store →</a></div>
+<div class="reference-storefront-hero__visual" aria-label="Elevation UpScales power, logistics and retail">
+<div class="home-stage">
+<a class="home-stage__primary" href="/shipping-logistics-services"><img src="/assets/hero/storefront-tropical-logistics-v3.webp" alt="Elevation UpScales power and logistics operations"><span class="home-stage__shade"></span><span class="home-stage__copy"><small>POWER · SUPPLY · LOGISTICS</small><strong>Built for orders that do not fit the normal path.</strong><span>Lithium, solar, freight and project support connected in one operating system.</span></span></a>
+<a class="home-stage__tile" href="/vendor/sok-energy"><img src="/assets/brands/sok/sk12v100pc/home-hero.webp" alt="SOK lithium battery"><span class="home-stage__shade"></span><span class="home-stage__copy"><small>LITHIUM</small><strong>SOK Energy</strong><span>Mobile to rack storage.</span></span></a>
+<a class="home-stage__tile" href="/launch/osight-r"><video autoplay muted loop playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/3e5d59411940464385c0995514de0f0c.thumbnail.0000000000.jpg?v=1790380001"><source src="https://cdn.shopify.com/videos/c/vp/3e5d59411940464385c0995514de0f0c/3e5d59411940464385c0995514de0f0c.HD-1080p-7.2Mbps-95592151.mp4" type="video/mp4"></video><span class="home-stage__shade"></span><span class="home-stage__copy"><small>NEW LAUNCH</small><strong>Osight R</strong><span>Official launch media now live.</span></span></a>
 </div>
+</div></div></section>
+
+<section class="home-live" aria-labelledby="home-live-title"><div class="cc-container"><div class="home-live__head"><div><p class="cc-eyebrow">WHAT'S HAPPENING NOW</p><h2 id="home-live-title">The business is moving fast. The homepage should show it.</h2></div><p>Current product launches, destination logistics and off-grid power are now surfaced visually instead of being buried several clicks deep.</p></div><div class="home-live__grid">
+<a class="home-live__card" href="/launch/osight-r"><video autoplay muted loop playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/3e5d59411940464385c0995514de0f0c.thumbnail.0000000000.jpg?v=1790380001"><source src="https://cdn.shopify.com/videos/c/vp/3e5d59411940464385c0995514de0f0c/3e5d59411940464385c0995514de0f0c.HD-1080p-7.2Mbps-95592151.mp4" type="video/mp4"></video><span class="home-live__body"><small>NEW PRODUCT LAUNCH</small><strong>Osight R</strong><span>Official launch video, approved product media and a dedicated launch experience.</span></span></a>
+<a class="home-live__card" href="/hawaii-lithium-batteries"><img src="/assets/hero/hawaii-ocean-freight-v1.webp" alt="Hawaii lithium freight and ocean logistics"><span class="home-live__body"><small>HAWAII POWER</small><strong>Lithium freight built around the destination</strong><span>Battery sourcing, compliance and freight review for island orders.</span></span></a>
+<a class="home-live__card" href="/solar-project"><img src="/assets/solar/builder-v2/rv-solar-install-field-desktop.webp" alt="Solar and off-grid installation planning"><span class="home-live__body"><small>SOLAR + OFF-GRID</small><strong>Plan the system, not just the parts</strong><span>Battery, inverter and solar planning connected to real project support.</span></span></a>
 </div></div></section>
 
 <section class="cc-section" aria-labelledby="shop-paths-title"><div class="cc-container"><div class="cc-section__head"><div><p class="cc-eyebrow">SHOP BY NEED</p><h2 id="shop-paths-title">Start with what you are actually buying.</h2></div><p>Real products and real use cases up front. Shopify remains the transaction layer.</p></div><div class="cc-visual-grid cc-visual-grid--4">
@@ -78,7 +115,7 @@
 </div></div></section>
 
 <section class="cc-section cc-section--alt" aria-labelledby="brands-title"><div class="cc-container"><div class="cc-section__head"><div><p class="cc-eyebrow">AUTHORIZED & FEATURED BRANDS</p><h2 id="brands-title">Know who you are buying from.</h2></div><p>Dedicated brand pages keep manufacturer context, Elevation's relationship and the purchase path in one place.</p></div>
-<div class="cc-brand-feature"><div class="cc-brand-feature__media"><img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/elevation-olight-partnership-announcement_ddc0a38d-b79b-498a-be1b-55f9463ae16f.png?v=1789786968" alt="Elevation UpScales and Olight partnership"></div><div class="cc-brand-feature__copy"><span class="cc-kicker">New Authorized Dealer</span><p class="cc-eyebrow">OLIGHT</p><h2>Official media. Clean product pages.</h2><p>Olight has opened its dealer product-material library to Elevation. We are using those manufacturer assets to build a stronger lighting catalog without scraping or inventing product media.</p><div class="cc-actions"><a class="cc-button cc-button--primary" href="/vendor/olight">Explore Olight</a><a class="cc-button cc-button--secondary" href="https://shop.elevationupscales.com/search?q=Olight">Shop Olight</a></div></div></div>
+<div class="home-brand-video"><div class="home-brand-video__media"><video autoplay muted loop playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/3e5d59411940464385c0995514de0f0c.thumbnail.0000000000.jpg?v=1790380001"><source src="https://cdn.shopify.com/videos/c/vp/3e5d59411940464385c0995514de0f0c/3e5d59411940464385c0995514de0f0c.HD-1080p-7.2Mbps-95592151.mp4" type="video/mp4"></video></div><div class="home-brand-video__copy"><span class="cc-kicker">New Authorized Dealer</span><p class="cc-eyebrow">OLIGHT + OSIGHT</p><h2>Official media is now part of the Elevation retail experience.</h2><p>Olight and Osight launches now use manufacturer-supplied product imagery and video from the approved dealer media set. The result is a stronger storefront without changing Elevation's broader power, logistics and project focus.</p><div class="cc-actions"><a class="cc-button cc-button--primary" href="/vendor/olight">Explore Olight / Osight</a><a class="cc-button cc-button--secondary" href="/launch/osight-r">View Osight R Launch</a></div></div></div>
 <div class="cc-visual-grid cc-visual-grid--4 cc-brand-links">
 <a class="cc-shop-card cc-shop-card--compact" href="/vendor/sok-energy"><img src="/assets/brands/sok/sk48v100n/system-cabinet.png" alt="SOK 48V rack battery system"><div><small>Authorized Dealer</small><strong>SOK Energy</strong><span>Lithium batteries and rack storage.</span></div></a>
 <a class="cc-shop-card cc-shop-card--compact" href="/vendor/renogy"><img src="/assets/solar/builder-v2/rv-solar-install-field-desktop.webp" alt="Renogy-focused solar and off-grid system applications"><div><small>Authorized Dealer</small><strong>Renogy</strong><span>Solar, charging and off-grid power.</span></div></a>
