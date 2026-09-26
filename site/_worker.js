@@ -108,7 +108,7 @@ export default {
     const response=await coreWorker.fetch(request,env,ctx);
     if(url.pathname==="/checkout"||url.pathname==="/checkout/") return previewSeoResponse(request,checkoutResponse(response));
     if(url.pathname==="/lithium-batteries"||url.pathname==="/lithium-batteries/") return previewSeoResponse(request,await enhanceStorefront(request,response,env,"lithium"));
-    if(url.pathname==="/hawaii-lithium-batteries"||url.pathname==="/hawaii-lithium-batteries/") return previewSeoResponse(request,await enhanceStorefront(request,response,env,"hawaii"));
+    if(url.pathname==="/hawaii-lithium-batteries"||url.pathname==="/hawaii-lithium-batteries/") return previewSeoResponse(request,response);
     if(url.pathname==="/rv-store"||url.pathname==="/rv-store/") return previewSeoResponse(request,await enhanceStorefront(request,response,env,"rv"));
     return previewSeoResponse(request,response);
   },
