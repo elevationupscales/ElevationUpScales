@@ -8,24 +8,9 @@ const product = fs.readFileSync("site/product.html", "utf8");
 const productDetail = fs.readFileSync("site/product-detail.js", "utf8");
 const terms = fs.readFileSync("site/terms.html", "utf8");
 
-const shopStart = shell.indexOf("const SHOP_LINKS");
-const shopEnd = shell.indexOf("function randomId", shopStart);
-assert.ok(shopStart >= 0 && shopEnd > shopStart, "shared SHOP_LINKS block must exist");
-const shopBlock = shell.slice(shopStart, shopEnd);
-
-for (const route of [
-  "https://shop.elevationupscales.com/collections/all",
-  "https://shop.elevationupscales.com/collections/complete-power-systems",
-  "https://shop.elevationupscales.com/collections/sok-battery",
-  "https://shop.elevationupscales.com/collections/renogy",
-  "https://shop.elevationupscales.com/collections/sungoldpower",
-]) {
-  assert.ok(shopBlock.includes(`"${route}"`), `shared Shop menu missing ${route}`);
-}
-
-assert.equal(shopBlock.includes('"/marketplace"'), false, "retired Marketplace must not be owned by the active Shop menu");
-assert.equal(shopBlock.includes('"/solar-services"'), false, "Solar services must remain under Services, not be duplicated into shared Shop ownership");
-assert.equal(shopBlock.includes('"/collector"'), false, "Collector Series must not remain in the primary Shop menu");
+assert.ok(shell.includes('href="https://shop.elevationupscales.com/"'), "shared shell must expose the Shopify storefront root");
+assert.equal(shell.includes("const SHOP_LINKS"), false, "obsolete shared Shop dropdown data must stay removed");
+assert.equal(shell.includes("eus-menu--shop reference-nav-menu"), false, "shared shell must not rebuild the obsolete Shop dropdown");
 assert.equal(shell.includes('<summary class="eus-nav-trigger">Power'), false, "retired duplicate Power menu must stay removed from the simplified shell");
 assert.ok(shell.includes('href="/vendors"'), "shared shell must expose the Brands hub");
 assert.ok(shell.includes('href="/commercial"'), "shared shell must expose the Commercial hub");
@@ -36,7 +21,7 @@ assert.equal(shell.includes('href="/marketplace"'), false, "retired Marketplace 
 
 // Main-site contract: Shopify owns product shopping; projects, planning and logistics stay on ElevationUpScales.com.
 for (const route of [
-  "https://shop.elevationupscales.com/collections/all",
+  "https://shop.elevationupscales.com/",
   "https://shop.elevationupscales.com/collections/complete-power-systems",
   "https://shop.elevationupscales.com/collections/sok-battery",
   "/solar-project",
@@ -48,7 +33,8 @@ for (const route of [
   assert.ok(home.includes(`href="${route}"`) || home.includes(`href="${route}?`), `homepage missing ${route}`);
 }
 assert.ok(home.includes('href="#logistics"') || home.includes('href="/shipping-logistics-services"'), "homepage must expose Freight & Logistics from primary retail navigation");
-assert.ok(home.includes("retail-shop-menu") || /reference-nav-menu[^>]*><summary[^>]*>Shop/.test(home), "homepage must use the retail-first Shop menu");
+assert.ok(home.includes('href="https://shop.elevationupscales.com/"'), "homepage must expose the Shopify storefront root");
+assert.equal(/reference-nav-menu[^>]*><summary[^>]*>Shop/.test(home), false, "obsolete homepage Shop dropdown must stay removed");
 assert.ok(home.includes("retail-more-menu") || home.includes("reference-nav-menu--company"), "homepage must retain a quieter company/menu layer for non-shopping destinations");
 assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain the main-site project path");
 
