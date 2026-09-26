@@ -6,7 +6,7 @@ const index = fs.readFileSync(new URL("../site/index.html", import.meta.url), "u
 const homeCommerce = fs.readFileSync(new URL("../site/home-commerce.js", import.meta.url), "utf8");
 
 test("protected homepage top stays authored in index.html and is not rewritten by commerce runtime", () => {
-  assert.match(index, /class="campaign-hero__lead">Shop lithium batteries, solar systems, professional lighting and off-grid equipment — backed by project knowledge and destination-aware logistics when the order gets complicated\.<\/p>/);
+  assert.match(index, /class="campaign-hero__lead">Shop the products Elevation is actively building around: SOK lithium, Renogy solar, Olight professional lighting and complete off-grid power systems\.<\/p>/);
   assert.match(index, /class="campaign-btn campaign-btn--primary"[^>]*href="https:\/\/shop\.elevationupscales\.com\/collections\/all"[^>]*>Shop Products/);
   assert.match(index, /class="campaign-btn campaign-btn--secondary"[^>]*href="\/start-a-project"[^>]*>Start a Project/);
 
