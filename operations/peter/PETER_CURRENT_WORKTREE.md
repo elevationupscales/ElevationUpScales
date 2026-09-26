@@ -3,7 +3,7 @@
 **Owner:** Casey Young  
 **Human Manager:** Peter Torres  
 **Parent:** Company Operations / current MPM  
-**Status:** ACTIVE / OLIGHT WAVE 2 LISTING PRODUCTION  
+**Status:** ACTIVE / OLIGHT WAVE 2 PRESERVED — MANAGEMENT GATE OPEN  
 **Effective:** 2026-09-26
 
 ## Current state
@@ -22,9 +22,17 @@ The prior 10 ACTIVE / 3 DRAFT assignment is superseded.
 
 ## Current objective
 
-Advance the next Olight listing wave from exact Olight supplier source material while keeping supplier-stock verification separate from listing production.
+Preserve the next Olight listing wave while MPM 25 closes the remaining storefront shipping/payment verification gates.
 
-**EXACT OLIGHT SOURCE → BUILD/STAGE LISTING → RECORD BLOCKERS → MANAGEMENT STOCK/MAP/FULFILLMENT GATE → RETAIL READINESS.**
+The underlying catalog repair is now materially improved:
+- all 23 current Olight variants use untracked supplier-fulfilled inventory;
+- source-proven SKU mismatches were corrected for PL X GL, OSIGHT R, Oclip 2 Pro and Marauder 3;
+- all current Olight PDPs include supplier-fulfillment/support wording;
+- direct cart routing reached Shopify checkout for three representative Olight products.
+
+**Do not interpret this as destination shipping or final payment-stage clearance.**
+
+**EXACT OLIGHT SOURCE → BUILD/STAGE LISTING → MANAGEMENT STOCK/ROUTE/PAYMENT GATE → RETAIL READINESS.**
 
 ## Startup requirement
 
@@ -113,6 +121,16 @@ Management separately owns:
 - MAP/launch timing;
 - fulfillment readiness;
 - final availability/customer promise.
+
+## MPM 25 gate — 2026-09-26
+
+Peter may preserve and prepare the bounded Wave 2 work, but must not represent any new product/variant as supplier-stock verified, destination-cleared or final-payment verified until management closes those gates.
+
+Current management holds:
+- Oclip 2 Ultra Premium Olive Green / Onyx Black SKU mapping remains a supplier-source conflict;
+- destination shipping for Olight has not been proven against the store's broad market-country configuration;
+- final checkout payment-stage verification remains incomplete;
+- generic storefront "In stock" wording now reflects untracked sellability, not a verified physical Olight quantity.
 
 ## Authorized work
 
