@@ -97,3 +97,6 @@
 }
 
 .campaign-product--video video{background:#050708}.campaign-product--video:hover video{filter:brightness(.96)}
+
+.campaign-feature__media--3d{background:#050708;padding:clamp(18px,3vw,42px)}
+.campaign-feature__media--3d video{object-fit:contain!important;background:#050708}
