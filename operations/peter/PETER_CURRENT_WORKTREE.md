@@ -176,3 +176,13 @@ Management then performs:
 **DONE:** Wave 2 listing-production queue staged with exact-source discipline.  
 **BLOCKED:** record the exact missing source/media/SKU item; continue the other clean queue items.  
 **NEXT:** return the Wave 2 receipt to Company Operations / current MPM for final supplier and retail-readiness gates.
+
+
+## Olight binary inventory rule — owner control
+
+For supplier-fulfilled Olight SKUs, Peter must use the owner-controlled binary model:
+
+**Olight AVAILABLE → Shopify quantity 10 for commerce control.**  
+**Olight UNAVAILABLE → controlled unavailable state.**
+
+Quantity 10 is not a warehouse count and must never be described as Olight physical inventory. If Elevation later purchases and owns stock, that owned stock switches to actual on-hand quantity tracking.
