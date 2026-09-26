@@ -6,6 +6,7 @@ const headers = fs.readFileSync("site/_headers", "utf8");
 const robots = fs.readFileSync("site/robots.txt", "utf8");
 const sitemap = fs.readFileSync("site/sitemap.xml", "utf8");
 const routes = fs.readFileSync("site/_routes.json", "utf8");
+const home = fs.readFileSync("site/index.html", "utf8");
 
 assert.ok(worker.includes('hostname.endsWith(".pages.dev")'), "Pages preview hostname SEO gate missing");
 assert.ok(worker.includes('headers.set("X-Robots-Tag","noindex, nofollow, noarchive")'), "Pages preview noindex header missing");
@@ -23,4 +24,11 @@ for (const file of ["site/product.html", "site/sok-order.html", "site/checkout/i
   const html = fs.readFileSync(file, "utf8");
   assert.ok(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html), `${file}: utility noindex missing`);
 }
+assert.ok(home.includes("<title>Lithium Batteries, Solar Power & Olight Gear | Elevation UpScales</title>"), "homepage SEO title missing");
+assert.ok(home.includes('name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"'), "homepage robots directive missing");
+assert.ok(home.includes('"@type":"WebSite"'), "homepage WebSite schema missing");
+assert.ok(home.includes('"@type":"WebPage"'), "homepage WebPage schema missing");
+assert.ok(home.includes('"@type":"ItemList"'), "homepage featured-product ItemList schema missing");
+assert.ok(home.includes('https://shop.elevationupscales.com/collections/olight'), "homepage Olight store route missing");
+assert.ok(home.includes('href="/vendor/olight"'), "homepage Olight dealer authority link missing");
 console.log("SEO static checks passed");
