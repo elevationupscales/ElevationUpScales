@@ -28,12 +28,15 @@ Historical files never override current owner direction or current accepted `mai
 
 ## 3. MPM 25 control baseline
 
-Control baseline at relock:
+Control baseline at initial MPM25 relock:
 
 `f8b55f928f28b8f3087980576158bab286dc022d`
 
-This is the accepted `main` state immediately after PR #247:
-`Direct Shop navigation to Shopify storefront`.
+Git drift recovery checkpoint established 2026-09-27:
+
+`30a161feef32bacccea1f0f043ea1bc0cf03d528`
+
+That recovery checkpoint added `operations/GIT_DRIFT_RECOVERY_2026-09-27.md`. Current `main` may advance after this checkpoint; workers must always re-resolve current `main` before work.
 
 Do not treat an older branch, preview, PR, recovery branch, or historical baseline as current production truth.
 
@@ -94,20 +97,20 @@ Not allowed without new owner authorization:
 
 ## 7. Open-PR hold rule
 
-At the time of this relock, the following pre-existing PRs are not active authority and are on HOLD until the owner explicitly reauthorizes them:
+As of the 2026-09-27 Git drift recovery, the following stale/diverged PRs are CLOSED / QUARANTINED:
 
 - PR #242 — SEO preview-domain indexing work.
 - PR #244 — Property Opportunity Engine Phase 1.
 - PR #245 — SEO preview refresh on current site baseline.
 
-HOLD means:
-- preserve the work;
+CLOSED / QUARANTINED means:
+- preserve the branch for evidence only;
 - do not deploy it;
 - do not merge it;
 - do not use it as a base for new work;
-- do not assume its content is still wanted.
+- if the objective is reauthorized, create a fresh branch from current `main` and port only the still-approved scoped changes.
 
-New owner direction may reauthorize any of them.
+See `operations/GIT_DRIFT_RECOVERY_2026-09-27.md` for the current recovery rule.
 
 ## 8. Worker handoff rule
 
@@ -202,8 +205,12 @@ When drift is detected:
 2. re-resolve `main`;
 3. identify the owner-approved objective;
 4. compare worker branch to current `main`;
-5. keep only in-scope work;
-6. resume only under this SOP.
+5. if the branch is behind or carries unrelated history, quarantine it instead of resuming it;
+6. create a fresh focused branch from current `main`;
+7. port only the still-authorized in-scope changes;
+8. resume only under this SOP.
+
+Do not repair drift by wholesale-merging a stale branch back into `main`.
 
 ## 14. Sensitive information
 
@@ -237,9 +244,10 @@ Do not bury status in long narrative.
 
 ## 16. Current MPM 25 state
 
-At relock:
-- `main` control baseline: `f8b55f928f28b8f3087980576158bab286dc022d`
-- Store-navigation-only patch is merged.
-- Git website and Shopify storefront are separate deployment systems.
-- Existing PRs #242, #244, #245 are HOLD.
-- This SOP changes control/worker behavior only. It does not authorize a website redesign, product edit, Shopify edit, or production deployment.
+Current recovery state:
+- initial MPM25 control baseline: `f8b55f928f28b8f3087980576158bab286dc022d`
+- Git drift recovery checkpoint: `30a161feef32bacccea1f0f043ea1bc0cf03d528`
+- PRs #242, #244 and #245 are CLOSED / QUARANTINED.
+- Git website and Shopify storefront remain separate deployment systems.
+- Existing historical `work/*` branches are evidence, not authority, unless explicitly reauthorized and rebuilt/reconciled from current `main`.
+- This SOP changes control/worker behavior only. It does not authorize a website redesign, product edit, Shopify edit, merge, or production deployment.
