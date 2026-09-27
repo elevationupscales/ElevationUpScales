@@ -82,3 +82,12 @@ body.clean-commerce-page{background:var(--cc-bg);color:var(--cc-text)}
 .cc-brand-links{padding-top:18px}
 @media(max-width:900px){.cc-hero__grid,.cc-brand-feature,.cc-commercial-showcase{grid-template-columns:1fr}.cc-grid,.cc-grid--3,.cc-visual-grid--4{grid-template-columns:repeat(2,minmax(0,1fr))}.cc-product-grid{grid-template-columns:1fr}.cc-section__head{display:block}.cc-section__head p{margin-top:12px}.cc-hero-mosaic{min-height:440px}}
 @media(max-width:600px){.cc-container{width:min(100% - 24px,var(--cc-max))}.cc-hero{padding:58px 0 48px}.cc-section{padding:52px 0}.cc-grid,.cc-grid--2,.cc-grid--3,.cc-visual-grid--2,.cc-visual-grid--4{grid-template-columns:1fr}.cc-hero-card,.cc-brand-feature__copy,.cc-commercial-band{padding:24px}.cc-actions{display:grid}.cc-button{width:100%}.cc-hero-mosaic{grid-template-columns:1fr;grid-template-rows:auto;min-height:0}.cc-hero-media--primary{grid-row:auto}.cc-hero-media{min-height:210px}.cc-hero-store-badge{grid-column:auto;grid-template-columns:1fr}.cc-shop-card--feature{grid-template-columns:1fr}.cc-shop-card--feature>img{height:260px}.cc-commercial-showcase__media{min-height:260px}}
+
+/* Marauder 3 campaign hero — mirrors live Shopify storefront */
+.marauder-kv-hero{position:relative;background:#071017}
+.marauder-kv-hero__link{position:relative;display:block;color:#fff;text-decoration:none}
+.marauder-kv-hero__link img{display:block;width:100%;height:auto;margin:0}
+.marauder-kv-hero__cta{position:absolute;right:clamp(18px,4vw,64px);bottom:clamp(18px,4vw,54px);display:flex;flex-direction:column;gap:5px;background:rgba(5,15,25,.82);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(8px);padding:14px 18px;border-radius:14px}
+.marauder-kv-hero__cta small{font-size:.66rem;letter-spacing:.14em;font-weight:900;color:#bfeeff}
+.marauder-kv-hero__cta strong{font-size:1rem}
+@media(max-width:620px){.marauder-kv-hero__cta{right:14px;bottom:14px;padding:11px 14px}.marauder-kv-hero__cta small{font-size:.58rem}}
