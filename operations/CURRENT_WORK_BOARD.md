@@ -21,6 +21,27 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
+# P0 GIT / WORKER DRIFT RECOVERY — 2026-09-27
+
+**STATE: ACTIVE CONTROL LOCK / REPAIR IN EFFECT**
+
+Owner directed repair of massive Git drift and worker execution errors.
+
+Current recovery control:
+- start every new technical task from current `main`;
+- existing drifted `work/*` branches are historical evidence unless explicitly reauthorized;
+- if a branch is behind current `main`, do not resume/merge it wholesale—create a fresh branch from current `main` and port only the still-approved scoped changes;
+- PRs #242, #244 and #245 are CLOSED / QUARANTINED;
+- do not use closed PR branches as bases;
+- one owner objective = one focused branch = one PR;
+- repetitive worker bookkeeping/recon/status commits must be consolidated rather than stacked;
+- Shopify actions remain Shopify work; Git website workers must not create competing commerce truth;
+- durable incident control: `operations/GIT_DRIFT_RECOVERY_2026-09-27.md`.
+
+**No production deployment is authorized by this recovery lock.**
+
+---
+
 # OWNER RELEASE CONTROL — CURRENT
 
 **NO PRODUCTION DEPLOYMENT WITHOUT CASEY'S EXPLICIT APPROVAL.**
