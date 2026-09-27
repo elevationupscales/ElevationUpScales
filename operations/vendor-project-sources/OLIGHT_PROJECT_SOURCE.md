@@ -323,3 +323,28 @@ Applied correction:
 - Elevation Baton 4 operational inventory restored to **10** under the owner-controlled Olight binary sellability model.
 - UPC remains **6975498002918**.
 - Do not describe quantity 10 as Olight warehouse stock; it is Elevation's operational sellability buffer.
+
+
+## Live Olight sellability RUN — 2026-09-26
+
+Owner-established rule enforced against current Olight storefront evidence.
+
+Current Shopify state: **19 Olight products = 15 ACTIVE + 4 DRAFT**.
+
+Released / corrected:
+- **ArkPro Class 3R Matte Black CW**: Olight US current search result shows **$99.99 / Add To Cart / Buy Now**. Elevation qty set to operational **10**, assigned to **Olight Standard Shipping**, product set **ACTIVE**, product profile published at **/pages/olight-arkpro-profile**, and PDP linked to profile.
+- **Oclip 2 Ultra Light Only**: current Olight US results show live purchaseability at **$69.99** for Onyx Black, Olive Green and Amber Orange. Elevation qty set to operational **10** for all three light-only variants, assigned to **Olight Standard Shipping**, redundant dock-bundle variants removed from this listing, product set **ACTIVE**, product profile published at **/pages/olight-oclip-2-ultra-profile**, and PDP linked to profile.
+- **Oclip 2 Pro Light + Charging Dock** variants: current Olight US product page presents the Pro/Premium family and Premium dock package. Existing active Oclip 2 Pro listing bundle variants restored to operational **10** and associated with **Olight Standard Shipping**. Separate Oclip 2 Pro Premium product remains DRAFT to avoid duplicate customer-facing listings.
+- **Oclip 2 Ultra Premium** remains ACTIVE at operational qty10; inventory policy normalized from CONTINUE to **DENY** so qty10 is a bounded sellability buffer, not unlimited overselling.
+
+Held:
+- **Javelot Pro 2**: old US product URL redirects to the general Olight store and current US search does not expose a purchasable Javelot Pro 2 product page. Elevation restored to qty **0 / DENY / DRAFT** despite dealer sheet not marking it sold out.
+- **Oclip 2 Charging Dock** standalone product: current Olight US accessories page explicitly says **Out of Stock** and notes restock on Oct 2. Elevation remains **0 / DENY / DRAFT**.
+- **ArkPro Lite**: remains DRAFT pending exact product-media completion and direct current sellability confirmation for the specific Lite configuration.
+
+Control rule:
+**Olight live storefront purchasability controls sellability.**
+Available on Olight → operational Shopify qty10 and sellable.
+Unavailable on Olight → qty0 / controlled unavailable.
+Elevation-owned inventory → actual on-hand quantity.
+Qty10 is never a claim of supplier physical stock.
