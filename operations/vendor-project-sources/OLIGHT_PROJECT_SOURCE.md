@@ -283,3 +283,24 @@ The uploaded ArkPro Series market-reference PDF is marked **DO NOT make public**
 - Newly uploaded large media batch labeled **Javelot Pro 2** is a separate product family and must NOT be attached to Javelot Turbo 2 by visual similarity.
 - Current Shopify search finds **no Javelot Pro 2 product record**. Treat the Pro 2 batch as the next new-listing candidate after exact current Olight product/SKU/price/availability verification.
 - No production theme deployment occurred.
+
+
+## Olight catalog error-audit checkpoint — 2026-09-26
+
+Live Shopify reconciliation now finds **19 Olight product records: 13 ACTIVE + 6 DRAFT**.
+
+Corrections completed:
+- Normalized Olight description block spacing to prevent raw-feed/snippet joins such as "AUTHORIZED OLIGHT DEALEROlight...".
+- Corrected **ArkPro Class 3R Matte Black CW** dealer SKU to **ARKPRO3RMBCW** and UPC to **6977261693880**; MSRP remains **$99.99**.
+- Corrected **ArkPro Lite Matte Black** to dealer SKU **ARKPROLITEMB**, UPC **6977261691947**, and dealer MSRP **$69.99**. Previous staged $79.99 / external SKU reference is superseded.
+- Corrected **Baton 4 Matte Black** UPC to **6975498002918** and set inventory to **0 / DENY** because the current dealer sheet marks the SKU Sold Out. Do not restore operational qty10 unless a newer supplier source confirms availability.
+- Added current UPCs to **Marauder 3** Black / Midnight Blue / Orange, **Odin S M-LOK**, **OSIGHT SE**, **PL X GL**, **Sphere**, and **Oclip 2 Ultra Premium** color variants.
+- Corrected all **Oclip 2 Ultra Light + Charging Dock** zero-qty package variants to inventory policy **DENY**.
+- **Javelot Pro 2** created as DRAFT with dealer MSRP **$209.95**, SKU **JAVELOTPRO2BK**, UPC **6972378124494**, operational qty10 based on dealer sheet not marking it Sold Out, Olight Standard Shipping assigned, and curated exact-model media attached.
+- Final automated Olight audit finds no raw heading joins, no missing SKUs, no zero-qty CONTINUE defects, and no missing barcodes on active products.
+
+Intentional remaining draft-media holds:
+- **ArkPro Lite** — no exact product media attached yet.
+- **Oclip 2 Charging Dock** — no exact standalone-dock media attached yet.
+
+Do not treat those two draft media holds as active-store defects. No production theme deployment occurred.
