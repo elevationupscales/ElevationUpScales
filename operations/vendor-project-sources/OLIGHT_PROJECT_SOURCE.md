@@ -304,3 +304,22 @@ Intentional remaining draft-media holds:
 - **Oclip 2 Charging Dock** — no exact standalone-dock media attached yet.
 
 Do not treat those two draft media holds as active-store defects. No production theme deployment occurred.
+
+
+## Olight live-availability authority correction — 2026-09-26
+
+Owner rule: **If an item is currently available for purchase on Olight's live storefront, Elevation can sell it.**
+
+Availability precedence for Olight:
+1. Current Olight live storefront purchasability
+2. Newer direct Olight/Kiki availability confirmation
+3. Dealer sheet inventory-status flag
+4. Historical catalog notes
+
+A static dealer-sheet "Sold Out" flag must not override a newer live Olight storefront that currently presents the item as purchasable.
+
+Applied correction:
+- Baton 4 live Olight page currently presents a **Buy Now** path and "Order today" merchandising.
+- Elevation Baton 4 operational inventory restored to **10** under the owner-controlled Olight binary sellability model.
+- UPC remains **6975498002918**.
+- Do not describe quantity 10 as Olight warehouse stock; it is Elevation's operational sellability buffer.
