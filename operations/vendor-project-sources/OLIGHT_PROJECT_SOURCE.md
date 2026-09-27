@@ -211,3 +211,15 @@ Control corrections:
 
 Current next action:
 **CURRENT SUPPLIER AVAILABILITY CHECK → RESOLVE ONLY CONFIRMED SKUs → SET BINARY SELLABILITY → FINAL SHIPPING/PAYMENT PURCHASEABILITY CHECK → PUBLISH ELIGIBLE DRAFTS → FIRST PAID OLIGHT FULFILLMENT PROOF.**
+
+
+## ArkPro Class 3R standard listing checkpoint — 2026-09-26
+
+- Shopify product created as **DRAFT**: Olight ArkPro Class 3R — 1,500 Lumen Flat EDC Flashlight with UV + Green Laser.
+- Initial variant: **Matte Black CW**.
+- Current public Olight retail price verified at **$99.99**.
+- Public MPN/SKU reference: **ARKPRO-C3R-MATTBK-CW**.
+- Public UPC: **6977261693880**.
+- Inventory tracking ON; quantity **0**; inventory policy **DENY** pending current dealer-warehouse availability confirmation.
+- Added to the manual **Olight Tactical & Professional Lighting** collection; vendor-based Olight collection will capture it automatically.
+- Exact standard-ArkPro media still requires mapping; do not reuse ArkPro Ultra media by appearance alone.
