@@ -369,3 +369,23 @@ This is not a second Master Work Board.
   - no post, DM, email, call or quote was sent.
 - Next required action outside this environment: reopen each Reddit source, verify the need remains active, read current replies, verify subreddit commercial/vendor rules or moderator permission, then post only the relevant Peter-identified public response where permitted.
 - Routed to: Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-09-26 — Olight Wave 2 listing-production pass
+
+**State:** LOCAL COMPLETE / MANAGEMENT GATES REMAIN
+
+- Verified change: Peter completed the bounded Olight Wave 2 Shopify listing-production pass against the September 2026 Olight new-arrivals source and exact authorized dealer media supplied in-session.
+- Evidence/source: private Olight September 2026 new-arrivals workbook; exact Olight media ZIPs for Oclip 2 Pro Premium, Oclip 2 Ultra, ArkPro Ultra Amber Orange, and Oclip 2 Pro Tidal Blue; live Shopify readback.
+- Oclip 2 Pro Premium: existing Shopify DRAFT preserved and completed with exact Black, Orange and Tidal Blue package media; source-supported SKUs/UPCs/prices/specs verified; SEO title/description added; no stock claim or publication change made.
+- Oclip 2 Ultra: existing Shopify DRAFT preserved and completed for Onyx Black, Olive Green and Amber Orange with exact authorized media; source-supported light-only SKUs/UPCs/prices/specs verified; SEO title/description added; no supplier-stock claim or publication change made.
+- ArkPro Ultra: existing ACTIVE product preserved; Amber Orange CW variant `ARKPROULTRAAO` / UPC `6979955450168` validated against the supplier workbook and exact Amber Orange product media added; no duplicate product or variant created.
+- Oclip 2 Pro: existing ACTIVE product preserved; Tidal Blue light-only variant `OCLIP2PROTB` / UPC `6979955450120` validated; exact Tidal Blue media added; SEO description updated to include Tidal Blue; no duplicate product created.
+- Oclip 2 Ultra Premium: audit only. Live product was not edited. Supplier workbook maps Olive Green to `OCLIPULTTRAPREMIUMOB` and Onyx Black to `OCLIPULTTRAPREMIUMOG`, while the live Shopify product uses separate Elevation-style SKU identities and currently lacks UPC values. No inferred correction was made.
+- Inventory/availability control preserved: Shopify quantity was not used as Olight physical-stock proof and no inventory values were changed during this pass.
+- Management gates still open: current U.S. supplier availability, dropship eligibility, MAP/launch timing, destination/fulfillment readiness, and the Oclip 2 Ultra Premium Olive Green / Onyx Black mapping confirmation from Olight/Kiki.
+- Catalog note for Management: the current Oclip 2 Pro ACTIVE product and Oclip 2 Ultra DRAFT still contain staged Light + Charging Dock variants in addition to the separate Premium product records. Peter did not delete live/staged variants because that cleanup was not explicitly included in the bounded assignment; Management should decide whether to preserve the combined-package structure or remove the overlapping Premium-package variants before final publication.
+- Routed to: Casey Young / Company Operations / current MPM.
+
