@@ -261,3 +261,15 @@ The uploaded ArkPro Series market-reference PDF is marked **DO NOT make public**
 - Standard ArkPro and ArkPro Lite product profiles remain UNPUBLISHED because their corresponding Shopify products remain DRAFT / unavailable for sale.
 - No change to the standard ArkPro or ArkPro Lite availability gates.
 - No production theme deployment occurred in this pass.
+
+
+## Baton 4 product-profile checkpoint — 2026-09-26
+
+- Existing ACTIVE Baton 4 product preserved; no duplicate product created.
+- Live listing remains Standard Edition, SKU **BATON4BK**, current Shopify retail **$54.99**, operational quantity 10.
+- Current Olight public specs used for profile QA: **1,300 lumens**, **170 m** beam, **7,225 cd**, **650mAh** battery, up to **30 days** moonlight runtime, **MCC magnetic charging**, **IPX8**, interactive brightness/battery indicators.
+- Shopify-hosted Baton 4 authorized media set verified and reused for profile merchandising.
+- Product profile created and PUBLISHED at **/pages/olight-baton-4-profile** using reusable `olight-catalog` template.
+- Baton 4 PDP now links to the full product profile.
+- Shopify admin verifies page publication and PDP link. Public browser smoke remains pending because the Opera Browser Connector was unavailable during this pass.
+- No production theme deployment occurred.
