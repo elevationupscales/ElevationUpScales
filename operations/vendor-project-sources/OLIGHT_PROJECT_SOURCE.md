@@ -273,3 +273,13 @@ The uploaded ArkPro Series market-reference PDF is marked **DO NOT make public**
 - Baton 4 PDP now links to the full product profile.
 - Shopify admin verifies page publication and PDP link. Public browser smoke remains pending because the Opera Browser Connector was unavailable during this pass.
 - No production theme deployment occurred.
+
+
+## Javelot family media reconciliation — 2026-09-26
+
+- **Javelot Turbo 2** existing ACTIVE product preserved; no duplicate product created.
+- Javelot Turbo 2 rich product profile created and PUBLISHED at **/pages/olight-javelot-turbo-2-profile** using the exact Turbo 2 media set: product hero/front, 1,500 m beam graphic, wireless remote, 5,000mAh battery system, rear/charging detail, holster, handheld view, Matte Black Kit and Digital Camouflage Kit.
+- Active Javelot Turbo 2 PDP now links to the published profile.
+- Newly uploaded large media batch labeled **Javelot Pro 2** is a separate product family and must NOT be attached to Javelot Turbo 2 by visual similarity.
+- Current Shopify search finds **no Javelot Pro 2 product record**. Treat the Pro 2 batch as the next new-listing candidate after exact current Olight product/SKU/price/availability verification.
+- No production theme deployment occurred.
