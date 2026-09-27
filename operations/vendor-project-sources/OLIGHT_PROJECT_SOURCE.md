@@ -223,3 +223,32 @@ Current next action:
 - Inventory tracking ON; quantity **0**; inventory policy **DENY** pending current dealer-warehouse availability confirmation.
 - Added to the manual **Olight Tactical & Professional Lighting** collection; vendor-based Olight collection will capture it automatically.
 - Exact standard-ArkPro media still requires mapping; do not reuse ArkPro Ultra media by appearance alone.
+
+
+## ArkPro family listing + item-profile checkpoint — 2026-09-26
+
+Live Shopify Olight catalog is now **18 product records: 13 ACTIVE + 5 DRAFT**.
+
+### ArkPro Class 3R
+- DRAFT product remains staged at **$99.99** with Matte Black CW.
+- SKU/MPN: **ARKPRO-C3R-MATTBK-CW**.
+- UPC: **6977261693880**.
+- Quantity 0 / inventory policy DENY / not available for sale.
+- Current public Olight Matte Black hero is now hosted in Shopify and attached as the featured image.
+- Unpublished product-profile page created: **/pages/olight-arkpro-profile** using the reusable `olight-catalog` template.
+
+### ArkPro Ultra
+- Existing ACTIVE product remains unchanged for sellable variants.
+- Unpublished rich product-profile page created: **/pages/olight-arkpro-ultra-profile** using current Shopify-hosted Ultra media (lifestyle, variant fronts, launch overview, performance/runtime, charging, UV, green-laser and use-case graphics).
+
+### ArkPro Lite
+- DRAFT product created at **$79.99** with Matte Black.
+- Public retailer SKU reference used for staging: **ARKPROLITEMTBK**.
+- Barcode intentionally left blank because current public evidence conflicts; do not infer or import an older internal UPC.
+- Quantity 0 / inventory policy DENY / not available for sale.
+- Added to manual Olight Tactical & Professional Lighting collection.
+- Unpublished product-profile page created: **/pages/olight-arkpro-lite-profile**.
+- Exact Olight Lite media and final dealer SKU/UPC remain verification gates.
+
+### Source-control rule
+The uploaded ArkPro Series market-reference PDF is marked **DO NOT make public**. It may be used for internal QA/cross-checking only. Customer-facing listing/profile claims must be supported by public/current Olight or other current public authorized-retailer evidence.
