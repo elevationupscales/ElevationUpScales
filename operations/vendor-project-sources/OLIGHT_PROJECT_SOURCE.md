@@ -185,3 +185,29 @@ Current implementation target:
 - supplier-unavailable Olight SKUs: controlled unavailable state;
 - future Elevation-owned Olight stock: actual physical on-hand quantity;
 - never interpret placeholder `10` as supplier warehouse inventory.
+
+
+## MPM 26 catalog recon checkpoint — 2026-09-26
+
+**State:** WAVE 2 CATALOG BUILD MATERIALLY COMPLETE / PUBLICATION + SUPPLIER AVAILABILITY GATES REMAIN.
+
+Live Shopify reconciliation now finds **16 Olight product records: 13 ACTIVE and 3 DRAFT**. The older 13-record/all-active snapshot is superseded for current catalog count.
+
+Wave 2 factual state:
+- **Oclip 2 Pro** remains ACTIVE and now includes three Light Only color variants plus three Light + Charging Dock package variants. The existing light-only supplier-available colors retain the owner-controlled operational quantity 10. Dock-package variants remain availability-gated rather than being presented as stocked.
+- **Oclip 2 Pro Premium** is BUILT / DRAFT with Black, Orange and Tidal Blue source-proven variants and authorized family media.
+- **Oclip 2 Ultra** is BUILT / DRAFT with Onyx Black, Olive Green and Amber Orange Light Only variants plus corresponding Light + Charging Dock package variants. Exact Ultra media has been attached.
+- **Oclip 2 Charging Dock** is BUILT / DRAFT at current public MSRP with verified public UPC/MPN evidence; current Olight dealer availability still requires confirmation before publication.
+- **ArkPro Ultra** remains ACTIVE; Amber Orange CW has been added to the existing product using the September Olight source SKU/UPC/MSRP and current authorized media. Amber Orange remains customer-unavailable pending supplier availability confirmation.
+- **Oclip 2 Ultra Premium** remains ACTIVE / AUDIT-ONLY for the apparent Olive Green / Onyx Black SKU mapping conflict. Do not infer a correction.
+- Authorized Olight media is now materially richer across Oclip 2 and ArkPro families. Exact-model media may be reused across Premium/package variants where the pictured product body/feature is identical; model-specific specs/features must remain exact.
+
+Control corrections:
+- The owner-controlled Olight inventory rule remains: **supplier AVAILABLE → operational Shopify quantity 10; supplier UNAVAILABLE → controlled unavailable; Elevation-owned physical stock → actual on-hand quantity.** Quantity 10 is never supplier warehouse truth.
+- Do not use battery/lithium inventory logic for Olight.
+- Do not reintroduce customer-facing \"Supplier Fulfillment\" operational sections merely to explain the internal fulfillment model. Customer-facing copy should communicate product availability and retailer support without fake scarcity or internal control language.
+- The latest direct Kiki/Olight launch thread supplied the September new-arrivals workbook but did **not** separately confirm live warehouse availability for the newly staged Wave 2 variants. Publication/availability remains gated on current supplier confirmation.
+- The smart **Olight — Authorized Dealer** collection currently captures all 16 vendor records. The narrower manual **Olight Tactical & Professional Lighting** collection remains intentionally selective rather than being treated as the complete Olight catalog.
+
+Current next action:
+**CURRENT SUPPLIER AVAILABILITY CHECK → RESOLVE ONLY CONFIRMED SKUs → SET BINARY SELLABILITY → FINAL SHIPPING/PAYMENT PURCHASEABILITY CHECK → PUBLISH ELIGIBLE DRAFTS → FIRST PAID OLIGHT FULFILLMENT PROOF.**
