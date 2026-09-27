@@ -252,3 +252,12 @@ Live Shopify Olight catalog is now **18 product records: 13 ACTIVE + 5 DRAFT**.
 
 ### Source-control rule
 The uploaded ArkPro Series market-reference PDF is marked **DO NOT make public**. It may be used for internal QA/cross-checking only. Customer-facing listing/profile claims must be supported by public/current Olight or other current public authorized-retailer evidence.
+
+
+## ArkPro profile release pass — 2026-09-26
+
+- **ArkPro Ultra product profile is now PUBLISHED** at `/pages/olight-arkpro-ultra-profile`.
+- Active ArkPro Ultra PDP now links directly to the published product profile.
+- Standard ArkPro and ArkPro Lite product profiles remain UNPUBLISHED because their corresponding Shopify products remain DRAFT / unavailable for sale.
+- No change to the standard ArkPro or ArkPro Lite availability gates.
+- No production theme deployment occurred in this pass.
