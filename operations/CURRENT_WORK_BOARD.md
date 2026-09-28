@@ -42,6 +42,36 @@ Current recovery control:
 
 ---
 
+# MPM 25 OPERATING RHYTHM LOCK — 2026-09-28
+
+**STATE: ACTIVE / RECOVERED CONTINUITY**
+
+MPM 25 has re-established the execution rhythm after the recent recon/crash cycle.
+
+Current management cadence:
+
+**MORNING CHECK → REAL CUSTOMERS → MONEY / FULFILLMENT → ONE REVENUE LANE → CONVERSION → OPTIONAL EXPANSION → CLOSE STATE → REPEAT**
+
+Individual-work cadence:
+
+**VERIFY ONCE → EXECUTE → VERIFY RESULT → RECORD MATERIAL CHANGE → NEXT**
+
+Immediate management stack:
+- **P0 — First Hawaii SOK order:** customer payment received; SOK supplier invoice issued; supplier payment/release remains blocked by the current payment/verification hold. Do not restart freight or document recon while this gate is unchanged.
+- **P0 — eBay paid-order fulfillment:** paid orders with Sep. 30 ship-by deadlines outrank catalog polishing. Order `01-15237-94168` is matched to Doba order `26092717652196`, which remains unpaid and is at risk of auto-cancellation; resolve fulfillment/payment or alternate sourcing before the customer deadline.
+- **P1 — Olight revenue lane:** Kiki confirmed on 2026-09-28 that the five new releases are launched and that Olight has sufficient inventory to support sales. Reconcile the current supplier workbook against live Shopify one bounded product family at a time; preserve accepted profiles and keep the Oclip 2 Ultra Premium SKU/color mapping conflict on HOLD until supplier confirmation.
+- **WAITING EXTERNAL:** Logistics Plus Hawaii operating review, Doba management/accounting escalation, and other already-requested external replies leave the active execution queue until new evidence arrives.
+- **P2 / PARKED:** Puerto Rico expansion and OS 3.0 / Agent Manager remain planning/qualification work and do not displace P0/P1 execution.
+
+Control:
+- MPM 25 manages.
+- OS RECON 6 verifies.
+- OS 3.0 is planning only / not current authority.
+- Do not create duplicate recon, duplicate workboards, or another OS layer.
+- Waiting work leaves the active queue until its external state changes.
+
+---
+
 # OWNER RELEASE CONTROL — CURRENT
 
 **NO PRODUCTION DEPLOYMENT WITHOUT CASEY'S EXPLICIT APPROVAL.**
