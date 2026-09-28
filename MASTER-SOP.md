@@ -226,7 +226,28 @@ Never commit:
 - non-public compliance packets;
 - payment or banking information.
 
-## 15. Closeout format
+## 15. Email approval and signature authority
+
+All external email must follow:
+
+**DRAFT → SHOW CASEY → CASEY EXPLICITLY APPROVES THE SPECIFIC SEND → SEND ONCE → VERIFY SENT.**
+
+Rules:
+- Do not send any email without Casey's explicit approval of that specific send.
+- Drafting permission is not sending permission.
+- A prior approval for another email, thread, recipient, or send class does not authorize a new send unless Casey explicitly says so.
+- If any email is transmitted without Casey's explicit approval, it must **not** be signed as Casey Young.
+- An unapproved-send exception must not use Casey's personal signature, title, phone number, personal closing, or wording that implies Casey personally authored or approved the message.
+- Do not represent an unapproved email as owner-approved after the fact.
+- If send state is uncertain, verify before retrying; never duplicate-send because of uncertainty.
+
+Control phrase:
+
+**NO CASEY APPROVAL → NO SEND. NO APPROVAL → NO CASEY SIGNATURE OR PERSONAL AUTHORITY IMPLIED.**
+
+---
+
+## 16. Closeout format
 
 Every completed Git task must end with one concise receipt:
 
