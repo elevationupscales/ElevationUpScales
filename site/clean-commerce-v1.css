@@ -197,3 +197,14 @@ body.clean-commerce-page{background:var(--cc-bg);color:var(--cc-text)}
   .retail-home-hero__video{display:none}
   .retail-home-hero{background:#05090b url("https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/bfde5d3eff8d43329ca06149a1c94808.thumbnail.0000000000.jpg?v=1790375698") center/cover no-repeat}
 }
+
+
+/* Locked SOK section contrast override */
+body.retail-home .retail-sok-primary,
+body.retail-home .retail-sok-primary__copy,
+body.retail-home .retail-sok-primary__copy h2{
+  color:#071014!important;
+}
+body.retail-home .retail-sok-primary__copy>p:not(.cc-eyebrow){
+  color:#66757d!important;
+}
