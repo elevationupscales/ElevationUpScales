@@ -389,3 +389,23 @@ This is not a second Master Work Board.
 - Catalog note for Management: the current Oclip 2 Pro ACTIVE product and Oclip 2 Ultra DRAFT still contain staged Light + Charging Dock variants in addition to the separate Premium product records. Peter did not delete live/staged variants because that cleanup was not explicitly included in the bounded assignment; Management should decide whether to preserve the combined-package structure or remove the overlapping Premium-package variants before final publication.
 - Routed to: Casey Young / Company Operations / current MPM.
 
+
+
+---
+
+## 2026-09-28 — Olight Wave 2 media completion / live-state recon
+
+**State:** LOCAL COMPLETE / MANAGEMENT RECON REQUIRED
+
+- Verified change: Peter completed the current Olight Wave 2 customer-facing media pass using the current September 2026 Olight new-arrivals workbook plus exact authorized Oclip 2 product and scenario media supplied in-session. No inventory, price, shipping-profile, SKU, UPC, or publication-status change was made in this pass.
+- Evidence/source: current live Shopify readback; private Olight `Olight New Arrivals in 2026.09.10.xlsx`; exact Oclip 2 Pro Premium Black/Orange/Tidal Blue white-background packages; exact Oclip 2 Pro family scenarios; exact Oclip 2 Ultra Onyx Black/Olive Green/Amber Orange product media; exact Oclip 2 Ultra scenarios.
+- Oclip 2 Pro Premium: current live Shopify readback now shows the product ACTIVE. Exact Black, Orange and Tidal Blue Premium-package media was completed with a clean Black Premium hero, exact color-specific variant media associations, the full supplied product-view sets, and selected approved lifestyle scenarios. Customer copy remains grounded to the supplier source: 530 lm, 125 m, up to 144 h, built-in 600mAh battery plus included 1,000mAh Mobile Charging Dock; existing supplier-supported SKU/UPC/pricing and SEO were preserved.
+- Oclip 2 Ultra: current live Shopify readback shows ACTIVE with the three light-only variants only: Onyx Black `OCLIPULTTRAOB`, Olive Green `OCLIPULTTRAOG`, Amber Orange `OCLIPULTTRAAO`. Exact color product media is attached to the matching variants; approved lifestyle additions cover hands-free chest-clip use, vehicle-maintenance lighting and UV inspection. Existing feature graphics/videos and clean Onyx Black hero were preserved.
+- ArkPro Ultra: Amber Orange CW remains on the existing ArkPro Ultra record as `ARKPROULTRAAO` / UPC `6979955450168` with exact Amber Orange media. No duplicate ArkPro Ultra product or variant was created.
+- Oclip 2 Pro: Tidal Blue light-only remains on the existing product as `OCLIP2PROTB` / UPC `6979955450120`. The Tidal Blue variant media association was corrected to the exact clean Tidal Blue product image instead of a lifestyle image. No duplicate product was created.
+- Oclip 2 Ultra Premium: AUDIT ONLY remains in force. Live product was not altered. The current supplier workbook still presents the apparent Olive Green / Onyx Black Premium SKU-suffix conflict (`...PREMIUMOB` vs `...PREMIUMOG`); no SKU correction was inferred. Management/Olight confirmation remains required before changing the mapping.
+- Live-structure recon needed: current Shopify readback shows **Oclip 2 Pro Premium ACTIVE** while the existing **Oclip 2 Pro** product still also contains Light + Charging Dock package variants. Peter did not remove or deactivate either structure because the bounded assignment did not authorize that catalog-architecture decision. Management should reconcile the intended customer-facing structure to avoid duplicate-package merchandising.
+- Inventory control: Peter made no inventory changes during this pass. Management-provided live-store checkpoint to preserve for recon reported positive Shopify inventory values for PL X GL, Warrior X 4, Marauder 3, OSIGHT R, Javelot Turbo 2, Warrior Ultra and ArkPro Ultra, and zero Shopify inventory values for OSIGHT SE, Odin S, Baton 4, Sphere, Oclip 2 Pro and Oclip 2 Ultra Premium. These are Shopify operational states only and **must not be treated as Olight physical-stock proof**. If current admin readback differs, reconcile the store state before any availability promise.
+- Management gate remains: Kiki/Olight confirmation controls current supplier availability, dropship eligibility, MAP/launch timing and final fulfillment readiness. Do not make customer availability promises from Shopify quantities alone.
+- Routed to: Casey Young / Company Operations / current MPM.
+
