@@ -69,7 +69,7 @@ assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static rede
 
 const home = fs.readFileSync("site/index.html", "utf8");
 assert.ok(home.includes("SOK Energy"), "homepage must retain SOK as a primary battery brand");
-assert.ok(home.includes("Shop the gear."), "store-first homepage headline missing");
+assert.ok(home.includes("Power Beyond Limits."), "approved homepage headline missing");
 assert.ok(home.includes("POWER • LIGHTING • OFF-GRID"), "store-first homepage framing missing");
 assert.ok(home.includes("shop.elevationupscales.com"), "homepage must expose the branded Shopify storefront");
 assert.ok(home.includes('href="/vendors"'), "homepage must retain the vendor information path");
