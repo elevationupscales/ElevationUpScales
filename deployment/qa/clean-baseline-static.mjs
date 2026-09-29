@@ -173,7 +173,10 @@ for (const file of customerRuntimeFiles) {
 }
 
 const home = text("site/index.html");
-assert.ok(home.includes("Start a Project"), "homepage primary Start a Project path must remain present");
+assert.ok(home.includes("https://shop.elevationupscales.com/"), "homepage primary store route must remain present");
+assert.ok(home.includes("/hawaii-lithium-batteries"), "homepage Hawaii lithium route must remain present");
+assert.ok(home.includes("/vendors"), "homepage vendor path must remain present");
+assert.equal(home.includes('href="/start-a-project"'), false, "homepage must not reintroduce Start a Project routing");
 assert.ok(home.includes("+1-208-813-4998"), "homepage must retain the 208 contact number");
 assert.equal(text("site/sitemap.xml").includes("/project-guides"), false, "/project-guides must not be reintroduced");
 
