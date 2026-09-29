@@ -68,18 +68,19 @@ for (const event of ["homepage_logistics_capability_view", "homepage_logistics_r
 assert.ok(homeRuntime.includes('sourceControl:"static-logistics"'), "static redesigned logistics block must record a capability view");
 
 const home = fs.readFileSync("site/index.html", "utf8");
-assert.ok(home.includes("AUTHORIZED SOK ENERGY DEALER"));
-assert.ok(home.includes("Power products and support"), "clean commerce homepage headline missing");
-assert.ok(home.includes("SHOP • COMMERCIAL • PROJECTS"), "clean commerce homepage intent framing missing");
+assert.ok(home.includes("SOK Energy"), "homepage must retain SOK as a primary battery brand");
+assert.ok(home.includes("Shop the gear."), "store-first homepage headline missing");
+assert.ok(home.includes("POWER • LIGHTING • OFF-GRID"), "store-first homepage framing missing");
 assert.ok(home.includes("shop.elevationupscales.com"), "homepage must expose the branded Shopify storefront");
-assert.equal(home.includes("Supply Logistics &amp; Ocean Freight"), false, "superseded freight mission returned to homepage flagship");
-assert.ok(home.includes('href="/hawaii-lithium-batteries"'), "homepage must retain the direct Hawaii purchase path");
-assert.ok(home.includes('href="/shipping-logistics-services"'), "homepage must retain general destination-logistics discovery");
-assert.ok(home.includes('data-eus-event="start_project_open"'), "homepage Start a Project CTAs must use start_project_open");
-assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK12V100PC"'), "homepage SK12V100PC analytics missing");
-assert.ok(home.includes('data-eus-event="homepage_sok_open" data-eus-value="SK48V100N"'), "homepage SK48V100N analytics missing");
-assert.ok(home.includes('data-eus-event="homepage_logistics_route" data-eus-value="hawaii"'), "homepage Hawaii logistics route analytics missing");
-assert.ok(home.includes('data-eus-event="commercial_review_route"'), "homepage commercial route analytics missing");
+assert.ok(home.includes('href="/vendors"'), "homepage must retain the vendor information path");
+assert.ok(home.includes('href="/hawaii-lithium-batteries"'), "homepage must retain the direct Hawaii lithium path");
+assert.equal(home.includes('href="/start-a-project"'), false, "homepage must not reintroduce Start a Project routing");
+assert.ok(home.includes('data-eus-event="shopify_store_open"'), "homepage store routing analytics missing");
+assert.ok(home.includes('data-eus-event="homepage_logistics_route"'), "homepage Hawaii routing analytics missing");
+assert.ok(home.includes("SK12V100PC"), "homepage SK12V100PC feature missing");
+assert.ok(home.includes("SK48V100N"), "homepage SK48V100N feature missing");
+assert.equal(home.includes("SHOP • COMMERCIAL • PROJECTS"), false, "retired homepage intent framing returned");
+assert.equal(home.includes('data-eus-event="commercial_review_route"'), false, "retired homepage commercial route returned");
 assert.equal(home.toLowerCase().includes("start with what you need"), false, "removed owner copy returned to homepage");
 assert.equal(home.includes("for RV Life."), false, "superseded RV-life hero copy returned to homepage");
 

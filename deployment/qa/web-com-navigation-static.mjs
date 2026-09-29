@@ -19,24 +19,21 @@ assert.ok(shell.includes('<summary class="eus-nav-trigger">Services'), "shared s
 assert.ok(shell.includes('<summary class="eus-nav-trigger">Company'), "shared shell must retain the quieter Company menu");
 assert.equal(shell.includes('href="/marketplace"'), false, "retired Marketplace must not remain in the shared public shell");
 
-// Main-site contract: Shopify owns product shopping; projects, planning and logistics stay on ElevationUpScales.com.
+// Homepage contract: retail showcase, vendor discovery, and Hawaii lithium routing.
 for (const route of [
   "https://shop.elevationupscales.com/",
-  "https://shop.elevationupscales.com/collections/complete-power-systems",
   "https://shop.elevationupscales.com/collections/sok-battery",
-  "/solar-project",
   "/hawaii-lithium-batteries",
   "/vendors",
-  "/commercial",
   "/vendor/olight",
 ]) {
   assert.ok(home.includes(`href="${route}"`) || home.includes(`href="${route}?`), `homepage missing ${route}`);
 }
-assert.ok(home.includes('href="#logistics"') || home.includes('href="/shipping-logistics-services"'), "homepage must expose Freight & Logistics from primary retail navigation");
 assert.ok(home.includes('href="https://shop.elevationupscales.com/"'), "homepage must expose the Shopify storefront root");
 assert.equal(/reference-nav-menu[^>]*><summary[^>]*>Shop/.test(home), false, "obsolete homepage Shop dropdown must stay removed");
-assert.ok(home.includes("retail-more-menu") || home.includes("reference-nav-menu--company"), "homepage must retain a quieter company/menu layer for non-shopping destinations");
-assert.ok(home.includes('href="/start-a-project"'), "Start a Project must remain the main-site project path");
+assert.equal(home.includes('href="/solar-project"'), false, "homepage must not reintroduce solar project intake");
+assert.equal(home.includes('href="/commercial"'), false, "homepage must not reintroduce commercial intake");
+assert.equal(home.includes('href="/start-a-project"'), false, "homepage must not reintroduce Start a Project");
 
 assert.ok(home.includes('href="/vendor/sok-energy"'), "homepage must expose the SOK vendor page");
 assert.ok(home.includes('href="/vendor/renogy"'), "homepage must expose the Renogy vendor page");
