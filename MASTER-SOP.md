@@ -241,8 +241,8 @@ Rules:
 - Valid send approval must be message-specific and unmistakable, such as SEND, CLEAR TO SEND, SEND THIS, or equally explicit wording referring to the exact prepared communication.
 - If approval is ambiguous, stop at the send gate and ask for approval; do not infer permission from urgency, workflow context, or connected-account access.
 - Drafting permission is not sending permission.
-- A prior approval for another email, thread, recipient, or send class does not authorize a new send unless Casey explicitly says so.
-- If any email is transmitted without Casey's explicit approval, it must **not** be signed as Casey Young.
+- A prior approval for another communication, thread, recipient, vendor, customer, or send class does not authorize a new send unless Casey explicitly says so.
+- If any external communication is transmitted without Casey's explicit approval, it must **not** be signed as Casey Young.
 - An unapproved-send exception must not use Casey's personal signature, title, phone number, personal closing, or wording that implies Casey personally authored or approved the message.
 - Do not represent an unapproved communication as owner-approved after the fact.
 - Do not send a correction, apology, follow-up, or retraction for an unauthorized send unless Casey separately approves that exact remediation send.
