@@ -5,9 +5,11 @@ import test from "node:test";
 const index = fs.readFileSync(new URL("../site/index.html", import.meta.url), "utf8");
 const homeCommerce = fs.readFileSync(new URL("../site/home-commerce.js", import.meta.url), "utf8");
 
-test("protected homepage top stays authored in index.html and is not rewritten by commerce runtime", () => {
-  assert.match(index, /class="reference-storefront-hero__lead">Shop authorized power products through the Elevation online store, start a project, or get help planning systems and moving lithium into harder-to-serve destinations\.<\/p>/);
-  assert.match(index, /class="button retail-primary reference-storefront-hero__primary"[^>]*href="\/start-a-project"[^>]*>Start a Project/);
+test("homepage top stays store-first and Hawaii-focused without project intake", () => {
+  assert.match(index, /class="retail-home-hero"/);
+  assert.match(index, /href="https:\/\/shop\.elevationupscales\.com\/"[^>]*>Shop the Store<\/a>/);
+  assert.match(index, /href="\/hawaii-lithium-batteries"[^>]*>Hawaii Lithium Freight<\/a>/);
+  assert.doesNotMatch(index, /href="\/start-a-project"[^>]*>Start a Project<\/a>/);
 
   assert.doesNotMatch(homeCommerce, /reference-storefront-hero__lead/);
   assert.doesNotMatch(homeCommerce, /reference-storefront-hero__primary/);
