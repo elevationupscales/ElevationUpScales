@@ -20,9 +20,12 @@ const home=read("site/index.html"),
   map=read("deployment/qa/WEBSITE_ANALYTICS_EVENT_MAP.md"),
   sitemap=read("site/sitemap.xml");
 
-must(home.includes("data-home-sok"),"homepage SOK section missing");
+must(home.includes("retail-product-grid"),"homepage featured inventory section missing");
 for(const sku of ["SK12V100PC","SK48V100N"])must(home.includes(sku),`homepage anchor missing ${sku}`);
-must(home.includes("Authorized SOK Energy Dealer")||home.includes("AUTHORIZED SOK ENERGY DEALER"),"authorized dealer claim missing");
+must(home.includes("SOK Energy"),"homepage SOK vendor path missing");
+must(home.includes("/hawaii-lithium-batteries"),"homepage Hawaii lithium route missing");
+must(home.includes("https://shop.elevationupscales.com/"),"homepage store route missing");
+must(!home.includes('href="/start-a-project"'),"homepage must not route to Start a Project");
 for(const old of ["sok-order-company","sok-order-site-type","sok-order-use","sok-order-demand"])must(!order.includes(old),`long-form field remains: ${old}`);
 must(order.includes("email or phone required"),"one contact method copy missing");
 must(runtime.includes("valid email or phone"),"server email-or-phone rule missing");
