@@ -226,22 +226,30 @@ Never commit:
 - non-public compliance packets;
 - payment or banking information.
 
-## 15. Email approval and signature authority
+## 15. External communication approval and signature authority
 
-All external email must follow:
+All external communication must follow:
 
-**DRAFT → SHOW CASEY → CASEY EXPLICITLY APPROVES THE SPECIFIC SEND → SEND ONCE → VERIFY SENT.**
+**DRAFT / PREPARE → SHOW CASEY → CASEY EXPLICITLY APPROVES THE SPECIFIC SEND → SEND ONCE → VERIFY SENT.**
+
+This gate applies to email, vendor/partner messages, customer messages, freight/logistics communications, marketplace messages, platform support messages, social direct messages, and any other outbound communication made in the company's name.
 
 Rules:
-- Do not send any email without Casey's explicit approval of that specific send.
-- Drafting permission is not sending permission.
-- A prior approval for another email, thread, recipient, or send class does not authorize a new send unless Casey explicitly says so.
-- If any email is transmitted without Casey's explicit approval, it must **not** be signed as Casey Young.
+- Do not send any external communication without Casey's explicit approval of that specific send.
+- Internal workflow authorization is **not** external-send authorization.
+- Commands such as **RUN**, **DO IT**, **EXECUTE**, **CONTINUE**, **FINISH THE WORKFLOW**, **GO**, **PROCEED**, or equivalent authorize only the requested internal workflow unless Casey separately and explicitly authorizes the external send.
+- Drafting, researching, reconciling, preparing, or completing a workflow does not authorize transmission.
+- Valid send approval must be message-specific and unmistakable, such as **SEND**, **CLEAR TO SEND**, **SEND THIS**, or an equally explicit instruction referring to the exact prepared communication.
+- A prior approval for another message, thread, recipient, vendor, customer, or send class does not authorize a new send.
+- If approval is ambiguous, stop at the send gate and ask for approval; do not infer permission from urgency, workflow context, or access to a connected account.
+- If any communication is transmitted without Casey's explicit approval, do not send a follow-up, apology, correction, or retraction unless Casey separately approves that exact remediation send.
 - An unapproved-send exception must not use Casey's personal signature, title, phone number, personal closing, or wording that implies Casey personally authored or approved the message.
-- Do not represent an unapproved email as owner-approved after the fact.
+- Do not represent an unapproved communication as owner-approved after the fact.
 - If send state is uncertain, verify before retrying; never duplicate-send because of uncertainty.
 
-Control phrase:
+Control phrases:
+
+**WORKFLOW AUTHORIZATION ≠ SEND AUTHORIZATION.**
 
 **NO CASEY APPROVAL → NO SEND. NO APPROVAL → NO CASEY SIGNATURE OR PERSONAL AUTHORITY IMPLIED.**
 
