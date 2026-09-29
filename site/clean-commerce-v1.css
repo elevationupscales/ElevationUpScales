@@ -165,3 +165,11 @@ body.clean-commerce-page{background:var(--cc-bg);color:var(--cc-text)}
 .retail-vendor-card span{display:block;color:#66757d;line-height:1.48}
 @media(max-width:1000px){.retail-vendor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){.retail-vendors{padding:58px 0}.retail-vendor-grid{grid-template-columns:1fr}}
+
+/* Final homepage simplification — four-section retail funnel */
+.retail-home-hero__media{object-position:center center}
+.retail-home-hero__content{padding-top:72px}
+.retail-section__head p:not(.cc-eyebrow){max-width:560px}
+.retail-vendor-card__image{aspect-ratio:1/1}
+.retail-vendor-card__image img{object-fit:contain}
+@media(max-width:680px){.retail-home-hero__content{padding-top:48px}}
