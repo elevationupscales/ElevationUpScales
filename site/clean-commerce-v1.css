@@ -149,3 +149,19 @@ body.clean-commerce-page{background:var(--cc-bg);color:var(--cc-text)}
 .retail-final-cta h2{font-size:clamp(2.2rem,4vw,3.5rem);margin:0;letter-spacing:-.045em}
 @media(max-width:1000px){.retail-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.retail-lane-grid{grid-template-columns:1fr}.retail-lane{min-height:420px}.retail-sok-feature__grid{grid-template-columns:1fr}.retail-sok-feature__copy{padding:58px 0}.retail-sok-feature__image{margin:0;min-height:430px}}
 @media(max-width:680px){.retail-home-hero{min-height:650px}.retail-home-hero__content{padding-bottom:48px}.retail-home-hero__shade{background:linear-gradient(0deg,rgba(3,8,10,.9),rgba(3,8,10,.28) 75%)}.retail-home-hero__actions{display:grid}.retail-shop-btn{width:100%}.retail-strip__inner{overflow-x:auto;justify-content:flex-start;white-space:nowrap}.retail-section{padding:58px 0}.retail-section__head{display:block}.retail-section__head>a{display:inline-block;margin-top:18px}.retail-product-grid{grid-template-columns:1fr}.retail-product-card__body p{min-height:0}.retail-lane{min-height:390px}.retail-sok-feature__copy{padding:52px 0}.retail-sok-feature__image{min-height:320px}.retail-hawaii{min-height:560px}.retail-final-cta__inner{display:block}.retail-final-cta__inner>a{margin-top:20px;width:100%}}
+
+/* Homepage refinement: scenic images as major moments, product/vendor imagery kept clean */
+.retail-product-card__image--contain{background:#f4f5f3}
+.retail-product-card__image--contain img{object-fit:contain;padding:24px;background:#f4f5f3}
+.retail-vendors{padding:84px 0;background:#fff;color:#071014;border-block:1px solid #e1e5e3}
+.retail-vendor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.retail-vendor-card{display:block;text-decoration:none;color:#071014;border:1px solid #dfe5e8;border-radius:14px;overflow:hidden;background:#fff;transition:transform .2s ease,box-shadow .2s ease}
+.retail-vendor-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(7,16,20,.1)}
+.retail-vendor-card__image{aspect-ratio:4/3;background:#f4f5f3;display:flex;align-items:center;justify-content:center;padding:22px}
+.retail-vendor-card__image img{width:100%;height:100%;object-fit:contain;display:block}
+.retail-vendor-card>div:last-child{padding:20px}
+.retail-vendor-card small{display:block;font-size:.68rem;letter-spacing:.11em;font-weight:900;color:#867046;margin-bottom:7px}
+.retail-vendor-card strong{display:block;font-size:1.35rem;margin-bottom:8px}
+.retail-vendor-card span{display:block;color:#66757d;line-height:1.48}
+@media(max-width:1000px){.retail-vendor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.retail-vendors{padding:58px 0}.retail-vendor-grid{grid-template-columns:1fr}}
