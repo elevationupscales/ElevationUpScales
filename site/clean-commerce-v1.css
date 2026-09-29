@@ -190,3 +190,10 @@ body.clean-commerce-page{background:var(--cc-bg);color:var(--cc-text)}
 .retail-sok-primary__products span{font-weight:900}
 @media(max-width:980px){.retail-sok-primary__grid{grid-template-columns:1fr}.retail-sok-primary__products{grid-template-columns:1fr 1fr}}
 @media(max-width:680px){.retail-sok-primary{padding:58px 0}.retail-sok-primary__products{grid-template-columns:1fr}}
+
+/* Olight manufacturer video hero */
+.retail-home-hero__video{object-fit:cover;object-position:center center}
+@media (prefers-reduced-motion:reduce){
+  .retail-home-hero__video{display:none}
+  .retail-home-hero{background:#05090b url("https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/bfde5d3eff8d43329ca06149a1c94808.thumbnail.0000000000.jpg?v=1790375698") center/cover no-repeat}
+}
