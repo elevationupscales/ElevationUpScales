@@ -1,6 +1,7 @@
-# MASTER S.O.P. — MPM 25 CONTROL LOCK
+# MASTER S.O.P. — OS 1 CONTROL / MPM 27 CONTINUITY
 
-Effective: 2026-09-26
+Original relock effective: 2026-09-26  
+Current control alignment: 2026-09-29
 Owner authority: President, Elevation UpScales, Inc.
 Repository: `elevationupscales/ElevationUpScales`
 
@@ -26,7 +27,18 @@ Workers must resolve instructions in this order:
 
 Historical files never override current owner direction or current accepted `main`.
 
-## 3. MPM 25 control baseline
+## 3. OS 1 control baseline and continuity
+
+**Current operating control:** OS 1 / Operating System.  
+**Current manager continuity:** MPM 27.  
+**MPM numbers are continuity/session labels, not separate authority layers.**
+
+Project boundaries:
+- **OS 1 / Operating System:** CURRENT / CONTROLLING.
+- **Operating System 2.0 / OS 2:** NON-CONTROLLING legacy/transitional evidence only. It must not override OS 1.
+- **OS 3 / Agent Manager:** BETA / DEVELOPMENT ONLY. It has no authority over OS 1, production, or current company operations unless the owner explicitly promotes it.
+
+The MPM 25 relock remains a valid historical control checkpoint and its anti-drift rules remain inherited where not superseded by newer owner direction.
 
 Control baseline at initial MPM25 relock:
 
