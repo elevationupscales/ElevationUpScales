@@ -1,0 +1,267 @@
+{
+  "shopifyMenuId": "gid://shopify/Menu/339416449393",
+  "handle": "elevation-clean-nav-2026-09-30",
+  "title": "Elevation Clean Navigation",
+  "stagedThemeId": "gid://shopify/OnlineStoreTheme/207872917873",
+  "stagedThemeName": "SMOKE P1 REPAIRS — READY TO REVIEW",
+  "items": [
+    {
+      "title": "Outdoor / Camping",
+      "type": "HTTP",
+      "url": "/collections/outdoor-camping",
+      "resourceId": null,
+      "items": [
+        {
+          "title": "Olight Lighting",
+          "type": "HTTP",
+          "url": "/collections/olight",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Recovery & Towing",
+          "type": "HTTP",
+          "url": "/collections/recovery-towing",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "RV Setup, Towing & Recovery",
+          "type": "HTTP",
+          "url": "/collections/rv-setup-towing-recovery",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "VEVOR Direct",
+          "type": "HTTP",
+          "url": "/collections/vevor-direct",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Elevation Picks",
+          "type": "HTTP",
+          "url": "/collections/shop-featured-elevation-picks",
+          "resourceId": null,
+          "items": []
+        }
+      ]
+    },
+    {
+      "title": "Off-Grid & Backup Power",
+      "type": "HTTP",
+      "url": "/collections/off-grid-power",
+      "resourceId": null,
+      "items": [
+        {
+          "title": "Lithium Batteries",
+          "type": "HTTP",
+          "url": "/collections/lithium-batteries",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Solar & Charging",
+          "type": "HTTP",
+          "url": "/collections/solar-charging",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Charge Controllers & DC-DC",
+          "type": "HTTP",
+          "url": "/collections/charge-controllers-dc-dc-charging",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Battery Charging & Monitoring",
+          "type": "HTTP",
+          "url": "/collections/battery-charging-monitoring",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "RV & Mobile Power",
+          "type": "HTTP",
+          "url": "/collections/rv-mobile-power",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Complete Power Systems",
+          "type": "HTTP",
+          "url": "/collections/complete-power-systems",
+          "resourceId": null,
+          "items": []
+        }
+      ]
+    },
+    {
+      "title": "Specialty Freight / Commercial",
+      "type": "HTTP",
+      "url": "/collections/commercial-contractor-systems",
+      "resourceId": null,
+      "items": [
+        {
+          "title": "Hawaii Lithium Freight",
+          "type": "HTTP",
+          "url": "/collections/hawaii-lithium-batteries",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Hawaii & Remote Power",
+          "type": "HTTP",
+          "url": "/collections/hawaii-remote-power",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Rack Batteries & Systems",
+          "type": "HTTP",
+          "url": "/collections/rack-batteries-systems",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Complete Power Systems",
+          "type": "HTTP",
+          "url": "/collections/complete-power-systems",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Start Freight / System Review",
+          "type": "HTTP",
+          "url": "/pages/system-review",
+          "resourceId": null,
+          "items": []
+        }
+      ]
+    },
+    {
+      "title": "Full Catalog",
+      "type": "HTTP",
+      "url": "/pages/shop-the-store",
+      "resourceId": null,
+      "items": [
+        {
+          "title": "Shop All Products",
+          "type": "CATALOG",
+          "url": "/collections/all",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "SOK Energy",
+          "type": "HTTP",
+          "url": "/collections/sok-battery",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Olight",
+          "type": "HTTP",
+          "url": "/collections/olight",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Renogy",
+          "type": "HTTP",
+          "url": "/collections/renogy",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "VEVOR",
+          "type": "HTTP",
+          "url": "/collections/vevor-direct",
+          "resourceId": null,
+          "items": []
+        }
+      ]
+    },
+    {
+      "title": "Brands",
+      "type": "HTTP",
+      "url": "/pages/shop-the-store#shop-by-brand",
+      "resourceId": null,
+      "items": [
+        {
+          "title": "SOK Energy",
+          "type": "HTTP",
+          "url": "/collections/sok-battery",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Olight",
+          "type": "HTTP",
+          "url": "/collections/olight",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Renogy",
+          "type": "HTTP",
+          "url": "/collections/renogy",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "VEVOR",
+          "type": "HTTP",
+          "url": "/collections/vevor-direct",
+          "resourceId": null,
+          "items": []
+        }
+      ]
+    },
+    {
+      "title": "Contact Us",
+      "type": "HTTP",
+      "url": "/pages/contact",
+      "resourceId": null,
+      "items": [
+        {
+          "title": "Hawaii Freight Order",
+          "type": "HTTP",
+          "url": "/pages/contact",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Help Choosing Equipment",
+          "type": "HTTP",
+          "url": "/pages/system-review",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Shipping",
+          "type": "HTTP",
+          "url": "/policies/shipping-policy",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Returns & Refunds",
+          "type": "HTTP",
+          "url": "/policies/refund-policy",
+          "resourceId": null,
+          "items": []
+        },
+        {
+          "title": "Warranty & Support",
+          "type": "HTTP",
+          "url": "/pages/contact",
+          "resourceId": null,
+          "items": []
+        }
+      ]
+    }
+  ]
+}
