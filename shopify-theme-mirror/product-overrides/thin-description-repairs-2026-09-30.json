@@ -1,0 +1,57 @@
+{
+  "synced": "2026-09-30",
+  "appliedToShopify": true,
+  "source": "Shopify storefront smoke repair",
+  "products": [
+    {
+      "id": "gid://shopify/Product/16001198981489",
+      "handle": "renogy-100w-n-type-bifacial-solar-panel",
+      "descriptionHtml": "<h2>Renogy 100W N-Type Bifacial Solar Panel</h2><p>A compact 100W N-Type bifacial solar panel for RV, mobile, backup and off-grid solar builds. This listing uses exact Renogy SKU <strong>RSP100DCT-G1-US</strong>.</p><p>Use it as a building block in a properly matched solar array, and verify controller, battery-bank and system-voltage compatibility before installation.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16001199112561",
+      "handle": "renogy-500a-battery-monitor-with-shunt",
+      "descriptionHtml": "<h2>Renogy 500A Battery Monitor with Shunt</h2><p>Monitor key battery-system information including voltage, current, capacity and state of charge with Renogy's 500A battery monitor and shunt.</p><p>Designed for RV, marine and off-grid battery systems. Exact Renogy SKU: <strong>RBM500-G3-US</strong>.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16001199735153",
+      "handle": "renogy-50a-ip67-dc-dc-battery-charger-with-mppt",
+      "descriptionHtml": "<h2>Renogy 50A IP67 DC-DC Battery Charger with MPPT</h2><p>A 50A DC-DC battery charger with integrated MPPT charging and an IP67-rated design for mobile and off-grid power systems.</p><p>Exact Renogy SKU: <strong>RBC2125DS-21W-G3-US</strong>. Confirm source, battery chemistry and system compatibility before installation.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16002364211569",
+      "handle": "renogy-rsp400lsc-g1-us",
+      "descriptionHtml": "<h2>Renogy 400W Compact Portable Solar Suitcase</h2><p>A high-output 400W portable solar suitcase for customers who need deployable solar without committing to a permanent roof-mounted array.</p><p>Exact Renogy SKU: <strong>RSP400LSC-G1-US</strong>. Pair with a compatible charge controller and battery system for your application.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16002364408177",
+      "handle": "renogy-rng-invt-3000-12v-p2-g3-us",
+      "descriptionHtml": "<h2>Renogy 3000W 12V Pure Sine Wave Inverter</h2><p>Convert 12V DC battery power to 120V AC with a 3000W pure sine wave inverter for RV, backup and off-grid applications.</p><p>Exact Renogy SKU: <strong>RNG-INVT-3000-12V-P2-G3-US</strong>. Size cabling, protection and battery capacity for the intended load before installation.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16004447306097",
+      "handle": "renogy-battery-shunt-300",
+      "descriptionHtml": "<h2>Renogy Battery Shunt 300</h2><p>Battery-monitoring hardware for RV and off-grid systems, designed to help provide clearer visibility into battery-bank performance.</p><p>This listing is Renogy model <strong>RSHST-B02P300-G1-US</strong> and supports the connected monitoring workflow associated with the Battery Shunt 300 platform.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16016759423345",
+      "handle": "renogy-bt-2-bluetooth-module-rs485-dc-home-app",
+      "descriptionHtml": "<h2>Renogy BT-2 Bluetooth Module</h2><p>Add Bluetooth monitoring to compatible Renogy equipment that uses the supported RS485 connection and view system information through the Renogy DC Home app.</p><p>Exact Renogy SKU: <strong>RCM-BT2-G2-US</strong>. Confirm compatibility with your specific Renogy device before ordering.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16020155236721",
+      "handle": "lg-16h-prime-battery-16kwh-400v-high-voltage",
+      "descriptionHtml": "<h2>LG RESU16H Prime 16kWh High-Voltage Battery</h2><p>A 16kWh high-voltage residential energy-storage battery for compatible solar, backup-power and battery-storage systems.</p><p>Because this is a high-voltage storage component, inverter compatibility, system design, installation requirements and freight should be confirmed before purchase.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16020156285297",
+      "handle": "growatt-10kw-hybrid-inverter-sph-10000tl-hu-us-b",
+      "descriptionHtml": "<h2>Growatt SPH 10000TL-HU-US-B 10kW Hybrid Inverter</h2><p>A 10kW hybrid inverter for compatible solar, battery-storage and backup-power systems.</p><p>System voltage, battery compatibility, array sizing, transfer requirements and installation configuration should be reviewed as part of the complete system design before purchase.</p>"
+    },
+    {
+      "id": "gid://shopify/Product/16020156612977",
+      "handle": "midnite-solar-little-rosie-mobile-off-grid-inverter-3600w-output-60a-battery-charger-american-made",
+      "descriptionHtml": "<h2>MidNite Solar Little Rosie 3600W Inverter/Charger</h2><p>A 3600W inverter/charger platform for compatible off-grid, mobile and backup-power systems, combining AC power conversion with battery charging in one system component.</p><p>Confirm battery-bank voltage, load requirements, protection and installation design before purchase.</p>"
+    }
+  ]
+}

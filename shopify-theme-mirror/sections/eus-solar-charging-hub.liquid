@@ -1,0 +1,94 @@
+{% if collection.handle == 'solar-charging' %}
+<section class="eus-solar" aria-label="Solar and Charging collection">
+  <div class="eus-solar__hero">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/file_6b5dfd55-5841-40ce-9850-d6611e397827.jpg?v=1789423737" alt="Renogy 400W portable solar suitcase" loading="eager" fetchpriority="high" width="2000" height="2000">
+    <div class="eus-solar__shade"></div>
+    <div class="eus-solar__hero-copy">
+      <span>SOLAR · CHARGING · INVERTERS · SYSTEM COMPONENTS</span>
+      <h1>Build the power path.</h1>
+      <p>Shop solar panels, charging equipment, inverters and system components for RV, backup and off-grid power.</p>
+      <div class="eus-solar__actions">
+        <a href="#ResultsList">Shop Solar &amp; Charging</a>
+        <a href="/collections/renogy">Shop Renogy</a>
+        <a href="/collections/sungoldpower">Shop SunGoldPower</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="eus-solar__quick">
+    <a href="/collections/solar-charging?filter.p.product_type=Solar%20Panels"><small>SOLAR PANELS</small><strong>Capture</strong><span>Portable and fixed-array panels →</span></a>
+    <a href="/collections/solar-charging?filter.p.product_type=Solar%20Charge%20Controllers"><small>CHARGE CONTROLLERS</small><strong>Regulate</strong><span>PWM and MPPT charging control →</span></a>
+    <a href="/collections/solar-charging?filter.p.product_type=Power%20Inverters"><small>INVERTERS</small><strong>Convert</strong><span>DC-to-AC power for mobile and backup use →</span></a>
+    <a href="/collections/solar-charging?filter.p.product_type=Solar%20Battery%20Maintainers"><small>MAINTAINERS</small><strong>Maintain</strong><span>Low-draw battery charging and upkeep →</span></a>
+  </div>
+
+  <div class="eus-solar__intro">
+    <div>
+      <span class="eus-solar__eyebrow">SHOP BY SYSTEM NEED</span>
+      <h2>Start with the job, then choose the hardware.</h2>
+    </div>
+    <p>Whether you are maintaining a battery, adding portable solar, upgrading an inverter or building a larger off-grid system, this collection is organized to make the next component easier to find.</p>
+  </div>
+
+  <div class="eus-solar__features">
+    <a href="/products/renogy-rsp400lsc-g1-us">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/file_6b5dfd55-5841-40ce-9850-d6611e397827.jpg?v=1789423737" alt="Renogy 400W portable solar suitcase" loading="lazy" width="1200" height="1200">
+      <span><small>PORTABLE SOLAR</small><strong>Renogy 400W Solar Suitcase</strong><em>Shop active solar →</em></span>
+    </a>
+    <a href="/products/renogy-rng-invt-3000-12v-p2-g3-us">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/RNG-260901-M9-_1-44.jpg?v=1789369602" alt="Renogy 3000W 12V pure sine wave inverter" loading="lazy" width="1200" height="1200">
+      <span><small>POWER CONVERSION</small><strong>Renogy 3000W Pure Sine Inverter</strong><em>Explore inverter power →</em></span>
+    </a>
+    <a href="/products/renogy-adventurer-li-30a-pwm-solar-charge-controller-with-lcd">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/renogy-adventurer-30a-main.jpg?v=1789200004" alt="Renogy Adventurer Li 30A solar charge controller" loading="lazy" width="1200" height="1200">
+      <span><small>CHARGE CONTROL</small><strong>Renogy Adventurer Li 30A</strong><em>Control your charge path →</em></span>
+    </a>
+  </div>
+
+  <div class="eus-solar__brand">
+    <div>
+      <span class="eus-solar__eyebrow">AUTHORIZED / APPROVED SUPPLIER LANES</span>
+      <h2>Shop by brand.</h2>
+      <p>Move directly into the broader Renogy and SunGoldPower catalogs when you already know the system family you want to build around.</p>
+    </div>
+    <div class="eus-solar__brand-links">
+      <a href="/collections/renogy"><strong>Renogy</strong><span>Solar, charging, inverters and off-grid equipment →</span></a>
+      <a href="/collections/sungoldpower"><strong>SunGoldPower</strong><span>Inverter chargers and scalable solar power systems →</span></a>
+    </div>
+  </div>
+
+  <div class="eus-solar__support">
+    <div>
+      <span class="eus-solar__eyebrow">NEED HELP SIZING A SYSTEM?</span>
+      <h2>Tell us what you need to power.</h2>
+      <p>We can help narrow the right solar, battery and inverter path before you check out.</p>
+    </div>
+    <a href="/pages/contact">Contact Us →</a>
+  </div>
+</section>
+
+<style>
+#shopify-section-{{ section.id }} ~ [id$="__section"]{display:none}
+#shopify-section-{{ section.id }} ~ [id$="__main"]{scroll-margin-top:110px}
+.eus-solar{background:#f5f7f8;color:#10212c}
+.eus-solar__hero{position:relative;min-height:620px;display:flex;align-items:flex-end;overflow:hidden;background:#08141d}
+.eus-solar__hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.eus-solar__shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,22,.94),rgba(5,15,22,.48) 58%,rgba(5,15,22,.08)),linear-gradient(0deg,rgba(5,15,22,.72),transparent 52%)}
+.eus-solar__hero-copy{position:relative;z-index:2;width:min(100% - 40px,1240px);margin:0 auto;padding:92px 0 58px;color:#fff}
+.eus-solar__hero-copy>span,.eus-solar__eyebrow{color:#6dd6a8;font-size:.72rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.eus-solar__hero h1{margin:8px 0 14px;font-size:clamp(3.5rem,8vw,7.3rem);line-height:.86;letter-spacing:-.06em;color:#fff}
+.eus-solar__hero p{max-width:680px;color:#d7e0e4;font-size:1.05rem;line-height:1.6;margin:0}
+.eus-solar__actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px}.eus-solar__actions a{display:inline-flex;min-height:46px;align-items:center;padding:0 18px;border-radius:10px;background:#fff;color:#0a1720;text-decoration:none;font-weight:900}.eus-solar__actions a+ a{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.4)}
+.eus-solar__quick{width:min(100% - 40px,1240px);margin:-32px auto 0;position:relative;z-index:3;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.eus-solar__quick a{padding:22px;border-radius:16px;background:#fff;box-shadow:0 16px 40px rgba(15,34,45,.12);color:#10212c;text-decoration:none}.eus-solar__quick small{display:block;color:#19835b;font-size:.64rem;font-weight:900;letter-spacing:.14em}.eus-solar__quick strong{display:block;margin:7px 0 4px;font-size:1.2rem}.eus-solar__quick span{font-size:.8rem;color:#61717b;line-height:1.4}
+.eus-solar__intro,.eus-solar__brand,.eus-solar__support{width:min(100% - 40px,1240px);margin:0 auto}.eus-solar__intro{padding:92px 0 48px;display:grid;grid-template-columns:.9fr 1.1fr;gap:44px;align-items:center}.eus-solar__intro h2,.eus-solar__brand h2,.eus-solar__support h2{margin:8px 0 12px;font-size:clamp(2.2rem,5vw,4.6rem);line-height:.96;letter-spacing:-.05em;color:#10212c}.eus-solar__intro p,.eus-solar__brand p,.eus-solar__support p{margin:0;color:#61717b;line-height:1.65}
+.eus-solar__features{width:min(100% - 40px,1240px);margin:0 auto 84px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.eus-solar__features a{position:relative;min-height:430px;border-radius:20px;overflow:hidden;background:#0c1b24;text-decoration:none;color:#fff}.eus-solar__features img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.eus-solar__features a:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,15,22,.88),rgba(5,15,22,.08) 64%)}.eus-solar__features span{position:absolute;z-index:2;left:22px;right:22px;bottom:22px;display:flex;flex-direction:column}.eus-solar__features small{font-size:.64rem;letter-spacing:.14em;font-weight:900;color:#7ce0b2}.eus-solar__features strong{margin:7px 0;font-size:1.35rem}.eus-solar__features em{font-style:normal;color:#d5e0e5;font-size:.82rem}
+.eus-solar__brand{padding:72px 0;border-top:1px solid #d7dfe3;display:grid;grid-template-columns:.8fr 1.2fr;gap:46px;align-items:start}.eus-solar__brand-links{display:grid;grid-template-columns:1fr 1fr;gap:12px}.eus-solar__brand-links a{padding:28px;border-radius:18px;background:#10212c;color:#fff;text-decoration:none}.eus-solar__brand-links strong{display:block;font-size:1.5rem}.eus-solar__brand-links span{display:block;margin-top:8px;color:#b6c2c8;line-height:1.5;font-size:.84rem}
+.eus-solar__support{margin-bottom:70px;padding:34px;border-radius:22px;background:#0f2135;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:28px}.eus-solar__support h2{color:#fff}.eus-solar__support p{color:#bdc8ce}.eus-solar__support a{flex:0 0 auto;display:inline-flex;min-height:48px;align-items:center;padding:0 20px;border-radius:10px;background:#fff;color:#0f2135;text-decoration:none;font-weight:900}
+@media(max-width:900px){.eus-solar__hero{min-height:520px}.eus-solar__hero-copy,.eus-solar__quick,.eus-solar__intro,.eus-solar__features,.eus-solar__brand,.eus-solar__support{width:min(100% - 28px,1240px)}.eus-solar__quick{grid-template-columns:repeat(2,1fr)}.eus-solar__intro,.eus-solar__brand{grid-template-columns:1fr}.eus-solar__features{grid-template-columns:1fr}.eus-solar__brand-links{grid-template-columns:1fr}.eus-solar__support{align-items:flex-start;flex-direction:column}}
+@media(max-width:560px){.eus-solar__hero{min-height:470px}.eus-solar__quick{grid-template-columns:1fr;margin-top:-18px}.eus-solar__hero h1{font-size:3.4rem}}
+</style>
+{% endif %}
+
+{% schema %}
+{"name":"Solar charging hub","settings":[],"presets":[{"name":"Solar charging hub"}]}
+{% endschema %}

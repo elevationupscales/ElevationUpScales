@@ -1,0 +1,166 @@
+{% if page.handle == 'system-review' %}
+<section class="eus-system-review">
+  <div class="page-width eus-system-review__grid">
+    <div class="eus-system-review__content">
+      <p class="eus-system-review__eyebrow">PROJECT CONFIGURATION • WHOLE-HOME • COMMERCIAL • OFF-GRID</p>
+      <h1>Request Your System Review</h1>
+      <p class="eus-system-review__lead">Large power systems should be matched to the property, loads, storage goals and shipping path before the order is released.</p>
+      <div class="eus-system-review__page-content rte">{{ page.content }}</div>
+      <div class="eus-system-review__routes">
+        <a href="/collections/complete-power-systems"><strong>Complete Power Systems</strong><span>Browse current packaged systems →</span></a>
+        <a href="/collections/commercial-contractor-systems"><strong>Commercial / Contractor</strong><span>Project-grade equipment and storage →</span></a>
+        <a href="/collections/hawaii-remote-power"><strong>Hawaii & Remote Power</strong><span>Remote-market and freight-supported options →</span></a>
+      </div>
+    </div>
+    <aside class="eus-system-review__form-card">
+      <p class="eus-system-review__eyebrow">START THE REVIEW</p>
+      <h2>Tell us about the project.</h2>
+      {% form 'contact', class: 'eus-system-review__form' %}
+        {% if form.posted_successfully? %}
+          <div class="eus-system-review__success">Thank you. Your system review request has been sent to the Elevation team.</div>
+        {% endif %}
+        {{ form.errors | default_errors }}
+        <input type="hidden" name="contact[subject]" value="System Review Request">
+        <label><span>Name</span><input type="text" name="contact[name]" value="{{ form.name }}" autocomplete="name" required></label>
+        <label><span>Email</span><input type="email" name="contact[email]" value="{{ form.email }}" autocomplete="email" required></label>
+        <label><span>Phone <small>optional</small></span><input type="tel" name="contact[phone]" value="{{ form.phone }}" autocomplete="tel"></label>
+        <label><span>Project location / ZIP</span><input type="text" name="contact[Project location]" placeholder="City, state and ZIP" required></label>
+        <label><span>System goal</span><input type="text" name="contact[System goal]" placeholder="Off-grid, backup, hybrid, commercial, RV, etc." required></label>
+        <label><span>What do you need to power?</span><textarea rows="5" name="contact[Loads and project notes]" placeholder="Major loads, current equipment, utility usage, battery/solar goals, freight needs or other details" required>{{ form.body }}</textarea></label>
+        <button type="submit">Request system review</button>
+      {% endform %}
+      <p class="eus-system-review__direct">Need immediate help? <a href="tel:+12088134998">(208) 813-4998</a> · <a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a></p>
+    </aside>
+  </div>
+</section>
+{% else %}
+<section class="eus-contact-page">
+  <div class="page-width eus-contact-page__grid">
+    <div class="eus-contact-page__intro">
+      <p class="eus-contact-page__eyebrow">ELEVATION UPSCALES, INC.</p>
+      <h1>Contact</h1>
+      <p class="eus-contact-page__lead">Need help with an order, shipping, product compatibility, batteries, solar equipment, off-grid power, or warranty support? Contact the Elevation team directly.</p>
+
+      <div class="eus-contact-page__contact">
+        <div>
+          <span>PHONE</span>
+          <a href="tel:+12088134998">(208) 813-4998</a>
+        </div>
+        <div>
+          <span>EMAIL</span>
+          <a href="mailto:casey@elevationupscales.com">casey@elevationupscales.com</a>
+        </div>
+      </div>
+
+      <div class="eus-contact-page__notice">
+        <strong>Time-sensitive order issue?</strong>
+        <p>Please call us. For everything else, use the form or email us. If your question is about an existing order, include your order number when available.</p>
+      </div>
+
+      <div class="eus-contact-page__help">
+        <p class="eus-contact-page__eyebrow">WE CAN HELP WITH</p>
+        <div class="eus-contact-page__help-grid">
+          <span>Product selection</span>
+          <span>System compatibility</span>
+          <span>Shipping &amp; freight</span>
+          <span>Supplier-fulfilled orders</span>
+          <span>Warranty coordination</span>
+          <span>RV &amp; off-grid power</span>
+          <span>Lithium batteries</span>
+          <span>Solar equipment</span>
+          <span>Complete power systems</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="eus-contact-page__form-card">
+      <p class="eus-contact-page__eyebrow">SEND A MESSAGE</p>
+      <h2>How can we help?</h2>
+      {% form 'contact', class: 'eus-contact-page__form' %}
+        {% if form.posted_successfully? %}
+          <div class="eus-contact-page__success">Thank you. Your message has been sent to the Elevation team.</div>
+        {% endif %}
+        {{ form.errors | default_errors }}
+        <label>
+          <span>Name</span>
+          <input type="text" name="contact[name]" value="{{ form.name }}" autocomplete="name">
+        </label>
+        <label>
+          <span>Email</span>
+          <input type="email" name="contact[email]" value="{{ form.email }}" autocomplete="email" required>
+        </label>
+        <label>
+          <span>Phone <small>optional</small></span>
+          <input type="tel" name="contact[phone]" value="{{ form.phone }}" autocomplete="tel">
+        </label>
+        <label>
+          <span>How can we help?</span>
+          <textarea rows="7" name="contact[body]" required>{{ form.body }}</textarea>
+        </label>
+        <button type="submit">Send message</button>
+      {% endform %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% stylesheet %}
+.eus-contact-page{--navy:#0f2135;--green:#2f624b;--line:#dfe5e1;--soft:#f6f7f5;background:#fff;color:#18232d;padding:72px 0 88px}
+.eus-contact-page__grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);gap:72px;align-items:start}
+.eus-contact-page__intro{max-width:720px}
+.eus-contact-page__eyebrow{margin:0 0 10px;font-size:.7rem;font-weight:900;letter-spacing:.16em;color:var(--green)}
+.eus-contact-page h1{font-size:clamp(3.5rem,7vw,6.5rem);line-height:.9;letter-spacing:-.055em;color:var(--navy);margin:0 0 24px}
+.eus-contact-page__lead{font-size:1.14rem;line-height:1.68;color:#5f6c73;margin:0;max-width:680px}
+.eus-contact-page__contact{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:34px 0}
+.eus-contact-page__contact>div{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff}
+.eus-contact-page__contact span{display:block;font-size:.65rem;font-weight:900;letter-spacing:.13em;color:#7d8984;margin-bottom:7px}
+.eus-contact-page__contact a{font-size:1.03rem;font-weight:850;color:var(--navy);text-decoration:none}
+.eus-contact-page__notice{border-left:4px solid var(--green);background:var(--soft);padding:18px 20px;margin:0 0 34px;border-radius:0 12px 12px 0}
+.eus-contact-page__notice strong{display:block;color:var(--navy);font-size:1rem;margin-bottom:5px}
+.eus-contact-page__notice p{margin:0;color:#626e6a;line-height:1.6}
+.eus-contact-page__help{margin-top:32px}
+.eus-contact-page__help-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.eus-contact-page__help-grid span{border:1px solid var(--line);border-radius:999px;padding:10px 13px;font-size:.78rem;font-weight:750;color:#425049;background:#fff}
+.eus-contact-page__form-card{background:var(--navy);color:#fff;border-radius:24px;padding:34px;box-shadow:0 18px 44px rgba(15,33,53,.12)}
+.eus-contact-page__form-card .eus-contact-page__eyebrow{color:#9cc9b4}
+.eus-contact-page__form-card h2{font-size:clamp(2rem,4vw,3.4rem);line-height:1;letter-spacing:-.04em;margin:0 0 26px;color:#fff}
+.eus-contact-page__form{display:grid;gap:16px}
+.eus-contact-page__form label{display:grid;gap:7px}
+.eus-contact-page__form label>span{font-size:.78rem;font-weight:850;color:#dce7e1}
+.eus-contact-page__form small{font-size:.68rem;font-weight:600;color:#91a39b}
+.eus-contact-page__form input,.eus-contact-page__form textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.22);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;padding:13px 14px;font:inherit}
+.eus-contact-page__form textarea{resize:vertical;min-height:160px}
+.eus-contact-page__form input:focus,.eus-contact-page__form textarea:focus{outline:2px solid rgba(156,201,180,.6);outline-offset:1px;border-color:transparent}
+.eus-contact-page__form button{justify-self:start;border:0;border-radius:12px;background:#fff;color:var(--navy);font-weight:900;padding:14px 20px;cursor:pointer}
+.eus-contact-page__success{background:#e9f6ef;color:#24523d;border-radius:10px;padding:12px 14px;font-weight:750}
+@media(max-width:980px){.eus-contact-page__grid{grid-template-columns:1fr;gap:44px}.eus-contact-page__intro{max-width:none}}
+@media(max-width:620px){.eus-contact-page{padding:48px 0 60px}.eus-contact-page__contact{grid-template-columns:1fr}.eus-contact-page__help-grid{grid-template-columns:1fr 1fr}.eus-contact-page__form-card{padding:24px;border-radius:18px}.eus-contact-page__contact a{font-size:.94rem}}
+
+
+.eus-system-review{--navy:#0f2135;--green:#2f624b;--line:#dfe5e1;background:#f6f7f5;color:#18232d;padding:72px 0 88px}
+.eus-system-review__grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(380px,.85fr);gap:58px;align-items:start}
+.eus-system-review__eyebrow{margin:0 0 10px;font-size:.7rem;font-weight:900;letter-spacing:.16em;color:var(--green)}
+.eus-system-review h1{font-size:clamp(3.2rem,6.5vw,6rem);line-height:.9;letter-spacing:-.055em;color:var(--navy);margin:0 0 22px}
+.eus-system-review__lead{font-size:1.12rem;line-height:1.68;color:#5f6c73;margin:0 0 30px;max-width:760px}
+.eus-system-review__page-content{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px}
+.eus-system-review__page-content h1{display:none}
+.eus-system-review__page-content h2{font-size:1.45rem;color:var(--navy);margin-top:28px;margin-bottom:10px}
+.eus-system-review__page-content p,.eus-system-review__page-content li{color:#55636b;line-height:1.65}
+.eus-system-review__routes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.eus-system-review__routes a{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:14px;background:#fff;border:1px solid var(--line);color:var(--navy);text-decoration:none}
+.eus-system-review__routes strong{font-size:.92rem}.eus-system-review__routes span{font-size:.76rem;line-height:1.45;color:#66737a}
+.eus-system-review__form-card{position:sticky;top:110px;background:var(--navy);color:#fff;border-radius:24px;padding:32px;box-shadow:0 18px 44px rgba(15,33,53,.12)}
+.eus-system-review__form-card .eus-system-review__eyebrow{color:#9cc9b4}.eus-system-review__form-card h2{font-size:clamp(2rem,3.5vw,3.1rem);line-height:1;letter-spacing:-.04em;margin:0 0 24px;color:#fff}
+.eus-system-review__form{display:grid;gap:14px}.eus-system-review__form label{display:grid;gap:7px}.eus-system-review__form label>span{font-size:.78rem;font-weight:850;color:#dce7e1}.eus-system-review__form small{font-size:.68rem;font-weight:600;color:#91a39b}
+.eus-system-review__form input,.eus-system-review__form textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.22);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;padding:13px 14px;font:inherit}.eus-system-review__form textarea{resize:vertical;min-height:140px}
+.eus-system-review__form button{justify-self:start;border:0;border-radius:12px;background:#fff;color:var(--navy);font-weight:900;padding:14px 20px;cursor:pointer}
+.eus-system-review__success{background:#e9f6ef;color:#24523d;border-radius:10px;padding:12px 14px;font-weight:750}
+.eus-system-review__direct{font-size:.76rem;color:#aebdb6;line-height:1.55;margin:18px 0 0}.eus-system-review__direct a{color:#fff}
+@media(max-width:980px){.eus-system-review__grid{grid-template-columns:1fr}.eus-system-review__form-card{position:static}.eus-system-review__routes{grid-template-columns:1fr}}
+@media(max-width:620px){.eus-system-review{padding:48px 0 60px}.eus-system-review__page-content{padding:20px}.eus-system-review__form-card{padding:24px;border-radius:18px}}
+
+{% endstylesheet %}
+
+{% schema %}
+{"name":"Elevation contact","settings":[],"presets":[{"name":"Elevation contact"}]}
+{% endschema %}

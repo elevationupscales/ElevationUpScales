@@ -1,0 +1,235 @@
+{% assign picks = collections['shop-featured-elevation-picks'] %}
+<section class="eus-shop-showcase">
+  <section class="eus-shop-showcase__hero">
+    <video autoplay muted loop playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/a215a298329f40819e45cf40a67c3b9d.thumbnail.0000000000.jpg?v=1790664672" aria-label="SOK SK48V100N lithium battery system animation">
+      <source src="https://cdn.shopify.com/videos/c/o/v/a215a298329f40819e45cf40a67c3b9d.mp4" type="video/mp4">
+    </video>
+    <div class="eus-shop-showcase__shade"></div>
+    <div class="page-width eus-shop-showcase__hero-copy">
+      <p>POWER • LIGHTING • OFF-GRID • SPECIALTY FREIGHT</p>
+      <h1>Shop Elevation.</h1>
+      <span>Move through the store by system, brand, application or destination. Start broad, then narrow into the exact equipment you need.</span>
+      <div class="eus-shop-showcase__hero-actions">
+        <a href="#shop-by-need">Shop by need</a>
+        <a href="#shop-by-brand">Shop by brand</a>
+        <a href="/collections/all">Browse all products</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="eus-shop-showcase__lanes" id="shop-by-need">
+    <div class="page-width">
+      <div class="eus-shop-showcase__section-head">
+        <div>
+          <p class="eus-shop-showcase__eyebrow">START HERE</p>
+          <h2>Choose your path.</h2>
+          <p>Three clear lanes keep the catalog simple while still giving you access to the full store.</p>
+        </div>
+      </div>
+      <div class="eus-shop-showcase__lane-grid">
+        <a href="/collections/outdoor-camping">
+          <small>OUTDOOR / CAMPING</small>
+          <strong>Lighting, gear &amp; field equipment</strong>
+          <span>Olight, camping, recovery and outdoor essentials →</span>
+        </a>
+        <a href="/collections/off-grid-power">
+          <small>OFF-GRID &amp; BACKUP POWER</small>
+          <strong>Lithium, solar &amp; complete systems</strong>
+          <span>Batteries, charging, storage and system packages →</span>
+        </a>
+        <a href="/collections/commercial-contractor-systems">
+          <small>SPECIALTY FREIGHT / COMMERCIAL</small>
+          <strong>Freight, bulk &amp; project-grade systems</strong>
+          <span>Hawaii lithium, commercial storage and contractor power →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-width eus-shop-showcase__brands eus-shop-showcase__brands--primary" id="shop-by-brand">
+    <div class="eus-shop-showcase__section-head">
+      <div>
+        <p class="eus-shop-showcase__eyebrow">FULL CATALOG • SHOP BY BRAND</p>
+        <h2>Shop by Brand</h2>
+        <p>Jump directly into each authorized brand catalog, or browse every active product in the store.</p>
+      </div>
+      <a href="/collections/all">Browse all products →</a>
+    </div>
+    <div class="eus-shop-showcase__brand-grid eus-shop-showcase__brand-grid--catalog">
+      <a href="/collections/sok-battery"><strong>SOK Energy</strong><span>Lithium battery systems →</span></a>
+      <a href="/collections/olight"><strong>Olight</strong><span>Lighting &amp; optics →</span></a>
+      <a href="/collections/renogy"><strong>Renogy</strong><span>Solar &amp; charging →</span></a>
+      <a href="/collections/sungoldpower"><strong>SunGoldPower</strong><span>Complete off-grid systems →</span></a>
+      <a href="/collections/vevor-direct"><strong>VEVOR</strong><span>Tools, equipment &amp; outdoor →</span></a>
+      <a href="/collections/all" class="eus-shop-showcase__brand-all"><strong>All Products</strong><span>Browse the full catalog →</span></a>
+    </div>
+  </section>
+
+  <section class="page-width eus-shop-showcase__intro">
+    <p class="eus-shop-showcase__eyebrow">SHOP BY CATEGORY</p>
+    <h2>Shop by Category</h2>
+    <p>Browse the catalog by application, then move into the products and brands that fit your project.</p>
+  </section>
+
+  <section class="page-width eus-shop-showcase__grid">
+    {% assign handles = 'lithium-batteries,solar-charging,complete-power-systems,outdoor-camping,hawaii-lithium-batteries,commercial-contractor-systems' | split: ',' %}
+    {% for handle in handles %}
+      {% assign c = collections[handle] %}
+      {% if c != blank %}
+        {% assign hero = c.image %}
+        {% if hero == blank and c.products.first != blank %}
+          {% assign hero = c.products.first.featured_image %}
+        {% endif %}
+        <a class="eus-shop-showcase__card" href="{{ c.url }}">
+          <div class="eus-shop-showcase__card-media">
+            {% if hero %}
+              {{ hero | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '480,720,960,1200', alt: c.title }}
+            {% endif %}
+            <span class="eus-shop-showcase__card-shade"></span>
+          </div>
+          <div class="eus-shop-showcase__card-copy">
+            <small>
+              {% case handle %}
+                {% when 'lithium-batteries' %}LITHIUM POWER
+                {% when 'solar-charging' %}SOLAR + CHARGING
+                {% when 'complete-power-systems' %}COMPLETE SYSTEMS
+                {% when 'outdoor-camping' %}OUTDOOR + CAMPING
+                {% when 'hawaii-lithium-batteries' %}HAWAII LITHIUM
+                {% when 'commercial-contractor-systems' %}COMMERCIAL + CONTRACTOR
+              {% endcase %}
+            </small>
+            <strong>{{ c.title }}</strong>
+            <em>Explore collection →</em>
+          </div>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </section>
+
+  {% if picks != blank %}
+  <section class="eus-shop-showcase__featured">
+    <div class="page-width">
+      <div class="eus-shop-showcase__section-head">
+        <div>
+          <p class="eus-shop-showcase__eyebrow">ELEVATION PICKS</p>
+          <h2>Elevation Picks</h2>
+          <p>A curated cross-section of the store rather than the entire catalog at once.</p>
+        </div>
+        <a href="{{ picks.url }}">View all Elevation Picks →</a>
+      </div>
+      <div class="eus-shop-showcase__products">
+        {% for product in picks.products limit: 8 %}
+          {% if product.available %}
+          <article>
+            <a class="eus-shop-showcase__product-media" href="{{ product.url }}">
+              {% if product.featured_image %}
+                {{ product.featured_image | image_url: width: 800 | image_tag: loading: 'lazy', widths: '320,480,640,800', alt: product.title }}
+              {% endif %}
+            </a>
+            <div>
+              <small>{{ product.vendor }}</small>
+              <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
+              <strong>{{ product.price | money }}</strong>
+              <a class="eus-shop-showcase__product-link" href="{{ product.url }}">View product →</a>
+            </div>
+          </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="eus-shop-showcase__support">
+    <div class="page-width eus-shop-showcase__support-inner">
+      <div>
+        <p class="eus-shop-showcase__eyebrow">NEED HELP CHECKING OUT?</p>
+        <h2>We can help with product fit, freight and checkout.</h2>
+        <p>If your order needs Hawaii freight, a larger system configuration, compatibility guidance or checkout support, contact Elevation before you force the wrong path.</p>
+      </div>
+      <div class="eus-shop-showcase__support-actions">
+        <a href="/pages/contact">Contact Us</a>
+        <a href="/collections/hawaii-lithium-batteries">Hawaii Lithium</a>
+        <a href="tel:+12088134998">208-813-4998</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-width eus-shop-showcase__catalog-end">
+    <p>Looking for everything?</p>
+    <a href="/collections/all">Open the full product catalog →</a>
+  </section>
+</section>
+
+{% stylesheet %}
+.eus-shop-showcase{--navy:#0f2135;--green:#2f624b;--line:#dbe1dd;background:#fff;color:#16202a}
+.eus-shop-showcase__hero{position:relative;min-height:520px;display:flex;align-items:flex-end;overflow:hidden;background:#071017}
+.eus-shop-showcase__hero>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.eus-shop-showcase__shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,25,.9),rgba(5,15,25,.28) 68%,rgba(5,15,25,.05)),linear-gradient(0deg,rgba(5,15,25,.62),transparent 55%)}
+.eus-shop-showcase__hero-copy{position:relative;z-index:2;color:#fff;padding-block:72px}
+.eus-shop-showcase__hero-copy p,.eus-shop-showcase__eyebrow{font-size:.7rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.eus-shop-showcase__hero-copy h1{font-size:clamp(3.8rem,9vw,8rem);line-height:.86;letter-spacing:-.06em;margin:8px 0 18px}
+.eus-shop-showcase__hero-copy span{display:block;max-width:720px;color:#d5e0e7;font-size:1.05rem;line-height:1.6}
+.eus-shop-showcase__hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.eus-shop-showcase__hero-actions a{display:inline-flex;align-items:center;justify-content:center;padding:13px 18px;border-radius:12px;background:#fff;color:var(--navy);font-size:.82rem;font-weight:900;text-decoration:none}
+.eus-shop-showcase__hero-actions a+ a{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.5)}
+.eus-shop-showcase__lanes{background:#0b1721;color:#fff;padding:64px 0;border-bottom:1px solid #20313c}
+.eus-shop-showcase__lanes .eus-shop-showcase__section-head h2{color:#fff}
+.eus-shop-showcase__lanes .eus-shop-showcase__section-head p:not(.eus-shop-showcase__eyebrow){color:#aebdc7}
+.eus-shop-showcase__lane-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.eus-shop-showcase__lane-grid a{min-height:220px;padding:28px;border:1px solid rgba(255,255,255,.13);border-radius:20px;background:linear-gradient(145deg,#0f2135,#0b1721);color:#fff;text-decoration:none;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .2s ease,border-color .2s ease}
+.eus-shop-showcase__lane-grid a:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.35)}
+.eus-shop-showcase__lane-grid small{font-size:.66rem;font-weight:900;letter-spacing:.15em;color:#7ed9f2}
+.eus-shop-showcase__lane-grid strong{font-size:1.45rem;line-height:1.08;margin:8px 0}
+.eus-shop-showcase__lane-grid span{font-size:.82rem;line-height:1.5;color:#b7c4cb}
+.eus-shop-showcase__intro{padding-block:68px 26px;max-width:1240px}
+.eus-shop-showcase__intro h2,.eus-shop-showcase__section-head h2{font-size:clamp(2.3rem,5vw,4.6rem);line-height:.98;letter-spacing:-.045em;margin:8px 0 12px;color:var(--navy)}
+.eus-shop-showcase__intro>p:last-child,.eus-shop-showcase__section-head p:not(.eus-shop-showcase__eyebrow){color:#667178;line-height:1.6;margin:0}
+.eus-shop-showcase__eyebrow{color:var(--green);margin:0}
+.eus-shop-showcase__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding-bottom:72px}
+.eus-shop-showcase__card{position:relative;min-height:370px;border-radius:22px;overflow:hidden;color:#fff;text-decoration:none;background:#071017}
+.eus-shop-showcase__card-media{position:absolute;inset:0}
+.eus-shop-showcase__card-media img{width:100%;height:100%;object-fit:cover}
+.eus-shop-showcase__card-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,12,20,.88),rgba(4,12,20,.05) 68%)}
+.eus-shop-showcase__card-copy{position:absolute;z-index:2;left:26px;right:26px;bottom:24px}
+.eus-shop-showcase__card-copy small,.eus-shop-showcase__card-copy strong,.eus-shop-showcase__card-copy em{display:block}
+.eus-shop-showcase__card-copy small{font-size:.66rem;letter-spacing:.14em;color:#78ddf6;font-weight:900}
+.eus-shop-showcase__card-copy strong{font-size:clamp(1.8rem,3vw,3rem);line-height:1;margin:6px 0 8px}
+.eus-shop-showcase__card-copy em{font-style:normal;color:#e0e9ed;font-weight:800;font-size:.82rem}
+.eus-shop-showcase__featured{background:#f6f7f5;border-block:1px solid var(--line);padding:72px 0}
+.eus-shop-showcase__section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:26px}
+.eus-shop-showcase__section-head>div{max-width:820px}
+.eus-shop-showcase__section-head>a{font-weight:850;color:var(--navy);text-decoration:none;border-bottom:1px solid var(--navy);padding-bottom:3px;white-space:nowrap}
+.eus-shop-showcase__products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.eus-shop-showcase__products article{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;display:flex;flex-direction:column}
+.eus-shop-showcase__product-media{aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center}
+.eus-shop-showcase__product-media img{width:100%;height:100%;object-fit:contain;padding:14px}
+.eus-shop-showcase__products article>div{padding:15px;display:flex;flex-direction:column;flex:1}
+.eus-shop-showcase__products small{font-size:.65rem;color:var(--green);font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.eus-shop-showcase__products h3{font-size:.95rem;line-height:1.35;margin:7px 0 12px}
+.eus-shop-showcase__products h3 a{color:var(--navy);text-decoration:none}
+.eus-shop-showcase__products strong{margin-top:auto;color:var(--navy);font-size:1.08rem}
+.eus-shop-showcase__product-link{margin-top:12px;font-size:.78rem;font-weight:850;color:var(--navy);text-decoration:none}
+.eus-shop-showcase__brands{padding-block:72px}
+.eus-shop-showcase__brand-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.eus-shop-showcase__brand-grid--catalog{grid-template-columns:repeat(3,minmax(0,1fr))}
+.eus-shop-showcase__brands--primary{padding-top:64px;padding-bottom:18px}
+.eus-shop-showcase__brand-all{background:var(--navy);color:#fff!important;border-color:var(--navy)!important}
+.eus-shop-showcase__brand-all span{color:rgba(255,255,255,.72)!important}
+.eus-shop-showcase__support{background:#0f2135;color:#fff;padding:58px 0}
+.eus-shop-showcase__support-inner{display:grid;grid-template-columns:1fr auto;gap:34px;align-items:center}
+.eus-shop-showcase__support h2{margin:7px 0 12px;font-size:clamp(2rem,4vw,3.8rem);line-height:1;letter-spacing:-.04em;color:#fff}
+.eus-shop-showcase__support p:not(.eus-shop-showcase__eyebrow){margin:0;max-width:800px;color:#b7c4cb;line-height:1.6}
+.eus-shop-showcase__support-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.eus-shop-showcase__support-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 17px;border-radius:10px;background:#fff;color:#0f2135;text-decoration:none;font-size:.8rem;font-weight:900}
+.eus-shop-showcase__support-actions a+ a{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.eus-shop-showcase__catalog-end{padding-block:34px 72px;display:flex;justify-content:space-between;align-items:center;gap:24px;border-top:1px solid var(--line)}
+.eus-shop-showcase__catalog-end p{margin:0;color:#68746f}
+.eus-shop-showcase__catalog-end a{font-weight:900;color:var(--navy);text-decoration:none;border-bottom:1px solid var(--navy);padding-bottom:3px}
+.eus-shop-showcase__brand-grid a{border:1px solid var(--line);border-radius:16px;padding:24px;text-decoration:none;color:var(--navy);display:flex;flex-direction:column;gap:6px}
+.eus-shop-showcase__brand-grid strong{font-size:1.2rem}
+.eus-shop-showcase__brand-grid span{font-size:.8rem;color:#69756f}
+@media(max-width:900px){.eus-shop-showcase__lane-grid{grid-template-columns:1fr}.eus-shop-showcase__support-inner{grid-template-columns:1fr}.eus-shop-showcase__support-actions{justify-content:flex-start}.eus-shop-showcase__grid{grid-template-columns:1fr}.eus-shop-showcase__products{grid-template-columns:repeat(2,minmax(0,1fr))}.eus-shop-showcase__brand-grid,.eus-shop-showcase__brand-grid--catalog{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.eus-shop-showcase__hero{min-height:450px}.eus-shop-showcase__hero-copy{padding-block:48px}.eus-shop-showcase__intro{padding-block:48px 20px}.eus-shop-showcase__grid{gap:10px;padding-bottom:50px}.eus-shop-showcase__card{min-height:310px;border-radius:16px}.eus-shop-showcase__card-copy{left:18px;right:18px;bottom:17px}.eus-shop-showcase__featured{padding:50px 0}.eus-shop-showcase__section-head{display:block}.eus-shop-showcase__section-head>a{display:inline-block;margin-top:14px}.eus-shop-showcase__products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.eus-shop-showcase__products article>div{padding:11px}.eus-shop-showcase__brand-grid{grid-template-columns:1fr 1fr;gap:10px}.eus-shop-showcase__brand-grid a{padding:18px 14px}.eus-shop-showcase__brands{padding-block:50px}.eus-shop-showcase__catalog-end{padding-block:28px 50px;display:block}.eus-shop-showcase__catalog-end a{display:inline-block;margin-top:10px}}
+{% endstylesheet %}
+{% schema %}{"name":"Shop showcase","settings":[],"presets":[{"name":"Shop showcase"}]}{% endschema %}

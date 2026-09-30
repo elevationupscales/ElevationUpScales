@@ -1,0 +1,100 @@
+{% if product.handle == 'olight-osight-xe-amrs-2-6-moa-dot-32-moa-circle-red-dot-sight' %}
+{% assign xe_variant = product.selected_or_first_available_variant %}
+<section class="eus-xe" aria-label="Olight OSIGHT XE AMRS product profile">
+  <div class="eus-xe__hero">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/1_25d1b45f-e874-4cd6-bee9-669669c401ba.jpg?v=1790725504" alt="Olight OSIGHT XE AMRS enclosed red dot sight" loading="eager" width="2560" height="2560">
+    <div class="eus-xe__shade"></div>
+    <div class="eus-xe__hero-copy">
+      <span>AUTHORIZED OLIGHT DEALER · ADVANCED MULTI-RETICLE SYSTEM</span>
+      <h2>OSIGHT XE AMRS</h2>
+      <p>Compact enclosed optics with selectable 2 MOA and 6 MOA dot options plus a 32 MOA circle configuration.</p>
+      <div class="eus-xe__retail">
+        <strong>{{ xe_variant.price | money }}</strong>
+        {% if xe_variant.available %}<em>Available to order</em>{% else %}<em>Check availability</em>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="eus-xe__intro">
+    <div>
+      <span class="eus-xe__eyebrow">MULTI-RETICLE FLEXIBILITY</span>
+      <h3>One optic. Multiple sight pictures.</h3>
+    </div>
+    <p>The OSIGHT XE AMRS combines a compact enclosed housing with Olight's Advanced Multi-Reticle System. Choose between 2 MOA dot, 6 MOA dot and 32 MOA circle combinations without changing optics.</p>
+  </div>
+
+  <div class="eus-xe__specs">
+    <article><small>RETICLE</small><strong>2 / 6 MOA Dot</strong><span>32 MOA circle combinations</span></article>
+    <article><small>BRIGHTNESS</small><strong>8 DL + 2 NV</strong><span>Daylight and night-vision settings</span></article>
+    <article><small>WINDOW</small><strong>23 × 18 mm</strong><span>Compact enclosed viewing window</span></article>
+    <article><small>RUNTIME</small><strong>Up to 105,000 h</strong><span>CR1632 replaceable battery</span></article>
+  </div>
+
+  <div class="eus-xe__motion">
+    <div class="eus-xe__motion-head">
+      <span class="eus-xe__eyebrow">SEE IT IN MOTION</span>
+      <h3>XE AMRS feature film.</h3>
+      <p>Explore the product profile, controls and design details using Olight's XE AMRS launch media.</p>
+    </div>
+    <video controls muted playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/preview_images/301c8025afe94f20afad1c93963c7d5b.thumbnail.0000000000.jpg?v=1790725969">
+      <source src="https://cdn.shopify.com/videos/c/o/v/301c8025afe94f20afad1c93963c7d5b.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="eus-xe__gallery">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2_369cf703-e5a5-4be4-bcea-866dbe28e9f9.jpg?v=1790725504" alt="Olight OSIGHT XE AMRS product detail" loading="lazy" width="2560" height="2560">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/3_dbc60cd6-a1ee-4732-aadf-d8e69ee21a45.jpg?v=1790725504" alt="Olight OSIGHT XE AMRS feature detail" loading="lazy" width="2560" height="2560">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/4_320c8c3b-9d14-46f5-9bb0-3768cb8bf6e6.jpg?v=1790725504" alt="Olight OSIGHT XE AMRS optic detail" loading="lazy" width="2560" height="2560">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/5_3ef345f4-6ac2-484e-9d25-553bb0a058c5.jpg?v=1790725503" alt="Olight OSIGHT XE AMRS product feature" loading="lazy" width="2560" height="2560">
+  </div>
+
+  <div class="eus-xe__details">
+    <div>
+      <span class="eus-xe__eyebrow">DESIGNED FOR SIMPLE SERVICE</span>
+      <h3>Side-loading battery. No optic removal.</h3>
+      <p>The replaceable CR1632 battery loads from the side, allowing battery service without removing the optic from its mounted position.</p>
+    </div>
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/6_90f7a573-624f-412f-836a-8d3b9103cc67.jpg?v=1790725503" alt="Olight OSIGHT XE AMRS side-loading battery feature" loading="lazy" width="2560" height="2560">
+  </div>
+
+  <div class="eus-xe__unbox">
+    <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/Unboxing.jpg?v=1790725504" alt="Olight OSIGHT XE AMRS unboxing and included contents" loading="lazy" width="2560" height="2560">
+    <div>
+      <span class="eus-xe__eyebrow">PRODUCT DETAILS</span>
+      <h3>OSIGHT XE AMRS</h3>
+      <p><strong>SKU:</strong> OSIGHTXEAMRS<br><strong>UPC:</strong> 6978095650292<br><strong>Dimensions:</strong> 48.5 × 30.5 × 29.5 mm<br><strong>Reticle color:</strong> Red</p>
+      <a href="{{ product.url }}">Shop OSIGHT XE AMRS →</a>
+    </div>
+  </div>
+</section>
+
+<style>
+.eus-xe{background:#05080b;color:#fff;padding-bottom:86px}
+.eus-xe__hero{position:relative;min-height:660px;overflow:hidden;display:flex;align-items:flex-end}
+.eus-xe__hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.eus-xe__shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,7,10,.94),rgba(3,7,10,.42) 58%,rgba(3,7,10,.05)),linear-gradient(0deg,rgba(3,7,10,.82),transparent 58%)}
+.eus-xe__hero-copy,.eus-xe__intro,.eus-xe__motion,.eus-xe__details,.eus-xe__unbox{width:min(100% - 40px,1240px);margin:0 auto}
+.eus-xe__hero-copy{position:relative;z-index:2;padding:90px 0 58px}
+.eus-xe__hero-copy>span,.eus-xe__eyebrow{color:#62d9f5;font-size:.72rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.eus-xe__hero h2{margin:8px 0 14px;font-size:clamp(4rem,9vw,8rem);line-height:.82;letter-spacing:-.065em;color:#fff}
+.eus-xe__hero p{max-width:650px;margin:0;color:#d5dfe5;font-size:1.05rem;line-height:1.6}
+.eus-xe__retail{display:flex;align-items:center;gap:14px;margin-top:24px}
+.eus-xe__retail strong{font-size:1.35rem}.eus-xe__retail em{font-style:normal;color:#9bd5a7;font-weight:800}
+.eus-xe__intro{padding:78px 0 44px;display:grid;grid-template-columns:.85fr 1.15fr;gap:46px;align-items:center}
+.eus-xe__intro h3,.eus-xe__motion h3,.eus-xe__details h3,.eus-xe__unbox h3{margin:8px 0 14px;font-size:clamp(2.2rem,5vw,4.6rem);line-height:.96;letter-spacing:-.05em;color:#fff}
+.eus-xe__intro p,.eus-xe__motion p,.eus-xe__details p,.eus-xe__unbox p{color:#aebbc4;line-height:1.68;margin:0}
+.eus-xe__specs{width:min(100% - 40px,1240px);margin:0 auto 70px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.eus-xe__specs article{padding:24px;border:1px solid #193441;border-radius:18px;background:#0a141b}
+.eus-xe__specs small{display:block;color:#62d9f5;font-size:.65rem;font-weight:900;letter-spacing:.14em}.eus-xe__specs strong{display:block;margin:9px 0 5px;font-size:1.4rem}.eus-xe__specs span{color:#9eabb3;font-size:.83rem}
+.eus-xe__motion{padding-bottom:72px}.eus-xe__motion-head{max-width:800px;margin-bottom:24px}.eus-xe__motion video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:22px;background:#000;border:1px solid #17313d}
+.eus-xe__gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:0 0 78px;background:#05080b}.eus-xe__gallery img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.eus-xe__details,.eus-xe__unbox{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;padding:24px 0 70px}.eus-xe__details img,.eus-xe__unbox img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:20px;background:#fff}
+.eus-xe__unbox{padding-bottom:0}.eus-xe__unbox a{display:inline-flex;margin-top:22px;min-height:46px;align-items:center;padding:0 18px;border-radius:10px;background:#fff;color:#071018;text-decoration:none;font-weight:900}
+@media(max-width:900px){.eus-xe__hero{min-height:520px}.eus-xe__hero-copy,.eus-xe__intro,.eus-xe__motion,.eus-xe__details,.eus-xe__unbox,.eus-xe__specs{width:min(100% - 28px,1240px)}.eus-xe__intro,.eus-xe__details,.eus-xe__unbox{grid-template-columns:1fr}.eus-xe__specs{grid-template-columns:repeat(2,1fr)}.eus-xe__gallery{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.eus-xe__hero{min-height:460px}.eus-xe__specs{grid-template-columns:1fr}.eus-xe__motion video{border-radius:14px}.eus-xe__gallery{grid-template-columns:1fr 1fr}}
+</style>
+{% endif %}
+
+{% schema %}
+{"name":"OSIGHT XE AMRS profile","settings":[],"presets":[{"name":"OSIGHT XE AMRS profile"}]}
+{% endschema %}
