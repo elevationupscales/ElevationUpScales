@@ -409,3 +409,29 @@ This is not a second Master Work Board.
 - Management gate remains: Kiki/Olight confirmation controls current supplier availability, dropship eligibility, MAP/launch timing and final fulfillment readiness. Do not make customer availability promises from Shopify quantities alone.
 - Routed to: Casey Young / Company Operations / current MPM.
 
+---
+
+## 2026-09-29 — PMPM1 Olight interrupted-run recovery / four-record checkpoint
+
+**State:** MASTER UPDATE REQUIRED
+
+- Verified change: Peter directed continuity from the interrupted PMPM1 Shopify run into PMPM2, followed by a bounded recovery reconciliation and this handoff update. The prior worker reported individual readbacks for four recovery records and no Shopify mutations during that audit.
+- Evidence/source: Peter-supplied PMPM1/PMPM2 conversation excerpt, including the four-record reconciliation and subsequent OSIGHT XE AMRS dealer-source confirmation; current accepted Git controls and existing Peter handoff log. Product findings below are attributed to that prior worker's checkpoint, not a fresh Shopify or supplier-document verification by the log-update worker.
+- Affected Project: Olight Authorized Dealer / Catalog / Commerce Integration; Ecommerce & Vendor Operations / Peter lane.
+- Prior state: PMPM1 stopped with “Analysis errored” during repeated Shopify Get Product / Update Product operations. Some updates may have completed; the full affected-product set and exact last successful mutation were not established.
+- New state — bounded checkpoint:
+
+| Product | Prior worker's reported Shopify checkpoint | Source disposition / remaining action |
+|---|---|---|
+| ArkPro Lite | DRAFT; inventory 0; Matte Black SKU `ARKPROLITEMB`; retail price $69.99 | Prior worker matched Matte Black identity/MSRP to the supplier dealer sheet. Preserve existing record; no duplicate rebuild. This checkpoint does not establish completion of every color variant or publication readiness. |
+| OSIGHT XE AMRS | DRAFT; inventory 0; SKU `OSIGHTXEAMRS`; retail price $249.99 | Subsequent prior-worker source check confirmed BOM `0.0015.0137`, UPC `6978095650292` and MSRP $249.99. No commercial correction was reported necessary; supplier availability/fulfillment and publication readiness remain separate. |
+| Javelot Pro 2 | DRAFT; inventory 0; current `JAVELOTPRO2BK` / $209.95 reported as unverified commercial data | Product documentation/media supports specs, but authoritative SKU/MSRP/availability provenance remains unresolved. Keep DRAFT; do not treat existing values as supplier-verified. Resume on exact supplier confirmation. |
+| Oclip 2 Charging Dock — standalone | DRAFT; inventory 0; generic identity and current retail price reported as non-authoritative | Standalone SKU/BOM, UPC, MSRP/protected floor and standalone availability remain unresolved. Keep DRAFT; bundled Premium-package documentation does not clear standalone sale. Resume on exact supplier confirmation. |
+
+- Protected controls: prior worker reported no Shopify writes during reconciliation. This handoff update makes no Shopify price, inventory, fulfillment, publication or product changes; reported zero quantities are a checkpoint, not an instruction to zero any ACTIVE products. Current Olight owner inventory policy and exact supplier-availability controls remain governing.
+- Commercial-source rule reported by prior worker: Casey's current dealer sheet is the authoritative commercial source; do not sell below MSRP and do not invent a separate MAP column. Protected dealer tiers, private correspondence and private media links are intentionally excluded from this public-safe receipt.
+- Open recovery limitation: four records were reconciled in the supplied checkpoint. The wider interrupted batch, exact last completed update, and other affected records remain OPEN / not proven fully reconciled. Do not blindly rerun the batch or mark the entire crash recovery closed.
+- Other retained input blockers: iMini 2 Roadster and O'Pen 3 Class 3R Orange pricing/spec sources were reported found, while exact approved media/source packages still remained needed. Do not infer a new build assignment from these findings.
+- Next executable action: compare the next currently authorized unfinished Olight record against current Shopify and exact supplier sources; update only a confirmed discrepancy within scope, then verify readback. Preserve completed listings and leave the two commercial-source holds bounded.
+- Recommended global update: incorporate this four-record checkpoint into the owning Olight lane, distinguish source-verified staging from retail readiness, retain the two supplier holds, and preserve remaining interrupted-batch audit work as OPEN. Older Peter index/worktree snapshots should not trigger replay of completed listing production.
+- Routed to: Company Operations / OS 1 / MPM 27 continuity through this Peter-lane handoff entry; no external message sent.
