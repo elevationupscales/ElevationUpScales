@@ -1,0 +1,71 @@
+{% if collection.products_count == 0 %}
+<section class="eus-empty-recovery" aria-label="{{ collection.title }} navigation">
+  <div class="eus-empty-recovery__hero">
+    <div>
+      <p class="eus-empty-recovery__eyebrow">SHOP ACTIVE INVENTORY</p>
+      <h1>{{ collection.title }}</h1>
+      {% case collection.handle %}
+        {% when 'outdoor-camping' %}
+          <p>Outdoor gear is being organized into the active product lanes below so you can keep shopping without landing on an empty catalog.</p>
+        {% when 'solar-accessories-installation' %}
+          <p>Solar accessories are currently organized through our active Solar &amp; Charging, Renogy and system-support lanes.</p>
+        {% when 'portable-power' %}
+          <p>Portable and backup power is currently organized through our active off-grid, lithium and complete-system collections.</p>
+        {% when 'whole-home-commercial-project-systems' %}
+          <p>Whole-home and commercial systems are reviewed as projects before purchase. Start with current systems or request a configuration review.</p>
+        {% else %}
+          <p>This category is being reorganized. Continue through the active shopping paths below.</p>
+      {% endcase %}
+    </div>
+  </div>
+
+  <div class="eus-empty-recovery__grid">
+    {% case collection.handle %}
+      {% when 'outdoor-camping' %}
+        <a href="/collections/olight"><small>LIGHTING &amp; OPTICS</small><strong>Olight</strong><span>17 active products →</span></a>
+        <a href="/collections/recovery-towing"><small>OUTDOOR UTILITY</small><strong>Recovery &amp; Towing</strong><span>Shop active recovery gear →</span></a>
+        <a href="/collections/rv-setup-towing-recovery"><small>RV &amp; MOBILE</small><strong>RV Setup &amp; Recovery</strong><span>Shop active RV gear →</span></a>
+        <a href="/collections/vevor-direct"><small>EQUIPMENT</small><strong>VEVOR Direct</strong><span>Tools, outdoor and utility equipment →</span></a>
+        <a href="/collections/shop-featured-elevation-picks"><small>CURATED</small><strong>Elevation Picks</strong><span>Browse featured active products →</span></a>
+      {% when 'solar-accessories-installation' %}
+        <a href="/collections/solar-charging"><small>SOLAR</small><strong>Solar &amp; Charging</strong><span>Panels, controllers and charging →</span></a>
+        <a href="/collections/renogy"><small>BRAND</small><strong>Renogy</strong><span>Current solar and charging equipment →</span></a>
+        <a href="/collections/complete-power-systems"><small>SYSTEMS</small><strong>Complete Power Systems</strong><span>Start from a complete package →</span></a>
+        <a href="/pages/contact"><small>SUPPORT</small><strong>Need an installation component?</strong><span>Contact Elevation →</span></a>
+      {% when 'portable-power' %}
+        <a href="/collections/off-grid-power"><small>POWER HUB</small><strong>Off-Grid Power</strong><span>Browse active power paths →</span></a>
+        <a href="/collections/lithium-batteries"><small>STORAGE</small><strong>Lithium Batteries</strong><span>Current battery inventory →</span></a>
+        <a href="/collections/complete-power-systems"><small>SYSTEMS</small><strong>Complete Power Systems</strong><span>Packaged power solutions →</span></a>
+        <a href="/pages/contact"><small>SUPPORT</small><strong>Help choosing equipment</strong><span>Contact Elevation →</span></a>
+      {% when 'whole-home-commercial-project-systems' %}
+        <a href="/collections/complete-power-systems"><small>ACTIVE SYSTEMS</small><strong>Complete Power Systems</strong><span>Browse packaged systems →</span></a>
+        <a href="/collections/commercial-contractor-systems"><small>COMMERCIAL</small><strong>Commercial / Contractor</strong><span>Project-grade equipment →</span></a>
+        <a href="/pages/system-review"><small>PROJECT REVIEW</small><strong>Request a System Review</strong><span>Configure the project with Elevation →</span></a>
+      {% else %}
+        <a href="/pages/shop-the-store"><small>STORE</small><strong>Shop the Store</strong><span>Browse active inventory →</span></a>
+        <a href="/collections/off-grid-power"><small>POWER</small><strong>Off-Grid Power</strong><span>Shop power systems →</span></a>
+        <a href="/pages/contact"><small>SUPPORT</small><strong>Contact Us</strong><span>Get help finding the right product →</span></a>
+    {% endcase %}
+  </div>
+</section>
+
+<style>
+#shopify-section-{{ section.id }} ~ [id$="__section"],
+#shopify-section-{{ section.id }} ~ [id$="__main"]{display:none}
+.eus-empty-recovery{background:#f5f7f6;color:#0f2135;padding:72px 0 84px}
+.eus-empty-recovery__hero,.eus-empty-recovery__grid{width:min(100% - 40px,1240px);margin:0 auto}
+.eus-empty-recovery__hero{padding-bottom:30px;border-bottom:1px solid #d8e0dc}
+.eus-empty-recovery__hero>div{max-width:820px}.eus-empty-recovery__eyebrow{margin:0 0 8px;color:#2f624b;font-size:.7rem;font-weight:900;letter-spacing:.16em}
+.eus-empty-recovery h1{margin:0 0 14px;font-size:clamp(3rem,7vw,6.4rem);line-height:.9;letter-spacing:-.055em}
+.eus-empty-recovery__hero p:last-child{margin:0;color:#61717b;line-height:1.65;font-size:1.04rem}
+.eus-empty-recovery__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-top:30px}
+.eus-empty-recovery__grid a{min-height:180px;padding:24px;border-radius:18px;background:#fff;border:1px solid #dce3df;color:#0f2135;text-decoration:none;display:flex;flex-direction:column;justify-content:flex-end}
+.eus-empty-recovery__grid small{font-size:.63rem;font-weight:900;letter-spacing:.14em;color:#367557}.eus-empty-recovery__grid strong{font-size:1.25rem;margin:7px 0}.eus-empty-recovery__grid span{font-size:.8rem;color:#66747b;line-height:1.45}
+@media(max-width:800px){.eus-empty-recovery__grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.eus-empty-recovery{padding:48px 0 60px}.eus-empty-recovery__hero,.eus-empty-recovery__grid{width:min(100% - 28px,1240px)}.eus-empty-recovery__grid{grid-template-columns:1fr}}
+</style>
+{% endif %}
+
+{% schema %}
+{"name":"Empty collection recovery","settings":[],"presets":[{"name":"Empty collection recovery"}]}
+{% endschema %}
