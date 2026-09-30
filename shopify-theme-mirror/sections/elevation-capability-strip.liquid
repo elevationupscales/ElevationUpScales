@@ -1,0 +1,36 @@
+<section class="eus-capability-strip" aria-label="Elevation UpScales capabilities">
+  <div class="eus-capability-strip__inner">
+    <a href="/collections/olight">
+      <strong>Authorized Olight Dealer</strong>
+      <span>Professional lighting &amp; optics</span>
+    </a>
+    <a href="/collections/sok-battery">
+      <strong>SOK Lithium Power</strong>
+      <span>RV, off-grid &amp; backup systems</span>
+    </a>
+    <a href="/collections/solar-charging">
+      <strong>Solar &amp; Complete Systems</strong>
+      <span>Panels, inverters &amp; storage</span>
+    </a>
+    <a href="/collections/sok-energy-hawaii-freight-options">
+      <strong>Hawaii Freight Available</strong>
+      <span>Coordinated lithium shipping</span>
+    </a>
+  </div>
+</section>
+
+{% stylesheet %}
+.eus-capability-strip{background:#0b1721;color:#fff;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.12)}
+.eus-capability-strip__inner{width:min(100% - 40px,1240px);margin:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.eus-capability-strip__inner a{display:flex;flex-direction:column;gap:5px;padding:22px 20px;color:#fff;text-decoration:none;border-right:1px solid rgba(255,255,255,.1)}
+.eus-capability-strip__inner a:last-child{border-right:0}
+.eus-capability-strip__inner strong{font-size:.9rem;font-weight:900;letter-spacing:.01em}
+.eus-capability-strip__inner span{font-size:.76rem;line-height:1.35;color:#aebdc7}
+.eus-capability-strip__inner a:hover strong,.eus-capability-strip__inner a:focus strong{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:900px){.eus-capability-strip__inner{grid-template-columns:repeat(2,minmax(0,1fr))}.eus-capability-strip__inner a:nth-child(2){border-right:0}.eus-capability-strip__inner a:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.1)}}
+@media(max-width:620px){.eus-capability-strip__inner{width:min(100% - 28px,1240px);grid-template-columns:1fr}.eus-capability-strip__inner a{border-right:0;border-bottom:1px solid rgba(255,255,255,.1);padding:17px 14px}.eus-capability-strip__inner a:last-child{border-bottom:0}}
+{% endstylesheet %}
+
+{% schema %}
+{"name":"Capability trust strip","settings":[],"presets":[{"name":"Capability trust strip"}]}
+{% endschema %}
