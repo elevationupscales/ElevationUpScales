@@ -234,6 +234,10 @@
     "offgrid_hub": {
       "type": "eus-off-grid-power-hub",
       "settings": {}
+    },
+    "empty_recovery": {
+      "type": "eus-empty-collection-recovery",
+      "settings": {}
     }
   },
   "order": [
@@ -241,6 +245,7 @@
     "sok_hub",
     "solar_hub",
     "offgrid_hub",
+    "empty_recovery",
     "section",
     "main",
     "secondary_catalog"
