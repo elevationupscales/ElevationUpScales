@@ -1,9 +1,9 @@
 # ELEVATION UPSCALES — CURRENT WORK BOARD
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-09-20  
+**Effective:** 2026-09-29  
 **Owner:** Casey Young  
-**State Owner:** **Operating System Project Manager — Company Oversight ROLE**  
+**State Owner:** **OS 1 / Operating System Project Manager — MPM 27 continuity**  
 **Web / Commerce Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
 **Active Execution Workflow:** `MPM_ACTIVE_EXECUTION_WORKFLOW_2026-09-17.md`
 
@@ -18,6 +18,22 @@ Numbered MPM/COM/Recon chat instances are continuity/session labels only. They d
 Casey's newest explicit direction controls. Git current `main` is technical state truth.
 
 Before routing technical work, resolve current `main` once. Do not relaunch broad recon merely because a chat changed.
+
+---
+
+# OS 1 CONTROL ALIGNMENT — 2026-09-29
+
+**STATE: CURRENT / CONTROLLING**
+
+Current owner-established project control:
+- **OS 1 / Operating System is the live company control system.**
+- **MPM 27 is the current manager continuity inside OS 1.**
+- MPM 25 and MPM 26 remain inherited execution/history checkpoints; they do not become parallel authority layers.
+- **OS 2 / Operating System 2.0 is non-controlling legacy/transitional evidence.** Reuse valid evidence only after reconciling it to current OS 1 truth.
+- **OS 3 / Agent Manager is beta/development only.** It has no production or company-control authority unless the owner explicitly promotes it.
+- Current direct owner instruction remains highest authority.
+- Current accepted `main` remains technical state truth.
+- Do not create another OS layer, master work board, or parallel control hierarchy.
 
 ---
 
@@ -42,11 +58,11 @@ Current recovery control:
 
 ---
 
-# MPM 25 OPERATING RHYTHM LOCK — 2026-09-28
+# MPM 25 OPERATING RHYTHM — INHERITED BY MPM 27 — 2026-09-28
 
-**STATE: ACTIVE / RECOVERED CONTINUITY**
+**STATE: ACTIVE CADENCE / HISTORICAL ORIGIN**
 
-MPM 25 has re-established the execution rhythm after the recent recon/crash cycle.
+MPM 25 re-established the execution rhythm after the recon/crash cycle. MPM 27 inherits this cadence unless newer owner direction changes it.
 
 Current management cadence:
 
@@ -64,9 +80,10 @@ Immediate management stack:
 - **P2 / PARKED:** Puerto Rico expansion and OS 3.0 / Agent Manager remain planning/qualification work and do not displace P0/P1 execution.
 
 Control:
-- MPM 25 manages.
-- OS RECON 6 verifies.
-- OS 3.0 is planning only / not current authority.
+- **MPM 27 manages inside OS 1.**
+- Recon verifies when routed; recon does not become a parallel manager.
+- **OS 2 is non-controlling reference/evidence only.**
+- **OS 3 is beta/development only and not current authority.**
 - Do not create duplicate recon, duplicate workboards, or another OS layer.
 - Waiting work leaves the active queue until its external state changes.
 

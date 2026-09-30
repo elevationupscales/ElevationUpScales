@@ -1,28 +1,69 @@
 # Elevation UpScales — Current Worker Handoff
 
-Updated: 2026-09-26
-Control mode: MPM 25 MASTER S.O.P. RELOCK
+Updated: 2026-09-29
+Control mode: **OS 1 / MPM 27 CONTINUITY**
 Repository: `elevationupscales/ElevationUpScales`
 
 ## Read first
 
 1. `MASTER-SOP.md`
-2. `AGENTS.md`
-3. `CODING-WORKFLOW.md`
-4. task-specific files explicitly required by the owner
+2. `operations/CURRENT_WORK_BOARD.md`
+3. `AGENTS.md`
+4. `CODING-WORKFLOW.md`
+5. task-specific files explicitly required by the owner
 
-Do not use older handoff content, old PR descriptions, or dated baselines as current authority.
+Do not use older handoff content, old PR descriptions, dated baselines, OS 2 records, or beta OS 3 work as current authority.
 
-## Control baseline
+## Current control
 
-Accepted `main` at relock:
+- **OS 1 / Operating System = CURRENT / CONTROLLING.**
+- **MPM 27 = current manager continuity inside OS 1.**
+- MPM numbers are continuity/session labels, not separate authority layers.
+- **OS 2 / Operating System 2.0 = NON-CONTROLLING legacy/transitional evidence.**
+- **OS 3 / Agent Manager = BETA / DEVELOPMENT ONLY.**
+- Casey's newest direct instruction is highest authority.
+- `MASTER-SOP.md` is the repository control document.
+- Current accepted `main` is technical state truth.
 
-`f8b55f928f28b8f3087980576158bab286dc022d`
+## Git baseline
 
-That SHA contains the merged PR #247 navigation-only patch:
-`Direct Shop navigation to Shopify storefront`.
+Current `main` at the start of this alignment:
 
-Always re-resolve `main` before beginning new work. The SHA above records the MPM 25 relock checkpoint; it is not permission to roll back newer owner-approved work.
+`7040bdc873739162cd163d4d741041f93f672ef0`
+
+Latest accepted Git work at that baseline is PR #264:
+`Mirror Shopify storefront repairs and smoke gate`.
+
+Always re-resolve `main` before beginning new work. This SHA records the alignment starting point; it is not permission to roll back newer owner-approved work.
+
+## Current accepted direction
+
+The recent MPM 26 storefront work is inherited, not reopened as a redesign project.
+
+Current accepted direction includes:
+- store-first customer routing;
+- SOK remains the primary lithium/battery brand;
+- Olight remains the premium lighting/optics vendor lane;
+- solar/off-grid remains a core commercial lane;
+- accepted homepage/storefront visual direction is locked unless Casey explicitly reopens design;
+- remaining storefront work is bounded defect repair, customer-path QA, and purchaseability verification.
+
+Recent Git merges include:
+- PR #256 — store-first homepage retail experience;
+- PR #260/#261 — approved hero-copy lock and QA alignment;
+- PR #262 — SOK heading contrast repair;
+- PR #263 — external-send authorization hardening;
+- PR #264 — Shopify storefront repair mirror + smoke gate.
+
+## Shopify boundary
+
+`shop.elevationupscales.com` and `store.elevationupscales.com` remain Shopify-owned runtime surfaces.
+
+The Shopify repair theme mirrored by PR #264 was recorded as:
+- `SMOKE P1 REPAIRS — READY TO REVIEW`
+- **UNPUBLISHED at mirror time**
+
+Therefore Git proves the staged/mirrored repair state, not publication to the live Shopify theme. Verify Shopify live state directly before claiming those staged repairs are live.
 
 ## Platform boundary
 
@@ -41,31 +82,9 @@ Shopify
 
 Workers must not cross these systems by assumption.
 
-## Current owner state
-
-The immediate website direction preceding this relock was navigation-only:
-- make the Shopify storefront easy to reach;
-- obsolete Git-site "Shop All Products" behavior must not be restored;
-- destination is the Shopify storefront;
-- no collection rebuild;
-- no wording edits;
-- no marketing additions.
-
-PR #247 is merged and represents that completed Git patch.
-
-## HOLD — preserved, not authorized
-
-These pre-existing open PRs are not active work until the owner explicitly reauthorizes them:
-
-- PR #242 — SEO preview-domain indexing
-- PR #244 — Property Opportunity Engine Phase 1
-- PR #245 — SEO preview refresh
-
-Do not merge, deploy, stack on, or treat these PRs as current requirements.
-
 ## Worker operating rule
 
-One task. One branch. One owner-approved objective.
+**ONE TASK → ONE CURRENT-MAIN BRANCH → ONE OWNER-APPROVED OBJECTIVE → VERIFY → PR/MERGE → RECORD RESULT**
 
 Before editing:
 - resolve current `main`;
@@ -76,14 +95,10 @@ Before editing:
 Before merge:
 - inspect changed files;
 - confirm no scope expansion;
-- run required QA;
+- run applicable QA;
 - compare against current `main`.
 
-Before deployment:
-- require explicit deployment authority;
-- use exact-SHA preview;
-- production must use the same SHA;
-- verify canonical production after release.
+Production deployment remains a separate owner gate under `MASTER-SOP.md`.
 
 ## Stop rule
 
@@ -96,11 +111,15 @@ If owner says STOP / HOLD / FREEZE / NO MORE EDITS:
 
 ## Current handoff status
 
-**MPM 25 CONTROL RELOCK IN PROGRESS**
+**OS 1 CONTROL ALIGNED / MPM 27 CONTINUITY ACTIVE**
 
-Scope of the relock branch:
-- add `MASTER-SOP.md`;
-- point `AGENTS.md` to master control;
-- replace this stale handoff with current MPM 25 state.
+This handoff alignment changes control documentation only.
 
-No website content, routing, Shopify content, product data, pricing, checkout logic, or deployment is authorized by this control update.
+It does **not** authorize:
+- website redesign;
+- Shopify publication;
+- product changes;
+- pricing changes;
+- checkout changes;
+- customer/order mutation;
+- production deployment.
