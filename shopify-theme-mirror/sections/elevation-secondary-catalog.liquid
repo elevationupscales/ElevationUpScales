@@ -1,0 +1,98 @@
+{% liquid
+  assign secondary = blank
+  assign heading = ''
+  assign intro = ''
+
+  if collection.handle == 'complete-power-systems'
+    assign secondary = collections['complete-systems-catalog']
+    assign heading = 'More Complete Systems & Power Packages'
+    assign intro = 'Browse the broader catalog of battery systems, charger kits, solar kits and integrated power packages.'
+  elsif collection.handle == 'solar-battery-deals'
+    assign secondary = collections['all']
+    assign heading = 'Browse More Power Equipment'
+    assign intro = 'Keep shopping the full Elevation UpScales power-equipment catalog.'
+  endif
+%}
+
+{% if secondary != blank and secondary.products_count > 0 %}
+<section class="eus-secondary-catalog">
+  <div class="eus-secondary-catalog__wrap">
+    <div class="eus-secondary-catalog__head">
+      <p class="eus-secondary-catalog__eyebrow">MORE TO SHOP</p>
+      <h2>{{ heading }}</h2>
+      <p>{{ intro }}</p>
+    </div>
+    <div class="eus-secondary-catalog__grid">
+      {% for product in secondary.products limit: 24 %}
+        {% if product.available %}
+          <article class="eus-secondary-card">
+            <a class="eus-secondary-card__media" href="{{ product.url }}">
+              {% if product.featured_image %}
+                {{ product.featured_image | image_url: width: 640 | image_tag: loading: 'lazy', widths: '260, 420, 640', alt: product.title }}
+              {% endif %}
+            </a>
+            <div class="eus-secondary-card__body">
+              <p class="eus-secondary-card__vendor">{{ product.vendor }}</p>
+              <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
+              <div class="eus-secondary-card__price">{{ product.price | money }}</div>
+              {% if product.available %}
+                {% if product.has_only_default_variant %}
+                  {% assign secondary_v = product.selected_or_first_available_variant %}
+                  {% form 'product', product, class: 'eus-secondary-card__buy-form' %}
+                    <input type="hidden" name="id" value="{{ secondary_v.id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" name="checkout" class="eus-secondary-card__buy-now">Buy now</button>
+                  {% endform %}
+                {% else %}
+                  <a class="eus-secondary-card__buy-now eus-secondary-card__buy-now--link" href="{{ product.url }}">Choose options</a>
+                {% endif %}
+              {% endif %}
+              <a class="eus-secondary-card__link" href="{{ product.url }}">View product</a>
+            </div>
+          </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="eus-secondary-catalog__footer">
+      <a href="{{ secondary.url }}">View full catalog →</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% stylesheet %}
+.eus-secondary-catalog{border-top:1px solid #e1e5e2;background:#f7f8f6;padding:64px 0}
+.eus-secondary-catalog__wrap{width:min(1240px,calc(100% - 40px));margin:0 auto}
+.eus-secondary-catalog__head{max-width:760px;margin-bottom:28px}
+.eus-secondary-catalog__eyebrow{font-size:.72rem;font-weight:850;letter-spacing:.15em;color:#2f624b;margin:0 0 8px}
+.eus-secondary-catalog__head h2{font-size:clamp(2rem,4vw,3.4rem);line-height:1.02;margin:0 0 10px;color:#0f2135}
+.eus-secondary-catalog__head p:not(.eus-secondary-catalog__eyebrow){margin:0;color:#5d6870;line-height:1.6}
+.eus-secondary-catalog__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.eus-secondary-card{background:#fff;border:1px solid #dbe1dd;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.eus-secondary-card__media{aspect-ratio:1/1;background:#fff;display:flex;align-items:center;justify-content:center}
+.eus-secondary-card__media img{width:100%;height:100%;object-fit:contain;padding:14px}
+.eus-secondary-card__body{padding:14px;display:flex;flex-direction:column;flex:1}
+.eus-secondary-card__vendor{font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:#2f624b;font-weight:800;margin:0 0 6px}
+.eus-secondary-card__body h3{font-size:.92rem;line-height:1.35;margin:0 0 10px}
+.eus-secondary-card__body h3 a{color:#0f2135;text-decoration:none}
+.eus-secondary-card__price{font-weight:900;color:#0f2135;margin-top:auto;margin-bottom:10px}
+.eus-secondary-card__link{font-size:.8rem;font-weight:800;color:#0f2135;text-decoration:none}
+.eus-secondary-card__buy-form{display:grid;margin:0 0 8px}
+.eus-secondary-card__buy-now{width:100%;min-height:42px;border:0;border-radius:10px;background:#0f2135;color:#fff;font:inherit;font-size:.8rem;font-weight:900;cursor:pointer;padding:10px 14px}
+.eus-secondary-card__buy-now:hover{background:#2f624b}
+.eus-secondary-card__link{display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid #0f2135;border-radius:10px;padding:9px 12px}
+.eus-secondary-catalog__footer{margin-top:24px}
+.eus-secondary-catalog__footer a{font-weight:850;color:#0f2135;text-decoration:none;border-bottom:1px solid #0f2135;padding-bottom:3px}
+@media(max-width:900px){.eus-secondary-catalog__grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.eus-secondary-catalog{padding:46px 0}.eus-secondary-catalog__wrap{width:min(100% - 28px,1240px)}.eus-secondary-catalog__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.eus-secondary-card__body{padding:11px}}
+{% endstylesheet %}
+
+<style>
+/* MPM28 P0 secondary catalog actions */
+.eus-secondary-card__buy-now--link{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.eus-secondary-card__link{display:flex!important;align-items:center;justify-content:center;min-height:42px;padding:10px 13px;border:1px solid currentColor;border-radius:10px;text-decoration:none!important;font-weight:900!important}
+</style>
+
+{% schema %}
+{"name":"Secondary catalog","settings":[],"presets":[{"name":"Secondary catalog"}]}
+{% endschema %}
