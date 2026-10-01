@@ -1,0 +1,197 @@
+{% comment %}
+Elevation UpScales — Olight Oclip Series dedicated retail profile.
+Collection profile pattern aligned with existing Olight item profiles.
+{% endcomment %}
+
+{% assign oclip_pro = all_products['olight-oclip-2-pro-530-lumen-rechargeable-clip-light'] %}
+{% assign oclip_pro_premium = all_products['olight-oclip-2-pro-premium-530-lumen-clip-light-charging-dock'] %}
+{% assign oclip_ultra = all_products['olight-oclip-2-ultra-580-lumen-clip-light-with-uv'] %}
+{% assign oclip_ultra_premium = all_products['olight-oclip-2-ultra-premium-580-lumen-clip-light-charging-dock'] %}
+
+<section class="eus-oclip">\n  <h1 class="eus-oclip__sr-only">Olight Oclip 2 Series</h1>
+  <section class="eus-oclip__hero">
+    {% if collection.image %}
+      {{ collection.image | image_url: width: 2880 | image_tag: loading: 'eager', fetchpriority: 'high', alt: 'Olight Oclip Series' }}
+    {% else %}
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/Series.jpg?v=1790638299&width=2880" alt="Olight Oclip Series" loading="eager" fetchpriority="high">
+    {% endif %}
+    <div class="eus-oclip__hero-shade"></div>
+    <div class="eus-oclip__wrap eus-oclip__hero-copy">
+      <div class="eus-oclip__hero-actions">
+        <a class="eus-oclip__button eus-oclip__button--light" href="#oclip-models">Compare models</a>
+        {% if oclip_pro != blank %}<a class="eus-oclip__text-link" href="{{ oclip_pro.url }}">Start with Oclip 2 Pro →</a>{% endif %}
+      </div>
+    </div>
+  </section>
+
+  <nav class="eus-oclip__nav" aria-label="Oclip Series navigation">
+    <div class="eus-oclip__wrap eus-oclip__nav-inner">
+      <strong>Olight Oclip Series</strong>
+      <div>
+        <a href="#oclip-models">Models</a>
+        <a href="#oclip-compare">Compare</a>
+        <a href="#oclip-premium">Premium</a>
+        <a class="eus-oclip__nav-buy" href="#oclip-models">Shop Oclip</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="eus-oclip__intro eus-oclip__wrap">
+    <div>
+      <span class="eus-oclip__eyebrow">THE OCLIP PLATFORM</span>
+      <h2>Small light. More ways to use it.</h2>
+      <p>Oclip is built around hands-free placement. Clip it to clothing or gear, rotate the head to aim the beam, use the magnetic mounting capability where appropriate, or pair Premium configurations with the mobile charging dock.</p>
+    </div>
+    <div class="eus-oclip__facts">
+      <span><strong>530–580 lm</strong><em>Maximum output by model</em></span>
+      <span><strong>125–130 m</strong><em>Maximum beam distance by model</em></span>
+      <span><strong>115° tilt</strong><em>Aim the light where needed</em></span>
+      <span><strong>360° rotation</strong><em>Flexible clip orientation</em></span>
+    </div>
+  </section>
+
+  <section class="eus-oclip__models eus-oclip__wrap" id="oclip-models">
+    <div class="eus-oclip__section-head">
+      <span class="eus-oclip__eyebrow">CHOOSE YOUR OCLIP</span>
+      <h2>Four retail configurations. Two core lights.</h2>
+      <p>Pro emphasizes compact everyday versatility. Ultra adds higher output and UV. Premium versions add the 1,000mAh mobile charging dock.</p>
+    </div>
+
+    <div class="eus-oclip__cards">
+      {% assign ordered_handles = 'olight-oclip-2-pro-530-lumen-rechargeable-clip-light,olight-oclip-2-pro-premium-530-lumen-clip-light-charging-dock,olight-oclip-2-ultra-580-lumen-clip-light-with-uv,olight-oclip-2-ultra-premium-580-lumen-clip-light-charging-dock' | split: ',' %}
+      {% for handle in ordered_handles %}
+        {% assign p = all_products[handle] %}
+        {% if p != blank %}
+          {% assign v = p.selected_or_first_available_variant %}
+          <article class="eus-oclip__card">
+            <a class="eus-oclip__card-media" href="{{ p.url }}">
+              {% if p.featured_image %}
+                {{ p.featured_image | image_url: width: 1200 | image_tag: loading: 'lazy', alt: p.title }}
+              {% endif %}
+            </a>
+            <div class="eus-oclip__card-body">
+              {% if p.title contains 'Premium' %}<span class="eus-oclip__badge">PREMIUM + DOCK</span>{% else %}<span class="eus-oclip__badge">LIGHT ONLY</span>{% endif %}
+              <h3>{{ p.title | remove: 'Olight ' | split: ' — ' | first }}</h3>
+              <p>
+                {% if p.title contains 'Ultra' %}
+                  580-lumen Oclip platform with flood, spot, red and UV lighting.
+                {% else %}
+                  530-lumen Oclip platform with flood, focused spotlight and red light.
+                {% endif %}
+              </p>
+              <div class="eus-oclip__card-buy">
+                <strong>{{ v.price | money }}</strong>
+                {% if v.available %}<span>Available to order</span>{% else %}<span>Check availability</span>{% endif %}
+              </div>
+              <a class="eus-oclip__button eus-oclip__button--dark" href="{{ p.url }}">Choose options</a>
+            </div>
+          </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="eus-oclip__compare" id="oclip-compare">
+    <div class="eus-oclip__wrap">
+      <div class="eus-oclip__section-head">
+        <span class="eus-oclip__eyebrow">PRO OR ULTRA?</span>
+        <h2>Pick the light source set that fits the job.</h2>
+      </div>
+      <div class="eus-oclip__compare-grid">
+        <article>
+          <span>OCLIP 2 PRO</span>
+          <strong>530 lm</strong>
+          <p>Flood + focused spotlight + red light.</p>
+          <ul><li>Up to 125 m beam distance</li><li>115° head tilt</li><li>360° rotating clip</li><li>600mAh rechargeable battery</li><li>Up to 144 hours runtime</li></ul>
+          {% if oclip_pro != blank %}<a class="eus-oclip__button eus-oclip__button--dark" href="{{ oclip_pro.url }}">Choose Oclip 2 Pro</a>{% endif %}
+        </article>
+        <article>
+          <span>OCLIP 2 ULTRA</span>
+          <strong>580 lm</strong>
+          <p>Flood + spot + red + UV for expanded task coverage.</p>
+          <ul><li>Up to 130 m spotlight</li><li>UV light mode</li><li>360° rotation</li><li>115° tilt</li><li>Multiple hands-free placement options</li></ul>
+          {% if oclip_ultra != blank %}<a class="eus-oclip__button eus-oclip__button--dark" href="{{ oclip_ultra.url }}">Choose Oclip 2 Ultra</a>{% endif %}
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="eus-oclip__premium eus-oclip__wrap" id="oclip-premium">
+    <div class="eus-oclip__premium-copy">
+      <span class="eus-oclip__eyebrow">PREMIUM CONFIGURATIONS</span>
+      <h2>Add portable charging to the Oclip setup.</h2>
+      <p>Oclip 2 Pro Premium and Oclip 2 Ultra Premium include Olight's 1,000mAh Mobile Charging Dock, giving the light a dedicated portable charging companion while keeping the same core light platform.</p>
+      <div class="eus-oclip__premium-actions">
+        {% if oclip_pro_premium != blank %}<a class="eus-oclip__button eus-oclip__button--light" href="{{ oclip_pro_premium.url }}">Choose Pro Premium</a>{% endif %}
+        {% if oclip_ultra_premium != blank %}<a class="eus-oclip__button eus-oclip__button--light" href="{{ oclip_ultra_premium.url }}">Choose Ultra Premium</a>{% endif %}
+      </div>
+    </div>
+    <div class="eus-oclip__premium-media">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/dock-cand-4_5c07e21e-4270-4ec9-86c7-c791dde58f06.jpg?v=1790610556&width=1400" alt="Olight Oclip 2 Mobile Charging Dock" loading="lazy">
+    </div>
+  </section>
+
+  <section class="eus-oclip__support eus-oclip__wrap">
+    <span class="eus-oclip__eyebrow">AUTHORIZED OLIGHT DEALER</span>
+    <h2>Official Olight. Elevation support.</h2>
+    <p>Shop the Oclip Series through Elevation UpScales, Inc. with current pricing, availability and U.S.-based retailer support before and after purchase.</p>
+    <a class="eus-oclip__button eus-oclip__button--light" href="#oclip-models">Choose your Oclip</a>
+  </section>
+</section>
+
+{% stylesheet %}
+.eus-oclip{background:#05080b;color:#fff;overflow:hidden}\n.eus-oclip__sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.eus-oclip__wrap{width:min(100% - 40px,1240px);margin-inline:auto}
+.eus-oclip__eyebrow{display:inline-block;color:#63d9f5;font-size:.7rem;font-weight:900;letter-spacing:.17em;text-transform:uppercase}
+.eus-oclip__hero{position:relative;min-height:610px;display:flex;align-items:flex-end;overflow:hidden;background:#071018}
+.eus-oclip__hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.eus-oclip__hero-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(3,7,10,.58),transparent 36%)}
+.eus-oclip__hero-copy{position:relative;z-index:2;padding-block:0 34px}
+.eus-oclip__hero-actions,.eus-oclip__premium-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:0}
+.eus-oclip__button{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:10px;text-decoration:none;font-weight:900}
+.eus-oclip__button--light{background:#fff;color:#071018}
+.eus-oclip__button--dark{background:#08141d;color:#fff;border:1px solid #203847;width:100%;box-sizing:border-box}
+.eus-oclip__text-link{color:#fff;text-decoration:none;font-weight:850;text-shadow:0 1px 12px rgba(0,0,0,.72)}
+.eus-oclip__nav{position:sticky;top:0;z-index:20;background:rgba(5,8,11,.94);backdrop-filter:blur(16px);border-block:1px solid #17303b}
+.eus-oclip__nav-inner{min-height:64px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.eus-oclip__nav-inner>div{display:flex;align-items:center;gap:18px}
+.eus-oclip__nav a{color:#d9e4e9;text-decoration:none;font-size:.82rem;font-weight:850}
+.eus-oclip__nav .eus-oclip__nav-buy{background:#fff;color:#071018;padding:10px 14px;border-radius:8px}
+.eus-oclip__intro{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center;padding-block:76px}
+.eus-oclip h2{font-size:clamp(2.4rem,5vw,5rem);line-height:.96;letter-spacing:-.05em;margin:8px 0 14px}
+.eus-oclip__intro p,.eus-oclip__section-head p,.eus-oclip__premium p,.eus-oclip__support p{color:#aebcc5;line-height:1.68;margin:0}
+.eus-oclip__facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.eus-oclip__facts span{padding:18px;border:1px solid #1a3440;border-radius:14px;background:#09131a}
+.eus-oclip__facts strong,.eus-oclip__facts em{display:block}
+.eus-oclip__facts strong{font-size:1.15rem}.eus-oclip__facts em{font-style:normal;color:#91a5af;font-size:.8rem;margin-top:4px}
+.eus-oclip__models{padding-block:18px 82px}
+.eus-oclip__section-head{max-width:860px;margin-bottom:30px}
+.eus-oclip__cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.eus-oclip__card{background:#09131a;border:1px solid #1a3440;border-radius:20px;overflow:hidden}
+.eus-oclip__card-media{display:block;background:#f7f8f8}
+.eus-oclip__card-media img{display:block;width:100%;aspect-ratio:1.25/1;object-fit:contain}
+.eus-oclip__card-body{padding:22px}
+.eus-oclip__badge{color:#64daf5;font-size:.66rem;font-weight:900;letter-spacing:.14em}
+.eus-oclip__card h3{font-size:clamp(1.5rem,3vw,2.2rem);margin:7px 0 9px;letter-spacing:-.035em}
+.eus-oclip__card p{color:#9eafb8;line-height:1.55;min-height:3.1em}
+.eus-oclip__card-buy{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:20px 0 15px}
+.eus-oclip__card-buy strong{font-size:1.45rem}.eus-oclip__card-buy span{color:#9fe2bb;font-size:.75rem;font-weight:800}
+.eus-oclip__compare{background:#0a1217;border-block:1px solid #18303b;padding:82px 0}
+.eus-oclip__compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.eus-oclip__compare-grid article{padding:30px;border-radius:18px;background:#05090c;border:1px solid #1b3440}
+.eus-oclip__compare-grid article>span{color:#64daf5;font-size:.7rem;font-weight:900;letter-spacing:.14em}
+.eus-oclip__compare-grid article>strong{display:block;font-size:3rem;margin:12px 0 5px}
+.eus-oclip__compare-grid p{color:#aebcc5}
+.eus-oclip__compare-grid ul{padding-left:20px;color:#d5e0e5;line-height:1.85}
+.eus-oclip__compare-grid a{color:#fff;font-weight:900;text-decoration:none}
+.eus-oclip__premium{display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:center;padding-block:86px}
+.eus-oclip__premium-media img{display:block;width:100%;aspect-ratio:1.15/1;object-fit:contain;background:#fff;border-radius:20px}
+.eus-oclip__support{text-align:center;padding-block:76px 94px}
+.eus-oclip__support p{max-width:700px;margin:0 auto 24px}
+@media(max-width:900px){.eus-oclip__hero{min-height:520px}.eus-oclip__hero-copy{padding-block:0 26px}.eus-oclip__nav-inner{align-items:flex-start;flex-direction:column;padding-block:12px}.eus-oclip__nav-inner>div{width:100%;overflow-x:auto}.eus-oclip__intro,.eus-oclip__premium{grid-template-columns:1fr;padding-block:54px}.eus-oclip__cards,.eus-oclip__compare-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.eus-oclip__wrap{width:min(100% - 28px,1240px)}.eus-oclip__hero{min-height:460px}.eus-oclip__hero>img{object-position:center}.eus-oclip__hero-actions,.eus-oclip__premium-actions{align-items:flex-start;flex-direction:column}.eus-oclip__facts{grid-template-columns:1fr}.eus-oclip__card-body{padding:18px}.eus-oclip__compare{padding:58px 0}.eus-oclip__support{padding:58px 0 70px}}
+{% endstylesheet %}
+
+{% schema %}
+{"name":"Oclip Series profile","settings":[],"presets":[{"name":"Oclip Series profile"}]}
+{% endschema %}
