@@ -145,3 +145,16 @@ The SOK eBay current wave remains a valid company/eBay-lane work item on the can
 ## Control phrase
 
 **CURRENT GIT FIRST → ONE ASSIGNMENT → VERIFIED EXECUTION → LOCAL UPDATE → MATERIAL DELTA UP.**
+
+
+---
+
+## Peter continuity rebuild — 2026-10-01
+
+**Human Manager:** Peter Torres — Director of Operations & Commerce.
+
+Current continuation receipt: [PETER_MPM_CONTINUITY_2026-10-01.md](PETER_MPM_CONTINUITY_2026-10-01.md).
+
+This dated receipt records the latest bounded Peter-lane work and evidence limits. It does not replace the global Work Board or master controls. Root `../../MASTER-SOP.md` is current repository authority; OS 1 / MPM 27 is current continuity. Older startup/control references above are subordinate where they conflict.
+
+The September 24 direct queue above is historical: do not rebuild completed ACTIVE records. Read the September 28 accepted handoff and the new receipt before selecting the next explicitly authorized unfinished item. Re-resolve current main and verify exact Shopify state rather than replaying a dated queue. PR #266 remains a separate unmerged recovery proposal; do not treat its historical checkpoints as current runtime truth.
