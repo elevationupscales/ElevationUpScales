@@ -1,7 +1,7 @@
 # ELEVATION UPSCALES — CURRENT WORK BOARD
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-09-29  
+**Effective:** 2026-10-01  
 **Owner:** Casey Young  
 **State Owner:** **OS 1 / Operating System Project Manager — MPM 27 continuity**  
 **Web / Commerce Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
@@ -18,6 +18,19 @@ Numbered MPM/COM/Recon chat instances are continuity/session labels only. They d
 Casey's newest explicit direction controls. Git current `main` is technical state truth.
 
 Before routing technical work, resolve current `main` once. Do not relaunch broad recon merely because a chat changed.
+
+---
+
+# OCTOBER 1 RECON CHECKPOINT
+
+**STATE: VERIFIED / PUBLIC-SAFE MANAGEMENT SYNC**
+
+- Current accepted `main` at this checkpoint: `66dc066fddd3d4f5e94fea111977731c77b92349`.
+- October 1 Shopify storefront purchasability work is live and mirrored into Git; storefront work is now bounded maintenance/defect repair, not a redesign program.
+- Oclip 2 Ultra Premium color/SKU mapping is resolved; do not carry the old mapping hold forward.
+- Hawaii logistics capability is verified enough to move from feasibility research into implementation/economics, while inventory commitments remain gated.
+- Doba is canceled and removed from the critical fulfillment path; no new customer obligation may depend on it without deliberate reauthorization.
+- Private customer, payment, banking, supplier-pricing and freight-quote details remain outside this public repository under `MASTER-SOP.md` section 14.
 
 ---
 
@@ -73,10 +86,11 @@ Individual-work cadence:
 **VERIFY ONCE → EXECUTE → VERIFY RESULT → RECORD MATERIAL CHANGE → NEXT**
 
 Immediate management stack:
-- **P0 — First Hawaii SOK order:** customer payment received; SOK supplier invoice issued; supplier payment/release remains blocked by the current payment/verification hold. Do not restart freight or document recon while this gate is unchanged.
-- **P0 — eBay paid-order fulfillment:** paid orders with Sep. 30 ship-by deadlines outrank catalog polishing. Order `01-15237-94168` is matched to Doba order `26092717652196`, which remains unpaid and is at risk of auto-cancellation; resolve fulfillment/payment or alternate sourcing before the customer deadline.
-- **P1 — Olight revenue lane:** Kiki confirmed on 2026-09-28 that the five new releases are launched and that Olight has sufficient inventory to support sales. Reconcile the current supplier workbook against live Shopify one bounded product family at a time; preserve accepted profiles and keep the Oclip 2 Ultra Premium SKU/color mapping conflict on HOLD until supplier confirmation.
-- **WAITING EXTERNAL:** Logistics Plus Hawaii operating review, Doba management/accounting escalation, and other already-requested external replies leave the active execution queue until new evidence arrives.
+- **P0 — First Hawaii SOK order:** the customer order and freight architecture are active, but physical supplier release, tender/tracking and confirmed movement remain the proof gate. Keep private customer/payment details outside public Git and do not call the Hawaii lane proven until the first shipment completes.
+- **P0 — eBay paid-order fulfillment:** paid customer orders outrank catalog polishing. The prior Doba-dependent fulfillment path is no longer available under the canceled Doba account. Resolve affected orders through a verified alternate source, customer resolution or refund decision; do not create new obligations that depend on Doba.
+- **P1 — Olight revenue lane:** supplier support remains healthy. The Oclip 2 Ultra Premium color/SKU mapping is now resolved and should no longer be treated as an open mapping hold. Preserve the confirmed mapping and keep pricing, exact availability, dropship readiness and publication as separate gates.
+- **P1 — Hawaii logistics operating model:** Hawaii logistics capability has advanced from feasibility research to implementation/economics. Warehousing, will-call, smaller outbound orders, larger releases and hazardous-lithium handling are operationally supportable; no stock commitment is authorized until first-shipment execution and landed-cost economics justify it.
+- **HOLD / REMOVE FROM CRITICAL PATH — Doba:** the subscription is canceled and the live customer-linked order could not be preserved. No new customer promise or active listing should depend on Doba unless Casey explicitly reauthorizes the relationship after a fresh qualification.
 - **P2 / PARKED:** Puerto Rico expansion and OS 3.0 / Agent Manager remain planning/qualification work and do not displace P0/P1 execution.
 
 Control:
@@ -108,13 +122,13 @@ MPM, COM, and Recon are not the normal production coding/deployment lane. The te
 # CURRENT COMPANY POSTURE
 
 **Aggregate:** GREEN / ACTIVE with contained yellow areas.  
-**Operating focus:** **REVENUE CONVERSION / COMMERCE STABILIZATION.**
+**Operating focus:** **PAID-ORDER FULFILLMENT / REVENUE CONVERSION / COMMERCE STABILIZATION.**
 
 Major website build/edit work is substantially complete. The company is now converting authorized vendor relationships into **verified, profitable, purchasable products and actual orders**.
 
 Current priority order:
 
-**P0 CORE LINEUP MERCHANDISING + PURCHASEABILITY → P0 WEB / COMMERCE STABILIZATION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 SOK EBAY REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P1 SUNGOLDPOWER → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
+**P0 PAID-ORDER FULFILLMENT → P0 CORE LINEUP MERCHANDISING + PURCHASEABILITY → P0 WEB / COMMERCE STABILIZATION → P1 CATALOG ECONOMICS + PRODUCT TRUTH → P1 OLIGHT / SOK REVENUE → P1 SHOPIFY / RENOGY REVENUE → P1 LISTING QUALITY → P1 SUNGOLDPOWER → P2 SECONDARY VENDOR / COMMUNICATION WORK.**
 
 Vendor acquisition is no longer the main mission. New vendor prospecting is opportunistic only unless Casey specifically elevates a target.
 
@@ -172,7 +186,7 @@ Do not use total catalog count as a storefront-success metric.
 | **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
 | **P1** | Renogy Hawaii / Alaska / Canada expansion + click conversion | Shopify Store Operations under Peter; Commerce/Storefront; Shipping & Logistics; OS RECON | **ACTIVE — SUPPORTING / NO LONGER STORE LEAD** | Preserve verified market routes and use them where they support the Core 12. Do not let destination expansion outrank the core conversion pass. |
 | **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — SOK MODEL ESTABLISHED** | Reuse the public-safe SOK truth pattern vendor by vendor: exact SKU, protected cost source, MAP/floor, shipping, channel fees, contribution state, stock, authorization, warranty/returns, source and verification state. Keep protected dealer costs/raw inventory out of public Git. |
-| **P1** | Olight launch / catalog truth | Company Operations + Ecommerce & Vendor Operations / Peter | **ACTIVE — 19 RECORDS / 15 ACTIVE + 4 DRAFT / LIVE OLIGHT AVAILABILITY RULE ENFORCED** | Live Shopify now contains 19 Olight product records: 15 ACTIVE and 4 DRAFT. Oclip 2 Pro now includes Light Only + Charging Dock package variants; Oclip 2 Pro Premium, Oclip 2 Ultra and the standalone Oclip 2 Charging Dock are built as DRAFTS pending current supplier-availability confirmation. ArkPro Ultra Amber Orange is added on the existing product at source-proven MSRP/SKU/UPC but remains unavailable until supplier availability is confirmed. Oclip 2 Ultra Premium color/SKU mapping remains HOLD pending supplier confirmation. Current Olight-live-available SKUs use the owner-controlled operational quantity 10; do not present 10 as supplier stock. Olight live storefront purchasability overrides an older dealer-sheet Sold Out flag. Do not reintroduce customer-facing supplier-fulfillment operational copy. Cart→checkout routing previously passed on representative Olight products; shipping-rate/destination/final payment-stage verification remains open. Use `vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`. |
+| **P1** | Olight launch / catalog truth | Company Operations + Ecommerce & Vendor Operations / Peter | **ACTIVE — PARTNER OPERATIONS / SKU MAPPING RESOLVED** | Preserve accepted live Olight profiles and the October 1 storefront baseline. Oclip 2 Ultra Premium color/SKU mapping is supplier-confirmed and is no longer an unresolved hold: Onyx Black `OCLIPULTTRAPREMIUMOG`, Olive Green `OCLIPULTTRAPREMIUMOB`, Amber Orange `OCLIPULTTRAPREMIUMAO`. Treat dealer pricing, exact availability, dropship readiness, inventory controls and publication as separate gates. Current Olight-live-available SKUs use owner-controlled operational quantities; do not present those values as supplier physical stock. Customer after-sales support can route through Olight while Elevation remains the customer-facing contact. Use `vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`. |
 | **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **OWNER-AUTHORIZED CURRENT WAVE / MAP CONTROLLED** | Execute only the supplied `00_CURRENT_UPLOADS` wave, verify each upload receipt, preserve MAP and shipping-policy controls, and do not use `90_SUPERSEDED_DRAFTS`. The `10_PRESALE_HOLD` lane remains held until separately cleared. |
 | **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / EXPANSION ACTIVE / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Expansion does not override SKU commercial holds. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
 | **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
