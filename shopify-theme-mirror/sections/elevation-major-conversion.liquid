@@ -15,113 +15,6 @@
       </div>
     </div>
   </div>
-  {% assign sungold_system = all_products['sungoldpower-off-grid-solar-system-kits-6-5kw-8kw-10-24-20-48kwh-lifepo4-120-240v'] %}
-  {% if sungold_system != blank %}
-  <section class="emh-rack-feature" aria-labelledby="emh-sungold-title">
-    <div class="emh-wrap emh-rack-grid">
-      <div class="emh-rack-media">
-        <a class="emh-rack-main" href="{{ sungold_system.url }}">
-          {% if sungold_system.featured_image %}
-            {{ sungold_system.featured_image | image_url: width: 1100 | image_tag: loading: 'eager', widths: '480, 720, 900, 1100', sizes: '(max-width: 900px) 100vw, 52vw', alt: sungold_system.title }}
-          {% endif %}
-          <span class="emh-rack-badge">AUTHORIZED SUNGOLDPOWER DEALER</span>
-        </a>
-      </div>
-      <div class="emh-rack-copy">
-        <p class="emh-kicker">COMPLETE OFF-GRID SYSTEM</p>
-        <h2 id="emh-sungold-title">8kW split-phase power with 10.24kWh lithium storage.</h2>
-        <p class="emh-rack-lead">A complete SunGoldPower system for cabins, tiny homes, workshops and off-grid properties. Choose 6.5kW or 8kW inverter capacity, 10.24–20.48kWh LiFePO4 storage, and matched bifacial solar.</p>
-        <div class="emh-rack-price">From {{ sungold_system.price_min | money }}</div>
-        <div class="emh-rack-facts">
-          <span><strong>120V / 240V</strong>Split-phase output</span>
-          <span><strong>10.24–20.48kWh</strong>LiFePO4 storage</span>
-          <span><strong>3.6–5.4kW</strong>Solar array</span>
-          <span><strong>Direct dealer support</strong>Elevation + SunGoldPower</span>
-        </div>
-        <div class="emh-actions emh-rack-actions">
-          <a class="emh-btn emh-btn--rack" href="{{ sungold_system.url }}">View system configurations</a>
-          <a class="emh-btn emh-btn--secondary" href="/pages/contact">Talk through a system</a>
-        </div>
-      </div>
-    </div>
-  </section>
-  {% endif %}
-
-  {% assign drop_sok12 = all_products['sok-sk12v100pc-12v-100ah-lifepo4-battery-group-24'] %}
-  {% assign drop_sok48 = all_products['sok-sk48v100n-51-2v-100ah-5-12kwh-lifepo4-rack-battery'] %}
-  {% assign drop_arkpro = all_products['olight-arkpro-class-3r-1-500-lumen-flat-edc-flashlight-with-uv-green-laser'] %}
-  <section class="emh-new-drops" aria-labelledby="emh-new-drops-title">
-    <div class="emh-wrap">
-      <div class="emh-new-drops__head">
-        <div>
-          <p class="emh-kicker">FEATURED NOW • NEW DROPS</p>
-          <h2 id="emh-new-drops-title">What’s new at Elevation.</h2>
-          <p>Current SOK priority models alongside the newest Olight launch in the Elevation lineup.</p>
-        </div>
-        <div class="emh-new-drops__links"><a href="/collections/sok-battery">See all SOK →</a><a href="/pages/shop-the-store">Shop all new &amp; featured →</a></div>
-      </div>
-
-      <div class="emh-new-drops__grid">
-        {% if drop_sok12 != blank %}
-        <article class="emh-drop-card emh-drop-card--sok">
-          <a class="emh-drop-card__media" href="{{ drop_sok12.url }}">
-            <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v100pc-standalone-isolated-2026-09-19.png?v=1790190768" alt="{{ drop_sok12.title }}" loading="lazy">
-            <span class="emh-drop-card__tag">SOK FEATURED</span>
-          </a>
-          <div class="emh-drop-card__copy">
-            <p class="emh-vendor">SOK Energy</p>
-            <h3><a href="{{ drop_sok12.url }}">{{ drop_sok12.title }}</a></h3>
-            <p>Compact 12V Bluetooth lithium for RV, marine, auxiliary and backup-power builds.</p>
-            <div class="emh-drop-card__bottom">
-              <strong>{{ drop_sok12.price | money }}</strong>
-              <span class="emh-sok-card-links"><a href="{{ drop_sok12.url }}">View battery →</a><a href="/collections/sok-battery">See all SOK →</a></span>
-            </div>
-          </div>
-        </article>
-        {% endif %}
-
-        {% if drop_sok48 != blank %}
-        <article class="emh-drop-card emh-drop-card--sok">
-          <a class="emh-drop-card__media" href="{{ drop_sok48.url }}">
-            <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk48v100n-official-clean.png?v=1789867193" alt="{{ drop_sok48.title }}" loading="lazy">
-            <span class="emh-drop-card__tag">SOK FEATURED</span>
-          </a>
-          <div class="emh-drop-card__copy">
-            <p class="emh-vendor">SOK Energy</p>
-            <h3><a href="{{ drop_sok48.url }}">{{ drop_sok48.title }}</a></h3>
-            <p>5.12kWh rack storage built to scale into larger off-grid and whole-home backup systems.</p>
-            <div class="emh-drop-card__bottom">
-              <strong>{{ drop_sok48.price | money }}</strong>
-              <span class="emh-sok-card-links"><a href="{{ drop_sok48.url }}">View rack battery →</a><a href="/collections/sok-battery">See all SOK →</a></span>
-            </div>
-          </div>
-        </article>
-        {% endif %}
-
-        {% if drop_arkpro != blank %}
-        <article class="emh-drop-card emh-drop-card--olight">
-          <a class="emh-drop-card__media" href="{{ drop_arkpro.url }}">
-            {% if drop_arkpro.featured_image %}
-              {{ drop_arkpro.featured_image | image_url: width: 1100 | image_tag: loading: 'lazy', widths: '420, 720, 900, 1100', alt: drop_arkpro.title }}
-            {% endif %}
-            <span class="emh-drop-card__tag">NEW OLIGHT DROP</span>
-          </a>
-          <div class="emh-drop-card__copy">
-            <p class="emh-vendor">Olight</p>
-            <h3><a href="{{ drop_arkpro.url }}">{{ drop_arkpro.title }}</a></h3>
-            <p>Flat EDC lighting with white light, UV and green laser in Olight’s newest ArkPro platform.</p>
-            <div class="emh-drop-card__bottom">
-              <strong>{{ drop_arkpro.price | money }}</strong>
-              <a href="{{ drop_arkpro.url }}">Explore ArkPro →</a>
-            </div>
-          </div>
-        </article>
-        {% endif %}
-      </div>
-    </div>
-  </section>
-
-
   {% assign core_lineup = collections['homepage-olight-featured'] %}
   <section class="emh-featured-sok" aria-labelledby="emh-featured-sok-title" data-emh-carousel>
     <div class="emh-wrap">
@@ -156,15 +49,18 @@
                 <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
                 <div class="emh-featured-card__price">{{ product.price | money }}</div>
                 <div class="emh-featured-card__actions">
-                  <a class="emh-btn emh-btn--product" href="{{ product.url }}">Details</a>
                   {% if v and product.available %}
-                    {% form 'product', product, class: 'emh-featured-card__atc' %}
-                      <input type="hidden" name="id" value="{{ v.id }}">
-                      <input type="hidden" name="quantity" value="1">
-                      <button type="submit">Add to cart</button>
-                      <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
-                    {% endform %}
+                    {% if product.has_only_default_variant %}
+                      {% form 'product', product, class: 'emh-featured-card__buy-form' %}
+                        <input type="hidden" name="id" value="{{ v.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" name="checkout" class="emh-buy-now emh-featured-card__primary">Buy now</button>
+                      {% endform %}
+                    {% else %}
+                      <a class="emh-buy-now emh-buy-now--link emh-featured-card__primary" href="{{ product.url }}">Choose options</a>
+                    {% endif %}
                   {% endif %}
+                  <a class="emh-featured-card__secondary" href="{{ product.url }}">View details</a>
                 </div>
               </div>
             </article>
@@ -178,9 +74,117 @@
     </div>
   </section>
 
+  {% assign drop_sok12 = all_products['sok-sk12v100pc-12v-100ah-lifepo4-battery-group-24'] %}
+  {% assign drop_sok48 = all_products['sok-sk48v100n-51-2v-100ah-5-12kwh-lifepo4-rack-battery'] %}
+  {% assign drop_arkpro = all_products['olight-arkpro-class-3r-1-500-lumen-flat-edc-flashlight-with-uv-green-laser'] %}
+  <section class="emh-new-drops" aria-labelledby="emh-new-drops-title">
+    <div class="emh-wrap">
+      <div class="emh-new-drops__head">
+        <div>
+          <p class="emh-kicker">FEATURED NOW • NEW DROPS</p>
+          <h2 id="emh-new-drops-title">What’s new at Elevation.</h2>
+          <p>Current SOK priority models alongside the newest Olight launch in the Elevation lineup.</p>
+        </div>
+        <div class="emh-new-drops__links"><a href="/collections/sok-battery">See all SOK →</a><a href="/pages/shop-the-store">Shop all new &amp; featured →</a></div>
+      </div>
+
+      <div class="emh-new-drops__grid">
+        {% if drop_sok12 != blank %}
+        <article class="emh-drop-card emh-drop-card--sok">
+          <a class="emh-drop-card__media" href="{{ drop_sok12.url }}">
+            <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk12v100pc-standalone-isolated-2026-09-19.png?v=1790190768" alt="{{ drop_sok12.title }}" loading="lazy">
+            <span class="emh-drop-card__tag">SOK FEATURED</span>
+          </a>
+          <div class="emh-drop-card__copy">
+            <p class="emh-vendor">SOK Energy</p>
+            <h3><a href="{{ drop_sok12.url }}">{{ drop_sok12.title }}</a></h3>
+            <p>Compact 12V Bluetooth lithium for RV, marine, auxiliary and backup-power builds.</p>
+            <div class="emh-drop-card__bottom">
+              <strong>{{ drop_sok12.price | money }}</strong>
+              <div class="emh-drop-commerce">
+  {% if drop_sok12.available and drop_sok12.has_only_default_variant %}
+    {% assign drop_sok12_v = drop_sok12.selected_or_first_available_variant %}
+    {% form 'product', drop_sok12, class: 'emh-drop-commerce__form' %}
+      <input type="hidden" name="id" value="{{ drop_sok12_v.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
+    {% endform %}
+  {% endif %}
+  <a class="emh-drop-details" href="{{ drop_sok12.url }}">View details</a>
+</div>
+            </div>
+          </div>
+        </article>
+        {% endif %}
+
+        {% if drop_sok48 != blank %}
+        <article class="emh-drop-card emh-drop-card--sok">
+          <a class="emh-drop-card__media" href="{{ drop_sok48.url }}">
+            <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/sok-sk48v100n-official-clean.png?v=1789867193" alt="{{ drop_sok48.title }}" loading="lazy">
+            <span class="emh-drop-card__tag">SOK FEATURED</span>
+          </a>
+          <div class="emh-drop-card__copy">
+            <p class="emh-vendor">SOK Energy</p>
+            <h3><a href="{{ drop_sok48.url }}">{{ drop_sok48.title }}</a></h3>
+            <p>5.12kWh rack storage built to scale into larger off-grid and whole-home backup systems.</p>
+            <div class="emh-drop-card__bottom">
+              <strong>{{ drop_sok48.price | money }}</strong>
+              <div class="emh-drop-commerce">
+  {% if drop_sok48.available and drop_sok48.has_only_default_variant %}
+    {% assign drop_sok48_v = drop_sok48.selected_or_first_available_variant %}
+    {% form 'product', drop_sok48, class: 'emh-drop-commerce__form' %}
+      <input type="hidden" name="id" value="{{ drop_sok48_v.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
+    {% endform %}
+  {% endif %}
+  <a class="emh-drop-details" href="{{ drop_sok48.url }}">View details</a>
+</div>
+            </div>
+          </div>
+        </article>
+        {% endif %}
+
+        {% if drop_arkpro != blank %}
+        <article class="emh-drop-card emh-drop-card--olight">
+          <a class="emh-drop-card__media" href="{{ drop_arkpro.url }}">
+            {% if drop_arkpro.featured_image %}
+              {{ drop_arkpro.featured_image | image_url: width: 1100 | image_tag: loading: 'lazy', widths: '420, 720, 900, 1100', alt: drop_arkpro.title }}
+            {% endif %}
+            <span class="emh-drop-card__tag">NEW OLIGHT DROP</span>
+          </a>
+          <div class="emh-drop-card__copy">
+            <p class="emh-vendor">Olight</p>
+            <h3><a href="{{ drop_arkpro.url }}">{{ drop_arkpro.title }}</a></h3>
+            <p>Flat EDC lighting with white light, UV and green laser in Olight’s newest ArkPro platform.</p>
+            <div class="emh-drop-card__bottom">
+              <strong>{{ drop_arkpro.price | money }}</strong>
+              <div class="emh-drop-commerce">
+  {% if drop_arkpro.available and drop_arkpro.has_only_default_variant %}
+    {% assign drop_arkpro_v = drop_arkpro.selected_or_first_available_variant %}
+    {% form 'product', drop_arkpro, class: 'emh-drop-commerce__form' %}
+      <input type="hidden" name="id" value="{{ drop_arkpro_v.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
+    {% endform %}
+  {% else %}
+    <a class="emh-buy-now emh-buy-now--link" href="{{ drop_arkpro.url }}">Choose options</a>
+  {% endif %}
+  <a class="emh-drop-details" href="{{ drop_arkpro.url }}">View details</a>
+</div>
+            </div>
+          </div>
+        </article>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+
+  {% assign plxgl_product = all_products['olight-pl-x-gl-1-200-lumen-light-green-laser'] %}
   {% comment %} EUS OLIGHT HOME MERCH START {% endcomment %}
   <section class="emh-olight-launch" aria-labelledby="emh-olight-launch-title">
-    <a class="emh-olight-launch__media" href="/pages/olight-pl-x-gl-gallery" aria-label="Explore the Olight PL X GL product gallery">
+    <a class="emh-olight-launch__media" href="{{ plxgl_product.url }}" aria-label="Explore the Olight PL X GL product gallery">
       <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
         <source src="https://cdn.shopify.com/videos/c/vp/5d7e43c2074046168042ce8157002fe2/5d7e43c2074046168042ce8157002fe2.HD-720p-3.0Mbps-95590725.mp4" type="video/mp4">
       </video>
@@ -196,7 +200,15 @@
       <h2>Light Your Way.</h2>
       <p>Our new Olight product galleries bring together the full image set, motion, feature graphics and specifications for each item before you move to purchase.</p>
       <div class="emh-actions">
-        <a class="emh-btn emh-btn--light" href="/pages/olight-pl-x-gl-gallery">Explore PL X GL</a>
+        <a class="emh-btn emh-btn--light" href="{{ plxgl_product.url }}">Explore PL X GL</a>
+        {% if plxgl_product != blank and plxgl_product.available and plxgl_product.has_only_default_variant %}
+          {% assign plxgl_v = plxgl_product.selected_or_first_available_variant %}
+          {% form 'product', plxgl_product, class: 'emh-olight-launch__buy-form' %}
+            <input type="hidden" name="id" value="{{ plxgl_v.id }}">
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" name="checkout" class="emh-buy-now emh-buy-now--hero">Buy now</button>
+          {% endform %}
+        {% endif %}
         <a class="emh-btn emh-btn--outline" href="/collections/olight">Shop all Olight</a>
       </div>
     </div>
@@ -246,7 +258,22 @@
               <p class="emh-vendor">{{ product.vendor }}</p>
               <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
               <div class="emh-home-card__price">{{ product.price | money }}</div>
-              <div class="emh-home-card__actions"><a class="emh-view" href="{{ product.url }}">View product</a><a class="emh-view emh-view--sok-all" href="/collections/sok-battery">See all SOK</a></div>
+              <div class="emh-home-card__actions">
+                <a class="emh-view" href="{{ product.url }}">View product</a>
+                {% if product.available %}
+                  {% if product.has_only_default_variant %}
+                    {% assign buy_v = product.selected_or_first_available_variant %}
+                    {% form 'product', product, class: 'emh-home-card__buy-form' %}
+                      <input type="hidden" name="id" value="{{ buy_v.id }}">
+                      <input type="hidden" name="quantity" value="1">
+                      <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
+                    {% endform %}
+                  {% else %}
+                    <a class="emh-buy-now emh-buy-now--link" href="{{ product.url }}">Choose options</a>
+                  {% endif %}
+                {% endif %}
+                <a class="emh-view emh-view--sok-all" href="/collections/sok-battery">See all SOK</a>
+              </div>
             </div>
           </article>
         {% endif %}
@@ -324,7 +351,22 @@
               <p class="emh-vendor">{{ product.vendor }}</p>
               <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
               <div class="emh-home-card__price">{{ product.price | money }}</div>
-              <div class="emh-home-card__actions"><a class="emh-view" href="{{ product.url }}">View freight option</a><a class="emh-view emh-view--sok-all" href="/pages/contact">Contact Us</a></div>
+              <div class="emh-home-card__actions">
+                <a class="emh-view" href="{{ product.url }}">View freight option</a>
+                {% if product.available %}
+                  {% if product.has_only_default_variant %}
+                    {% assign buy_v = product.selected_or_first_available_variant %}
+                    {% form 'product', product, class: 'emh-home-card__buy-form' %}
+                      <input type="hidden" name="id" value="{{ buy_v.id }}">
+                      <input type="hidden" name="quantity" value="1">
+                      <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
+                    {% endform %}
+                  {% else %}
+                    <a class="emh-buy-now emh-buy-now--link" href="{{ product.url }}">Choose options</a>
+                  {% endif %}
+                {% endif %}
+                <a class="emh-view emh-view--sok-all" href="/pages/contact">Contact Us</a>
+              </div>
             </div>
           </article>
         {% endif %}
@@ -359,12 +401,16 @@
             <div class="emh-price">{{ product.price | money }}</div>
             <div class="emh-card-actions">
               {% if v and product.available %}
-                {% form 'product', product, class: 'emh-atc' %}
-                  <input type="hidden" name="id" value="{{ v.id }}">
-                  <input type="hidden" name="quantity" value="1">
-                  <button type="submit">Add to cart</button>
-                  <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
-                {% endform %}
+                {% if product.has_only_default_variant %}
+                  {% form 'product', product, class: 'emh-atc' %}
+                    <input type="hidden" name="id" value="{{ v.id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit">Add to cart</button>
+                    <button type="submit" name="checkout" class="emh-buy-now">Buy now</button>
+                  {% endform %}
+                {% else %}
+                  <a class="emh-buy-now emh-buy-now--link" href="{{ product.url }}">Choose options</a>
+                {% endif %}
               {% else %}<a class="emh-view" href="{{ product.url }}">Check availability</a>{% endif %}
               <a class="emh-view" href="{{ product.url }}">Details</a>
             </div>
@@ -489,7 +535,7 @@
 .emh-partner-card__actions a{font-size:.76rem;font-weight:850;color:#bfeeff;text-decoration:none}
 .emh-partner-card__actions a:last-child{color:rgba(255,255,255,.78)}
 @media(max-width:900px){.emh-partners__intro{grid-template-columns:1fr;row-gap:14px}.emh-partners__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:620px){.emh-partners__inner{padding:32px 0 36px}.emh-partners__intro h2{font-size:clamp(1.9rem,9vw,2.7rem)}.emh-partners__grid{grid-template-columns:1fr 1fr;gap:9px}.emh-partner-card{min-height:132px;padding:16px}.emh-partner-card__name{font-size:1.08rem}.emh-partner-card__type{font-size:.76rem}}.emh-deals{padding:70px 0}.emh-heading{display:flex;justify-content:space-between;gap:32px;align-items:flex-end;margin-bottom:26px}.emh-heading h2,.emh-support h2{font-size:clamp(2.2rem,4.5vw,4rem);line-height:1;margin:6px 0 10px;letter-spacing:-.04em}.emh-heading p:not(.emh-kicker),.emh-support p:not(.emh-kicker){color:#5d6870;max-width:700px;line-height:1.6;margin:0}.emh-heading>a{font-weight:800;color:var(--navy);text-decoration:none;border-bottom:1px solid var(--navy);padding-bottom:4px}.emh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.emh-card{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 24px rgba(16,34,53,.035);display:flex;flex-direction:column;height:100%}.emh-media{display:flex;aspect-ratio:1/1;position:relative;background:#f7f7f5;align-items:center;justify-content:center}.emh-media img{width:100%;height:100%;object-fit:contain;padding:16px}.emh-badge{position:absolute;top:12px;left:12px;background:var(--green);color:#fff;border-radius:99px;padding:7px 10px;font-size:.68rem;font-weight:800}.emh-copy{padding:18px;display:flex;flex-direction:column;flex:1}.emh-vendor{font-size:.68rem;letter-spacing:.12em;color:var(--green);font-weight:850;text-transform:uppercase;margin:0 0 6px}.emh-copy h3{font-size:1.02rem;line-height:1.35;margin:0 0 14px;min-height:4.05em;max-height:4.05em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.emh-copy h3 a{text-decoration:none;color:var(--navy)}.emh-price{font-size:1.15rem;font-weight:900;color:var(--navy);margin-top:auto;margin-bottom:14px}.emh-card-actions{display:grid;grid-template-columns:1fr;gap:8px}.emh-atc button,.emh-view{width:100%;min-height:42px;border-radius:10px;padding:10px 14px;font-weight:800;font-size:.82rem}.emh-atc button{border:0;background:var(--navy);color:#fff;cursor:pointer}.emh-view{display:flex;align-items:center;justify-content:center;border:1px solid var(--line);text-decoration:none;color:var(--navy);background:#fff}.emh-catalog{padding:70px 0;border-top:1px solid var(--line)}.emh-catalog__heading{margin-bottom:26px}.emh-catalog-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.emh-catalog-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column;min-width:0}.emh-catalog-card__media{display:flex;aspect-ratio:1/1;align-items:center;justify-content:center;background:#f7f7f5}.emh-catalog-card__media img{width:100%;height:100%;object-fit:contain;padding:14px}.emh-catalog-card__copy{padding:14px;display:flex;flex-direction:column;flex:1}.emh-catalog-card__copy h3{font-size:.92rem;line-height:1.35;margin:0 0 10px;min-height:3.72em;max-height:3.72em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.emh-catalog-card__copy h3 a{color:var(--navy);text-decoration:none}.emh-catalog-card__price{font-weight:900;color:var(--navy);margin-top:auto;margin-bottom:10px}.emh-paths{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;padding-bottom:70px}.emh-paths a{padding:24px;border:1px solid var(--line);border-radius:16px;text-decoration:none;color:var(--navy);display:flex;flex-direction:column;gap:6px}.emh-paths strong{font-size:1.2rem}.emh-paths span{font-size:.82rem;color:#68746e}.emh-support{margin-bottom:72px;background:var(--navy);color:#fff;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1.05fr .95fr;align-items:stretch}.emh-support__media{min-height:430px;background:#081521}.emh-support__media img{display:block;width:100%;height:100%;object-fit:cover}.emh-support__copy{padding:50px;display:flex;flex-direction:column;justify-content:center}.emh-support__copy h2{max-width:700px}.emh-support p:not(.emh-kicker){color:rgba(255,255,255,.72)}.emh-support__contact{margin-top:18px!important}.emh-support__contact a{color:#fff;font-weight:800;text-decoration:none}.emh-actions--stack{min-width:220px;flex-direction:column}.emh-btn--light{background:#fff;color:var(--navy)}.emh-btn--outline{color:#fff;border:1px solid rgba(255,255,255,.5)}.emh-rack-feature{background:linear-gradient(180deg,#f8f6f0 0%,#fff 100%);padding:72px 0;border-bottom:1px solid var(--line)}.emh-rack-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}.emh-rack-media{display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:stretch}.emh-rack-main,.emh-rack-secondary{position:relative;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;min-height:460px}.emh-rack-main img,.emh-rack-secondary img{width:100%;height:100%;object-fit:contain;padding:20px}.emh-rack-secondary{min-height:220px}.emh-rack-badge{position:absolute;left:16px;top:16px;background:var(--navy);color:#fff;padding:8px 12px;border-radius:99px;font-size:.67rem;font-weight:900;letter-spacing:.08em}.emh-rack-copy h2{font-size:clamp(2.3rem,4.6vw,4.6rem);line-height:.98;letter-spacing:-.045em;margin:7px 0 16px;color:var(--navy)}.emh-rack-lead{font-size:1rem;line-height:1.65;color:#5e6a70;margin:0}.emh-rack-price{font-size:2.15rem;font-weight:950;color:var(--navy);margin:24px 0 16px}.emh-rack-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:0 0 18px}.emh-rack-facts span{font-size:.88rem;color:#5f6b70}.emh-rack-facts strong{display:block;color:var(--navy);font-size:1rem}.emh-rack-note{font-size:.8rem;line-height:1.5;color:#6d777b}.emh-rack-actions{align-items:stretch}.emh-btn--rack{background:var(--navy);color:#fff}.emh-rack-atc button{height:100%;border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:15px 20px;font-weight:850;cursor:pointer}.emh-featured-sok{padding:68px 0 54px;background:linear-gradient(180deg,#f7f8f6 0%,#fff 100%);border-bottom:1px solid var(--line)}.emh-featured-sok__head{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;margin-bottom:24px}.emh-featured-sok__head>div:first-child{max-width:820px}.emh-featured-sok__head h2{font-size:clamp(2.15rem,4.6vw,4rem);line-height:1;margin:7px 0 12px;letter-spacing:-.045em;color:var(--navy)}.emh-featured-sok__head p:not(.emh-kicker){margin:0;color:#5d6870;line-height:1.6}.emh-carousel-controls{display:flex;gap:9px}.emh-carousel-button{width:46px;height:46px;border-radius:999px;border:1px solid #cfd8d3;background:#fff;color:var(--navy);font-size:1.65rem;line-height:1;cursor:pointer;box-shadow:0 5px 16px rgba(16,34,53,.06)}.emh-carousel-button:hover{border-color:#8fa69a}.emh-featured-sok__track{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(280px,31.5%);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:2px 2px 14px;overscroll-behavior-inline:contain;scrollbar-width:thin;align-items:stretch}.emh-featured-card{scroll-snap-align:start;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 12px 28px rgba(16,34,53,.045);display:flex;flex-direction:column;min-width:0;height:100%}.emh-featured-card__media{position:relative;display:flex;aspect-ratio:1/1;align-items:center;justify-content:center;background:linear-gradient(145deg,#f6f7f5,#eef2ef);overflow:hidden;text-decoration:none}.emh-featured-card__fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c3cbc6;font-weight:900;font-size:.8rem;letter-spacing:.14em}.emh-featured-card__image{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;padding:18px;background:#f7f7f5}.emh-featured-card__badge{position:absolute;z-index:2;top:12px;left:12px;background:var(--green);color:#fff;border-radius:999px;padding:7px 10px;font-size:.66rem;line-height:1;font-weight:900;letter-spacing:.07em}.emh-featured-card__copy{padding:18px;display:flex;flex-direction:column;flex:1}.emh-featured-card__copy h3{font-size:1rem;line-height:1.36;margin:0 0 12px;min-height:4.08em;max-height:4.08em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.emh-featured-card__copy h3 a{color:var(--navy);text-decoration:none}.emh-featured-card__price{font-size:1.18rem;font-weight:900;color:var(--navy);margin-top:auto;margin-bottom:14px}.emh-featured-card__actions{display:grid;grid-template-columns:1fr;gap:8px}.emh-btn--product,.emh-featured-card__atc button{width:100%;min-height:42px;border-radius:10px;padding:10px 12px;font-size:.79rem;font-weight:850}.emh-btn--product{background:var(--navy);color:#fff}.emh-featured-card__atc button{border:1px solid #cfd8d3;background:#fff;color:var(--navy);cursor:pointer}.emh-featured-card__atc,.emh-atc{display:grid;gap:8px}.emh-buy-now{width:100%;min-height:42px;border:0;border-radius:10px;padding:10px 14px;background:#2f624b;color:#fff;font-size:.82rem;font-weight:850;cursor:pointer}.emh-featured-sok__footer{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:10px;font-size:.78rem;color:#7a8580}.emh-featured-sok__all{font-weight:850;color:var(--navy);text-decoration:none;border-bottom:1px solid var(--navy);padding-bottom:3px}@media(max-width:1000px){.emh-featured-sok__track{grid-auto-columns:minmax(270px,44%)}}@media(max-width:900px){.emh-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.emh-rack-grid{grid-template-columns:1fr}.emh-rack-media{grid-template-columns:1fr 160px}.emh-rack-copy{max-width:760px}.emh-trust{grid-template-columns:repeat(2,1fr)}.emh-grid{grid-template-columns:repeat(2,1fr)}.emh-paths{grid-template-columns:1fr}.emh-support{grid-template-columns:1fr}.emh-support__media{min-height:320px}.emh-support__copy{padding:38px 32px}.emh-actions--stack{width:100%}}@media(max-width:620px){.emh-catalog{padding:48px 0}.emh-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.emh-catalog-card__copy{padding:11px}.emh-catalog-card__copy h3{font-size:.84rem;min-height:3.45em;max-height:3.45em}.emh-featured-sok{padding:48px 0 42px}.emh-featured-sok__head{align-items:flex-start}.emh-carousel-controls{display:none}.emh-featured-sok__track{grid-auto-columns:82%;gap:12px;margin-right:-14px;padding-right:14px}.emh-featured-card__copy{padding:15px}.emh-featured-card__actions{grid-template-columns:1fr}.emh-featured-sok__footer span{display:none}.emh-rack-feature{padding:48px 0}.emh-rack-media{grid-template-columns:1fr 110px}.emh-rack-main{min-height:320px}.emh-rack-secondary{min-height:180px}.emh-rack-copy h2{font-size:clamp(2.2rem,10vw,3.3rem)}.emh-rack-facts{grid-template-columns:1fr}.emh-rack-actions{flex-direction:column}.emh-wrap{width:min(100% - 28px,1240px)}.emh-hero{min-height:520px;background-position:58% center}.emh-hero__shade{background:linear-gradient(90deg,rgba(7,18,31,.9),rgba(7,18,31,.66))}.emh-hero__content{padding:54px 0;display:block}.emh-hero__copy{max-width:100%}.emh-hero__content h1{font-size:clamp(2.45rem,12vw,4.2rem)}.emh-trust{grid-template-columns:1fr 1fr}.emh-trust>div{padding:14px 12px}.emh-deals{padding:48px 0}.emh-heading{display:block}.emh-heading>a{display:inline-block;margin-top:16px}.emh-grid{grid-template-columns:1fr}.emh-card-actions{grid-template-columns:1fr}.emh-support{border-radius:18px}.emh-support__media{min-height:250px}.emh-support__copy{padding:30px 24px}}
+@media(max-width:620px){.emh-partners__inner{padding:32px 0 36px}.emh-partners__intro h2{font-size:clamp(1.9rem,9vw,2.7rem)}.emh-partners__grid{grid-template-columns:1fr 1fr;gap:9px}.emh-partner-card{min-height:132px;padding:16px}.emh-partner-card__name{font-size:1.08rem}.emh-partner-card__type{font-size:.76rem}}.emh-deals{padding:70px 0}.emh-heading{display:flex;justify-content:space-between;gap:32px;align-items:flex-end;margin-bottom:26px}.emh-heading h2,.emh-support h2{font-size:clamp(2.2rem,4.5vw,4rem);line-height:1;margin:6px 0 10px;letter-spacing:-.04em}.emh-heading p:not(.emh-kicker),.emh-support p:not(.emh-kicker){color:#5d6870;max-width:700px;line-height:1.6;margin:0}.emh-heading>a{font-weight:800;color:var(--navy);text-decoration:none;border-bottom:1px solid var(--navy);padding-bottom:4px}.emh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.emh-card{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 24px rgba(16,34,53,.035);display:flex;flex-direction:column;height:100%}.emh-media{display:flex;aspect-ratio:1/1;position:relative;background:#f7f7f5;align-items:center;justify-content:center}.emh-media img{width:100%;height:100%;object-fit:contain;padding:16px}.emh-badge{position:absolute;top:12px;left:12px;background:var(--green);color:#fff;border-radius:99px;padding:7px 10px;font-size:.68rem;font-weight:800}.emh-copy{padding:18px;display:flex;flex-direction:column;flex:1}.emh-vendor{font-size:.68rem;letter-spacing:.12em;color:var(--green);font-weight:850;text-transform:uppercase;margin:0 0 6px}.emh-copy h3{font-size:1.02rem;line-height:1.35;margin:0 0 14px;min-height:4.05em;max-height:4.05em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.emh-copy h3 a{text-decoration:none;color:var(--navy)}.emh-price{font-size:1.15rem;font-weight:900;color:var(--navy);margin-top:auto;margin-bottom:14px}.emh-card-actions{display:grid;grid-template-columns:1fr;gap:8px}.emh-atc button,.emh-view{width:100%;min-height:42px;border-radius:10px;padding:10px 14px;font-weight:800;font-size:.82rem}.emh-atc button{border:0;background:var(--navy);color:#fff;cursor:pointer}.emh-view{display:flex;align-items:center;justify-content:center;border:1px solid var(--navy);text-decoration:none;color:var(--navy);background:#fff;box-shadow:0 2px 8px rgba(15,33,53,.06)}.emh-catalog{padding:70px 0;border-top:1px solid var(--line)}.emh-catalog__heading{margin-bottom:26px}.emh-catalog-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.emh-catalog-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column;min-width:0}.emh-catalog-card__media{display:flex;aspect-ratio:1/1;align-items:center;justify-content:center;background:#f7f7f5}.emh-catalog-card__media img{width:100%;height:100%;object-fit:contain;padding:14px}.emh-catalog-card__copy{padding:14px;display:flex;flex-direction:column;flex:1}.emh-catalog-card__copy h3{font-size:.92rem;line-height:1.35;margin:0 0 10px;min-height:3.72em;max-height:3.72em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.emh-catalog-card__copy h3 a{color:var(--navy);text-decoration:none}.emh-catalog-card__price{font-weight:900;color:var(--navy);margin-top:auto;margin-bottom:10px}.emh-paths{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;padding-bottom:70px}.emh-paths a{padding:24px;border:1px solid var(--line);border-radius:16px;text-decoration:none;color:var(--navy);display:flex;flex-direction:column;gap:6px}.emh-paths strong{font-size:1.2rem}.emh-paths span{font-size:.82rem;color:#68746e}.emh-support{margin-bottom:72px;background:var(--navy);color:#fff;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1.05fr .95fr;align-items:stretch}.emh-support__media{min-height:430px;background:#081521}.emh-support__media img{display:block;width:100%;height:100%;object-fit:cover}.emh-support__copy{padding:50px;display:flex;flex-direction:column;justify-content:center}.emh-support__copy h2{max-width:700px}.emh-support p:not(.emh-kicker){color:rgba(255,255,255,.72)}.emh-support__contact{margin-top:18px!important}.emh-support__contact a{color:#fff;font-weight:800;text-decoration:none}.emh-actions--stack{min-width:220px;flex-direction:column}.emh-btn--light{background:#fff;color:var(--navy)}.emh-btn--outline{color:#fff;border:1px solid rgba(255,255,255,.5)}.emh-rack-feature{background:linear-gradient(180deg,#f8f6f0 0%,#fff 100%);padding:72px 0;border-bottom:1px solid var(--line)}.emh-rack-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}.emh-rack-media{display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:stretch}.emh-rack-main,.emh-rack-secondary{position:relative;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;min-height:460px}.emh-rack-main img,.emh-rack-secondary img{width:100%;height:100%;object-fit:contain;padding:20px}.emh-rack-secondary{min-height:220px}.emh-rack-badge{position:absolute;left:16px;top:16px;background:var(--navy);color:#fff;padding:8px 12px;border-radius:99px;font-size:.67rem;font-weight:900;letter-spacing:.08em}.emh-rack-copy h2{font-size:clamp(2.3rem,4.6vw,4.6rem);line-height:.98;letter-spacing:-.045em;margin:7px 0 16px;color:var(--navy)}.emh-rack-lead{font-size:1rem;line-height:1.65;color:#5e6a70;margin:0}.emh-rack-price{font-size:2.15rem;font-weight:950;color:var(--navy);margin:24px 0 16px}.emh-rack-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:0 0 18px}.emh-rack-facts span{font-size:.88rem;color:#5f6b70}.emh-rack-facts strong{display:block;color:var(--navy);font-size:1rem}.emh-rack-note{font-size:.8rem;line-height:1.5;color:#6d777b}.emh-rack-actions{align-items:stretch}.emh-btn--rack{background:var(--navy);color:#fff}.emh-rack-atc button{height:100%;border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:15px 20px;font-weight:850;cursor:pointer}.emh-featured-sok{padding:68px 0 54px;background:linear-gradient(180deg,#f7f8f6 0%,#fff 100%);border-bottom:1px solid var(--line)}.emh-featured-sok__head{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;margin-bottom:24px}.emh-featured-sok__head>div:first-child{max-width:820px}.emh-featured-sok__head h2{font-size:clamp(2.15rem,4.6vw,4rem);line-height:1;margin:7px 0 12px;letter-spacing:-.045em;color:var(--navy)}.emh-featured-sok__head p:not(.emh-kicker){margin:0;color:#5d6870;line-height:1.6}.emh-carousel-controls{display:flex;gap:9px}.emh-carousel-button{width:46px;height:46px;border-radius:999px;border:1px solid #cfd8d3;background:#fff;color:var(--navy);font-size:1.65rem;line-height:1;cursor:pointer;box-shadow:0 5px 16px rgba(16,34,53,.06)}.emh-carousel-button:hover{border-color:#8fa69a}.emh-featured-sok__track{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(280px,31.5%);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:2px 2px 14px;overscroll-behavior-inline:contain;scrollbar-width:thin;align-items:stretch}.emh-featured-card{scroll-snap-align:start;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 12px 28px rgba(16,34,53,.045);display:flex;flex-direction:column;min-width:0;height:100%}.emh-featured-card__media{position:relative;display:flex;aspect-ratio:1/1;align-items:center;justify-content:center;background:linear-gradient(145deg,#f6f7f5,#eef2ef);overflow:hidden;text-decoration:none}.emh-featured-card__fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c3cbc6;font-weight:900;font-size:.8rem;letter-spacing:.14em}.emh-featured-card__image{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;padding:18px;background:#f7f7f5}.emh-featured-card__badge{position:absolute;z-index:2;top:12px;left:12px;background:var(--green);color:#fff;border-radius:999px;padding:7px 10px;font-size:.66rem;line-height:1;font-weight:900;letter-spacing:.07em}.emh-featured-card__copy{padding:18px;display:flex;flex-direction:column;flex:1}.emh-featured-card__copy h3{font-size:1rem;line-height:1.36;margin:0 0 12px;min-height:4.08em;max-height:4.08em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.emh-featured-card__copy h3 a{color:var(--navy);text-decoration:none}.emh-featured-card__price{font-size:1.18rem;font-weight:900;color:var(--navy);margin-top:auto;margin-bottom:14px}.emh-featured-card__actions{display:grid;grid-template-columns:1fr;gap:8px}.emh-btn--product,.emh-featured-card__atc button{width:100%;min-height:42px;border-radius:10px;padding:10px 12px;font-size:.79rem;font-weight:850}.emh-btn--product{background:var(--navy);color:#fff}.emh-featured-card__atc button{border:0;background:var(--navy);color:#fff;cursor:pointer}.emh-featured-card__atc,.emh-atc{display:grid;gap:8px}.emh-buy-now{width:100%;min-height:42px;border:0;border-radius:10px;padding:10px 14px;background:#2f624b;color:#fff;font-size:.82rem;font-weight:850;cursor:pointer}.emh-featured-sok__footer{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:10px;font-size:.78rem;color:#7a8580}.emh-featured-sok__all{font-weight:850;color:var(--navy);text-decoration:none;border-bottom:1px solid var(--navy);padding-bottom:3px}@media(max-width:1000px){.emh-featured-sok__track{grid-auto-columns:minmax(270px,44%)}}@media(max-width:900px){.emh-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.emh-rack-grid{grid-template-columns:1fr}.emh-rack-media{grid-template-columns:1fr 160px}.emh-rack-copy{max-width:760px}.emh-trust{grid-template-columns:repeat(2,1fr)}.emh-grid{grid-template-columns:repeat(2,1fr)}.emh-paths{grid-template-columns:1fr}.emh-support{grid-template-columns:1fr}.emh-support__media{min-height:320px}.emh-support__copy{padding:38px 32px}.emh-actions--stack{width:100%}}@media(max-width:620px){.emh-catalog{padding:48px 0}.emh-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.emh-catalog-card__copy{padding:11px}.emh-catalog-card__copy h3{font-size:.84rem;min-height:3.45em;max-height:3.45em}.emh-featured-sok{padding:48px 0 42px}.emh-featured-sok__head{align-items:flex-start}.emh-carousel-controls{display:none}.emh-featured-sok__track{grid-auto-columns:82%;gap:12px;margin-right:-14px;padding-right:14px}.emh-featured-card__copy{padding:15px}.emh-featured-card__actions{grid-template-columns:1fr}.emh-featured-sok__footer span{display:none}.emh-rack-feature{padding:48px 0}.emh-rack-media{grid-template-columns:1fr 110px}.emh-rack-main{min-height:320px}.emh-rack-secondary{min-height:180px}.emh-rack-copy h2{font-size:clamp(2.2rem,10vw,3.3rem)}.emh-rack-facts{grid-template-columns:1fr}.emh-rack-actions{flex-direction:column}.emh-wrap{width:min(100% - 28px,1240px)}.emh-hero{min-height:520px;background-position:58% center}.emh-hero__shade{background:linear-gradient(90deg,rgba(7,18,31,.9),rgba(7,18,31,.66))}.emh-hero__content{padding:54px 0;display:block}.emh-hero__copy{max-width:100%}.emh-hero__content h1{font-size:clamp(2.45rem,12vw,4.2rem)}.emh-trust{grid-template-columns:1fr 1fr}.emh-trust>div{padding:14px 12px}.emh-deals{padding:48px 0}.emh-heading{display:block}.emh-heading>a{display:inline-block;margin-top:16px}.emh-grid{grid-template-columns:1fr}.emh-card-actions{grid-template-columns:1fr}.emh-support{border-radius:18px}.emh-support__media{min-height:250px}.emh-support__copy{padding:30px 24px}}
 
 .emh-sok-tech{padding:68px 0;background:#071017;color:#fff;border-bottom:1px solid #18313d}
 .emh-sok-tech__head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:26px}
@@ -572,6 +618,7 @@
 .emh-olight-launch__aside{padding:30px;display:flex;flex-direction:column;justify-content:center}
 .emh-olight-launch__aside h2{font-size:clamp(2rem,3.2vw,3.5rem);line-height:1;letter-spacing:-.04em;margin:7px 0 15px;color:#fff}
 .emh-olight-launch__aside>p:not(.emh-kicker){color:#afbec7;line-height:1.65;margin:0}
+.emh-olight-launch__buy-form{display:flex;margin:0}.emh-buy-now--hero{width:auto;min-height:48px;padding:14px 20px;white-space:nowrap}
 @media(max-width:900px){.emh-olight-launch{grid-template-columns:1fr}.emh-olight-launch__media{min-height:360px}.emh-olight-launch__aside{padding:24px 18px 18px}}
 @media(max-width:620px){.emh-olight-launch{width:min(100% - 28px,1240px);margin:46px auto;padding:10px;border-radius:18px}.emh-olight-launch__media{min-height:300px}.emh-olight-launch__copy{left:18px;right:18px;bottom:18px}.emh-olight-launch__aside{padding:22px 12px 16px}}
 
@@ -615,6 +662,8 @@
 @media(max-width:900px){.emh-new-drops__grid{grid-template-columns:1fr 1fr}.emh-drop-card:last-child{grid-column:1/-1}.emh-drop-card:last-child .emh-drop-card__media{aspect-ratio:16/9}}
 @media(max-width:620px){.emh-new-drops{padding:48px 0}.emh-new-drops__head{display:block}.emh-new-drops__links{justify-content:flex-start;margin-top:15px}.emh-new-drops__links a{display:inline-block}.emh-new-drops__grid{grid-template-columns:1fr}.emh-drop-card:last-child{grid-column:auto}.emh-drop-card:last-child .emh-drop-card__media{aspect-ratio:1/1}.emh-drop-card__copy{padding:16px}}
 
+
+.emh-home-card__buy-form{display:grid;margin:0}.emh-home-card__buy-form .emh-buy-now{min-height:42px}.emh-home-card__actions{gap:9px}
 {% endstylesheet %}
 
 <script>
@@ -630,6 +679,30 @@
     if (next) next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
   })();
 </script>
+
+<style>
+/* MPM28 P0 purchasability restore */
+.emh-buy-now--link{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.emh-btn--secondary,.emh-btn--outline{border:1px solid rgba(255,255,255,.82)!important;background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.emh-view{min-height:44px!important;border-width:1px!important;font-weight:900!important}
+.emh-new-drops__links a,.emh-sok-card-links a,.emh-featured-sok__all{display:inline-flex!important;align-items:center;justify-content:center;min-height:42px;padding:10px 14px!important;border:1px solid rgba(255,255,255,.72)!important;border-radius:10px!important;text-decoration:none!important;font-weight:900!important}
+.emh-drop-commerce{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+.emh-drop-commerce__form{margin:0;width:100%}
+.emh-drop-details{display:flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border:1px solid currentColor;border-radius:10px;color:inherit;text-decoration:none;font-weight:900}
+@media(max-width:620px){.emh-btn,.emh-buy-now,.emh-view,.emh-drop-details{min-height:46px}.emh-actions{gap:10px}}
+</style>
+
+<style>
+/* MPM28 P0 featured Olight CTA consistency */
+.emh-featured-card__actions{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;margin-top:12px}
+.emh-featured-card__buy-form{margin:0;width:100%}
+.emh-featured-card__primary,.emh-featured-card__secondary{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;border-radius:10px;padding:10px 13px;text-align:center;text-decoration:none;font-size:.82rem;font-weight:900}
+.emh-featured-card__primary{background:#2f624b!important;color:#fff!important;border:1px solid #2f624b!important;box-shadow:0 5px 14px rgba(47,98,75,.18)}
+.emh-featured-card__primary:hover{background:#244f3c!important;border-color:#244f3c!important}
+.emh-featured-card__secondary{background:#fff;color:#0f2135;border:1px solid #0f2135}
+.emh-featured-card__secondary:hover{background:#f4f7f5}
+@media(max-width:620px){.emh-featured-card__primary,.emh-featured-card__secondary{min-height:46px}}
+</style>
 
 {% schema %}
 {"name":"Major conversion","settings":[],"presets":[{"name":"Major conversion"}]}
