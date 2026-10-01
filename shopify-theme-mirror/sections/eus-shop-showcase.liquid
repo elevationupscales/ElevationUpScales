@@ -131,6 +131,18 @@
               <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
               <strong>{{ product.price | money }}</strong>
               <a class="eus-shop-showcase__product-link" href="{{ product.url }}">View product →</a>
+              {% if product.available %}
+                {% if product.has_only_default_variant %}
+                  {% assign buy_v = product.selected_or_first_available_variant %}
+                  {% form 'product', product, class: 'eus-shop-showcase__buy-form' %}
+                    <input type="hidden" name="id" value="{{ buy_v.id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" name="checkout" class="eus-shop-showcase__buy-now">Buy now</button>
+                  {% endform %}
+                {% else %}
+                  <a class="eus-shop-showcase__buy-now eus-shop-showcase__buy-now--link" href="{{ product.url }}">Choose options</a>
+                {% endif %}
+              {% endif %}
             </div>
           </article>
           {% endif %}
@@ -231,5 +243,15 @@
 .eus-shop-showcase__brand-grid span{font-size:.8rem;color:#69756f}
 @media(max-width:900px){.eus-shop-showcase__lane-grid{grid-template-columns:1fr}.eus-shop-showcase__support-inner{grid-template-columns:1fr}.eus-shop-showcase__support-actions{justify-content:flex-start}.eus-shop-showcase__grid{grid-template-columns:1fr}.eus-shop-showcase__products{grid-template-columns:repeat(2,minmax(0,1fr))}.eus-shop-showcase__brand-grid,.eus-shop-showcase__brand-grid--catalog{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.eus-shop-showcase__hero{min-height:450px}.eus-shop-showcase__hero-copy{padding-block:48px}.eus-shop-showcase__intro{padding-block:48px 20px}.eus-shop-showcase__grid{gap:10px;padding-bottom:50px}.eus-shop-showcase__card{min-height:310px;border-radius:16px}.eus-shop-showcase__card-copy{left:18px;right:18px;bottom:17px}.eus-shop-showcase__featured{padding:50px 0}.eus-shop-showcase__section-head{display:block}.eus-shop-showcase__section-head>a{display:inline-block;margin-top:14px}.eus-shop-showcase__products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.eus-shop-showcase__products article>div{padding:11px}.eus-shop-showcase__brand-grid{grid-template-columns:1fr 1fr;gap:10px}.eus-shop-showcase__brand-grid a{padding:18px 14px}.eus-shop-showcase__brands{padding-block:50px}.eus-shop-showcase__catalog-end{padding-block:28px 50px;display:block}.eus-shop-showcase__catalog-end a{display:inline-block;margin-top:10px}}
+
+.eus-shop-showcase__buy-form{display:grid;margin-top:10px}
+.eus-shop-showcase__buy-now{min-height:42px;width:100%;border:0;border-radius:10px;background:var(--navy);color:#fff;font:inherit;font-size:.8rem;font-weight:900;cursor:pointer;padding:10px 14px}
+.eus-shop-showcase__buy-now:hover{background:var(--green)}
 {% endstylesheet %}
+<style>
+/* MPM28 P0 showcase actions */
+.eus-shop-showcase__buy-now--link{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.eus-shop-showcase__product-link{display:flex!important;align-items:center;justify-content:center;min-height:42px;padding:10px 13px;border:1px solid currentColor;border-radius:10px;text-decoration:none!important;font-weight:900!important}
+</style>
+
 {% schema %}{"name":"Shop showcase","settings":[],"presets":[{"name":"Shop showcase"}]}{% endschema %}

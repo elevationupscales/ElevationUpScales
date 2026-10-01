@@ -1,0 +1,72 @@
+<section class="elevation-kv-video" aria-label="Olight OSIGHT XE AMRS feature video">
+  <a
+    class="elevation-kv-video__desktop-link"
+    href="/products/olight-osight-xe-amrs-2-6-moa-dot-32-moa-circle-red-dot-sight"
+    aria-label="Shop Olight OSIGHT XE AMRS"
+  >
+    <video autoplay muted loop playsinline preload="metadata">
+      <source src="https://cdn.shopify.com/videos/c/vp/301c8025afe94f20afad1c93963c7d5b/301c8025afe94f20afad1c93963c7d5b.HD-1080p-7.2Mbps-95945931.mp4" type="video/mp4">
+    </video>
+    <span class="elevation-kv-video__desktop-cta">Shop OSIGHT XE AMRS <span aria-hidden="true">→</span></span>
+  </a>
+
+  <div class="elevation-kv-video__mobile">
+    <div class="elevation-kv-video__mobile-shade"></div>
+    <div class="elevation-kv-video__mobile-copy">
+      <p class="elevation-kv-video__eyebrow">FEATURED: OLIGHT OSIGHT XE AMRS • POWER • LIGHTING • OFF-GRID</p>
+      <h1>Power Beyond Limits.</h1>
+      <p class="elevation-kv-video__sub">Lithium power for mobile, backup and off-grid systems.</p>
+      <div class="elevation-kv-video__actions">
+        <a class="elevation-kv-video__button elevation-kv-video__button--primary" href="/products/olight-osight-xe-amrs-2-6-moa-dot-32-moa-circle-red-dot-sight">Shop OSIGHT XE AMRS</a>
+        <a class="elevation-kv-video__button elevation-kv-video__button--secondary" href="/collections/off-grid-power">Shop Power</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.elevation-kv-video{position:relative;background:#020609;overflow:hidden}
+.elevation-kv-video__desktop-link{position:relative;display:block;color:inherit;text-decoration:none}
+.elevation-kv-video video{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;background:#020609}
+.elevation-kv-video__desktop-cta{position:absolute;right:22px;bottom:20px;z-index:2;display:flex;align-items:center;justify-content:center;min-height:46px;padding:11px 16px;border-radius:10px;background:rgba(2,6,9,.78);border:1px solid rgba(255,255,255,.72);color:#fff;font-size:.84rem;font-weight:900;letter-spacing:.01em;backdrop-filter:blur(7px)}
+.elevation-kv-video__desktop-link:hover .elevation-kv-video__desktop-cta,.elevation-kv-video__desktop-link:focus-visible .elevation-kv-video__desktop-cta{background:#fff;color:#0f2135}
+.elevation-kv-video__mobile{display:none}
+@media(max-width:620px){
+  .elevation-kv-video__desktop-link{display:none}
+  .elevation-kv-video__mobile{
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    min-height:430px;
+    background:url('https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2R8A0265_65ec7441-d4e1-422e-841a-5dff52173b39.jpg?v=1790107803') 58% center/cover no-repeat;
+  }
+  .elevation-kv-video__mobile-shade{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(5,13,22,.12) 0%,rgba(5,13,22,.5) 44%,rgba(5,13,22,.93) 100%);
+  }
+  .elevation-kv-video__mobile-copy{
+    position:relative;z-index:1;width:min(100% - 28px,560px);margin:0 auto;padding:44px 0 34px;color:#fff;
+  }
+  .elevation-kv-video__eyebrow{margin:0 0 10px;color:#b8dccb;font-size:.68rem;line-height:1.35;font-weight:900;letter-spacing:.13em}
+  .elevation-kv-video__mobile h1{margin:0 0 12px;max-width:520px;color:#fff;font-size:clamp(2.55rem,12vw,4.15rem);line-height:.92;letter-spacing:-.05em}
+  .elevation-kv-video__sub{margin:0;max-width:500px;color:rgba(255,255,255,.88);font-size:1rem;line-height:1.52}
+  .elevation-kv-video__actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+  .elevation-kv-video__button{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 14px;border-radius:10px;text-decoration:none;font-size:.86rem;font-weight:900}
+  .elevation-kv-video__button--primary{background:#fff;color:#0f2135}
+  .elevation-kv-video__button--secondary{border:1px solid rgba(255,255,255,.7);background:rgba(7,18,31,.58);color:#fff}
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "XE AMRS video header",
+  "tag": "section",
+  "class": "section-kv-hero",
+  "settings": [],
+  "presets": [
+    {
+      "name": "XE AMRS video header"
+    }
+  ]
+}
+{% endschema %}

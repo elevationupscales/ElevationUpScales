@@ -1,0 +1,439 @@
+{% if collection.handle == 'olight' or collection.handle == 'olight-tactical-professional-lighting' %}
+{% assign is_tactical = false %}
+{% if collection.handle == 'olight-tactical-professional-lighting' %}{% assign is_tactical = true %}{% endif %}
+<section class="eus-olight-destination{% if is_tactical %} eus-olight-destination--tactical{% endif %}" aria-label="Olight">
+  {% assign hero_video = blank %}
+  {% if is_tactical %}
+    {% assign hero_image = 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/01_OSIGHT_R_Outdoor_Long_Range_2520c3ad-d433-430d-ae34-77f783501001.jpg?v=1790122780' %}
+    {% assign hero_alt = 'Olight OSIGHT R in an outdoor long-range setup' %}
+    {% assign eyebrow = 'OLIGHT TACTICAL & PROFESSIONAL' %}
+    {% assign headline = 'Ready When It Matters.' %}
+    {% assign subcopy = 'Purpose-built Olight lighting and optics for demanding outdoor, property, work and professional applications.' %}
+  {% else %}
+    {% assign hero_image = 'https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2R8A0200_e72d2856-72e2-4cc0-82f0-28ca4a6980eb.jpg?v=1790107803' %}
+    {% assign hero_video = 'https://cdn.shopify.com/videos/c/o/v/1c899e67ef154741adcc3351562e957b.mp4' %}
+    {% assign hero_alt = 'Olight dust and waterproof durability demonstration' %}
+    {% assign eyebrow = 'AUTHORIZED OLIGHT DEALER' %}
+    {% assign headline = 'Find Your Light.' %}
+    {% assign subcopy = 'Explore dependable Olight illumination for everyday carry, outdoor adventures, property, work, travel and the moments when light matters.' %}
+  {% endif %}
+
+  <div class="eus-olight-destination__hero">
+    {% if hero_video != blank %}
+      <video autoplay muted loop playsinline preload="metadata" poster="{{ hero_image }}" aria-label="{{ hero_alt }}">
+        <source src="{{ hero_video }}" type="video/mp4">
+      </video>
+    {% else %}
+      <img src="{{ hero_image }}&width=2200" alt="{{ hero_alt }}" loading="eager" fetchpriority="high" width="2200" height="1031">
+    {% endif %}
+    <div class="eus-olight-destination__hero-shade"></div>
+    <div class="eus-olight-destination__hero-copy page-width">
+      <span class="eus-olight-destination__eyebrow">{{ eyebrow }}</span>
+      <h1>{{ headline }}</h1>
+      <p>{{ subcopy }}</p>
+      <div class="eus-olight-destination__actions">
+        <a class="eus-olight-destination__button eus-olight-destination__button--primary" href="#olight-products">Shop Olight</a>
+        {% if is_tactical %}
+          <a class="eus-olight-destination__button" href="/collections/olight">Explore All Olight</a>
+        {% else %}
+          <a class="eus-olight-destination__button" href="/collections/olight-tactical-professional-lighting">Tactical &amp; Professional</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="eus-olight-destination__trust page-width">
+    <div><strong>Authorized Olight Dealer</strong><span>Official Olight products through Elevation UpScales</span></div>
+    <div><strong>Built for the Outdoors</strong><span>Lighting for travel, property, work and exploration</span></div>
+    <div><strong>Elevation Support</strong><span>U.S.-based retailer support before and after purchase</span></div>
+  </div>
+
+  {% unless is_tactical %}
+  <div class="eus-olight-destination__intro page-width">
+    <div>
+      <span class="eus-olight-destination__eyebrow">ILLUMINATE YOUR WORLD</span>
+      <h2>Light for the places you go and the work you do.</h2>
+    </div>
+    <p>From long-range handhelds and rugged everyday lights to professional optics, Elevation UpScales brings Olight into a broader equipment lineup built around outdoor, off-grid and property use.</p>
+  </div>
+
+  <div class="eus-olight-destination__paths page-width">
+    <a class="eus-olight-path" href="/products/olight-warrior-ultra-2-500-lumen-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2R8A9785_80be1376-5bb9-4cb2-ae4c-6f9a6a247aab.jpg?v=1790107802&width=1000" alt="Olight Warrior Ultra color lineup" loading="lazy" width="1000" height="667">
+      <span class="eus-olight-path__shade"></span>
+      <span class="eus-olight-path__copy"><small>EVERYDAY ILLUMINATION</small><strong>Warrior Ultra</strong><em>Shop the lineup →</em></span>
+    </a>
+    <a class="eus-olight-path" href="/products/olight-javelot-turbo-2-1-800-lumen-long-range-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/03_Javelot_Turbo_2_1500m_Beam_336579a7-ef2b-4900-90c3-ef695f48f76b.jpg?v=1790101953&width=1000" alt="Olight Javelot Turbo 2 long-range beam" loading="lazy" width="1000" height="667">
+      <span class="eus-olight-path__shade"></span>
+      <span class="eus-olight-path__copy"><small>CONQUER THE NIGHT</small><strong>Long-Range Lighting</strong><em>Explore Javelot Turbo 2 →</em></span>
+    </a>
+    <a class="eus-olight-path" href="/products/olight-osight-r-enclosed-red-dot-sight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/olight-osight-r-lifestyle-mounted-optic.jpg?v=1790121568&width=1000" alt="Olight OSIGHT R mounted outdoors" loading="lazy" width="1000" height="667">
+      <span class="eus-olight-path__shade"></span>
+      <span class="eus-olight-path__copy"><small>READY WHEN IT MATTERS</small><strong>OSIGHT Optics</strong><em>Explore OSIGHT R →</em></span>
+    </a>
+  </div>
+
+  <section class="eus-olight-new page-width" aria-label="New from Olight">
+    <a class="eus-olight-new__media" href="/pages/olight-pl-x-gl-gallery" aria-label="Explore the Olight PL X GL product gallery">
+      <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="https://cdn.shopify.com/videos/c/o/v/5d7e43c2074046168042ce8157002fe2.mp4" type="video/mp4">
+      </video>
+      <span class="eus-olight-new__shade"></span>
+      <span class="eus-olight-new__media-copy">
+        <small>NEW FROM OLIGHT</small>
+        <strong>PL X GL</strong>
+        <em>Explore the product gallery →</em>
+      </span>
+    </a>
+    <div class="eus-olight-new__copy">
+      <span class="eus-olight-destination__eyebrow">PRODUCT GALLERY</span>
+      <h2>Go beyond the listing.</h2>
+      <p>Explore the complete PL X GL image set, 3D breakdown, feature graphics and specifications in one dedicated product gallery.</p>
+      <a class="eus-olight-destination__button eus-olight-destination__button--primary" href="/pages/olight-pl-x-gl-gallery">Explore PL X GL</a>
+    </div>
+  </section>
+
+  {% assign osight_r = all_products['olight-osight-r-enclosed-red-dot-sight'] %}
+  {% if osight_r != blank %}
+  {% assign osight_r_variant = osight_r.selected_or_first_available_variant %}
+  <section class="eus-olight-osr page-width" aria-label="Featured Olight OSIGHT R">
+    <div class="eus-olight-osr__copy">
+      <span class="eus-olight-destination__eyebrow">FEATURED OPTICS</span>
+      <h2>OSIGHT R, in motion.</h2>
+      <p>See the OSIGHT R before you shop it. This feature brings Olight's launch media together with current retail pricing and a direct path to the product listing.</p>
+      <div class="eus-olight-osr__retail">
+        <strong>{{ osight_r_variant.price | money }}</strong>
+        {% if osight_r_variant.available %}
+          <span>Available to order</span>
+        {% else %}
+          <span>Check availability</span>
+        {% endif %}
+      </div>
+      <div class="eus-olight-osr__actions">
+        {% if osight_r_variant.available %}
+          {% form 'product', osight_r, class: 'eus-olight-osr__buy-form' %}
+            <input type="hidden" name="id" value="{{ osight_r_variant.id }}">
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" name="checkout" class="eus-olight-destination__button eus-olight-destination__button--primary eus-olight-osr__buy-now">Buy OSIGHT R now</button>
+          {% endform %}
+        {% endif %}
+        <a class="eus-olight-destination__button" href="{{ osight_r.url }}">View OSIGHT R</a>
+        <a class="eus-olight-osr__secondary" href="/pages/olight-osight-r-gallery">Explore the OSIGHT R profile →</a>
+      </div>
+    </div>
+
+    <div class="eus-olight-osr__media">
+      <video controls muted playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/11_OSIGHT_R_Ready_When_It_Matters_b7f8b790-a3d6-4862-858a-77b0e140a2cd.jpg?v=1790110309">
+        <source src="https://cdn.shopify.com/videos/c/o/v/bfe377f92ca44a74b28dce9185232e68.mp4" type="video/mp4">
+      </video>
+      <div class="eus-olight-osr__media-meta">
+        <span>NEW FROM OLIGHT</span>
+        <strong>OSIGHT R</strong>
+        <em>51-second promotional feature</em>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+  {% endunless %}
+
+  {% if is_tactical %}
+  {% assign tactical_osight = all_products['olight-osight-r-enclosed-red-dot-sight'] %}
+  {% assign tactical_osight_variant = tactical_osight.selected_or_first_available_variant %}
+  <div class="eus-olight-destination__intro page-width">
+    <div>
+      <span class="eus-olight-destination__eyebrow">TACTICAL &amp; PROFESSIONAL</span>
+      <h2>Professional lighting and optics, shown in motion.</h2>
+    </div>
+    <p>Explore Olight's professional lineup through product video, operating demonstrations and installation content before moving into the current collection.</p>
+  </div>
+
+  <section class="eus-tactical-video-hub page-width" aria-label="Olight tactical video features">
+    <div class="eus-tactical-video-hub__lead">
+      <video controls muted playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/11_OSIGHT_R_Ready_When_It_Matters_b7f8b790-a3d6-4862-858a-77b0e140a2cd.jpg?v=1790110309">
+        <source src="https://cdn.shopify.com/videos/c/o/v/bfe377f92ca44a74b28dce9185232e68.mp4" type="video/mp4">
+      </video>
+      <div class="eus-tactical-video-hub__lead-copy">
+        <span class="eus-olight-destination__eyebrow">FEATURED OPTICS</span>
+        <h2>OSIGHT R campaign feature.</h2>
+        <p>Start with the released OSIGHT R promotional film, then move into the operating and mounting demonstrations below.</p>
+        {% if tactical_osight != blank %}
+          <div class="eus-tactical-video-hub__retail">
+            <strong>{{ tactical_osight_variant.price | money }}</strong>
+            {% if tactical_osight_variant.available %}<span>Available to order</span>{% else %}<span>Check availability</span>{% endif %}
+          </div>
+          <a class="eus-olight-destination__button eus-olight-destination__button--primary" href="{{ tactical_osight.url }}">Shop OSIGHT R</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="eus-tactical-video-hub__grid">
+      <article class="eus-tactical-video-card">
+        <video controls muted playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/04_OSIGHT_R_NV_Control_Side_589ad7a6-7246-463a-a168-d5118dd6b5f6.jpg?v=1790110310">
+          <source src="https://cdn.shopify.com/videos/c/o/v/8f6941e0091c4d49b79f24eb8553e7ef.mp4" type="video/mp4">
+        </video>
+        <div><span>OSIGHT R</span><strong>Operation</strong><em>Controls, settings and product use</em></div>
+      </article>
+      <article class="eus-tactical-video-card">
+        <video controls muted playsinline preload="metadata" poster="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/08_OSIGHT_R_ARD_View_a5f5b317-0c54-4f0c-98e8-16ddb1ca2eeb.jpg?v=1790110310">
+          <source src="https://cdn.shopify.com/videos/c/o/v/7cc7977b4d7b43ef89866fc8e2027cc1.mp4" type="video/mp4">
+        </video>
+        <div><span>OSIGHT R</span><strong>Mounts &amp; ARD Installation</strong><em>Mounting and accessory setup</em></div>
+      </article>
+    </div>
+  </section>
+
+  <div class="eus-olight-destination__tactical-feature page-width">
+    <a href="/products/olight-warrior-x-4-2-600-lumen-long-throw-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/02_Warrior_X4_Performance_2600lm_630m.jpg?v=1790091800&width=1300" alt="Olight Warrior X 4 2600 lumen 630 meter performance" loading="lazy" width="1300" height="609">
+      <span><small>LONG-RANGE LIGHTING</small><strong>Warrior X 4</strong><em>2,600 lumens · 630 m throw →</em></span>
+    </a>
+    <a href="/products/olight-osight-r-enclosed-red-dot-sight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/08_OSIGHT_R_Studio_Action_1ca732eb-467e-453a-9fbf-f4a0250d912e.jpg?v=1790122779&width=1300" alt="Olight OSIGHT R studio action scene" loading="lazy" width="1300" height="867">
+      <span><small>PROFESSIONAL OPTICS</small><strong>OSIGHT R</strong><em>Enclosed multi-reticle optic →</em></span>
+    </a>
+  </div>
+  {% endif %}
+
+  <div class="eus-olight-destination__gallery-head page-width">
+    <div>
+      <span class="eus-olight-destination__eyebrow">{% if is_tactical %}READY WHEN IT MATTERS{% else %}LIGHT UP EVERY ADVENTURE{% endif %}</span>
+      <h2>{% if is_tactical %}Professional lighting and optics in focus.{% else %}Explore Olight in action.{% endif %}</h2>
+    </div>
+    <p>Choose a scene to shop the featured product or explore the related Olight collection.</p>
+  </div>
+
+  <div class="eus-olight-destination__gallery page-width">
+    <a class="eus-olight-gallery-card eus-olight-gallery-card--wide" href="/products/olight-warrior-ultra-2-500-lumen-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2R8A9832_662f0910-3435-477e-854d-016fa4bc60b3.jpg?v=1790107803&width=1400" alt="Olight Warrior Ultra illuminating a wooded trail at night" loading="lazy" width="1400" height="933">
+      <span>Built for the Outdoors <b>Warrior Ultra →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-warrior-ultra-2-500-lumen-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2R8A0778_1f3e7ee7-fad0-4411-ab6f-afc1341a5e0d.jpg?v=1790107803&width=900" alt="Olight Warrior Ultra waterproof durability demonstration" loading="lazy" width="900" height="600">
+      <span>Ready for the Elements <b>Warrior Ultra →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-warrior-x-4-2-600-lumen-long-throw-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/02_Warrior_X4_Performance_2600lm_630m.jpg?v=1790091800&width=900" alt="Olight Warrior X 4 beam performance" loading="lazy" width="900" height="422">
+      <span>Go the Distance <b>Warrior X 4 →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-warrior-x-4-2-600-lumen-long-throw-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/olight-warrior-x4-tail-switch_2cf1ba54-d963-416c-a183-e1e29199ac64.jpg?v=1790093377&width=900" alt="Olight Warrior X 4 tail switch and charging interface" loading="lazy" width="900" height="600">
+      <span>Fast Control <b>Warrior X 4 →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card eus-olight-gallery-card--wide" href="/products/olight-javelot-turbo-2-1-800-lumen-long-range-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/03_Javelot_Turbo_2_1500m_Beam_336579a7-ef2b-4900-90c3-ef695f48f76b.jpg?v=1790101953&width=1400" alt="Olight Javelot Turbo 2 1500 meter beam" loading="lazy" width="1400" height="933">
+      <span>Conquer the Night <b>Javelot Turbo 2 →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-javelot-turbo-2-1-800-lumen-long-range-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/08_Javelot_Turbo_2_Handheld_b4335b54-f0cc-49db-a83a-b5865eb0e3b4.jpg?v=1790101953&width=900" alt="Olight Javelot Turbo 2 handheld" loading="lazy" width="900" height="600">
+      <span>Long-Range Control <b>Javelot Turbo 2 →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-osight-r-enclosed-red-dot-sight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/olight-osight-r-lifestyle-mounted-optic.jpg?v=1790121568&width=900" alt="Olight OSIGHT R mounted outdoors" loading="lazy" width="900" height="600">
+      <span>Find Your Focus <b>OSIGHT R →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-osight-r-enclosed-red-dot-sight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/02_OSIGHT_R_Field_Closeup_c40670e5-fdc6-4e80-be75-59fa91cdd608.jpg?v=1790122780&width=900" alt="Olight OSIGHT R field close-up" loading="lazy" width="900" height="600">
+      <span>Built for Visibility <b>OSIGHT R →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card eus-olight-gallery-card--wide" href="/products/olight-osight-r-enclosed-red-dot-sight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/11_OSIGHT_R_Ready_When_It_Matters_b7f8b790-a3d6-4862-858a-77b0e140a2cd.jpg?v=1790110309&width=1400" alt="Olight OSIGHT R Ready When It Matters feature" loading="lazy" width="1400" height="933">
+      <span>Ready When It Matters <b>OSIGHT R →</b></span>
+    </a>
+    <a class="eus-olight-gallery-card" href="/products/olight-warrior-ultra-2-500-lumen-rechargeable-flashlight">
+      <img src="https://cdn.shopify.com/s/files/1/1035/5353/2273/files/2R8A9785_80be1376-5bb9-4cb2-ae4c-6f9a6a247aab.jpg?v=1790107802&width=900" alt="Olight Warrior Ultra in three colors" loading="lazy" width="900" height="600">
+      <span>Choose Your Light <b>Warrior Ultra →</b></span>
+    </a>
+  </div>
+
+  <div class="eus-olight-destination__shop-intro page-width" id="olight-products">
+    <span class="eus-olight-destination__eyebrow">SHOP OLIGHT AT ELEVATION</span>
+    <h2>{% if is_tactical %}Tactical &amp; Professional Products{% else %}Featured Olight Products{% endif %}</h2>
+    <p>Official Olight products with Elevation UpScales retailer support.</p>
+  </div>
+</section>
+
+<style>
+body:has(.eus-olight-destination) .shopify-section:has(.eus-olight-destination) + .shopify-section{display:none}
+.eus-olight-destination{background:#05080b;color:#fff;padding-bottom:20px}
+.eus-olight-destination__hero{position:relative;min-height:660px;display:flex;align-items:flex-end;overflow:hidden;background:#05080b}
+.eus-olight-destination__hero>img,.eus-olight-destination__hero>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.eus-olight-destination__hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,7,10,.95) 0%,rgba(3,7,10,.72) 40%,rgba(3,7,10,.2) 72%,rgba(3,7,10,.03) 100%),linear-gradient(0deg,rgba(3,7,10,.75),transparent 52%)}
+.eus-olight-destination__hero-copy{position:relative;z-index:2;width:100%;padding-top:110px;padding-bottom:78px}
+.eus-olight-destination__eyebrow{display:inline-block;margin-bottom:14px;color:#58d4f4;font-size:.72rem;font-weight:850;letter-spacing:.18em;text-transform:uppercase}
+.eus-olight-destination h1{max-width:760px;margin:0 0 18px;font-size:clamp(3rem,6vw,6.2rem);line-height:.92;letter-spacing:-.055em;color:#fff}
+.eus-olight-destination__hero-copy p{max-width:720px;margin:0;color:#d8e1e7;font-size:1.08rem;line-height:1.65}
+.eus-olight-destination__actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.eus-olight-destination__button{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border:1px solid rgba(255,255,255,.48);border-radius:9px;color:#fff;text-decoration:none;font-weight:800}
+.eus-olight-destination__button--primary{background:#fff;color:#071018;border-color:#fff}
+.eus-olight-destination__trust{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#22313a;border:1px solid #22313a;margin-top:0}
+.eus-olight-destination__trust>div{background:#091017;padding:24px}
+.eus-olight-destination__trust strong,.eus-olight-destination__trust span{display:block}
+.eus-olight-destination__trust strong{font-size:1rem;margin-bottom:6px}
+.eus-olight-destination__trust span{color:#9eafb9;font-size:.9rem;line-height:1.45}
+.eus-olight-destination__intro,.eus-olight-destination__gallery-head{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:end;padding-top:72px;padding-bottom:30px}
+.eus-olight-destination__intro h2,.eus-olight-destination__gallery-head h2,.eus-olight-destination__shop-intro h2{margin:0;color:#fff;font-size:clamp(2.2rem,4.6vw,4.6rem);line-height:.98;letter-spacing:-.045em}
+.eus-olight-destination__intro p,.eus-olight-destination__gallery-head p,.eus-olight-destination__shop-intro p{margin:0;color:#aebbc4;line-height:1.65}
+.eus-olight-destination__paths{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.eus-olight-path{position:relative;display:block;min-height:390px;border-radius:18px;overflow:hidden;color:#fff;text-decoration:none;background:#0b1218}
+.eus-olight-path img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+.eus-olight-path:hover img{transform:scale(1.025)}
+.eus-olight-path__shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(3,7,10,.92),rgba(3,7,10,.12) 68%)}
+.eus-olight-path__copy{position:absolute;inset:auto 22px 22px;z-index:2}
+.eus-olight-path__copy small,.eus-olight-path__copy strong,.eus-olight-path__copy em{display:block}
+.eus-olight-path__copy small{font-size:.68rem;letter-spacing:.14em;color:#6adcf8;font-weight:850}
+.eus-olight-path__copy strong{font-size:1.45rem;margin:5px 0 4px}
+.eus-olight-path__copy em{font-style:normal;color:#d7e1e7;font-size:.9rem}
+.eus-olight-destination__tactical-feature{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+.eus-olight-destination__tactical-feature a{position:relative;display:block;min-height:420px;border-radius:18px;overflow:hidden;color:#fff;text-decoration:none;background:#0b1218}
+.eus-olight-destination__tactical-feature img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.eus-olight-destination__tactical-feature a:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(3,7,10,.92),rgba(3,7,10,.08) 65%)}
+.eus-olight-destination__tactical-feature span{position:absolute;z-index:2;left:24px;right:24px;bottom:24px}
+.eus-olight-destination__tactical-feature small,.eus-olight-destination__tactical-feature strong,.eus-olight-destination__tactical-feature em{display:block}
+.eus-olight-destination__tactical-feature small{color:#67daf5;font-size:.68rem;font-weight:850;letter-spacing:.14em}
+.eus-olight-destination__tactical-feature strong{font-size:1.6rem;margin:5px 0}
+.eus-olight-destination__tactical-feature em{font-style:normal;color:#d4dee4}
+.eus-olight-destination__gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:270px;gap:12px;padding-bottom:68px}
+.eus-olight-gallery-card{position:relative;overflow:hidden;border-radius:14px;background:#0c151b;color:#fff;text-decoration:none}
+.eus-olight-gallery-card--wide{grid-column:span 2}
+.eus-olight-gallery-card img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+.eus-olight-gallery-card:hover img{transform:scale(1.025)}
+.eus-olight-gallery-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,7,11,.88),transparent 62%)}
+.eus-olight-gallery-card>span{position:absolute;z-index:2;left:16px;right:16px;bottom:15px;font-size:.78rem;color:#d7e2e8}
+.eus-olight-gallery-card b{display:block;color:#fff;font-size:1rem;margin-top:3px}
+.eus-olight-media-story{padding-top:26px;padding-bottom:72px}
+.eus-olight-media-story__head{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:end;padding:44px 0 28px}
+.eus-olight-media-story__head h2{margin:0;color:#fff;font-size:clamp(2.2rem,4.6vw,4.6rem);line-height:.98;letter-spacing:-.045em}
+.eus-olight-media-story__head p{margin:0;color:#aebbc4;line-height:1.65}
+.eus-olight-profile{margin-top:18px;padding:18px;border:1px solid #20303a;border-radius:22px;background:#081017}
+.eus-olight-profile__cinema{position:relative;display:block;min-height:330px;border-radius:16px;overflow:hidden;background:#03070a;color:#fff;text-decoration:none}
+.eus-olight-profile__cinema video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.eus-olight-profile__cinema-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,6,9,.9),rgba(2,6,9,.08) 68%)}
+.eus-olight-profile__cinema-copy{position:absolute;z-index:2;left:24px;right:24px;bottom:22px}
+.eus-olight-profile__cinema-copy small,.eus-olight-profile__cinema-copy strong,.eus-olight-profile__cinema-copy em{display:block}
+.eus-olight-profile__cinema-copy small{color:#67daf5;font-size:.7rem;font-weight:850;letter-spacing:.16em}
+.eus-olight-profile__cinema-copy strong{font-size:clamp(1.7rem,3vw,3rem);margin:4px 0}
+.eus-olight-profile__cinema-copy em{font-style:normal;color:#d7e1e7}
+.eus-olight-profile__copy{padding:28px 8px 18px}
+.eus-olight-profile__copy h3{margin:0 0 10px;color:#fff;font-size:clamp(2rem,3.6vw,3.5rem);line-height:1;letter-spacing:-.04em}
+.eus-olight-profile__copy p{max-width:760px;margin:0 0 22px;color:#aebbc4;line-height:1.65}
+.eus-olight-profile__media-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.eus-olight-video-card{margin:0;overflow:hidden;border-radius:14px;background:#0d171e;border:1px solid #1d2c35}
+.eus-olight-video-card video{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#03070a}
+.eus-olight-video-card--tall video{aspect-ratio:16/10;object-position:center 38%}
+.eus-olight-video-card figcaption{padding:14px}
+.eus-olight-video-card figcaption strong,.eus-olight-video-card figcaption span{display:block}
+.eus-olight-video-card figcaption strong{color:#fff;margin-bottom:4px}
+.eus-olight-video-card figcaption span{color:#8fa2ad;font-size:.86rem;line-height:1.45}
+.eus-olight-profile--osight-se{display:grid;grid-template-columns:1.35fr .65fr;gap:12px;align-items:stretch;margin-top:22px}
+.eus-olight-profile--osight-se .eus-olight-profile__copy{display:flex;flex-direction:column;justify-content:center;padding:30px}
+.eus-olight-profile__cinema--static{min-height:360px}
+.eus-olight-destination__shop-intro{padding-top:16px;padding-bottom:30px}
+.eus-olight-destination__shop-intro h2{font-size:clamp(2rem,4vw,3.5rem);margin-bottom:8px}
+@media(max-width:900px){
+  .eus-olight-destination__hero{min-height:560px}
+  .eus-olight-destination__hero>img{object-position:62% center}.eus-olight-destination__hero>video{object-position:center}
+  .eus-olight-destination__hero-shade{background:linear-gradient(0deg,rgba(3,7,10,.96) 0%,rgba(3,7,10,.74) 55%,rgba(3,7,10,.18) 100%)}
+  .eus-olight-destination__hero-copy{padding-top:220px;padding-bottom:48px}
+  .eus-olight-destination__trust{grid-template-columns:1fr}
+  .eus-olight-destination__intro,.eus-olight-destination__gallery-head,.eus-olight-media-story__head{grid-template-columns:1fr;gap:16px;padding-top:54px}
+  .eus-olight-profile__media-grid{grid-template-columns:repeat(2,1fr)}
+  .eus-olight-profile--osight-se{grid-template-columns:1fr}
+  .eus-olight-destination__paths{grid-template-columns:1fr}
+  .eus-olight-path{min-height:330px}
+  .eus-olight-destination__tactical-feature{grid-template-columns:1fr}
+  .eus-olight-destination__gallery{grid-template-columns:repeat(2,1fr);grid-auto-rows:240px}
+  .eus-olight-gallery-card--wide{grid-column:span 2}
+}
+@media(max-width:560px){
+  .eus-olight-destination__hero{min-height:520px}
+  .eus-olight-destination__hero>img{object-position:68% center}.eus-olight-destination__hero>video{object-fit:contain;object-position:center;background:#05080b}
+  .eus-olight-destination h1{font-size:clamp(2.7rem,14vw,4.3rem)}
+  .eus-olight-destination__hero-copy{padding-top:210px;padding-bottom:38px}
+  .eus-olight-destination__gallery{grid-template-columns:1fr;grid-auto-rows:260px;gap:9px}
+  .eus-olight-gallery-card--wide{grid-column:span 1}
+  .eus-olight-path{min-height:300px}
+  .eus-olight-profile{padding:10px;border-radius:16px}
+  .eus-olight-profile__cinema{min-height:230px}
+  .eus-olight-profile__media-grid{grid-template-columns:1fr}
+  .eus-olight-profile--osight-se .eus-olight-profile__copy{padding:24px 12px}
+  .eus-olight-video-card video{aspect-ratio:16/9}
+  .eus-olight-video-card--tall video{aspect-ratio:9/12}
+}
+
+.eus-olight-new{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;align-items:stretch;padding-top:54px;padding-bottom:70px}
+.eus-olight-new__media{position:relative;display:block;min-height:390px;border-radius:20px;overflow:hidden;background:#020609;color:#fff;text-decoration:none;border:1px solid #18313c}
+.eus-olight-new__media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.eus-olight-new__shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,7,10,.92),rgba(2,7,10,.05) 68%)}
+.eus-olight-new__media-copy{position:absolute;z-index:2;left:24px;right:24px;bottom:22px}
+.eus-olight-new__media-copy small,.eus-olight-new__media-copy strong,.eus-olight-new__media-copy em{display:block}
+.eus-olight-new__media-copy small{font-size:.68rem;font-weight:900;letter-spacing:.15em;color:#62d9f5}
+.eus-olight-new__media-copy strong{font-size:clamp(2.2rem,4.5vw,4.6rem);line-height:.9;letter-spacing:-.045em;margin:6px 0 8px}
+.eus-olight-new__media-copy em{font-style:normal;color:#e1ebf0;font-weight:800}
+.eus-olight-new__copy{padding:34px;display:flex;flex-direction:column;justify-content:center;border:1px solid #18313c;border-radius:20px;background:#091119}
+.eus-olight-new__copy h2{font-size:clamp(2rem,3.6vw,3.7rem);line-height:.98;letter-spacing:-.045em;margin:0 0 12px;color:#fff}
+.eus-olight-new__copy p{color:#aebbc4;line-height:1.65;margin:0 0 22px}
+@media(max-width:900px){.eus-olight-new{grid-template-columns:1fr}.eus-olight-new__media{min-height:340px}.eus-olight-new__copy{padding:28px}}
+@media(max-width:560px){.eus-olight-new{padding-top:38px;padding-bottom:48px}.eus-olight-new__media{min-height:280px}.eus-olight-new__copy{padding:24px 18px}}
+
+
+.eus-olight-osr{display:grid;grid-template-columns:.72fr 1.28fr;gap:16px;align-items:stretch;padding-bottom:74px}
+.eus-olight-osr__copy{padding:38px;border:1px solid #18313c;border-radius:20px;background:#091119;display:flex;flex-direction:column;justify-content:center}
+.eus-olight-osr__copy h2{font-size:clamp(2.2rem,4vw,4rem);line-height:.96;letter-spacing:-.045em;margin:8px 0 14px;color:#fff}
+.eus-olight-osr__copy p{color:#aebbc4;line-height:1.65;margin:0 0 22px}
+.eus-olight-osr__retail{display:flex;align-items:baseline;gap:12px;margin-bottom:24px}
+.eus-olight-osr__retail strong{font-size:1.7rem;color:#fff}
+.eus-olight-osr__retail span{font-size:.78rem;color:#9fe2bb;font-weight:800}
+.eus-olight-osr__actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.eus-olight-osr__secondary{color:#dce8ee;text-decoration:none;font-weight:800;font-size:.88rem}
+.eus-olight-osr__secondary:hover{text-decoration:underline}
+.eus-olight-osr__media{position:relative;min-height:460px;border:1px solid #18313c;border-radius:20px;overflow:hidden;background:#020609}
+.eus-olight-osr__media video{width:100%;height:100%;display:block;object-fit:contain;background:#020609}
+.eus-olight-osr__media-meta{position:absolute;left:18px;bottom:18px;background:rgba(4,10,14,.86);backdrop-filter:blur(10px);padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12)}
+.eus-olight-osr__media-meta span,.eus-olight-osr__media-meta strong,.eus-olight-osr__media-meta em{display:block}
+.eus-olight-osr__media-meta span{font-size:.64rem;letter-spacing:.14em;color:#63d9f5;font-weight:900}
+.eus-olight-osr__media-meta strong{font-size:1.15rem;color:#fff;margin-top:3px}
+.eus-olight-osr__media-meta em{font-size:.75rem;color:#aebbc4;font-style:normal;margin-top:2px}
+@media(max-width:900px){.eus-olight-osr{grid-template-columns:1fr}.eus-olight-osr__media{min-height:400px}.eus-olight-osr__copy{padding:30px}}
+@media(max-width:560px){.eus-olight-osr{padding-bottom:50px}.eus-olight-osr__copy{padding:24px 18px}.eus-olight-osr__media{min-height:520px}.eus-olight-osr__actions{align-items:flex-start;flex-direction:column}}
+
+
+.eus-tactical-video-hub{padding-bottom:72px}
+.eus-tactical-video-hub__lead{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;background:#081119;border:1px solid #1a3441;border-radius:22px;overflow:hidden}
+.eus-tactical-video-hub__lead video{display:block;width:100%;height:100%;min-height:520px;object-fit:contain;background:#020609}
+.eus-tactical-video-hub__lead-copy{padding:38px;display:flex;flex-direction:column;justify-content:center}
+.eus-tactical-video-hub__lead-copy h2{font-size:clamp(2.2rem,4vw,4.2rem);line-height:.96;letter-spacing:-.045em;margin:8px 0 14px;color:#fff}
+.eus-tactical-video-hub__lead-copy p{color:#aebbc4;line-height:1.65;margin:0 0 22px}
+.eus-tactical-video-hub__retail{display:flex;align-items:baseline;gap:12px;margin-bottom:22px}
+.eus-tactical-video-hub__retail strong{font-size:1.8rem;color:#fff}
+.eus-tactical-video-hub__retail span{font-size:.78rem;color:#9fe2bb;font-weight:800}
+.eus-tactical-video-hub__grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.eus-tactical-video-card{overflow:hidden;border:1px solid #1a3441;border-radius:18px;background:#09131a}
+.eus-tactical-video-card video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#020609}
+.eus-tactical-video-card>div{padding:15px 18px}
+.eus-tactical-video-card span,.eus-tactical-video-card strong,.eus-tactical-video-card em{display:block}
+.eus-tactical-video-card span{color:#63d9f5;font-size:.68rem;font-weight:900;letter-spacing:.13em}
+.eus-tactical-video-card strong{font-size:1.05rem;color:#fff;margin-top:4px}
+.eus-tactical-video-card em{font-size:.8rem;color:#8fa3ae;font-style:normal;margin-top:3px}
+@media(max-width:900px){.eus-tactical-video-hub__lead{grid-template-columns:1fr}.eus-tactical-video-hub__lead video{min-height:380px}.eus-tactical-video-hub__lead-copy{padding:30px}.eus-tactical-video-hub__grid{grid-template-columns:1fr}}
+@media(max-width:560px){.eus-tactical-video-hub{padding-bottom:50px}.eus-tactical-video-hub__lead-copy{padding:24px 18px}.eus-tactical-video-hub__lead video{min-height:460px}}
+
+</style>
+{% endif %}
+
+<style>
+/* MPM28 P0 Olight commerce actions */
+.eus-olight-osr__buy-form{margin:0}
+.eus-olight-osr__buy-now{border:0;cursor:pointer;font:inherit}
+.eus-olight-destination__button{min-height:46px;font-weight:900!important}
+</style>
+
+{% schema %}
+{
+  "name":"Olight Brand Destination",
+  "enabled_on":{"templates":["collection"]},
+  "settings":[],
+  "presets":[{"name":"Olight Brand Destination"}]
+}
+{% endschema %}
