@@ -1,9 +1,9 @@
 # ELEVATION UPSCALES — CURRENT WORK BOARD
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-09-29  
+**Effective:** 2026-10-02  
 **Owner:** Casey Young  
-**State Owner:** **OS 1 / Operating System Project Manager — MPM 27 continuity**  
+**State Owner:** **OS 1 / Operating System Project Manager — MPM 28 continuity**  
 **Web / Commerce Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
 **Active Execution Workflow:** `MPM_ACTIVE_EXECUTION_WORKFLOW_2026-09-17.md`
 
@@ -21,16 +21,17 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
-# OS 1 CONTROL ALIGNMENT — 2026-09-29
+# OS 1 / MPM 28 CONTROL ALIGNMENT — 2026-10-02
 
 **STATE: CURRENT / CONTROLLING**
 
 Current owner-established project control:
-- **OS 1 / Operating System is the live company control system.**
-- **MPM 27 is the current manager continuity inside OS 1.**
-- MPM 25 and MPM 26 remain inherited execution/history checkpoints; they do not become parallel authority layers.
-- **OS 2 / Operating System 2.0 is non-controlling legacy/transitional evidence.** Reuse valid evidence only after reconciling it to current OS 1 truth.
-- **OS 3 / Agent Manager is beta/development only.** It has no production or company-control authority unless the owner explicitly promotes it.
+- **OS 1 / Operating System is the active company management/control system.**
+- **MPM 28 is the current manager continuity inside OS 1.**
+- MPM 27 and earlier MPM sessions remain inherited history/evidence; they do not become parallel authority layers.
+- **OS 2 / Operating System 2.0 is RETIRED.** Do not route new work through it.
+- **OS 3 / Agent Manager is an ACTIVE API EXECUTION / CONTROL SYSTEM used alongside MPM 28.** It may perform bounded API execution, acceptance, verification, and audited workflows under its own gates. It does not replace OS 1 management authority and does not infer production, payment, external-send, or unrelated mutation authority.
+- Current accepted OS 3 baseline is maintained in `elevationupscales/elevationupscales-elevation-agent-manager`; accepted OS 3 main at this transition is `1e6970dd1fb59b82ae7e5adbf92b58c681794969`.
 - Current direct owner instruction remains highest authority.
 - Current accepted `main` remains technical state truth.
 - Do not create another OS layer, master work board, or parallel control hierarchy.
@@ -58,11 +59,9 @@ Current recovery control:
 
 ---
 
-# MPM 25 OPERATING RHYTHM — INHERITED BY MPM 27 — 2026-09-28
+# MPM 28 OPERATING RHYTHM — 2026-10-02
 
-**STATE: ACTIVE CADENCE / HISTORICAL ORIGIN**
-
-MPM 25 re-established the execution rhythm after the recon/crash cycle. MPM 27 inherits this cadence unless newer owner direction changes it.
+**STATE: ACTIVE MANAGEMENT CADENCE**
 
 Current management cadence:
 
@@ -72,20 +71,39 @@ Individual-work cadence:
 
 **VERIFY ONCE → EXECUTE → VERIFY RESULT → RECORD MATERIAL CHANGE → NEXT**
 
+Waiting-external rule:
+
+```
+BLOCKED LANE
+↓
+WAITING EXTERNAL
+↓
+REMOVE FROM ACTIVE WORK QUEUE
+↓
+CONTINUE OTHER INDEPENDENT WORK
+```
+
+A waiting lane re-enters active work only when a new external reply arrives, materially new evidence appears, or Casey explicitly reactivates it.
+
 Immediate management stack:
-- **P0 — First Hawaii SOK order:** customer payment received; SOK supplier invoice issued; supplier payment/release remains blocked by the current payment/verification hold. Do not restart freight or document recon while this gate is unchanged.
-- **P0 — eBay paid-order fulfillment:** paid orders with Sep. 30 ship-by deadlines outrank catalog polishing. Order `01-15237-94168` is matched to Doba order `26092717652196`, which remains unpaid and is at risk of auto-cancellation; resolve fulfillment/payment or alternate sourcing before the customer deadline.
-- **P1 — Olight revenue lane:** Kiki confirmed on 2026-09-28 that the five new releases are launched and that Olight has sufficient inventory to support sales. Reconcile the current supplier workbook against live Shopify one bounded product family at a time; preserve accepted profiles and keep the Oclip 2 Ultra Premium SKU/color mapping conflict on HOLD until supplier confirmation.
-- **WAITING EXTERNAL:** Logistics Plus Hawaii operating review, Doba management/accounting escalation, and other already-requested external replies leave the active execution queue until new evidence arrives.
-- **P2 / PARKED:** Puerto Rico expansion and OS 3.0 / Agent Manager remain planning/qualification work and do not displace P0/P1 execution.
+- **P0 — Paid customer fulfillment:** paid customer obligations outrank catalog polish or blocked-account recon. eBay fulfillment remains at the front of this lane until current paid-order obligations are reconciled and completed.
+- **P0 — MPM 28 continuity:** canonical control documents, active queue, and worker routing must reflect the current OS 1 / OS 2 / OS 3 model.
+- **P1 — OS 3 production acceptance / controlled expansion:** continue bounded API acceptance work independent of PayPal. Current accepted OS 3 main baseline is `1e6970dd1fb59b82ae7e5adbf92b58c681794969`; eBay read-only foundation remains an active controlled-expansion lane until separately accepted.
+- **P1 — Shopify/CJ commerce workflow:** Shopify specialist acceptance and CJ → Shopify controlled workflow may continue under exact approval, read-after-write, audit, and independent-verification gates.
+- **P1 — Google Merchant repair:** treat as an active revenue/acquisition blocker.
+- **P1 — Hawaii SOK physical movement/payment path:** logistics model is proven; first physical order still requires completion proof through supplier release / tender / movement / receipt as applicable.
+- **P1 — Olight domestic revenue + global qualification:** domestic lane remains active; international/global expansion stays qualification-gated.
+- **WAITING EXTERNAL — PayPal complaint/account review:** no repeated recon or escalation while there is no new PayPal evidence. PayPal is not a global blocker.
+- **WAITING EXTERNAL — Signature Solar EG4 freight package:** hold until supplier freight/hazardous-goods data advances.
+- **HOLD — PayPal-dependent work:** only work specifically requiring restored PayPal capability remains held.
 
 Control:
-- **MPM 27 manages inside OS 1.**
+- **MPM 28 manages inside OS 1.**
 - Recon verifies when routed; recon does not become a parallel manager.
-- **OS 2 is non-controlling reference/evidence only.**
-- **OS 3 is beta/development only and not current authority.**
-- Do not create duplicate recon, duplicate workboards, or another OS layer.
+- **OS 2 is retired.**
+- **OS 3 is active bounded execution/control alongside MPM 28.**
 - Waiting work leaves the active queue until its external state changes.
+- One blocked lane does not block another clean revenue or acceptance lane.
 
 ---
 
@@ -163,28 +181,41 @@ Primary measurement:
 
 Do not use total catalog count as a storefront-success metric.
 
-# CURRENT PRIORITIES
+# CURRENT PRIORITIES — MPM 28 ACTIVE STACK
+
+This table is the current queue and supersedes older priority ordering elsewhere in this file where there is a conflict. Detailed downstream workstream sections remain supporting context only.
 
 | Priority | Work Item | Execution Owner | State | Next Action |
 |---|---|---|---|---|
-| **P0** | Core lineup merchandising + purchaseability | Shopify Store Operations / Commerce-Storefront; Recon-QA verifies | **ACTIVE — OWNER DIRECTED** | Lock the Core 12, rebuild homepage hierarchy without redesign, expose three buying lanes, run trust pass, smoke all 12 purchase paths, then market only after clean evidence. |
-| **P0** | Web / commerce stabilization | Web V2 Development | **ACTIVE — SUPPORTING BOUNDED DEFECT REPAIR** | Repair only exact defects exposed by the Core 12 smoke. No broad redesign. Build/test on branch and stop at READY TO DEPLOY. |
-| **P0** | Store purchaseability + customer-path QA | Recon / QA verification supporting Development | **ACTIVE — READ/VERIFY** | Verify card → detail → CTA → quote/cart/checkout consistency; return exact defects to Development. Do not deploy. |
-| **P1** | Renogy Hawaii / Alaska / Canada expansion + click conversion | Shopify Store Operations under Peter; Commerce/Storefront; Shipping & Logistics; OS RECON | **ACTIVE — SUPPORTING / NO LONGER STORE LEAD** | Preserve verified market routes and use them where they support the Core 12. Do not let destination expansion outrank the core conversion pass. |
-| **P1** | Master catalog economics / product truth | Company Operations + Vendor Projects | **ACTIVE — SOK MODEL ESTABLISHED** | Reuse the public-safe SOK truth pattern vendor by vendor: exact SKU, protected cost source, MAP/floor, shipping, channel fees, contribution state, stock, authorization, warranty/returns, source and verification state. Keep protected dealer costs/raw inventory out of public Git. |
-| **P1** | Olight launch / catalog truth | Company Operations + Ecommerce & Vendor Operations / Peter | **ACTIVE — 19 RECORDS / 15 ACTIVE + 4 DRAFT / LIVE OLIGHT AVAILABILITY RULE ENFORCED** | Live Shopify now contains 19 Olight product records: 15 ACTIVE and 4 DRAFT. Oclip 2 Pro now includes Light Only + Charging Dock package variants; Oclip 2 Pro Premium, Oclip 2 Ultra and the standalone Oclip 2 Charging Dock are built as DRAFTS pending current supplier-availability confirmation. ArkPro Ultra Amber Orange is added on the existing product at source-proven MSRP/SKU/UPC but remains unavailable until supplier availability is confirmed. Oclip 2 Ultra Premium color/SKU mapping remains HOLD pending supplier confirmation. Current Olight-live-available SKUs use the owner-controlled operational quantity 10; do not present 10 as supplier stock. Olight live storefront purchasability overrides an older dealer-sheet Sold Out flag. Do not reintroduce customer-facing supplier-fulfillment operational copy. Cart→checkout routing previously passed on representative Olight products; shipping-rate/destination/final payment-stage verification remains open. Use `vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`. |
-| **P1** | SOK eBay full catalog | eBay Store Operations under Peter | **OWNER-AUTHORIZED CURRENT WAVE / MAP CONTROLLED** | Execute only the supplied `00_CURRENT_UPLOADS` wave, verify each upload receipt, preserve MAP and shipping-policy controls, and do not use `90_SUPERSEDED_DRAFTS`. The `10_PRESALE_HOLD` lane remains held until separately cleared. |
-| **P1** | Shopify / Renogy revenue lane | Shopify Store Operations under Peter | **PAYMENT GREEN / TWO LIVE SKUS / EXPANSION ACTIVE / NEXT REVIEW SET HELD AT COMMERCIAL GATES** | Preserve the verified 10W product and published 400W suitcase. Expansion does not override SKU commercial holds. Require ACTIVE + ONLINE STORE PUBLISHED + STOREFRONT URL VERIFIED before calling any future launch live. |
-| **P1** | Listing/card quality + catalog organization | Commerce Development / Catalog worker | **ACTIVE — POST-FUNCTIONAL CLEANUP** | Normalize brand, SKU/model, clean title, description, category, primary image, price and CTA; identify duplicates instead of polishing duplicate supplier-feed records. |
-| **P1** | SunGoldPower catalog | Vendor / Commerce Operations | **BATCH 1 STAGED — 5 DRAFTS / EXTERNAL ACTIVATION GATES** | Five in-stock inverter SKUs are staged at supplier MAP. Hold publication until approved exact-SKU media, dropship/order-submission procedure and Lower-48 shipping economics are verified. Do not send duplicate vendor outreach; the operating-detail request is already pending. |
-| **HOLD** | Kingboss | Kingboss Project | **ISOLATED HOLD** | Keep Kingboss out of the critical path; do not let its storefront/catalog uncertainty block other vendors or the main store. |
-| **P2** | VEVOR | VEVOR Project | **DEPRIORITIZED** | No broad VEVOR optimization push. Work only a proven source-cost/revenue case explicitly routed by management. |
-| **P2** | Puerto Rico market entry — PR-01 / PR-02 | Company Operations + Shipping & Logistics + Ecommerce | **ACTIVE LOGISTICS-LANE R&D — NO LAUNCH / NO QUOTES / NO PRODUCT OUTREACH YET** | Establish Approved Forwarders Puerto Rico lane architecture first: terminals/will-call, destination handoff, local operating support, final-mile capability, customer information needs, and responsibility split. In parallel map SURI/IVU/import/EEI obligations. Hold SOK exact-SKU qualification and freight pricing until the lane is understood. Hawaii first shipment remains fulfillment priority. Peter remains on Olight; no PR reassignment. Use `PUERTO_RICO_MARKET_ENTRY_PR01_2026-09-24.md` + `PUERTO_RICO_PR02_QUALIFICATION_WORKTREE_2026-09-25.md`. |
-| **P2** | New vendor acquisition | Vendor Operations | **PAUSED / OPPORTUNISTIC** | Process valuable inbound or Casey-directed prospects; do not run acquisition as the primary company mission. |
-| **P2** | External communications control | Company Operations | **INCIDENT CONFIRMED / HARD SEND GATE ACTIVE** | Sep. 29 Olight catalog-clarification send crossed the existing approval boundary. Workflow commands such as RUN / DO IT / CONTINUE do not authorize transmission. Draft/prep only until Casey gives message-specific SEND / CLEAR TO SEND approval. No remediation send without separate approval. |
-| **P2** | Owner direct phone/SMS verification | Communications Recovery | **OPEN VERIFICATION** | Verify inbound call, SMS and voicemail when routed; does not block commerce. |
-| **P2** | Optional visual/media polish | Web specialist lane | **ONLY AFTER PROVEN REVENUE DEFECTS** | One proven section/media group at a time. No redesign campaign. |
+| **P0** | Paid customer fulfillment / eBay fulfillment | MPM 28 + Commerce / eBay Operations | **ACTIVE / CUSTOMER OBLIGATION** | Reconcile and complete paid-order fulfillment first. Do not let PayPal waiting state or catalog polish displace customer deadlines. |
+| **P0** | MPM 28 management continuity | OS 1 / MPM 28 | **ACTIVE / CONTROLLING** | Keep canonical board, handoff, worker routing, and closeout state aligned to current owner direction. |
+| **P1** | OS 3 production acceptance / controlled API expansion | OS 3 Agent Manager under OS 1 / MPM 28 | **ACTIVE / CONTROLLED EXPANSION** | Continue read → bounded write → read-after-write → audit → independent verification acceptance. Preserve exact approval gates. |
+| **P1** | Shopify / CJ commerce workflow | OS 3 + Shopify/CJ specialists | **ACTIVE / CONTROLLED** | Continue bounded Shopify/CJ integration independent of PayPal; no uncontrolled publication, pricing, inventory, or fulfillment writes. |
+| **P1** | Google Merchant repair | Commerce / Acquisition | **ACTIVE REVENUE BLOCKER** | Diagnose and repair current Merchant acquisition/feed/compliance blockers with bounded evidence-first work. |
+| **P1** | Hawaii SOK physical movement / payment path | Company Operations + Shipping & Logistics | **ACTIVE / COMPLETION PROOF OPEN** | Advance the first physical order through remaining release/tender/movement/receipt evidence. Do not restart broad recon when a gate is unchanged. |
+| **P1** | Olight domestic revenue + global qualification | Ecommerce & Vendor Operations / Peter | **DOMESTIC ACTIVE / GLOBAL GATED** | Keep domestic revenue lane moving; qualify territory, fulfillment, transport, and compliance before international expansion. |
+| **WAITING EXTERNAL** | PayPal complaint / account review | Company Operations | **WAITING EXTERNAL** | No active recon or repeated escalation until a new PayPal reply or materially new evidence arrives. Not a global blocker. |
+| **WAITING EXTERNAL** | Signature Solar EG4 freight package | Vendor / Shipping Operations | **WAITING EXTERNAL** | Resume when supplier freight / DG / packed-weight data arrives. |
+| **HOLD** | Work specifically dependent on PayPal restoration | Relevant workstream owner | **HOLD — DEPENDENCY** | Resume only after PayPal capability is restored or an owner-approved alternate payment path is established. |
 
+Current health summary:
+
+```
+OS 1 MANAGEMENT          YELLOW — MPM 28 TRANSITION IN PROGRESS
+OS 2                     CLOSED / RETIRED
+OS 3                     GREEN-YELLOW — ACTIVE / CONTROLLED EXPANSION
+PAYPAL                    WAITING EXTERNAL
+SHOPIFY                   GREEN
+CJ                        GREEN
+EBAY FULFILLMENT          RED / P0
+OLIGHT DOMESTIC           GREEN
+OLIGHT GLOBAL             YELLOW / QUALIFICATION
+HAWAII LOGISTICS          GREEN-YELLOW
+GOOGLE MERCHANT           RED / P1 BLOCKER
+CANONICAL GIT STATE       YELLOW → ALIGNING TO MPM 28
+```
+
+---
 
 ---
 
