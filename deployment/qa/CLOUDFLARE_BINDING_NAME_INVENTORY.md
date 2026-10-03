@@ -10,6 +10,7 @@ Names only. No secret values are recorded. No binding configuration changes in t
 - `ASSETS`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_EMAIL_API_TOKEN`
+- `EBAY_DELETION_VERIFICATION_TOKEN`
 - `EMAIL`
 - `IMAGES`
 - `LEADS_DB`
