@@ -1,69 +1,95 @@
 # Elevation UpScales — Current Worker Handoff
 
-Updated: 2026-09-29
-Control mode: **OS 1 / MPM 27 CONTINUITY**
+Updated: 2026-10-02
+Control mode: **OS 1 / MPM 28 ACTIVE MANAGEMENT**
 Repository: `elevationupscales/ElevationUpScales`
 
 ## Read first
 
 1. `MASTER-SOP.md`
 2. `operations/CURRENT_WORK_BOARD.md`
-3. `AGENTS.md`
-4. `CODING-WORKFLOW.md`
-5. task-specific files explicitly required by the owner
+3. `operations/MPM_28_START_STATE_2026-10-02.md`
+4. `AGENTS.md`
+5. `CODING-WORKFLOW.md`
+6. task-specific files explicitly required by the owner
 
-Do not use older handoff content, old PR descriptions, dated baselines, OS 2 records, or beta OS 3 work as current authority.
+Do not use older handoff content, old PR descriptions, dated baselines, or OS 2 records as current authority.
 
 ## Current control
 
-- **OS 1 / Operating System = CURRENT / CONTROLLING.**
-- **MPM 27 = current manager continuity inside OS 1.**
+- **OS 1 / Operating System = ACTIVE / CONTROLLING MANAGEMENT SYSTEM.**
+- **MPM 28 = current manager continuity inside OS 1.**
 - MPM numbers are continuity/session labels, not separate authority layers.
-- **OS 2 / Operating System 2.0 = NON-CONTROLLING legacy/transitional evidence.**
-- **OS 3 / Agent Manager = BETA / DEVELOPMENT ONLY.**
-- Casey's newest direct instruction is highest authority.
+- **OS 2 / Operating System 2.0 = RETIRED.** Do not route new work through it.
+- **OS 3 / Agent Manager = ACTIVE API EXECUTION / CONTROL SYSTEM.** It may be used alongside MPM 28 for bounded API execution, acceptance, verification, and audited workflows. It does not replace OS 1 management authority.
+- Casey's newest direct instruction remains highest authority.
 - `MASTER-SOP.md` is the repository control document.
 - Current accepted `main` is technical state truth.
 
 ## Git baseline
 
-Current `main` at the start of this alignment:
+Control transition base:
 
-`7040bdc873739162cd163d4d741041f93f672ef0`
+`66dc066fddd3d4f5e94fea111977731c77b92349`
 
-Latest accepted Git work at that baseline is PR #264:
-`Mirror Shopify storefront repairs and smoke gate`.
+Commit description at transition:
 
-Always re-resolve `main` before beginning new work. This SHA records the alignment starting point; it is not permission to roll back newer owner-approved work.
+`Sync Oct 1 live Shopify purchasability baseline`
 
-## Current accepted direction
+Always re-resolve `main` before beginning new work. This SHA records the MPM 28 transition starting point; it is not permission to roll back newer owner-approved work.
 
-The recent MPM 26 storefront work is inherited, not reopened as a redesign project.
+## OS 3 accepted state
 
-Current accepted direction includes:
-- store-first customer routing;
-- SOK remains the primary lithium/battery brand;
-- Olight remains the premium lighting/optics vendor lane;
-- solar/off-grid remains a core commercial lane;
-- accepted homepage/storefront visual direction is locked unless Casey explicitly reopens design;
-- remaining storefront work is bounded defect repair, customer-path QA, and purchaseability verification.
+Separate OS 3 repository:
 
-Recent Git merges include:
-- PR #256 — store-first homepage retail experience;
-- PR #260/#261 — approved hero-copy lock and QA alignment;
-- PR #262 — SOK heading contrast repair;
-- PR #263 — external-send authorization hardening;
-- PR #264 — Shopify storefront repair mirror + smoke gate.
+`elevationupscales/elevationupscales-elevation-agent-manager`
 
-## Shopify boundary
+Accepted OS 3 main baseline at this handoff:
 
-`shop.elevationupscales.com` and `store.elevationupscales.com` remain Shopify-owned runtime surfaces.
+`1e6970dd1fb59b82ae7e5adbf92b58c681794969`
 
-The Shopify repair theme mirrored by PR #264 was recorded as:
-- `SMOKE P1 REPAIRS — READY TO REVIEW`
-- **UNPUBLISHED at mirror time**
+That baseline contains the accepted CJ response-shape work and exact-gated Shopify DRAFT-create workflow. eBay read-only foundation work remains a controlled acceptance/development lane until separately accepted.
 
-Therefore Git proves the staged/mirrored repair state, not publication to the live Shopify theme. Verify Shopify live state directly before claiming those staged repairs are live.
+OS 3 work does not authorize production deployment, publication, payments, external sends, or unrelated mutations.
+
+## Waiting-external rule
+
+A blocked lane that is waiting on an external party leaves the active execution queue.
+
+```
+BLOCKED LANE
+↓
+WAITING EXTERNAL
+↓
+REMOVE FROM ACTIVE WORK QUEUE
+↓
+CONTINUE OTHER INDEPENDENT WORK
+```
+
+Re-enter a waiting lane only when:
+- a new external reply arrives;
+- materially new evidence is obtained; or
+- Casey explicitly reactivates the lane.
+
+## Current active stack
+
+### P0
+- Paid customer fulfillment, with eBay fulfillment at the front of the operational queue.
+- MPM 28 management continuity and canonical-control alignment.
+
+### P1
+- OS 3 production acceptance / controlled API expansion.
+- Shopify/CJ commerce workflow.
+- Google Merchant repair.
+- Hawaii SOK physical-movement/payment path through completion proof.
+- Olight domestic revenue plus bounded global qualification.
+
+### WAITING EXTERNAL
+- PayPal complaint / account-review lane. No active recon or repeated escalation without new evidence.
+- Signature Solar EG4 freight package.
+
+### HOLD
+- Any work specifically dependent on PayPal restoration.
 
 ## Platform boundary
 
@@ -111,9 +137,9 @@ If owner says STOP / HOLD / FREEZE / NO MORE EDITS:
 
 ## Current handoff status
 
-**OS 1 CONTROL ALIGNED / MPM 27 CONTINUITY ACTIVE**
+**OS 1 CONTROL ALIGNED / MPM 28 ACTIVE**
 
-This handoff alignment changes control documentation only.
+This handoff alignment changes management/control documentation only.
 
 It does **not** authorize:
 - website redesign;
@@ -122,4 +148,6 @@ It does **not** authorize:
 - pricing changes;
 - checkout changes;
 - customer/order mutation;
+- payment action;
+- external sends;
 - production deployment.
