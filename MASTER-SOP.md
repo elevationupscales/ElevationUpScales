@@ -1,7 +1,7 @@
-# MASTER S.O.P. — OS 1 CONTROL / MPM 27 CONTINUITY
+# MASTER S.O.P. — OS 1 CONTROL / MPM 28 CONTINUITY
 
 Original relock effective: 2026-09-26  
-Current control alignment: 2026-09-29
+Current control alignment: 2026-10-02
 Owner authority: President, Elevation UpScales, Inc.
 Repository: `elevationupscales/ElevationUpScales`
 
@@ -30,15 +30,42 @@ Historical files never override current owner direction or current accepted `mai
 ## 3. OS 1 control baseline and continuity
 
 **Current operating control:** OS 1 / Operating System.  
-**Current manager continuity:** MPM 27.  
+**Current manager continuity:** MPM 28.  
 **MPM numbers are continuity/session labels, not separate authority layers.**
 
 Project boundaries:
-- **OS 1 / Operating System:** CURRENT / CONTROLLING.
-- **Operating System 2.0 / OS 2:** NON-CONTROLLING legacy/transitional evidence only. It must not override OS 1.
-- **OS 3 / Agent Manager:** BETA / DEVELOPMENT ONLY. It has no authority over OS 1, production, or current company operations unless the owner explicitly promotes it.
+- **OS 1 / Operating System:** ACTIVE / CONTROLLING MANAGEMENT SYSTEM.
+- **MPM 28:** current management continuity inside OS 1.
+- **Operating System 2.0 / OS 2:** RETIRED. Do not route new work through it.
+- **OS 3 / Agent Manager:** ACTIVE API EXECUTION / CONTROL SYSTEM used alongside MPM 28 for bounded API execution, acceptance, verification, and audited workflows. OS 3 does not replace OS 1 management authority and may not infer broader business, production, payment, communication, or deployment authority from API capability.
+
+Current OS 3 accepted baseline is maintained in the separate repository `elevationupscales/elevationupscales-elevation-agent-manager`. At this alignment the accepted OS 3 main baseline is `1e6970dd1fb59b82ae7e5adbf92b58c681794969`. Workers must re-resolve that repository before relying on a newer OS 3 state.
 
 The MPM 25 relock remains a valid historical control checkpoint and its anti-drift rules remain inherited where not superseded by newer owner direction.
+
+## 3A. Waiting-external queue rule
+
+A blocked lane waiting on an external party is not a global blocker.
+
+```
+BLOCKED LANE
+↓
+WAITING EXTERNAL
+↓
+REMOVE FROM ACTIVE WORK QUEUE
+↓
+CONTINUE OTHER INDEPENDENT WORK
+```
+
+A WAITING EXTERNAL lane returns to active work only when:
+- a new external reply arrives;
+- materially new evidence is obtained; or
+- Casey explicitly reactivates it.
+
+Current application at this control transition:
+- **PayPal:** WAITING EXTERNAL. No repeated recon, escalation, or global blocking without new evidence.
+- **Signature Solar EG4 freight package:** WAITING EXTERNAL.
+- Work that specifically requires PayPal restoration remains HOLD, while independent fulfillment, commerce, OS 3, Shopify/CJ, Google Merchant, Hawaii, and Olight work continues.
 
 Control baseline at initial MPM25 relock:
 
@@ -284,9 +311,13 @@ Every completed Git task must end with one concise receipt:
 
 Do not bury status in long narrative.
 
-## 16. Current MPM 25 state
+## 16. Current MPM 28 state
 
-Current recovery state:
+Current management state:
+- **OS 1 / MPM 28 = ACTIVE management control.**
+- **OS 2 = RETIRED.**
+- **OS 3 = ACTIVE bounded API execution/control system alongside MPM 28.**
+- **PayPal = WAITING EXTERNAL; not a global blocker.**
 - initial MPM25 control baseline: `f8b55f928f28b8f3087980576158bab286dc022d`
 - Git drift recovery checkpoint: `30a161feef32bacccea1f0f043ea1bc0cf03d528`
 - PRs #242, #244 and #245 are CLOSED / QUARANTINED.
