@@ -455,3 +455,37 @@ Updated vendor priority:
 - **P1 — Phocos** vendor-manager follow-up, current North American assortment/catalog/pricing source
 - **HOLD — Hughes Autoformers**
 - **CLOSED — Winegard**
+
+
+---
+
+# OWNER CORRECTION — WINEGARD ACTIVE FOLLOW-UP — 2026-10-04
+
+Winegard is **not closed**.
+
+Current state:
+- Elevation UpScales was approved as a Winegard reseller.
+- The reseller agreement was completed.
+- The operational gap is that Elevation never received or captured the complete dealer SKU catalog, dealer pricing, current inventory/availability source, or a recommended starter assortment.
+
+Ownership:
+- **Peter Torres owns the Winegard follow-up as vendor manager.**
+- Casey remains approval/escalation authority but should not carry routine vendor follow-up.
+
+Peter's required Winegard follow-up:
+1. Confirm the approved reseller/dealer account is active.
+2. Recover or activate the Winegard dealer portal if access is still missing.
+3. Request the **full current dealer/reseller SKU list**.
+4. Request current **dealer pricing / cost** and applicable MAP/UMAP rules.
+5. Request current **inventory / availability** source or dealer-portal method.
+6. Request UPC/MPN, product status, shipping class, weight/dimensions, warranty/RMA, and dropship/direct-to-customer terms where available.
+7. Ask Winegard for a **recommended starter assortment** for Elevation's RV/mobile-power/off-grid catalog: the products they would recommend listing first based on current availability, dealer support, product velocity, and fit.
+8. Return the source files/export and recommended starter list to OS3 for POS normalization.
+
+Positioning for outreach:
+- explain that Elevation has been busy building the broader supplier catalog/POS system
+- state that the catalog foundation is now ready
+- the goal is to integrate Winegard correctly from supplier-authoritative SKU, pricing, and availability data rather than guessing from public listings
+
+Status:
+**P1 ACTIVE FOLLOW-UP — PETER OWNER**
