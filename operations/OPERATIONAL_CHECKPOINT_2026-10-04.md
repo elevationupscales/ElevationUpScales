@@ -26,3 +26,23 @@
 ## Next fulfillment lane
 
 Advance to the next unresolved paid-customer obligation. Current evidence points to the 8 kW diesel air heater as the next item requiring shipment-status reconciliation, unless newer fulfillment proof supersedes that state.
+
+
+## eBay / VEVOR 8 kW diesel air heater
+
+**State:** BLOCKED — WORKING CAPITAL
+
+- Owner confirmed on 2026-10-04 that available working capital is insufficient to fulfill this item while TikTok seller funds remain frozen.
+- Do not treat this as completed or canceled. Keep it as a paid-customer obligation blocked by funding.
+- Resume immediately when sufficient working capital becomes available or an approved alternate fulfillment path is identified.
+
+## Next low-dollar fulfillment item
+
+**State:** ACTIVE — NEXT
+
+- Item: VEVOR 3-Inch Diesel Heater Pipe Duct Vent Kit with Y-Connector & Air Duct Clamps for 5KW/8KW heaters.
+- eBay order: `18-15223-96471`.
+- Sold: 2026-10-01.
+- Sale amount: $23.99.
+- eBay ship-by date: 2026-10-06.
+- Current supplier availability should be verified immediately before purchase.
