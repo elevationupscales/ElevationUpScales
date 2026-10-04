@@ -357,3 +357,84 @@ A vendor is **POS MASTER READY** when OS3 has:
 10. refresh method
 
 Until all ten are present, OS3 may use the vendor for controlled/manual sales but must not represent the vendor as a fully automated master catalog.
+
+
+---
+
+# OWNER CORRECTION — 2026-10-04
+
+## Vendor-management ownership
+
+### Peter Torres — PRIMARY VENDOR MANAGER WORK
+
+Peter's main vendor-management priority is now:
+
+1. **EPOCH Batteries — P0**
+   - take ownership of the EPOCH relationship
+   - recover/activate the existing approved wholesale portal account
+   - do not treat this as a fresh dealer application unless EPOCH explicitly requires it
+   - Nick Motsinger already confirmed dealer approval and stated that a portal login link had been sent
+   - establish direct vendor-manager follow-up with Nick
+   - recover current catalog, dealer pricing, availability, fulfillment, shipping, MAP, warranty/RMA, and marketing assets
+   - return a structured POS source package to OS3
+   - own ongoing EPOCH follow-up so Casey is not carrying this vendor relationship day-to-day
+
+2. **Phocos — P1**
+   - Peter takes over routine vendor follow-up with Youssef Akazdir
+   - Elevation is already set up as a Phocos dealer/reseller
+   - Phocos has already supplied an initial five-product commercial assortment and requested a call
+   - Peter should schedule/complete the vendor-manager call, request the updated North American catalog/price list when available, and recover a machine-readable or structured SKU/pricing source for POS
+   - preserve the focused commercial/installer/project positioning rather than broad consumer catalog loading
+
+### Casey Young
+
+Casey remains owner/approval authority but should not be the routine operator for these vendor follow-ups unless escalation, commercial approval, or signature is required.
+
+## Winegard — CLOSED / DEAD END
+
+Owner direction: **Winegard is a dead end.**
+
+Action:
+- remove Winegard from active POS-master follow-up
+- do not spend Peter/Casey time chasing catalog or portal access
+- retain historical approval correspondence only for recordkeeping
+- status: CLOSED / NO ACTIVE WORK
+
+## Hughes Autoformers — PROSPECT / NOT YET ESTABLISHED
+
+Recovered history:
+- Elevation sent one dealer-partnership inquiry on 2026-09-10/11
+- no supplier reply was recovered
+- no approved dealer account, pricing sheet, portal, or SKU master has been established
+
+Why it was pursued:
+- Hughes Autoformers and Power Watchdog are strong fits for Elevation's RV/mobile-power customer base
+- products complement RV electrical protection, voltage management, and off-grid/mobile power categories
+- non-lithium products may be operationally simpler than battery vendors
+
+Current public supplier state:
+- Hughes maintains an active "Become a Dealer" program
+- dealer materials and dealer newsletter are available
+- current sales contact: sales@autoformers.com
+- phone: +1 (888) 540-1504
+
+Priority:
+- **P2 — AFTER EPOCH AND PHOCOS**
+- Peter should not spend time here until the two higher-priority relationships are moving
+
+If advanced, Peter should:
+1. contact Hughes dealer sales / complete dealer onboarding
+2. request current dealer price list and complete SKU catalog
+3. confirm MAP/channel restrictions
+4. confirm opening-order/MOQ requirements
+5. confirm dropship/direct-to-customer capability
+6. obtain current inventory/availability method
+7. obtain warranty/RMA terms
+8. return a POS-ready source package before any catalog build
+
+## Updated vendor priority
+
+P0 — EPOCH portal activation + vendor-management takeover  
+P1 — Phocos follow-up + current North American SKU/pricing source  
+P2 — Hughes Autoformers dealer onboarding decision  
+CLOSED — Winegard
