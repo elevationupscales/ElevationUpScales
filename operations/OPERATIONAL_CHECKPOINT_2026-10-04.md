@@ -36,13 +36,15 @@ Advance to the next unresolved paid-customer obligation. Current evidence points
 - Do not treat this as completed or canceled. Keep it as a paid-customer obligation blocked by funding.
 - Resume immediately when sufficient working capital becomes available or an approved alternate fulfillment path is identified.
 
-## Next low-dollar fulfillment item
+## eBay / VEVOR 3-Inch Diesel Heater Pipe Vent Kit
 
-**State:** ACTIVE — NEXT
+**State:** SUPPLIER ORDER COMPLETE / FULFILLMENT IN PROGRESS
 
 - Item: VEVOR 3-Inch Diesel Heater Pipe Duct Vent Kit with Y-Connector & Air Duct Clamps for 5KW/8KW heaters.
 - eBay order: `18-15223-96471`.
 - Sold: 2026-10-01.
 - Sale amount: $23.99.
 - eBay ship-by date: 2026-10-06.
-- Current supplier availability should be verified immediately before purchase.
+- Owner confirmed supplier order completion on 2026-10-04.
+- Supplier order/reference number was not provided in the owner update; capture it with tracking when available.
+- Next gate: tracking / shipment confirmation.
