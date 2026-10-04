@@ -84,3 +84,58 @@ Recommended launch architecture:
 - do not publish until exact stock-by-VID is refreshed and listing claims/specs are validated
 
 Current decision: **ADVANCE TO FINAL LAUNCH QUALIFICATION**.
+
+
+## Current market positioning check
+
+Fresh retail recon on 2026-10-04 found:
+- the exact "Solar Dual Headlight 20000mAh Power Bank" offered by another storefront at about $45.10
+- generic 20,000mAh solar/flashlight power banks in Canada spanning low-cost commodity listings through roughly CAD $42.65 and substantially higher premium-style offers
+- U.S. mass-market competition includes heavily discounted generic 20,000mAh solar banks around the mid-teens
+
+Interpretation:
+- demand/category validation exists
+- the category is highly commoditized
+- Elevation should not attempt to win on lowest price
+- product presentation must emphasize outdoor/emergency use, integrated lighting, clear battery-shipping expectations, and supplier-backed fulfillment
+
+## Recommended controlled launch
+
+**Decision:** GO — CONTROLLED U.S. + CANADA TEST LAUNCH, subject to final compliance/spec verification.
+
+Recommended initial retail:
+- **$39.99 USD**
+- customer shipping: **FREE** for enabled launch lanes
+
+Why:
+- U.S. modeled contribution remains about $22.24 / 55.6%
+- Canada modeled contribution remains about $19.82 / 49.6%
+- price is below the observed exact-product ~$45.10 storefront offer while preserving substantial contribution
+- $39.99 provides a cleaner value position than $44.99 in a price-sensitive commodity category
+
+Initial launch lanes:
+- United States — ENABLE
+- Canada — ENABLE / PRIORITY INTERNATIONAL SALES FOCUS
+
+Do not initially enable:
+- New Zealand — no route
+- Puerto Rico — no route
+- Mexico — battery eligibility not verified
+
+Secondary expansion after early sales validation:
+- United Kingdom
+- Australia
+- Germany
+
+High-cost EU lanes should not set base price and may remain off until conversion justifies them.
+
+## Final launch blockers
+
+Before publication, verify:
+1. exact stock-by-VID is still available and classify CJ-vs-factory inventory
+2. listing claims/specs are accurate for the selected variant, including actual ports/features and capacity
+3. battery documentation needed for the intended shipping/market workflow is available (for example current transport/compliance documents supplied by CJ)
+4. checkout/delivery messaging does not imply solar charging is equivalent to normal wall charging
+5. Shopify delivery profile contains only approved battery-qualified lanes
+
+If all five pass, this candidate is approved for controlled listing construction.
