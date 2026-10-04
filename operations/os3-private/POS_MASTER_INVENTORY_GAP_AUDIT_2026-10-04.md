@@ -438,3 +438,20 @@ P0 — EPOCH portal activation + vendor-management takeover
 P1 — Phocos follow-up + current North American SKU/pricing source  
 P2 — Hughes Autoformers dealer onboarding decision  
 CLOSED — Winegard
+
+
+## OWNER CORRECTION — HUGHES AUTOFORMERS HOLD
+
+**Date:** 2026-10-04
+
+Owner direction:
+- Hughes Autoformers is moved to **HOLD / NO ACTIVE WORK**
+- do not pursue dealer onboarding, follow-up, catalog requests, or POS integration at this time
+- retain the existing Sept. 10/11 dealer inquiry as historical prospect evidence only
+- revisit only after EPOCH and Phocos vendor-management work is caught up and management explicitly reopens the lane
+
+Updated vendor priority:
+- **P0 — EPOCH** portal/account activation, catalog recovery, vendor-manager follow-up
+- **P1 — Phocos** vendor-manager follow-up, current North American assortment/catalog/pricing source
+- **HOLD — Hughes Autoformers**
+- **CLOSED — Winegard**
