@@ -73,10 +73,11 @@ Operating rule:
 Supplier-confirmed operating sources:
 - Renogy Partner Portal provides dealer pricing
 - Renogy confirmed inventory/catalog data and marketing assets are available to approved partners
-- vendor catalog work packet includes a **Renogy SKU/UPC list + marketing toolkit**
-- full source-list count has not yet been recovered from the retained packet, so OS3 must not invent a master count
+- vendor catalog work packet includes the supplier-issued **`Item List (with UPC Code).xlsx` + marketing toolkit**
+- recovered supplier list contains **204 current items** (rows 0–203) with exact SKU, description, dealer price, MSRP, status, and UPC
 
-Current storefront scale:
+Current supplier/POS scale:
+- **204 supplier-issued Renogy items** recovered from the September 11 dealer file
 - recent internal recon described the Shopify Renogy collection as roughly **80 products**
 - this is storefront scope, not real-time supplier inventory
 
