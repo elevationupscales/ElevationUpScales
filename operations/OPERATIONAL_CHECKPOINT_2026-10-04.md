@@ -70,3 +70,22 @@ Advance to the next unresolved paid-customer obligation. Current evidence points
 - Owner confirmed on 2026-10-04 that Google Merchant Center identity verification was submitted.
 - Do not submit duplicate identity verification or request another review until Google returns the verification result or materially new Merchant Center guidance.
 - Next gate: Google identity-verification outcome → Merchant Center Misrepresentation review eligibility / status.
+
+
+## International pricing / freight-lane learning — CJ travel bag
+
+**State:** ACCEPTED OPERATING LEARNING — LISTING BUILD VALID / FREIGHT PRESENTATION REQUIRES NORMALIZATION
+
+- Product: Waterproof Sports & Travel Gear Bag with Shoe Compartment, SKU CJJT167029603CX.
+- Listing and international delivery-profile build are considered valid. The observed checkout friction is not evidence of worker/listing failure.
+- Current item price: $29.99.
+- Live lane freight spans $6.78–$28.17. Mean across all 12 configured lanes is approximately $12.40; median is approximately $10.92. Excluding Puerto Rico, mean freight is approximately $10.96.
+- Highest-friction lane overall: Puerto Rico, $28.17 freight (about 94% of item price), with a 12–50 day estimate.
+- Highest-friction international country lane: Ireland, $16.14 freight (about 54% of item price).
+- Next-highest international lanes: Netherlands $12.20, New Zealand $11.88, Mexico $11.76.
+- Lowest-cost lane: United Kingdom, $6.78.
+- Internal pricing direction for future international general-merchandise listings: embed a standard freight allowance into merchandise price, keep raw supplier/freight lane economics internal, and expose a lower/simple customer-facing shipping amount by lane.
+- Working baseline for this bag class: embed roughly $10 freight into price (e.g. $39.99 merchandise) and reduce visible shipping by the same $10. This preserves approximately the same pre-product-cost contribution as the original $29.99 + actual freight structure for lanes at or above $10 freight, while making shipping appear materially lower.
+- High-friction outliers must be treated separately rather than forcing every market into one flat shipping promise.
+- Before the next international item launch: capture supplier unit cost, live freight by active market/territory, payment/marketplace fees, mean/median freight, worst-lane freight, and gross-contribution floor before setting retail and customer-facing shipping.
+- Do not expose internal supplier freight rates or margin logic publicly.
