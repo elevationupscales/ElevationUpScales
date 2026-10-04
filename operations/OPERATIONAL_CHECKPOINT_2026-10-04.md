@@ -48,3 +48,14 @@ Advance to the next unresolved paid-customer obligation. Current evidence points
 - Owner confirmed supplier order completion on 2026-10-04.
 - Supplier order/reference number was not provided in the owner update; capture it with tracking when available.
 - Next gate: tracking / shipment confirmation.
+
+
+## eBay / 6,000W Pure Sine Wave Inverter Charger
+
+**State:** HOLD — WORKING CAPITAL
+
+- eBay order: `07-15247-64154`.
+- Sold: $499.00 on 2026-10-01.
+- Ship-by date: 2026-10-06.
+- Owner directed on 2026-10-04 to hold fulfillment until more working capital is available.
+- Do not spend further time on supplier execution until capital is available or Casey explicitly reactivates the order.
