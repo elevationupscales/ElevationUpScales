@@ -89,3 +89,17 @@ Advance to the next unresolved paid-customer obligation. Current evidence points
 - High-friction outliers must be treated separately rather than forcing every market into one flat shipping promise.
 - Before the next international item launch: capture supplier unit cost, live freight by active market/territory, payment/marketplace fees, mean/median freight, worst-lane freight, and gross-contribution floor before setting retail and customer-facing shipping.
 - Do not expose internal supplier freight rates or margin logic publicly.
+
+
+## CJ travel bag pricing adjustment — implemented
+
+**State:** LIVE / VERIFIED
+
+- Product: Waterproof Sports & Travel Gear Bag with Shoe Compartment
+- SKU: CJJT167029603CX
+- Retail price changed from $29.99 to **$45.99** on 2026-10-04.
+- Dedicated delivery profile: CJ Global — Travel Gear Bag.
+- All 12 existing active shipping lanes changed to **$0 customer-facing shipping** while preserving current lane coverage and delivery estimates.
+- Verified free-shipping lanes: Australia, Canada, France, Germany, Ireland, Mexico, Netherlands, New Zealand, Puerto Rico, Spain, United Kingdom, and U.S. Lower 48.
+- This is a pricing-presentation change, not a supplier-cost change. Internal freight economics remain tracked by lane.
+- Margin watch: Puerto Rico historical freight cost $28.17 leaves $17.82 from the $45.99 retail price before supplier unit cost and payment fees. Supplier unit cost is not currently stored in Shopify, so all-lane profitability is not yet proven.
