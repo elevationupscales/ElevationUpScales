@@ -59,3 +59,14 @@ Advance to the next unresolved paid-customer obligation. Current evidence points
 - Ship-by date: 2026-10-06.
 - Owner directed on 2026-10-04 to hold fulfillment until more working capital is available.
 - Do not spend further time on supplier execution until capital is available or Casey explicitly reactivates the order.
+
+
+## Google Merchant Center — identity verification
+
+**State:** WAITING EXTERNAL — IDENTITY VERIFICATION SUBMITTED
+
+- Merchant Center account remains blocked by Misrepresentation for the United States and Mexico.
+- Shopify business identity/contact data has been reconciled to the public store: support@elevationupscales.com, (208) 813-4998, and the Peyton, Colorado business address.
+- Owner confirmed on 2026-10-04 that Google Merchant Center identity verification was submitted.
+- Do not submit duplicate identity verification or request another review until Google returns the verification result or materially new Merchant Center guidance.
+- Next gate: Google identity-verification outcome → Merchant Center Misrepresentation review eligibility / status.
