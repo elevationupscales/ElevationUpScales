@@ -102,4 +102,9 @@ Advance to the next unresolved paid-customer obligation. Current evidence points
 - All 12 existing active shipping lanes changed to **$0 customer-facing shipping** while preserving current lane coverage and delivery estimates.
 - Verified free-shipping lanes: Australia, Canada, France, Germany, Ireland, Mexico, Netherlands, New Zealand, Puerto Rico, Spain, United Kingdom, and U.S. Lower 48.
 - This is a pricing-presentation change, not a supplier-cost change. Internal freight economics remain tracked by lane.
-- Margin watch: Puerto Rico historical freight cost $28.17 leaves $17.82 from the $45.99 retail price before supplier unit cost and payment fees. Supplier unit cost is not currently stored in Shopify, so all-lane profitability is not yet proven.
+- Internal model now uses verified prior CJ/OS3 supplier cost **$4.19** plus a working payment-fee assumption of **2.9% + $0.30** until the active processor rate is verified.
+- Modeled average contribution across all 12 lanes: **$27.77/order / 60.4%**.
+- Modeled average contribution excluding Puerto Rico: **$29.20/order**.
+- Puerto Rico remains the structural outlier: historical freight $28.17 leaves approximately **$12.00 contribution / 26.1% margin** under the working model.
+- Dedicated operating model: `operations/international/CJ_TRAVEL_BAG_PRICING_MODEL_2026-10-04.md`.
+- Reusable rule: no future international listing publishes without supplier cost, lane freight table, payment-fee assumption, average/worst-lane contribution, margin, and explicit outlier treatment.
