@@ -145,7 +145,7 @@ body.clean-commerce-page{background:var(--cc-bg);color:var(--cc-text)}
 .retail-hawaii__content h2{font-size:clamp(3rem,5.8vw,5rem);line-height:.95;letter-spacing:-.055em;margin:0;max-width:720px}
 .retail-hawaii__content>p:not(.cc-eyebrow){color:#dae4e8;line-height:1.65;max-width:660px;font-size:1.08rem}
 .retail-location-trust{padding:34px 0 38px;background:#071014;color:#fff;border-top:1px solid rgba(255,255,255,.1)}
- .retail-location-trust__head{margin-bottom:18px}
+.retail-location-trust__head{margin-bottom:18px}
 .retail-location-trust__head h2{margin:4px 0 0;font-size:clamp(1.55rem,3vw,2.35rem);line-height:1.05;letter-spacing:-.035em;max-width:760px}
 .retail-location-trust__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .retail-location-trust__grid article{padding:15px 16px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#0b171c}
