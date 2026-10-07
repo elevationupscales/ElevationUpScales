@@ -59,6 +59,36 @@ Acceptance standard for each single:
 
 ---
 
+# MPM ACCEPTANCE — SOK MARINE + 24V SOURCE RECON — 2026-10-07
+
+**STATE: SOURCE RESOLUTION PASS / EBAY LIVE DELTA OPEN**
+
+MPM accepts the Recon Worker source packet for the four priority SOK singles:
+- SK12V206PH — marine-grade single.
+- SK12V314PH — marine-capable/Victron single; preserve preorder state.
+- SK24V100 — standard 24V single; do not market as a marine-specific model without newer source evidence.
+- SK24V150PH — marine-capable/Victron 24V single.
+
+Accepted controls:
+- manufacturer SKU is the source-product identity;
+- Elevation pack/kit SKUs are commerce compositions and must not be treated as separate manufacturer products;
+- exact base-product galleries meet the six-image eBay preparation floor;
+- Lower-48 SOK singles source from the SOK Chino fulfillment lane;
+- current Hawaii SK24V150PH draft/profile defects stay outside this eBay-single workstream and remain DRAFT/HOLD until separately remediated;
+- no new international route is inferred from the Lower-48 source listings.
+
+Current Recon Worker assignment through OS3:
+1. Re-read the existing eBay single/offer state for SK12V206PH.
+2. Prove whether an exact SK12V314PH single already exists; keep the known presale multipack separate.
+3. Reconcile the exact SK24V100 single separately from its charger kit and packs.
+4. Reconcile the exact SK24V150PH single separately from its packs.
+5. Resolve exact blue/orange 24V model identity from authoritative source/media evidence before color enters eBay copy.
+6. Return only live item/offer IDs, seller SKU, title, price, quantity, image count, merchant location, policies, status, duplicate/collision state, and factual blockers.
+
+No create, revise or publish action is authorized by this acceptance entry. Clean packets advance to MPM acceptance; Casey receives only an unresolved business decision or the exact consequential execution approval.
+
+---
+
 # OS 1 / MPM 28 CONTROL ALIGNMENT — 2026-10-02
 
 **STATE: CURRENT / CONTROLLING**
