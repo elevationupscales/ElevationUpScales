@@ -23,9 +23,9 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 # OWNER PRIORITY OVERRIDE — SOK SINGLE-BATTERY EBAY REVENUE — 2026-10-07
 
-**STATE: ACTIVE / CURRENT OWNER DIRECTION**
+**STATE: P0 / CURRENT OWNER DIRECTION / OS3 EXECUTION**
 
-Casey's newest direct instruction elevates SOK single-battery eBay listing quality above older catalog-expansion priorities.
+Casey's newest direct instruction makes SOK single-battery eBay listing execution through OS3 the current P0 revenue lane, above older catalog-expansion and fulfillment-polish priorities.
 
 Immediate sequence:
 
@@ -36,7 +36,7 @@ Immediate sequence:
 5. After these four pass acceptance, expand through the remaining SOK single-battery catalog using the same control packet.
 
 Execution ownership:
-- **MPM 28 / OS 1:** priority, packet acceptance, business-decision routing and final execution gate.
+- **MPM / OS 1:** P0 priority, packet acceptance, business-decision routing and final execution gate.
 - **Recon Worker via OS 3:** live eBay listing/offer/duplicate state, exact seller location/policy evidence, exact model/color evidence, and exception reporting.
 - **Shopify/SOK source read:** exact active source variant, approved exact-model media, specifications and source hash.
 - **eBay specialist:** prepare or revise only the exact accepted single-battery target; no unrelated packs, kits, prices, policies or listings.
@@ -255,7 +255,8 @@ This table is the current queue and supersedes older priority ordering elsewhere
 
 | Priority | Work Item | Execution Owner | State | Next Action |
 |---|---|---|---|---|
-| **P0** | Paid customer fulfillment / eBay fulfillment | MPM 28 + Commerce / eBay Operations | **ACTIVE / CUSTOMER OBLIGATION** | Reconcile and complete paid-order fulfillment first. Do not let PayPal waiting state or catalog polish displace customer deadlines. |
+| **P0** | SOK single-battery eBay listings via OS3 | MPM / OS 1 + OS3 eBay specialist | **ACTIVE / OWNER OVERRIDE** | Execute the accepted sequence SK12V206PH → SK12V314PH → SK24V100 → SK24V150PH using live reconciliation, exact proposal gates, and readback verification. No broad recon restart. |
+| **P0** | Paid customer fulfillment / eBay fulfillment | MPM + Commerce / eBay Operations | **ACTIVE / CUSTOMER OBLIGATION** | Maintain customer obligations, but do not displace the owner-directed SOK eBay P0 lane unless a same-day shipment deadline requires intervention. |
 | **P0** | MPM 28 management continuity | OS 1 / MPM 28 | **ACTIVE / CONTROLLING** | Keep canonical board, handoff, worker routing, and closeout state aligned to current owner direction. |
 | **P1** | OS 3 production acceptance / controlled API expansion | OS 3 Agent Manager under OS 1 / MPM 28 | **ACTIVE / CONTROLLED EXPANSION** | Continue read → bounded write → read-after-write → audit → independent verification acceptance. Preserve exact approval gates. |
 | **P1** | Shopify / CJ commerce workflow | OS 3 + Shopify/CJ specialists | **ACTIVE / CONTROLLED** | Continue bounded Shopify/CJ integration independent of PayPal; no uncontrolled publication, pricing, inventory, or fulfillment writes. |
