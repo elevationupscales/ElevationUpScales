@@ -21,6 +21,44 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
+# OWNER PRIORITY OVERRIDE — SOK SINGLE-BATTERY EBAY REVENUE — 2026-10-07
+
+**STATE: ACTIVE / CURRENT OWNER DIRECTION**
+
+Casey's newest direct instruction elevates SOK single-battery eBay listing quality above older catalog-expansion priorities.
+
+Immediate sequence:
+
+1. **SK12V206PH** — exact single-battery listing reconciliation / strengthening.
+2. **SK12V314PH** — exact single-battery listing preparation with preorder/fulfillment evidence preserved.
+3. **SK24V100** — exact 24V single-battery listing reconciliation; preserve separation from charger kits and multipacks.
+4. **SK24V150PH** — exact 24V single-battery listing reconciliation / strengthening.
+5. After these four pass acceptance, expand through the remaining SOK single-battery catalog using the same control packet.
+
+Execution ownership:
+- **MPM 28 / OS 1:** priority, packet acceptance, business-decision routing and final execution gate.
+- **Recon Worker via OS 3:** live eBay listing/offer/duplicate state, exact seller location/policy evidence, exact model/color evidence, and exception reporting.
+- **Shopify/SOK source read:** exact active source variant, approved exact-model media, specifications and source hash.
+- **eBay specialist:** prepare or revise only the exact accepted single-battery target; no unrelated packs, kits, prices, policies or listings.
+- **Casey:** receives only unresolved business decisions or the final exact consequential execution approval.
+
+Acceptance standard for each single:
+- exact model and intended single-battery configuration proven;
+- exact 24V blue/orange model identity proven before color enters listing copy;
+- existing eBay listing reconciled before any new-listing proposal;
+- no duplicate kit, pack or legacy listing collision;
+- at least six exact-model approved images, with 8–12 preferred when available;
+- source specifications and media match the exact model;
+- current marketplace price respects supplier MAP;
+- current fulfillment origin, destination rule and business policies are live-read rather than guessed;
+- preorder/backorder status is explicit when applicable;
+- proposal remains non-mutating until the exact owner execution gate;
+- after execution, live readback must verify item ID, title, price, quantity, images, policies, location and status.
+
+**DO NOT restart broad SOK recon. Resume from existing evidence and resolve only the missing live facts required for these exact listings.**
+
+---
+
 # OS 1 / MPM 28 CONTROL ALIGNMENT — 2026-10-02
 
 **STATE: CURRENT / CONTROLLING**
