@@ -88,6 +88,17 @@ OS3 [PR #41](https://github.com/elevationupscales/elevationupscales-elevation-ag
 
 **Execution:** These are prepared data/document corrections only. The legacy eBay listings have **not been revised live**; OS3 needs an authorized seller-owned existing-listing revise method or authenticated seller session. Do not treat Git merger as eBay publication. SK24V100 remains Shopify-only; SK24V150PH new-listing proposal is blocked by the existing single.
 
+## OWNER MEDIA STANDARD — 12 DISTINCT PHOTOS + VIDEO — 2026-10-07
+
+**Owner direction:** Use 12 real, distinct, model-correct photos on SOK eBay single-battery listings wherever enough approved media exists, PLUS one exact-model seller-approved video where eligible. eBay permits up to 24 ordinary listing photos and one video. Existing 5/6-image packets are valid preparation baselines, **not the desired end state**. Never pad with near-identical cloned renders, incompatible SKU/case/color, charger kits or multipacks.
+
+**Source discovery:** OS3 must search Shopify **product media and Shopify Files** (not just attached product gallery), authoritative SOK approved manufacturer media, previously accepted vendor files/Drive media and accessible local assets. Preserve Shopify exact retail-ready `descriptionHtml`. Record every candidate's model, rights, dimensions, view role, duplicate status and video format/size. Seller-owned legacy item readback and correct API editing route remain mandatory; no Media API upload or live revise without exact owner approval.
+
+**Current live Shopify recon:** SK24V150PH 6 product images / 12 matching image files (several likely copied heroes) **plus attached SOK parallel-wiring READY video 89 seconds**; SK12V206H 5 product images / 9 matching files (some clones or heater-kit-associated); SK12V100H 6 product images / 8 matching files. Video sweep: 73 total store videos, with dedicated SOK SK12V314PH, SK48V100N and SK12V280H clips. No exact SK12V206H or SK12V100H video was identified yet. These are candidate counts, **not approval that 12 unique images exist**.
+
+**Worker task:** [OS3 issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44). Stage one consolidated SKU-exact media/video proposal and safe existing eBay item IDs. No edits, publication, new listings, freight rate leakage, or video uploads in reconnaissance. Inaccessible/expired legacy conversation attachments are not source evidence; retrieve original Drive/Shopify/vendor content where available.
+
+---
 ## MPM continuation checkpoint — 2026-10-08 / existing eBay singles
 
 **Disposition:** Data-only media/description improvements for legacy eBay items are staged; not yet executed on eBay. Following the owner-approved Hawaii freight-index read acceptance, return first to these exact eBay legacy single improvements. Do not restart discovery or create duplicative offers.
