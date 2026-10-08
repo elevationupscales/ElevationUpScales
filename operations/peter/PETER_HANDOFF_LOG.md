@@ -190,7 +190,7 @@ This is not a second Master Work Board.
 - Evidence/source: official Olight Odin S `白底图 / M-LOK版 / 黑色` package, matching `M版-哑黑` unboxing image, official Odin S Launch Pages, and selected official Odin S scenario images supplied by Peter; Shopify readback after media update.
 - Gallery completed: clean M-LOK Matte Black hero, remote-switch configuration, alternate product angles, tail-switch detail, emitter/front detail, M-LOK mounted outdoor close-up, long-range night-beam lifestyle image, 1,500-lumen / 250 m official feature graphic, dual-power official feature graphic, and matching M-version Matte Black package contents.
 - Variant control: Picatinny-version and Desert/Tan assets were explicitly excluded from the assigned `ODINSMMTBK` draft.
-- Hero state: clean Odin S M-LOK Matte Black product image is the Shopify featured image.
+- Hero state: clean Odin S M-LOK Matte Black product image is now the Shopify featured image.
 - Tag state: `Dealer Media Pending` removed only after the exact-product media pass was complete.
 - Protected controls preserved: SKU `ODINSMMTBK`, price $149.99, vendor Olight, inventory state and DRAFT status remain unchanged.
 - New state: Odin S media/copy pass is review-ready and remains DRAFT for Management commercial/publish review.
@@ -409,3 +409,19 @@ This is not a second Master Work Board.
 - Management gate remains: Kiki/Olight confirmation controls current supplier availability, dropship eligibility, MAP/launch timing and final fulfillment readiness. Do not make customer availability promises from Shopify quantities alone.
 - Routed to: Casey Young / Company Operations / current MPM.
 
+
+---
+
+## 2026-10-07 — Commerce cleanup R1 mobile/checklist closeout
+
+**State:** LOCAL COMPLETE / OWNER REVIEW REQUIRED
+
+- Verified change: Peter completed the current `PETER COMMERCE CLEANUP R1 — REVIEW` mobile/checklist verification pass. The draft theme remains unpublished.
+- Evidence/source: live mobile draft-theme preview supplied by Peter; on-phone cart/checkout retest; current Gmail commerce-cleanup thread.
+- Completed/accepted checks: duplicate card controls, recommendations, Olight weak-link cleanup, SOK guidance, six CTA repairs, AMRS add-to-cart behavior, AMRS checkout opening, broader mobile layout review, and the minor mobile chat-button overlap accepted as non-blocking.
+- Final visual blemish check: the previously tracked stray floating `.` below the header is no longer visible in the final mobile preview; the period in `Power Beyond Limits.` is intentional headline punctuation.
+- Checkout control: AMRS added to cart and checkout opened successfully on Peter's phone; no order was placed. The test item was removed from the cart after verification.
+- Scope boundary: this closes Peter's commerce-cleanup/mobile checklist only. Supplier availability, publication approval, and any paid-order → OS3 ingestion verification remain separate management/owner controls; Peter has been told he will not receive OS3 access.
+- New state: `PETER COMMERCE CLEANUP R1 — REVIEW` is ready for Casey's approval decision. No publication action was taken in this closeout.
+- Recommended global update: mark the Peter commerce-cleanup checklist complete and move the draft theme to owner review/publication decision.
+- Routed to: Casey Young / Company Operations / current MPM.
