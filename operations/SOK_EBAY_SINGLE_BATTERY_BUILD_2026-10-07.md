@@ -41,6 +41,19 @@ A charger/battery kit, multipack (3/6/12), rack-system bundle, Hawaii freight pa
 
 **Nonmutating board directive only. No eBay/Shopify inventory, policy, price, product or listing write is authorized by this file.**
 
+## Read-only cross-SKU listing census (October 8)
+
+Additional exact-model public eBay / Gmail historical evidence, **all legacy seller SKUs to preserve**:
+
+| Model | Evidence | Handling |
+|---|---|---|
+| `SK24V150PH` | [single item 168697309882](https://www.ebay.com/itm/168697309882), exact single $1,149 + $25 shipping, three gallery images at live read; battery + charger kit is 168697425029 | **Block** OS3 proposal `EBAYLIST-2C667EBB64-944W95F9`; enhance/review legacy single, no new offer |
+| `SK48V100N` | [single rack battery 168698654916](https://www.ebay.com/itm/168698654916), same seller/model, price requires live read; charger kit 168700814177 | Inspect/upgrade legacy single, no duplicate |
+| `SK12V206H` | [single item 168698654908](https://www.ebay.com/itm/168698654908), same seller/model, historical current page shows $789 + $25 shipping | Inspect/upgrade legacy single, no duplicate |
+| `SK12V100H` | historical September 17 eBay listing confirmation [single item 168697309880](https://www.ebay.com/itm/168697309880), $369 + $25 shipping at listing; also newer 168699452846 advertised $549.99 + $25 (exact contents unverified) | Reconcile legacy exact single and kit, do not duplicate |
+
+OS3 CLI new-listing preflight with `legacyListingDiscovery=NOT_AVAILABLE_WITH_CURRENT_V0_1_READS` must **never** be treated as global duplicate clearance. Build a read-only legacy listing audit/upgrader path before any more SOK new-listing creates; once safe, batch gallery/fulfillment reviews and bring owner a consolidated execution package. Do not revise live listings without exact owner approval; no creates/revisions happened in this recon.
+
 ## SK24V150PH duplicate found after OS3 proposal (October 8)
 
 - Local OS3 read-only proposal `EBAYLIST-2C667EBB64-944W95F9`, seller SKU `SK24V150PH-SINGLE-L48-OCT26`, passed exact-new-SKU checks (`inventoryItemExists=false`, `existingOfferIds=[]`, location/policies enabled, validation errors zero), status `AWAITING_EBAY_LISTING_CREATE_APPROVAL`. **Do not approve, create, or publish.** Its preflight explicitly returned `legacyListingDiscovery=NOT_AVAILABLE_WITH_CURRENT_V0_1_READS` and cannot detect legacy listings under different seller SKUs.
