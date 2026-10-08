@@ -40,3 +40,9 @@ A charger/battery kit, multipack (3/6/12), rack-system bundle, Hawaii freight pa
 - Next expansion after nine singles: approved 3/6/12-packs, system components and Hawaii-specific packages, each with separate freight/profile gates.
 
 **Nonmutating board directive only. No eBay/Shopify inventory, policy, price, product or listing write is authorized by this file.**
+
+## Owner operating update — 2026-10-07 (SK24V100 → SK24V150PH)
+
+- **SK24V100**: restock/ship date remains unconfirmed; owner directed **Shopify pre-purchase only**. Do not create or publish a new eBay single while this gate is unresolved. Approved nine-image packet remains on OS3 main from PR #38 but is **staged only**. Historical eBay single 168697309881 and charger kit 168697478742 need independent live status/reconciliation; do not change without specific owner instruction.
+- **SK24V150PH**: standalone battery packet merged to OS3 main in [PR #39](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/pull/39), merge SHA `a2705d6c4095755784c0f9eefdb80e845c7f045f`; six exact-model product gallery images; proposed $1,149 delivered; SKU `SK24V150PH-SINGLE-L48-OCT26`; quantity convention 1; Chino Lower 48 profile. SOK catalog showed In Stock at last review but physical supplier dispatch ability remains unconfirmed. The historical [eBay item 168697425029](https://www.ebay.com/itm/168697425029) is battery + 24V charger, **not a standalone single**. Avoid kit collision. No new eBay publication receipt verified yet.
+- **Reduce owner handoffs:** combine read-only preflight into one CLI invocation and consolidate results for MPM; invoke an existing single-owner-command create/publish flow only if the owner authorizes that exact listing and the supplier/duplicate gates have passed, never automatically. Preserve audit events and stop on any partial-create failure rather than retrying create.
