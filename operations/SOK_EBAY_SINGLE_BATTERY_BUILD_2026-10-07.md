@@ -87,3 +87,23 @@ Owner: "yes improve listing". Read-only live eBay check, source Shopify catalog 
 OS3 [PR #41](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/pull/41) merged `67e9cac58a505cded3b3d8e87c6e4da8170e493e`. Readback confirmed **three existing-item revision packets** (SK24V150PH item 168697309882; SK12V206H item 168698654908; SK12V100H item 168697309880), and **three unexecuted JSON seed files** have descriptions equal to their current Shopify source with no identified operations-text slip. Images and planned prices unaffected. OS3 docs: `docs/ebay-retail-ready-shopify-copy-standard.md`.
 
 **Execution:** These are prepared data/document corrections only. The legacy eBay listings have **not been revised live**; OS3 needs an authorized seller-owned existing-listing revise method or authenticated seller session. Do not treat Git merger as eBay publication. SK24V100 remains Shopify-only; SK24V150PH new-listing proposal is blocked by the existing single.
+
+## MPM continuation checkpoint — 2026-10-08 / existing eBay singles
+
+**Disposition:** Data-only media/description improvements for legacy eBay items are staged; not yet executed on eBay. Following the owner-approved Hawaii freight-index read acceptance, return first to these exact eBay legacy single improvements. Do not restart discovery or create duplicative offers.
+
+**OS3 bounded engineering assignment:** [issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44), a P0 read-only identification and draft-only legacy revision workstream.
+
+| Exact eBay listing | SOK SKU | Staged gallery | Next owner-gated task |
+|---|---|---:|---|
+| 168697309882 | SK24V150PH | 6 | Prove seller-owned active listing and revise method, then exact-ID gallery/Shopify-copy-only revision proposal; protect $1,149 + $25 shipping |
+| 168698654908 | SK12V206H | 5 | Same; protect $789 + $25 shipping |
+| 168697309880 | SK12V100H | 6 | Same; protect $369 + $25 shipping |
+
+Sources already merged into OS3 main: `runtime/ebay-listing-revisions/sok-exact-existing-singles-20261007.json`, `runtime/ebay-listing-revisions/SOK_EXISTING_SINGLES_EXECUTION_PLAN_20261007.md`, and `docs/ebay-retail-ready-shopify-copy-standard.md`.
+
+**OS3 permission boundary:** Trading API `GetItem` can read exact legacy item IDs with seller OAuth where allowed; Inventory API edits apply only to Inventory-managed objects. eBay Trading API `ReviseFixedPriceItem` cannot revise listings created under the new Inventory model. The worker must prove management model and exact seller ownership before any revision design; conflicting EPS/vendor picture modes must fail closed. Issue #44 requests READ/RECON and DRAFT-PR only; no owner approval for live modify, migrate, relist, publish, or change price/quantity/policies has been issued.
+
+**Existing holds unchanged:** `SK24V100` Shopify-only pending dispatch date, `SK48V100N` item 168698654916 seller-ended, duplicate SK24V150PH new-offer proposal `EBAYLIST-2C667EBB64-944W95F9` blocked, distinct kits and multipacks untouched.
+
+**Hawaii subsequent step:** After singles complete, derive Hawaii offer preflight from the separate source-backed local OS3 rate index at `F:\OS3\HawaiiFreight` (39 records, receipt `OS3-20261008053840-EDSUK`; quote validity and 5 historical model-review flags tracked). OS3 private master PR #43 remains draft/unmerged pending exact owner authorization; no private carrier-cost publication.
