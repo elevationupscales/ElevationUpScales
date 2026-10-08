@@ -476,3 +476,23 @@ This is not a second Master Work Board.
 - Signature control: Gmail's API/connector path does not automatically apply the web-compose signature. Peter's current signature was therefore manually embedded in the draft body. Future connector-created Peter emails should include the approved signature explicitly so messages do not go out without it.
 - Relationship objective: establish Peter as a day-to-day Olight operations contact without displacing Casey's owner/supplier relationship, and keep Casey visibly included during the transition.
 - Routed to: Casey Young for approval; Peter Torres / Olight supplier relationship.
+
+
+---
+
+## 2026-10-08 — Peter Black Friday Olight/SOK/Heater package P0 handoff
+
+**State:** MASTER UPDATE REQUIRED / P0 PLANNING READY (NO COMMERCE EXECUTION)
+
+- Verified change: Casey assigned Peter Torres and team lead ownership of Elevation Olight Black Friday bundles and deals: heater + battery + solar concepts, SOK battery packages with Olight, and threshold/free-Oclip concepts. Management's focused public-safe documentation package prepared for Git review.
+- Evidence/source: Oct. 8 direct owner instruction; canonical `operations/CURRENT_WORK_BOARD.md`; `operations/SOK_OLIGHT_CONVERSION_CAMPAIGN_RECON_2026-09-20.md`; original Kiki/Olight dealer correspondence and supplied private dealer sheet/New Arrivals file (reviewed, NOT committed); Oct. 8 Shopify 21-product Olight read and MAIN-theme status.
+- Affected Project: Peter / Olight commerce / Black Friday; OS 1 MPM 28 acceptance.
+- Prior state: Historical Peter index/worktree pointed to completed Sept. Wave 2 product listing work and still said commerce theme was unpublished; Black Friday bundle ownership was not current in Peter's Git pointers.
+- New state: [October 8 Bundle Workstream](PETER_BLACK_FRIDAY_BUNDLE_WORKSTREAM_2026-10-08.md) defines 9 concept IDs, 5 customer-facing writing templates, read-only source audit, exact product/recall and compatibility gates, internal costing/margin template, supplier promotions clearance, and no-publication boundaries.
+- Global priority: Peter P0 is planning and readiness. Paid-order obligations, product-safety/recall and existing independent SOK eBay owner work are **not** displaced; they remain with their assigned owners.
+- Kiki: formal introductory message from Casey with Peter copied has been sent; no repeat onboarding/media/pricing request, no additional supplier contact authorized.
+- Commercial gates: SOK MAP, Olight MSRP/no-below rules, actual additional Olight shipping, gift cost, customer order threshold, checkout/returns logic. “Spend $200 get an Oclip on us” remains a concept requiring documented supplier authorization.
+- Heater safety: No recalled or eBay-restricted heater as bundle component; match battery/solar/controller electrical requirements, fuel/exhaust constraints and region shipping before any claim or proposal advances.
+- Private information: supplier buy-costs, original dealer sheets, non-public freight and all sensitive files must remain out of this public Git repository.
+- Next: Peter acknowledges the accepted current Git change; runs his team's recon; returns ranked 9-concept research and private costing packet. MPM performs review, Casey approves exact eventual commerce action only if gates pass. No Shopify/eBay change, publication, discount or deployment by this Git commit.
+- Routed to: Peter Torres → Company Operations / MPM 28 → Casey.
