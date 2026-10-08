@@ -32,6 +32,13 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 ---
 ## OWNER MEDIA STANDARD — 12 DISTINCT PHOTOS + VIDEO — 2026-10-07
 
+### 2026-10-08 DEEP SOK VIDEO RECON — SUPPLIER MASTER FOUND
+
+SOK's manager sent a **574 MB authoritative product-video RAR archive** on Sep 29, verified by live Google Drive metadata. The related **930 MB SOK photo ZIP** is also available. See `operations/SOK_VIDEO_MEDIA_RECON_2026-10-08.md` for supplier-origin IDs, all nine Shopify model video reads, video candidates and license gates. These files are too large for the connector's 256 MiB limit; the OS3 worker should index the supplier RAR locally on F: when downloaded, not start new general research.
+
+Shopify exhaustive read: **73 video files across the store**, **7 SOK model-associated source clips** (SK12V314PH×3, SK24V150PH×1, SK48V100N×2, SK12V280H×1) and **2 generic feature candidates** awaiting frame-to-SKU validation. SK12V206H and SK12V100H exact-video gap remains until supplier RAR indexed. eBay video uploads/revisions remain not authorized. OS3 issue #44 holds the consolidated task.
+
+
 **Owner direction:** Use 12 real, distinct, model-correct photos on SOK eBay single-battery listings wherever enough approved media exists, PLUS one exact-model seller-approved video where eligible. eBay permits up to 24 ordinary listing photos and one video. Existing 5/6-image packets are valid preparation baselines, **not the desired end state**. Never pad with near-identical cloned renders, incompatible SKU/case/color, charger kits or multipacks.
 
 **Source discovery:** OS3 must search Shopify **product media and Shopify Files** (not just attached product gallery), authoritative SOK approved manufacturer media, previously accepted vendor files/Drive media and accessible local assets. Preserve Shopify exact retail-ready `descriptionHtml`. Record every candidate's model, rights, dimensions, view role, duplicate status and video format/size. Seller-owned legacy item readback and correct API editing route remain mandatory; no Media API upload or live revise without exact owner approval.
