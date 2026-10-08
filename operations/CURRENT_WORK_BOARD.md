@@ -34,6 +34,9 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ### 2026-10-08 DEEP SOK VIDEO RECON — SUPPLIER MASTER FOUND
 
+**Owner F: availability update:** SOK confirms original SOK Battery Product Videos.rar is already stored on the local F: drive. [OS3 draft PR #45](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/pull/45) stages an exact read-only RAR inventory command, without copying videos or extracting them. PR #45 is stacked on the unmerged draft #43 for tested Windows portability; local build/test and actual RAR inventory receipt still required. eBay video publication/edit remains NOT AUTHORIZED.
+
+
 SOK's manager sent a **574 MB authoritative product-video RAR archive** on Sep 29, verified by live Google Drive metadata. The related **930 MB SOK photo ZIP** is also available. See `operations/SOK_VIDEO_MEDIA_RECON_2026-10-08.md` for supplier-origin IDs, all nine Shopify model video reads, video candidates and license gates. These files are too large for the connector's 256 MiB limit; the OS3 worker should index the supplier RAR locally on F: when downloaded, not start new general research.
 
 Shopify exhaustive read: **73 video files across the store**, **7 SOK model-associated source clips** (SK12V314PH×3, SK24V150PH×1, SK48V100N×2, SK12V280H×1) and **2 generic feature candidates** awaiting frame-to-SKU validation. SK12V206H and SK12V100H exact-video gap remains until supplier RAR indexed. eBay video uploads/revisions remain not authorized. OS3 issue #44 holds the consolidated task.
