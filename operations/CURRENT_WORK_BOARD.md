@@ -30,6 +30,17 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 - Resume existing SOK single work before **derived Hawaii freight** offers. Hawaii retail offers remain separate and cannot use internal carrier buy prices as direct checkout prices.
 
 ---
+## OWNER MEDIA STANDARD — 12 DISTINCT PHOTOS + VIDEO — 2026-10-07
+
+**Owner direction:** Use 12 real, distinct, model-correct photos on SOK eBay single-battery listings wherever enough approved media exists, PLUS one exact-model seller-approved video where eligible. eBay permits up to 24 ordinary listing photos and one video. Existing 5/6-image packets are valid preparation baselines, **not the desired end state**. Never pad with near-identical cloned renders, incompatible SKU/case/color, charger kits or multipacks.
+
+**Source discovery:** OS3 must search Shopify **product media and Shopify Files** (not just attached product gallery), authoritative SOK approved manufacturer media, previously accepted vendor files/Drive media and accessible local assets. Preserve Shopify exact retail-ready `descriptionHtml`. Record every candidate's model, rights, dimensions, view role, duplicate status and video format/size. Seller-owned legacy item readback and correct API editing route remain mandatory; no Media API upload or live revise without exact owner approval.
+
+**Current live Shopify recon:** SK24V150PH 6 product images / 12 matching image files (several likely copied heroes) **plus attached SOK parallel-wiring READY video 89 seconds**; SK12V206H 5 product images / 9 matching files (some clones or heater-kit-associated); SK12V100H 6 product images / 8 matching files. Video sweep: 73 total store videos, with dedicated SOK SK12V314PH, SK48V100N and SK12V280H clips. No exact SK12V206H or SK12V100H video was identified yet. These are candidate counts, **not approval that 12 unique images exist**.
+
+**Worker task:** [OS3 issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44). Stage one consolidated SKU-exact media/video proposal and safe existing eBay item IDs. No edits, publication, new listings, freight rate leakage, or video uploads in reconnaissance. Inaccessible/expired legacy conversation attachments are not source evidence; retrieve original Drive/Shopify/vendor content where available.
+
+---
 # CURRENT OWNER OVERRIDE — ALL NINE SOK SINGLE BATTERIES — 2026-10-07
 
 **STATE: P0 / ACTIVE / 1-UNIT EBAY OFFER CONVENTION**
