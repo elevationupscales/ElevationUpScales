@@ -21,6 +21,20 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
+# CURRENT OWNER OVERRIDE — ALL NINE SOK SINGLE BATTERIES — 2026-10-07
+
+**STATE: P0 / ACTIVE / 1-UNIT EBAY OFFER CONVENTION**
+
+Casey's newest direct instruction supersedes the prior four-model-first restriction: **build every currently identified standalone SOK battery listing now; conduct the detailed supplier stock audit for the internal availability lists after the listing-build pass.** Keep eBay offer quantity at **one (1)** for new single-model offers and preserve accepted one-unit eBay singles. Do not infer confirmed physical stock from an offer quantity of 1.
+
+Nine confirmed Shopify manufacturer-model sources: `SK12V100PC`, `SK12V206PH`, `SK12V314PH`, `SK24V100`, `SK24V150PH`, `SK48V100N`, `SK12V100H`, `SK12V206H`, `SK12V280H`. The two accepted existing singles stay intact. SK12V314PH is owner-cleared to sell and remains the current exact packet; Shopify's stale `Pre-Order` tag needs source-state reconciliation. Complete the rest using existing Shopify/OS3 exact-model discovery and eBay legacy-duplicate checks.
+
+**Source/assignment/status matrix:** `operations/SOK_EBAY_SINGLE_BATTERY_BUILD_2026-10-07.md`.
+
+Execution boundaries are unchanged: per-SKU read-only build packet, specific seller create approval, separate publish approval, live readback; do not conflate quantities with supplier stock. Build preparation proceeds without requiring the final all-model stock spreadsheet; fulfillability and accurate customer shipping promises still gate publication. No blanket commerce write authorization.
+
+---
+
 # OWNER PRIORITY OVERRIDE — SOK SINGLE-BATTERY EBAY REVENUE — 2026-10-07
 
 **STATE: ACTIVE / CURRENT OWNER DIRECTION**
