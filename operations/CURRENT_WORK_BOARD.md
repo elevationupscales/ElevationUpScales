@@ -1,9 +1,9 @@
 # ELEVATION UPSCALES — CURRENT WORK BOARD
 
 **Status:** ACTIVE / CANONICAL GLOBAL WORK STATE  
-**Effective:** 2026-10-02  
+**Effective:** 2026-10-08  
 **Owner:** Casey Young  
-**State Owner:** **OS 1 / Operating System Project Manager — MPM 28 continuity**  
+**State Owner:** **OS 1 / Operating System Project Manager — MPM 30 continuity**  
 **Web / Commerce Worktree:** `WEB_V2_CURRENT_WORKTREE.md`  
 **Active Execution Workflow:** `MPM_ACTIVE_EXECUTION_WORKFLOW_2026-09-17.md`
 
@@ -21,7 +21,22 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
-## 2026-10-08 MPM continuation — current exact SOK execution blocker
+## 2026-10-08 MPM 30 — OS3 execution integration and current SOK state
+
+This section supersedes the older draft-only assignment and mandatory further-media sourcing below **for the three existing singles only**. Preserve historical receipts as evidence; they are not new execution gates.
+
+- **Code:** [OS3 PR #49](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/pull/49) implements the bounded existing-item content executor, durable jobs/checkpoints and typed local MCP interface. Follow the [current OS3 runbook](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/blob/main/docs/os3-execution-integration.md). Re-resolve accepted main and installed capabilities; code acceptance does not prove host installation or a connected OS1 session.
+- **Accepted content:** Shopify descriptions and **6 / 5 / 6** approved photos for `SK24V150PH` (`168697309882`), `SK12V206H` (`168698654908`), and `SK12V100H` (`168697309880`), respectively. [Owner override in issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44#issuecomment-6070497096) permits this baseline; twelve photos and video are optional later enhancement, not blockers. Do not reopen Drive/archive/catalog research to finish this bundle.
+- **Preservation:** revise only approved description and gallery on those original IDs. Preserve current retail price, quantity, shipping, policies, handling, category, SKU and location. No duplicate creation, migration, end/relist or unrelated listing mutation.
+- **Runtime next action:** install accepted OS3 main on the owner host and establish its private MCP connection to OS1. Use `Show OS3 capabilities`, reuse the existing preparation packet, and bind one local exact-bundle execution grant to the reviewed seller/hash. MCP cannot issue that grant. Existing seller authorization may be reused if runtime checks pass; do not assume a browser sign-in is required merely because no editor was previously attached.
+- **Resume:** submit the registered execute action with a stable idempotency key, poll its durable job, and report each item independently. Known image uploads resume from checkpoints; unknown upload/revision outcomes require reconciliation. A blocked item does not freeze other safe items.
+- **Evidence boundary:** no live eBay revisions or host/OS1 connection acceptance are claimed by this coding update. Completion requires original-ID readback of description/gallery and preserved commercial fields.
+- **Separate drafts:** OS3 #42/#43/#45 remain unmerged. #48's offline revision plan is superseded for this lane; do not merge that draft as another engineering prerequisite. Hawaii/private-source, video, and excluded models keep their existing boundaries.
+
+---
+
+## Historical 2026-10-08 continuation — pre-integration blocker
+
 
 - Local OS3 Hawaii master **read and persistence accepted**: Windows receipt `OS3-20261008053840-EDSUK`, 497/497 tests, 39 private carrier quotes (27 in-window/12 historical), unchanged source hash. Private-source access PR #43 is **draft/unmerged** pending explicit merge approval. No freight booking or customer pricing authorized.
 - SOK single-battery eBay **improvement priority**: Three already-listed singles (`SK24V150PH` 168697309882, `SK12V206H` 168698654908, `SK12V100H` 168697309880) have exact Shopify retail-ready description/gallery packets staged on OS3 main. **No live eBay revisions yet**.
@@ -30,7 +45,9 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 - Resume existing SOK single work before **derived Hawaii freight** offers. Hawaii retail offers remain separate and cannot use internal carrier buy prices as direct checkout prices.
 
 ---
-## OWNER MEDIA STANDARD — 12 DISTINCT PHOTOS + VIDEO — 2026-10-07
+## HISTORICAL MEDIA STANDARD — 12 DISTINCT PHOTOS + VIDEO — 2026-10-07
+
+For the three existing singles, the current MPM 30 override above controls. The research record below is retained for optional later improvements.
 
 ### 2026-10-08 DEEP SOK VIDEO RECON — SUPPLIER MASTER FOUND
 

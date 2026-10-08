@@ -1,7 +1,7 @@
-# MASTER S.O.P. — OS 1 CONTROL / MPM 28 CONTINUITY
+# MASTER S.O.P. — OS 1 CONTROL / MPM 30 CONTINUITY
 
 Original relock effective: 2026-09-26  
-Current control alignment: 2026-10-02
+Current control alignment: 2026-10-08
 Owner authority: President, Elevation UpScales, Inc.
 Repository: `elevationupscales/ElevationUpScales`
 
@@ -30,16 +30,18 @@ Historical files never override current owner direction or current accepted `mai
 ## 3. OS 1 control baseline and continuity
 
 **Current operating control:** OS 1 / Operating System.  
-**Current manager continuity:** MPM 28.  
+**Current manager continuity:** MPM 30.  
 **MPM numbers are continuity/session labels, not separate authority layers.**
 
 Project boundaries:
 - **OS 1 / Operating System:** ACTIVE / CONTROLLING MANAGEMENT SYSTEM.
-- **MPM 28:** current management continuity inside OS 1.
+- **MPM 30:** current management continuity inside OS 1.
 - **Operating System 2.0 / OS 2:** RETIRED. Do not route new work through it.
-- **OS 3 / Agent Manager:** ACTIVE API EXECUTION / CONTROL SYSTEM used alongside MPM 28 for bounded API execution, acceptance, verification, and audited workflows. OS 3 does not replace OS 1 management authority and may not infer broader business, production, payment, communication, or deployment authority from API capability.
+- **OS 3 / Agent Manager:** ACTIVE API EXECUTION / CONTROL SYSTEM used alongside MPM 30 for bounded API execution, acceptance, verification, and audited workflows. OS 3 does not replace OS 1 management authority and may not infer broader business, production, payment, communication, or deployment authority from API capability.
 
-Current OS 3 accepted baseline is maintained in the separate repository `elevationupscales/elevationupscales-elevation-agent-manager`. At this alignment the accepted OS 3 main baseline is `1e6970dd1fb59b82ae7e5adbf92b58c681794969`. Workers must re-resolve that repository before relying on a newer OS 3 state.
+Current OS 3 accepted baseline is maintained in the separate repository `elevationupscales/elevationupscales-elevation-agent-manager`. Re-resolve that repository's accepted `main` before routing work; an old checkpoint, draft branch or local test is not the installed runtime. The current integration is [OS3 PR #49](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/pull/49); use its [execution runbook](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/blob/main/docs/os3-execution-integration.md). Report source revision, host installation, OS1 connection and live receipts separately.
+
+OS1 MPM submits bounded typed jobs through the connected OS3 MCP interface and polls persisted job IDs. Status reads do not repeat execution. Resume accepted packets and checkpoints across MPM sessions; do not restart content sourcing or engineering solely because the session changed. An unavailable connection is a host-integration blocker, not proof of missing seller content or expired credentials. Unknown side effects require reconciliation, never a blind retry. Remote jobs cannot issue the exact local execution grant. The current coding update is not a live commerce or deployment receipt.
 
 The MPM 25 relock remains a valid historical control checkpoint and its anti-drift rules remain inherited where not superseded by newer owner direction.
 
@@ -311,12 +313,12 @@ Every completed Git task must end with one concise receipt:
 
 Do not bury status in long narrative.
 
-## 16. Current MPM 28 state
+## 16. Current MPM 30 state
 
 Current management state:
-- **OS 1 / MPM 28 = ACTIVE management control.**
+- **OS 1 / MPM 30 = ACTIVE management control.**
 - **OS 2 = RETIRED.**
-- **OS 3 = ACTIVE bounded API execution/control system alongside MPM 28.**
+- **OS 3 = ACTIVE bounded API execution/control system alongside MPM 30.**
 - **PayPal = WAITING EXTERNAL; not a global blocker.**
 - initial MPM25 control baseline: `f8b55f928f28b8f3087980576158bab286dc022d`
 - Git drift recovery checkpoint: `30a161feef32bacccea1f0f043ea1bc0cf03d528`
