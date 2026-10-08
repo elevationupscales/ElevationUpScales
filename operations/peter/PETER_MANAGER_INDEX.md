@@ -7,6 +7,22 @@
 **Status:** ACTIVE / PETER-LANE INDEX / ACCESS VERIFIED  
 **Repository:** `elevationupscales/ElevationUpScales`
 
+## CURRENT P0 POINTER — 2026-10-08 / PETER BLACK FRIDAY DEALS
+
+**Owner-assigned primary lane:** Olight / SOK / RV winter-power bundle planning, exact supplier-source recon, margin studies and Black Friday gift-with-purchase concept development.  
+**Execution owner:** Peter Torres, Director of Operations & Commerce and his team.  
+**Report to:** OS 1 / MPM 28. OS 2 remains retired; OS3 is a bounded read/execution assistant, not a separate manager or implied Peter permission.
+
+**Read these in order:** current `main` → [MASTER S.O.P.](../../MASTER-SOP.md) → [Global Work Board](../CURRENT_WORK_BOARD.md) → this index → [Peter Current Worktree](PETER_CURRENT_WORKTREE.md) → [October 8 Bundle Workstream](PETER_BLACK_FRIDAY_BUNDLE_WORKSTREAM_2026-10-08.md) → exact current Olight/SOK/Renogy source and live Shopify/OS3 evidence.
+
+**Priority P0 sequence:** paid-order/safety non-regression → live-theme read-only QA → source/availability recon using existing Kiki material → 3 heater + 3 SOK/Olight + 3 holiday offers → private margin and supplier-rule verification → one MPM-reviewed bundle packet. The historical “Current bounded assignment pointer” and 2026-09-24 draft list lower in this file are archived reference, not current work instructions.
+
+**Communication:** Casey has introduced Peter to Kiki; do not ask for catalog, media, SKU mapping or dealer onboarding already supplied. Only genuinely unresolved, source-backed supplier questions go to MPM for Casey's approval before external contact. Avoid private supplier price sheets and protected dollar data in public Git.
+
+**Restrictions:** No offer creation/publication, discount activation, theme edits/deploy, supplier spending, checkout changes or external sends without separate exact approval. A complimentary Olight incentive (e.g., “Spend $200, get an Oclip”) remains conditional on supplier promotion permission and economics. Heater concepts stay HOLD pending exact model recall/compliance and power-system fit checks.
+
+---
+
 ## This file is not the Master Work Board
 
 This is Peter's durable orientation and management index.
