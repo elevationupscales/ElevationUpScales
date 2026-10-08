@@ -68,3 +68,25 @@ eBay policy cautions against copying manufacturer/third-party website media with
 5. Submit one consolidated proposal as an addendum to OS3 [issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44) and maintain source records in the internal POS; do not modify eBay listings without exact owner authorization.
 
 **Additional security:** Neither supplier ZIP/RAR nor private Shopify media should be copied into a public Git repository; catalog only pointers and harmless metadata. Do not disclose internal supplier communications in customer-facing listings.
+
+## F. Local manufacturer archive content metadata — owner accepted 2026-10-08
+
+**First true Windows runtime source read:** `OS3-20261008061621-4A2T7`; `INVENTORY_REVIEW_REQUIRED`, `mutationPerformed:false`, `executionIntegrity:WORKER_COMPLETED`. Owner reported `npm test` 503 passed, no failures or skips. 7-Zip 26.04 installed. OS3 read `F:\SOK Battery Product Videos (2).rar`, **574,003,731 bytes**, same as source Drive metadata, 9 archive members and 9 video candidates, zero unsafe names and zero encrypted members. This is NOT a cryptographic source hash or video content proof.
+
+| RAR original video filename | Size (bytes) | Source grouping |
+|---|---:|---|
+| `sk12v314PH动画-20250224删减.mp4` | 135,546,037 | `SK12V314PH` — named |
+| `12V314PH并联设置.mp4` | 105,036,981 | `SK12V314PH` — named |
+| `SK48V100N 动画-EN 0905.mp4` | 61,486,632 | `SK48V100N` — named |
+| `SOK 5度电蓝牙APP展示-英语 20250917.mp4` | 20,653,142 | 5kWh family — exact model still needs visual proof |
+| `加热原理.mp4` | 53,102,353 | Generic heating explanation — no exact SKU claimed |
+| `24V150并联接线动画250808.mp4` | 76,672,916 | `SK24V150PH` known filename alias — requires content review |
+| `SK12V280H.mp4` | 107,550,233 | `SK12V280H` — named |
+| `APP功能展示.mp4` | 7,836,718 | Generic app demonstration — no exact SKU claimed |
+| `12V314PH连接蓝牙.mp4` | 19,221,577 | `SK12V314PH` — named |
+
+**Cross-source reconciliation:** All nine RAR clips are already identifiable by filename in Shopify Files. No additional specifically named `SK12V206H` or `SK12V100H` video exists in the provided RAR. The eBay media program can reuse already-imported candidate references if source licensing and exact footage are qualified, without reimporting duplicate videos.
+
+**Classification correction staged:** OS3 draft [PR #45](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/pull/45) now recognizes the isolated token `24V150` as a documented alias candidate for `SK24V150PH`, with explicit `KNOWN_ALIAS_REQUIRES_CONTENT_REVIEW`; rejects wrong near-SKUs. Original local tests were 503 pass; following the patch, run build + 504 expected tests + repeat F: inventory; do not claim post-patch acceptance without receipt.
+
+**No changes or publication:** Listing video compatibility, exact SKU shown in frames, soundtrack rights, retailer/marketplace media permission, specs and moderation are not established by the archive filenames. Keep issue #44 gated.
