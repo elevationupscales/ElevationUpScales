@@ -15,8 +15,8 @@ Live Shopify vendor `SOK Battery`, product type `LiFePO4 Battery`, nine standalo
 | 1 | SK12V100PC | 15995497906545 | $319 | Existing accepted single eBay listing 168697125231; preserve accepted eBay price, qty1; Shopify currently reports zero stock, internal audit later |
 | 2 | SK12V206PH | 15997525197169 | $750 | Existing accepted single eBay listing 168698654921; preserve accepted eBay price, qty1 |
 | 3 | SK12V314PH | 15997525492081 | $1099 | Current exact single packet; owner confirms saleable stock, Chino location verified; Shopify `Pre-Order` tag needs reconciliation |
-| 4 | SK24V100 | 15997525262705 | $751 | Prepare new/existing single reconcile, avoid kit and pack collisions |
-| 5 | SK24V150PH | 15997525623153 | $1149 | Prepare new/existing single reconcile; preserve exact variant/color identity |
+| 4 | SK24V100 | 15997525262705 | $751 | **SHOPIFY ONLY (owner decision 2026-10-07):** pre-purchase flow remains; no new eBay listing while SOK stock date is unconfirmed. Nine-image OS3 packet retained but not authorized to publish. Legacy eBay single 168697309881 ($751 + $25 on Sep 17) requires separate read-only reconciliation before any future eBay action |
+| 5 | SK24V150PH | 15997525623153 | $1149 | **NEXT:** OS3 draft single-battery packet staged; SOK current 24V catalog labels in stock but Chino fulfillment not independently confirmed. Prior eBay 168697425029 is SK24V150PH **+ SK24V10A charger kit** (Sep 18 $1349.99 + $25), not single; preserve kit. Legacy standalone collision + OS3 preflight required |
 | 6 | SK48V100N | 15995497972081 | $1199 | Prepare new/existing standalone rack-battery reconcile |
 | 7 | SK12V100H | 15997524935025 | $369 | Prepare new/existing single reconcile |
 | 8 | SK12V206H | 15997525164401 | $749 | Prepare new/existing single reconcile; not the same as SK12V206PH |
