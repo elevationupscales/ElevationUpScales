@@ -41,6 +41,13 @@ A charger/battery kit, multipack (3/6/12), rack-system bundle, Hawaii freight pa
 
 **Nonmutating board directive only. No eBay/Shopify inventory, policy, price, product or listing write is authorized by this file.**
 
+## SK24V150PH duplicate found after OS3 proposal (October 8)
+
+- Local OS3 read-only proposal `EBAYLIST-2C667EBB64-944W95F9`, seller SKU `SK24V150PH-SINGLE-L48-OCT26`, passed exact-new-SKU checks (`inventoryItemExists=false`, `existingOfferIds=[]`, location/policies enabled, validation errors zero), status `AWAITING_EBAY_LISTING_CREATE_APPROVAL`. **Do not approve, create, or publish.** Its preflight explicitly returned `legacyListingDiscovery=NOT_AVAILABLE_WITH_CURRENT_V0_1_READS` and cannot detect legacy listings under different seller SKUs.
+- Read-only public eBay listing discovery found an existing Elevation single [item **168697309882**](https://www.ebay.com/itm/168697309882), exact model/MPN `SK24V150PH` and title `SOK SK24V150PH 24V 150Ah LiFePO4 Victron CAN Heated Bluetooth IP67`, advertised at **$1,149 plus $25 shipping**, three gallery images. This is **not** the 24V charger kit (item 168697425029).
+- Preserve existing live single and kit. **No new SKU duplicate**. Follow-up task: evaluate existing listing's gallery/title/price/shipping/stock and stage revision through a separately approved legacy listing revision capability; current OS3 legacy mutation path disabled. Use six existing approved Shopify media. Do not silently revise the existing listing or change price.
+- MPM process correction: use public/legacy duplicate search **before** generating exact new listing proposal, and stop when an accepted single already exists. Owner requests fewer handoffs; do not ask for redundant creation approvals after a duplicate is found.
+
 ## Owner operating update — 2026-10-07 (SK24V100 → SK24V150PH)
 
 - **SK24V100**: restock/ship date remains unconfirmed; owner directed **Shopify pre-purchase only**. Do not create or publish a new eBay single while this gate is unresolved. Approved nine-image packet remains on OS3 main from PR #38 but is **staged only**. Historical eBay single 168697309881 and charger kit 168697478742 need independent live status/reconciliation; do not change without specific owner instruction.
