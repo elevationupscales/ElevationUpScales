@@ -6,6 +6,27 @@
 **Status:** ACTIVE / OLIGHT WAVE 2 PRESERVED — MANAGEMENT GATE OPEN  
 **Effective:** 2026-09-26
 
+## CURRENT OVERRIDE — 2026-10-08 / P0 BLACK FRIDAY BUILD & RESEARCH
+
+**Authority:** Casey's Oct. 8 direct assignment, `MASTER-SOP.md` and `operations/CURRENT_WORK_BOARD.md`.  
+**Execution owner:** Peter Torres with delegated Olight/creative/commerce research workers, under OS 1 / MPM 28.  
+**Status:** P0 / ACTIVE / DRAFT CONCEPTS & COSTING ONLY.
+
+**Controlling Peter assignment:** [Black Friday Bundle Workstream](PETER_BLACK_FRIDAY_BUNDLE_WORKSTREAM_2026-10-08.md). It supersedes the historical Wave 2/Odin S/PL X GL/OSIGHT SE production queue printed below. **Do not rebuild already-active listings or resurrect a previously resolved Oclip source conflict.**
+
+**Immediate work:**
+1. Verify the **live** Shopify `PETER COMMERCE CLEANUP R1 — REVIEW` theme presently shows role MAIN. Run read-only desktop/mobile product CTA/cart entry/navigation regression and record any defect; do not republish or restore an older theme.
+2. Reconcile Kiki's **already supplied** dealer pricing, Sept. 10 new-arrivals variants, official media library, color/UPC mappings, U.S. dropship rules, and warranty process against current Shopify/Olight catalog, using private supplier source files off public Git. Current Oct. 8 snapshot: **21 Olight products / 18 active / 3 draft**; the 3 held drafts are ArkPro Lite, Oclip 2 Charging Dock and Charging Dock Holster. OSIGHT XE AMRS remains ACTIVE with zero modeled quantity; purchaseability is not warehouse availability.
+3. Research, design, cost and rank **9 offers**: 3 eligible heater + battery + solar kits, 3 SOK + Olight bundles, 3 Black Friday/gift-with-purchase deals. Prepare at least the 5 customer-facing templates in the controlling assignment.
+4. Enforce exact-model **diesel heater recall/product safety** gates, verified electrical/solar fit and diesel-fuel disclosures; preserve **SOK MAP** and **Olight pricing/promotion** rules. Proposed `Spend $200 — Get an Oclip on Us` needs affirmative Olight giveaway approval; not authorized to advertise or activate.
+5. Return one management packet: accurate SKU-level components, private delivered-cost/margin math, documented compliance, shipping/region eligibility, authorized media, review mockups, PASS/REPAIR/SOURCE GAP/HOLD, unresolved approvals.
+
+**Access routing:** Peter Git write access to this public repository is verified. Do not presume access to the separate private OS3 Agent Manager; request an MPM-bounded evidence read when needed. No new board or authority layer.
+
+**Not authorized:** Shopify product/theme/policy/inventory changes, campaign/discount publication, supplier purchase, outbound supplier questionnaire, new international shipping, public Git disclosure of dealer buy costs/quotes, or production deployment. Maintain paid-customer fulfillment/product-safety exceptions as global P0.
+
+---
+
 ## Current state
 
 Peter's Git collaboration onboarding is complete and write access is verified.
