@@ -425,3 +425,54 @@ This is not a second Master Work Board.
 - New state: `PETER COMMERCE CLEANUP R1 — REVIEW` is ready for Casey's approval decision. No publication action was taken in this closeout.
 - Recommended global update: mark the Peter commerce-cleanup checklist complete and move the draft theme to owner review/publication decision.
 - Routed to: Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-10-08 — Published-theme Warrior X 4 media normalization
+
+**State:** LOCAL COMPLETE / LIVE FOLLOW-UP SCHEDULED
+
+- Verified change: After the commerce-cleanup theme was published, Peter explicitly directed that normalization continue on the published copy. The Warrior X 4 performance-image references were normalized on the live Shopify theme to the canonical asset filename `olight-warrior-x4-catalog-performance.jpg`.
+- Evidence/source: Shopify theme-code editor screenshots supplied by Peter; direct live MAIN-theme readback; Shopify media/file readiness verification.
+- Affected files: `sections/eus-olight-coming-soon.liquid` and `sections/product-information.liquid`.
+- Repair details: the malformed intermediate filename `flight-warrior-x4-catalog-performance.jpg2600lm_630m.jpg` was repaired first; all remaining `flight-warrior-x4-catalog-performance.jpg` aliases in the two affected sections were then replaced with the canonical `olight-warrior-x4-catalog-performance.jpg` reference while preserving the existing query parameters and width transforms.
+- Verification state: old `flight-` references were cleared from the affected theme locations; the canonical Warrior X 4 Shopify media file is READY with no file errors.
+- Save-error note: Shopify's browser editor displayed `FileSaveError` notices during the final save attempts, but direct live-theme verification confirmed the normalized changes were present in both files. Do not treat those stale editor notices as evidence that the live changes failed.
+- Publication state: no new publish action was required during normalization because Peter had already confirmed the working theme was the published copy; the normalization therefore affected the current live storefront.
+- Follow-up: a read-only live verification is scheduled for later 2026-10-08 to confirm both theme references and the READY media state remain intact; no change should be made during that check unless separately authorized.
+- Routed to: Peter Torres / Casey Young / Company Operations / current MPM.
+
+
+---
+
+## 2026-10-08 — Peter Elevation Instagram seven-day media build
+
+**State:** LOCAL COMPLETE / CAPTION REVIEW + SCHEDULING PENDING
+
+- Verified change: Built the first seven-day Peter Elevation Instagram media rotation using current approved/authorized Shopify Olight media, with a different product for every post and no baked-in carousel numbering.
+- Evidence/source: Metricool brand `6901559` schedule/best-time readback; current Shopify Olight product/media readback; authorized Olight media rights already on file.
+- Metricool checkpoint: no posts were scheduled for the Oct. 8–15 review window at the time of the build. Current Instagram best-time data supported a consistent approximately 10:00 AM Pacific posting window for the planned queue.
+- Seven-day media queue: OSIGHT R photo carousel → Oclip 2 Pro Premium Reel using official vertical Olight video → Warrior X 4 photo carousel → ArkPro Ultra Class 3R photo carousel → Javelot Turbo 2 photo carousel → Warrior Ultra photo carousel → Marauder 3 photo carousel.
+- Media/editing standard: use clean product-first vendor media; keep carousel-position numbers as Instagram UI only; do not bake `1/5`, `2/5`, etc. into images; avoid unnecessary text overlays, price/stock claims, or extra Elevation graphics that make the feed look like a flyer catalog.
+- Video control: authorized Olight videos may be used where appropriate; the Oclip 2 Pro family has READY official Shopify-hosted vertical video suitable for a Reel.
+- Caption standard established by Peter: natural Peter voice, tag Elevation UpScales plus the corresponding supplier account (`Olight` or `SOK Energy` depending on the item), use exactly five post-specific hashtags, and include a clear call to action directing customers to `elevationupscales.com` on every post.
+- Publication/scheduling state: media plan only. Posts were not scheduled or published in Metricool yet; caption review remains the next step.
+- Routed to: Peter Torres / Social Media / Ecommerce & Vendor Operations.
+
+
+---
+
+## 2026-10-08 — Olight/Kiki relationship handoff + approval-gated introduction draft
+
+**State:** LOCAL COMPLETE / OWNER APPROVAL REQUIRED
+
+- Verified change: Reviewed Casey-forwarded Olight/Kiki supplier correspondence and prepared Peter's formal relationship handoff/introduction email for Kiki as Casey directed.
+- Evidence/source: Casey's forwarded September 18 onward Kiki/Olight source correspondence in the connected Elevation Gmail, including dealer onboarding, launch-progress follow-up, new-release/order information, and Kiki's stated willingness to work on competitive pricing/support based on Elevation's target budget.
+- Source-control note: Casey previously said he would provide an additional Olight conversation/feed for Peter; no separate feed/transcript was found in the connected mailbox or current project context at this checkpoint. The draft is therefore grounded only in the forwarded source correspondence already received plus Casey's current instruction.
+- Current handoff message: Peter is formally taking on part of the Olight workload alongside Casey, with emphasis on Shopify/catalog/media and bundle/deal follow-through; Elevation has fine-tuned its first Olight wave, is running ad campaigns, and is working through the bundles/deal opportunities Kiki sent over.
+- Gmail draft created from `elevationlithium@gmail.com` to `kiki_huang@olight.com`, with Casey CC'd at `casey@elevationupscales.com`; subject: `Olight coordination — Peter Torres / Elevation UpScales`.
+- Send control: draft is NOT sent. Casey approval is required before any external send.
+- Signature control: Gmail's API/connector path does not automatically apply the web-compose signature. Peter's current signature was therefore manually embedded in the draft body. Future connector-created Peter emails should include the approved signature explicitly so messages do not go out without it.
+- Relationship objective: establish Peter as a day-to-day Olight operations contact without displacing Casey's owner/supplier relationship, and keep Casey visibly included during the transition.
+- Routed to: Casey Young for approval; Peter Torres / Olight supplier relationship.
