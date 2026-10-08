@@ -4,7 +4,7 @@
 
 Before any repository work, read `MASTER-SOP.md`.
 
-`MASTER-SOP.md` is the active worker-control authority for MPM 25. If this file, `CODING-WORKFLOW.md`, a historical handoff, a dated baseline, an old PR, or another worker note conflicts with `MASTER-SOP.md`, follow `MASTER-SOP.md` unless the owner gives a newer direct instruction.
+`MASTER-SOP.md` is the active worker-control authority for OS 1; MPM numbers identify continuity sessions. If this file, `CODING-WORKFLOW.md`, a historical handoff, a dated baseline, an old PR, or another worker note conflicts with `MASTER-SOP.md`, follow `MASTER-SOP.md` unless the owner gives a newer direct instruction.
 
 ## Current source
 
