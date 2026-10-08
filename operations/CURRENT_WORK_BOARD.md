@@ -21,6 +21,27 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
+## 2026-10-08 OWNER P0 UPDATE — PETER OLIGHT BLACK FRIDAY BUNDLES & DEALS
+
+**State:** P0 / OWNER-DIRECTED PETER COMMERCE PRIORITY / PLANNING & UNPUBLISHED PREPARATION ONLY.  
+**Authoritative assignment:** [Peter Black Friday Bundle Workstream](peter/PETER_BLACK_FRIDAY_BUNDLE_WORKSTREAM_2026-10-08.md).  
+**Execution owner:** Peter Torres, Director of Operations & Commerce, with his team. MPM 28 / OS 1 retains parent priority, safety, source acceptance and exact owner gates; OS3 may support bounded reads only.
+
+Casey's latest direction moves Peter's immediate active work to **building a source-backed, financially qualified portfolio of Olight bundles and Black Friday promotions**. Continue from Kiki's provided Olight price sheet, Sept. new arrivals, media and current internal catalog sources; no duplicate supplier onboarding or general document requests. A formal introductory email to Kiki, with Peter involved, has already been sent. Do not infer approval for a later supplier request.
+
+**P0 list for Peter's lane, in order:**
+1. **Non-regression / safety:** Preserve real paid-customer fulfillment and product-safety/recall exceptions as hard global P0 gates. Obtain read-only live QA for the Peter commerce-cleanup theme, now observed as **MAIN** in Shopify on Oct. 8; do not republish or roll back.
+2. **Supplier/source recon:** reconcile 21 Olight products (18 active/3 draft at Oct. 8 snapshot), zero-modeled-inventory OSIGHT XE AMRS, exact Oclip mappings and shipping/fulfillment against private supplier data. No warehouse-stock claims based on Shopify quantity.
+3. **Nine concept proposals:** three heater + SOK battery + solar/charger system concepts, three SOK + Olight packages, three Black Friday/gift-with-purchase offers. Draft exact SKU, technical fit, approved media, fulfillment method and customer-language templates.
+4. **Pricing/compliance/safety:** verify landed costs and contribution, SOK MAP, Olight no-below-MSRP/promo restrictions, purchase eligibility, gift fulfillment/return/stacking, destination freight, and heater model recall clearance. **“Spend $200 get an Oclip on us” is a HOLD concept**, not an approved offer.
+5. **Return one ranked management packet:** PASS / REPAIR / SOURCE GAP / HOLD, exact private pricing evidence, and only genuinely unresolved questions/owner approvals; no new global board.
+
+**Peter handoff / update:** [Peter Manager Index](peter/PETER_MANAGER_INDEX.md) → [Current Worktree](peter/PETER_CURRENT_WORKTREE.md) → [Black Friday Workstream](peter/PETER_BLACK_FRIDAY_BUNDLE_WORKSTREAM_2026-10-08.md) → [Handoff Log](peter/PETER_HANDOFF_LOG.md). Earlier Olight draft-production queues and Peter theme “unpublished” notes are historical, not controlling over current live reads/new owner assignment.
+
+**Boundary:** All supplier dealer costs, protected freight and private correspondence stay outside this public repository. The Git update is planning documentation only; does not authorize Shopify mutations, supplier commitments, pricing/promotion execution, eBay changes, branch merge or production deployment. Other P0 SOK eBay/paid-order work remains with its existing owner, not reassigned to Peter.
+
+---
+
 ## 2026-10-08 MPM continuation — current exact SOK execution blocker
 
 - Local OS3 Hawaii master **read and persistence accepted**: Windows receipt `OS3-20261008053840-EDSUK`, 497/497 tests, 39 private carrier quotes (27 in-window/12 historical), unchanged source hash. Private-source access PR #43 is **draft/unmerged** pending explicit merge approval. No freight booking or customer pricing authorized.
