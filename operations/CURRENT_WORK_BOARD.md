@@ -21,6 +21,15 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
+## 2026-10-08 MPM continuation — current exact SOK execution blocker
+
+- Local OS3 Hawaii master **read and persistence accepted**: Windows receipt `OS3-20261008053840-EDSUK`, 497/497 tests, 39 private carrier quotes (27 in-window/12 historical), unchanged source hash. Private-source access PR #43 is **draft/unmerged** pending explicit merge approval. No freight booking or customer pricing authorized.
+- SOK single-battery eBay **improvement priority**: Three already-listed singles (`SK24V150PH` 168697309882, `SK12V206H` 168698654908, `SK12V100H` 168697309880) have exact Shopify retail-ready description/gallery packets staged on OS3 main. **No live eBay revisions yet**.
+- Next bounded OS3 engineering/read assignment: [elevation-agent-manager issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44). Confirm seller item ID, legacy Trading API vs Inventory API management, current status, SKU/model, gallery source mode and exact field-by-field diff; stop at a **draft-only revision implementation/preview** with no write until exact owner approval.
+- Preserve Shopify-only hold for SK24V100, ended/seller-held SK48V100N, excluded charger kits/multipacks, and blocked new SK24V150PH duplicate offer `EBAYLIST-2C667EBB64-944W95F9`.
+- Resume existing SOK single work before **derived Hawaii freight** offers. Hawaii retail offers remain separate and cannot use internal carrier buy prices as direct checkout prices.
+
+---
 # CURRENT OWNER OVERRIDE — ALL NINE SOK SINGLE BATTERIES — 2026-10-07
 
 **STATE: P0 / ACTIVE / 1-UNIT EBAY OFFER CONVENTION**
