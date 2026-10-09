@@ -159,6 +159,26 @@ The new failure is more serious because it occurred **after** the HIGH incident,
 **Accountability:** OS1/MPM 31. This recurrence is not attributed to eBay, OS3 code, or owner error.
 
 
+## Canonical credential refresh procedure — Recon morning method
+
+Owner direction: the fast, seamless Recon recovery used on the morning of 2026-10-09 is the preferred eBay credential-refresh procedure.
+
+The controlling method is:
+
+1. Preserve the current `.env` until the replacement authorization actually succeeds; a backup may be taken first.
+2. Verify Production base configuration without printing secrets.
+3. Generate **exactly one** Production authorization request.
+4. Owner approves that one request in the correct Elevation seller account.
+5. Exchange the **exact matching full redirect once** through the existing OS3 helper.
+6. On successful exchange, let the helper save the new `EBAY_REFRESH_TOKEN` and deliberately blank `EBAY_ACCESS_TOKEN`.
+7. Verify locally that Production remains selected, refresh token is present, and manual access-token override is absent.
+8. STOP before commerce work; prove normal OS3 REST and Trading read paths before releasing the write hold.
+9. Any error stops the sequence. Preserve the exact error and classify the failed layer; do not create a second authorization flow automatically.
+
+This procedure is preferred specifically because it avoids the destructive pattern of pre-clearing or repeatedly manipulating credentials while an authorization attempt is still unresolved.
+
+**Do not substitute:** manual token copy, multiple URLs, multiple redirect exchanges, clipboard clearing, manual OAuth-state deletion, repeated `.env` token edits, or using Issue #44 writes as an authentication test.
+
 ## Closeout gate
 
 Do **not** close this incident based on a Git commit, a successful OAuth `SAVED` response, a synthetic test, or verbal assurance. **The entire OS3 eBay API auth-dependent execution lane remains gated; the three-item SOK content job is only one symptom.** Close only after: (a) a reproducible cause is established or a documented bounded external state explains failure; (b) regression or reconciliation evidence is accepted; (c) auth and seller identity verification succeed on the **normal OS3 worker path**; (d) existing SOK work's preserved/blocked/completed state is independently read back; and (e) OS1 records actual owner-impact remediation; and (f) regression tests demonstrate that one routine API error cannot trigger repeated speculative credential resets, clipboard clearing, or unsafe replay. Commerce execution approval remains separate.
