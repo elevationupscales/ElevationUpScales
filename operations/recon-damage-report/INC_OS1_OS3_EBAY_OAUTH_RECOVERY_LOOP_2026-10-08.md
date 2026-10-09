@@ -4,15 +4,27 @@
 **Recorded by:** OS1 / Operating System Project Manager (MPM continuity session; no new authority layer)  
 **Owner:** Casey Young  
 **Affected lane:** Entire OS3 eBay API integration as a reliability/control concern — OAuth/credential lifecycle, REST and Trading paths, eBay specialist and downstream listings. Three existing SOK content revisions are the active blocked work; no claim that every eBay API endpoint is technically defective.  
-**Severity:** HIGH — repeated management-control failure and owner-reported catastrophic operational disruption over multiple sessions, with confirmed lost owner time and delayed revenue work. No quantified monetary loss or demonstrated credential disclosure.  
+**Severity:** CRITICAL — catastrophic troubleshooting control failure with repeated destructive credential intervention, including confirmed execution of an unnecessary token cleanup after fresh Production credentials had been obtained. Owner time and revenue work were materially disrupted. No credential disclosure, hostile access, or quantified monetary loss has been proven.  
 **Classification:** `DAMAGE — REPAIR NOW` (OS1 process/recovery control) + `DAMAGE — ROUTE TO OWNER LANE` (OS3 engineering)  
-**Status:** REPEATED SYSTEMIC INCIDENT / RECURRENCE CONFIRMED 2026-10-09 / CONTAINED FOR API WRITES / MANAGEMENT CAUSE CONFIRMED / TECHNICAL CAUSE OPEN / NOT CLOSED
+**Status:** CATASTROPHIC TROUBLESHOOTING INCIDENT / CRITICAL / EXECUTED RECURRENCE CONFIRMED 2026-10-09 / EBAY API WRITES HELD / MANAGEMENT CAUSE CONFIRMED / TECHNICAL CAUSE OPEN / NOT CLOSED
 
 ## Authority and scope
 
 Follow current `MASTER-SOP.md`, accepted `main`, `operations/CURRENT_WORK_BOARD.md`, `operations/recon-damage-report/RECON_DAMAGE_REPORT_PROJECT_SOURCE.md`, and the accepted OS3 `docs/os3-execution-integration.md`. OS1 manages; OS3 development owns source defects; the eBay specialist owns verified commerce behavior; Recon Damage Report owns independent regression verification. MPM numbers identify continuity sessions, not separate managers.
 
 This is an **internal Elevation operating incident**, not a finding that eBay's public status service caused these failures. The owner reports that the repeated OS1 diagnostic loop — immediate misclassification of small errors, speculative credential troubleshooting, and destructive follow-up instructions — was the principal cause of wasted time on October 7–8 and overnight, and that similar incidents have happened repeatedly. That reported pattern is supported by the observed October 8–9 command sequence; exact older occurrences and technical extent of credential damage remain to be reconciled. Documenting the incident does not itself prove eBay account compromise or an OAuth defect. The owner requested a damage report and incident record. This document makes no source/code, credential, eBay listing, payment, external-send, or deployment change.
+
+## Company-level incident declaration
+
+This incident is a **company-level operating control failure** because the recovery process itself repeatedly caused or compounded the eBay API credential state instead of containing the original fault. The controlling danger is not a single OAuth error; it is **catastrophic troubleshooting behavior**:
+
+**small or ambiguous API fault → unsupported diagnosis → credential intervention → new failure → further credential intervention → destructive recovery loop.**
+
+The loop consumed owner time across multiple sessions, blocked revenue work, and on 2026-10-09 caused an unnecessary token cleanup to be executed after fresh Production credentials had already been obtained.
+
+Until closed, the eBay API lane is treated as **operationally compromised by troubleshooting integrity failure**. That phrase does not assert credential theft, hostile access, or an eBay platform breach. It means OS1/OS3 cannot currently be trusted to perform credential-affecting recovery without an independently verified current-state gate.
+
+**Company control:** no person or worker may infer "reauthorize/reset credentials" from a generic 400/401, Trading error, REST error, state error, or blocked job. One observed error must be classified before any auth mutation. Any credential-affecting recovery requires current-state evidence, one reviewed action, and a stop-on-failure gate.
 
 ## Approved work at risk — DO NOT RECREATE
 
