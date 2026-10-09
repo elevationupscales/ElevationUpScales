@@ -1,188 +1,92 @@
 # Elevation UpScales — Peter Current Worktree
 
 **Owner:** Casey Young  
-**Human Manager:** Peter Torres  
-**Parent:** Company Operations / current MPM  
-**Status:** ACTIVE / OLIGHT WAVE 2 PRESERVED — MANAGEMENT GATE OPEN  
-**Effective:** 2026-09-26
+**Human Manager:** Peter Torres — Director of Operations & Commerce  
+**Parent:** Company Operations / current OS1 / MPM continuity  
+**Status:** ACTIVE / OCTOBER 8 OWNER DIRECTION CONTROLS  
+**Effective:** 2026-10-08
 
-## Current state
+## Authority and current-state rule
 
-Peter's Git collaboration onboarding is complete and write access is verified.
+Casey's newest explicit owner direction controls Peter-lane execution. Current Git `main` is technical state truth. Historical MPM numbers, September queues, old chat handoffs and completed assignments are evidence only unless current state explicitly reactivates them.
 
-Fresh Shopify verification on 2026-09-26 shows:
+Do not route Peter back into September Olight draft-only gates or completed Wave 2 work.
 
-- **13 total Olight product records**
-- **13 ACTIVE**
-- **0 DRAFT**
+## Peter authority / Shopify control
 
-The prior 10 ACTIVE / 3 DRAFT assignment is superseded.
+Casey has explicitly reduced Peter's prior operating gates and authorized Peter with owner-level Shopify access for assigned commerce work.
 
-**Odin S M-LOK, PL X GL, and OSIGHT SE are already ACTIVE. Do not rebuild them.**
+For active Peter-owned Shopify work, Peter may perform the normal product, catalog, merchandising, theme, publication and operational changes necessary to complete the assigned work without re-requesting the old September per-change approval gates.
 
-## Current objective
+This authority does not permit fabricated supplier facts, invented stock, unsupported shipping/fulfillment promises, disclosure of protected dealer costs or credentials, unsafe product claims, or unrelated financial/account-owner changes not part of the assignment.
 
-Preserve the next Olight listing wave while MPM 25 closes the remaining storefront shipping/payment verification gates.
+Newest owner direction supersedes any older Peter-specific restriction that conflicts with this section.
 
-The underlying catalog repair is now materially improved:
-- all 23 current Olight variants use untracked supplier-fulfilled inventory;
-- source-proven SKU mismatches were corrected for PL X GL, OSIGHT R, Oclip 2 Pro and Marauder 3;
-- all current Olight PDPs include supplier-fulfillment/support wording;
-- direct cart routing reached Shopify checkout for three representative Olight products.
+## Current owner-led workstream — Holiday / Black Friday offers
 
-**Do not interpret this as destination shipping or final payment-stage clearance.**
+On 2026-10-08 Casey moved ownership of Elevation's Olight bundles, cross-brand packages and Black Friday deal development to Peter and team.
 
-**EXACT OLIGHT SOURCE → BUILD/STAGE LISTING → MANAGEMENT STOCK/ROUTE/PAYMENT GATE → RETAIL READINESS.**
+Required concept set:
 
-## Startup requirement
+1. Three heater + SOK battery + solar/controller concepts.
+2. Three SOK battery/power-system packages with an Olight item.
+3. Three Black Friday promotions/gift concepts, including the possible `Spend $200, get an Oclip on us` structure.
 
-Before work:
+### Current state
 
-**RESOLVE CURRENT MAIN → MASTER S.O.P. → CURRENT WORK BOARD → PETER MANAGER INDEX → OLIGHT PROJECT SOURCE → EXACT SHOPIFY PRODUCT / MISSING PRODUCT FAMILY.**
+**CONCEPT / REVIEW PACKET COMPLETE — OWNER REVIEW.**
 
-Required control sources:
+Peter completed the consolidated nine-concept holiday offer packet and sent the private ZIP to Casey by email on 2026-10-08 for review. The packet includes the requested three + three + three concept structure and identifies the two strongest pairings recommended for first build.
 
-- `../CURRENT_WORK_BOARD.md`
-- `../vendor-project-sources/OLIGHT_PROJECT_SOURCE.md`
-- `../OLIGHT_MASTER_CATALOG_TRUTH_2026-09-23.md`
-- `PETER_MANAGER_INDEX.md`
-- private Olight September 2026 new-arrivals source supplied by management
+Do not rebuild or re-research the packet unless Casey requests a revision or a source fact materially changes.
 
-## Current bounded queue
+### Next action
 
-### 1. Oclip 2 Pro Premium — BUILD FIRST
+1. Await / ingest Casey's review decision on the completed packet.
+2. Build the owner-selected first offers from the already-reviewed source packet.
+3. Use current vendor facts, current Shopify state and exact approved media.
+4. Route only real unresolved commercial, safety, supplier or margin decisions back to Casey.
+5. Record material completion/state changes in `PETER_HANDOFF_LOG.md`.
 
-Build the missing product family from exact Olight source data.
+## Olight / Kiki relationship lane
 
-Expected source-supported color family:
-- Black
-- Orange
-- Tidal Blue
+Casey formally introduced Peter to Kiki as Elevation UpScales' Director of Operations & Commerce and a day-to-day Olight operations contact.
 
-Peter may stage exact:
-- title / description / specs;
-- authorized media;
-- variant structure;
-- SKU / UPC data when supported by source;
-- SEO/customer-facing merchandising.
+Kiki has confirmed she will support Peter and Casey with product information, marketing support and upcoming orders. Treat this as an active supplier relationship lane, not a new onboarding project.
 
-Do not invent stock or supplier availability.
+When new actionable vendor emails arrive:
 
-### 2. Oclip 2 Ultra — BUILD SECOND
+- analyze the request and implications;
+- prepare the appropriate reply;
+- show Peter the draft for approval before sending;
+- do not create duplicate vendor requests when the supplier has already answered the question.
 
-Build the missing product family from exact Olight source data.
+## Completed Olight work — historical, not an active gate
 
-Expected source-supported color family:
-- Olive Green
-- Onyx Black
-- Amber Orange
+The September Olight draft-production and Wave 2 queues are complete historical work. This includes the Odin S M-LOK, PL X GL, OSIGHT SE closeout and the later Oclip / ArkPro Wave 2 production passes.
 
-Same exact-product and no-invented-stock controls apply.
+Do not use those old assignments to restrict current Peter work or to restart completed products.
 
-### 3. ArkPro Ultra — VARIANT EXPANSION
+Exact-product, no-duplicate and source-accuracy controls remain good operating practice.
 
-Prepare the missing **Amber Orange** variant on the existing ArkPro Ultra product after validating the exact variant identity against the Olight source.
+## Inventory / supplier truth rule
 
-Do not create a duplicate ArkPro Ultra product.
+Shopify operational inventory is not proof of supplier physical stock.
 
-### 4. Oclip 2 Pro — VARIANT EXPANSION
+Use current supplier evidence for customer-facing availability claims. Do not invent warehouse quantity, dropship eligibility, delivery timing, MAP exceptions or special-route freight terms.
 
-Prepare the missing **Tidal Blue** variant on the existing Oclip 2 Pro product after validating the exact variant identity against the Olight source.
+Where Casey has established a commerce-control inventory convention, follow the current owner-approved convention while keeping the distinction between commerce quantity and physical supplier stock clear internally.
 
-Do not create a duplicate Oclip 2 Pro product.
+## Current operating priorities for Peter
 
-### 5. Oclip 2 Ultra Premium — AUDIT ONLY
+1. Owner-selected implementation from the completed Holiday / Black Friday packet.
+2. Olight vendor coordination and actionable Kiki follow-up.
+3. Shopify commerce work assigned by Casey under Peter's expanded owner-level access.
+4. Current vendor/catalog/revenue tasks surfaced by the canonical Work Board or direct owner direction.
+5. Historical September work only when explicitly reactivated.
 
-The current live product remains in place.
+## Completion / return standard
 
-There is an apparent supplier-source conflict in the Olive Green / Onyx Black SKU mapping.
-
-Peter must:
-- preserve the existing live product;
-- record the discrepancy;
-- avoid changing the SKU mapping by inference;
-- wait for management/Olight confirmation before any correction.
-
-## Inventory / availability rule
-
-**SHOPIFY INVENTORY ≠ OLIGHT PHYSICAL STOCK.**
-
-Peter may build/stage listings from exact supplier source data without waiting for management to complete stock recon.
-
-Peter may not:
-- represent Shopify inventory as supplier warehouse truth;
-- invent exact availability;
-- promise dropship fulfillment from an old snapshot;
-- silently substitute adjacent colors/SKUs.
-
-Management separately owns:
-- current U.S. warehouse availability;
-- dropship eligibility;
-- MAP/launch timing;
-- fulfillment readiness;
-- final availability/customer promise.
-
-## MPM 25 gate — 2026-09-26
-
-Peter may preserve and prepare the bounded Wave 2 work, but must not represent any new product/variant as supplier-stock verified, destination-cleared or final-payment verified until management closes those gates.
-
-Current management holds:
-- Oclip 2 Ultra Premium Olive Green / Onyx Black SKU mapping remains a supplier-source conflict;
-- destination shipping for Olight has not been proven against the store's broad market-country configuration;
-- final checkout payment-stage verification remains incomplete;
-- generic storefront "In stock" wording now reflects untracked sellability, not a verified physical Olight quantity.
-
-## Authorized work
-
-Peter may:
-1. work only the queue above;
-2. use Olight-authorized media/spec source material;
-3. build or stage accurate customer-facing listing content;
-4. add exact source-supported variants to the existing products named above;
-5. record conflicts/blockers instead of guessing;
-6. return a listing-production receipt to Company Operations.
-
-## Hard boundaries
-
-This assignment does not authorize Peter to:
-- rebuild existing active Olight products outside the queue;
-- use Shopify inventory as supplier stock proof;
-- invent stock;
-- infer a disputed SKU mapping;
-- expose protected dealer costs/raw supplier inventory in public Git;
-- alter unrelated Shopify products;
-- alter Shopify theme;
-- alter billing, payouts, staff/users, apps or owner-level settings;
-- make unsupported Hawaii/Alaska/special-route shipping promises.
-
-## Completion condition
-
-This Worktree is complete when:
-
-1. Oclip 2 Pro Premium is staged/built from exact supplier source;
-2. Oclip 2 Ultra is staged/built from exact supplier source;
-3. ArkPro Ultra Amber Orange variant work is staged against the existing product;
-4. Oclip 2 Pro Tidal Blue variant work is staged against the existing product;
-5. Oclip 2 Ultra Premium discrepancy is recorded with no inferred correction;
-6. all source conflicts/blockers are returned to Company Operations;
-7. no duplicate product is created and no unsupported stock promise is made.
-
-Management then performs:
-
-**EXACT PRODUCT/SKU → CURRENT OLIGHT SOURCE → CURRENT AVAILABILITY → PRICE/MAP → MEDIA → SHIPPING/FULFILLMENT → PUBLICATION/PURCHASEABILITY.**
-
-## Return
-
-**DONE:** Wave 2 listing-production queue staged with exact-source discipline.  
-**BLOCKED:** record the exact missing source/media/SKU item; continue the other clean queue items.  
-**NEXT:** return the Wave 2 receipt to Company Operations / current MPM for final supplier and retail-readiness gates.
-
-
-## Olight binary inventory rule — owner control
-
-For supplier-fulfilled Olight SKUs, Peter must use the owner-controlled binary model:
-
-**Olight AVAILABLE → Shopify quantity 10 for commerce control.**  
-**Olight UNAVAILABLE → controlled unavailable state.**
-
-Quantity 10 is not a warehouse count and must never be described as Olight physical inventory. If Elevation later purchases and owns stock, that owned stock switches to actual on-hand quantity tracking.
+**DONE:** assigned change completed and verified against current source/platform state.  
+**BLOCKED:** report the exact real blocker and continue other safe work; do not invent an approval gate.  
+**NEXT:** follow Casey's newest owner direction and the current canonical Work Board.
