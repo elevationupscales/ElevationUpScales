@@ -6,7 +6,7 @@
 **Affected lane:** Entire OS3 eBay API integration as a reliability/control concern — OAuth/credential lifecycle, REST and Trading paths, eBay specialist and downstream listings. Three existing SOK content revisions are the active blocked work; no claim that every eBay API endpoint is technically defective.  
 **Severity:** HIGH — repeated management-control failure and owner-reported catastrophic operational disruption over multiple sessions, with confirmed lost owner time and delayed revenue work. No quantified monetary loss or demonstrated credential disclosure.  
 **Classification:** `DAMAGE — REPAIR NOW` (OS1 process/recovery control) + `DAMAGE — ROUTE TO OWNER LANE` (OS3 engineering)  
-**Status:** REPEATED SYSTEMIC INCIDENT / CONTAINED FOR API WRITES / MANAGEMENT CAUSE CONFIRMED / TECHNICAL CAUSE OPEN / NOT CLOSED
+**Status:** REPEATED SYSTEMIC INCIDENT / RECURRENCE CONFIRMED 2026-10-09 / CONTAINED FOR API WRITES / MANAGEMENT CAUSE CONFIRMED / TECHNICAL CAUSE OPEN / NOT CLOSED
 
 ## Authority and scope
 
@@ -89,6 +89,49 @@ One bounded, read-first defect investigation must:
 - Test/fix only a **reproduced** defect in a single scoped branch from current accepted main; maintain fail-closed identity/item checks and all existing permissions. No seller-verification bypass.
 - Return one developer receipt: base SHA, branch, exact defect reproduction, affected files, tests, fail-closed security proof, verification, and whether a PR/merge requires explicit owner approval.
 - Resume the already-approved SOK bundle only after independently verified production authentication and valid exact local grant; verify each original eBay ID's description/gallery and unchanged commercial fields after any authorized write. Unknown side effects require reconciliation, not retry.
+
+## Recurrence — MPM 31 token-cleanup regression (2026-10-09 MDT)
+
+**Status:** CONFIRMED RECURRENCE OF THE SAME HIGH INCIDENT / MANAGEMENT CONTROL FAILURE
+
+After the owner supplied a recovery takeover explicitly designed to prevent speculative credential intervention, OS1/MPM 31 still repeated the same failure pattern.
+
+### Sequence
+
+1. Owner authorized re-establishing one clean Production authorization and required OS1 to inspect/reconcile before any owner action.
+2. OS1 correctly read the damage report and source, then requested a read-only clean-state check.
+3. The owner generated one Production authorization URL and the clean-state check reported only `EBAY_ACCESS_TOKEN` nonblank while `EBAY_REFRESH_TOKEN` was blank.
+4. OS1 then issued a token-cleanup script to blank `EBAY_ACCESS_TOKEN` in `.env` and remove token variables from the current PowerShell process.
+5. The owner then clarified that the fresh OAuth tokens had already been obtained, making the cleanup instruction stale and potentially destructive to the just-recovered credential state.
+6. OS1 withdrew the instruction only after the owner challenged it.
+
+### Why this is a recurrence
+
+This reproduces the exact confirmed management failure mechanism already documented:
+
+**partial/ambiguous state → premature credential intervention → risk of new auth damage → owner interruption required to stop the loop.**
+
+The new failure is more serious because it occurred **after** the HIGH incident, anti-loop rule, MPM 31 takeover prompt, and explicit instruction that only one clean Production authorization be established.
+
+### Confirmed impact
+
+- Owner confidence and time were damaged again.
+- The eBay recovery sequence was disrupted again.
+- A fresh credential state was placed at risk by an unnecessary cleanup instruction.
+- The owner had to detect and stop the management error.
+- No evidence in this record proves the cleanup script was actually executed or that fresh tokens were destroyed; credential state therefore remains **UNVERIFIED**, not assumed damaged or healthy.
+
+### Mandatory control correction
+
+- Any recovery gate derived from earlier state becomes invalid once newer owner-host evidence supersedes it.
+- OS1 must re-resolve the **latest credential state before every credential-affecting instruction**.
+- If the owner reports a successful fresh token acquisition, all prior token-clearing steps are immediately void.
+- Credential-affecting commands require a single current-state statement immediately before execution: what is known, what is unknown, what exact field will change, and why that change is still necessary.
+- If that statement cannot be made from current evidence, **STOP — NO TOKEN ACTION**.
+- The owner must not be used as the primary debugger for repeated eBay auth failures.
+
+**Accountability:** OS1/MPM 31. This recurrence is not attributed to eBay, OS3 code, or owner error.
+
 
 ## Closeout gate
 
