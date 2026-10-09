@@ -1,18 +1,18 @@
-# INC-OS1-OS3-EBAY-2026-10-08 — Owner-Directed Damage Report
+# INC-OS1-OS3-EBAY-2026-10-08 — SYSTEMIC OS1 eBay API Recovery-Loop Damage
 
-**Incident date:** 2026-10-08 MDT (owner-host job receipts may show 2026-10-09 UTC)  
+**Incident window:** 2026-10-07 to 2026-10-08 MDT, including the overnight period; owner reports similar catastrophic recovery loops on multiple occasions (exact earlier dates/impact still require evidence). Owner-host job receipts may show 2026-10-09 UTC  
 **Recorded by:** OS1 / Operating System Project Manager (MPM continuity session; no new authority layer)  
 **Owner:** Casey Young  
-**Affected lane:** OS3 eBay OAuth / Trading seller verification / three existing SOK content revisions  
-**Severity:** MEDIUM — confirmed owner-time and process/authority damage; revenue-lane delay; no quantified financial loss or demonstrated credential exposure  
-**Classification:** `DAMAGE — ROUTE TO OWNER LANE`  
-**Status:** CONTAINED / ROOT CAUSE OPEN / NOT CLOSED
+**Affected lane:** Entire OS3 eBay API integration as a reliability/control concern — OAuth/credential lifecycle, REST and Trading paths, eBay specialist and downstream listings. Three existing SOK content revisions are the active blocked work; no claim that every eBay API endpoint is technically defective.  
+**Severity:** HIGH — repeated management-control failure and owner-reported catastrophic operational disruption over multiple sessions, with confirmed lost owner time and delayed revenue work. No quantified monetary loss or demonstrated credential disclosure.  
+**Classification:** `DAMAGE — REPAIR NOW` (OS1 process/recovery control) + `DAMAGE — ROUTE TO OWNER LANE` (OS3 engineering)  
+**Status:** REPEATED SYSTEMIC INCIDENT / CONTAINED FOR API WRITES / MANAGEMENT CAUSE CONFIRMED / TECHNICAL CAUSE OPEN / NOT CLOSED
 
 ## Authority and scope
 
 Follow current `MASTER-SOP.md`, accepted `main`, `operations/CURRENT_WORK_BOARD.md`, `operations/recon-damage-report/RECON_DAMAGE_REPORT_PROJECT_SOURCE.md`, and the accepted OS3 `docs/os3-execution-integration.md`. OS1 manages; OS3 development owns source defects; the eBay specialist owns verified commerce behavior; Recon Damage Report owns independent regression verification. MPM numbers identify continuity sessions, not separate managers.
 
-This is an **internal Elevation operating incident**, not a finding that eBay's public status service caused these failures. The owner requested a damage report and incident record. This report makes no source/code, credential, eBay listing, payment, external-send, or deployment change.
+This is an **internal Elevation operating incident**, not a finding that eBay's public status service caused these failures. The owner reports that the repeated OS1 diagnostic loop — immediate misclassification of small errors, speculative credential troubleshooting, and destructive follow-up instructions — was the principal cause of wasted time on October 7–8 and overnight, and that similar incidents have happened repeatedly. That reported pattern is supported by the observed October 8–9 command sequence; exact older occurrences and technical extent of credential damage remain to be reconciled. Documenting the incident does not itself prove eBay account compromise or an OAuth defect. The owner requested a damage report and incident record. This document makes no source/code, credential, eBay listing, payment, external-send, or deployment change.
 
 ## Approved work at risk — DO NOT RECREATE
 
@@ -38,26 +38,30 @@ Only approved Shopify-equivalent descriptions and vetted galleries may change af
 5. SOK execute job `JOB-74b0582d-1c54-47c4-8cbf-19514f1d1b78` also returned `BLOCKED / TRADING_RESPONSE_NOT_CLEAN_SUCCESS`. Its pre-item seller check failed; no successful original-ID post-write verification exists.
 6. Despite repeated authentication evidence and the current SOP's anti-loop guidance, OS1 instructed the owner to repeat OAuth URL generation/exchange, to clear the clipboard, and to run further terminal probes. The owner then reported `EBAY_OAUTH_STATE_NOT_FOUND`, and after the earlier clipboard clear, `EBAY_AUTH_REDIRECT_URL_REQUIRED`. A PowerShell `stin` typo also reflects unnecessary owner terminal burden, not a cause of the eBay API failure.
 7. Owner explicitly objected to the repeated procedure and directed OS1 to produce a damage report and record the incident.
+8. **Owner correction after the initial report:** The owner identified the entire eBay API operating lane as compromised in the *operational integrity* sense and described recurring catastrophic failure across October 7, October 8 and the overnight sessions: when a small error occurred, OS1 immediately chose the wrong troubleshooting branch, repeatedly intervened in credentials, and compounded the original blockage. The owner states this was the **core cause of wasted time** across those sessions. This testimony is evidence of business impact and management failure; it is **not** by itself a verified security compromise or proof that all API credentials are unusable.
 
 Sources of technical continuity: [agent-manager Issue #44](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/44), accepted [execution runbook](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/blob/main/docs/os3-execution-integration.md), owner-provided terminal outputs in OS1 conversation. Never copy redirect URLs, authorization codes, tokens, private seller data, or raw `.env` into this public repository.
 
 ## Confirmed damage versus unproven consequences
 
 **Confirmed:**
+- **Primary failure mechanism:** OS1 repeatedly converted a small or ambiguous eBay/API runtime error into speculative credential-repair instructions, did not enforce a one-evidence/one-owner/fail-closed diagnosis, and compounded the error with subsequent operator actions. This management feedback loop, rather than a proven eBay outage, is the supported cause of the unnecessary recovery attempts.
 - OS1 management/control failure: repeated user-operated OAuth and terminal recovery loops instead of one bounded evidence-driven internal development incident.
 - Premature clipboard-clearing instruction before confirmation of successful exchange; lost/empty clipboard became part of later failed local recovery flow.
-- Additional owner effort and frustration, with delayed completion of the three accepted SOK content upgrades.
+- Additional owner effort and frustration, with delayed completion of the three accepted SOK content upgrades. The owner reports **catastrophic operational disruption across yesterday and last night as well as today**; precise lost hours and monetary consequences are unquantified.
 - OS3 eBay seller/API verification remained blocked in latest owner-host receipts; no verified success/closeout receipt for the three-item bundle.
 
 **Not established and must not be asserted:**
-- No evidence supplied of disclosed credentials/tokens or seller-account compromise.
+- No evidence supplied of disclosed credentials/tokens or unauthorized seller-account access. The owner's term **"compromised"** is recorded as a description of **system reliability and credential-handling integrity**, not an established malicious security breach.
 - No proven loss of customer funds, direct revenue amount, or production/site outage due to this incident.
 - No proof that the latest credential set is valid or invalid across all processes; direct Trading and normal worker results differ.
 - No confirmed image upload, listing revision, or completed update from the blocked jobs; do not generalize this to all historic eBay operations. An independently verified current readback is required for final state.
 - Do not attribute error `10007` or the auth discrepancy to either eBay infrastructure or OS3 code without controlled evidence.
 
-## Failed controls and accountability
+## Root cause split, failed controls and accountability
 
+- **Confirmed primary management cause:** OS1/MPM failed to triage/evidence the original small error before selecting authentication remediation, then repeated and escalated credential-affecting recovery commands without a stable, confirmed root cause. This is an OS1 fault in decision routing and containment; the owner should not have been made to debug it.
+- **Unresolved technical causes:** Whether OS3 code mishandles refresh tokens, environment precedence, OAuth state, REST/Trading requests, or error classification; whether eBay also returned an independent server error. Neither a successful redirect exchange nor an error code alone resolves this.
 - **Primary accountable lane:** OS1/MPM — manager delegated repeated diagnosis and credential handling to the owner, inferred next actions from partial results, and exceeded the requested low-friction operating model.
 - **Internal engineering incident:** OS3 eBay integration — competing local/manual and worker auth results require bounded diagnosis. No source defect confirmed yet.
 - **SOP failure:** CONTINUITY / ONE CURRENT STATE / NO DUPLICATE RECON / WAITING OR BLOCKED LANE ONLY; code acceptance, local install, auth, remote connection, and live eBay commerce completion must remain separate verifiable states.
@@ -66,7 +70,7 @@ Sources of technical continuity: [agent-manager Issue #44](https://github.com/el
 ## Containment — effective immediately
 
 1. Halt further owner-directed OAuth links/exchanges, token refresh scripts, clipboard manipulation, and `Execute SOK revision` attempts. Do not revoke or erase saved credentials, reset `.env`, or delete persistent runtime, receipts, and state files.
-2. Place only **OS3 eBay existing-listing execution** in `BLOCKED / INCIDENT INVESTIGATION`. No global shutdown: paid-order fulfillment and unrelated revenue lanes continue under existing priorities and approval gates.
+2. Place the **OS3 eBay API integration's auth-dependent execution and all API writes** in `BLOCKED / INCIDENT INVESTIGATION` pending normal-worker-path identity and authorization verification. Safe local source/tests and non-credential-changing forensics can proceed within their gates; no general claim of seller-account takeover. Seller Hub manual customer-fulfillment operations and unrelated revenue lanes remain separate and must not be stopped by this incident.
 3. Preserve the immutable three-item bundle, job IDs, hash, accepted source SHAs, and all evidence. Do not silently retry an operation with an uncertain side effect.
 4. No outbound eBay support/vendor/customer communication under this incident without a separate explicit send approval.
 
@@ -75,6 +79,8 @@ Sources of technical continuity: [agent-manager Issue #44](https://github.com/el
 **Execution owner:** OS3 Agent Manager development, routed by OS1.  
 **Verification owner:** existing Recon Damage Report / Systems Integrity & Regression Specialist.  
 **Commerce acceptance:** eBay Store Operations under Peter; owner exact execution grants remain mandatory.
+
+**Anti-recurrence management requirement:** At the first unexplained eBay API error, preserve state; classify transport/auth/application/scope/platform failure using sanitized evidence before proposing any credential-affecting step. OS1 must not prescribe a fresh OAuth flow merely from `BLOCKED`, generic 400, API `10007`, or a successful independent read. Escalate to OS3 developer with one incident packet rather than producing repetitive owner-side commands. Any repair must start with read-only internal tests and be independently verified.
 
 One bounded, read-first defect investigation must:
 - Reconcile documented OAuth state-file creation/consumption with repeated redirect handling; identify whether missing state is expected after prior consumption or a separate bug.
@@ -86,8 +92,8 @@ One bounded, read-first defect investigation must:
 
 ## Closeout gate
 
-Do **not** close this incident based on a Git commit, a successful OAuth `SAVED` response, a synthetic test, or verbal assurance. Close only after: (a) a reproducible cause is established or a documented bounded external state explains failure; (b) regression or reconciliation evidence is accepted; (c) auth and seller identity verification succeed on the **normal OS3 worker path**; (d) existing SOK work's preserved/blocked/completed state is independently read back; and (e) OS1 records actual owner-impact remediation. Commerce execution approval remains separate.
+Do **not** close this incident based on a Git commit, a successful OAuth `SAVED` response, a synthetic test, or verbal assurance. **The entire OS3 eBay API auth-dependent execution lane remains gated; the three-item SOK content job is only one symptom.** Close only after: (a) a reproducible cause is established or a documented bounded external state explains failure; (b) regression or reconciliation evidence is accepted; (c) auth and seller identity verification succeed on the **normal OS3 worker path**; (d) existing SOK work's preserved/blocked/completed state is independently read back; and (e) OS1 records actual owner-impact remediation; and (f) regression tests demonstrate that one routine API error cannot trigger repeated speculative credential resets, clipboard clearing, or unsafe replay. Commerce execution approval remains separate.
 
-**Owner action required now:** NONE for repeated credential generation or terminal troubleshooting. If a later exact authorization or private host operation is genuinely necessary, route a single reviewed step only after the internal worker has exhausted supported evidence.
+**Owner action required now:** NONE for repeated credential generation or terminal troubleshooting. Responsibility lies with OS1 management and the existing OS3 development/recon owners. If a later exact authorization or private host operation is genuinely necessary, route a single reviewed step only after the internal worker has exhausted supported evidence.
 
 **Publication note:** Public-safe incident narrative only. Draft branch/PR is an evidence record; merged current main is canonical only after separately accepted merge and fresh main readback.
