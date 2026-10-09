@@ -90,9 +90,9 @@ One bounded, read-first defect investigation must:
 - Return one developer receipt: base SHA, branch, exact defect reproduction, affected files, tests, fail-closed security proof, verification, and whether a PR/merge requires explicit owner approval.
 - Resume the already-approved SOK bundle only after independently verified production authentication and valid exact local grant; verify each original eBay ID's description/gallery and unchanged commercial fields after any authorized write. Unknown side effects require reconciliation, not retry.
 
-## Recurrence — MPM 31 token-cleanup regression (2026-10-09 MDT)
+## Recurrence — MPM 31 executed token-cleanup regression (2026-10-09 MDT)
 
-**Status:** CONFIRMED RECURRENCE OF THE SAME HIGH INCIDENT / MANAGEMENT CONTROL FAILURE
+**Status:** CONFIRMED EXECUTED RECURRENCE OF THE SAME HIGH INCIDENT / MANAGEMENT CONTROL FAILURE
 
 After the owner supplied a recovery takeover explicitly designed to prevent speculative credential intervention, OS1/MPM 31 still repeated the same failure pattern.
 
@@ -117,9 +117,9 @@ The new failure is more serious because it occurred **after** the HIGH incident,
 
 - Owner confidence and time were damaged again.
 - The eBay recovery sequence was disrupted again.
-- A fresh credential state was placed at risk by an unnecessary cleanup instruction.
+- The fresh credential state was actually modified by an unnecessary cleanup instruction.
 - The owner had to detect and stop the management error.
-- No evidence in this record proves the cleanup script was actually executed or that fresh tokens were destroyed; credential state therefore remains **UNVERIFIED**, not assumed damaged or healthy.
+- **Owner correction:** the cleanup script **was executed**. Therefore the fresh credential state was actually altered by the MPM-directed cleanup. This is confirmed operational damage, not merely risk. The exact resulting credential contents/state still require read-only verification; do not infer whether a fresh refresh token remains present or whether another consent is needed.
 
 ### Mandatory control correction
 
