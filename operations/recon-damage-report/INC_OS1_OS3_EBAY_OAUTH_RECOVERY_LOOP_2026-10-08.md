@@ -4,7 +4,7 @@
 **Recorded by:** OS1 / Operating System Project Manager (MPM continuity session; no new authority layer)  
 **Owner:** Casey Young  
 **Affected lane:** Entire OS3 eBay API integration as a reliability/control concern — OAuth/credential lifecycle, REST and Trading paths, eBay specialist and downstream listings. Three existing SOK content revisions are the active blocked work; no claim that every eBay API endpoint is technically defective.  
-**Severity:** CRITICAL — catastrophic troubleshooting control failure with repeated destructive credential intervention, including confirmed execution of an unnecessary token cleanup after fresh Production credentials had been obtained. Owner time and revenue work were materially disrupted. No credential disclosure, hostile access, or quantified monetary loss has been proven.  
+**Severity:** CRITICAL — catastrophic troubleshooting control failure with repeated destructive credential intervention. The current chat confirms that fresh Production credentials were obtained, then OS1 immediately directed and caused execution of a stale token cleanup that altered the just-restored credential state. Owner time and revenue work were materially disrupted. No credential disclosure, hostile access, or quantified monetary loss has been proven.  
 **Classification:** `DAMAGE — REPAIR NOW` (OS1 process/recovery control) + `DAMAGE — ROUTE TO OWNER LANE` (OS3 engineering)  
 **Status:** CATASTROPHIC TROUBLESHOOTING INCIDENT / CRITICAL / EXECUTED RECURRENCE CONFIRMED 2026-10-09 / EBAY API WRITES HELD / MANAGEMENT CAUSE CONFIRMED / TECHNICAL CAUSE OPEN / NOT CLOSED
 
@@ -13,6 +13,20 @@
 Follow current `MASTER-SOP.md`, accepted `main`, `operations/CURRENT_WORK_BOARD.md`, `operations/recon-damage-report/RECON_DAMAGE_REPORT_PROJECT_SOURCE.md`, and the accepted OS3 `docs/os3-execution-integration.md`. OS1 manages; OS3 development owns source defects; the eBay specialist owns verified commerce behavior; Recon Damage Report owns independent regression verification. MPM numbers identify continuity sessions, not separate managers.
 
 This is an **internal Elevation operating incident**, not a finding that eBay's public status service caused these failures. The owner reports that the repeated OS1 diagnostic loop — immediate misclassification of small errors, speculative credential troubleshooting, and destructive follow-up instructions — was the principal cause of wasted time on October 7–8 and overnight, and that similar incidents have happened repeatedly. That reported pattern is supported by the observed October 8–9 command sequence; exact older occurrences and technical extent of credential damage remain to be reconciled. Documenting the incident does not itself prove eBay account compromise or an OAuth defect. The owner requested a damage report and incident record. This document makes no source/code, credential, eBay listing, payment, external-send, or deployment change.
+
+## Owner-confirmed recovery destruction sequence — current chat evidence
+
+The current OS1 conversation establishes the critical sequence directly:
+
+1. The eBay Production authorization was re-established and fresh credentials were obtained.
+2. The owner immediately stated that the tokens already existed when OS1 proposed another cleanup.
+3. Before that correction was recognized, OS1 had issued a token-cleanup command.
+4. The owner confirmed the cleanup command **was executed**.
+5. Therefore the recovery was not merely delayed or at risk: **a credential state that had just been restored was immediately altered again by OS1 troubleshooting.**
+
+The owner describes the repair as having been achieved in mere moments and then immediately damaged again by the troubleshooting loop. This is the strongest evidence of the incident's catastrophic nature: the recovery process itself became the destructive event.
+
+This is an **owner-confirmed operational fact from the controlling chat**, not an assertion that eBay itself revoked credentials or that hostile access occurred.
 
 ## Company-level incident declaration
 
