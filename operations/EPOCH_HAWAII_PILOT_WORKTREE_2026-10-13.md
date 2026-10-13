@@ -1,4 +1,4 @@
-# Elevation UpScales — Epoch Hawaii Five-Model Pilot Worktree
+# Elevation UpScales — Epoch Hawaii / Puerto Rico Five-Model Pilot Worktree
 
 **Status:** ACTIVE / QUALIFICATION PREP  
 **Effective:** 2026-10-13  
@@ -8,29 +8,65 @@
 
 ## Objective
 
-Build the next Hawaii lithium program from the verified Epoch core catalog rather than creating route-specific product records first.
+Build the next special-route lithium program from the verified Epoch core catalog rather than creating route-specific product records first.
 
 Sequence:
 
 **CORE PRODUCT TRUTH → DG / PACKED PROFILE → SUPPLIER HANDOFF → CARRIER ACCEPTANCE → LANDED ECONOMICS → ROUTE-SPECIFIC SHOPIFY OFFER → FIRST PROOF ORDER**
 
-No Hawaii product, pack, shipping promise or public launch is authorized by this worktree alone.
+No Hawaii / Puerto Rico product, pack, shipping promise or public launch is authorized by this worktree alone.
+
+## Current priority relationship
+
+Casey's newest 2026-10-13 direction places the SOK Hawaii P1-P3 Shopify build ahead of further Epoch expansion until that SOK queue is organized and progressing.
+
+Epoch remains the next lithium catalog focus. Olight expansion remains paused unless explicitly reactivated.
 
 ## Pilot-model matrix
 
-| Slot | Exact model | Core Shopify state | Product Wh / weight | DG docs | Packed profile | Supplier handoff | Carrier acceptance | Hawaii offer |
-|---|---|---|---|---|---|---|---|---|
-| 1 | `1250A-ES` — 12V 50Ah Essential Series | DRAFT baseline complete | 640Wh / 14.3 lb product weight | **PENDING** | **PENDING** | **PENDING** | **PENDING** | **NOT CREATED** |
-| 2 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — |
-| 3 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — |
-| 4 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — |
-| 5 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — |
+| Slot | Exact model | Core Shopify state | Product Wh / weight | Core media | DG docs | Packed profile | Supplier handoff | Carrier acceptance | Hawaii / PR offer |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | `1250A-ES` — 12V 50Ah Essential Series | **ACTIVE Lower-48** | 640Wh / 14.3 lb bare weight | **3 exact supplier images COMPLETE** | **PENDING** | **PENDING** | **PENDING** | **PENDING** | **NOT CREATED** |
+| 2 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — | — |
+| 3 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — | — |
+| 4 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — | — |
+| 5 | **TBD — Epoch recommendation required** | — | — | — | — | — | — | — | — |
 
-`14.3 lb` is the verified product weight for `1250A-ES`, not a shipping gross weight. Do not use it as carton, pallet or carrier-rated weight.
+`14.3 lb` is the verified bare product weight for `1250A-ES`, not shipping gross weight. Do not use it as carton, pallet or carrier-rated weight.
+
+## `1250A-ES` core commerce baseline — complete
+
+Current Lower-48 Shopify state:
+
+- Product GID: `gid://shopify/Product/16068335075697`
+- Status: **ACTIVE**
+- SKU: `1250A-ES`
+- Selling price: `$299.00`
+- Three exact-model supplier product photographs attached
+- Owner-verified `availableForSale: true`
+- Supplier-fulfilled variant inventory tracking disabled
+- Shipping profile: `Epoch Batteries — Lower 48 $18 Shipping`
+- Method: `Epoch Standard — Lower 48`
+- Shipping: `$18.00`
+- Scope: contiguous U.S. + DC only
+- Merchandise + shipping: `$317` before tax
+
+This active Lower-48 state does not prove supplier physical stock and does not qualify Hawaii / Puerto Rico freight.
+
+## Lower-48 follow-up — not a listing blocker
+
+Track separately:
+
+- confirm exact-SKU current supplier orderability with Nick;
+- confirm any dealer dropship fee;
+- verify an actual buyer checkout presents the intended `$18` rate;
+- maintain current Epoch MAP / fulfillment requirements.
+
+No paid test order or supplier shipment has been placed.
 
 ## Qualification fields — exact model/package
 
-For every pilot slot, capture and verify:
+For every special-route pilot slot, capture and verify:
 
 ### Product identity
 
@@ -40,7 +76,7 @@ For every pilot slot, capture and verify:
 - current manufacturer revision;
 - current mainland orderability / supplier stock evidence;
 - current MAP / public-price rule;
-- warranty terms and any destination limitation.
+- warranty terms and destination limitations.
 
 ### Dangerous goods / compliance
 
@@ -57,9 +93,8 @@ For every pilot slot, capture and verify:
 
 - single-unit carton dimensions;
 - single-unit gross packed weight;
-- batteries per master carton if applicable;
-- pallet dimensions;
-- pallet gross weight;
+- master-carton configuration if applicable;
+- pallet dimensions and gross weight;
 - units per pallet;
 - securement / blocking / bracing requirements;
 - palletization minimum / MOQ if any;
@@ -78,80 +113,56 @@ For every pilot slot, capture and verify:
 
 - exact forwarder / carrier lane;
 - acceptance of the exact lithium classification and package;
-- terminal / delivery endpoint;
+- island / Puerto Rico endpoint and service level;
 - handling / DG documentation requirements;
 - quote validity / exclusions;
-- proof that the selected pack configuration is accepted as presented.
+- proof the selected pack configuration is accepted as presented.
 
 Keep protected quotes, dealer costs and private commercial terms outside public Git.
 
-## `1250A-ES` current baseline
+## `1250A-ES` unresolved special-route facts
 
-Verified core product facts already staged in Shopify:
-
-- 12.8V nominal;
-- 50Ah;
-- 640Wh nominal energy;
-- Bluetooth monitoring;
-- 50A maximum continuous discharge;
-- 170A peak up to 3 seconds;
-- 50A maximum continuous charge rate;
-- 25A recommended charge rate;
-- BCI Group 22NF footprint;
-- 14.3 lb / 6.5 kg bare product weight;
-- IP54;
-- manufacturer-rated 4,000+ cycles;
-- 11-year manufacturer warranty subject to registration and terms;
-- not an engine-cranking battery;
-- no internal heating; BMS blocks charging below 32°F / 0°C.
-
-Current unresolved Hawaii facts for `1250A-ES`:
+The Lower-48 listing is live, but the following remain unresolved for Hawaii / Puerto Rico:
 
 - exact SDS/MSDS and UN38.3 packet for the current revision;
 - exact UN / DOT / ocean classification record;
 - shipping state of charge;
 - carton dimensions and gross packed weight;
-- pallet configuration / securement / label requirements;
+- pallet configuration / securement / labels;
 - supplier warehouse origin and California-forwarder handoff;
 - carrier acceptance and route quote;
 - landed economics;
-- actual Hawaii pack sizes that Epoch can support repeatably.
+- actual pack sizes Epoch can support repeatably.
 
 ## Shopify architecture
 
-Do not begin by cloning the core draft into speculative Hawaii products.
+Do not clone the active Lower-48 product into speculative Hawaii / Puerto Rico records.
 
 When a route is qualified:
 
 1. Preserve the core Epoch model as the technical catalog source.
-2. Create a route-specific Hawaii product/package only when the actual sellable offer needs its own freight profile, quantity/pack structure, checkout handling or destination rules.
+2. Create a route-specific product/package only when the actual sellable offer needs its own freight profile, quantity/pack structure, checkout handling or destination rules.
 3. Reuse only verified exact-product media and specifications from the core model.
-4. Add Hawaii-specific customer copy for freight method, destination/service level, delivery/pickup expectation and any pack restriction.
+4. Add route-specific customer copy for freight method, destination/service level, delivery/pickup expectation and any pack restriction.
 5. Keep supplier stock evidence separate from Shopify commerce quantity.
-6. Re-check product price/MAP and route economics immediately before publication.
+6. Re-check price/MAP and route economics immediately before publication.
 
-## Current blockers / wake conditions
+## Supplier response wake condition
 
-### Supplier response wake condition
+Wake slots 2–5 and the special-route freight model when Epoch returns any of:
 
-Wake the pilot-model selection when Epoch returns any of the following:
-
-- recommended top-selling / promising models for the requested RV, marine, solar and off-grid pilot;
+- recommended top-selling / promising RV, marine, solar or off-grid models;
 - compliance packets;
 - packed shipment profiles;
 - warehouse / forwarder-delivery confirmation;
 - bulk or pallet configuration guidance.
 
-Do not send a duplicate request while the current supplier request is still awaiting response.
-
-### Media wake condition
-
-`1250A-ES` product-page publication remains held until exact official product imagery is available. Vendor-page collection media may use the supplier-provided Epoch logo, but the logo is not a substitute for product photography on the PDP.
+Do not send a duplicate request while the current supplier request is awaiting response.
 
 ## Next unblocked actions
 
-1. Keep `1250A-ES` DRAFT while exact product media and fulfillment are unresolved.
-2. Ingest Epoch's next supplier response once received; populate slots 2–5 only from verified recommendations/evidence.
-3. Attach official exact-product media to the core PDP before publication.
-4. Qualify packed/DG data before requesting carrier pricing for any Epoch Hawaii package.
-5. After one exact model clears supplier + carrier + economics, build the first Hawaii offer from that verified core model and run a controlled proof-order path.
+1. Keep the active `1250A-ES` Lower-48 listing intact while tracking supplier-orderability / dropship-fee / checkout checks separately.
+2. Complete the current SOK Hawaii P1-P3 queue under Casey's latest priority.
+3. Ingest Epoch's next supplier response once received; populate slots 2–5 only from verified recommendations/evidence.
+4. Qualify packed/DG data before requesting or accepting any special-route carrier pricing.
+5. After one exact Epoch model clears supplier + carrier + economics for a route, build the first Hawaii / Puerto Rico offer from that verified core model and run a controlled proof-order path.
