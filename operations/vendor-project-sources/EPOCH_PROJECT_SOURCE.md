@@ -41,7 +41,7 @@ This source does not replace private supplier correspondence, dealer pricing, po
 - Sort: `PRICE_DESC`, matching the primary SOK vendor collection pattern
 - Publication state: **UNPUBLISHED / STAGED**
 - Current product count: 1 DRAFT product
-- Image state: no collection image until verified Epoch media is available
+- Image state: supplier-provided official Epoch logo attached as collection media; exact product photography is still required for product pages
 
 Customer-facing collection copy is structured around:
 
