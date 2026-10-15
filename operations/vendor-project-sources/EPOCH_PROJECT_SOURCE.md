@@ -52,6 +52,16 @@ Current verified Shopify state:
 - Geographic scope: contiguous U.S. + DC only
 - Merchandise + standard shipping: **$317 before applicable tax**
 
+### Peter readback — 2026-10-15
+
+A read-only Shopify Admin GraphQL reconciliation independently confirmed the shipping configuration above without creating an order or changing store data:
+
+- Delivery profile: `gid://shopify/DeliveryProfile/147434045809` / `Epoch Batteries — Lower 48 $18 Shipping`.
+- The profile contains only the Epoch `1250A-ES` product and variant `gid://shopify/ProductVariant/67728571728241`.
+- Delivery zone `Epoch Lower 48` contains the 48 contiguous U.S. states plus District of Columbia; Alaska and Hawaii are absent.
+- The profile has one active merchant rate: `Epoch Standard — Lower 48` at **$18.00 USD**.
+- This confirms the Admin shipping configuration. The separate buyer-facing checkout-presentation test remains open until an actual checkout session proves that the intended rate is displayed to the buyer.
+
 The current Shopify quantity display must not be treated as proof of Epoch physical stock.
 
 Verified product-page facts include:
