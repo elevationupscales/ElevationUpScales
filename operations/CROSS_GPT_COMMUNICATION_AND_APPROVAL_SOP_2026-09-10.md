@@ -49,6 +49,14 @@ Peter's normal return format is intentionally short under the current simplified
 
 Add evidence or a longer sync receipt only when it materially helps reconciliation, recovery, compliance, or a complex handoff.
 
+### Owner work-order outcome email — 2026-10-18 (status notice only)
+
+Once Company Operations **verifies and records in accepted Git** that a numbered company work order is **COMPLETED/CLOSED** or deliberately **DEFERRED / moved to the back (P3)**, notify Peter by **one short email** in the existing authorized thread or to his verified work correspondence address. The **four-digit work-order sequence remains stable** and only the `P0`–`P3` suffix changes when reprioritized. Example: `0003P1` -> `0003P3`.
+
+Email contents: **WORK ORDER ID / COMPLETED or MOVED TO BACK / one-line outcome / remaining trigger or next step / PETER ACTION (NONE unless genuinely assigned) / Git workboard link**. Combine multiple same-session transitions in one email if useful. Do not send on ordinary progress, unchanged WAITING/HOLD, initial numbering, historical completed tasks or every P-level adjustment not involving deferral. No repeated notice because Peter hasn't replied. This is an informational status message, **not** a management command, new task gate or replacement for accepted Git. Peter does not need to respond or maintain a separate register.
+
+Do not wait for an email to close/defer work. If Gmail is unavailable, preserve the correct Git state and retry only the unsent transition notice when email is available. Keep confidential company costs, customer information and internal financial evidence out of public Git and include such information in email only where necessary and authorized.
+
 ## Priority synchronization
 
 Do not maintain a copied static priority board in this SOP.
