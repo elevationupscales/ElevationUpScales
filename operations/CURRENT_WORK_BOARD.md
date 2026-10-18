@@ -21,6 +21,29 @@ Before routing technical work, resolve current `main` once. Do not relaunch broa
 
 ---
 
+## 2026-10-18 OWNER P0 — ORDER PROFITABILITY AND TODAY'S MANAGEMENT QUEUE
+
+**Authority:** Casey's direct owner decision of 2026-10-18; this dated section supersedes older priority labels for the items named here. **P0 means immediate management attention/routing, not automatic execution, publication, supplier contact or reactivation of a genuine HOLD.** Preserve completed evidence and wait states. OS1 owns the shared queue; Peter receives at most one bounded human-needed task.
+
+| P0 lane | Current state and next executable action | Owner / decision |
+| --- | --- | --- |
+| New paid eBay VEVOR heater-ducting sale (Oct 17; ship-by Oct 21) | **P0 PROFITABILITY DECISION PENDING.** Read Seller Hub exact order/SKU/payment/paid shipping, authorized source, current supplier landed cost, fees/promotions, fulfillment reliability and handling deadline. Do not order from a supplier or mark shipped without a documented approve decision. If unavailable/uneconomic, escalate customer-protection alternatives promptly; do not auto-cancel a paid order. | eBay Store Operations performs check; OS1 prepares protected economics; Casey APPROVE / DENY SOURCE ROUTE / HOLD FOR EVIDENCE; Peter joins commercial decision if needed. |
+| First SOK Hawaii paid shipment | Forwarder invoice/payment confirmed; Oct 17 sailing was *eligible*, loading/departure not yet verified. Obtain carrier movement/terminal status and tracking; do not restart booking. | Company Operations / Logistics; owner escalation only for material change. |
+| Logistics Plus Hawaii — Cara | Existing rate card and operational support evidence already accepted; owner Oct 13 informed Cara the SOK warranty-stock program likely begins around December. Prepare one friendly follow-up in existing thread on account/onboarding lead time and remaining activation steps; **do not send without Casey's exact-message approval**. Do not promise stock, sign a contract or restart intake. | Company Operations prepares; Casey approves send; Peter involved at the later stocking/commercial decision. |
+| EG4 Big Island commercial lead | Tim indicated local island pricing is cheaper; owner has already asked for the price gap. Preserve relationship; do not represent earlier quote as accepted. James advised Oct 20 battery price increase; re-evaluate only if buyer reengages or owner activates an alternative source comparison. | OS1 opportunity monitoring / owner commercial decision; Peter advisory when actionable. |
+| Peter SOP/Git drift | Owner sent Oct 18 SOP-first correction and proposed repository reorganization for Peter's input. Await reply; use existing OS1 management Git/SOPs. No automatic new repo or private OS3 requirement. | OS1 management; Peter has no extra remediation backlog. |
+| Yelp refund and cancellation | First refund approved for processing; second refund reportedly resubmitted after owner phone follow-up, posting not confirmed. Verify credits and permanent termination without repeating disputed calls unnecessarily. | OS1 / owner billing decision. |
+| Shopify pending payment/order | Keep pending-payment order isolated; do not source or fulfill on pending payment. Paid/fulfilled order remains closed unless exceptions occur. | Shopify / Company Operations. |
+| Renogy audits, CJ Mexico pilot and SOK Hawaii catalog | Existing Peter audit/management packets are complete; no broad repeat scans. Continue only named OS1/OS3 operational proofs from accepted evidence; held drafts stay held where freight/technical/source facts actually require it. | Owning project specialists; Peter only for a discrete necessary human step. |
+| Olight expansion | Preserve owner PAUSE; P0 visibility only, **not reactivation**. | OS1 waiting trigger. |
+
+### New eBay post-sale authorization (already supported by existing lane SOP; owner adds decision checkpoint)
+**PAID SALE → VERIFY EXACT ORDER/SOURCE → CURRENT LANDED COST + ALL PLATFORM/PROMOTION COSTS → EXPECTED PRE-FEE MARGIN AND NET CONTRIBUTION → OWNER APPROVE / DENY SOURCE PURCHASE / HOLD FOR EVIDENCE → EXECUTE APPROVED ROUTE → TRACKING/DELIVERY → ACTUALS.** Use the existing eBay profitability thresholds, not a new formula. Do not place supplier orders, buy labels or mark shipment complete when approval is pending. A denial of an uneconomic procurement route does **not** extinguish buyer obligations; route lawful eBay-compliant fulfillment alternatives or owner-approved customer remediation separately. Protect the Oct 21 ship-by date; a wait state requires immediate alternate routing, not neglect.
+
+**Protected-economics rule:** Public management Git records only order lane, decision state, blocker and accountable party. Exact dealer costs, private freight, buyer personal data and fee receipts stay in authorized private systems.
+
+---
+
 ## 2026-10-08 MPM 30 — OS3 execution integration and current SOK state
 
 This section supersedes the older draft-only assignment and mandatory further-media sourcing below **for the three existing singles only**. Preserve historical receipts as evidence; they are not new execution gates.
