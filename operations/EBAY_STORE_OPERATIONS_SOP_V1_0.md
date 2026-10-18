@@ -273,6 +273,12 @@ On every new paid eBay order:
 
 Do not wait until the ship-by date to find out whether source fulfillment is executable.
 
+### VEVOR-source exception path — immediate promotion check (owner direction 2026-10-18)
+
+For any new paid order involving a **VEVOR-branded item**, read current VEVOR promotional email / PRO-account coupon eligibility immediately at the procurement decision. Validate exact-SKU applicability, expiry, minimum spend, stacking, taxes, destination, and final checkout price; calculate economic benefit **only from a redeemable, checkout-confirmed coupon**. No coupon, expired coupon or coupon-site failure must **not** freeze a source otherwise cleared by the existing order/economics decision. Compare exact identical source options including VEVOR direct PRO and CJ Dropshipping if a matching product is found; read current delivered one-unit price, source stock, ship-by feasibility, fulfillment and return handling, and vendor/channel provenance before recommending a route. Preserve distinct VEVOR-branded product configurations; a previous VEVOR receipt for a similar kit is not exact model proof.
+
+**Authorization boundary:** existing direct VEVOR dropship arrangements on the independent website do not by themselves grant eBay marketplace resale. Do not switch paid marketplace orders to direct VEVOR or CJ without an appropriate lawful/authorized supplier/channel path and owner approval. Keep full coupons, protected costs, fee detail and buyer address out of public Git. All purchase, label, shipment and cancellation actions remain subject to the order-specific Casey approval and buyer-protection rules above.
+
 ## Seller-account protection
 
 Escalate immediately if current evidence shows:

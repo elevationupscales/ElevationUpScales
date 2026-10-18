@@ -137,6 +137,14 @@ If live price or MAP cannot be verified reliably, hold only that SKU/price actio
 
 Do not use coupons, compare-at pricing, automatic discounts, bundle mechanics, gifts or other promotions to bypass MAP.
 
+### Owner clarification (2026-10-18) — VEVOR coupon-first sourcing check
+
+For **every new VEVOR-branded sale/order procurement decision**, make a **quick immediate read** of current VEVOR promotion/coupon emails and eligible VEVOR PRO account coupons **before choosing the purchasing source**. Promotions expire quickly. Check exact applicability to the chosen product/quantity/account, expiration/time zone, minimum order, stacking restrictions, shipping/tax impact and **actual checkout-confirmed discount**. Include only redeemable discounts in protected landed-cost economics; **never count an emailed coupon as realized savings until checkout validates it**. A nonapplicable/expired/missing coupon is **not a new HOLD**: continue promptly with the verified noncoupon baseline to protect shipment deadlines. Recheck at order placement if the earlier offer may have expired.
+
+Compare **exact identical SKU/variant** sourcing through VEVOR direct/PRO and CJ Dropshipping, where available, using current U.S. ship-to cost, stock/dispatch and delivery timing, invoicing/returns, and **channel authorization**. The lowest quoted price alone does not authorize source switching. Direct VEVOR permission for Elevation's independent website does **not** extend automatically to eBay; CJ origin and VEVOR brand provenance/marketplace eligibility must be verified for the exact product. A related but different heater-duct/vent kit does not establish exact-SKU match or comparable economics. This is a fast per-order purchase optimization, not a renewed full vendor qualification.
+
+Keep coupons, private costs and order economics in protected systems; write only the coupon-check status, route status, and approval/decision reference to public management Git. eBay orders remain under the existing eBay SOP's per-order owner APPROVE / DENY ROUTE / HOLD decision before any supplier purchase. Peter is consulted only where a specific commercial judgment is needed.
+
 ## 6. Inventory and sellability
 
 The supplier feed is a source snapshot, not a permanent customer promise.
