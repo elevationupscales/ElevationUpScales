@@ -24,6 +24,12 @@ Historical Gmail management messages may still be read as **factual evidence** w
 
 **GMAIL MAY CARRY FACTS; GIT/WORKTREES CARRY MANAGEMENT TRUTH.**
 
+### Owner-directed Peter close/defer status-notice exception (2026-10-18)
+
+Casey specifically authorizes **brief outbound work-order outcome emails to Peter** when a numbered company work order is verified **COMPLETED/CLOSED** or **moved to the back (P3/DEFERRED)**. First update the canonical Git Work Board/current worktree; email Peter afterward with the current `NNNNP#` work-order ID, outcome, next/reopen trigger and whether he needs to act. Batch same-session completions/deferrals where sensible. Do not send duplicate notices for ordinary progress, initial numbering or unchanged waiting work.
+
+**This does not reverse Gmail's retirement as internal management authority.** An email is notice only; no separate priority system, hidden email-only task assignment, new approval gate or required reply. Accepted Git is the controlling record. Respect confidentiality requirements for supplier prices, customer data and company documents.
+
 ## Gmail file and source-evidence use remains authorized
 
 Retiring Gmail for manager communication does **not** retire Gmail as a source-of-origin, file-recovery or evidence system.
