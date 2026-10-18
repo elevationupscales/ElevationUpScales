@@ -267,7 +267,9 @@ Products that sell but create cancellations/refunds/negative economics must be f
 
 On every new paid eBay order:
 
-**VERIFY PAYMENT → EXACT LISTING/SKU → SOURCE → CURRENT SUPPLIER COST/SELLABILITY → EXPECTED CONTRIBUTION → PLACE/VERIFY SUPPLIER ORDER → TRACKING → EBAY UPDATE → BUYER UPDATE IF NEEDED → ACTUAL ECONOMICS → CLOSE.**
+**VERIFY PAYMENT → EXACT LISTING/SKU → AUTHORIZED SOURCE + CURRENT LANDED COST → PRE-FEE MARGIN + EXPECTED CONTRIBUTION AFTER EBAY/PROMOTION/VARIABLE COSTS → CASEY APPROVE / DENY SOURCE ROUTE / HOLD FOR EVIDENCE → PLACE/VERIFY APPROVED SUPPLIER ORDER → TRACKING → EBAY UPDATE → BUYER UPDATE IF NEEDED → ACTUAL ECONOMICS → CLOSE.**
+
+**October 18, 2026 owner clarification — all new paid eBay orders:** Company Operations/eBay worker prepares the existing SOP's exact-order profitability check **before** purchasing supplier inventory, buying a fulfillment label, or releasing fulfillment. Use current seller order facts, authorized exact SKU source, actual supplier landed price and shipping, eBay selling/promotion fees and other variable costs. Retain the standing 30% pre-fee working screen and positive expected contribution test; never fabricate missing costs. Return a concise **APPROVE / DENY PROPOSED SOURCE ROUTE / HOLD FOR EVIDENCE** recommendation to Casey for the final call; include Peter in the decision when his judgment or platform access is genuinely needed, without assigning him a recurring admin queue. **DENY does not automatically cancel/refund the paid customer:** the order remains a customer obligation and requires timely alternate fulfillment or eBay-compliant owner-authorized remediation. A blocked economic check must be escalated promptly against the actual ship-by deadline; do not let a gate create preventable late shipment. Store protected cost/fee details outside public Git and write only decision/status/receipt references here.
 
 Do not wait until the ship-by date to find out whether source fulfillment is executable.
 
