@@ -1,14 +1,16 @@
+> **CURRENT AUTHORITY POINTER (2026-10-10):** This file is a historical transition handoff, not a second active work board. Treat all MPM 28 references and the old SHA below as dated evidence only. Resolve owner direction, `MASTER-SOP.md`, both repositories' current accepted main, and `operations/CURRENT_WORK_BOARD.md` for active state. For SK48V100N see the 2026-10-10 P0 recovery entry; three existing offers must not be recreated. An OS3 Git commit is not proof of local host installation, connected MCP, or eBay publication.
+
 # Elevation UpScales — Current Worker Handoff
 
-Updated: 2026-10-02
-Control mode: **OS 1 / MPM 28 ACTIVE MANAGEMENT**
+Updated: 2026-10-10 (continuity pointer; original 2026-10-02 snapshot remains historical)
+Control mode: **OS 1 / canonical MASTER-SOP.md + operations/CURRENT_WORK_BOARD.md. MPM labels are session identifiers, not authority.**
 Repository: `elevationupscales/ElevationUpScales`
 
 ## Read first
 
 1. `MASTER-SOP.md`
 2. `operations/CURRENT_WORK_BOARD.md`
-3. `operations/MPM_28_START_STATE_2026-10-02.md`
+3. The current dated priority/owner override in `operations/CURRENT_WORK_BOARD.md` (do not default to the historical MPM 28 state)
 4. `AGENTS.md`
 5. `CODING-WORKFLOW.md`
 6. task-specific files explicitly required by the owner

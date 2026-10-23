@@ -9,6 +9,28 @@
 
 ---
 
+## 2026-10-10 — SK48V100N eBay existing-offer P0 recovery (owner-approved)
+
+**Management owner:** OS1 / MPM. **Execution owner:** OS3 exact-gated local eBay specialist. **Parent:** [OS3 issue #68](https://github.com/elevationupscales/elevationupscales-elevation-agent-manager/issues/68). **State:** BLOCKED — repair executor not implemented or accepted; publication NOT VERIFIED.
+
+| Package | Exact existing seller SKU | Existing offer ID | Owner-approved price |
+|---|---|---|---|
+| 1 × 5.12 kWh | `EUS-SOK-SK48V100N-L48-1-BACKUP` | `306734221011` | $1,199.00 |
+| 2 × 10.24 kWh | `EUS-SOK-SK48V100N-L48-2-BACKUP` | `306734239011` | $2,699.99 |
+| 3 × 15.36 kWh | `EUS-SOK-SK48V100N-L48-3-BACKUP` | `306734248011` | $3,999.99 |
+
+**Evidence:** owner Windows runtime created all three existing inventory items/offers; eBay publish attempts returned error `25002` requiring `Type`. The proposed correction is `product.aspects.Type = ["Battery"]` subject to exact Taxonomy validation in category `48619`. Owner expressly authorized the commercial publication objective and narrow repair, but no verified existing-inventory update executor or live listing IDs are recorded.
+
+**Next supported engineering action:** implement/test exact-gated existing-SKU item aspect repair with full-field preservation; retain original immutable proposal and bind an audited corrective amendment so post-publication readback does not mistake approved `Type` for unapproved drift. Verify live record/offer bindings and only then resume OS3's distinct publication gates. Reconciliation before any repeat write. Do NOT recreate inventory/offers or reset OAuth.
+
+**Protected legacy listings:** `168697401413` and `168697401415` remain untouched until a separate item-bound retirement decision.
+
+**Evidence custody:** owner-host durable job/receipt store is execution truth. GitHub main is technical source truth. A chat approval, branch, PR, or code merge alone is never an eBay publish receipt. OS1↔OS3 MCP connectivity and installed host SHA remain NOT VERIFIED here. Never leak seller credentials or private pricing to public Git.
+
+**Acceptance:** correction readback 3/3, original field/policy preservation, publish verified 3/3 with public eBay listing IDs, zero duplicate offers, tests and host receipt; synchronize result back into this exact item.
+
+---
+
 # CONTROL RULE
 
 **ONE CURRENT STATE PER WORK ITEM. ONE EXECUTION OWNER. NO DUPLICATE RECON. NO DUPLICATE DEV ROUTING.**
