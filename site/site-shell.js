@@ -386,24 +386,12 @@
       <button class="eus-menu-toggle" type="button" aria-controls="eus-nav" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <nav class="eus-nav" id="eus-nav" aria-label="Primary navigation">
         <a class="eus-nav-link" href="https://shop.elevationupscales.com/" data-eus-event="shopify_store_open" data-eus-value="header">Shop</a>
-        <a class="eus-nav-link" href="/vendors">Brands</a>
-        <a class="eus-nav-link" href="/commercial">Commercial</a>
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Projects <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-          <a href="/start-a-project"><span><strong>Start a Project</strong><small>Installation, repair or project support</small></span></a>
-          <a href="/solar-project"><span><strong>Solar System Builder</strong><small>Plan battery, solar and inverter needs</small></span></a>
-        </div></details>
-        <details class="eus-menu reference-nav-menu"><summary class="eus-nav-trigger">Services <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-          <a href="/shipping-logistics-services"><span><strong>Freight & Logistics</strong><small>Hawaii, Alaska and destination support</small></span></a>
-          <a href="/solar-services"><span><strong>Power & Solar Services</strong><small>Planning and troubleshooting</small></span></a>
-          <a href="/what-we-do#home-rv-services"><span><strong>Home & RV Services</strong><small>Repair, restoration and upgrades</small></span></a>
-        </div></details>
-        <details class="eus-menu reference-nav-menu reference-nav-menu--company"><summary class="eus-nav-trigger">Company <span class="eus-caret" aria-hidden="true"></span></summary><div class="eus-dropdown">
-          <a href="/what-we-do"><span><strong>About Elevation</strong><small>Products, logistics and projects</small></span></a>
-          <a href="/work-with-us"><span><strong>Work With Us</strong><small>Creators, technicians and growth</small></span></a>
-        </div></details>
-      </nav>
+        <a class="eus-nav-link" href="/hawaii-lithium-batteries">Hawaii Freight</a>
+        <a class="eus-nav-link" href="/what-we-do">About Elevation</a>
+        <a class="eus-nav-link" href="mailto:support@elevationupscales.com">Contact</a>
+      </nav></nav>
       ${retailRoute ? '<form class="reference-global-search" data-global-search role="search"><label class="sr-only" for="global-site-search">Search products</label><input id="global-site-search" name="q" type="search" autocomplete="off" placeholder="Search products…"><button type="submit" aria-label="Search">⌕</button></form>' : ""}
-      <a class="button button-primary reference-global-cta" href="/start-a-project" data-eus-event="start_project_open" data-eus-value="header">Start a Project</a>`;
+      <a class="button button-primary reference-global-cta" href="https://shop.elevationupscales.com/" data-eus-event="shopify_store_open" data-eus-value="header-cta">Shop the Store</a>`;
 
     const search = inner.querySelector("[data-global-search]");
     search?.addEventListener("submit", (event) => {
