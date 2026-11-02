@@ -11,11 +11,12 @@ Owner direction: keep elevationupscales.com simple: company information, Hawaii 
 ## Target: one store, one company site
 Primary domain keeps home, company details, specialty freight information, privacy and terms. Shopping links go to https://shop.elevationupscales.com/. Shopify handles catalog, stock, carts, shipping zones, tax and payment. Hawaii lithium freight stays an informational/support route; specialized quotes may use the approved manual quote workflow. Do not replace it with unqualified battery checkout or claim carrier acceptance.
 
-## Phase 1 (this PR) — simplify global navigation
-- Header: Shop; Hawaii Freight; About Elevation; Contact.
-- Primary CTA becomes Shop the Store, linking to Shopify.
-- Existing homepage media, commercial data, customer intake, APIs, source images, price records and freight content remain unchanged.
-- Stage branch only, run canonical QA and preview before production.
+## P0 owner visual freeze — exact homepage preservation
+- Preserve the existing elevationupscales.com homepage **exactly as it currently appears**. Do not change the homepage layout, sections, imagery, colors, typography, text, navigation, header, footer, buttons, CTA positioning, responsive/mobile appearance, or behavior as part of this restructure.
+- In particular do **not** alter `site/index.html`, shared `site/site-shell.js`, associated homepage CSS/JS/assets, or their rendered output. Existing storefront links, Hawaii freight information and company content stay visible and unchanged.
+- The initial header/CTA proposal was explicitly **withdrawn and reverted**. The `site/site-shell.js` blob on the working branch is now byte-for-byte identical to `main` as of the rollback. Do not reintroduce the navigation change.
+- Only perform **nonvisual, backward-compatible backend/domain/redirect dependency analysis and staged retirement** until owner separately requests additions. A change that could alter rendered HTML, routing for existing homepage links, or homepage behavior is out of scope.
+- Before any site deployment, compare homepage desktop/mobile screenshots against the current accepted production baseline, verify primary links and Hawaii contact paths, and stop/rollback on any difference. Do not claim pixel-perfect equality until tested.
 
 ## Phase 2 — consolidate public commerce destinations, separate PR
 - Audit /store, /rv-store, /lithium-batteries, /marketplace, /product, /checkout, /custom-order and all retired sales paths. Confirm current consumers and preserve successful external backlinks.
