@@ -10,8 +10,8 @@ export function redirectLegacyStoreLanding(request) {
   if (method !== "GET" && method !== "HEAD") return null;
 
   const url = new URL(request.url);
-  if (url.origin !== "https://elevationupscales.com" &&
-      url.origin !== "http://elevationupscales.com") return null;
+  // Host is controlled by the Cloudflare Pages Worker. Allow preview domains
+  // so the same route can be verified before production deployment.
 
   const landingPaths = new Set(["/store", "/store/", "/store.html"]);
   if (!landingPaths.has(url.pathname)) return null;
