@@ -1,4 +1,5 @@
 import coreWorker from "./worker-core.js";
+import { redirectLegacyStoreLanding } from "./legacy-storefront-redirect.js";
 import { handleStoreCheckoutApi } from "./store-checkout-server.js";
 import { handleStoreOrdersAdminApi } from "./store-orders-admin-server.js";
 import { handleCatalogAdminApi, handleCatalogPublicApi } from "./catalog-admin-runtime.js";
@@ -57,6 +58,8 @@ async function enhanceStorefront(request,response,env,section){if(request.method
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const legacyLanding = redirectLegacyStoreLanding(request);
+    if (legacyLanding) return legacyLanding;
     const internalRuntimePaths = new Set([
       "/_worker.js",
       "/worker-core.js",
