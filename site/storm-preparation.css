@@ -1,0 +1,104 @@
+/* November storefront: owner-authorized additional homepage navigation section.
+   Scoped exclusively to #storm-preparation. Existing homepage visuals stay intact. */
+#storm-preparation {
+  background: #f3f6f4;
+  color: #10282c;
+  padding: clamp(2.5rem, 5vw, 4.5rem) 0;
+  scroll-margin-top: 6rem;
+}
+#storm-preparation .storm-preparation__header { max-width: 48rem; margin-bottom: 1.65rem; }
+#storm-preparation .storm-preparation__eyebrow {
+  margin: 0 0 .6rem;
+  color: #735923;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+#storm-preparation h2 {
+  color: #10282c;
+  font-size: clamp(1.75rem, 3vw, 2.7rem);
+  line-height: 1.14;
+  margin: 0 0 .7rem;
+}
+#storm-preparation .storm-preparation__intro {
+  color: #425659;
+  line-height: 1.6;
+  margin: 0;
+}
+#storm-preparation .storm-preparation__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+#storm-preparation .storm-preparation__card {
+  background: #fff;
+  border: 1px solid #dbe4e0;
+  border-radius: .85rem;
+  padding: 1.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  box-shadow: 0 4px 18px rgba(10, 33, 37, .045);
+}
+#storm-preparation .storm-preparation__tag {
+  color: #806528;
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+#storm-preparation .storm-preparation__card h3 {
+  color: #10282c;
+  font-size: 1.32rem;
+  line-height: 1.25;
+  margin: 0;
+}
+#storm-preparation .storm-preparation__card p {
+  color: #44585b;
+  line-height: 1.55;
+  margin: 0 0 .35rem;
+  flex: 1;
+}
+#storm-preparation .storm-preparation__card a {
+  display: inline-flex;
+  align-self: flex-start;
+  color: #0c5256;
+  text-decoration: underline;
+  text-underline-offset: .2rem;
+  font-weight: 750;
+  padding: .2rem 0;
+}
+#storm-preparation .storm-preparation__guides {
+  background: #102c32;
+  color: #fff;
+  padding: 1rem 1.2rem;
+  border-radius: .75rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .55rem 1.4rem;
+  line-height: 1.45;
+}
+#storm-preparation .storm-preparation__guides strong { margin-right: auto; }
+#storm-preparation .storm-preparation__guides a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: .2rem;
+  font-weight: 650;
+}
+#storm-preparation .storm-preparation__note {
+  margin: .85rem 0 0;
+  font-size: .82rem;
+  line-height: 1.5;
+  color: #536366;
+}
+#storm-preparation a:focus-visible { outline: 3px solid #b29045; outline-offset: 4px; }
+@media (max-width: 840px) {
+  #storm-preparation .storm-preparation__grid { grid-template-columns: 1fr; }
+  #storm-preparation .storm-preparation__card { gap: .5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #storm-preparation { scroll-behavior: auto; }
+}
