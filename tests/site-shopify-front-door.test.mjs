@@ -9,9 +9,9 @@ import { redirectLegacyStoreLanding } from "../site/legacy-storefront-redirect.j
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DESTINATION = "https://shop.elevationupscales.com/";
 
-// Exact accepted homepage source blobs before the restructuring branch.
-// During this migration, any visual home/shared-shell change requires a
-// separately authorized PR, not an accidental change in a backend refactor.
+// Owner-approved November Storm Preparation add-on is the ONLY exception to the
+// originally frozen homepage HTML. Verify the rest reconstructs byte-for-byte
+// from the accepted baseline and all shared visual files remain unchanged.
 const FROZEN_VISUAL_BLOBS = {
   "site/index.html": "4eb8113c9f6f5ca5713ce39ce20f57944076ce6c",
   "site/site-shell.js": "e82a08745022078d27c2b6579d1d12ddb8a24fe5",
@@ -70,15 +70,68 @@ test("never intercepts company homepage, Hawaii freight, checkout, admin, or API
   }
 });
 
-test("homepage and shared visual assets match owner-frozen Git blobs byte for byte", () => {
-  for (const [path, expected] of Object.entries(FROZEN_VISUAL_BLOBS)) {
-    const content = readFileSync(resolve(ROOT, path));
-    const actual = createHash("sha1")
-      .update("blob " + content.length + "\0")
-      .update(content)
-      .digest("hex");
-    assert.equal(actual, expected, path + " changed despite the owner visual freeze");
+const BLOB_SHA = (content) => createHash("sha1")
+  .update("blob " + content.length + "\0")
+  .update(content)
+  .digest("hex");
+
+const HOMEPAGE_ADDITION = {
+  stylesheet: '<link rel="stylesheet" href="/storm-preparation.css?v=1">\n',
+  navigation: '<a class="eus-nav-link" href="#storm-preparation">Storm Prep</a>\n',
+  start: '<!-- Elevation November Storm Preparation: begin -->\n',
+  end: '<!-- Elevation November Storm Preparation: end -->\n\n',
+};
+
+test("November Storm Preparation is the only change to the frozen homepage", () => {
+  const path = "site/index.html";
+  const html = readFileSync(resolve(ROOT, path), "utf8");
+  for (const [label, marker] of Object.entries(HOMEPAGE_ADDITION)) {
+    assert.equal(html.split(marker).length, 2, label + " marker must occur exactly once");
   }
+  const start = html.indexOf(HOMEPAGE_ADDITION.start);
+  const end = html.indexOf(HOMEPAGE_ADDITION.end, start);
+  assert.ok(end > start, "storm section boundaries missing");
+  const inserted = html.slice(start, end + HOMEPAGE_ADDITION.end.length);
+  assert.match(inserted, /<section[^>]+id="storm-preparation"/);
+  const restored = html
+    .replace(HOMEPAGE_ADDITION.stylesheet, "")
+    .replace(HOMEPAGE_ADDITION.navigation, "")
+    .replace(inserted, "");
+  assert.equal(
+    BLOB_SHA(Buffer.from(restored, "utf8")),
+    FROZEN_VISUAL_BLOBS[path],
+    "existing homepage markup changed beyond the isolated November storefront"
+  );
+  for (const [asset, sha] of Object.entries(FROZEN_VISUAL_BLOBS)) {
+    if (asset === path) continue;
+    assert.equal(BLOB_SHA(readFileSync(resolve(ROOT, asset))), sha,
+      asset + " changed despite the owner visual freeze");
+  }
+});
+
+test("storm-preparation shopping goes only to Shopify; Hawaii guidance stays on site", () => {
+  const html = readFileSync(resolve(ROOT, "site/index.html"), "utf8");
+  const section = html.split(HOMEPAGE_ADDITION.start)[1].split(HOMEPAGE_ADDITION.end)[0];
+  const urls = [...section.matchAll(/href="([^"]+)"/g)].map(x => x[1]);
+  assert.equal(urls.length, 6, "expected three specialties and three guidance links");
+  for (const collection of [
+    "diesel-heaters-accessories",
+    "hurricane-starlink-backup-power",
+    "olight",
+  ]) {
+    assert.ok(urls.includes(`https://shop.elevationupscales.com/collections/${collection}`),
+      "missing verified Shopify specialty collection: " + collection);
+  }
+  for (const guide of ["build-my-emergency-solar-kit", "build-a-heater-kit"]) {
+    assert.ok(urls.includes(`https://shop.elevationupscales.com/pages/${guide}`),
+      "missing verified Shopify guidance page: " + guide);
+  }
+  assert.ok(urls.includes("/hawaii-lithium-batteries"), "Hawaii guidance missing");
+  assert.ok(urls.every(x => x.startsWith("https://shop.elevationupscales.com/") ||
+    x === "/hawaii-lithium-batteries"), "no independent checkout or custom lead routes");
+  assert.doesNotMatch(section, /purchase now|guaranteed runtime|guaranteed shipping/i);
+  assert.ok(readFileSync(resolve(ROOT, "site/storm-preparation.css"), "utf8")
+    .includes("#storm-preparation"), "missing section-scoped responsive CSS");
 });
 
 test("store landing redirect is integrated into the Cloudflare Worker before legacy fallback", () => {
